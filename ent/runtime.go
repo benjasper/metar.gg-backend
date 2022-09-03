@@ -4,6 +4,7 @@ package ent
 
 import (
 	"metar.gg/ent/airport"
+	"metar.gg/ent/frequency"
 	"metar.gg/ent/runway"
 	"metar.gg/ent/schema"
 )
@@ -21,6 +22,15 @@ func init() {
 	airportDescImportFlag := airportMixinFields0[2].Descriptor()
 	// airport.DefaultImportFlag holds the default value on creation for the import_flag field.
 	airport.DefaultImportFlag = airportDescImportFlag.Default.(bool)
+	frequencyMixin := schema.Frequency{}.Mixin()
+	frequencyMixinFields0 := frequencyMixin[0].Fields()
+	_ = frequencyMixinFields0
+	frequencyFields := schema.Frequency{}.Fields()
+	_ = frequencyFields
+	// frequencyDescImportFlag is the schema descriptor for import_flag field.
+	frequencyDescImportFlag := frequencyMixinFields0[2].Descriptor()
+	// frequency.DefaultImportFlag holds the default value on creation for the import_flag field.
+	frequency.DefaultImportFlag = frequencyDescImportFlag.Default.(bool)
 	runwayMixin := schema.Runway{}.Mixin()
 	runwayMixinFields0 := runwayMixin[0].Fields()
 	_ = runwayMixinFields0

@@ -16,6 +16,22 @@ func (a *Airport) Runways(ctx context.Context) ([]*Runway, error) {
 	return result, err
 }
 
+func (a *Airport) Frequencies(ctx context.Context) ([]*Frequency, error) {
+	result, err := a.NamedFrequencies(graphql.GetFieldContext(ctx).Field.Alias)
+	if IsNotLoaded(err) {
+		result, err = a.QueryFrequencies().All(ctx)
+	}
+	return result, err
+}
+
+func (f *Frequency) Airport(ctx context.Context) (*Airport, error) {
+	result, err := f.Edges.AirportOrErr()
+	if IsNotLoaded(err) {
+		result, err = f.QueryAirport().Only(ctx)
+	}
+	return result, MaskNotFound(err)
+}
+
 func (r *Runway) Airport(ctx context.Context) (*Airport, error) {
 	result, err := r.Edges.AirportOrErr()
 	if IsNotLoaded(err) {

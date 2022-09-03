@@ -325,6 +325,8 @@ func (ec *executionContext) fieldContext_AirportEdge_node(ctx context.Context, f
 				return ec.fieldContext_Airport_keywords(ctx, field)
 			case "runways":
 				return ec.fieldContext_Airport_runways(ctx, field)
+			case "frequencies":
+				return ec.fieldContext_Airport_frequencies(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Airport", field.Name)
 		},
@@ -485,11 +487,14 @@ func (ec *executionContext) _PageInfo_startCursor(ctx context.Context, field gra
 		return graphql.Null
 	}
 	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
 		return graphql.Null
 	}
 	res := resTmp.(*ent.Cursor)
 	fc.Result = res
-	return ec.marshalOCursor2ᚖmetarᚗggᚋentᚐCursor(ctx, field.Selections, res)
+	return ec.marshalNCursor2ᚖmetarᚗggᚋentᚐCursor(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_PageInfo_startCursor(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -526,11 +531,14 @@ func (ec *executionContext) _PageInfo_endCursor(ctx context.Context, field graph
 		return graphql.Null
 	}
 	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
 		return graphql.Null
 	}
 	res := resTmp.(*ent.Cursor)
 	fc.Result = res
-	return ec.marshalOCursor2ᚖmetarᚗggᚋentᚐCursor(ctx, field.Selections, res)
+	return ec.marshalNCursor2ᚖmetarᚗggᚋentᚐCursor(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_PageInfo_endCursor(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -855,10 +863,16 @@ func (ec *executionContext) _PageInfo(ctx context.Context, sel ast.SelectionSet,
 
 			out.Values[i] = ec._PageInfo_startCursor(ctx, field, obj)
 
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
 		case "endCursor":
 
 			out.Values[i] = ec._PageInfo_endCursor(ctx, field, obj)
 
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -1014,6 +1028,22 @@ func (ec *executionContext) unmarshalNCursor2metarᚗggᚋentᚐCursor(ctx conte
 }
 
 func (ec *executionContext) marshalNCursor2metarᚗggᚋentᚐCursor(ctx context.Context, sel ast.SelectionSet, v ent.Cursor) graphql.Marshaler {
+	return v
+}
+
+func (ec *executionContext) unmarshalNCursor2ᚖmetarᚗggᚋentᚐCursor(ctx context.Context, v interface{}) (*ent.Cursor, error) {
+	var res = new(ent.Cursor)
+	err := res.UnmarshalGQL(v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalNCursor2ᚖmetarᚗggᚋentᚐCursor(ctx context.Context, sel ast.SelectionSet, v *ent.Cursor) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+		}
+		return graphql.Null
+	}
 	return v
 }
 

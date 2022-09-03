@@ -20,7 +20,7 @@ func main() {
 		log.Fatalf("failed creating schema resources: %v", err)
 	}
 
-	//RunImport(client)
+	RunImport(client)
 	RunServer(client)
 }
 
@@ -42,6 +42,12 @@ func RunImport(db *ent.Client) {
 	}
 
 	err = imp.ImportRunways("https://raw.githubusercontent.com/davidmegginson/ourairports-data/main/runways.csv")
+	if err != nil {
+		panic(err)
+		return
+	}
+
+	err = imp.ImportFrequencies("https://raw.githubusercontent.com/davidmegginson/ourairports-data/main/airport-frequencies.csv")
 	if err != nil {
 		panic(err)
 		return

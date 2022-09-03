@@ -9,6 +9,7 @@ import (
 	"io"
 	"metar.gg/ent"
 	"metar.gg/ent/airport"
+	"metar.gg/ent/frequency"
 	"metar.gg/ent/runway"
 	"metar.gg/utils"
 	"net/http"
@@ -70,6 +71,15 @@ func (i *Importer) ImportAirports(url string) error {
 
 func (i *Importer) ImportRunways(url string) error {
 	err := i.importModelType(url, i.importRunwayLine, i.cleanupRunways)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (i *Importer) ImportFrequencies(url string) error {
+	err := i.importModelType(url, i.importFrequencyLine, i.cleanupFrequencies)
 	if err != nil {
 		return err
 	}
@@ -380,6 +390,78 @@ func (i *Importer) cleanupRunways() error {
 	}
 
 	println("Total runways ", saved, " rows")
+
+	return nil
+}
+
+// The raw data is in the following order: "id","airport_ref","airport_ident","type","description","frequency_mhz"
+func (i *Importer) importFrequencyLine(data []string) error {
+	// Hash the current line via md5
+	line := strings.Join(data, "")
+	hash := strconv.FormatUint(fnv1a.HashString64(line), 10)
+	frequencyID, _ := strconv.ParseInt(data[0], 10, 64)
+
+	ctx := context.TODO()
+
+	found, err := i.db.Airport.Update().Where(
+		airport.Hash(hash),
+		airport.ID(int(frequencyID)),
+	).
+		SetImportFlag(true).
+		Save(ctx)
+	if err != nil {
+		return err
+	}
+
+	if found == 1 {
+		return nil
+	}
+
+	// Upsert airport, because we know it doesn't exist yet, or it changed
+	airportID, err := strconv.ParseInt(data[1], 10, 64)
+	if err != nil {
+		return err
+	}
+
+	frequency, _ := strconv.ParseFloat(data[5], 64)
+
+	err = i.db.Frequency.Create().
+		SetImportFlag(true).
+		SetHash(hash).
+		SetID(int(frequencyID)).
+		SetAirportID(int(airportID)).
+		SetType(data[3]).
+		SetDescription(data[4]).
+		SetFrequency(frequency).
+		OnConflict().
+		UpdateNewValues().
+		Exec(ctx)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (i *Importer) cleanupFrequencies() error {
+	ctx := context.TODO()
+	deleted, err := i.db.Frequency.Delete().Where(
+		frequency.ImportFlag(false),
+	).Exec(ctx)
+	if err != nil {
+		return err
+	}
+
+	fmt.Println("Deleted ", deleted, " rows from frequencies")
+
+	saved, err := i.db.Frequency.Update().Where(
+		frequency.ImportFlag(true),
+	).SetImportFlag(false).Save(ctx)
+	if err != nil {
+		return err
+	}
+
+	println("Total frequencies ", saved, " rows")
 
 	return nil
 }

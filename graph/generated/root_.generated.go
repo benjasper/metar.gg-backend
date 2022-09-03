@@ -41,6 +41,7 @@ type ComplexityRoot struct {
 		Continent        func(childComplexity int) int
 		Country          func(childComplexity int) int
 		Elevation        func(childComplexity int) int
+		Frequencies      func(childComplexity int) int
 		GpsCode          func(childComplexity int) int
 		ID               func(childComplexity int) int
 		IataCode         func(childComplexity int) int
@@ -71,7 +72,11 @@ type ComplexityRoot struct {
 	}
 
 	Frequency struct {
-		ID func(childComplexity int) int
+		Airport     func(childComplexity int) int
+		Description func(childComplexity int) int
+		Frequency   func(childComplexity int) int
+		ID          func(childComplexity int) int
+		Type        func(childComplexity int) int
 	}
 
 	PageInfo struct {
@@ -143,6 +148,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Airport.Elevation(childComplexity), true
+
+	case "Airport.frequencies":
+		if e.complexity.Airport.Frequencies == nil {
+			break
+		}
+
+		return e.complexity.Airport.Frequencies(childComplexity), true
 
 	case "Airport.gpsCode":
 		if e.complexity.Airport.GpsCode == nil {
@@ -291,12 +303,40 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.AirportEdge.Node(childComplexity), true
 
+	case "Frequency.airport":
+		if e.complexity.Frequency.Airport == nil {
+			break
+		}
+
+		return e.complexity.Frequency.Airport(childComplexity), true
+
+	case "Frequency.description":
+		if e.complexity.Frequency.Description == nil {
+			break
+		}
+
+		return e.complexity.Frequency.Description(childComplexity), true
+
+	case "Frequency.frequency":
+		if e.complexity.Frequency.Frequency == nil {
+			break
+		}
+
+		return e.complexity.Frequency.Frequency(childComplexity), true
+
 	case "Frequency.id":
 		if e.complexity.Frequency.ID == nil {
 			break
 		}
 
 		return e.complexity.Frequency.ID(childComplexity), true
+
+	case "Frequency.type":
+		if e.complexity.Frequency.Type == nil {
+			break
+		}
+
+		return e.complexity.Frequency.Type(childComplexity), true
 
 	case "PageInfo.endCursor":
 		if e.complexity.PageInfo.EndCursor == nil {
@@ -560,6 +600,7 @@ type Airport {
   """Extra keywords/phrases to assist with search. May include former names for the airport, alternate codes, names in other languages, nearby tourist destinations, etc."""
   keywords: [String!]!
   runways: [Runway!]
+  frequencies: [Frequency!]
 }
 """AirportContinent is enum for the field continent"""
 enum AirportContinent @goModel(model: "metar.gg/ent/airport.Continent") {
@@ -582,6 +623,13 @@ enum AirportType @goModel(model: "metar.gg/ent/airport.Type") {
 }
 type Frequency {
   id: ID!
+  """A code for the frequency type. Some common values are "TWR" (tower), "ATF" or "CTAF" (common traffic frequency), "GND" (ground control), "RMP" (ramp control), "ATIS" (automated weather), "RCO" (remote radio outlet), "ARR" (arrivals), "DEP" (departures), "UNICOM" (monitored ground station), and "RDO" (a flight-service station)."""
+  type: String!
+  """A description of the frequency."""
+  description: String!
+  """Radio frequency in megahertz. Note that the same frequency may appear multiple times for an airport, serving different functions"""
+  frequency: Float!
+  airport: Airport
 }
 """Possible directions in which to order a list of items when provided an ` + "`" + `orderBy` + "`" + ` argument."""
 enum OrderDirection {
@@ -597,7 +645,7 @@ type Runway {
   """Width of the runway surface in feet."""
   width: Int!
   """Code for the runway surface type. This is not yet a controlled vocabulary, but probably will be soon. Some common values include "ASP" (asphalt), "TURF" (turf), "CON" (concrete), "GRS" (grass), "GRE" (gravel), "WATER" (water), and "UNK" (unknown)."""
-  surface: String!
+  surface: String
   """Whether the runway is lighted at night or not."""
   lighted: Boolean!
   """Whether the runway is currently closed or not."""
@@ -634,8 +682,8 @@ type Runway {
 type PageInfo {
     hasNextPage: Boolean!
     hasPreviousPage: Boolean!
-    startCursor: Cursor
-    endCursor: Cursor
+    startCursor: Cursor!
+    endCursor: Cursor!
 }
 
 type AirportConnection {

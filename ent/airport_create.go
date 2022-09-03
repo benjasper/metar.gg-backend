@@ -11,6 +11,7 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"metar.gg/ent/airport"
+	"metar.gg/ent/frequency"
 	"metar.gg/ent/runway"
 )
 
@@ -219,6 +220,21 @@ func (ac *AirportCreate) AddRunways(r ...*Runway) *AirportCreate {
 		ids[i] = r[i].ID
 	}
 	return ac.AddRunwayIDs(ids...)
+}
+
+// AddFrequencyIDs adds the "frequencies" edge to the Frequency entity by IDs.
+func (ac *AirportCreate) AddFrequencyIDs(ids ...int) *AirportCreate {
+	ac.mutation.AddFrequencyIDs(ids...)
+	return ac
+}
+
+// AddFrequencies adds the "frequencies" edges to the Frequency entity.
+func (ac *AirportCreate) AddFrequencies(f ...*Frequency) *AirportCreate {
+	ids := make([]int, len(f))
+	for i := range f {
+		ids[i] = f[i].ID
+	}
+	return ac.AddFrequencyIDs(ids...)
 }
 
 // Mutation returns the AirportMutation object of the builder.
@@ -549,6 +565,25 @@ func (ac *AirportCreate) createSpec() (*Airport, *sqlgraph.CreateSpec) {
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeInt,
 					Column: runway.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := ac.mutation.FrequenciesIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   airport.FrequenciesTable,
+			Columns: []string{airport.FrequenciesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: frequency.FieldID,
 				},
 			},
 		}

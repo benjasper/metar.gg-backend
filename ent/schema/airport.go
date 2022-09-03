@@ -15,7 +15,7 @@ type Airport struct {
 // Fields of the Airport.
 func (Airport) Fields() []ent.Field {
 	return []ent.Field{
-		field.String("identifier").Comment("This will be the ICAO code if available. Otherwise, it will be a local airport code (if no conflict), or if nothing else is available, an internally-generated code starting with the ISO2 country code, followed by a dash and a four-digit number."),
+		field.String("identifier").Unique().Comment("This will be the ICAO code if available. Otherwise, it will be a local airport code (if no conflict), or if nothing else is available, an internally-generated code starting with the ISO2 country code, followed by a dash and a four-digit number."),
 		field.Enum("type").Values("large_airport", "medium_airport", "small_airport", "closed_airport", "heliport", "seaplane_base").Comment("Type of airport."),
 		field.String("name").Comment("The official airport name, including \"Airport\", \"Airstrip\", etc."),
 		field.Float("latitude").Comment("Latitude of the airport in decimal degrees (positive is north)."),
@@ -39,6 +39,7 @@ func (Airport) Fields() []ent.Field {
 func (Airport) Edges() []ent.Edge {
 	return []ent.Edge{
 		edge.To("runways", Runway.Type).Comment("Runways at the airport."),
+		edge.To("frequencies", Frequency.Type).Comment("Frequencies at the airport."),
 	}
 }
 

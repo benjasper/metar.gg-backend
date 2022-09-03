@@ -240,6 +240,22 @@ func (c *AirportClient) QueryRunways(a *Airport) *RunwayQuery {
 	return query
 }
 
+// QueryFrequencies queries the frequencies edge of a Airport.
+func (c *AirportClient) QueryFrequencies(a *Airport) *FrequencyQuery {
+	query := &FrequencyQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := a.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(airport.Table, airport.FieldID, id),
+			sqlgraph.To(frequency.Table, frequency.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, airport.FrequenciesTable, airport.FrequenciesColumn),
+		)
+		fromV = sqlgraph.Neighbors(a.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // Hooks returns the client hooks.
 func (c *AirportClient) Hooks() []Hook {
 	return c.hooks.Airport
@@ -328,6 +344,22 @@ func (c *FrequencyClient) GetX(ctx context.Context, id int) *Frequency {
 		panic(err)
 	}
 	return obj
+}
+
+// QueryAirport queries the airport edge of a Frequency.
+func (c *FrequencyClient) QueryAirport(f *Frequency) *AirportQuery {
+	query := &AirportQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := f.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(frequency.Table, frequency.FieldID, id),
+			sqlgraph.To(airport.Table, airport.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, frequency.AirportTable, frequency.AirportColumn),
+		)
+		fromV = sqlgraph.Neighbors(f.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
 }
 
 // Hooks returns the client hooks.

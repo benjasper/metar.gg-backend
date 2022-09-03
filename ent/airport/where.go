@@ -1698,6 +1698,34 @@ func HasRunwaysWith(preds ...predicate.Runway) predicate.Airport {
 	})
 }
 
+// HasFrequencies applies the HasEdge predicate on the "frequencies" edge.
+func HasFrequencies() predicate.Airport {
+	return predicate.Airport(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.To(FrequenciesTable, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, FrequenciesTable, FrequenciesColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasFrequenciesWith applies the HasEdge predicate on the "frequencies" edge with a given conditions (other predicates).
+func HasFrequenciesWith(preds ...predicate.Frequency) predicate.Airport {
+	return predicate.Airport(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.To(FrequenciesInverseTable, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, FrequenciesTable, FrequenciesColumn),
+		)
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
 // And groups predicates with the AND operator between them.
 func And(predicates ...predicate.Airport) predicate.Airport {
 	return predicate.Airport(func(s *sql.Selector) {

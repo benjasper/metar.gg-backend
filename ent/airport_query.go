@@ -12,6 +12,7 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"metar.gg/ent/airport"
+	"metar.gg/ent/frequency"
 	"metar.gg/ent/predicate"
 	"metar.gg/ent/runway"
 )
@@ -19,16 +20,18 @@ import (
 // AirportQuery is the builder for querying Airport entities.
 type AirportQuery struct {
 	config
-	limit            *int
-	offset           *int
-	unique           *bool
-	order            []OrderFunc
-	fields           []string
-	predicates       []predicate.Airport
-	withRunways      *RunwayQuery
-	modifiers        []func(*sql.Selector)
-	loadTotal        []func(context.Context, []*Airport) error
-	withNamedRunways map[string]*RunwayQuery
+	limit                *int
+	offset               *int
+	unique               *bool
+	order                []OrderFunc
+	fields               []string
+	predicates           []predicate.Airport
+	withRunways          *RunwayQuery
+	withFrequencies      *FrequencyQuery
+	modifiers            []func(*sql.Selector)
+	loadTotal            []func(context.Context, []*Airport) error
+	withNamedRunways     map[string]*RunwayQuery
+	withNamedFrequencies map[string]*FrequencyQuery
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -80,6 +83,28 @@ func (aq *AirportQuery) QueryRunways() *RunwayQuery {
 			sqlgraph.From(airport.Table, airport.FieldID, selector),
 			sqlgraph.To(runway.Table, runway.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, false, airport.RunwaysTable, airport.RunwaysColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(aq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryFrequencies chains the current query on the "frequencies" edge.
+func (aq *AirportQuery) QueryFrequencies() *FrequencyQuery {
+	query := &FrequencyQuery{config: aq.config}
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := aq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := aq.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(airport.Table, airport.FieldID, selector),
+			sqlgraph.To(frequency.Table, frequency.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, airport.FrequenciesTable, airport.FrequenciesColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(aq.driver.Dialect(), step)
 		return fromU, nil
@@ -263,12 +288,13 @@ func (aq *AirportQuery) Clone() *AirportQuery {
 		return nil
 	}
 	return &AirportQuery{
-		config:      aq.config,
-		limit:       aq.limit,
-		offset:      aq.offset,
-		order:       append([]OrderFunc{}, aq.order...),
-		predicates:  append([]predicate.Airport{}, aq.predicates...),
-		withRunways: aq.withRunways.Clone(),
+		config:          aq.config,
+		limit:           aq.limit,
+		offset:          aq.offset,
+		order:           append([]OrderFunc{}, aq.order...),
+		predicates:      append([]predicate.Airport{}, aq.predicates...),
+		withRunways:     aq.withRunways.Clone(),
+		withFrequencies: aq.withFrequencies.Clone(),
 		// clone intermediate query.
 		sql:    aq.sql.Clone(),
 		path:   aq.path,
@@ -284,6 +310,17 @@ func (aq *AirportQuery) WithRunways(opts ...func(*RunwayQuery)) *AirportQuery {
 		opt(query)
 	}
 	aq.withRunways = query
+	return aq
+}
+
+// WithFrequencies tells the query-builder to eager-load the nodes that are connected to
+// the "frequencies" edge. The optional arguments are used to configure the query builder of the edge.
+func (aq *AirportQuery) WithFrequencies(opts ...func(*FrequencyQuery)) *AirportQuery {
+	query := &FrequencyQuery{config: aq.config}
+	for _, opt := range opts {
+		opt(query)
+	}
+	aq.withFrequencies = query
 	return aq
 }
 
@@ -355,8 +392,9 @@ func (aq *AirportQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Airp
 	var (
 		nodes       = []*Airport{}
 		_spec       = aq.querySpec()
-		loadedTypes = [1]bool{
+		loadedTypes = [2]bool{
 			aq.withRunways != nil,
+			aq.withFrequencies != nil,
 		}
 	)
 	_spec.ScanValues = func(columns []string) ([]any, error) {
@@ -387,10 +425,24 @@ func (aq *AirportQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Airp
 			return nil, err
 		}
 	}
+	if query := aq.withFrequencies; query != nil {
+		if err := aq.loadFrequencies(ctx, query, nodes,
+			func(n *Airport) { n.Edges.Frequencies = []*Frequency{} },
+			func(n *Airport, e *Frequency) { n.Edges.Frequencies = append(n.Edges.Frequencies, e) }); err != nil {
+			return nil, err
+		}
+	}
 	for name, query := range aq.withNamedRunways {
 		if err := aq.loadRunways(ctx, query, nodes,
 			func(n *Airport) { n.appendNamedRunways(name) },
 			func(n *Airport, e *Runway) { n.appendNamedRunways(name, e) }); err != nil {
+			return nil, err
+		}
+	}
+	for name, query := range aq.withNamedFrequencies {
+		if err := aq.loadFrequencies(ctx, query, nodes,
+			func(n *Airport) { n.appendNamedFrequencies(name) },
+			func(n *Airport, e *Frequency) { n.appendNamedFrequencies(name, e) }); err != nil {
 			return nil, err
 		}
 	}
@@ -428,6 +480,37 @@ func (aq *AirportQuery) loadRunways(ctx context.Context, query *RunwayQuery, nod
 		node, ok := nodeids[*fk]
 		if !ok {
 			return fmt.Errorf(`unexpected foreign-key "airport_runways" returned %v for node %v`, *fk, n.ID)
+		}
+		assign(node, n)
+	}
+	return nil
+}
+func (aq *AirportQuery) loadFrequencies(ctx context.Context, query *FrequencyQuery, nodes []*Airport, init func(*Airport), assign func(*Airport, *Frequency)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[int]*Airport)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
+		}
+	}
+	query.withFKs = true
+	query.Where(predicate.Frequency(func(s *sql.Selector) {
+		s.Where(sql.InValues(airport.FrequenciesColumn, fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.airport_frequencies
+		if fk == nil {
+			return fmt.Errorf(`foreign-key "airport_frequencies" is nil for node %v`, n.ID)
+		}
+		node, ok := nodeids[*fk]
+		if !ok {
+			return fmt.Errorf(`unexpected foreign-key "airport_frequencies" returned %v for node %v`, *fk, n.ID)
 		}
 		assign(node, n)
 	}
@@ -545,6 +628,20 @@ func (aq *AirportQuery) WithNamedRunways(name string, opts ...func(*RunwayQuery)
 		aq.withNamedRunways = make(map[string]*RunwayQuery)
 	}
 	aq.withNamedRunways[name] = query
+	return aq
+}
+
+// WithNamedFrequencies tells the query-builder to eager-load the nodes that are connected to the "frequencies"
+// edge with the given name. The optional arguments are used to configure the query builder of the edge.
+func (aq *AirportQuery) WithNamedFrequencies(name string, opts ...func(*FrequencyQuery)) *AirportQuery {
+	query := &FrequencyQuery{config: aq.config}
+	for _, opt := range opts {
+		opt(query)
+	}
+	if aq.withNamedFrequencies == nil {
+		aq.withNamedFrequencies = make(map[string]*FrequencyQuery)
+	}
+	aq.withNamedFrequencies[name] = query
 	return aq
 }
 

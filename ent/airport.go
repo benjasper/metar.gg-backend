@@ -63,13 +63,16 @@ type Airport struct {
 type AirportEdges struct {
 	// Runways at the airport.
 	Runways []*Runway `json:"runways,omitempty"`
+	// Frequencies at the airport.
+	Frequencies []*Frequency `json:"frequencies,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [1]bool
+	loadedTypes [2]bool
 	// totalCount holds the count of the edges above.
-	totalCount [1]map[string]int
+	totalCount [2]map[string]int
 
-	namedRunways map[string][]*Runway
+	namedRunways     map[string][]*Runway
+	namedFrequencies map[string][]*Frequency
 }
 
 // RunwaysOrErr returns the Runways value or an error if the edge
@@ -79,6 +82,15 @@ func (e AirportEdges) RunwaysOrErr() ([]*Runway, error) {
 		return e.Runways, nil
 	}
 	return nil, &NotLoadedError{edge: "runways"}
+}
+
+// FrequenciesOrErr returns the Frequencies value or an error if the edge
+// was not loaded in eager-loading.
+func (e AirportEdges) FrequenciesOrErr() ([]*Frequency, error) {
+	if e.loadedTypes[1] {
+		return e.Frequencies, nil
+	}
+	return nil, &NotLoadedError{edge: "frequencies"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -250,6 +262,11 @@ func (a *Airport) QueryRunways() *RunwayQuery {
 	return (&AirportClient{config: a.config}).QueryRunways(a)
 }
 
+// QueryFrequencies queries the "frequencies" edge of the Airport entity.
+func (a *Airport) QueryFrequencies() *FrequencyQuery {
+	return (&AirportClient{config: a.config}).QueryFrequencies(a)
+}
+
 // Update returns a builder for updating this Airport.
 // Note that you need to call Airport.Unwrap() before calling this method if this Airport
 // was returned from a transaction, and the transaction was committed or rolled back.
@@ -368,6 +385,30 @@ func (a *Airport) appendNamedRunways(name string, edges ...*Runway) {
 		a.Edges.namedRunways[name] = []*Runway{}
 	} else {
 		a.Edges.namedRunways[name] = append(a.Edges.namedRunways[name], edges...)
+	}
+}
+
+// NamedFrequencies returns the Frequencies named value or an error if the edge was not
+// loaded in eager-loading with this name.
+func (a *Airport) NamedFrequencies(name string) ([]*Frequency, error) {
+	if a.Edges.namedFrequencies == nil {
+		return nil, &NotLoadedError{edge: name}
+	}
+	nodes, ok := a.Edges.namedFrequencies[name]
+	if !ok {
+		return nil, &NotLoadedError{edge: name}
+	}
+	return nodes, nil
+}
+
+func (a *Airport) appendNamedFrequencies(name string, edges ...*Frequency) {
+	if a.Edges.namedFrequencies == nil {
+		a.Edges.namedFrequencies = make(map[string][]*Frequency)
+	}
+	if len(edges) == 0 {
+		a.Edges.namedFrequencies[name] = []*Frequency{}
+	} else {
+		a.Edges.namedFrequencies[name] = append(a.Edges.namedFrequencies[name], edges...)
 	}
 }
 

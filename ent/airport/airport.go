@@ -53,6 +53,8 @@ const (
 	FieldKeywords = "keywords"
 	// EdgeRunways holds the string denoting the runways edge name in mutations.
 	EdgeRunways = "runways"
+	// EdgeFrequencies holds the string denoting the frequencies edge name in mutations.
+	EdgeFrequencies = "frequencies"
 	// Table holds the table name of the airport in the database.
 	Table = "airports"
 	// RunwaysTable is the table that holds the runways relation/edge.
@@ -62,6 +64,13 @@ const (
 	RunwaysInverseTable = "runways"
 	// RunwaysColumn is the table column denoting the runways relation/edge.
 	RunwaysColumn = "airport_runways"
+	// FrequenciesTable is the table that holds the frequencies relation/edge.
+	FrequenciesTable = "frequencies"
+	// FrequenciesInverseTable is the table name for the Frequency entity.
+	// It exists in this package in order to avoid circular dependency with the "frequency" package.
+	FrequenciesInverseTable = "frequencies"
+	// FrequenciesColumn is the table column denoting the frequencies relation/edge.
+	FrequenciesColumn = "airport_frequencies"
 )
 
 // Columns holds all SQL columns for airport fields.

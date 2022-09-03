@@ -35,6 +35,7 @@ type Airport {
   """Extra keywords/phrases to assist with search. May include former names for the airport, alternate codes, names in other languages, nearby tourist destinations, etc."""
   keywords: [String!]!
   runways: [Runway!]
+  frequencies: [Frequency!]
 }
 """AirportContinent is enum for the field continent"""
 enum AirportContinent @goModel(model: "metar.gg/ent/airport.Continent") {
@@ -57,6 +58,13 @@ enum AirportType @goModel(model: "metar.gg/ent/airport.Type") {
 }
 type Frequency {
   id: ID!
+  """A code for the frequency type. Some common values are "TWR" (tower), "ATF" or "CTAF" (common traffic frequency), "GND" (ground control), "RMP" (ramp control), "ATIS" (automated weather), "RCO" (remote radio outlet), "ARR" (arrivals), "DEP" (departures), "UNICOM" (monitored ground station), and "RDO" (a flight-service station)."""
+  type: String!
+  """A description of the frequency."""
+  description: String!
+  """Radio frequency in megahertz. Note that the same frequency may appear multiple times for an airport, serving different functions"""
+  frequency: Float!
+  airport: Airport
 }
 """Possible directions in which to order a list of items when provided an `orderBy` argument."""
 enum OrderDirection {

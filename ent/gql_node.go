@@ -53,7 +53,7 @@ func (a *Airport) Node(ctx context.Context) (node *Node, err error) {
 		ID:     a.ID,
 		Type:   "Airport",
 		Fields: make([]*Field, 17),
-		Edges:  make([]*Edge, 1),
+		Edges:  make([]*Edge, 2),
 	}
 	var buf []byte
 	if buf, err = json.Marshal(a.Identifier); err != nil {
@@ -202,6 +202,16 @@ func (a *Airport) Node(ctx context.Context) (node *Node, err error) {
 	if err != nil {
 		return nil, err
 	}
+	node.Edges[1] = &Edge{
+		Type: "Frequency",
+		Name: "frequencies",
+	}
+	err = a.QueryFrequencies().
+		Select(frequency.FieldID).
+		Scan(ctx, &node.Edges[1].IDs)
+	if err != nil {
+		return nil, err
+	}
 	return node, nil
 }
 
@@ -209,8 +219,43 @@ func (f *Frequency) Node(ctx context.Context) (node *Node, err error) {
 	node = &Node{
 		ID:     f.ID,
 		Type:   "Frequency",
-		Fields: make([]*Field, 0),
-		Edges:  make([]*Edge, 0),
+		Fields: make([]*Field, 3),
+		Edges:  make([]*Edge, 1),
+	}
+	var buf []byte
+	if buf, err = json.Marshal(f.Type); err != nil {
+		return nil, err
+	}
+	node.Fields[0] = &Field{
+		Type:  "string",
+		Name:  "type",
+		Value: string(buf),
+	}
+	if buf, err = json.Marshal(f.Description); err != nil {
+		return nil, err
+	}
+	node.Fields[1] = &Field{
+		Type:  "string",
+		Name:  "description",
+		Value: string(buf),
+	}
+	if buf, err = json.Marshal(f.Frequency); err != nil {
+		return nil, err
+	}
+	node.Fields[2] = &Field{
+		Type:  "float64",
+		Name:  "frequency",
+		Value: string(buf),
+	}
+	node.Edges[0] = &Edge{
+		Type: "Airport",
+		Name: "airport",
+	}
+	err = f.QueryAirport().
+		Select(airport.FieldID).
+		Scan(ctx, &node.Edges[0].IDs)
+	if err != nil {
+		return nil, err
 	}
 	return node, nil
 }

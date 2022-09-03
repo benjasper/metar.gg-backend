@@ -10,6 +10,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"metar.gg/ent/airport"
 	"metar.gg/ent/frequency"
 	"metar.gg/ent/predicate"
 )
@@ -17,14 +18,16 @@ import (
 // FrequencyQuery is the builder for querying Frequency entities.
 type FrequencyQuery struct {
 	config
-	limit      *int
-	offset     *int
-	unique     *bool
-	order      []OrderFunc
-	fields     []string
-	predicates []predicate.Frequency
-	modifiers  []func(*sql.Selector)
-	loadTotal  []func(context.Context, []*Frequency) error
+	limit       *int
+	offset      *int
+	unique      *bool
+	order       []OrderFunc
+	fields      []string
+	predicates  []predicate.Frequency
+	withAirport *AirportQuery
+	withFKs     bool
+	modifiers   []func(*sql.Selector)
+	loadTotal   []func(context.Context, []*Frequency) error
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -59,6 +62,28 @@ func (fq *FrequencyQuery) Unique(unique bool) *FrequencyQuery {
 func (fq *FrequencyQuery) Order(o ...OrderFunc) *FrequencyQuery {
 	fq.order = append(fq.order, o...)
 	return fq
+}
+
+// QueryAirport chains the current query on the "airport" edge.
+func (fq *FrequencyQuery) QueryAirport() *AirportQuery {
+	query := &AirportQuery{config: fq.config}
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := fq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := fq.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(frequency.Table, frequency.FieldID, selector),
+			sqlgraph.To(airport.Table, airport.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, frequency.AirportTable, frequency.AirportColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(fq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
 }
 
 // First returns the first Frequency entity from the query.
@@ -237,11 +262,12 @@ func (fq *FrequencyQuery) Clone() *FrequencyQuery {
 		return nil
 	}
 	return &FrequencyQuery{
-		config:     fq.config,
-		limit:      fq.limit,
-		offset:     fq.offset,
-		order:      append([]OrderFunc{}, fq.order...),
-		predicates: append([]predicate.Frequency{}, fq.predicates...),
+		config:      fq.config,
+		limit:       fq.limit,
+		offset:      fq.offset,
+		order:       append([]OrderFunc{}, fq.order...),
+		predicates:  append([]predicate.Frequency{}, fq.predicates...),
+		withAirport: fq.withAirport.Clone(),
 		// clone intermediate query.
 		sql:    fq.sql.Clone(),
 		path:   fq.path,
@@ -249,8 +275,31 @@ func (fq *FrequencyQuery) Clone() *FrequencyQuery {
 	}
 }
 
+// WithAirport tells the query-builder to eager-load the nodes that are connected to
+// the "airport" edge. The optional arguments are used to configure the query builder of the edge.
+func (fq *FrequencyQuery) WithAirport(opts ...func(*AirportQuery)) *FrequencyQuery {
+	query := &AirportQuery{config: fq.config}
+	for _, opt := range opts {
+		opt(query)
+	}
+	fq.withAirport = query
+	return fq
+}
+
 // GroupBy is used to group vertices by one or more fields/columns.
 // It is often used with aggregate functions, like: count, max, mean, min, sum.
+//
+// Example:
+//
+//	var v []struct {
+//		Hash string `json:"hash,omitempty"`
+//		Count int `json:"count,omitempty"`
+//	}
+//
+//	client.Frequency.Query().
+//		GroupBy(frequency.FieldHash).
+//		Aggregate(ent.Count()).
+//		Scan(ctx, &v)
 func (fq *FrequencyQuery) GroupBy(field string, fields ...string) *FrequencyGroupBy {
 	grbuild := &FrequencyGroupBy{config: fq.config}
 	grbuild.fields = append([]string{field}, fields...)
@@ -267,6 +316,16 @@ func (fq *FrequencyQuery) GroupBy(field string, fields ...string) *FrequencyGrou
 
 // Select allows the selection one or more fields/columns for the given query,
 // instead of selecting all fields in the entity.
+//
+// Example:
+//
+//	var v []struct {
+//		Hash string `json:"hash,omitempty"`
+//	}
+//
+//	client.Frequency.Query().
+//		Select(frequency.FieldHash).
+//		Scan(ctx, &v)
 func (fq *FrequencyQuery) Select(fields ...string) *FrequencySelect {
 	fq.fields = append(fq.fields, fields...)
 	selbuild := &FrequencySelect{FrequencyQuery: fq}
@@ -293,15 +352,26 @@ func (fq *FrequencyQuery) prepareQuery(ctx context.Context) error {
 
 func (fq *FrequencyQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Frequency, error) {
 	var (
-		nodes = []*Frequency{}
-		_spec = fq.querySpec()
+		nodes       = []*Frequency{}
+		withFKs     = fq.withFKs
+		_spec       = fq.querySpec()
+		loadedTypes = [1]bool{
+			fq.withAirport != nil,
+		}
 	)
+	if fq.withAirport != nil {
+		withFKs = true
+	}
+	if withFKs {
+		_spec.Node.Columns = append(_spec.Node.Columns, frequency.ForeignKeys...)
+	}
 	_spec.ScanValues = func(columns []string) ([]any, error) {
 		return (*Frequency).scanValues(nil, columns)
 	}
 	_spec.Assign = func(columns []string, values []any) error {
 		node := &Frequency{config: fq.config}
 		nodes = append(nodes, node)
+		node.Edges.loadedTypes = loadedTypes
 		return node.assignValues(columns, values)
 	}
 	if len(fq.modifiers) > 0 {
@@ -316,12 +386,48 @@ func (fq *FrequencyQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Fr
 	if len(nodes) == 0 {
 		return nodes, nil
 	}
+	if query := fq.withAirport; query != nil {
+		if err := fq.loadAirport(ctx, query, nodes, nil,
+			func(n *Frequency, e *Airport) { n.Edges.Airport = e }); err != nil {
+			return nil, err
+		}
+	}
 	for i := range fq.loadTotal {
 		if err := fq.loadTotal[i](ctx, nodes); err != nil {
 			return nil, err
 		}
 	}
 	return nodes, nil
+}
+
+func (fq *FrequencyQuery) loadAirport(ctx context.Context, query *AirportQuery, nodes []*Frequency, init func(*Frequency), assign func(*Frequency, *Airport)) error {
+	ids := make([]int, 0, len(nodes))
+	nodeids := make(map[int][]*Frequency)
+	for i := range nodes {
+		if nodes[i].airport_frequencies == nil {
+			continue
+		}
+		fk := *nodes[i].airport_frequencies
+		if _, ok := nodeids[fk]; !ok {
+			ids = append(ids, fk)
+		}
+		nodeids[fk] = append(nodeids[fk], nodes[i])
+	}
+	query.Where(airport.IDIn(ids...))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		nodes, ok := nodeids[n.ID]
+		if !ok {
+			return fmt.Errorf(`unexpected foreign-key "airport_frequencies" returned %v`, n.ID)
+		}
+		for i := range nodes {
+			assign(nodes[i], n)
+		}
+	}
+	return nil
 }
 
 func (fq *FrequencyQuery) sqlCount(ctx context.Context) (int, error) {

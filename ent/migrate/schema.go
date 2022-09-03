@@ -13,7 +13,7 @@ var (
 		{Name: "id", Type: field.TypeInt, Increment: true},
 		{Name: "hash", Type: field.TypeString},
 		{Name: "import_flag", Type: field.TypeBool, Default: false},
-		{Name: "identifier", Type: field.TypeString},
+		{Name: "identifier", Type: field.TypeString, Unique: true},
 		{Name: "type", Type: field.TypeEnum, Enums: []string{"large_airport", "medium_airport", "small_airport", "closed_airport", "heliport", "seaplane_base"}},
 		{Name: "name", Type: field.TypeString},
 		{Name: "latitude", Type: field.TypeFloat64},
@@ -52,12 +52,33 @@ var (
 	// FrequenciesColumns holds the columns for the "frequencies" table.
 	FrequenciesColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "hash", Type: field.TypeString},
+		{Name: "import_flag", Type: field.TypeBool, Default: false},
+		{Name: "type", Type: field.TypeString},
+		{Name: "description", Type: field.TypeString},
+		{Name: "frequency", Type: field.TypeFloat64},
+		{Name: "airport_frequencies", Type: field.TypeInt, Nullable: true},
 	}
 	// FrequenciesTable holds the schema information for the "frequencies" table.
 	FrequenciesTable = &schema.Table{
 		Name:       "frequencies",
 		Columns:    FrequenciesColumns,
 		PrimaryKey: []*schema.Column{FrequenciesColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "frequencies_airports_frequencies",
+				Columns:    []*schema.Column{FrequenciesColumns[6]},
+				RefColumns: []*schema.Column{AirportsColumns[0]},
+				OnDelete:   schema.SetNull,
+			},
+		},
+		Indexes: []*schema.Index{
+			{
+				Name:    "frequency_hash",
+				Unique:  false,
+				Columns: []*schema.Column{FrequenciesColumns[1]},
+			},
+		},
 	}
 	// RunwaysColumns holds the columns for the "runways" table.
 	RunwaysColumns = []*schema.Column{
@@ -113,5 +134,6 @@ var (
 )
 
 func init() {
+	FrequenciesTable.ForeignKeys[0].RefTable = AirportsTable
 	RunwaysTable.ForeignKeys[0].RefTable = AirportsTable
 }

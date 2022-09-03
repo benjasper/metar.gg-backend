@@ -11,6 +11,7 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"metar.gg/ent/airport"
+	"metar.gg/ent/frequency"
 	"metar.gg/ent/predicate"
 	"metar.gg/ent/runway"
 )
@@ -284,6 +285,21 @@ func (au *AirportUpdate) AddRunways(r ...*Runway) *AirportUpdate {
 	return au.AddRunwayIDs(ids...)
 }
 
+// AddFrequencyIDs adds the "frequencies" edge to the Frequency entity by IDs.
+func (au *AirportUpdate) AddFrequencyIDs(ids ...int) *AirportUpdate {
+	au.mutation.AddFrequencyIDs(ids...)
+	return au
+}
+
+// AddFrequencies adds the "frequencies" edges to the Frequency entity.
+func (au *AirportUpdate) AddFrequencies(f ...*Frequency) *AirportUpdate {
+	ids := make([]int, len(f))
+	for i := range f {
+		ids[i] = f[i].ID
+	}
+	return au.AddFrequencyIDs(ids...)
+}
+
 // Mutation returns the AirportMutation object of the builder.
 func (au *AirportUpdate) Mutation() *AirportMutation {
 	return au.mutation
@@ -308,6 +324,27 @@ func (au *AirportUpdate) RemoveRunways(r ...*Runway) *AirportUpdate {
 		ids[i] = r[i].ID
 	}
 	return au.RemoveRunwayIDs(ids...)
+}
+
+// ClearFrequencies clears all "frequencies" edges to the Frequency entity.
+func (au *AirportUpdate) ClearFrequencies() *AirportUpdate {
+	au.mutation.ClearFrequencies()
+	return au
+}
+
+// RemoveFrequencyIDs removes the "frequencies" edge to Frequency entities by IDs.
+func (au *AirportUpdate) RemoveFrequencyIDs(ids ...int) *AirportUpdate {
+	au.mutation.RemoveFrequencyIDs(ids...)
+	return au
+}
+
+// RemoveFrequencies removes "frequencies" edges to Frequency entities.
+func (au *AirportUpdate) RemoveFrequencies(f ...*Frequency) *AirportUpdate {
+	ids := make([]int, len(f))
+	for i := range f {
+		ids[i] = f[i].ID
+	}
+	return au.RemoveFrequencyIDs(ids...)
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -653,6 +690,60 @@ func (au *AirportUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
+	if au.mutation.FrequenciesCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   airport.FrequenciesTable,
+			Columns: []string{airport.FrequenciesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: frequency.FieldID,
+				},
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := au.mutation.RemovedFrequenciesIDs(); len(nodes) > 0 && !au.mutation.FrequenciesCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   airport.FrequenciesTable,
+			Columns: []string{airport.FrequenciesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: frequency.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := au.mutation.FrequenciesIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   airport.FrequenciesTable,
+			Columns: []string{airport.FrequenciesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: frequency.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
 	if n, err = sqlgraph.UpdateNodes(ctx, au.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{airport.Label}
@@ -928,6 +1019,21 @@ func (auo *AirportUpdateOne) AddRunways(r ...*Runway) *AirportUpdateOne {
 	return auo.AddRunwayIDs(ids...)
 }
 
+// AddFrequencyIDs adds the "frequencies" edge to the Frequency entity by IDs.
+func (auo *AirportUpdateOne) AddFrequencyIDs(ids ...int) *AirportUpdateOne {
+	auo.mutation.AddFrequencyIDs(ids...)
+	return auo
+}
+
+// AddFrequencies adds the "frequencies" edges to the Frequency entity.
+func (auo *AirportUpdateOne) AddFrequencies(f ...*Frequency) *AirportUpdateOne {
+	ids := make([]int, len(f))
+	for i := range f {
+		ids[i] = f[i].ID
+	}
+	return auo.AddFrequencyIDs(ids...)
+}
+
 // Mutation returns the AirportMutation object of the builder.
 func (auo *AirportUpdateOne) Mutation() *AirportMutation {
 	return auo.mutation
@@ -952,6 +1058,27 @@ func (auo *AirportUpdateOne) RemoveRunways(r ...*Runway) *AirportUpdateOne {
 		ids[i] = r[i].ID
 	}
 	return auo.RemoveRunwayIDs(ids...)
+}
+
+// ClearFrequencies clears all "frequencies" edges to the Frequency entity.
+func (auo *AirportUpdateOne) ClearFrequencies() *AirportUpdateOne {
+	auo.mutation.ClearFrequencies()
+	return auo
+}
+
+// RemoveFrequencyIDs removes the "frequencies" edge to Frequency entities by IDs.
+func (auo *AirportUpdateOne) RemoveFrequencyIDs(ids ...int) *AirportUpdateOne {
+	auo.mutation.RemoveFrequencyIDs(ids...)
+	return auo
+}
+
+// RemoveFrequencies removes "frequencies" edges to Frequency entities.
+func (auo *AirportUpdateOne) RemoveFrequencies(f ...*Frequency) *AirportUpdateOne {
+	ids := make([]int, len(f))
+	for i := range f {
+		ids[i] = f[i].ID
+	}
+	return auo.RemoveFrequencyIDs(ids...)
 }
 
 // Select allows selecting one or more fields (columns) of the returned entity.
@@ -1319,6 +1446,60 @@ func (auo *AirportUpdateOne) sqlSave(ctx context.Context) (_node *Airport, err e
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeInt,
 					Column: runway.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if auo.mutation.FrequenciesCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   airport.FrequenciesTable,
+			Columns: []string{airport.FrequenciesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: frequency.FieldID,
+				},
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := auo.mutation.RemovedFrequenciesIDs(); len(nodes) > 0 && !auo.mutation.FrequenciesCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   airport.FrequenciesTable,
+			Columns: []string{airport.FrequenciesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: frequency.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := auo.mutation.FrequenciesIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   airport.FrequenciesTable,
+			Columns: []string{airport.FrequenciesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: frequency.FieldID,
 				},
 			},
 		}

@@ -882,6 +882,59 @@ func (ec *executionContext) fieldContext_Airport_runways(ctx context.Context, fi
 	return fc, nil
 }
 
+func (ec *executionContext) _Airport_frequencies(ctx context.Context, field graphql.CollectedField, obj *ent.Airport) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Airport_frequencies(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Frequencies(ctx)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.([]*ent.Frequency)
+	fc.Result = res
+	return ec.marshalOFrequency2ᚕᚖmetarᚗggᚋentᚐFrequencyᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Airport_frequencies(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Airport",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_Frequency_id(ctx, field)
+			case "type":
+				return ec.fieldContext_Frequency_type(ctx, field)
+			case "description":
+				return ec.fieldContext_Frequency_description(ctx, field)
+			case "frequency":
+				return ec.fieldContext_Frequency_frequency(ctx, field)
+			case "airport":
+				return ec.fieldContext_Frequency_airport(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type Frequency", field.Name)
+		},
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _Frequency_id(ctx context.Context, field graphql.CollectedField, obj *ent.Frequency) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_Frequency_id(ctx, field)
 	if err != nil {
@@ -921,6 +974,221 @@ func (ec *executionContext) fieldContext_Frequency_id(ctx context.Context, field
 		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			return nil, errors.New("field of type ID does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Frequency_type(ctx context.Context, field graphql.CollectedField, obj *ent.Frequency) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Frequency_type(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Type, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Frequency_type(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Frequency",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Frequency_description(ctx context.Context, field graphql.CollectedField, obj *ent.Frequency) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Frequency_description(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Description, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Frequency_description(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Frequency",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Frequency_frequency(ctx context.Context, field graphql.CollectedField, obj *ent.Frequency) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Frequency_frequency(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Frequency, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(float64)
+	fc.Result = res
+	return ec.marshalNFloat2float64(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Frequency_frequency(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Frequency",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Float does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Frequency_airport(ctx context.Context, field graphql.CollectedField, obj *ent.Frequency) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Frequency_airport(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Airport(ctx)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*ent.Airport)
+	fc.Result = res
+	return ec.marshalOAirport2ᚖmetarᚗggᚋentᚐAirport(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Frequency_airport(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Frequency",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_Airport_id(ctx, field)
+			case "identifier":
+				return ec.fieldContext_Airport_identifier(ctx, field)
+			case "type":
+				return ec.fieldContext_Airport_type(ctx, field)
+			case "name":
+				return ec.fieldContext_Airport_name(ctx, field)
+			case "latitude":
+				return ec.fieldContext_Airport_latitude(ctx, field)
+			case "longitude":
+				return ec.fieldContext_Airport_longitude(ctx, field)
+			case "elevation":
+				return ec.fieldContext_Airport_elevation(ctx, field)
+			case "continent":
+				return ec.fieldContext_Airport_continent(ctx, field)
+			case "country":
+				return ec.fieldContext_Airport_country(ctx, field)
+			case "region":
+				return ec.fieldContext_Airport_region(ctx, field)
+			case "municipality":
+				return ec.fieldContext_Airport_municipality(ctx, field)
+			case "scheduledService":
+				return ec.fieldContext_Airport_scheduledService(ctx, field)
+			case "gpsCode":
+				return ec.fieldContext_Airport_gpsCode(ctx, field)
+			case "iataCode":
+				return ec.fieldContext_Airport_iataCode(ctx, field)
+			case "localCode":
+				return ec.fieldContext_Airport_localCode(ctx, field)
+			case "website":
+				return ec.fieldContext_Airport_website(ctx, field)
+			case "wikipedia":
+				return ec.fieldContext_Airport_wikipedia(ctx, field)
+			case "keywords":
+				return ec.fieldContext_Airport_keywords(ctx, field)
+			case "runways":
+				return ec.fieldContext_Airport_runways(ctx, field)
+			case "frequencies":
+				return ec.fieldContext_Airport_frequencies(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type Airport", field.Name)
 		},
 	}
 	return fc, nil
@@ -1079,14 +1347,11 @@ func (ec *executionContext) _Runway_surface(ctx context.Context, field graphql.C
 		return graphql.Null
 	}
 	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
 		return graphql.Null
 	}
-	res := resTmp.(string)
+	res := resTmp.(*string)
 	fc.Result = res
-	return ec.marshalNString2string(ctx, field.Selections, res)
+	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Runway_surface(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -1762,6 +2027,8 @@ func (ec *executionContext) fieldContext_Runway_airport(ctx context.Context, fie
 				return ec.fieldContext_Airport_keywords(ctx, field)
 			case "runways":
 				return ec.fieldContext_Airport_runways(ctx, field)
+			case "frequencies":
+				return ec.fieldContext_Airport_frequencies(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Airport", field.Name)
 		},
@@ -1913,6 +2180,23 @@ func (ec *executionContext) _Airport(ctx context.Context, sel ast.SelectionSet, 
 				return innerFunc(ctx)
 
 			})
+		case "frequencies":
+			field := field
+
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Airport_frequencies(ctx, field, obj)
+				return res
+			}
+
+			out.Concurrently(i, func() graphql.Marshaler {
+				return innerFunc(ctx)
+
+			})
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -1939,8 +2223,46 @@ func (ec *executionContext) _Frequency(ctx context.Context, sel ast.SelectionSet
 			out.Values[i] = ec._Frequency_id(ctx, field, obj)
 
 			if out.Values[i] == graphql.Null {
-				invalids++
+				atomic.AddUint32(&invalids, 1)
 			}
+		case "type":
+
+			out.Values[i] = ec._Frequency_type(ctx, field, obj)
+
+			if out.Values[i] == graphql.Null {
+				atomic.AddUint32(&invalids, 1)
+			}
+		case "description":
+
+			out.Values[i] = ec._Frequency_description(ctx, field, obj)
+
+			if out.Values[i] == graphql.Null {
+				atomic.AddUint32(&invalids, 1)
+			}
+		case "frequency":
+
+			out.Values[i] = ec._Frequency_frequency(ctx, field, obj)
+
+			if out.Values[i] == graphql.Null {
+				atomic.AddUint32(&invalids, 1)
+			}
+		case "airport":
+			field := field
+
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Frequency_airport(ctx, field, obj)
+				return res
+			}
+
+			out.Concurrently(i, func() graphql.Marshaler {
+				return innerFunc(ctx)
+
+			})
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -1987,9 +2309,6 @@ func (ec *executionContext) _Runway(ctx context.Context, sel ast.SelectionSet, o
 
 			out.Values[i] = ec._Runway_surface(ctx, field, obj)
 
-			if out.Values[i] == graphql.Null {
-				atomic.AddUint32(&invalids, 1)
-			}
 		case "lighted":
 
 			out.Values[i] = ec._Runway_lighted(ctx, field, obj)
@@ -2120,6 +2439,16 @@ func (ec *executionContext) marshalNAirportType2metarᚗggᚋentᚋairportᚐTyp
 	return v
 }
 
+func (ec *executionContext) marshalNFrequency2ᚖmetarᚗggᚋentᚐFrequency(ctx context.Context, sel ast.SelectionSet, v *ent.Frequency) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+		}
+		return graphql.Null
+	}
+	return ec._Frequency(ctx, sel, v)
+}
+
 func (ec *executionContext) marshalNRunway2ᚖmetarᚗggᚋentᚐRunway(ctx context.Context, sel ast.SelectionSet, v *ent.Runway) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
@@ -2135,6 +2464,53 @@ func (ec *executionContext) marshalOAirport2ᚖmetarᚗggᚋentᚐAirport(ctx co
 		return graphql.Null
 	}
 	return ec._Airport(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalOFrequency2ᚕᚖmetarᚗggᚋentᚐFrequencyᚄ(ctx context.Context, sel ast.SelectionSet, v []*ent.Frequency) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		fc := &graphql.FieldContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithFieldContext(ctx, fc)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalNFrequency2ᚖmetarᚗggᚋentᚐFrequency(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+
+	for _, e := range ret {
+		if e == graphql.Null {
+			return graphql.Null
+		}
+	}
+
+	return ret
 }
 
 func (ec *executionContext) marshalORunway2ᚕᚖmetarᚗggᚋentᚐRunwayᚄ(ctx context.Context, sel ast.SelectionSet, v []*ent.Runway) graphql.Marshaler {

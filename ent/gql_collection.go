@@ -37,6 +37,18 @@ func (a *AirportQuery) collectField(ctx context.Context, op *graphql.OperationCo
 			a.WithNamedRunways(alias, func(wq *RunwayQuery) {
 				*wq = *query
 			})
+		case "frequencies":
+			var (
+				alias = field.Alias
+				path  = append(path, alias)
+				query = &FrequencyQuery{config: a.config}
+			)
+			if err := query.collectField(ctx, op, field, path, satisfies...); err != nil {
+				return err
+			}
+			a.WithNamedFrequencies(alias, func(wq *FrequencyQuery) {
+				*wq = *query
+			})
 		}
 	}
 	return nil
@@ -82,6 +94,20 @@ func (f *FrequencyQuery) CollectFields(ctx context.Context, satisfies ...string)
 
 func (f *FrequencyQuery) collectField(ctx context.Context, op *graphql.OperationContext, field graphql.CollectedField, path []string, satisfies ...string) error {
 	path = append([]string(nil), path...)
+	for _, field := range graphql.CollectFields(op, field.Selections, satisfies) {
+		switch field.Name {
+		case "airport":
+			var (
+				alias = field.Alias
+				path  = append(path, alias)
+				query = &AirportQuery{config: f.config}
+			)
+			if err := query.collectField(ctx, op, field, path, satisfies...); err != nil {
+				return err
+			}
+			f.withAirport = query
+		}
+	}
 	return nil
 }
 

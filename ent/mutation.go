@@ -9,6 +9,7 @@ import (
 	"sync"
 
 	"metar.gg/ent/airport"
+	"metar.gg/ent/frequency"
 	"metar.gg/ent/predicate"
 	"metar.gg/ent/runway"
 
@@ -32,38 +33,41 @@ const (
 // AirportMutation represents an operation that mutates the Airport nodes in the graph.
 type AirportMutation struct {
 	config
-	op                Op
-	typ               string
-	id                *int
-	hash              *string
-	import_flag       *bool
-	identifier        *string
-	_type             *airport.Type
-	name              *string
-	latitude          *float64
-	addlatitude       *float64
-	longitude         *float64
-	addlongitude      *float64
-	elevation         *int
-	addelevation      *int
-	continent         *airport.Continent
-	country           *string
-	region            *string
-	municipality      *string
-	scheduled_service *bool
-	gps_code          *string
-	iata_code         *string
-	local_code        *string
-	website           *string
-	wikipedia         *string
-	keywords          *[]string
-	clearedFields     map[string]struct{}
-	runways           map[int]struct{}
-	removedrunways    map[int]struct{}
-	clearedrunways    bool
-	done              bool
-	oldValue          func(context.Context) (*Airport, error)
-	predicates        []predicate.Airport
+	op                 Op
+	typ                string
+	id                 *int
+	hash               *string
+	import_flag        *bool
+	identifier         *string
+	_type              *airport.Type
+	name               *string
+	latitude           *float64
+	addlatitude        *float64
+	longitude          *float64
+	addlongitude       *float64
+	elevation          *int
+	addelevation       *int
+	continent          *airport.Continent
+	country            *string
+	region             *string
+	municipality       *string
+	scheduled_service  *bool
+	gps_code           *string
+	iata_code          *string
+	local_code         *string
+	website            *string
+	wikipedia          *string
+	keywords           *[]string
+	clearedFields      map[string]struct{}
+	runways            map[int]struct{}
+	removedrunways     map[int]struct{}
+	clearedrunways     bool
+	frequencies        map[int]struct{}
+	removedfrequencies map[int]struct{}
+	clearedfrequencies bool
+	done               bool
+	oldValue           func(context.Context) (*Airport, error)
+	predicates         []predicate.Airport
 }
 
 var _ ent.Mutation = (*AirportMutation)(nil)
@@ -1060,6 +1064,60 @@ func (m *AirportMutation) ResetRunways() {
 	m.removedrunways = nil
 }
 
+// AddFrequencyIDs adds the "frequencies" edge to the Frequency entity by ids.
+func (m *AirportMutation) AddFrequencyIDs(ids ...int) {
+	if m.frequencies == nil {
+		m.frequencies = make(map[int]struct{})
+	}
+	for i := range ids {
+		m.frequencies[ids[i]] = struct{}{}
+	}
+}
+
+// ClearFrequencies clears the "frequencies" edge to the Frequency entity.
+func (m *AirportMutation) ClearFrequencies() {
+	m.clearedfrequencies = true
+}
+
+// FrequenciesCleared reports if the "frequencies" edge to the Frequency entity was cleared.
+func (m *AirportMutation) FrequenciesCleared() bool {
+	return m.clearedfrequencies
+}
+
+// RemoveFrequencyIDs removes the "frequencies" edge to the Frequency entity by IDs.
+func (m *AirportMutation) RemoveFrequencyIDs(ids ...int) {
+	if m.removedfrequencies == nil {
+		m.removedfrequencies = make(map[int]struct{})
+	}
+	for i := range ids {
+		delete(m.frequencies, ids[i])
+		m.removedfrequencies[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedFrequencies returns the removed IDs of the "frequencies" edge to the Frequency entity.
+func (m *AirportMutation) RemovedFrequenciesIDs() (ids []int) {
+	for id := range m.removedfrequencies {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// FrequenciesIDs returns the "frequencies" edge IDs in the mutation.
+func (m *AirportMutation) FrequenciesIDs() (ids []int) {
+	for id := range m.frequencies {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetFrequencies resets all changes to the "frequencies" edge.
+func (m *AirportMutation) ResetFrequencies() {
+	m.frequencies = nil
+	m.clearedfrequencies = false
+	m.removedfrequencies = nil
+}
+
 // Where appends a list predicates to the AirportMutation builder.
 func (m *AirportMutation) Where(ps ...predicate.Airport) {
 	m.predicates = append(m.predicates, ps...)
@@ -1568,9 +1626,12 @@ func (m *AirportMutation) ResetField(name string) error {
 
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *AirportMutation) AddedEdges() []string {
-	edges := make([]string, 0, 1)
+	edges := make([]string, 0, 2)
 	if m.runways != nil {
 		edges = append(edges, airport.EdgeRunways)
+	}
+	if m.frequencies != nil {
+		edges = append(edges, airport.EdgeFrequencies)
 	}
 	return edges
 }
@@ -1585,15 +1646,24 @@ func (m *AirportMutation) AddedIDs(name string) []ent.Value {
 			ids = append(ids, id)
 		}
 		return ids
+	case airport.EdgeFrequencies:
+		ids := make([]ent.Value, 0, len(m.frequencies))
+		for id := range m.frequencies {
+			ids = append(ids, id)
+		}
+		return ids
 	}
 	return nil
 }
 
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *AirportMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 1)
+	edges := make([]string, 0, 2)
 	if m.removedrunways != nil {
 		edges = append(edges, airport.EdgeRunways)
+	}
+	if m.removedfrequencies != nil {
+		edges = append(edges, airport.EdgeFrequencies)
 	}
 	return edges
 }
@@ -1608,15 +1678,24 @@ func (m *AirportMutation) RemovedIDs(name string) []ent.Value {
 			ids = append(ids, id)
 		}
 		return ids
+	case airport.EdgeFrequencies:
+		ids := make([]ent.Value, 0, len(m.removedfrequencies))
+		for id := range m.removedfrequencies {
+			ids = append(ids, id)
+		}
+		return ids
 	}
 	return nil
 }
 
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *AirportMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 1)
+	edges := make([]string, 0, 2)
 	if m.clearedrunways {
 		edges = append(edges, airport.EdgeRunways)
+	}
+	if m.clearedfrequencies {
+		edges = append(edges, airport.EdgeFrequencies)
 	}
 	return edges
 }
@@ -1627,6 +1706,8 @@ func (m *AirportMutation) EdgeCleared(name string) bool {
 	switch name {
 	case airport.EdgeRunways:
 		return m.clearedrunways
+	case airport.EdgeFrequencies:
+		return m.clearedfrequencies
 	}
 	return false
 }
@@ -1646,6 +1727,9 @@ func (m *AirportMutation) ResetEdge(name string) error {
 	case airport.EdgeRunways:
 		m.ResetRunways()
 		return nil
+	case airport.EdgeFrequencies:
+		m.ResetFrequencies()
+		return nil
 	}
 	return fmt.Errorf("unknown Airport edge %s", name)
 }
@@ -1653,13 +1737,21 @@ func (m *AirportMutation) ResetEdge(name string) error {
 // FrequencyMutation represents an operation that mutates the Frequency nodes in the graph.
 type FrequencyMutation struct {
 	config
-	op            Op
-	typ           string
-	id            *int
-	clearedFields map[string]struct{}
-	done          bool
-	oldValue      func(context.Context) (*Frequency, error)
-	predicates    []predicate.Frequency
+	op             Op
+	typ            string
+	id             *int
+	hash           *string
+	import_flag    *bool
+	_type          *string
+	description    *string
+	frequency      *float64
+	addfrequency   *float64
+	clearedFields  map[string]struct{}
+	airport        *int
+	clearedairport bool
+	done           bool
+	oldValue       func(context.Context) (*Frequency, error)
+	predicates     []predicate.Frequency
 }
 
 var _ ent.Mutation = (*FrequencyMutation)(nil)
@@ -1732,6 +1824,12 @@ func (m FrequencyMutation) Tx() (*Tx, error) {
 	return tx, nil
 }
 
+// SetID sets the value of the id field. Note that this
+// operation is only accepted on creation of Frequency entities.
+func (m *FrequencyMutation) SetID(id int) {
+	m.id = &id
+}
+
 // ID returns the ID value in the mutation. Note that the ID is only available
 // if it was provided to the builder or after it was returned from the database.
 func (m *FrequencyMutation) ID() (id int, exists bool) {
@@ -1760,6 +1858,245 @@ func (m *FrequencyMutation) IDs(ctx context.Context) ([]int, error) {
 	}
 }
 
+// SetHash sets the "hash" field.
+func (m *FrequencyMutation) SetHash(s string) {
+	m.hash = &s
+}
+
+// Hash returns the value of the "hash" field in the mutation.
+func (m *FrequencyMutation) Hash() (r string, exists bool) {
+	v := m.hash
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldHash returns the old "hash" field's value of the Frequency entity.
+// If the Frequency object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *FrequencyMutation) OldHash(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldHash is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldHash requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldHash: %w", err)
+	}
+	return oldValue.Hash, nil
+}
+
+// ResetHash resets all changes to the "hash" field.
+func (m *FrequencyMutation) ResetHash() {
+	m.hash = nil
+}
+
+// SetImportFlag sets the "import_flag" field.
+func (m *FrequencyMutation) SetImportFlag(b bool) {
+	m.import_flag = &b
+}
+
+// ImportFlag returns the value of the "import_flag" field in the mutation.
+func (m *FrequencyMutation) ImportFlag() (r bool, exists bool) {
+	v := m.import_flag
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldImportFlag returns the old "import_flag" field's value of the Frequency entity.
+// If the Frequency object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *FrequencyMutation) OldImportFlag(ctx context.Context) (v bool, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldImportFlag is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldImportFlag requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldImportFlag: %w", err)
+	}
+	return oldValue.ImportFlag, nil
+}
+
+// ResetImportFlag resets all changes to the "import_flag" field.
+func (m *FrequencyMutation) ResetImportFlag() {
+	m.import_flag = nil
+}
+
+// SetType sets the "type" field.
+func (m *FrequencyMutation) SetType(s string) {
+	m._type = &s
+}
+
+// GetType returns the value of the "type" field in the mutation.
+func (m *FrequencyMutation) GetType() (r string, exists bool) {
+	v := m._type
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldType returns the old "type" field's value of the Frequency entity.
+// If the Frequency object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *FrequencyMutation) OldType(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldType is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldType requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldType: %w", err)
+	}
+	return oldValue.Type, nil
+}
+
+// ResetType resets all changes to the "type" field.
+func (m *FrequencyMutation) ResetType() {
+	m._type = nil
+}
+
+// SetDescription sets the "description" field.
+func (m *FrequencyMutation) SetDescription(s string) {
+	m.description = &s
+}
+
+// Description returns the value of the "description" field in the mutation.
+func (m *FrequencyMutation) Description() (r string, exists bool) {
+	v := m.description
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldDescription returns the old "description" field's value of the Frequency entity.
+// If the Frequency object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *FrequencyMutation) OldDescription(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldDescription is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldDescription requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldDescription: %w", err)
+	}
+	return oldValue.Description, nil
+}
+
+// ResetDescription resets all changes to the "description" field.
+func (m *FrequencyMutation) ResetDescription() {
+	m.description = nil
+}
+
+// SetFrequency sets the "frequency" field.
+func (m *FrequencyMutation) SetFrequency(f float64) {
+	m.frequency = &f
+	m.addfrequency = nil
+}
+
+// Frequency returns the value of the "frequency" field in the mutation.
+func (m *FrequencyMutation) Frequency() (r float64, exists bool) {
+	v := m.frequency
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldFrequency returns the old "frequency" field's value of the Frequency entity.
+// If the Frequency object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *FrequencyMutation) OldFrequency(ctx context.Context) (v float64, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldFrequency is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldFrequency requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldFrequency: %w", err)
+	}
+	return oldValue.Frequency, nil
+}
+
+// AddFrequency adds f to the "frequency" field.
+func (m *FrequencyMutation) AddFrequency(f float64) {
+	if m.addfrequency != nil {
+		*m.addfrequency += f
+	} else {
+		m.addfrequency = &f
+	}
+}
+
+// AddedFrequency returns the value that was added to the "frequency" field in this mutation.
+func (m *FrequencyMutation) AddedFrequency() (r float64, exists bool) {
+	v := m.addfrequency
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetFrequency resets all changes to the "frequency" field.
+func (m *FrequencyMutation) ResetFrequency() {
+	m.frequency = nil
+	m.addfrequency = nil
+}
+
+// SetAirportID sets the "airport" edge to the Airport entity by id.
+func (m *FrequencyMutation) SetAirportID(id int) {
+	m.airport = &id
+}
+
+// ClearAirport clears the "airport" edge to the Airport entity.
+func (m *FrequencyMutation) ClearAirport() {
+	m.clearedairport = true
+}
+
+// AirportCleared reports if the "airport" edge to the Airport entity was cleared.
+func (m *FrequencyMutation) AirportCleared() bool {
+	return m.clearedairport
+}
+
+// AirportID returns the "airport" edge ID in the mutation.
+func (m *FrequencyMutation) AirportID() (id int, exists bool) {
+	if m.airport != nil {
+		return *m.airport, true
+	}
+	return
+}
+
+// AirportIDs returns the "airport" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// AirportID instead. It exists only for internal usage by the builders.
+func (m *FrequencyMutation) AirportIDs() (ids []int) {
+	if id := m.airport; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetAirport resets all changes to the "airport" edge.
+func (m *FrequencyMutation) ResetAirport() {
+	m.airport = nil
+	m.clearedairport = false
+}
+
 // Where appends a list predicates to the FrequencyMutation builder.
 func (m *FrequencyMutation) Where(ps ...predicate.Frequency) {
 	m.predicates = append(m.predicates, ps...)
@@ -1779,7 +2116,22 @@ func (m *FrequencyMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *FrequencyMutation) Fields() []string {
-	fields := make([]string, 0, 0)
+	fields := make([]string, 0, 5)
+	if m.hash != nil {
+		fields = append(fields, frequency.FieldHash)
+	}
+	if m.import_flag != nil {
+		fields = append(fields, frequency.FieldImportFlag)
+	}
+	if m._type != nil {
+		fields = append(fields, frequency.FieldType)
+	}
+	if m.description != nil {
+		fields = append(fields, frequency.FieldDescription)
+	}
+	if m.frequency != nil {
+		fields = append(fields, frequency.FieldFrequency)
+	}
 	return fields
 }
 
@@ -1787,6 +2139,18 @@ func (m *FrequencyMutation) Fields() []string {
 // return value indicates that this field was not set, or was not defined in the
 // schema.
 func (m *FrequencyMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case frequency.FieldHash:
+		return m.Hash()
+	case frequency.FieldImportFlag:
+		return m.ImportFlag()
+	case frequency.FieldType:
+		return m.GetType()
+	case frequency.FieldDescription:
+		return m.Description()
+	case frequency.FieldFrequency:
+		return m.Frequency()
+	}
 	return nil, false
 }
 
@@ -1794,6 +2158,18 @@ func (m *FrequencyMutation) Field(name string) (ent.Value, bool) {
 // returned if the mutation operation is not UpdateOne, or the query to the
 // database failed.
 func (m *FrequencyMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case frequency.FieldHash:
+		return m.OldHash(ctx)
+	case frequency.FieldImportFlag:
+		return m.OldImportFlag(ctx)
+	case frequency.FieldType:
+		return m.OldType(ctx)
+	case frequency.FieldDescription:
+		return m.OldDescription(ctx)
+	case frequency.FieldFrequency:
+		return m.OldFrequency(ctx)
+	}
 	return nil, fmt.Errorf("unknown Frequency field %s", name)
 }
 
@@ -1802,6 +2178,41 @@ func (m *FrequencyMutation) OldField(ctx context.Context, name string) (ent.Valu
 // type.
 func (m *FrequencyMutation) SetField(name string, value ent.Value) error {
 	switch name {
+	case frequency.FieldHash:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetHash(v)
+		return nil
+	case frequency.FieldImportFlag:
+		v, ok := value.(bool)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetImportFlag(v)
+		return nil
+	case frequency.FieldType:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetType(v)
+		return nil
+	case frequency.FieldDescription:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetDescription(v)
+		return nil
+	case frequency.FieldFrequency:
+		v, ok := value.(float64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetFrequency(v)
+		return nil
 	}
 	return fmt.Errorf("unknown Frequency field %s", name)
 }
@@ -1809,13 +2220,21 @@ func (m *FrequencyMutation) SetField(name string, value ent.Value) error {
 // AddedFields returns all numeric fields that were incremented/decremented during
 // this mutation.
 func (m *FrequencyMutation) AddedFields() []string {
-	return nil
+	var fields []string
+	if m.addfrequency != nil {
+		fields = append(fields, frequency.FieldFrequency)
+	}
+	return fields
 }
 
 // AddedField returns the numeric value that was incremented/decremented on a field
 // with the given name. The second boolean return value indicates that this field
 // was not set, or was not defined in the schema.
 func (m *FrequencyMutation) AddedField(name string) (ent.Value, bool) {
+	switch name {
+	case frequency.FieldFrequency:
+		return m.AddedFrequency()
+	}
 	return nil, false
 }
 
@@ -1823,6 +2242,15 @@ func (m *FrequencyMutation) AddedField(name string) (ent.Value, bool) {
 // the field is not defined in the schema, or if the type mismatched the field
 // type.
 func (m *FrequencyMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	case frequency.FieldFrequency:
+		v, ok := value.(float64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddFrequency(v)
+		return nil
+	}
 	return fmt.Errorf("unknown Frequency numeric field %s", name)
 }
 
@@ -1848,24 +2276,50 @@ func (m *FrequencyMutation) ClearField(name string) error {
 // ResetField resets all changes in the mutation for the field with the given name.
 // It returns an error if the field is not defined in the schema.
 func (m *FrequencyMutation) ResetField(name string) error {
+	switch name {
+	case frequency.FieldHash:
+		m.ResetHash()
+		return nil
+	case frequency.FieldImportFlag:
+		m.ResetImportFlag()
+		return nil
+	case frequency.FieldType:
+		m.ResetType()
+		return nil
+	case frequency.FieldDescription:
+		m.ResetDescription()
+		return nil
+	case frequency.FieldFrequency:
+		m.ResetFrequency()
+		return nil
+	}
 	return fmt.Errorf("unknown Frequency field %s", name)
 }
 
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *FrequencyMutation) AddedEdges() []string {
-	edges := make([]string, 0, 0)
+	edges := make([]string, 0, 1)
+	if m.airport != nil {
+		edges = append(edges, frequency.EdgeAirport)
+	}
 	return edges
 }
 
 // AddedIDs returns all IDs (to other nodes) that were added for the given edge
 // name in this mutation.
 func (m *FrequencyMutation) AddedIDs(name string) []ent.Value {
+	switch name {
+	case frequency.EdgeAirport:
+		if id := m.airport; id != nil {
+			return []ent.Value{*id}
+		}
+	}
 	return nil
 }
 
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *FrequencyMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 0)
+	edges := make([]string, 0, 1)
 	return edges
 }
 
@@ -1877,25 +2331,42 @@ func (m *FrequencyMutation) RemovedIDs(name string) []ent.Value {
 
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *FrequencyMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 0)
+	edges := make([]string, 0, 1)
+	if m.clearedairport {
+		edges = append(edges, frequency.EdgeAirport)
+	}
 	return edges
 }
 
 // EdgeCleared returns a boolean which indicates if the edge with the given name
 // was cleared in this mutation.
 func (m *FrequencyMutation) EdgeCleared(name string) bool {
+	switch name {
+	case frequency.EdgeAirport:
+		return m.clearedairport
+	}
 	return false
 }
 
 // ClearEdge clears the value of the edge with the given name. It returns an error
 // if that edge is not defined in the schema.
 func (m *FrequencyMutation) ClearEdge(name string) error {
+	switch name {
+	case frequency.EdgeAirport:
+		m.ClearAirport()
+		return nil
+	}
 	return fmt.Errorf("unknown Frequency unique edge %s", name)
 }
 
 // ResetEdge resets all changes to the edge with the given name in this mutation.
 // It returns an error if the edge is not defined in the schema.
 func (m *FrequencyMutation) ResetEdge(name string) error {
+	switch name {
+	case frequency.EdgeAirport:
+		m.ResetAirport()
+		return nil
+	}
 	return fmt.Errorf("unknown Frequency edge %s", name)
 }
 
