@@ -20,7 +20,7 @@ func main() {
 		log.Fatalf("failed creating schema resources: %v", err)
 	}
 
-	RunImport(client)
+	//RunImport(client)
 	RunServer(client)
 }
 

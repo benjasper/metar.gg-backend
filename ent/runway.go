@@ -20,42 +20,40 @@ type Runway struct {
 	Hash string `json:"hash,omitempty"`
 	// ImportFlag holds the value of the "import_flag" field.
 	ImportFlag bool `json:"import_flag,omitempty"`
-	// AirportIdentifier holds the value of the "airport_identifier" field.
-	AirportIdentifier string `json:"airport_identifier,omitempty"`
-	// Length holds the value of the "length" field.
+	// Length of the runway in feet.
 	Length int `json:"length,omitempty"`
-	// Width holds the value of the "width" field.
+	// Width of the runway surface in feet.
 	Width int `json:"width,omitempty"`
-	// Surface holds the value of the "surface" field.
+	// Code for the runway surface type. This is not yet a controlled vocabulary, but probably will be soon. Some common values include "ASP" (asphalt), "TURF" (turf), "CON" (concrete), "GRS" (grass), "GRE" (gravel), "WATER" (water), and "UNK" (unknown).
 	Surface string `json:"surface,omitempty"`
-	// Lighted holds the value of the "lighted" field.
+	// Whether the runway is lighted at night or not.
 	Lighted bool `json:"lighted,omitempty"`
-	// Closed holds the value of the "closed" field.
+	// Whether the runway is currently closed or not.
 	Closed bool `json:"closed,omitempty"`
-	// Low numbered runway identifier, like 18R
+	// Low numbered runway identifier, like 18R.
 	LowRunwayIdentifier string `json:"low_runway_identifier,omitempty"`
-	// LowRunwayLatitude holds the value of the "low_runway_latitude" field.
+	// Latitude of the low numbered runway end, in decimal degrees (positive is north).
 	LowRunwayLatitude *float64 `json:"low_runway_latitude,omitempty"`
-	// LowRunwayLongitude holds the value of the "low_runway_longitude" field.
+	// Longitude of the low numbered runway end, in decimal degrees (positive is east).
 	LowRunwayLongitude *float64 `json:"low_runway_longitude,omitempty"`
-	// LowRunwayElevation holds the value of the "low_runway_elevation" field.
+	// Elevation of the low numbered runway end, in feet.
 	LowRunwayElevation *int `json:"low_runway_elevation,omitempty"`
-	// LowRunwayHeading holds the value of the "low_runway_heading" field.
-	LowRunwayHeading *int `json:"low_runway_heading,omitempty"`
-	// LowRunwayDisplaced holds the value of the "low_runway_displaced" field.
-	LowRunwayDisplaced *int `json:"low_runway_displaced,omitempty"`
-	// High numbered runway identifier, like 18R
+	// True (not magnetic) heading of the lower numbered runway.
+	LowRunwayHeading *float64 `json:"low_runway_heading,omitempty"`
+	// Displaced threshold length of the lower numbered runway end, in feet.
+	LowRunwayDisplacedThreshold *int `json:"low_runway_displaced_threshold,omitempty"`
+	// High numbered runway identifier, like 01L.
 	HighRunwayIdentifier string `json:"high_runway_identifier,omitempty"`
-	// HighRunwayLatitude holds the value of the "high_runway_latitude" field.
+	// Latitude of the high numbered runway end, in decimal degrees (positive is north).
 	HighRunwayLatitude *float64 `json:"high_runway_latitude,omitempty"`
-	// HighRunwayLongitude holds the value of the "high_runway_longitude" field.
+	// Longitude of the high numbered runway end, in decimal degrees (positive is east).
 	HighRunwayLongitude *float64 `json:"high_runway_longitude,omitempty"`
-	// HighRunwayElevation holds the value of the "high_runway_elevation" field.
+	// Elevation of the high numbered runway end, in feet.
 	HighRunwayElevation *int `json:"high_runway_elevation,omitempty"`
-	// HighRunwayHeading holds the value of the "high_runway_heading" field.
-	HighRunwayHeading *int `json:"high_runway_heading,omitempty"`
-	// HighRunwayDisplaced holds the value of the "high_runway_displaced" field.
-	HighRunwayDisplaced *int `json:"high_runway_displaced,omitempty"`
+	// True (not magnetic) heading of the higher numbered runway.
+	HighRunwayHeading *float64 `json:"high_runway_heading,omitempty"`
+	// Displaced threshold length of the higher numbered runway end, in feet.
+	HighRunwayDisplacedThreshold *int `json:"high_runway_displaced_threshold,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the RunwayQuery when eager-loading is set.
 	Edges           RunwayEdges `json:"edges"`
@@ -93,11 +91,11 @@ func (*Runway) scanValues(columns []string) ([]any, error) {
 		switch columns[i] {
 		case runway.FieldImportFlag, runway.FieldLighted, runway.FieldClosed:
 			values[i] = new(sql.NullBool)
-		case runway.FieldLowRunwayLatitude, runway.FieldLowRunwayLongitude, runway.FieldHighRunwayLatitude, runway.FieldHighRunwayLongitude:
+		case runway.FieldLowRunwayLatitude, runway.FieldLowRunwayLongitude, runway.FieldLowRunwayHeading, runway.FieldHighRunwayLatitude, runway.FieldHighRunwayLongitude, runway.FieldHighRunwayHeading:
 			values[i] = new(sql.NullFloat64)
-		case runway.FieldID, runway.FieldLength, runway.FieldWidth, runway.FieldLowRunwayElevation, runway.FieldLowRunwayHeading, runway.FieldLowRunwayDisplaced, runway.FieldHighRunwayElevation, runway.FieldHighRunwayHeading, runway.FieldHighRunwayDisplaced:
+		case runway.FieldID, runway.FieldLength, runway.FieldWidth, runway.FieldLowRunwayElevation, runway.FieldLowRunwayDisplacedThreshold, runway.FieldHighRunwayElevation, runway.FieldHighRunwayDisplacedThreshold:
 			values[i] = new(sql.NullInt64)
-		case runway.FieldHash, runway.FieldAirportIdentifier, runway.FieldSurface, runway.FieldLowRunwayIdentifier, runway.FieldHighRunwayIdentifier:
+		case runway.FieldHash, runway.FieldSurface, runway.FieldLowRunwayIdentifier, runway.FieldHighRunwayIdentifier:
 			values[i] = new(sql.NullString)
 		case runway.ForeignKeys[0]: // airport_runways
 			values[i] = new(sql.NullInt64)
@@ -133,12 +131,6 @@ func (r *Runway) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field import_flag", values[i])
 			} else if value.Valid {
 				r.ImportFlag = value.Bool
-			}
-		case runway.FieldAirportIdentifier:
-			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field airport_identifier", values[i])
-			} else if value.Valid {
-				r.AirportIdentifier = value.String
 			}
 		case runway.FieldLength:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
@@ -198,18 +190,18 @@ func (r *Runway) assignValues(columns []string, values []any) error {
 				*r.LowRunwayElevation = int(value.Int64)
 			}
 		case runway.FieldLowRunwayHeading:
-			if value, ok := values[i].(*sql.NullInt64); !ok {
+			if value, ok := values[i].(*sql.NullFloat64); !ok {
 				return fmt.Errorf("unexpected type %T for field low_runway_heading", values[i])
 			} else if value.Valid {
-				r.LowRunwayHeading = new(int)
-				*r.LowRunwayHeading = int(value.Int64)
+				r.LowRunwayHeading = new(float64)
+				*r.LowRunwayHeading = value.Float64
 			}
-		case runway.FieldLowRunwayDisplaced:
+		case runway.FieldLowRunwayDisplacedThreshold:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for field low_runway_displaced", values[i])
+				return fmt.Errorf("unexpected type %T for field low_runway_displaced_threshold", values[i])
 			} else if value.Valid {
-				r.LowRunwayDisplaced = new(int)
-				*r.LowRunwayDisplaced = int(value.Int64)
+				r.LowRunwayDisplacedThreshold = new(int)
+				*r.LowRunwayDisplacedThreshold = int(value.Int64)
 			}
 		case runway.FieldHighRunwayIdentifier:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -239,18 +231,18 @@ func (r *Runway) assignValues(columns []string, values []any) error {
 				*r.HighRunwayElevation = int(value.Int64)
 			}
 		case runway.FieldHighRunwayHeading:
-			if value, ok := values[i].(*sql.NullInt64); !ok {
+			if value, ok := values[i].(*sql.NullFloat64); !ok {
 				return fmt.Errorf("unexpected type %T for field high_runway_heading", values[i])
 			} else if value.Valid {
-				r.HighRunwayHeading = new(int)
-				*r.HighRunwayHeading = int(value.Int64)
+				r.HighRunwayHeading = new(float64)
+				*r.HighRunwayHeading = value.Float64
 			}
-		case runway.FieldHighRunwayDisplaced:
+		case runway.FieldHighRunwayDisplacedThreshold:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for field high_runway_displaced", values[i])
+				return fmt.Errorf("unexpected type %T for field high_runway_displaced_threshold", values[i])
 			} else if value.Valid {
-				r.HighRunwayDisplaced = new(int)
-				*r.HighRunwayDisplaced = int(value.Int64)
+				r.HighRunwayDisplacedThreshold = new(int)
+				*r.HighRunwayDisplacedThreshold = int(value.Int64)
 			}
 		case runway.ForeignKeys[0]:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
@@ -298,9 +290,6 @@ func (r *Runway) String() string {
 	builder.WriteString("import_flag=")
 	builder.WriteString(fmt.Sprintf("%v", r.ImportFlag))
 	builder.WriteString(", ")
-	builder.WriteString("airport_identifier=")
-	builder.WriteString(r.AirportIdentifier)
-	builder.WriteString(", ")
 	builder.WriteString("length=")
 	builder.WriteString(fmt.Sprintf("%v", r.Length))
 	builder.WriteString(", ")
@@ -339,8 +328,8 @@ func (r *Runway) String() string {
 		builder.WriteString(fmt.Sprintf("%v", *v))
 	}
 	builder.WriteString(", ")
-	if v := r.LowRunwayDisplaced; v != nil {
-		builder.WriteString("low_runway_displaced=")
+	if v := r.LowRunwayDisplacedThreshold; v != nil {
+		builder.WriteString("low_runway_displaced_threshold=")
 		builder.WriteString(fmt.Sprintf("%v", *v))
 	}
 	builder.WriteString(", ")
@@ -367,8 +356,8 @@ func (r *Runway) String() string {
 		builder.WriteString(fmt.Sprintf("%v", *v))
 	}
 	builder.WriteString(", ")
-	if v := r.HighRunwayDisplaced; v != nil {
-		builder.WriteString("high_runway_displaced=")
+	if v := r.HighRunwayDisplacedThreshold; v != nil {
+		builder.WriteString("high_runway_displaced_threshold=")
 		builder.WriteString(fmt.Sprintf("%v", *v))
 	}
 	builder.WriteByte(')')

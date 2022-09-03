@@ -11,8 +11,6 @@ const (
 	FieldHash = "hash"
 	// FieldImportFlag holds the string denoting the import_flag field in the database.
 	FieldImportFlag = "import_flag"
-	// FieldAirportIdentifier holds the string denoting the airport_identifier field in the database.
-	FieldAirportIdentifier = "airport_identifier"
 	// FieldLength holds the string denoting the length field in the database.
 	FieldLength = "length"
 	// FieldWidth holds the string denoting the width field in the database.
@@ -33,8 +31,8 @@ const (
 	FieldLowRunwayElevation = "low_runway_elevation"
 	// FieldLowRunwayHeading holds the string denoting the low_runway_heading field in the database.
 	FieldLowRunwayHeading = "low_runway_heading"
-	// FieldLowRunwayDisplaced holds the string denoting the low_runway_displaced field in the database.
-	FieldLowRunwayDisplaced = "low_runway_displaced"
+	// FieldLowRunwayDisplacedThreshold holds the string denoting the low_runway_displaced_threshold field in the database.
+	FieldLowRunwayDisplacedThreshold = "low_runway_displaced_threshold"
 	// FieldHighRunwayIdentifier holds the string denoting the high_runway_identifier field in the database.
 	FieldHighRunwayIdentifier = "high_runway_identifier"
 	// FieldHighRunwayLatitude holds the string denoting the high_runway_latitude field in the database.
@@ -45,8 +43,8 @@ const (
 	FieldHighRunwayElevation = "high_runway_elevation"
 	// FieldHighRunwayHeading holds the string denoting the high_runway_heading field in the database.
 	FieldHighRunwayHeading = "high_runway_heading"
-	// FieldHighRunwayDisplaced holds the string denoting the high_runway_displaced field in the database.
-	FieldHighRunwayDisplaced = "high_runway_displaced"
+	// FieldHighRunwayDisplacedThreshold holds the string denoting the high_runway_displaced_threshold field in the database.
+	FieldHighRunwayDisplacedThreshold = "high_runway_displaced_threshold"
 	// EdgeAirport holds the string denoting the airport edge name in mutations.
 	EdgeAirport = "airport"
 	// Table holds the table name of the runway in the database.
@@ -65,7 +63,6 @@ var Columns = []string{
 	FieldID,
 	FieldHash,
 	FieldImportFlag,
-	FieldAirportIdentifier,
 	FieldLength,
 	FieldWidth,
 	FieldSurface,
@@ -76,13 +73,13 @@ var Columns = []string{
 	FieldLowRunwayLongitude,
 	FieldLowRunwayElevation,
 	FieldLowRunwayHeading,
-	FieldLowRunwayDisplaced,
+	FieldLowRunwayDisplacedThreshold,
 	FieldHighRunwayIdentifier,
 	FieldHighRunwayLatitude,
 	FieldHighRunwayLongitude,
 	FieldHighRunwayElevation,
 	FieldHighRunwayHeading,
-	FieldHighRunwayDisplaced,
+	FieldHighRunwayDisplacedThreshold,
 }
 
 // ForeignKeys holds the SQL foreign-keys that are owned by the "runways"

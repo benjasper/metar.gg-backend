@@ -108,7 +108,7 @@ func (a *Airport) Node(ctx context.Context) (node *Node, err error) {
 		return nil, err
 	}
 	node.Fields[6] = &Field{
-		Type:  "string",
+		Type:  "airport.Continent",
 		Name:  "continent",
 		Value: string(buf),
 	}
@@ -219,22 +219,14 @@ func (r *Runway) Node(ctx context.Context) (node *Node, err error) {
 	node = &Node{
 		ID:     r.ID,
 		Type:   "Runway",
-		Fields: make([]*Field, 18),
+		Fields: make([]*Field, 17),
 		Edges:  make([]*Edge, 1),
 	}
 	var buf []byte
-	if buf, err = json.Marshal(r.AirportIdentifier); err != nil {
-		return nil, err
-	}
-	node.Fields[0] = &Field{
-		Type:  "string",
-		Name:  "airport_identifier",
-		Value: string(buf),
-	}
 	if buf, err = json.Marshal(r.Length); err != nil {
 		return nil, err
 	}
-	node.Fields[1] = &Field{
+	node.Fields[0] = &Field{
 		Type:  "int",
 		Name:  "length",
 		Value: string(buf),
@@ -242,7 +234,7 @@ func (r *Runway) Node(ctx context.Context) (node *Node, err error) {
 	if buf, err = json.Marshal(r.Width); err != nil {
 		return nil, err
 	}
-	node.Fields[2] = &Field{
+	node.Fields[1] = &Field{
 		Type:  "int",
 		Name:  "width",
 		Value: string(buf),
@@ -250,7 +242,7 @@ func (r *Runway) Node(ctx context.Context) (node *Node, err error) {
 	if buf, err = json.Marshal(r.Surface); err != nil {
 		return nil, err
 	}
-	node.Fields[3] = &Field{
+	node.Fields[2] = &Field{
 		Type:  "string",
 		Name:  "surface",
 		Value: string(buf),
@@ -258,7 +250,7 @@ func (r *Runway) Node(ctx context.Context) (node *Node, err error) {
 	if buf, err = json.Marshal(r.Lighted); err != nil {
 		return nil, err
 	}
-	node.Fields[4] = &Field{
+	node.Fields[3] = &Field{
 		Type:  "bool",
 		Name:  "lighted",
 		Value: string(buf),
@@ -266,7 +258,7 @@ func (r *Runway) Node(ctx context.Context) (node *Node, err error) {
 	if buf, err = json.Marshal(r.Closed); err != nil {
 		return nil, err
 	}
-	node.Fields[5] = &Field{
+	node.Fields[4] = &Field{
 		Type:  "bool",
 		Name:  "closed",
 		Value: string(buf),
@@ -274,7 +266,7 @@ func (r *Runway) Node(ctx context.Context) (node *Node, err error) {
 	if buf, err = json.Marshal(r.LowRunwayIdentifier); err != nil {
 		return nil, err
 	}
-	node.Fields[6] = &Field{
+	node.Fields[5] = &Field{
 		Type:  "string",
 		Name:  "low_runway_identifier",
 		Value: string(buf),
@@ -282,7 +274,7 @@ func (r *Runway) Node(ctx context.Context) (node *Node, err error) {
 	if buf, err = json.Marshal(r.LowRunwayLatitude); err != nil {
 		return nil, err
 	}
-	node.Fields[7] = &Field{
+	node.Fields[6] = &Field{
 		Type:  "float64",
 		Name:  "low_runway_latitude",
 		Value: string(buf),
@@ -290,7 +282,7 @@ func (r *Runway) Node(ctx context.Context) (node *Node, err error) {
 	if buf, err = json.Marshal(r.LowRunwayLongitude); err != nil {
 		return nil, err
 	}
-	node.Fields[8] = &Field{
+	node.Fields[7] = &Field{
 		Type:  "float64",
 		Name:  "low_runway_longitude",
 		Value: string(buf),
@@ -298,7 +290,7 @@ func (r *Runway) Node(ctx context.Context) (node *Node, err error) {
 	if buf, err = json.Marshal(r.LowRunwayElevation); err != nil {
 		return nil, err
 	}
-	node.Fields[9] = &Field{
+	node.Fields[8] = &Field{
 		Type:  "int",
 		Name:  "low_runway_elevation",
 		Value: string(buf),
@@ -306,23 +298,23 @@ func (r *Runway) Node(ctx context.Context) (node *Node, err error) {
 	if buf, err = json.Marshal(r.LowRunwayHeading); err != nil {
 		return nil, err
 	}
-	node.Fields[10] = &Field{
-		Type:  "int",
+	node.Fields[9] = &Field{
+		Type:  "float64",
 		Name:  "low_runway_heading",
 		Value: string(buf),
 	}
-	if buf, err = json.Marshal(r.LowRunwayDisplaced); err != nil {
+	if buf, err = json.Marshal(r.LowRunwayDisplacedThreshold); err != nil {
 		return nil, err
 	}
-	node.Fields[11] = &Field{
+	node.Fields[10] = &Field{
 		Type:  "int",
-		Name:  "low_runway_displaced",
+		Name:  "low_runway_displaced_threshold",
 		Value: string(buf),
 	}
 	if buf, err = json.Marshal(r.HighRunwayIdentifier); err != nil {
 		return nil, err
 	}
-	node.Fields[12] = &Field{
+	node.Fields[11] = &Field{
 		Type:  "string",
 		Name:  "high_runway_identifier",
 		Value: string(buf),
@@ -330,7 +322,7 @@ func (r *Runway) Node(ctx context.Context) (node *Node, err error) {
 	if buf, err = json.Marshal(r.HighRunwayLatitude); err != nil {
 		return nil, err
 	}
-	node.Fields[13] = &Field{
+	node.Fields[12] = &Field{
 		Type:  "float64",
 		Name:  "high_runway_latitude",
 		Value: string(buf),
@@ -338,7 +330,7 @@ func (r *Runway) Node(ctx context.Context) (node *Node, err error) {
 	if buf, err = json.Marshal(r.HighRunwayLongitude); err != nil {
 		return nil, err
 	}
-	node.Fields[14] = &Field{
+	node.Fields[13] = &Field{
 		Type:  "float64",
 		Name:  "high_runway_longitude",
 		Value: string(buf),
@@ -346,7 +338,7 @@ func (r *Runway) Node(ctx context.Context) (node *Node, err error) {
 	if buf, err = json.Marshal(r.HighRunwayElevation); err != nil {
 		return nil, err
 	}
-	node.Fields[15] = &Field{
+	node.Fields[14] = &Field{
 		Type:  "int",
 		Name:  "high_runway_elevation",
 		Value: string(buf),
@@ -354,17 +346,17 @@ func (r *Runway) Node(ctx context.Context) (node *Node, err error) {
 	if buf, err = json.Marshal(r.HighRunwayHeading); err != nil {
 		return nil, err
 	}
-	node.Fields[16] = &Field{
-		Type:  "int",
+	node.Fields[15] = &Field{
+		Type:  "float64",
 		Name:  "high_runway_heading",
 		Value: string(buf),
 	}
-	if buf, err = json.Marshal(r.HighRunwayDisplaced); err != nil {
+	if buf, err = json.Marshal(r.HighRunwayDisplacedThreshold); err != nil {
 		return nil, err
 	}
-	node.Fields[17] = &Field{
+	node.Fields[16] = &Field{
 		Type:  "int",
-		Name:  "high_runway_displaced",
+		Name:  "high_runway_displaced_threshold",
 		Value: string(buf),
 	}
 	node.Edges[0] = &Edge{

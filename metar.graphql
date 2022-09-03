@@ -3,18 +3,18 @@ scalar Cursor
 type PageInfo {
     hasNextPage: Boolean!
     hasPreviousPage: Boolean!
-    startCursor: Cursor
-    endCursor: Cursor
+    startCursor: Cursor!
+    endCursor: Cursor!
 }
 
 type AirportConnection {
     totalCount: Int!
     pageInfo: PageInfo!
-    edges: [AirportEdge]
+    edges: [AirportEdge!]!
 }
 
 type AirportEdge {
-    node: Airport
+    node: Airport!
     cursor: Cursor!
 }
 
@@ -23,5 +23,7 @@ type Query {
         after: Cursor
         first: Int
         before: Cursor
-        last: Int): AirportConnection
+        last: Int
+        identifier: String
+    ): AirportConnection!
 }

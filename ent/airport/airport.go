@@ -130,6 +130,34 @@ func TypeValidator(_type Type) error {
 	}
 }
 
+// Continent defines the type for the "continent" enum field.
+type Continent string
+
+// Continent values.
+const (
+	ContinentAfrica       Continent = "AF"
+	ContinentAntarctica   Continent = "AN"
+	ContinentAsia         Continent = "AS"
+	ContinentEurope       Continent = "EU"
+	ContinentNorthAmerica Continent = "NA"
+	ContinentSouthAmerica Continent = "SA"
+	ContinentOceania      Continent = "OC"
+)
+
+func (c Continent) String() string {
+	return string(c)
+}
+
+// ContinentValidator is a validator for the "continent" field enum values. It is called by the builders before save.
+func ContinentValidator(c Continent) error {
+	switch c {
+	case ContinentAfrica, ContinentAntarctica, ContinentAsia, ContinentEurope, ContinentNorthAmerica, ContinentSouthAmerica, ContinentOceania:
+		return nil
+	default:
+		return fmt.Errorf("airport: invalid enum value for continent field: %q", c)
+	}
+}
+
 // MarshalGQL implements graphql.Marshaler interface.
 func (e Type) MarshalGQL(w io.Writer) {
 	io.WriteString(w, strconv.Quote(e.String()))
@@ -144,6 +172,24 @@ func (e *Type) UnmarshalGQL(val interface{}) error {
 	*e = Type(str)
 	if err := TypeValidator(*e); err != nil {
 		return fmt.Errorf("%s is not a valid Type", str)
+	}
+	return nil
+}
+
+// MarshalGQL implements graphql.Marshaler interface.
+func (e Continent) MarshalGQL(w io.Writer) {
+	io.WriteString(w, strconv.Quote(e.String()))
+}
+
+// UnmarshalGQL implements graphql.Unmarshaler interface.
+func (e *Continent) UnmarshalGQL(val interface{}) error {
+	str, ok := val.(string)
+	if !ok {
+		return fmt.Errorf("enum %T must be a string", val)
+	}
+	*e = Continent(str)
+	if err := ContinentValidator(*e); err != nil {
+		return fmt.Errorf("%s is not a valid Continent", str)
 	}
 	return nil
 }

@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"strconv"
 	"sync"
+	"sync/atomic"
 
 	"github.com/99designs/gqlgen/graphql"
 	"github.com/99designs/gqlgen/graphql/introspection"
@@ -18,7 +19,7 @@ import (
 // region    ************************** generated!.gotpl **************************
 
 type QueryResolver interface {
-	GetAirports(ctx context.Context, after *ent.Cursor, first *int, before *ent.Cursor, last *int) (*ent.AirportConnection, error)
+	GetAirports(ctx context.Context, after *ent.Cursor, first *int, before *ent.Cursor, last *int, identifier *string) (*ent.AirportConnection, error)
 }
 
 // endregion ************************** generated!.gotpl **************************
@@ -79,6 +80,15 @@ func (ec *executionContext) field_Query_getAirports_args(ctx context.Context, ra
 		}
 	}
 	args["last"] = arg3
+	var arg4 *string
+	if tmp, ok := rawArgs["identifier"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("identifier"))
+		arg4, err = ec.unmarshalOString2ᚖstring(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["identifier"] = arg4
 	return args, nil
 }
 
@@ -209,11 +219,14 @@ func (ec *executionContext) _AirportConnection_edges(ctx context.Context, field 
 		return graphql.Null
 	}
 	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
 		return graphql.Null
 	}
 	res := resTmp.([]*ent.AirportEdge)
 	fc.Result = res
-	return ec.marshalOAirportEdge2ᚕᚖmetarᚗggᚋentᚐAirportEdge(ctx, field.Selections, res)
+	return ec.marshalNAirportEdge2ᚕᚖmetarᚗggᚋentᚐAirportEdgeᚄ(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_AirportConnection_edges(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -256,11 +269,14 @@ func (ec *executionContext) _AirportEdge_node(ctx context.Context, field graphql
 		return graphql.Null
 	}
 	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
 		return graphql.Null
 	}
 	res := resTmp.(*ent.Airport)
 	fc.Result = res
-	return ec.marshalOAirport2ᚖmetarᚗggᚋentᚐAirport(ctx, field.Selections, res)
+	return ec.marshalNAirport2ᚖmetarᚗggᚋentᚐAirport(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_AirportEdge_node(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -544,18 +560,21 @@ func (ec *executionContext) _Query_getAirports(ctx context.Context, field graphq
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().GetAirports(rctx, fc.Args["after"].(*ent.Cursor), fc.Args["first"].(*int), fc.Args["before"].(*ent.Cursor), fc.Args["last"].(*int))
+		return ec.resolvers.Query().GetAirports(rctx, fc.Args["after"].(*ent.Cursor), fc.Args["first"].(*int), fc.Args["before"].(*ent.Cursor), fc.Args["last"].(*int), fc.Args["identifier"].(*string))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
 		return graphql.Null
 	}
 	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
 		return graphql.Null
 	}
 	res := resTmp.(*ent.AirportConnection)
 	fc.Result = res
-	return ec.marshalOAirportConnection2ᚖmetarᚗggᚋentᚐAirportConnection(ctx, field.Selections, res)
+	return ec.marshalNAirportConnection2ᚖmetarᚗggᚋentᚐAirportConnection(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Query_getAirports(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -759,6 +778,9 @@ func (ec *executionContext) _AirportConnection(ctx context.Context, sel ast.Sele
 
 			out.Values[i] = ec._AirportConnection_edges(ctx, field, obj)
 
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -784,6 +806,9 @@ func (ec *executionContext) _AirportEdge(ctx context.Context, sel ast.SelectionS
 
 			out.Values[i] = ec._AirportEdge_node(ctx, field, obj)
 
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
 		case "cursor":
 
 			out.Values[i] = ec._AirportEdge_cursor(ctx, field, obj)
@@ -874,6 +899,9 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 					}
 				}()
 				res = ec._Query_getAirports(ctx, field)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
 				return res
 			}
 
@@ -911,31 +939,21 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 
 // region    ***************************** type.gotpl *****************************
 
-func (ec *executionContext) unmarshalNCursor2metarᚗggᚋentᚐCursor(ctx context.Context, v interface{}) (ent.Cursor, error) {
-	var res ent.Cursor
-	err := res.UnmarshalGQL(v)
-	return res, graphql.ErrorOnPath(ctx, err)
+func (ec *executionContext) marshalNAirportConnection2metarᚗggᚋentᚐAirportConnection(ctx context.Context, sel ast.SelectionSet, v ent.AirportConnection) graphql.Marshaler {
+	return ec._AirportConnection(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalNCursor2metarᚗggᚋentᚐCursor(ctx context.Context, sel ast.SelectionSet, v ent.Cursor) graphql.Marshaler {
-	return v
-}
-
-func (ec *executionContext) marshalNPageInfo2metarᚗggᚋentᚐPageInfo(ctx context.Context, sel ast.SelectionSet, v ent.PageInfo) graphql.Marshaler {
-	return ec._PageInfo(ctx, sel, &v)
-}
-
-func (ec *executionContext) marshalOAirportConnection2ᚖmetarᚗggᚋentᚐAirportConnection(ctx context.Context, sel ast.SelectionSet, v *ent.AirportConnection) graphql.Marshaler {
+func (ec *executionContext) marshalNAirportConnection2ᚖmetarᚗggᚋentᚐAirportConnection(ctx context.Context, sel ast.SelectionSet, v *ent.AirportConnection) graphql.Marshaler {
 	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+		}
 		return graphql.Null
 	}
 	return ec._AirportConnection(ctx, sel, v)
 }
 
-func (ec *executionContext) marshalOAirportEdge2ᚕᚖmetarᚗggᚋentᚐAirportEdge(ctx context.Context, sel ast.SelectionSet, v []*ent.AirportEdge) graphql.Marshaler {
-	if v == nil {
-		return graphql.Null
-	}
+func (ec *executionContext) marshalNAirportEdge2ᚕᚖmetarᚗggᚋentᚐAirportEdgeᚄ(ctx context.Context, sel ast.SelectionSet, v []*ent.AirportEdge) graphql.Marshaler {
 	ret := make(graphql.Array, len(v))
 	var wg sync.WaitGroup
 	isLen1 := len(v) == 1
@@ -959,7 +977,7 @@ func (ec *executionContext) marshalOAirportEdge2ᚕᚖmetarᚗggᚋentᚐAirport
 			if !isLen1 {
 				defer wg.Done()
 			}
-			ret[i] = ec.marshalOAirportEdge2ᚖmetarᚗggᚋentᚐAirportEdge(ctx, sel, v[i])
+			ret[i] = ec.marshalNAirportEdge2ᚖmetarᚗggᚋentᚐAirportEdge(ctx, sel, v[i])
 		}
 		if isLen1 {
 			f(i)
@@ -970,14 +988,37 @@ func (ec *executionContext) marshalOAirportEdge2ᚕᚖmetarᚗggᚋentᚐAirport
 	}
 	wg.Wait()
 
+	for _, e := range ret {
+		if e == graphql.Null {
+			return graphql.Null
+		}
+	}
+
 	return ret
 }
 
-func (ec *executionContext) marshalOAirportEdge2ᚖmetarᚗggᚋentᚐAirportEdge(ctx context.Context, sel ast.SelectionSet, v *ent.AirportEdge) graphql.Marshaler {
+func (ec *executionContext) marshalNAirportEdge2ᚖmetarᚗggᚋentᚐAirportEdge(ctx context.Context, sel ast.SelectionSet, v *ent.AirportEdge) graphql.Marshaler {
 	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+		}
 		return graphql.Null
 	}
 	return ec._AirportEdge(ctx, sel, v)
+}
+
+func (ec *executionContext) unmarshalNCursor2metarᚗggᚋentᚐCursor(ctx context.Context, v interface{}) (ent.Cursor, error) {
+	var res ent.Cursor
+	err := res.UnmarshalGQL(v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalNCursor2metarᚗggᚋentᚐCursor(ctx context.Context, sel ast.SelectionSet, v ent.Cursor) graphql.Marshaler {
+	return v
+}
+
+func (ec *executionContext) marshalNPageInfo2metarᚗggᚋentᚐPageInfo(ctx context.Context, sel ast.SelectionSet, v ent.PageInfo) graphql.Marshaler {
+	return ec._PageInfo(ctx, sel, &v)
 }
 
 func (ec *executionContext) unmarshalOCursor2ᚖmetarᚗggᚋentᚐCursor(ctx context.Context, v interface{}) (*ent.Cursor, error) {

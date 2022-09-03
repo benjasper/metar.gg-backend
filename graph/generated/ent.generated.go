@@ -361,9 +361,9 @@ func (ec *executionContext) _Airport_continent(ctx context.Context, field graphq
 		}
 		return graphql.Null
 	}
-	res := resTmp.(string)
+	res := resTmp.(airport.Continent)
 	fc.Result = res
-	return ec.marshalNString2string(ctx, field.Selections, res)
+	return ec.marshalNAirportContinent2metarᚗggᚋentᚋairportᚐContinent(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Airport_continent(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -373,7 +373,7 @@ func (ec *executionContext) fieldContext_Airport_continent(ctx context.Context, 
 		IsMethod:   false,
 		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type String does not have child fields")
+			return nil, errors.New("field of type AirportContinent does not have child fields")
 		},
 	}
 	return fc, nil
@@ -488,14 +488,11 @@ func (ec *executionContext) _Airport_municipality(ctx context.Context, field gra
 		return graphql.Null
 	}
 	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
 		return graphql.Null
 	}
-	res := resTmp.(string)
+	res := resTmp.(*string)
 	fc.Result = res
-	return ec.marshalNString2string(ctx, field.Selections, res)
+	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Airport_municipality(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -825,14 +822,11 @@ func (ec *executionContext) _Airport_runways(ctx context.Context, field graphql.
 		return graphql.Null
 	}
 	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
 		return graphql.Null
 	}
 	res := resTmp.([]*ent.Runway)
 	fc.Result = res
-	return ec.marshalNRunway2ᚕᚖmetarᚗggᚋentᚐRunwayᚄ(ctx, field.Selections, res)
+	return ec.marshalORunway2ᚕᚖmetarᚗggᚋentᚐRunwayᚄ(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Airport_runways(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -845,8 +839,6 @@ func (ec *executionContext) fieldContext_Airport_runways(ctx context.Context, fi
 			switch field.Name {
 			case "id":
 				return ec.fieldContext_Runway_id(ctx, field)
-			case "airportIdentifier":
-				return ec.fieldContext_Runway_airportIdentifier(ctx, field)
 			case "length":
 				return ec.fieldContext_Runway_length(ctx, field)
 			case "width":
@@ -867,8 +859,8 @@ func (ec *executionContext) fieldContext_Airport_runways(ctx context.Context, fi
 				return ec.fieldContext_Runway_lowRunwayElevation(ctx, field)
 			case "lowRunwayHeading":
 				return ec.fieldContext_Runway_lowRunwayHeading(ctx, field)
-			case "lowRunwayDisplaced":
-				return ec.fieldContext_Runway_lowRunwayDisplaced(ctx, field)
+			case "lowRunwayDisplacedThreshold":
+				return ec.fieldContext_Runway_lowRunwayDisplacedThreshold(ctx, field)
 			case "highRunwayIdentifier":
 				return ec.fieldContext_Runway_highRunwayIdentifier(ctx, field)
 			case "highRunwayLatitude":
@@ -879,8 +871,8 @@ func (ec *executionContext) fieldContext_Airport_runways(ctx context.Context, fi
 				return ec.fieldContext_Runway_highRunwayElevation(ctx, field)
 			case "highRunwayHeading":
 				return ec.fieldContext_Runway_highRunwayHeading(ctx, field)
-			case "highRunwayDisplaced":
-				return ec.fieldContext_Runway_highRunwayDisplaced(ctx, field)
+			case "highRunwayDisplacedThreshold":
+				return ec.fieldContext_Runway_highRunwayDisplacedThreshold(ctx, field)
 			case "airport":
 				return ec.fieldContext_Runway_airport(ctx, field)
 			}
@@ -973,50 +965,6 @@ func (ec *executionContext) fieldContext_Runway_id(ctx context.Context, field gr
 		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			return nil, errors.New("field of type ID does not have child fields")
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _Runway_airportIdentifier(ctx context.Context, field graphql.CollectedField, obj *ent.Runway) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Runway_airportIdentifier(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.AirportIdentifier, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(string)
-	fc.Result = res
-	return ec.marshalNString2string(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_Runway_airportIdentifier(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Runway",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type String does not have child fields")
 		},
 	}
 	return fc, nil
@@ -1432,9 +1380,9 @@ func (ec *executionContext) _Runway_lowRunwayHeading(ctx context.Context, field 
 	if resTmp == nil {
 		return graphql.Null
 	}
-	res := resTmp.(*int)
+	res := resTmp.(*float64)
 	fc.Result = res
-	return ec.marshalOInt2ᚖint(ctx, field.Selections, res)
+	return ec.marshalOFloat2ᚖfloat64(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Runway_lowRunwayHeading(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -1444,14 +1392,14 @@ func (ec *executionContext) fieldContext_Runway_lowRunwayHeading(ctx context.Con
 		IsMethod:   false,
 		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type Int does not have child fields")
+			return nil, errors.New("field of type Float does not have child fields")
 		},
 	}
 	return fc, nil
 }
 
-func (ec *executionContext) _Runway_lowRunwayDisplaced(ctx context.Context, field graphql.CollectedField, obj *ent.Runway) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Runway_lowRunwayDisplaced(ctx, field)
+func (ec *executionContext) _Runway_lowRunwayDisplacedThreshold(ctx context.Context, field graphql.CollectedField, obj *ent.Runway) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Runway_lowRunwayDisplacedThreshold(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -1464,7 +1412,7 @@ func (ec *executionContext) _Runway_lowRunwayDisplaced(ctx context.Context, fiel
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.LowRunwayDisplaced, nil
+		return obj.LowRunwayDisplacedThreshold, nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -1478,7 +1426,7 @@ func (ec *executionContext) _Runway_lowRunwayDisplaced(ctx context.Context, fiel
 	return ec.marshalOInt2ᚖint(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_Runway_lowRunwayDisplaced(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_Runway_lowRunwayDisplacedThreshold(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Runway",
 		Field:      field,
@@ -1681,9 +1629,9 @@ func (ec *executionContext) _Runway_highRunwayHeading(ctx context.Context, field
 	if resTmp == nil {
 		return graphql.Null
 	}
-	res := resTmp.(*int)
+	res := resTmp.(*float64)
 	fc.Result = res
-	return ec.marshalOInt2ᚖint(ctx, field.Selections, res)
+	return ec.marshalOFloat2ᚖfloat64(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Runway_highRunwayHeading(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -1693,14 +1641,14 @@ func (ec *executionContext) fieldContext_Runway_highRunwayHeading(ctx context.Co
 		IsMethod:   false,
 		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type Int does not have child fields")
+			return nil, errors.New("field of type Float does not have child fields")
 		},
 	}
 	return fc, nil
 }
 
-func (ec *executionContext) _Runway_highRunwayDisplaced(ctx context.Context, field graphql.CollectedField, obj *ent.Runway) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Runway_highRunwayDisplaced(ctx, field)
+func (ec *executionContext) _Runway_highRunwayDisplacedThreshold(ctx context.Context, field graphql.CollectedField, obj *ent.Runway) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Runway_highRunwayDisplacedThreshold(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -1713,7 +1661,7 @@ func (ec *executionContext) _Runway_highRunwayDisplaced(ctx context.Context, fie
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.HighRunwayDisplaced, nil
+		return obj.HighRunwayDisplacedThreshold, nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -1727,7 +1675,7 @@ func (ec *executionContext) _Runway_highRunwayDisplaced(ctx context.Context, fie
 	return ec.marshalOInt2ᚖint(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_Runway_highRunwayDisplaced(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_Runway_highRunwayDisplacedThreshold(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Runway",
 		Field:      field,
@@ -1914,9 +1862,6 @@ func (ec *executionContext) _Airport(ctx context.Context, sel ast.SelectionSet, 
 
 			out.Values[i] = ec._Airport_municipality(ctx, field, obj)
 
-			if out.Values[i] == graphql.Null {
-				atomic.AddUint32(&invalids, 1)
-			}
 		case "scheduledService":
 
 			out.Values[i] = ec._Airport_scheduledService(ctx, field, obj)
@@ -1961,9 +1906,6 @@ func (ec *executionContext) _Airport(ctx context.Context, sel ast.SelectionSet, 
 					}
 				}()
 				res = ec._Airport_runways(ctx, field, obj)
-				if res == graphql.Null {
-					atomic.AddUint32(&invalids, 1)
-				}
 				return res
 			}
 
@@ -2027,13 +1969,6 @@ func (ec *executionContext) _Runway(ctx context.Context, sel ast.SelectionSet, o
 			if out.Values[i] == graphql.Null {
 				atomic.AddUint32(&invalids, 1)
 			}
-		case "airportIdentifier":
-
-			out.Values[i] = ec._Runway_airportIdentifier(ctx, field, obj)
-
-			if out.Values[i] == graphql.Null {
-				atomic.AddUint32(&invalids, 1)
-			}
 		case "length":
 
 			out.Values[i] = ec._Runway_length(ctx, field, obj)
@@ -2092,9 +2027,9 @@ func (ec *executionContext) _Runway(ctx context.Context, sel ast.SelectionSet, o
 
 			out.Values[i] = ec._Runway_lowRunwayHeading(ctx, field, obj)
 
-		case "lowRunwayDisplaced":
+		case "lowRunwayDisplacedThreshold":
 
-			out.Values[i] = ec._Runway_lowRunwayDisplaced(ctx, field, obj)
+			out.Values[i] = ec._Runway_lowRunwayDisplacedThreshold(ctx, field, obj)
 
 		case "highRunwayIdentifier":
 
@@ -2119,9 +2054,9 @@ func (ec *executionContext) _Runway(ctx context.Context, sel ast.SelectionSet, o
 
 			out.Values[i] = ec._Runway_highRunwayHeading(ctx, field, obj)
 
-		case "highRunwayDisplaced":
+		case "highRunwayDisplacedThreshold":
 
-			out.Values[i] = ec._Runway_highRunwayDisplaced(ctx, field, obj)
+			out.Values[i] = ec._Runway_highRunwayDisplacedThreshold(ctx, field, obj)
 
 		case "airport":
 			field := field
@@ -2155,6 +2090,26 @@ func (ec *executionContext) _Runway(ctx context.Context, sel ast.SelectionSet, o
 
 // region    ***************************** type.gotpl *****************************
 
+func (ec *executionContext) marshalNAirport2ᚖmetarᚗggᚋentᚐAirport(ctx context.Context, sel ast.SelectionSet, v *ent.Airport) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+		}
+		return graphql.Null
+	}
+	return ec._Airport(ctx, sel, v)
+}
+
+func (ec *executionContext) unmarshalNAirportContinent2metarᚗggᚋentᚋairportᚐContinent(ctx context.Context, v interface{}) (airport.Continent, error) {
+	var res airport.Continent
+	err := res.UnmarshalGQL(v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalNAirportContinent2metarᚗggᚋentᚋairportᚐContinent(ctx context.Context, sel ast.SelectionSet, v airport.Continent) graphql.Marshaler {
+	return v
+}
+
 func (ec *executionContext) unmarshalNAirportType2metarᚗggᚋentᚋairportᚐType(ctx context.Context, v interface{}) (airport.Type, error) {
 	var res airport.Type
 	err := res.UnmarshalGQL(v)
@@ -2165,7 +2120,27 @@ func (ec *executionContext) marshalNAirportType2metarᚗggᚋentᚋairportᚐTyp
 	return v
 }
 
-func (ec *executionContext) marshalNRunway2ᚕᚖmetarᚗggᚋentᚐRunwayᚄ(ctx context.Context, sel ast.SelectionSet, v []*ent.Runway) graphql.Marshaler {
+func (ec *executionContext) marshalNRunway2ᚖmetarᚗggᚋentᚐRunway(ctx context.Context, sel ast.SelectionSet, v *ent.Runway) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+		}
+		return graphql.Null
+	}
+	return ec._Runway(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalOAirport2ᚖmetarᚗggᚋentᚐAirport(ctx context.Context, sel ast.SelectionSet, v *ent.Airport) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._Airport(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalORunway2ᚕᚖmetarᚗggᚋentᚐRunwayᚄ(ctx context.Context, sel ast.SelectionSet, v []*ent.Runway) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
 	ret := make(graphql.Array, len(v))
 	var wg sync.WaitGroup
 	isLen1 := len(v) == 1
@@ -2207,23 +2182,6 @@ func (ec *executionContext) marshalNRunway2ᚕᚖmetarᚗggᚋentᚐRunwayᚄ(ct
 	}
 
 	return ret
-}
-
-func (ec *executionContext) marshalNRunway2ᚖmetarᚗggᚋentᚐRunway(ctx context.Context, sel ast.SelectionSet, v *ent.Runway) graphql.Marshaler {
-	if v == nil {
-		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
-			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
-		}
-		return graphql.Null
-	}
-	return ec._Runway(ctx, sel, v)
-}
-
-func (ec *executionContext) marshalOAirport2ᚖmetarᚗggᚋentᚐAirport(ctx context.Context, sel ast.SelectionSet, v *ent.Airport) graphql.Marshaler {
-	if v == nil {
-		return graphql.Null
-	}
-	return ec._Airport(ctx, sel, v)
 }
 
 // endregion ***************************** type.gotpl *****************************

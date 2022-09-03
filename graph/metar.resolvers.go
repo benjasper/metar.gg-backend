@@ -7,12 +7,15 @@ import (
 	"context"
 
 	"metar.gg/ent"
+	"metar.gg/ent/airport"
 	"metar.gg/graph/generated"
 )
 
 // GetAirports is the resolver for the getAirports field.
-func (r *queryResolver) GetAirports(ctx context.Context, after *ent.Cursor, first *int, before *ent.Cursor, last *int) (*ent.AirportConnection, error) {
-	connection, err := r.client.Airport.Query().Paginate(ctx, after, first, before, last)
+func (r *queryResolver) GetAirports(ctx context.Context, after *ent.Cursor, first *int, before *ent.Cursor, last *int, identifier *string) (*ent.AirportConnection, error) {
+	connection, err := r.client.Airport.Query().Where(
+		airport.IdentifierContains(*identifier),
+	).WithRunways().Paginate(ctx, after, first, before, last)
 	if err != nil {
 		return nil, err
 	}

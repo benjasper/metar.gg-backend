@@ -2,24 +2,49 @@ directive @goField(forceResolver: Boolean, name: String) on FIELD_DEFINITION | I
 directive @goModel(model: String, models: [String!]) on OBJECT | INPUT_OBJECT | SCALAR | ENUM | INTERFACE | UNION
 type Airport {
   id: ID!
+  """This will be the ICAO code if available. Otherwise, it will be a local airport code (if no conflict), or if nothing else is available, an internally-generated code starting with the ISO2 country code, followed by a dash and a four-digit number."""
   identifier: String!
+  """Type of airport."""
   type: AirportType!
+  """The official airport name, including "Airport", "Airstrip", etc."""
   name: String!
+  """Latitude of the airport in decimal degrees (positive is north)."""
   latitude: Float!
+  """Longitude of the airport in decimal degrees (positive is east)."""
   longitude: Float!
+  """Elevation of the airport, in feet."""
   elevation: Int
-  continent: String!
+  """Where the airport is (primarily) located."""
+  continent: AirportContinent!
   country: String!
   region: String!
-  municipality: String!
+  """The primary municipality that the airport serves (when available). Note that this is not necessarily the municipality where the airport is physically located."""
+  municipality: String
+  """Whether the airport has scheduled airline service."""
   scheduledService: Boolean!
+  """The code that an aviation GPS database (such as Jeppesen's or Garmin's) would normally use for the airport. This will always be the ICAO code if one exists. Note that, unlike the ident column, this is not guaranteed to be globally unique."""
   gpsCode: String
+  """The three-letter IATA code for the airport."""
   iataCode: String
+  """The local country code for the airport, if different from the gps_code and iata_code fields (used mainly for US airports)."""
   localCode: String
+  """The URL of the airport's website."""
   website: String
+  """The URL of the airport's Wikipedia page."""
   wikipedia: String
+  """Extra keywords/phrases to assist with search. May include former names for the airport, alternate codes, names in other languages, nearby tourist destinations, etc."""
   keywords: [String!]!
-  runways: [Runway!]!
+  runways: [Runway!]
+}
+"""AirportContinent is enum for the field continent"""
+enum AirportContinent @goModel(model: "metar.gg/ent/airport.Continent") {
+  AF
+  AN
+  AS
+  EU
+  NA
+  SA
+  OC
 }
 """AirportType is enum for the field type"""
 enum AirportType @goModel(model: "metar.gg/ent/airport.Type") {
@@ -42,25 +67,39 @@ enum OrderDirection {
 }
 type Runway {
   id: ID!
-  airportIdentifier: String!
+  """Length of the runway in feet."""
   length: Int!
+  """Width of the runway surface in feet."""
   width: Int!
+  """Code for the runway surface type. This is not yet a controlled vocabulary, but probably will be soon. Some common values include "ASP" (asphalt), "TURF" (turf), "CON" (concrete), "GRS" (grass), "GRE" (gravel), "WATER" (water), and "UNK" (unknown)."""
   surface: String!
+  """Whether the runway is lighted at night or not."""
   lighted: Boolean!
+  """Whether the runway is currently closed or not."""
   closed: Boolean!
-  """Low numbered runway identifier, like 18R"""
+  """Low numbered runway identifier, like 18R."""
   lowRunwayIdentifier: String!
+  """Latitude of the low numbered runway end, in decimal degrees (positive is north)."""
   lowRunwayLatitude: Float
+  """Longitude of the low numbered runway end, in decimal degrees (positive is east)."""
   lowRunwayLongitude: Float
+  """Elevation of the low numbered runway end, in feet."""
   lowRunwayElevation: Int
-  lowRunwayHeading: Int
-  lowRunwayDisplaced: Int
-  """High numbered runway identifier, like 18R"""
+  """True (not magnetic) heading of the lower numbered runway."""
+  lowRunwayHeading: Float
+  """Displaced threshold length of the lower numbered runway end, in feet."""
+  lowRunwayDisplacedThreshold: Int
+  """High numbered runway identifier, like 01L."""
   highRunwayIdentifier: String!
+  """Latitude of the high numbered runway end, in decimal degrees (positive is north)."""
   highRunwayLatitude: Float
+  """Longitude of the high numbered runway end, in decimal degrees (positive is east)."""
   highRunwayLongitude: Float
+  """Elevation of the high numbered runway end, in feet."""
   highRunwayElevation: Int
-  highRunwayHeading: Int
-  highRunwayDisplaced: Int
+  """True (not magnetic) heading of the higher numbered runway."""
+  highRunwayHeading: Float
+  """Displaced threshold length of the higher numbered runway end, in feet."""
+  highRunwayDisplacedThreshold: Int
   airport: Airport
 }

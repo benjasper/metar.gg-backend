@@ -87,8 +87,8 @@ func (ac *AirportCreate) SetNillableElevation(i *int) *AirportCreate {
 }
 
 // SetContinent sets the "continent" field.
-func (ac *AirportCreate) SetContinent(s string) *AirportCreate {
-	ac.mutation.SetContinent(s)
+func (ac *AirportCreate) SetContinent(a airport.Continent) *AirportCreate {
+	ac.mutation.SetContinent(a)
 	return ac
 }
 
@@ -107,6 +107,14 @@ func (ac *AirportCreate) SetRegion(s string) *AirportCreate {
 // SetMunicipality sets the "municipality" field.
 func (ac *AirportCreate) SetMunicipality(s string) *AirportCreate {
 	ac.mutation.SetMunicipality(s)
+	return ac
+}
+
+// SetNillableMunicipality sets the "municipality" field if the given value is not nil.
+func (ac *AirportCreate) SetNillableMunicipality(s *string) *AirportCreate {
+	if s != nil {
+		ac.SetMunicipality(*s)
+	}
 	return ac
 }
 
@@ -327,23 +335,22 @@ func (ac *AirportCreate) check() error {
 	if _, ok := ac.mutation.Continent(); !ok {
 		return &ValidationError{Name: "continent", err: errors.New(`ent: missing required field "Airport.continent"`)}
 	}
+	if v, ok := ac.mutation.Continent(); ok {
+		if err := airport.ContinentValidator(v); err != nil {
+			return &ValidationError{Name: "continent", err: fmt.Errorf(`ent: validator failed for field "Airport.continent": %w`, err)}
+		}
+	}
 	if _, ok := ac.mutation.Country(); !ok {
 		return &ValidationError{Name: "country", err: errors.New(`ent: missing required field "Airport.country"`)}
 	}
 	if _, ok := ac.mutation.Region(); !ok {
 		return &ValidationError{Name: "region", err: errors.New(`ent: missing required field "Airport.region"`)}
 	}
-	if _, ok := ac.mutation.Municipality(); !ok {
-		return &ValidationError{Name: "municipality", err: errors.New(`ent: missing required field "Airport.municipality"`)}
-	}
 	if _, ok := ac.mutation.ScheduledService(); !ok {
 		return &ValidationError{Name: "scheduled_service", err: errors.New(`ent: missing required field "Airport.scheduled_service"`)}
 	}
 	if _, ok := ac.mutation.Keywords(); !ok {
 		return &ValidationError{Name: "keywords", err: errors.New(`ent: missing required field "Airport.keywords"`)}
-	}
-	if len(ac.mutation.RunwaysIDs()) == 0 {
-		return &ValidationError{Name: "runways", err: errors.New(`ent: missing required edge "Airport.runways"`)}
 	}
 	return nil
 }
@@ -445,7 +452,7 @@ func (ac *AirportCreate) createSpec() (*Airport, *sqlgraph.CreateSpec) {
 	}
 	if value, ok := ac.mutation.Continent(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
+			Type:   field.TypeEnum,
 			Value:  value,
 			Column: airport.FieldContinent,
 		})
@@ -473,7 +480,7 @@ func (ac *AirportCreate) createSpec() (*Airport, *sqlgraph.CreateSpec) {
 			Value:  value,
 			Column: airport.FieldMunicipality,
 		})
-		_node.Municipality = value
+		_node.Municipality = &value
 	}
 	if value, ok := ac.mutation.ScheduledService(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
@@ -723,7 +730,7 @@ func (u *AirportUpsert) ClearElevation() *AirportUpsert {
 }
 
 // SetContinent sets the "continent" field.
-func (u *AirportUpsert) SetContinent(v string) *AirportUpsert {
+func (u *AirportUpsert) SetContinent(v airport.Continent) *AirportUpsert {
 	u.Set(airport.FieldContinent, v)
 	return u
 }
@@ -767,6 +774,12 @@ func (u *AirportUpsert) SetMunicipality(v string) *AirportUpsert {
 // UpdateMunicipality sets the "municipality" field to the value that was provided on create.
 func (u *AirportUpsert) UpdateMunicipality() *AirportUpsert {
 	u.SetExcluded(airport.FieldMunicipality)
+	return u
+}
+
+// ClearMunicipality clears the value of the "municipality" field.
+func (u *AirportUpsert) ClearMunicipality() *AirportUpsert {
+	u.SetNull(airport.FieldMunicipality)
 	return u
 }
 
@@ -1073,7 +1086,7 @@ func (u *AirportUpsertOne) ClearElevation() *AirportUpsertOne {
 }
 
 // SetContinent sets the "continent" field.
-func (u *AirportUpsertOne) SetContinent(v string) *AirportUpsertOne {
+func (u *AirportUpsertOne) SetContinent(v airport.Continent) *AirportUpsertOne {
 	return u.Update(func(s *AirportUpsert) {
 		s.SetContinent(v)
 	})
@@ -1125,6 +1138,13 @@ func (u *AirportUpsertOne) SetMunicipality(v string) *AirportUpsertOne {
 func (u *AirportUpsertOne) UpdateMunicipality() *AirportUpsertOne {
 	return u.Update(func(s *AirportUpsert) {
 		s.UpdateMunicipality()
+	})
+}
+
+// ClearMunicipality clears the value of the "municipality" field.
+func (u *AirportUpsertOne) ClearMunicipality() *AirportUpsertOne {
+	return u.Update(func(s *AirportUpsert) {
+		s.ClearMunicipality()
 	})
 }
 
@@ -1612,7 +1632,7 @@ func (u *AirportUpsertBulk) ClearElevation() *AirportUpsertBulk {
 }
 
 // SetContinent sets the "continent" field.
-func (u *AirportUpsertBulk) SetContinent(v string) *AirportUpsertBulk {
+func (u *AirportUpsertBulk) SetContinent(v airport.Continent) *AirportUpsertBulk {
 	return u.Update(func(s *AirportUpsert) {
 		s.SetContinent(v)
 	})
@@ -1664,6 +1684,13 @@ func (u *AirportUpsertBulk) SetMunicipality(v string) *AirportUpsertBulk {
 func (u *AirportUpsertBulk) UpdateMunicipality() *AirportUpsertBulk {
 	return u.Update(func(s *AirportUpsert) {
 		s.UpdateMunicipality()
+	})
+}
+
+// ClearMunicipality clears the value of the "municipality" field.
+func (u *AirportUpsertBulk) ClearMunicipality() *AirportUpsertBulk {
+	return u.Update(func(s *AirportUpsert) {
+		s.ClearMunicipality()
 	})
 }
 

@@ -42,12 +42,6 @@ func (rc *RunwayCreate) SetNillableImportFlag(b *bool) *RunwayCreate {
 	return rc
 }
 
-// SetAirportIdentifier sets the "airport_identifier" field.
-func (rc *RunwayCreate) SetAirportIdentifier(s string) *RunwayCreate {
-	rc.mutation.SetAirportIdentifier(s)
-	return rc
-}
-
 // SetLength sets the "length" field.
 func (rc *RunwayCreate) SetLength(i int) *RunwayCreate {
 	rc.mutation.SetLength(i)
@@ -127,29 +121,29 @@ func (rc *RunwayCreate) SetNillableLowRunwayElevation(i *int) *RunwayCreate {
 }
 
 // SetLowRunwayHeading sets the "low_runway_heading" field.
-func (rc *RunwayCreate) SetLowRunwayHeading(i int) *RunwayCreate {
-	rc.mutation.SetLowRunwayHeading(i)
+func (rc *RunwayCreate) SetLowRunwayHeading(f float64) *RunwayCreate {
+	rc.mutation.SetLowRunwayHeading(f)
 	return rc
 }
 
 // SetNillableLowRunwayHeading sets the "low_runway_heading" field if the given value is not nil.
-func (rc *RunwayCreate) SetNillableLowRunwayHeading(i *int) *RunwayCreate {
-	if i != nil {
-		rc.SetLowRunwayHeading(*i)
+func (rc *RunwayCreate) SetNillableLowRunwayHeading(f *float64) *RunwayCreate {
+	if f != nil {
+		rc.SetLowRunwayHeading(*f)
 	}
 	return rc
 }
 
-// SetLowRunwayDisplaced sets the "low_runway_displaced" field.
-func (rc *RunwayCreate) SetLowRunwayDisplaced(i int) *RunwayCreate {
-	rc.mutation.SetLowRunwayDisplaced(i)
+// SetLowRunwayDisplacedThreshold sets the "low_runway_displaced_threshold" field.
+func (rc *RunwayCreate) SetLowRunwayDisplacedThreshold(i int) *RunwayCreate {
+	rc.mutation.SetLowRunwayDisplacedThreshold(i)
 	return rc
 }
 
-// SetNillableLowRunwayDisplaced sets the "low_runway_displaced" field if the given value is not nil.
-func (rc *RunwayCreate) SetNillableLowRunwayDisplaced(i *int) *RunwayCreate {
+// SetNillableLowRunwayDisplacedThreshold sets the "low_runway_displaced_threshold" field if the given value is not nil.
+func (rc *RunwayCreate) SetNillableLowRunwayDisplacedThreshold(i *int) *RunwayCreate {
 	if i != nil {
-		rc.SetLowRunwayDisplaced(*i)
+		rc.SetLowRunwayDisplacedThreshold(*i)
 	}
 	return rc
 }
@@ -203,29 +197,29 @@ func (rc *RunwayCreate) SetNillableHighRunwayElevation(i *int) *RunwayCreate {
 }
 
 // SetHighRunwayHeading sets the "high_runway_heading" field.
-func (rc *RunwayCreate) SetHighRunwayHeading(i int) *RunwayCreate {
-	rc.mutation.SetHighRunwayHeading(i)
+func (rc *RunwayCreate) SetHighRunwayHeading(f float64) *RunwayCreate {
+	rc.mutation.SetHighRunwayHeading(f)
 	return rc
 }
 
 // SetNillableHighRunwayHeading sets the "high_runway_heading" field if the given value is not nil.
-func (rc *RunwayCreate) SetNillableHighRunwayHeading(i *int) *RunwayCreate {
-	if i != nil {
-		rc.SetHighRunwayHeading(*i)
+func (rc *RunwayCreate) SetNillableHighRunwayHeading(f *float64) *RunwayCreate {
+	if f != nil {
+		rc.SetHighRunwayHeading(*f)
 	}
 	return rc
 }
 
-// SetHighRunwayDisplaced sets the "high_runway_displaced" field.
-func (rc *RunwayCreate) SetHighRunwayDisplaced(i int) *RunwayCreate {
-	rc.mutation.SetHighRunwayDisplaced(i)
+// SetHighRunwayDisplacedThreshold sets the "high_runway_displaced_threshold" field.
+func (rc *RunwayCreate) SetHighRunwayDisplacedThreshold(i int) *RunwayCreate {
+	rc.mutation.SetHighRunwayDisplacedThreshold(i)
 	return rc
 }
 
-// SetNillableHighRunwayDisplaced sets the "high_runway_displaced" field if the given value is not nil.
-func (rc *RunwayCreate) SetNillableHighRunwayDisplaced(i *int) *RunwayCreate {
+// SetNillableHighRunwayDisplacedThreshold sets the "high_runway_displaced_threshold" field if the given value is not nil.
+func (rc *RunwayCreate) SetNillableHighRunwayDisplacedThreshold(i *int) *RunwayCreate {
 	if i != nil {
-		rc.SetHighRunwayDisplaced(*i)
+		rc.SetHighRunwayDisplacedThreshold(*i)
 	}
 	return rc
 }
@@ -346,9 +340,6 @@ func (rc *RunwayCreate) check() error {
 	if _, ok := rc.mutation.ImportFlag(); !ok {
 		return &ValidationError{Name: "import_flag", err: errors.New(`ent: missing required field "Runway.import_flag"`)}
 	}
-	if _, ok := rc.mutation.AirportIdentifier(); !ok {
-		return &ValidationError{Name: "airport_identifier", err: errors.New(`ent: missing required field "Runway.airport_identifier"`)}
-	}
 	if _, ok := rc.mutation.Length(); !ok {
 		return &ValidationError{Name: "length", err: errors.New(`ent: missing required field "Runway.length"`)}
 	}
@@ -419,14 +410,6 @@ func (rc *RunwayCreate) createSpec() (*Runway, *sqlgraph.CreateSpec) {
 			Column: runway.FieldImportFlag,
 		})
 		_node.ImportFlag = value
-	}
-	if value, ok := rc.mutation.AirportIdentifier(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: runway.FieldAirportIdentifier,
-		})
-		_node.AirportIdentifier = value
 	}
 	if value, ok := rc.mutation.Length(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
@@ -502,19 +485,19 @@ func (rc *RunwayCreate) createSpec() (*Runway, *sqlgraph.CreateSpec) {
 	}
 	if value, ok := rc.mutation.LowRunwayHeading(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
+			Type:   field.TypeFloat64,
 			Value:  value,
 			Column: runway.FieldLowRunwayHeading,
 		})
 		_node.LowRunwayHeading = &value
 	}
-	if value, ok := rc.mutation.LowRunwayDisplaced(); ok {
+	if value, ok := rc.mutation.LowRunwayDisplacedThreshold(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
 			Type:   field.TypeInt,
 			Value:  value,
-			Column: runway.FieldLowRunwayDisplaced,
+			Column: runway.FieldLowRunwayDisplacedThreshold,
 		})
-		_node.LowRunwayDisplaced = &value
+		_node.LowRunwayDisplacedThreshold = &value
 	}
 	if value, ok := rc.mutation.HighRunwayIdentifier(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
@@ -550,19 +533,19 @@ func (rc *RunwayCreate) createSpec() (*Runway, *sqlgraph.CreateSpec) {
 	}
 	if value, ok := rc.mutation.HighRunwayHeading(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
+			Type:   field.TypeFloat64,
 			Value:  value,
 			Column: runway.FieldHighRunwayHeading,
 		})
 		_node.HighRunwayHeading = &value
 	}
-	if value, ok := rc.mutation.HighRunwayDisplaced(); ok {
+	if value, ok := rc.mutation.HighRunwayDisplacedThreshold(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
 			Type:   field.TypeInt,
 			Value:  value,
-			Column: runway.FieldHighRunwayDisplaced,
+			Column: runway.FieldHighRunwayDisplacedThreshold,
 		})
-		_node.HighRunwayDisplaced = &value
+		_node.HighRunwayDisplacedThreshold = &value
 	}
 	if nodes := rc.mutation.AirportIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
@@ -657,18 +640,6 @@ func (u *RunwayUpsert) SetImportFlag(v bool) *RunwayUpsert {
 // UpdateImportFlag sets the "import_flag" field to the value that was provided on create.
 func (u *RunwayUpsert) UpdateImportFlag() *RunwayUpsert {
 	u.SetExcluded(runway.FieldImportFlag)
-	return u
-}
-
-// SetAirportIdentifier sets the "airport_identifier" field.
-func (u *RunwayUpsert) SetAirportIdentifier(v string) *RunwayUpsert {
-	u.Set(runway.FieldAirportIdentifier, v)
-	return u
-}
-
-// UpdateAirportIdentifier sets the "airport_identifier" field to the value that was provided on create.
-func (u *RunwayUpsert) UpdateAirportIdentifier() *RunwayUpsert {
-	u.SetExcluded(runway.FieldAirportIdentifier)
 	return u
 }
 
@@ -829,7 +800,7 @@ func (u *RunwayUpsert) ClearLowRunwayElevation() *RunwayUpsert {
 }
 
 // SetLowRunwayHeading sets the "low_runway_heading" field.
-func (u *RunwayUpsert) SetLowRunwayHeading(v int) *RunwayUpsert {
+func (u *RunwayUpsert) SetLowRunwayHeading(v float64) *RunwayUpsert {
 	u.Set(runway.FieldLowRunwayHeading, v)
 	return u
 }
@@ -841,7 +812,7 @@ func (u *RunwayUpsert) UpdateLowRunwayHeading() *RunwayUpsert {
 }
 
 // AddLowRunwayHeading adds v to the "low_runway_heading" field.
-func (u *RunwayUpsert) AddLowRunwayHeading(v int) *RunwayUpsert {
+func (u *RunwayUpsert) AddLowRunwayHeading(v float64) *RunwayUpsert {
 	u.Add(runway.FieldLowRunwayHeading, v)
 	return u
 }
@@ -852,27 +823,27 @@ func (u *RunwayUpsert) ClearLowRunwayHeading() *RunwayUpsert {
 	return u
 }
 
-// SetLowRunwayDisplaced sets the "low_runway_displaced" field.
-func (u *RunwayUpsert) SetLowRunwayDisplaced(v int) *RunwayUpsert {
-	u.Set(runway.FieldLowRunwayDisplaced, v)
+// SetLowRunwayDisplacedThreshold sets the "low_runway_displaced_threshold" field.
+func (u *RunwayUpsert) SetLowRunwayDisplacedThreshold(v int) *RunwayUpsert {
+	u.Set(runway.FieldLowRunwayDisplacedThreshold, v)
 	return u
 }
 
-// UpdateLowRunwayDisplaced sets the "low_runway_displaced" field to the value that was provided on create.
-func (u *RunwayUpsert) UpdateLowRunwayDisplaced() *RunwayUpsert {
-	u.SetExcluded(runway.FieldLowRunwayDisplaced)
+// UpdateLowRunwayDisplacedThreshold sets the "low_runway_displaced_threshold" field to the value that was provided on create.
+func (u *RunwayUpsert) UpdateLowRunwayDisplacedThreshold() *RunwayUpsert {
+	u.SetExcluded(runway.FieldLowRunwayDisplacedThreshold)
 	return u
 }
 
-// AddLowRunwayDisplaced adds v to the "low_runway_displaced" field.
-func (u *RunwayUpsert) AddLowRunwayDisplaced(v int) *RunwayUpsert {
-	u.Add(runway.FieldLowRunwayDisplaced, v)
+// AddLowRunwayDisplacedThreshold adds v to the "low_runway_displaced_threshold" field.
+func (u *RunwayUpsert) AddLowRunwayDisplacedThreshold(v int) *RunwayUpsert {
+	u.Add(runway.FieldLowRunwayDisplacedThreshold, v)
 	return u
 }
 
-// ClearLowRunwayDisplaced clears the value of the "low_runway_displaced" field.
-func (u *RunwayUpsert) ClearLowRunwayDisplaced() *RunwayUpsert {
-	u.SetNull(runway.FieldLowRunwayDisplaced)
+// ClearLowRunwayDisplacedThreshold clears the value of the "low_runway_displaced_threshold" field.
+func (u *RunwayUpsert) ClearLowRunwayDisplacedThreshold() *RunwayUpsert {
+	u.SetNull(runway.FieldLowRunwayDisplacedThreshold)
 	return u
 }
 
@@ -961,7 +932,7 @@ func (u *RunwayUpsert) ClearHighRunwayElevation() *RunwayUpsert {
 }
 
 // SetHighRunwayHeading sets the "high_runway_heading" field.
-func (u *RunwayUpsert) SetHighRunwayHeading(v int) *RunwayUpsert {
+func (u *RunwayUpsert) SetHighRunwayHeading(v float64) *RunwayUpsert {
 	u.Set(runway.FieldHighRunwayHeading, v)
 	return u
 }
@@ -973,7 +944,7 @@ func (u *RunwayUpsert) UpdateHighRunwayHeading() *RunwayUpsert {
 }
 
 // AddHighRunwayHeading adds v to the "high_runway_heading" field.
-func (u *RunwayUpsert) AddHighRunwayHeading(v int) *RunwayUpsert {
+func (u *RunwayUpsert) AddHighRunwayHeading(v float64) *RunwayUpsert {
 	u.Add(runway.FieldHighRunwayHeading, v)
 	return u
 }
@@ -984,27 +955,27 @@ func (u *RunwayUpsert) ClearHighRunwayHeading() *RunwayUpsert {
 	return u
 }
 
-// SetHighRunwayDisplaced sets the "high_runway_displaced" field.
-func (u *RunwayUpsert) SetHighRunwayDisplaced(v int) *RunwayUpsert {
-	u.Set(runway.FieldHighRunwayDisplaced, v)
+// SetHighRunwayDisplacedThreshold sets the "high_runway_displaced_threshold" field.
+func (u *RunwayUpsert) SetHighRunwayDisplacedThreshold(v int) *RunwayUpsert {
+	u.Set(runway.FieldHighRunwayDisplacedThreshold, v)
 	return u
 }
 
-// UpdateHighRunwayDisplaced sets the "high_runway_displaced" field to the value that was provided on create.
-func (u *RunwayUpsert) UpdateHighRunwayDisplaced() *RunwayUpsert {
-	u.SetExcluded(runway.FieldHighRunwayDisplaced)
+// UpdateHighRunwayDisplacedThreshold sets the "high_runway_displaced_threshold" field to the value that was provided on create.
+func (u *RunwayUpsert) UpdateHighRunwayDisplacedThreshold() *RunwayUpsert {
+	u.SetExcluded(runway.FieldHighRunwayDisplacedThreshold)
 	return u
 }
 
-// AddHighRunwayDisplaced adds v to the "high_runway_displaced" field.
-func (u *RunwayUpsert) AddHighRunwayDisplaced(v int) *RunwayUpsert {
-	u.Add(runway.FieldHighRunwayDisplaced, v)
+// AddHighRunwayDisplacedThreshold adds v to the "high_runway_displaced_threshold" field.
+func (u *RunwayUpsert) AddHighRunwayDisplacedThreshold(v int) *RunwayUpsert {
+	u.Add(runway.FieldHighRunwayDisplacedThreshold, v)
 	return u
 }
 
-// ClearHighRunwayDisplaced clears the value of the "high_runway_displaced" field.
-func (u *RunwayUpsert) ClearHighRunwayDisplaced() *RunwayUpsert {
-	u.SetNull(runway.FieldHighRunwayDisplaced)
+// ClearHighRunwayDisplacedThreshold clears the value of the "high_runway_displaced_threshold" field.
+func (u *RunwayUpsert) ClearHighRunwayDisplacedThreshold() *RunwayUpsert {
+	u.SetNull(runway.FieldHighRunwayDisplacedThreshold)
 	return u
 }
 
@@ -1081,20 +1052,6 @@ func (u *RunwayUpsertOne) SetImportFlag(v bool) *RunwayUpsertOne {
 func (u *RunwayUpsertOne) UpdateImportFlag() *RunwayUpsertOne {
 	return u.Update(func(s *RunwayUpsert) {
 		s.UpdateImportFlag()
-	})
-}
-
-// SetAirportIdentifier sets the "airport_identifier" field.
-func (u *RunwayUpsertOne) SetAirportIdentifier(v string) *RunwayUpsertOne {
-	return u.Update(func(s *RunwayUpsert) {
-		s.SetAirportIdentifier(v)
-	})
-}
-
-// UpdateAirportIdentifier sets the "airport_identifier" field to the value that was provided on create.
-func (u *RunwayUpsertOne) UpdateAirportIdentifier() *RunwayUpsertOne {
-	return u.Update(func(s *RunwayUpsert) {
-		s.UpdateAirportIdentifier()
 	})
 }
 
@@ -1281,14 +1238,14 @@ func (u *RunwayUpsertOne) ClearLowRunwayElevation() *RunwayUpsertOne {
 }
 
 // SetLowRunwayHeading sets the "low_runway_heading" field.
-func (u *RunwayUpsertOne) SetLowRunwayHeading(v int) *RunwayUpsertOne {
+func (u *RunwayUpsertOne) SetLowRunwayHeading(v float64) *RunwayUpsertOne {
 	return u.Update(func(s *RunwayUpsert) {
 		s.SetLowRunwayHeading(v)
 	})
 }
 
 // AddLowRunwayHeading adds v to the "low_runway_heading" field.
-func (u *RunwayUpsertOne) AddLowRunwayHeading(v int) *RunwayUpsertOne {
+func (u *RunwayUpsertOne) AddLowRunwayHeading(v float64) *RunwayUpsertOne {
 	return u.Update(func(s *RunwayUpsert) {
 		s.AddLowRunwayHeading(v)
 	})
@@ -1308,31 +1265,31 @@ func (u *RunwayUpsertOne) ClearLowRunwayHeading() *RunwayUpsertOne {
 	})
 }
 
-// SetLowRunwayDisplaced sets the "low_runway_displaced" field.
-func (u *RunwayUpsertOne) SetLowRunwayDisplaced(v int) *RunwayUpsertOne {
+// SetLowRunwayDisplacedThreshold sets the "low_runway_displaced_threshold" field.
+func (u *RunwayUpsertOne) SetLowRunwayDisplacedThreshold(v int) *RunwayUpsertOne {
 	return u.Update(func(s *RunwayUpsert) {
-		s.SetLowRunwayDisplaced(v)
+		s.SetLowRunwayDisplacedThreshold(v)
 	})
 }
 
-// AddLowRunwayDisplaced adds v to the "low_runway_displaced" field.
-func (u *RunwayUpsertOne) AddLowRunwayDisplaced(v int) *RunwayUpsertOne {
+// AddLowRunwayDisplacedThreshold adds v to the "low_runway_displaced_threshold" field.
+func (u *RunwayUpsertOne) AddLowRunwayDisplacedThreshold(v int) *RunwayUpsertOne {
 	return u.Update(func(s *RunwayUpsert) {
-		s.AddLowRunwayDisplaced(v)
+		s.AddLowRunwayDisplacedThreshold(v)
 	})
 }
 
-// UpdateLowRunwayDisplaced sets the "low_runway_displaced" field to the value that was provided on create.
-func (u *RunwayUpsertOne) UpdateLowRunwayDisplaced() *RunwayUpsertOne {
+// UpdateLowRunwayDisplacedThreshold sets the "low_runway_displaced_threshold" field to the value that was provided on create.
+func (u *RunwayUpsertOne) UpdateLowRunwayDisplacedThreshold() *RunwayUpsertOne {
 	return u.Update(func(s *RunwayUpsert) {
-		s.UpdateLowRunwayDisplaced()
+		s.UpdateLowRunwayDisplacedThreshold()
 	})
 }
 
-// ClearLowRunwayDisplaced clears the value of the "low_runway_displaced" field.
-func (u *RunwayUpsertOne) ClearLowRunwayDisplaced() *RunwayUpsertOne {
+// ClearLowRunwayDisplacedThreshold clears the value of the "low_runway_displaced_threshold" field.
+func (u *RunwayUpsertOne) ClearLowRunwayDisplacedThreshold() *RunwayUpsertOne {
 	return u.Update(func(s *RunwayUpsert) {
-		s.ClearLowRunwayDisplaced()
+		s.ClearLowRunwayDisplacedThreshold()
 	})
 }
 
@@ -1435,14 +1392,14 @@ func (u *RunwayUpsertOne) ClearHighRunwayElevation() *RunwayUpsertOne {
 }
 
 // SetHighRunwayHeading sets the "high_runway_heading" field.
-func (u *RunwayUpsertOne) SetHighRunwayHeading(v int) *RunwayUpsertOne {
+func (u *RunwayUpsertOne) SetHighRunwayHeading(v float64) *RunwayUpsertOne {
 	return u.Update(func(s *RunwayUpsert) {
 		s.SetHighRunwayHeading(v)
 	})
 }
 
 // AddHighRunwayHeading adds v to the "high_runway_heading" field.
-func (u *RunwayUpsertOne) AddHighRunwayHeading(v int) *RunwayUpsertOne {
+func (u *RunwayUpsertOne) AddHighRunwayHeading(v float64) *RunwayUpsertOne {
 	return u.Update(func(s *RunwayUpsert) {
 		s.AddHighRunwayHeading(v)
 	})
@@ -1462,31 +1419,31 @@ func (u *RunwayUpsertOne) ClearHighRunwayHeading() *RunwayUpsertOne {
 	})
 }
 
-// SetHighRunwayDisplaced sets the "high_runway_displaced" field.
-func (u *RunwayUpsertOne) SetHighRunwayDisplaced(v int) *RunwayUpsertOne {
+// SetHighRunwayDisplacedThreshold sets the "high_runway_displaced_threshold" field.
+func (u *RunwayUpsertOne) SetHighRunwayDisplacedThreshold(v int) *RunwayUpsertOne {
 	return u.Update(func(s *RunwayUpsert) {
-		s.SetHighRunwayDisplaced(v)
+		s.SetHighRunwayDisplacedThreshold(v)
 	})
 }
 
-// AddHighRunwayDisplaced adds v to the "high_runway_displaced" field.
-func (u *RunwayUpsertOne) AddHighRunwayDisplaced(v int) *RunwayUpsertOne {
+// AddHighRunwayDisplacedThreshold adds v to the "high_runway_displaced_threshold" field.
+func (u *RunwayUpsertOne) AddHighRunwayDisplacedThreshold(v int) *RunwayUpsertOne {
 	return u.Update(func(s *RunwayUpsert) {
-		s.AddHighRunwayDisplaced(v)
+		s.AddHighRunwayDisplacedThreshold(v)
 	})
 }
 
-// UpdateHighRunwayDisplaced sets the "high_runway_displaced" field to the value that was provided on create.
-func (u *RunwayUpsertOne) UpdateHighRunwayDisplaced() *RunwayUpsertOne {
+// UpdateHighRunwayDisplacedThreshold sets the "high_runway_displaced_threshold" field to the value that was provided on create.
+func (u *RunwayUpsertOne) UpdateHighRunwayDisplacedThreshold() *RunwayUpsertOne {
 	return u.Update(func(s *RunwayUpsert) {
-		s.UpdateHighRunwayDisplaced()
+		s.UpdateHighRunwayDisplacedThreshold()
 	})
 }
 
-// ClearHighRunwayDisplaced clears the value of the "high_runway_displaced" field.
-func (u *RunwayUpsertOne) ClearHighRunwayDisplaced() *RunwayUpsertOne {
+// ClearHighRunwayDisplacedThreshold clears the value of the "high_runway_displaced_threshold" field.
+func (u *RunwayUpsertOne) ClearHighRunwayDisplacedThreshold() *RunwayUpsertOne {
 	return u.Update(func(s *RunwayUpsert) {
-		s.ClearHighRunwayDisplaced()
+		s.ClearHighRunwayDisplacedThreshold()
 	})
 }
 
@@ -1728,20 +1685,6 @@ func (u *RunwayUpsertBulk) UpdateImportFlag() *RunwayUpsertBulk {
 	})
 }
 
-// SetAirportIdentifier sets the "airport_identifier" field.
-func (u *RunwayUpsertBulk) SetAirportIdentifier(v string) *RunwayUpsertBulk {
-	return u.Update(func(s *RunwayUpsert) {
-		s.SetAirportIdentifier(v)
-	})
-}
-
-// UpdateAirportIdentifier sets the "airport_identifier" field to the value that was provided on create.
-func (u *RunwayUpsertBulk) UpdateAirportIdentifier() *RunwayUpsertBulk {
-	return u.Update(func(s *RunwayUpsert) {
-		s.UpdateAirportIdentifier()
-	})
-}
-
 // SetLength sets the "length" field.
 func (u *RunwayUpsertBulk) SetLength(v int) *RunwayUpsertBulk {
 	return u.Update(func(s *RunwayUpsert) {
@@ -1925,14 +1868,14 @@ func (u *RunwayUpsertBulk) ClearLowRunwayElevation() *RunwayUpsertBulk {
 }
 
 // SetLowRunwayHeading sets the "low_runway_heading" field.
-func (u *RunwayUpsertBulk) SetLowRunwayHeading(v int) *RunwayUpsertBulk {
+func (u *RunwayUpsertBulk) SetLowRunwayHeading(v float64) *RunwayUpsertBulk {
 	return u.Update(func(s *RunwayUpsert) {
 		s.SetLowRunwayHeading(v)
 	})
 }
 
 // AddLowRunwayHeading adds v to the "low_runway_heading" field.
-func (u *RunwayUpsertBulk) AddLowRunwayHeading(v int) *RunwayUpsertBulk {
+func (u *RunwayUpsertBulk) AddLowRunwayHeading(v float64) *RunwayUpsertBulk {
 	return u.Update(func(s *RunwayUpsert) {
 		s.AddLowRunwayHeading(v)
 	})
@@ -1952,31 +1895,31 @@ func (u *RunwayUpsertBulk) ClearLowRunwayHeading() *RunwayUpsertBulk {
 	})
 }
 
-// SetLowRunwayDisplaced sets the "low_runway_displaced" field.
-func (u *RunwayUpsertBulk) SetLowRunwayDisplaced(v int) *RunwayUpsertBulk {
+// SetLowRunwayDisplacedThreshold sets the "low_runway_displaced_threshold" field.
+func (u *RunwayUpsertBulk) SetLowRunwayDisplacedThreshold(v int) *RunwayUpsertBulk {
 	return u.Update(func(s *RunwayUpsert) {
-		s.SetLowRunwayDisplaced(v)
+		s.SetLowRunwayDisplacedThreshold(v)
 	})
 }
 
-// AddLowRunwayDisplaced adds v to the "low_runway_displaced" field.
-func (u *RunwayUpsertBulk) AddLowRunwayDisplaced(v int) *RunwayUpsertBulk {
+// AddLowRunwayDisplacedThreshold adds v to the "low_runway_displaced_threshold" field.
+func (u *RunwayUpsertBulk) AddLowRunwayDisplacedThreshold(v int) *RunwayUpsertBulk {
 	return u.Update(func(s *RunwayUpsert) {
-		s.AddLowRunwayDisplaced(v)
+		s.AddLowRunwayDisplacedThreshold(v)
 	})
 }
 
-// UpdateLowRunwayDisplaced sets the "low_runway_displaced" field to the value that was provided on create.
-func (u *RunwayUpsertBulk) UpdateLowRunwayDisplaced() *RunwayUpsertBulk {
+// UpdateLowRunwayDisplacedThreshold sets the "low_runway_displaced_threshold" field to the value that was provided on create.
+func (u *RunwayUpsertBulk) UpdateLowRunwayDisplacedThreshold() *RunwayUpsertBulk {
 	return u.Update(func(s *RunwayUpsert) {
-		s.UpdateLowRunwayDisplaced()
+		s.UpdateLowRunwayDisplacedThreshold()
 	})
 }
 
-// ClearLowRunwayDisplaced clears the value of the "low_runway_displaced" field.
-func (u *RunwayUpsertBulk) ClearLowRunwayDisplaced() *RunwayUpsertBulk {
+// ClearLowRunwayDisplacedThreshold clears the value of the "low_runway_displaced_threshold" field.
+func (u *RunwayUpsertBulk) ClearLowRunwayDisplacedThreshold() *RunwayUpsertBulk {
 	return u.Update(func(s *RunwayUpsert) {
-		s.ClearLowRunwayDisplaced()
+		s.ClearLowRunwayDisplacedThreshold()
 	})
 }
 
@@ -2079,14 +2022,14 @@ func (u *RunwayUpsertBulk) ClearHighRunwayElevation() *RunwayUpsertBulk {
 }
 
 // SetHighRunwayHeading sets the "high_runway_heading" field.
-func (u *RunwayUpsertBulk) SetHighRunwayHeading(v int) *RunwayUpsertBulk {
+func (u *RunwayUpsertBulk) SetHighRunwayHeading(v float64) *RunwayUpsertBulk {
 	return u.Update(func(s *RunwayUpsert) {
 		s.SetHighRunwayHeading(v)
 	})
 }
 
 // AddHighRunwayHeading adds v to the "high_runway_heading" field.
-func (u *RunwayUpsertBulk) AddHighRunwayHeading(v int) *RunwayUpsertBulk {
+func (u *RunwayUpsertBulk) AddHighRunwayHeading(v float64) *RunwayUpsertBulk {
 	return u.Update(func(s *RunwayUpsert) {
 		s.AddHighRunwayHeading(v)
 	})
@@ -2106,31 +2049,31 @@ func (u *RunwayUpsertBulk) ClearHighRunwayHeading() *RunwayUpsertBulk {
 	})
 }
 
-// SetHighRunwayDisplaced sets the "high_runway_displaced" field.
-func (u *RunwayUpsertBulk) SetHighRunwayDisplaced(v int) *RunwayUpsertBulk {
+// SetHighRunwayDisplacedThreshold sets the "high_runway_displaced_threshold" field.
+func (u *RunwayUpsertBulk) SetHighRunwayDisplacedThreshold(v int) *RunwayUpsertBulk {
 	return u.Update(func(s *RunwayUpsert) {
-		s.SetHighRunwayDisplaced(v)
+		s.SetHighRunwayDisplacedThreshold(v)
 	})
 }
 
-// AddHighRunwayDisplaced adds v to the "high_runway_displaced" field.
-func (u *RunwayUpsertBulk) AddHighRunwayDisplaced(v int) *RunwayUpsertBulk {
+// AddHighRunwayDisplacedThreshold adds v to the "high_runway_displaced_threshold" field.
+func (u *RunwayUpsertBulk) AddHighRunwayDisplacedThreshold(v int) *RunwayUpsertBulk {
 	return u.Update(func(s *RunwayUpsert) {
-		s.AddHighRunwayDisplaced(v)
+		s.AddHighRunwayDisplacedThreshold(v)
 	})
 }
 
-// UpdateHighRunwayDisplaced sets the "high_runway_displaced" field to the value that was provided on create.
-func (u *RunwayUpsertBulk) UpdateHighRunwayDisplaced() *RunwayUpsertBulk {
+// UpdateHighRunwayDisplacedThreshold sets the "high_runway_displaced_threshold" field to the value that was provided on create.
+func (u *RunwayUpsertBulk) UpdateHighRunwayDisplacedThreshold() *RunwayUpsertBulk {
 	return u.Update(func(s *RunwayUpsert) {
-		s.UpdateHighRunwayDisplaced()
+		s.UpdateHighRunwayDisplacedThreshold()
 	})
 }
 
-// ClearHighRunwayDisplaced clears the value of the "high_runway_displaced" field.
-func (u *RunwayUpsertBulk) ClearHighRunwayDisplaced() *RunwayUpsertBulk {
+// ClearHighRunwayDisplacedThreshold clears the value of the "high_runway_displaced_threshold" field.
+func (u *RunwayUpsertBulk) ClearHighRunwayDisplacedThreshold() *RunwayUpsertBulk {
 	return u.Update(func(s *RunwayUpsert) {
-		s.ClearHighRunwayDisplaced()
+		s.ClearHighRunwayDisplacedThreshold()
 	})
 }
 

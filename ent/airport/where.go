@@ -128,13 +128,6 @@ func Elevation(v int) predicate.Airport {
 	})
 }
 
-// Continent applies equality check predicate on the "continent" field. It's identical to ContinentEQ.
-func Continent(v string) predicate.Airport {
-	return predicate.Airport(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldContinent), v))
-	})
-}
-
 // Country applies equality check predicate on the "country" field. It's identical to CountryEQ.
 func Country(v string) predicate.Airport {
 	return predicate.Airport(func(s *sql.Selector) {
@@ -752,21 +745,21 @@ func ElevationNotNil() predicate.Airport {
 }
 
 // ContinentEQ applies the EQ predicate on the "continent" field.
-func ContinentEQ(v string) predicate.Airport {
+func ContinentEQ(v Continent) predicate.Airport {
 	return predicate.Airport(func(s *sql.Selector) {
 		s.Where(sql.EQ(s.C(FieldContinent), v))
 	})
 }
 
 // ContinentNEQ applies the NEQ predicate on the "continent" field.
-func ContinentNEQ(v string) predicate.Airport {
+func ContinentNEQ(v Continent) predicate.Airport {
 	return predicate.Airport(func(s *sql.Selector) {
 		s.Where(sql.NEQ(s.C(FieldContinent), v))
 	})
 }
 
 // ContinentIn applies the In predicate on the "continent" field.
-func ContinentIn(vs ...string) predicate.Airport {
+func ContinentIn(vs ...Continent) predicate.Airport {
 	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
@@ -777,76 +770,13 @@ func ContinentIn(vs ...string) predicate.Airport {
 }
 
 // ContinentNotIn applies the NotIn predicate on the "continent" field.
-func ContinentNotIn(vs ...string) predicate.Airport {
+func ContinentNotIn(vs ...Continent) predicate.Airport {
 	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
 	return predicate.Airport(func(s *sql.Selector) {
 		s.Where(sql.NotIn(s.C(FieldContinent), v...))
-	})
-}
-
-// ContinentGT applies the GT predicate on the "continent" field.
-func ContinentGT(v string) predicate.Airport {
-	return predicate.Airport(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldContinent), v))
-	})
-}
-
-// ContinentGTE applies the GTE predicate on the "continent" field.
-func ContinentGTE(v string) predicate.Airport {
-	return predicate.Airport(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldContinent), v))
-	})
-}
-
-// ContinentLT applies the LT predicate on the "continent" field.
-func ContinentLT(v string) predicate.Airport {
-	return predicate.Airport(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldContinent), v))
-	})
-}
-
-// ContinentLTE applies the LTE predicate on the "continent" field.
-func ContinentLTE(v string) predicate.Airport {
-	return predicate.Airport(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldContinent), v))
-	})
-}
-
-// ContinentContains applies the Contains predicate on the "continent" field.
-func ContinentContains(v string) predicate.Airport {
-	return predicate.Airport(func(s *sql.Selector) {
-		s.Where(sql.Contains(s.C(FieldContinent), v))
-	})
-}
-
-// ContinentHasPrefix applies the HasPrefix predicate on the "continent" field.
-func ContinentHasPrefix(v string) predicate.Airport {
-	return predicate.Airport(func(s *sql.Selector) {
-		s.Where(sql.HasPrefix(s.C(FieldContinent), v))
-	})
-}
-
-// ContinentHasSuffix applies the HasSuffix predicate on the "continent" field.
-func ContinentHasSuffix(v string) predicate.Airport {
-	return predicate.Airport(func(s *sql.Selector) {
-		s.Where(sql.HasSuffix(s.C(FieldContinent), v))
-	})
-}
-
-// ContinentEqualFold applies the EqualFold predicate on the "continent" field.
-func ContinentEqualFold(v string) predicate.Airport {
-	return predicate.Airport(func(s *sql.Selector) {
-		s.Where(sql.EqualFold(s.C(FieldContinent), v))
-	})
-}
-
-// ContinentContainsFold applies the ContainsFold predicate on the "continent" field.
-func ContinentContainsFold(v string) predicate.Airport {
-	return predicate.Airport(func(s *sql.Selector) {
-		s.Where(sql.ContainsFold(s.C(FieldContinent), v))
 	})
 }
 
@@ -1130,6 +1060,20 @@ func MunicipalityHasPrefix(v string) predicate.Airport {
 func MunicipalityHasSuffix(v string) predicate.Airport {
 	return predicate.Airport(func(s *sql.Selector) {
 		s.Where(sql.HasSuffix(s.C(FieldMunicipality), v))
+	})
+}
+
+// MunicipalityIsNil applies the IsNil predicate on the "municipality" field.
+func MunicipalityIsNil() predicate.Airport {
+	return predicate.Airport(func(s *sql.Selector) {
+		s.Where(sql.IsNull(s.C(FieldMunicipality)))
+	})
+}
+
+// MunicipalityNotNil applies the NotNil predicate on the "municipality" field.
+func MunicipalityNotNil() predicate.Airport {
+	return predicate.Airport(func(s *sql.Selector) {
+		s.Where(sql.NotNull(s.C(FieldMunicipality)))
 	})
 }
 

@@ -48,12 +48,6 @@ func (ru *RunwayUpdate) SetNillableImportFlag(b *bool) *RunwayUpdate {
 	return ru
 }
 
-// SetAirportIdentifier sets the "airport_identifier" field.
-func (ru *RunwayUpdate) SetAirportIdentifier(s string) *RunwayUpdate {
-	ru.mutation.SetAirportIdentifier(s)
-	return ru
-}
-
 // SetLength sets the "length" field.
 func (ru *RunwayUpdate) SetLength(i int) *RunwayUpdate {
 	ru.mutation.ResetLength()
@@ -186,23 +180,23 @@ func (ru *RunwayUpdate) ClearLowRunwayElevation() *RunwayUpdate {
 }
 
 // SetLowRunwayHeading sets the "low_runway_heading" field.
-func (ru *RunwayUpdate) SetLowRunwayHeading(i int) *RunwayUpdate {
+func (ru *RunwayUpdate) SetLowRunwayHeading(f float64) *RunwayUpdate {
 	ru.mutation.ResetLowRunwayHeading()
-	ru.mutation.SetLowRunwayHeading(i)
+	ru.mutation.SetLowRunwayHeading(f)
 	return ru
 }
 
 // SetNillableLowRunwayHeading sets the "low_runway_heading" field if the given value is not nil.
-func (ru *RunwayUpdate) SetNillableLowRunwayHeading(i *int) *RunwayUpdate {
-	if i != nil {
-		ru.SetLowRunwayHeading(*i)
+func (ru *RunwayUpdate) SetNillableLowRunwayHeading(f *float64) *RunwayUpdate {
+	if f != nil {
+		ru.SetLowRunwayHeading(*f)
 	}
 	return ru
 }
 
-// AddLowRunwayHeading adds i to the "low_runway_heading" field.
-func (ru *RunwayUpdate) AddLowRunwayHeading(i int) *RunwayUpdate {
-	ru.mutation.AddLowRunwayHeading(i)
+// AddLowRunwayHeading adds f to the "low_runway_heading" field.
+func (ru *RunwayUpdate) AddLowRunwayHeading(f float64) *RunwayUpdate {
+	ru.mutation.AddLowRunwayHeading(f)
 	return ru
 }
 
@@ -212,30 +206,30 @@ func (ru *RunwayUpdate) ClearLowRunwayHeading() *RunwayUpdate {
 	return ru
 }
 
-// SetLowRunwayDisplaced sets the "low_runway_displaced" field.
-func (ru *RunwayUpdate) SetLowRunwayDisplaced(i int) *RunwayUpdate {
-	ru.mutation.ResetLowRunwayDisplaced()
-	ru.mutation.SetLowRunwayDisplaced(i)
+// SetLowRunwayDisplacedThreshold sets the "low_runway_displaced_threshold" field.
+func (ru *RunwayUpdate) SetLowRunwayDisplacedThreshold(i int) *RunwayUpdate {
+	ru.mutation.ResetLowRunwayDisplacedThreshold()
+	ru.mutation.SetLowRunwayDisplacedThreshold(i)
 	return ru
 }
 
-// SetNillableLowRunwayDisplaced sets the "low_runway_displaced" field if the given value is not nil.
-func (ru *RunwayUpdate) SetNillableLowRunwayDisplaced(i *int) *RunwayUpdate {
+// SetNillableLowRunwayDisplacedThreshold sets the "low_runway_displaced_threshold" field if the given value is not nil.
+func (ru *RunwayUpdate) SetNillableLowRunwayDisplacedThreshold(i *int) *RunwayUpdate {
 	if i != nil {
-		ru.SetLowRunwayDisplaced(*i)
+		ru.SetLowRunwayDisplacedThreshold(*i)
 	}
 	return ru
 }
 
-// AddLowRunwayDisplaced adds i to the "low_runway_displaced" field.
-func (ru *RunwayUpdate) AddLowRunwayDisplaced(i int) *RunwayUpdate {
-	ru.mutation.AddLowRunwayDisplaced(i)
+// AddLowRunwayDisplacedThreshold adds i to the "low_runway_displaced_threshold" field.
+func (ru *RunwayUpdate) AddLowRunwayDisplacedThreshold(i int) *RunwayUpdate {
+	ru.mutation.AddLowRunwayDisplacedThreshold(i)
 	return ru
 }
 
-// ClearLowRunwayDisplaced clears the value of the "low_runway_displaced" field.
-func (ru *RunwayUpdate) ClearLowRunwayDisplaced() *RunwayUpdate {
-	ru.mutation.ClearLowRunwayDisplaced()
+// ClearLowRunwayDisplacedThreshold clears the value of the "low_runway_displaced_threshold" field.
+func (ru *RunwayUpdate) ClearLowRunwayDisplacedThreshold() *RunwayUpdate {
+	ru.mutation.ClearLowRunwayDisplacedThreshold()
 	return ru
 }
 
@@ -327,23 +321,23 @@ func (ru *RunwayUpdate) ClearHighRunwayElevation() *RunwayUpdate {
 }
 
 // SetHighRunwayHeading sets the "high_runway_heading" field.
-func (ru *RunwayUpdate) SetHighRunwayHeading(i int) *RunwayUpdate {
+func (ru *RunwayUpdate) SetHighRunwayHeading(f float64) *RunwayUpdate {
 	ru.mutation.ResetHighRunwayHeading()
-	ru.mutation.SetHighRunwayHeading(i)
+	ru.mutation.SetHighRunwayHeading(f)
 	return ru
 }
 
 // SetNillableHighRunwayHeading sets the "high_runway_heading" field if the given value is not nil.
-func (ru *RunwayUpdate) SetNillableHighRunwayHeading(i *int) *RunwayUpdate {
-	if i != nil {
-		ru.SetHighRunwayHeading(*i)
+func (ru *RunwayUpdate) SetNillableHighRunwayHeading(f *float64) *RunwayUpdate {
+	if f != nil {
+		ru.SetHighRunwayHeading(*f)
 	}
 	return ru
 }
 
-// AddHighRunwayHeading adds i to the "high_runway_heading" field.
-func (ru *RunwayUpdate) AddHighRunwayHeading(i int) *RunwayUpdate {
-	ru.mutation.AddHighRunwayHeading(i)
+// AddHighRunwayHeading adds f to the "high_runway_heading" field.
+func (ru *RunwayUpdate) AddHighRunwayHeading(f float64) *RunwayUpdate {
+	ru.mutation.AddHighRunwayHeading(f)
 	return ru
 }
 
@@ -353,30 +347,30 @@ func (ru *RunwayUpdate) ClearHighRunwayHeading() *RunwayUpdate {
 	return ru
 }
 
-// SetHighRunwayDisplaced sets the "high_runway_displaced" field.
-func (ru *RunwayUpdate) SetHighRunwayDisplaced(i int) *RunwayUpdate {
-	ru.mutation.ResetHighRunwayDisplaced()
-	ru.mutation.SetHighRunwayDisplaced(i)
+// SetHighRunwayDisplacedThreshold sets the "high_runway_displaced_threshold" field.
+func (ru *RunwayUpdate) SetHighRunwayDisplacedThreshold(i int) *RunwayUpdate {
+	ru.mutation.ResetHighRunwayDisplacedThreshold()
+	ru.mutation.SetHighRunwayDisplacedThreshold(i)
 	return ru
 }
 
-// SetNillableHighRunwayDisplaced sets the "high_runway_displaced" field if the given value is not nil.
-func (ru *RunwayUpdate) SetNillableHighRunwayDisplaced(i *int) *RunwayUpdate {
+// SetNillableHighRunwayDisplacedThreshold sets the "high_runway_displaced_threshold" field if the given value is not nil.
+func (ru *RunwayUpdate) SetNillableHighRunwayDisplacedThreshold(i *int) *RunwayUpdate {
 	if i != nil {
-		ru.SetHighRunwayDisplaced(*i)
+		ru.SetHighRunwayDisplacedThreshold(*i)
 	}
 	return ru
 }
 
-// AddHighRunwayDisplaced adds i to the "high_runway_displaced" field.
-func (ru *RunwayUpdate) AddHighRunwayDisplaced(i int) *RunwayUpdate {
-	ru.mutation.AddHighRunwayDisplaced(i)
+// AddHighRunwayDisplacedThreshold adds i to the "high_runway_displaced_threshold" field.
+func (ru *RunwayUpdate) AddHighRunwayDisplacedThreshold(i int) *RunwayUpdate {
+	ru.mutation.AddHighRunwayDisplacedThreshold(i)
 	return ru
 }
 
-// ClearHighRunwayDisplaced clears the value of the "high_runway_displaced" field.
-func (ru *RunwayUpdate) ClearHighRunwayDisplaced() *RunwayUpdate {
-	ru.mutation.ClearHighRunwayDisplaced()
+// ClearHighRunwayDisplacedThreshold clears the value of the "high_runway_displaced_threshold" field.
+func (ru *RunwayUpdate) ClearHighRunwayDisplacedThreshold() *RunwayUpdate {
+	ru.mutation.ClearHighRunwayDisplacedThreshold()
 	return ru
 }
 
@@ -494,13 +488,6 @@ func (ru *RunwayUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Type:   field.TypeBool,
 			Value:  value,
 			Column: runway.FieldImportFlag,
-		})
-	}
-	if value, ok := ru.mutation.AirportIdentifier(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: runway.FieldAirportIdentifier,
 		})
 	}
 	if value, ok := ru.mutation.Length(); ok {
@@ -621,42 +608,42 @@ func (ru *RunwayUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	if value, ok := ru.mutation.LowRunwayHeading(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
+			Type:   field.TypeFloat64,
 			Value:  value,
 			Column: runway.FieldLowRunwayHeading,
 		})
 	}
 	if value, ok := ru.mutation.AddedLowRunwayHeading(); ok {
 		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
+			Type:   field.TypeFloat64,
 			Value:  value,
 			Column: runway.FieldLowRunwayHeading,
 		})
 	}
 	if ru.mutation.LowRunwayHeadingCleared() {
 		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
+			Type:   field.TypeFloat64,
 			Column: runway.FieldLowRunwayHeading,
 		})
 	}
-	if value, ok := ru.mutation.LowRunwayDisplaced(); ok {
+	if value, ok := ru.mutation.LowRunwayDisplacedThreshold(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeInt,
 			Value:  value,
-			Column: runway.FieldLowRunwayDisplaced,
+			Column: runway.FieldLowRunwayDisplacedThreshold,
 		})
 	}
-	if value, ok := ru.mutation.AddedLowRunwayDisplaced(); ok {
+	if value, ok := ru.mutation.AddedLowRunwayDisplacedThreshold(); ok {
 		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
 			Type:   field.TypeInt,
 			Value:  value,
-			Column: runway.FieldLowRunwayDisplaced,
+			Column: runway.FieldLowRunwayDisplacedThreshold,
 		})
 	}
-	if ru.mutation.LowRunwayDisplacedCleared() {
+	if ru.mutation.LowRunwayDisplacedThresholdCleared() {
 		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
 			Type:   field.TypeInt,
-			Column: runway.FieldLowRunwayDisplaced,
+			Column: runway.FieldLowRunwayDisplacedThreshold,
 		})
 	}
 	if value, ok := ru.mutation.HighRunwayIdentifier(); ok {
@@ -728,42 +715,42 @@ func (ru *RunwayUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	if value, ok := ru.mutation.HighRunwayHeading(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
+			Type:   field.TypeFloat64,
 			Value:  value,
 			Column: runway.FieldHighRunwayHeading,
 		})
 	}
 	if value, ok := ru.mutation.AddedHighRunwayHeading(); ok {
 		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
+			Type:   field.TypeFloat64,
 			Value:  value,
 			Column: runway.FieldHighRunwayHeading,
 		})
 	}
 	if ru.mutation.HighRunwayHeadingCleared() {
 		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
+			Type:   field.TypeFloat64,
 			Column: runway.FieldHighRunwayHeading,
 		})
 	}
-	if value, ok := ru.mutation.HighRunwayDisplaced(); ok {
+	if value, ok := ru.mutation.HighRunwayDisplacedThreshold(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeInt,
 			Value:  value,
-			Column: runway.FieldHighRunwayDisplaced,
+			Column: runway.FieldHighRunwayDisplacedThreshold,
 		})
 	}
-	if value, ok := ru.mutation.AddedHighRunwayDisplaced(); ok {
+	if value, ok := ru.mutation.AddedHighRunwayDisplacedThreshold(); ok {
 		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
 			Type:   field.TypeInt,
 			Value:  value,
-			Column: runway.FieldHighRunwayDisplaced,
+			Column: runway.FieldHighRunwayDisplacedThreshold,
 		})
 	}
-	if ru.mutation.HighRunwayDisplacedCleared() {
+	if ru.mutation.HighRunwayDisplacedThresholdCleared() {
 		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
 			Type:   field.TypeInt,
-			Column: runway.FieldHighRunwayDisplaced,
+			Column: runway.FieldHighRunwayDisplacedThreshold,
 		})
 	}
 	if ru.mutation.AirportCleared() {
@@ -837,12 +824,6 @@ func (ruo *RunwayUpdateOne) SetNillableImportFlag(b *bool) *RunwayUpdateOne {
 	if b != nil {
 		ruo.SetImportFlag(*b)
 	}
-	return ruo
-}
-
-// SetAirportIdentifier sets the "airport_identifier" field.
-func (ruo *RunwayUpdateOne) SetAirportIdentifier(s string) *RunwayUpdateOne {
-	ruo.mutation.SetAirportIdentifier(s)
 	return ruo
 }
 
@@ -978,23 +959,23 @@ func (ruo *RunwayUpdateOne) ClearLowRunwayElevation() *RunwayUpdateOne {
 }
 
 // SetLowRunwayHeading sets the "low_runway_heading" field.
-func (ruo *RunwayUpdateOne) SetLowRunwayHeading(i int) *RunwayUpdateOne {
+func (ruo *RunwayUpdateOne) SetLowRunwayHeading(f float64) *RunwayUpdateOne {
 	ruo.mutation.ResetLowRunwayHeading()
-	ruo.mutation.SetLowRunwayHeading(i)
+	ruo.mutation.SetLowRunwayHeading(f)
 	return ruo
 }
 
 // SetNillableLowRunwayHeading sets the "low_runway_heading" field if the given value is not nil.
-func (ruo *RunwayUpdateOne) SetNillableLowRunwayHeading(i *int) *RunwayUpdateOne {
-	if i != nil {
-		ruo.SetLowRunwayHeading(*i)
+func (ruo *RunwayUpdateOne) SetNillableLowRunwayHeading(f *float64) *RunwayUpdateOne {
+	if f != nil {
+		ruo.SetLowRunwayHeading(*f)
 	}
 	return ruo
 }
 
-// AddLowRunwayHeading adds i to the "low_runway_heading" field.
-func (ruo *RunwayUpdateOne) AddLowRunwayHeading(i int) *RunwayUpdateOne {
-	ruo.mutation.AddLowRunwayHeading(i)
+// AddLowRunwayHeading adds f to the "low_runway_heading" field.
+func (ruo *RunwayUpdateOne) AddLowRunwayHeading(f float64) *RunwayUpdateOne {
+	ruo.mutation.AddLowRunwayHeading(f)
 	return ruo
 }
 
@@ -1004,30 +985,30 @@ func (ruo *RunwayUpdateOne) ClearLowRunwayHeading() *RunwayUpdateOne {
 	return ruo
 }
 
-// SetLowRunwayDisplaced sets the "low_runway_displaced" field.
-func (ruo *RunwayUpdateOne) SetLowRunwayDisplaced(i int) *RunwayUpdateOne {
-	ruo.mutation.ResetLowRunwayDisplaced()
-	ruo.mutation.SetLowRunwayDisplaced(i)
+// SetLowRunwayDisplacedThreshold sets the "low_runway_displaced_threshold" field.
+func (ruo *RunwayUpdateOne) SetLowRunwayDisplacedThreshold(i int) *RunwayUpdateOne {
+	ruo.mutation.ResetLowRunwayDisplacedThreshold()
+	ruo.mutation.SetLowRunwayDisplacedThreshold(i)
 	return ruo
 }
 
-// SetNillableLowRunwayDisplaced sets the "low_runway_displaced" field if the given value is not nil.
-func (ruo *RunwayUpdateOne) SetNillableLowRunwayDisplaced(i *int) *RunwayUpdateOne {
+// SetNillableLowRunwayDisplacedThreshold sets the "low_runway_displaced_threshold" field if the given value is not nil.
+func (ruo *RunwayUpdateOne) SetNillableLowRunwayDisplacedThreshold(i *int) *RunwayUpdateOne {
 	if i != nil {
-		ruo.SetLowRunwayDisplaced(*i)
+		ruo.SetLowRunwayDisplacedThreshold(*i)
 	}
 	return ruo
 }
 
-// AddLowRunwayDisplaced adds i to the "low_runway_displaced" field.
-func (ruo *RunwayUpdateOne) AddLowRunwayDisplaced(i int) *RunwayUpdateOne {
-	ruo.mutation.AddLowRunwayDisplaced(i)
+// AddLowRunwayDisplacedThreshold adds i to the "low_runway_displaced_threshold" field.
+func (ruo *RunwayUpdateOne) AddLowRunwayDisplacedThreshold(i int) *RunwayUpdateOne {
+	ruo.mutation.AddLowRunwayDisplacedThreshold(i)
 	return ruo
 }
 
-// ClearLowRunwayDisplaced clears the value of the "low_runway_displaced" field.
-func (ruo *RunwayUpdateOne) ClearLowRunwayDisplaced() *RunwayUpdateOne {
-	ruo.mutation.ClearLowRunwayDisplaced()
+// ClearLowRunwayDisplacedThreshold clears the value of the "low_runway_displaced_threshold" field.
+func (ruo *RunwayUpdateOne) ClearLowRunwayDisplacedThreshold() *RunwayUpdateOne {
+	ruo.mutation.ClearLowRunwayDisplacedThreshold()
 	return ruo
 }
 
@@ -1119,23 +1100,23 @@ func (ruo *RunwayUpdateOne) ClearHighRunwayElevation() *RunwayUpdateOne {
 }
 
 // SetHighRunwayHeading sets the "high_runway_heading" field.
-func (ruo *RunwayUpdateOne) SetHighRunwayHeading(i int) *RunwayUpdateOne {
+func (ruo *RunwayUpdateOne) SetHighRunwayHeading(f float64) *RunwayUpdateOne {
 	ruo.mutation.ResetHighRunwayHeading()
-	ruo.mutation.SetHighRunwayHeading(i)
+	ruo.mutation.SetHighRunwayHeading(f)
 	return ruo
 }
 
 // SetNillableHighRunwayHeading sets the "high_runway_heading" field if the given value is not nil.
-func (ruo *RunwayUpdateOne) SetNillableHighRunwayHeading(i *int) *RunwayUpdateOne {
-	if i != nil {
-		ruo.SetHighRunwayHeading(*i)
+func (ruo *RunwayUpdateOne) SetNillableHighRunwayHeading(f *float64) *RunwayUpdateOne {
+	if f != nil {
+		ruo.SetHighRunwayHeading(*f)
 	}
 	return ruo
 }
 
-// AddHighRunwayHeading adds i to the "high_runway_heading" field.
-func (ruo *RunwayUpdateOne) AddHighRunwayHeading(i int) *RunwayUpdateOne {
-	ruo.mutation.AddHighRunwayHeading(i)
+// AddHighRunwayHeading adds f to the "high_runway_heading" field.
+func (ruo *RunwayUpdateOne) AddHighRunwayHeading(f float64) *RunwayUpdateOne {
+	ruo.mutation.AddHighRunwayHeading(f)
 	return ruo
 }
 
@@ -1145,30 +1126,30 @@ func (ruo *RunwayUpdateOne) ClearHighRunwayHeading() *RunwayUpdateOne {
 	return ruo
 }
 
-// SetHighRunwayDisplaced sets the "high_runway_displaced" field.
-func (ruo *RunwayUpdateOne) SetHighRunwayDisplaced(i int) *RunwayUpdateOne {
-	ruo.mutation.ResetHighRunwayDisplaced()
-	ruo.mutation.SetHighRunwayDisplaced(i)
+// SetHighRunwayDisplacedThreshold sets the "high_runway_displaced_threshold" field.
+func (ruo *RunwayUpdateOne) SetHighRunwayDisplacedThreshold(i int) *RunwayUpdateOne {
+	ruo.mutation.ResetHighRunwayDisplacedThreshold()
+	ruo.mutation.SetHighRunwayDisplacedThreshold(i)
 	return ruo
 }
 
-// SetNillableHighRunwayDisplaced sets the "high_runway_displaced" field if the given value is not nil.
-func (ruo *RunwayUpdateOne) SetNillableHighRunwayDisplaced(i *int) *RunwayUpdateOne {
+// SetNillableHighRunwayDisplacedThreshold sets the "high_runway_displaced_threshold" field if the given value is not nil.
+func (ruo *RunwayUpdateOne) SetNillableHighRunwayDisplacedThreshold(i *int) *RunwayUpdateOne {
 	if i != nil {
-		ruo.SetHighRunwayDisplaced(*i)
+		ruo.SetHighRunwayDisplacedThreshold(*i)
 	}
 	return ruo
 }
 
-// AddHighRunwayDisplaced adds i to the "high_runway_displaced" field.
-func (ruo *RunwayUpdateOne) AddHighRunwayDisplaced(i int) *RunwayUpdateOne {
-	ruo.mutation.AddHighRunwayDisplaced(i)
+// AddHighRunwayDisplacedThreshold adds i to the "high_runway_displaced_threshold" field.
+func (ruo *RunwayUpdateOne) AddHighRunwayDisplacedThreshold(i int) *RunwayUpdateOne {
+	ruo.mutation.AddHighRunwayDisplacedThreshold(i)
 	return ruo
 }
 
-// ClearHighRunwayDisplaced clears the value of the "high_runway_displaced" field.
-func (ruo *RunwayUpdateOne) ClearHighRunwayDisplaced() *RunwayUpdateOne {
-	ruo.mutation.ClearHighRunwayDisplaced()
+// ClearHighRunwayDisplacedThreshold clears the value of the "high_runway_displaced_threshold" field.
+func (ruo *RunwayUpdateOne) ClearHighRunwayDisplacedThreshold() *RunwayUpdateOne {
+	ruo.mutation.ClearHighRunwayDisplacedThreshold()
 	return ruo
 }
 
@@ -1318,13 +1299,6 @@ func (ruo *RunwayUpdateOne) sqlSave(ctx context.Context) (_node *Runway, err err
 			Column: runway.FieldImportFlag,
 		})
 	}
-	if value, ok := ruo.mutation.AirportIdentifier(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: runway.FieldAirportIdentifier,
-		})
-	}
 	if value, ok := ruo.mutation.Length(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeInt,
@@ -1443,42 +1417,42 @@ func (ruo *RunwayUpdateOne) sqlSave(ctx context.Context) (_node *Runway, err err
 	}
 	if value, ok := ruo.mutation.LowRunwayHeading(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
+			Type:   field.TypeFloat64,
 			Value:  value,
 			Column: runway.FieldLowRunwayHeading,
 		})
 	}
 	if value, ok := ruo.mutation.AddedLowRunwayHeading(); ok {
 		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
+			Type:   field.TypeFloat64,
 			Value:  value,
 			Column: runway.FieldLowRunwayHeading,
 		})
 	}
 	if ruo.mutation.LowRunwayHeadingCleared() {
 		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
+			Type:   field.TypeFloat64,
 			Column: runway.FieldLowRunwayHeading,
 		})
 	}
-	if value, ok := ruo.mutation.LowRunwayDisplaced(); ok {
+	if value, ok := ruo.mutation.LowRunwayDisplacedThreshold(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeInt,
 			Value:  value,
-			Column: runway.FieldLowRunwayDisplaced,
+			Column: runway.FieldLowRunwayDisplacedThreshold,
 		})
 	}
-	if value, ok := ruo.mutation.AddedLowRunwayDisplaced(); ok {
+	if value, ok := ruo.mutation.AddedLowRunwayDisplacedThreshold(); ok {
 		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
 			Type:   field.TypeInt,
 			Value:  value,
-			Column: runway.FieldLowRunwayDisplaced,
+			Column: runway.FieldLowRunwayDisplacedThreshold,
 		})
 	}
-	if ruo.mutation.LowRunwayDisplacedCleared() {
+	if ruo.mutation.LowRunwayDisplacedThresholdCleared() {
 		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
 			Type:   field.TypeInt,
-			Column: runway.FieldLowRunwayDisplaced,
+			Column: runway.FieldLowRunwayDisplacedThreshold,
 		})
 	}
 	if value, ok := ruo.mutation.HighRunwayIdentifier(); ok {
@@ -1550,42 +1524,42 @@ func (ruo *RunwayUpdateOne) sqlSave(ctx context.Context) (_node *Runway, err err
 	}
 	if value, ok := ruo.mutation.HighRunwayHeading(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
+			Type:   field.TypeFloat64,
 			Value:  value,
 			Column: runway.FieldHighRunwayHeading,
 		})
 	}
 	if value, ok := ruo.mutation.AddedHighRunwayHeading(); ok {
 		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
+			Type:   field.TypeFloat64,
 			Value:  value,
 			Column: runway.FieldHighRunwayHeading,
 		})
 	}
 	if ruo.mutation.HighRunwayHeadingCleared() {
 		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
+			Type:   field.TypeFloat64,
 			Column: runway.FieldHighRunwayHeading,
 		})
 	}
-	if value, ok := ruo.mutation.HighRunwayDisplaced(); ok {
+	if value, ok := ruo.mutation.HighRunwayDisplacedThreshold(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeInt,
 			Value:  value,
-			Column: runway.FieldHighRunwayDisplaced,
+			Column: runway.FieldHighRunwayDisplacedThreshold,
 		})
 	}
-	if value, ok := ruo.mutation.AddedHighRunwayDisplaced(); ok {
+	if value, ok := ruo.mutation.AddedHighRunwayDisplacedThreshold(); ok {
 		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
 			Type:   field.TypeInt,
 			Value:  value,
-			Column: runway.FieldHighRunwayDisplaced,
+			Column: runway.FieldHighRunwayDisplacedThreshold,
 		})
 	}
-	if ruo.mutation.HighRunwayDisplacedCleared() {
+	if ruo.mutation.HighRunwayDisplacedThresholdCleared() {
 		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
 			Type:   field.TypeInt,
-			Column: runway.FieldHighRunwayDisplaced,
+			Column: runway.FieldHighRunwayDisplacedThreshold,
 		})
 	}
 	if ruo.mutation.AirportCleared() {

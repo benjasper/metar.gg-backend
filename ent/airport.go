@@ -20,39 +20,39 @@ type Airport struct {
 	Hash string `json:"hash,omitempty"`
 	// ImportFlag holds the value of the "import_flag" field.
 	ImportFlag bool `json:"import_flag,omitempty"`
-	// Identifier holds the value of the "identifier" field.
+	// This will be the ICAO code if available. Otherwise, it will be a local airport code (if no conflict), or if nothing else is available, an internally-generated code starting with the ISO2 country code, followed by a dash and a four-digit number.
 	Identifier string `json:"identifier,omitempty"`
-	// Type holds the value of the "type" field.
+	// Type of airport.
 	Type airport.Type `json:"type,omitempty"`
-	// Name holds the value of the "name" field.
+	// The official airport name, including "Airport", "Airstrip", etc.
 	Name string `json:"name,omitempty"`
-	// Latitude holds the value of the "latitude" field.
+	// Latitude of the airport in decimal degrees (positive is north).
 	Latitude float64 `json:"latitude,omitempty"`
-	// Longitude holds the value of the "longitude" field.
+	// Longitude of the airport in decimal degrees (positive is east).
 	Longitude float64 `json:"longitude,omitempty"`
-	// Elevation holds the value of the "elevation" field.
+	// Elevation of the airport, in feet.
 	Elevation *int `json:"elevation,omitempty"`
-	// Continent holds the value of the "continent" field.
-	Continent string `json:"continent,omitempty"`
+	// Where the airport is (primarily) located.
+	Continent airport.Continent `json:"continent,omitempty"`
 	// Country holds the value of the "country" field.
 	Country string `json:"country,omitempty"`
 	// Region holds the value of the "region" field.
 	Region string `json:"region,omitempty"`
-	// Municipality holds the value of the "municipality" field.
-	Municipality string `json:"municipality,omitempty"`
-	// ScheduledService holds the value of the "scheduled_service" field.
+	// The primary municipality that the airport serves (when available). Note that this is not necessarily the municipality where the airport is physically located.
+	Municipality *string `json:"municipality,omitempty"`
+	// Whether the airport has scheduled airline service.
 	ScheduledService bool `json:"scheduled_service,omitempty"`
-	// GpsCode holds the value of the "gps_code" field.
+	// The code that an aviation GPS database (such as Jeppesen's or Garmin's) would normally use for the airport. This will always be the ICAO code if one exists. Note that, unlike the ident column, this is not guaranteed to be globally unique.
 	GpsCode *string `json:"gps_code,omitempty"`
-	// IataCode holds the value of the "iata_code" field.
+	// The three-letter IATA code for the airport.
 	IataCode *string `json:"iata_code,omitempty"`
-	// LocalCode holds the value of the "local_code" field.
+	// The local country code for the airport, if different from the gps_code and iata_code fields (used mainly for US airports).
 	LocalCode *string `json:"local_code,omitempty"`
-	// Website holds the value of the "website" field.
+	// The URL of the airport's website.
 	Website *string `json:"website,omitempty"`
-	// Wikipedia holds the value of the "wikipedia" field.
+	// The URL of the airport's Wikipedia page.
 	Wikipedia *string `json:"wikipedia,omitempty"`
-	// Keywords holds the value of the "keywords" field.
+	// Extra keywords/phrases to assist with search. May include former names for the airport, alternate codes, names in other languages, nearby tourist destinations, etc.
 	Keywords []string `json:"keywords,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the AirportQuery when eager-loading is set.
@@ -61,7 +61,7 @@ type Airport struct {
 
 // AirportEdges holds the relations/edges for other nodes in the graph.
 type AirportEdges struct {
-	// Runways holds the value of the runways edge.
+	// Runways at the airport.
 	Runways []*Runway `json:"runways,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
@@ -170,7 +170,7 @@ func (a *Airport) assignValues(columns []string, values []any) error {
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field continent", values[i])
 			} else if value.Valid {
-				a.Continent = value.String
+				a.Continent = airport.Continent(value.String)
 			}
 		case airport.FieldCountry:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -188,7 +188,8 @@ func (a *Airport) assignValues(columns []string, values []any) error {
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field municipality", values[i])
 			} else if value.Valid {
-				a.Municipality = value.String
+				a.Municipality = new(string)
+				*a.Municipality = value.String
 			}
 		case airport.FieldScheduledService:
 			if value, ok := values[i].(*sql.NullBool); !ok {
@@ -299,7 +300,7 @@ func (a *Airport) String() string {
 	}
 	builder.WriteString(", ")
 	builder.WriteString("continent=")
-	builder.WriteString(a.Continent)
+	builder.WriteString(fmt.Sprintf("%v", a.Continent))
 	builder.WriteString(", ")
 	builder.WriteString("country=")
 	builder.WriteString(a.Country)
@@ -307,8 +308,10 @@ func (a *Airport) String() string {
 	builder.WriteString("region=")
 	builder.WriteString(a.Region)
 	builder.WriteString(", ")
-	builder.WriteString("municipality=")
-	builder.WriteString(a.Municipality)
+	if v := a.Municipality; v != nil {
+		builder.WriteString("municipality=")
+		builder.WriteString(*v)
+	}
 	builder.WriteString(", ")
 	builder.WriteString("scheduled_service=")
 	builder.WriteString(fmt.Sprintf("%v", a.ScheduledService))

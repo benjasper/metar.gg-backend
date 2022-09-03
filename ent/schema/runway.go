@@ -14,26 +14,25 @@ type Runway struct {
 // Fields of the Runway.
 func (Runway) Fields() []ent.Field {
 	return []ent.Field{
-		field.String("airport_identifier"),
-		field.Int("length"),
-		field.Int("width"),
-		field.String("surface"),
-		field.Bool("lighted"),
-		field.Bool("closed"),
+		field.Int("length").Comment("Length of the runway in feet."),
+		field.Int("width").Comment("Width of the runway surface in feet."),
+		field.String("surface").Comment("Code for the runway surface type. This is not yet a controlled vocabulary, but probably will be soon. Some common values include \"ASP\" (asphalt), \"TURF\" (turf), \"CON\" (concrete), \"GRS\" (grass), \"GRE\" (gravel), \"WATER\" (water), and \"UNK\" (unknown)."),
+		field.Bool("lighted").Comment("Whether the runway is lighted at night or not."),
+		field.Bool("closed").Comment("Whether the runway is currently closed or not."),
 
-		field.String("low_runway_identifier").Comment("Low numbered runway identifier, like 18R"),
-		field.Float("low_runway_latitude").Optional().Nillable(),
-		field.Float("low_runway_longitude").Optional().Nillable(),
-		field.Int("low_runway_elevation").Optional().Nillable(),
-		field.Int("low_runway_heading").Optional().Nillable(),
-		field.Int("low_runway_displaced").Optional().Nillable(),
+		field.String("low_runway_identifier").Comment("Low numbered runway identifier, like 18R."),
+		field.Float("low_runway_latitude").Optional().Nillable().Comment("Latitude of the low numbered runway end, in decimal degrees (positive is north)."),
+		field.Float("low_runway_longitude").Optional().Nillable().Comment("Longitude of the low numbered runway end, in decimal degrees (positive is east)."),
+		field.Int("low_runway_elevation").Optional().Nillable().Comment("Elevation of the low numbered runway end, in feet."),
+		field.Float("low_runway_heading").Optional().Nillable().Comment("True (not magnetic) heading of the lower numbered runway."),
+		field.Int("low_runway_displaced_threshold").Optional().Nillable().Comment("Displaced threshold length of the lower numbered runway end, in feet."),
 
-		field.String("high_runway_identifier").Comment("High numbered runway identifier, like 18R"),
-		field.Float("high_runway_latitude").Optional().Nillable(),
-		field.Float("high_runway_longitude").Optional().Nillable(),
-		field.Int("high_runway_elevation").Optional().Nillable(),
-		field.Int("high_runway_heading").Optional().Nillable(),
-		field.Int("high_runway_displaced").Optional().Nillable(),
+		field.String("high_runway_identifier").Comment("High numbered runway identifier, like 01L."),
+		field.Float("high_runway_latitude").Optional().Nillable().Comment("Latitude of the high numbered runway end, in decimal degrees (positive is north)."),
+		field.Float("high_runway_longitude").Optional().Nillable().Comment("Longitude of the high numbered runway end, in decimal degrees (positive is east)."),
+		field.Int("high_runway_elevation").Optional().Nillable().Comment("Elevation of the high numbered runway end, in feet."),
+		field.Float("high_runway_heading").Optional().Nillable().Comment("True (not magnetic) heading of the higher numbered runway."),
+		field.Int("high_runway_displaced_threshold").Optional().Nillable().Comment("Displaced threshold length of the higher numbered runway end, in feet."),
 	}
 }
 

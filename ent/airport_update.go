@@ -120,8 +120,8 @@ func (au *AirportUpdate) ClearElevation() *AirportUpdate {
 }
 
 // SetContinent sets the "continent" field.
-func (au *AirportUpdate) SetContinent(s string) *AirportUpdate {
-	au.mutation.SetContinent(s)
+func (au *AirportUpdate) SetContinent(a airport.Continent) *AirportUpdate {
+	au.mutation.SetContinent(a)
 	return au
 }
 
@@ -140,6 +140,20 @@ func (au *AirportUpdate) SetRegion(s string) *AirportUpdate {
 // SetMunicipality sets the "municipality" field.
 func (au *AirportUpdate) SetMunicipality(s string) *AirportUpdate {
 	au.mutation.SetMunicipality(s)
+	return au
+}
+
+// SetNillableMunicipality sets the "municipality" field if the given value is not nil.
+func (au *AirportUpdate) SetNillableMunicipality(s *string) *AirportUpdate {
+	if s != nil {
+		au.SetMunicipality(*s)
+	}
+	return au
+}
+
+// ClearMunicipality clears the value of the "municipality" field.
+func (au *AirportUpdate) ClearMunicipality() *AirportUpdate {
+	au.mutation.ClearMunicipality()
 	return au
 }
 
@@ -363,6 +377,11 @@ func (au *AirportUpdate) check() error {
 			return &ValidationError{Name: "type", err: fmt.Errorf(`ent: validator failed for field "Airport.type": %w`, err)}
 		}
 	}
+	if v, ok := au.mutation.Continent(); ok {
+		if err := airport.ContinentValidator(v); err != nil {
+			return &ValidationError{Name: "continent", err: fmt.Errorf(`ent: validator failed for field "Airport.continent": %w`, err)}
+		}
+	}
 	return nil
 }
 
@@ -469,7 +488,7 @@ func (au *AirportUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	if value, ok := au.mutation.Continent(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
+			Type:   field.TypeEnum,
 			Value:  value,
 			Column: airport.FieldContinent,
 		})
@@ -492,6 +511,12 @@ func (au *AirportUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
 			Value:  value,
+			Column: airport.FieldMunicipality,
+		})
+	}
+	if au.mutation.MunicipalityCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
 			Column: airport.FieldMunicipality,
 		})
 	}
@@ -739,8 +764,8 @@ func (auo *AirportUpdateOne) ClearElevation() *AirportUpdateOne {
 }
 
 // SetContinent sets the "continent" field.
-func (auo *AirportUpdateOne) SetContinent(s string) *AirportUpdateOne {
-	auo.mutation.SetContinent(s)
+func (auo *AirportUpdateOne) SetContinent(a airport.Continent) *AirportUpdateOne {
+	auo.mutation.SetContinent(a)
 	return auo
 }
 
@@ -759,6 +784,20 @@ func (auo *AirportUpdateOne) SetRegion(s string) *AirportUpdateOne {
 // SetMunicipality sets the "municipality" field.
 func (auo *AirportUpdateOne) SetMunicipality(s string) *AirportUpdateOne {
 	auo.mutation.SetMunicipality(s)
+	return auo
+}
+
+// SetNillableMunicipality sets the "municipality" field if the given value is not nil.
+func (auo *AirportUpdateOne) SetNillableMunicipality(s *string) *AirportUpdateOne {
+	if s != nil {
+		auo.SetMunicipality(*s)
+	}
+	return auo
+}
+
+// ClearMunicipality clears the value of the "municipality" field.
+func (auo *AirportUpdateOne) ClearMunicipality() *AirportUpdateOne {
+	auo.mutation.ClearMunicipality()
 	return auo
 }
 
@@ -995,6 +1034,11 @@ func (auo *AirportUpdateOne) check() error {
 			return &ValidationError{Name: "type", err: fmt.Errorf(`ent: validator failed for field "Airport.type": %w`, err)}
 		}
 	}
+	if v, ok := auo.mutation.Continent(); ok {
+		if err := airport.ContinentValidator(v); err != nil {
+			return &ValidationError{Name: "continent", err: fmt.Errorf(`ent: validator failed for field "Airport.continent": %w`, err)}
+		}
+	}
 	return nil
 }
 
@@ -1118,7 +1162,7 @@ func (auo *AirportUpdateOne) sqlSave(ctx context.Context) (_node *Airport, err e
 	}
 	if value, ok := auo.mutation.Continent(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
+			Type:   field.TypeEnum,
 			Value:  value,
 			Column: airport.FieldContinent,
 		})
@@ -1141,6 +1185,12 @@ func (auo *AirportUpdateOne) sqlSave(ctx context.Context) (_node *Airport, err e
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
 			Value:  value,
+			Column: airport.FieldMunicipality,
+		})
+	}
+	if auo.mutation.MunicipalityCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
 			Column: airport.FieldMunicipality,
 		})
 	}

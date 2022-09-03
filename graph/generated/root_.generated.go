@@ -82,30 +82,29 @@ type ComplexityRoot struct {
 	}
 
 	Query struct {
-		GetAirports func(childComplexity int, after *ent.Cursor, first *int, before *ent.Cursor, last *int) int
+		GetAirports func(childComplexity int, after *ent.Cursor, first *int, before *ent.Cursor, last *int, identifier *string) int
 	}
 
 	Runway struct {
-		Airport              func(childComplexity int) int
-		AirportIdentifier    func(childComplexity int) int
-		Closed               func(childComplexity int) int
-		HighRunwayDisplaced  func(childComplexity int) int
-		HighRunwayElevation  func(childComplexity int) int
-		HighRunwayHeading    func(childComplexity int) int
-		HighRunwayIdentifier func(childComplexity int) int
-		HighRunwayLatitude   func(childComplexity int) int
-		HighRunwayLongitude  func(childComplexity int) int
-		ID                   func(childComplexity int) int
-		Length               func(childComplexity int) int
-		Lighted              func(childComplexity int) int
-		LowRunwayDisplaced   func(childComplexity int) int
-		LowRunwayElevation   func(childComplexity int) int
-		LowRunwayHeading     func(childComplexity int) int
-		LowRunwayIdentifier  func(childComplexity int) int
-		LowRunwayLatitude    func(childComplexity int) int
-		LowRunwayLongitude   func(childComplexity int) int
-		Surface              func(childComplexity int) int
-		Width                func(childComplexity int) int
+		Airport                      func(childComplexity int) int
+		Closed                       func(childComplexity int) int
+		HighRunwayDisplacedThreshold func(childComplexity int) int
+		HighRunwayElevation          func(childComplexity int) int
+		HighRunwayHeading            func(childComplexity int) int
+		HighRunwayIdentifier         func(childComplexity int) int
+		HighRunwayLatitude           func(childComplexity int) int
+		HighRunwayLongitude          func(childComplexity int) int
+		ID                           func(childComplexity int) int
+		Length                       func(childComplexity int) int
+		Lighted                      func(childComplexity int) int
+		LowRunwayDisplacedThreshold  func(childComplexity int) int
+		LowRunwayElevation           func(childComplexity int) int
+		LowRunwayHeading             func(childComplexity int) int
+		LowRunwayIdentifier          func(childComplexity int) int
+		LowRunwayLatitude            func(childComplexity int) int
+		LowRunwayLongitude           func(childComplexity int) int
+		Surface                      func(childComplexity int) int
+		Width                        func(childComplexity int) int
 	}
 }
 
@@ -337,7 +336,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Query.GetAirports(childComplexity, args["after"].(*ent.Cursor), args["first"].(*int), args["before"].(*ent.Cursor), args["last"].(*int)), true
+		return e.complexity.Query.GetAirports(childComplexity, args["after"].(*ent.Cursor), args["first"].(*int), args["before"].(*ent.Cursor), args["last"].(*int), args["identifier"].(*string)), true
 
 	case "Runway.airport":
 		if e.complexity.Runway.Airport == nil {
@@ -346,13 +345,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Runway.Airport(childComplexity), true
 
-	case "Runway.airportIdentifier":
-		if e.complexity.Runway.AirportIdentifier == nil {
-			break
-		}
-
-		return e.complexity.Runway.AirportIdentifier(childComplexity), true
-
 	case "Runway.closed":
 		if e.complexity.Runway.Closed == nil {
 			break
@@ -360,12 +352,12 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Runway.Closed(childComplexity), true
 
-	case "Runway.highRunwayDisplaced":
-		if e.complexity.Runway.HighRunwayDisplaced == nil {
+	case "Runway.highRunwayDisplacedThreshold":
+		if e.complexity.Runway.HighRunwayDisplacedThreshold == nil {
 			break
 		}
 
-		return e.complexity.Runway.HighRunwayDisplaced(childComplexity), true
+		return e.complexity.Runway.HighRunwayDisplacedThreshold(childComplexity), true
 
 	case "Runway.highRunwayElevation":
 		if e.complexity.Runway.HighRunwayElevation == nil {
@@ -423,12 +415,12 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Runway.Lighted(childComplexity), true
 
-	case "Runway.lowRunwayDisplaced":
-		if e.complexity.Runway.LowRunwayDisplaced == nil {
+	case "Runway.lowRunwayDisplacedThreshold":
+		if e.complexity.Runway.LowRunwayDisplacedThreshold == nil {
 			break
 		}
 
-		return e.complexity.Runway.LowRunwayDisplaced(childComplexity), true
+		return e.complexity.Runway.LowRunwayDisplacedThreshold(childComplexity), true
 
 	case "Runway.lowRunwayElevation":
 		if e.complexity.Runway.LowRunwayElevation == nil {
@@ -535,24 +527,49 @@ var sources = []*ast.Source{
 directive @goModel(model: String, models: [String!]) on OBJECT | INPUT_OBJECT | SCALAR | ENUM | INTERFACE | UNION
 type Airport {
   id: ID!
+  """This will be the ICAO code if available. Otherwise, it will be a local airport code (if no conflict), or if nothing else is available, an internally-generated code starting with the ISO2 country code, followed by a dash and a four-digit number."""
   identifier: String!
+  """Type of airport."""
   type: AirportType!
+  """The official airport name, including "Airport", "Airstrip", etc."""
   name: String!
+  """Latitude of the airport in decimal degrees (positive is north)."""
   latitude: Float!
+  """Longitude of the airport in decimal degrees (positive is east)."""
   longitude: Float!
+  """Elevation of the airport, in feet."""
   elevation: Int
-  continent: String!
+  """Where the airport is (primarily) located."""
+  continent: AirportContinent!
   country: String!
   region: String!
-  municipality: String!
+  """The primary municipality that the airport serves (when available). Note that this is not necessarily the municipality where the airport is physically located."""
+  municipality: String
+  """Whether the airport has scheduled airline service."""
   scheduledService: Boolean!
+  """The code that an aviation GPS database (such as Jeppesen's or Garmin's) would normally use for the airport. This will always be the ICAO code if one exists. Note that, unlike the ident column, this is not guaranteed to be globally unique."""
   gpsCode: String
+  """The three-letter IATA code for the airport."""
   iataCode: String
+  """The local country code for the airport, if different from the gps_code and iata_code fields (used mainly for US airports)."""
   localCode: String
+  """The URL of the airport's website."""
   website: String
+  """The URL of the airport's Wikipedia page."""
   wikipedia: String
+  """Extra keywords/phrases to assist with search. May include former names for the airport, alternate codes, names in other languages, nearby tourist destinations, etc."""
   keywords: [String!]!
-  runways: [Runway!]!
+  runways: [Runway!]
+}
+"""AirportContinent is enum for the field continent"""
+enum AirportContinent @goModel(model: "metar.gg/ent/airport.Continent") {
+  AF
+  AN
+  AS
+  EU
+  NA
+  SA
+  OC
 }
 """AirportType is enum for the field type"""
 enum AirportType @goModel(model: "metar.gg/ent/airport.Type") {
@@ -575,26 +592,40 @@ enum OrderDirection {
 }
 type Runway {
   id: ID!
-  airportIdentifier: String!
+  """Length of the runway in feet."""
   length: Int!
+  """Width of the runway surface in feet."""
   width: Int!
+  """Code for the runway surface type. This is not yet a controlled vocabulary, but probably will be soon. Some common values include "ASP" (asphalt), "TURF" (turf), "CON" (concrete), "GRS" (grass), "GRE" (gravel), "WATER" (water), and "UNK" (unknown)."""
   surface: String!
+  """Whether the runway is lighted at night or not."""
   lighted: Boolean!
+  """Whether the runway is currently closed or not."""
   closed: Boolean!
-  """Low numbered runway identifier, like 18R"""
+  """Low numbered runway identifier, like 18R."""
   lowRunwayIdentifier: String!
+  """Latitude of the low numbered runway end, in decimal degrees (positive is north)."""
   lowRunwayLatitude: Float
+  """Longitude of the low numbered runway end, in decimal degrees (positive is east)."""
   lowRunwayLongitude: Float
+  """Elevation of the low numbered runway end, in feet."""
   lowRunwayElevation: Int
-  lowRunwayHeading: Int
-  lowRunwayDisplaced: Int
-  """High numbered runway identifier, like 18R"""
+  """True (not magnetic) heading of the lower numbered runway."""
+  lowRunwayHeading: Float
+  """Displaced threshold length of the lower numbered runway end, in feet."""
+  lowRunwayDisplacedThreshold: Int
+  """High numbered runway identifier, like 01L."""
   highRunwayIdentifier: String!
+  """Latitude of the high numbered runway end, in decimal degrees (positive is north)."""
   highRunwayLatitude: Float
+  """Longitude of the high numbered runway end, in decimal degrees (positive is east)."""
   highRunwayLongitude: Float
+  """Elevation of the high numbered runway end, in feet."""
   highRunwayElevation: Int
-  highRunwayHeading: Int
-  highRunwayDisplaced: Int
+  """True (not magnetic) heading of the higher numbered runway."""
+  highRunwayHeading: Float
+  """Displaced threshold length of the higher numbered runway end, in feet."""
+  highRunwayDisplacedThreshold: Int
   airport: Airport
 }
 `, BuiltIn: false},
@@ -610,11 +641,11 @@ type PageInfo {
 type AirportConnection {
     totalCount: Int!
     pageInfo: PageInfo!
-    edges: [AirportEdge]
+    edges: [AirportEdge!]!
 }
 
 type AirportEdge {
-    node: Airport
+    node: Airport!
     cursor: Cursor!
 }
 
@@ -623,7 +654,9 @@ type Query {
         after: Cursor
         first: Int
         before: Cursor
-        last: Int): AirportConnection
+        last: Int
+        identifier: String
+    ): AirportConnection!
 }`, BuiltIn: false},
 }
 var parsedSchema = gqlparser.MustLoadSchema(sources...)

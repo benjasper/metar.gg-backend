@@ -141,6 +141,7 @@ func (i *Importer) importModelType(url string, importFunction ImportLineFunction
 	return err
 }
 
+// CSV file format: "id","ident","type","name","latitude_deg","longitude_deg","elevation_ft","continent","iso_country","iso_region","municipality","scheduled_service","gps_code","iata_code","local_code","home_link","wikipedia_link","keywords"
 func (i *Importer) importAirportLine(data []string) error {
 	// Hash the current line via md5
 	line := strings.Join(data, "")
@@ -170,12 +171,15 @@ func (i *Importer) importAirportLine(data []string) error {
 
 	elevation, _ := strconv.ParseInt(data[6], 10, 64)
 
-	scheduledService, _ := strconv.ParseBool(data[9])
+	scheduledService := false
+	if data[9] == "yes" {
+		scheduledService = true
+	}
 
 	// Explode keywords into array.
 	keywords := make([]string, 0)
-	if data[14] != "" {
-		keywords = strings.Split(data[14], ",")
+	if data[17] != "" {
+		keywords = strings.Split(data[17], ", ")
 	}
 
 	airportType := airport.TypeSmallAirport
@@ -200,6 +204,28 @@ func (i *Importer) importAirportLine(data []string) error {
 		break
 	}
 
+	continent := airport.ContinentEurope
+	switch data[11] {
+	case airport.ContinentAfrica.String():
+		continent = airport.ContinentAfrica
+		break
+	case airport.ContinentAntarctica.String():
+		continent = airport.ContinentAntarctica
+		break
+	case airport.ContinentAsia.String():
+		continent = airport.ContinentAsia
+		break
+	case airport.ContinentOceania.String():
+		continent = airport.ContinentOceania
+		break
+	case airport.ContinentSouthAmerica.String():
+		continent = airport.ContinentSouthAmerica
+		break
+	case airport.ContinentNorthAmerica.String():
+		continent = airport.ContinentNorthAmerica
+		break
+	}
+
 	err = i.db.Airport.Create().
 		SetImportFlag(true).
 		SetHash(hash).
@@ -210,10 +236,10 @@ func (i *Importer) importAirportLine(data []string) error {
 		SetLatitude(lat).
 		SetLongitude(lon).
 		SetNillableElevation(utils.Nillable(data[6], int(elevation))).
-		SetContinent(data[7]).
+		SetContinent(continent).
 		SetCountry(data[8]).
 		SetRegion(data[9]).
-		SetMunicipality(data[10]).
+		SetNillableMunicipality(utils.NillableString(data[10])).
 		SetScheduledService(scheduledService).
 		SetNillableGpsCode(utils.NillableString(data[12])).
 		SetIataCode(data[13]).
@@ -292,13 +318,13 @@ func (i *Importer) importRunwayLine(data []string) error {
 	isClosed, _ := strconv.ParseBool(data[7])
 
 	leElevation, _ := strconv.ParseInt(data[11], 10, 64)
-	leHeading, _ := strconv.ParseInt(data[12], 10, 64)
+	leHeading, _ := strconv.ParseFloat(data[12], 64)
 	leDisplacedThreshold, _ := strconv.ParseInt(data[13], 10, 64)
 	leLatitude, _ := strconv.ParseFloat(data[9], 64)
 	leLongitude, _ := strconv.ParseFloat(data[10], 64)
 
 	heElevation, _ := strconv.ParseInt(data[17], 10, 64)
-	heHeading, _ := strconv.ParseInt(data[18], 10, 64)
+	heHeading, _ := strconv.ParseFloat(data[18], 64)
 	heDisplacedThreshold, _ := strconv.ParseInt(data[19], 10, 64)
 	heLatitude, _ := strconv.ParseFloat(data[15], 64)
 	heLongitude, _ := strconv.ParseFloat(data[16], 64)
@@ -308,7 +334,6 @@ func (i *Importer) importRunwayLine(data []string) error {
 		SetHash(hash).
 		SetID(int(runwayID)).
 		SetAirportID(int(airportID)).
-		SetAirportIdentifier(data[2]).
 		SetLength(int(length)).
 		SetWidth(int(width)).
 		SetSurface(data[5]).
@@ -318,14 +343,14 @@ func (i *Importer) importRunwayLine(data []string) error {
 		SetNillableLowRunwayLatitude(utils.Nillable(data[9], leLatitude)).
 		SetNillableLowRunwayLongitude(utils.Nillable(data[10], leLongitude)).
 		SetNillableLowRunwayElevation(utils.Nillable(data[11], int(leElevation))).
-		SetNillableLowRunwayHeading(utils.Nillable(data[12], int(leHeading))).
-		SetNillableLowRunwayDisplaced(utils.Nillable(data[13], int(leDisplacedThreshold))).
+		SetNillableLowRunwayHeading(utils.Nillable(data[12], leHeading)).
+		SetNillableLowRunwayDisplacedThreshold(utils.Nillable(data[13], int(leDisplacedThreshold))).
 		SetHighRunwayIdentifier(data[14]).
 		SetNillableHighRunwayLatitude(utils.Nillable(data[15], heLatitude)).
 		SetNillableHighRunwayLongitude(utils.Nillable(data[16], heLongitude)).
 		SetNillableHighRunwayElevation(utils.Nillable(data[17], int(heElevation))).
-		SetNillableHighRunwayHeading(utils.Nillable(data[18], int(heHeading))).
-		SetNillableHighRunwayDisplaced(utils.Nillable(data[19], int(heDisplacedThreshold))).
+		SetNillableHighRunwayHeading(utils.Nillable(data[18], heHeading)).
+		SetNillableHighRunwayDisplacedThreshold(utils.Nillable(data[19], int(heDisplacedThreshold))).
 		OnConflict().
 		UpdateNewValues().
 		Exec(ctx)
