@@ -6,10 +6,11 @@ import (
 	"log"
 	"metar.gg/ent"
 	"metar.gg/importer"
+	"metar.gg/server"
 )
 
 func main() {
-	client, err := ent.Open("mysql", "root:123@tcp(localhost:3306)/metar.gg?parseTime=True")
+	client, err := ent.Open("mysql", "root:123@tcp(localhost:3306)/metargg?parseTime=True")
 	if err != nil {
 		log.Fatalf("failed opening connection to mysql: %v", err)
 	}
@@ -20,42 +21,27 @@ func main() {
 	}
 
 	RunImport(client)
-	//RunServer()
+	RunServer(client)
 }
 
-/*
-func RunServer() {
-
-	schema, _ := graphql.NewSchema(testutil.TestSchemaConfig)
-
-	h := handler.New(&handler.Config{
-		Schema:   &schema,
-		Pretty:   true,
-		GraphiQL: true,
-	})
-
-	http.Handle("/graphql", h)
-	err := http.ListenAndServe(":8080", nil)
+func RunServer(db *ent.Client) {
+	err := server.NewServer().Run(db)
 	if err != nil {
 		panic(err)
 		return
 	}
 }
-*/
 
 func RunImport(db *ent.Client) {
 	imp := importer.NewImporter(db)
 
-	/*
-		err := imp.ImportAirports("https://raw.githubusercontent.com/davidmegginson/ourairports-data/main/airports.csv")
-		if err != nil {
-			panic(err)
-			return
-		}
+	err := imp.ImportAirports("https://raw.githubusercontent.com/davidmegginson/ourairports-data/main/airports.csv")
+	if err != nil {
+		panic(err)
+		return
+	}
 
-	*/
-
-	err := imp.ImportRunways("https://raw.githubusercontent.com/davidmegginson/ourairports-data/main/runways.csv")
+	err = imp.ImportRunways("https://raw.githubusercontent.com/davidmegginson/ourairports-data/main/runways.csv")
 	if err != nil {
 		panic(err)
 		return

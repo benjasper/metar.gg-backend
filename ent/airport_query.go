@@ -19,13 +19,16 @@ import (
 // AirportQuery is the builder for querying Airport entities.
 type AirportQuery struct {
 	config
-	limit       *int
-	offset      *int
-	unique      *bool
-	order       []OrderFunc
-	fields      []string
-	predicates  []predicate.Airport
-	withRunways *RunwayQuery
+	limit            *int
+	offset           *int
+	unique           *bool
+	order            []OrderFunc
+	fields           []string
+	predicates       []predicate.Airport
+	withRunways      *RunwayQuery
+	modifiers        []func(*sql.Selector)
+	loadTotal        []func(context.Context, []*Airport) error
+	withNamedRunways map[string]*RunwayQuery
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -290,7 +293,7 @@ func (aq *AirportQuery) WithRunways(opts ...func(*RunwayQuery)) *AirportQuery {
 // Example:
 //
 //	var v []struct {
-//		Hash uint64 `json:"hash,omitempty"`
+//		Hash string `json:"hash,omitempty"`
 //		Count int `json:"count,omitempty"`
 //	}
 //
@@ -298,7 +301,6 @@ func (aq *AirportQuery) WithRunways(opts ...func(*RunwayQuery)) *AirportQuery {
 //		GroupBy(airport.FieldHash).
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
-//
 func (aq *AirportQuery) GroupBy(field string, fields ...string) *AirportGroupBy {
 	grbuild := &AirportGroupBy{config: aq.config}
 	grbuild.fields = append([]string{field}, fields...)
@@ -319,13 +321,12 @@ func (aq *AirportQuery) GroupBy(field string, fields ...string) *AirportGroupBy 
 // Example:
 //
 //	var v []struct {
-//		Hash uint64 `json:"hash,omitempty"`
+//		Hash string `json:"hash,omitempty"`
 //	}
 //
 //	client.Airport.Query().
 //		Select(airport.FieldHash).
 //		Scan(ctx, &v)
-//
 func (aq *AirportQuery) Select(fields ...string) *AirportSelect {
 	aq.fields = append(aq.fields, fields...)
 	selbuild := &AirportSelect{AirportQuery: aq}
@@ -358,14 +359,17 @@ func (aq *AirportQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Airp
 			aq.withRunways != nil,
 		}
 	)
-	_spec.ScanValues = func(columns []string) ([]interface{}, error) {
+	_spec.ScanValues = func(columns []string) ([]any, error) {
 		return (*Airport).scanValues(nil, columns)
 	}
-	_spec.Assign = func(columns []string, values []interface{}) error {
+	_spec.Assign = func(columns []string, values []any) error {
 		node := &Airport{config: aq.config}
 		nodes = append(nodes, node)
 		node.Edges.loadedTypes = loadedTypes
 		return node.assignValues(columns, values)
+	}
+	if len(aq.modifiers) > 0 {
+		_spec.Modifiers = aq.modifiers
 	}
 	for i := range hooks {
 		hooks[i](ctx, _spec)
@@ -380,6 +384,18 @@ func (aq *AirportQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Airp
 		if err := aq.loadRunways(ctx, query, nodes,
 			func(n *Airport) { n.Edges.Runways = []*Runway{} },
 			func(n *Airport, e *Runway) { n.Edges.Runways = append(n.Edges.Runways, e) }); err != nil {
+			return nil, err
+		}
+	}
+	for name, query := range aq.withNamedRunways {
+		if err := aq.loadRunways(ctx, query, nodes,
+			func(n *Airport) { n.appendNamedRunways(name) },
+			func(n *Airport, e *Runway) { n.appendNamedRunways(name, e) }); err != nil {
+			return nil, err
+		}
+	}
+	for i := range aq.loadTotal {
+		if err := aq.loadTotal[i](ctx, nodes); err != nil {
 			return nil, err
 		}
 	}
@@ -420,6 +436,9 @@ func (aq *AirportQuery) loadRunways(ctx context.Context, query *RunwayQuery, nod
 
 func (aq *AirportQuery) sqlCount(ctx context.Context) (int, error) {
 	_spec := aq.querySpec()
+	if len(aq.modifiers) > 0 {
+		_spec.Modifiers = aq.modifiers
+	}
 	_spec.Node.Columns = aq.fields
 	if len(aq.fields) > 0 {
 		_spec.Unique = aq.unique != nil && *aq.unique
@@ -515,6 +534,20 @@ func (aq *AirportQuery) sqlQuery(ctx context.Context) *sql.Selector {
 	return selector
 }
 
+// WithNamedRunways tells the query-builder to eager-load the nodes that are connected to the "runways"
+// edge with the given name. The optional arguments are used to configure the query builder of the edge.
+func (aq *AirportQuery) WithNamedRunways(name string, opts ...func(*RunwayQuery)) *AirportQuery {
+	query := &RunwayQuery{config: aq.config}
+	for _, opt := range opts {
+		opt(query)
+	}
+	if aq.withNamedRunways == nil {
+		aq.withNamedRunways = make(map[string]*RunwayQuery)
+	}
+	aq.withNamedRunways[name] = query
+	return aq
+}
+
 // AirportGroupBy is the group-by builder for Airport entities.
 type AirportGroupBy struct {
 	config
@@ -533,7 +566,7 @@ func (agb *AirportGroupBy) Aggregate(fns ...AggregateFunc) *AirportGroupBy {
 }
 
 // Scan applies the group-by query and scans the result into the given value.
-func (agb *AirportGroupBy) Scan(ctx context.Context, v interface{}) error {
+func (agb *AirportGroupBy) Scan(ctx context.Context, v any) error {
 	query, err := agb.path(ctx)
 	if err != nil {
 		return err
@@ -542,7 +575,7 @@ func (agb *AirportGroupBy) Scan(ctx context.Context, v interface{}) error {
 	return agb.sqlScan(ctx, v)
 }
 
-func (agb *AirportGroupBy) sqlScan(ctx context.Context, v interface{}) error {
+func (agb *AirportGroupBy) sqlScan(ctx context.Context, v any) error {
 	for _, f := range agb.fields {
 		if !airport.ValidColumn(f) {
 			return &ValidationError{Name: f, err: fmt.Errorf("invalid field %q for group-by", f)}
@@ -589,7 +622,7 @@ type AirportSelect struct {
 }
 
 // Scan applies the selector query and scans the result into the given value.
-func (as *AirportSelect) Scan(ctx context.Context, v interface{}) error {
+func (as *AirportSelect) Scan(ctx context.Context, v any) error {
 	if err := as.prepareQuery(ctx); err != nil {
 		return err
 	}
@@ -597,7 +630,7 @@ func (as *AirportSelect) Scan(ctx context.Context, v interface{}) error {
 	return as.sqlScan(ctx, v)
 }
 
-func (as *AirportSelect) sqlScan(ctx context.Context, v interface{}) error {
+func (as *AirportSelect) sqlScan(ctx context.Context, v any) error {
 	rows := &sql.Rows{}
 	query, args := as.sql.Query()
 	if err := as.driver.Query(ctx, query, args, rows); err != nil {

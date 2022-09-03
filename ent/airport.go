@@ -6,7 +6,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"strings"
-	"time"
 
 	"entgo.io/ent/dialect/sql"
 	"metar.gg/ent/airport"
@@ -18,17 +17,13 @@ type Airport struct {
 	// ID of the ent.
 	ID int `json:"id,omitempty"`
 	// Hash holds the value of the "hash" field.
-	Hash uint64 `json:"hash,omitempty"`
+	Hash string `json:"hash,omitempty"`
 	// ImportFlag holds the value of the "import_flag" field.
 	ImportFlag bool `json:"import_flag,omitempty"`
-	// CreateTime holds the value of the "create_time" field.
-	CreateTime time.Time `json:"create_time,omitempty"`
-	// UpdateTime holds the value of the "update_time" field.
-	UpdateTime time.Time `json:"update_time,omitempty"`
 	// Identifier holds the value of the "identifier" field.
 	Identifier string `json:"identifier,omitempty"`
 	// Type holds the value of the "type" field.
-	Type string `json:"type,omitempty"`
+	Type airport.Type `json:"type,omitempty"`
 	// Name holds the value of the "name" field.
 	Name string `json:"name,omitempty"`
 	// Latitude holds the value of the "latitude" field.
@@ -36,7 +31,7 @@ type Airport struct {
 	// Longitude holds the value of the "longitude" field.
 	Longitude float64 `json:"longitude,omitempty"`
 	// Elevation holds the value of the "elevation" field.
-	Elevation int `json:"elevation,omitempty"`
+	Elevation *int `json:"elevation,omitempty"`
 	// Continent holds the value of the "continent" field.
 	Continent string `json:"continent,omitempty"`
 	// Country holds the value of the "country" field.
@@ -48,15 +43,15 @@ type Airport struct {
 	// ScheduledService holds the value of the "scheduled_service" field.
 	ScheduledService bool `json:"scheduled_service,omitempty"`
 	// GpsCode holds the value of the "gps_code" field.
-	GpsCode string `json:"gps_code,omitempty"`
+	GpsCode *string `json:"gps_code,omitempty"`
 	// IataCode holds the value of the "iata_code" field.
-	IataCode string `json:"iata_code,omitempty"`
+	IataCode *string `json:"iata_code,omitempty"`
 	// LocalCode holds the value of the "local_code" field.
-	LocalCode string `json:"local_code,omitempty"`
+	LocalCode *string `json:"local_code,omitempty"`
 	// Website holds the value of the "website" field.
-	Website string `json:"website,omitempty"`
+	Website *string `json:"website,omitempty"`
 	// Wikipedia holds the value of the "wikipedia" field.
-	Wikipedia string `json:"wikipedia,omitempty"`
+	Wikipedia *string `json:"wikipedia,omitempty"`
 	// Keywords holds the value of the "keywords" field.
 	Keywords []string `json:"keywords,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
@@ -71,6 +66,10 @@ type AirportEdges struct {
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
 	loadedTypes [1]bool
+	// totalCount holds the count of the edges above.
+	totalCount [1]map[string]int
+
+	namedRunways map[string][]*Runway
 }
 
 // RunwaysOrErr returns the Runways value or an error if the edge
@@ -83,8 +82,8 @@ func (e AirportEdges) RunwaysOrErr() ([]*Runway, error) {
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
-func (*Airport) scanValues(columns []string) ([]interface{}, error) {
-	values := make([]interface{}, len(columns))
+func (*Airport) scanValues(columns []string) ([]any, error) {
+	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
 		case airport.FieldKeywords:
@@ -93,12 +92,10 @@ func (*Airport) scanValues(columns []string) ([]interface{}, error) {
 			values[i] = new(sql.NullBool)
 		case airport.FieldLatitude, airport.FieldLongitude:
 			values[i] = new(sql.NullFloat64)
-		case airport.FieldID, airport.FieldHash, airport.FieldElevation:
+		case airport.FieldID, airport.FieldElevation:
 			values[i] = new(sql.NullInt64)
-		case airport.FieldIdentifier, airport.FieldType, airport.FieldName, airport.FieldContinent, airport.FieldCountry, airport.FieldRegion, airport.FieldMunicipality, airport.FieldGpsCode, airport.FieldIataCode, airport.FieldLocalCode, airport.FieldWebsite, airport.FieldWikipedia:
+		case airport.FieldHash, airport.FieldIdentifier, airport.FieldType, airport.FieldName, airport.FieldContinent, airport.FieldCountry, airport.FieldRegion, airport.FieldMunicipality, airport.FieldGpsCode, airport.FieldIataCode, airport.FieldLocalCode, airport.FieldWebsite, airport.FieldWikipedia:
 			values[i] = new(sql.NullString)
-		case airport.FieldCreateTime, airport.FieldUpdateTime:
-			values[i] = new(sql.NullTime)
 		default:
 			return nil, fmt.Errorf("unexpected column %q for type Airport", columns[i])
 		}
@@ -108,7 +105,7 @@ func (*Airport) scanValues(columns []string) ([]interface{}, error) {
 
 // assignValues assigns the values that were returned from sql.Rows (after scanning)
 // to the Airport fields.
-func (a *Airport) assignValues(columns []string, values []interface{}) error {
+func (a *Airport) assignValues(columns []string, values []any) error {
 	if m, n := len(values), len(columns); m < n {
 		return fmt.Errorf("mismatch number of scan values: %d != %d", m, n)
 	}
@@ -121,28 +118,16 @@ func (a *Airport) assignValues(columns []string, values []interface{}) error {
 			}
 			a.ID = int(value.Int64)
 		case airport.FieldHash:
-			if value, ok := values[i].(*sql.NullInt64); !ok {
+			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field hash", values[i])
 			} else if value.Valid {
-				a.Hash = uint64(value.Int64)
+				a.Hash = value.String
 			}
 		case airport.FieldImportFlag:
 			if value, ok := values[i].(*sql.NullBool); !ok {
 				return fmt.Errorf("unexpected type %T for field import_flag", values[i])
 			} else if value.Valid {
 				a.ImportFlag = value.Bool
-			}
-		case airport.FieldCreateTime:
-			if value, ok := values[i].(*sql.NullTime); !ok {
-				return fmt.Errorf("unexpected type %T for field create_time", values[i])
-			} else if value.Valid {
-				a.CreateTime = value.Time
-			}
-		case airport.FieldUpdateTime:
-			if value, ok := values[i].(*sql.NullTime); !ok {
-				return fmt.Errorf("unexpected type %T for field update_time", values[i])
-			} else if value.Valid {
-				a.UpdateTime = value.Time
 			}
 		case airport.FieldIdentifier:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -154,7 +139,7 @@ func (a *Airport) assignValues(columns []string, values []interface{}) error {
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field type", values[i])
 			} else if value.Valid {
-				a.Type = value.String
+				a.Type = airport.Type(value.String)
 			}
 		case airport.FieldName:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -178,7 +163,8 @@ func (a *Airport) assignValues(columns []string, values []interface{}) error {
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for field elevation", values[i])
 			} else if value.Valid {
-				a.Elevation = int(value.Int64)
+				a.Elevation = new(int)
+				*a.Elevation = int(value.Int64)
 			}
 		case airport.FieldContinent:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -214,31 +200,36 @@ func (a *Airport) assignValues(columns []string, values []interface{}) error {
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field gps_code", values[i])
 			} else if value.Valid {
-				a.GpsCode = value.String
+				a.GpsCode = new(string)
+				*a.GpsCode = value.String
 			}
 		case airport.FieldIataCode:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field iata_code", values[i])
 			} else if value.Valid {
-				a.IataCode = value.String
+				a.IataCode = new(string)
+				*a.IataCode = value.String
 			}
 		case airport.FieldLocalCode:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field local_code", values[i])
 			} else if value.Valid {
-				a.LocalCode = value.String
+				a.LocalCode = new(string)
+				*a.LocalCode = value.String
 			}
 		case airport.FieldWebsite:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field website", values[i])
 			} else if value.Valid {
-				a.Website = value.String
+				a.Website = new(string)
+				*a.Website = value.String
 			}
 		case airport.FieldWikipedia:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field wikipedia", values[i])
 			} else if value.Valid {
-				a.Wikipedia = value.String
+				a.Wikipedia = new(string)
+				*a.Wikipedia = value.String
 			}
 		case airport.FieldKeywords:
 			if value, ok := values[i].(*[]byte); !ok {
@@ -282,22 +273,16 @@ func (a *Airport) String() string {
 	builder.WriteString("Airport(")
 	builder.WriteString(fmt.Sprintf("id=%v, ", a.ID))
 	builder.WriteString("hash=")
-	builder.WriteString(fmt.Sprintf("%v", a.Hash))
+	builder.WriteString(a.Hash)
 	builder.WriteString(", ")
 	builder.WriteString("import_flag=")
 	builder.WriteString(fmt.Sprintf("%v", a.ImportFlag))
-	builder.WriteString(", ")
-	builder.WriteString("create_time=")
-	builder.WriteString(a.CreateTime.Format(time.ANSIC))
-	builder.WriteString(", ")
-	builder.WriteString("update_time=")
-	builder.WriteString(a.UpdateTime.Format(time.ANSIC))
 	builder.WriteString(", ")
 	builder.WriteString("identifier=")
 	builder.WriteString(a.Identifier)
 	builder.WriteString(", ")
 	builder.WriteString("type=")
-	builder.WriteString(a.Type)
+	builder.WriteString(fmt.Sprintf("%v", a.Type))
 	builder.WriteString(", ")
 	builder.WriteString("name=")
 	builder.WriteString(a.Name)
@@ -308,8 +293,10 @@ func (a *Airport) String() string {
 	builder.WriteString("longitude=")
 	builder.WriteString(fmt.Sprintf("%v", a.Longitude))
 	builder.WriteString(", ")
-	builder.WriteString("elevation=")
-	builder.WriteString(fmt.Sprintf("%v", a.Elevation))
+	if v := a.Elevation; v != nil {
+		builder.WriteString("elevation=")
+		builder.WriteString(fmt.Sprintf("%v", *v))
+	}
 	builder.WriteString(", ")
 	builder.WriteString("continent=")
 	builder.WriteString(a.Continent)
@@ -326,25 +313,59 @@ func (a *Airport) String() string {
 	builder.WriteString("scheduled_service=")
 	builder.WriteString(fmt.Sprintf("%v", a.ScheduledService))
 	builder.WriteString(", ")
-	builder.WriteString("gps_code=")
-	builder.WriteString(a.GpsCode)
+	if v := a.GpsCode; v != nil {
+		builder.WriteString("gps_code=")
+		builder.WriteString(*v)
+	}
 	builder.WriteString(", ")
-	builder.WriteString("iata_code=")
-	builder.WriteString(a.IataCode)
+	if v := a.IataCode; v != nil {
+		builder.WriteString("iata_code=")
+		builder.WriteString(*v)
+	}
 	builder.WriteString(", ")
-	builder.WriteString("local_code=")
-	builder.WriteString(a.LocalCode)
+	if v := a.LocalCode; v != nil {
+		builder.WriteString("local_code=")
+		builder.WriteString(*v)
+	}
 	builder.WriteString(", ")
-	builder.WriteString("website=")
-	builder.WriteString(a.Website)
+	if v := a.Website; v != nil {
+		builder.WriteString("website=")
+		builder.WriteString(*v)
+	}
 	builder.WriteString(", ")
-	builder.WriteString("wikipedia=")
-	builder.WriteString(a.Wikipedia)
+	if v := a.Wikipedia; v != nil {
+		builder.WriteString("wikipedia=")
+		builder.WriteString(*v)
+	}
 	builder.WriteString(", ")
 	builder.WriteString("keywords=")
 	builder.WriteString(fmt.Sprintf("%v", a.Keywords))
 	builder.WriteByte(')')
 	return builder.String()
+}
+
+// NamedRunways returns the Runways named value or an error if the edge was not
+// loaded in eager-loading with this name.
+func (a *Airport) NamedRunways(name string) ([]*Runway, error) {
+	if a.Edges.namedRunways == nil {
+		return nil, &NotLoadedError{edge: name}
+	}
+	nodes, ok := a.Edges.namedRunways[name]
+	if !ok {
+		return nil, &NotLoadedError{edge: name}
+	}
+	return nodes, nil
+}
+
+func (a *Airport) appendNamedRunways(name string, edges ...*Runway) {
+	if a.Edges.namedRunways == nil {
+		a.Edges.namedRunways = make(map[string][]*Runway)
+	}
+	if len(edges) == 0 {
+		a.Edges.namedRunways[name] = []*Runway{}
+	} else {
+		a.Edges.namedRunways[name] = append(a.Edges.namedRunways[name], edges...)
+	}
 }
 
 // Airports is a parsable slice of Airport.

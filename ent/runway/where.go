@@ -3,8 +3,6 @@
 package runway
 
 import (
-	"time"
-
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"metar.gg/ent/predicate"
@@ -34,7 +32,7 @@ func IDNEQ(id int) predicate.Runway {
 // IDIn applies the In predicate on the ID field.
 func IDIn(ids ...int) predicate.Runway {
 	return predicate.Runway(func(s *sql.Selector) {
-		v := make([]interface{}, len(ids))
+		v := make([]any, len(ids))
 		for i := range v {
 			v[i] = ids[i]
 		}
@@ -45,7 +43,7 @@ func IDIn(ids ...int) predicate.Runway {
 // IDNotIn applies the NotIn predicate on the ID field.
 func IDNotIn(ids ...int) predicate.Runway {
 	return predicate.Runway(func(s *sql.Selector) {
-		v := make([]interface{}, len(ids))
+		v := make([]any, len(ids))
 		for i := range v {
 			v[i] = ids[i]
 		}
@@ -82,7 +80,7 @@ func IDLTE(id int) predicate.Runway {
 }
 
 // Hash applies equality check predicate on the "hash" field. It's identical to HashEQ.
-func Hash(v uint64) predicate.Runway {
+func Hash(v string) predicate.Runway {
 	return predicate.Runway(func(s *sql.Selector) {
 		s.Where(sql.EQ(s.C(FieldHash), v))
 	})
@@ -92,20 +90,6 @@ func Hash(v uint64) predicate.Runway {
 func ImportFlag(v bool) predicate.Runway {
 	return predicate.Runway(func(s *sql.Selector) {
 		s.Where(sql.EQ(s.C(FieldImportFlag), v))
-	})
-}
-
-// CreateTime applies equality check predicate on the "create_time" field. It's identical to CreateTimeEQ.
-func CreateTime(v time.Time) predicate.Runway {
-	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldCreateTime), v))
-	})
-}
-
-// UpdateTime applies equality check predicate on the "update_time" field. It's identical to UpdateTimeEQ.
-func UpdateTime(v time.Time) predicate.Runway {
-	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldUpdateTime), v))
 	})
 }
 
@@ -151,107 +135,107 @@ func Closed(v bool) predicate.Runway {
 	})
 }
 
-// LowNumberedRunwayEndIdentifier applies equality check predicate on the "low_numbered_runway_end_identifier" field. It's identical to LowNumberedRunwayEndIdentifierEQ.
-func LowNumberedRunwayEndIdentifier(v string) predicate.Runway {
+// LowRunwayIdentifier applies equality check predicate on the "low_runway_identifier" field. It's identical to LowRunwayIdentifierEQ.
+func LowRunwayIdentifier(v string) predicate.Runway {
 	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldLowNumberedRunwayEndIdentifier), v))
+		s.Where(sql.EQ(s.C(FieldLowRunwayIdentifier), v))
 	})
 }
 
-// LowNumberedRunwayEndLatitude applies equality check predicate on the "low_numbered_runway_end_latitude" field. It's identical to LowNumberedRunwayEndLatitudeEQ.
-func LowNumberedRunwayEndLatitude(v float64) predicate.Runway {
+// LowRunwayLatitude applies equality check predicate on the "low_runway_latitude" field. It's identical to LowRunwayLatitudeEQ.
+func LowRunwayLatitude(v float64) predicate.Runway {
 	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldLowNumberedRunwayEndLatitude), v))
+		s.Where(sql.EQ(s.C(FieldLowRunwayLatitude), v))
 	})
 }
 
-// LowNumberedRunwayEndLongitude applies equality check predicate on the "low_numbered_runway_end_longitude" field. It's identical to LowNumberedRunwayEndLongitudeEQ.
-func LowNumberedRunwayEndLongitude(v float64) predicate.Runway {
+// LowRunwayLongitude applies equality check predicate on the "low_runway_longitude" field. It's identical to LowRunwayLongitudeEQ.
+func LowRunwayLongitude(v float64) predicate.Runway {
 	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldLowNumberedRunwayEndLongitude), v))
+		s.Where(sql.EQ(s.C(FieldLowRunwayLongitude), v))
 	})
 }
 
-// LowNumberedRunwayEndElevation applies equality check predicate on the "low_numbered_runway_end_elevation" field. It's identical to LowNumberedRunwayEndElevationEQ.
-func LowNumberedRunwayEndElevation(v int) predicate.Runway {
+// LowRunwayElevation applies equality check predicate on the "low_runway_elevation" field. It's identical to LowRunwayElevationEQ.
+func LowRunwayElevation(v int) predicate.Runway {
 	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldLowNumberedRunwayEndElevation), v))
+		s.Where(sql.EQ(s.C(FieldLowRunwayElevation), v))
 	})
 }
 
-// LowNumberedRunwayEndHeading applies equality check predicate on the "low_numbered_runway_end_heading" field. It's identical to LowNumberedRunwayEndHeadingEQ.
-func LowNumberedRunwayEndHeading(v int) predicate.Runway {
+// LowRunwayHeading applies equality check predicate on the "low_runway_heading" field. It's identical to LowRunwayHeadingEQ.
+func LowRunwayHeading(v int) predicate.Runway {
 	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldLowNumberedRunwayEndHeading), v))
+		s.Where(sql.EQ(s.C(FieldLowRunwayHeading), v))
 	})
 }
 
-// LowNumberedRunwayEndDisplaced applies equality check predicate on the "low_numbered_runway_end_displaced" field. It's identical to LowNumberedRunwayEndDisplacedEQ.
-func LowNumberedRunwayEndDisplaced(v int) predicate.Runway {
+// LowRunwayDisplaced applies equality check predicate on the "low_runway_displaced" field. It's identical to LowRunwayDisplacedEQ.
+func LowRunwayDisplaced(v int) predicate.Runway {
 	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldLowNumberedRunwayEndDisplaced), v))
+		s.Where(sql.EQ(s.C(FieldLowRunwayDisplaced), v))
 	})
 }
 
-// HighNumberedRunwayEndIdentifier applies equality check predicate on the "high_numbered_runway_end_identifier" field. It's identical to HighNumberedRunwayEndIdentifierEQ.
-func HighNumberedRunwayEndIdentifier(v string) predicate.Runway {
+// HighRunwayIdentifier applies equality check predicate on the "high_runway_identifier" field. It's identical to HighRunwayIdentifierEQ.
+func HighRunwayIdentifier(v string) predicate.Runway {
 	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldHighNumberedRunwayEndIdentifier), v))
+		s.Where(sql.EQ(s.C(FieldHighRunwayIdentifier), v))
 	})
 }
 
-// HighNumberedRunwayEndLatitude applies equality check predicate on the "high_numbered_runway_end_latitude" field. It's identical to HighNumberedRunwayEndLatitudeEQ.
-func HighNumberedRunwayEndLatitude(v float64) predicate.Runway {
+// HighRunwayLatitude applies equality check predicate on the "high_runway_latitude" field. It's identical to HighRunwayLatitudeEQ.
+func HighRunwayLatitude(v float64) predicate.Runway {
 	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldHighNumberedRunwayEndLatitude), v))
+		s.Where(sql.EQ(s.C(FieldHighRunwayLatitude), v))
 	})
 }
 
-// HighNumberedRunwayEndLongitude applies equality check predicate on the "high_numbered_runway_end_longitude" field. It's identical to HighNumberedRunwayEndLongitudeEQ.
-func HighNumberedRunwayEndLongitude(v float64) predicate.Runway {
+// HighRunwayLongitude applies equality check predicate on the "high_runway_longitude" field. It's identical to HighRunwayLongitudeEQ.
+func HighRunwayLongitude(v float64) predicate.Runway {
 	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldHighNumberedRunwayEndLongitude), v))
+		s.Where(sql.EQ(s.C(FieldHighRunwayLongitude), v))
 	})
 }
 
-// HighNumberedRunwayEndElevation applies equality check predicate on the "high_numbered_runway_end_elevation" field. It's identical to HighNumberedRunwayEndElevationEQ.
-func HighNumberedRunwayEndElevation(v int) predicate.Runway {
+// HighRunwayElevation applies equality check predicate on the "high_runway_elevation" field. It's identical to HighRunwayElevationEQ.
+func HighRunwayElevation(v int) predicate.Runway {
 	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldHighNumberedRunwayEndElevation), v))
+		s.Where(sql.EQ(s.C(FieldHighRunwayElevation), v))
 	})
 }
 
-// HighNumberedRunwayEndHeading applies equality check predicate on the "high_numbered_runway_end_heading" field. It's identical to HighNumberedRunwayEndHeadingEQ.
-func HighNumberedRunwayEndHeading(v int) predicate.Runway {
+// HighRunwayHeading applies equality check predicate on the "high_runway_heading" field. It's identical to HighRunwayHeadingEQ.
+func HighRunwayHeading(v int) predicate.Runway {
 	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldHighNumberedRunwayEndHeading), v))
+		s.Where(sql.EQ(s.C(FieldHighRunwayHeading), v))
 	})
 }
 
-// HighNumberedRunwayEndDisplaced applies equality check predicate on the "high_numbered_runway_end_displaced" field. It's identical to HighNumberedRunwayEndDisplacedEQ.
-func HighNumberedRunwayEndDisplaced(v int) predicate.Runway {
+// HighRunwayDisplaced applies equality check predicate on the "high_runway_displaced" field. It's identical to HighRunwayDisplacedEQ.
+func HighRunwayDisplaced(v int) predicate.Runway {
 	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldHighNumberedRunwayEndDisplaced), v))
+		s.Where(sql.EQ(s.C(FieldHighRunwayDisplaced), v))
 	})
 }
 
 // HashEQ applies the EQ predicate on the "hash" field.
-func HashEQ(v uint64) predicate.Runway {
+func HashEQ(v string) predicate.Runway {
 	return predicate.Runway(func(s *sql.Selector) {
 		s.Where(sql.EQ(s.C(FieldHash), v))
 	})
 }
 
 // HashNEQ applies the NEQ predicate on the "hash" field.
-func HashNEQ(v uint64) predicate.Runway {
+func HashNEQ(v string) predicate.Runway {
 	return predicate.Runway(func(s *sql.Selector) {
 		s.Where(sql.NEQ(s.C(FieldHash), v))
 	})
 }
 
 // HashIn applies the In predicate on the "hash" field.
-func HashIn(vs ...uint64) predicate.Runway {
-	v := make([]interface{}, len(vs))
+func HashIn(vs ...string) predicate.Runway {
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
@@ -261,8 +245,8 @@ func HashIn(vs ...uint64) predicate.Runway {
 }
 
 // HashNotIn applies the NotIn predicate on the "hash" field.
-func HashNotIn(vs ...uint64) predicate.Runway {
-	v := make([]interface{}, len(vs))
+func HashNotIn(vs ...string) predicate.Runway {
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
@@ -272,30 +256,65 @@ func HashNotIn(vs ...uint64) predicate.Runway {
 }
 
 // HashGT applies the GT predicate on the "hash" field.
-func HashGT(v uint64) predicate.Runway {
+func HashGT(v string) predicate.Runway {
 	return predicate.Runway(func(s *sql.Selector) {
 		s.Where(sql.GT(s.C(FieldHash), v))
 	})
 }
 
 // HashGTE applies the GTE predicate on the "hash" field.
-func HashGTE(v uint64) predicate.Runway {
+func HashGTE(v string) predicate.Runway {
 	return predicate.Runway(func(s *sql.Selector) {
 		s.Where(sql.GTE(s.C(FieldHash), v))
 	})
 }
 
 // HashLT applies the LT predicate on the "hash" field.
-func HashLT(v uint64) predicate.Runway {
+func HashLT(v string) predicate.Runway {
 	return predicate.Runway(func(s *sql.Selector) {
 		s.Where(sql.LT(s.C(FieldHash), v))
 	})
 }
 
 // HashLTE applies the LTE predicate on the "hash" field.
-func HashLTE(v uint64) predicate.Runway {
+func HashLTE(v string) predicate.Runway {
 	return predicate.Runway(func(s *sql.Selector) {
 		s.Where(sql.LTE(s.C(FieldHash), v))
+	})
+}
+
+// HashContains applies the Contains predicate on the "hash" field.
+func HashContains(v string) predicate.Runway {
+	return predicate.Runway(func(s *sql.Selector) {
+		s.Where(sql.Contains(s.C(FieldHash), v))
+	})
+}
+
+// HashHasPrefix applies the HasPrefix predicate on the "hash" field.
+func HashHasPrefix(v string) predicate.Runway {
+	return predicate.Runway(func(s *sql.Selector) {
+		s.Where(sql.HasPrefix(s.C(FieldHash), v))
+	})
+}
+
+// HashHasSuffix applies the HasSuffix predicate on the "hash" field.
+func HashHasSuffix(v string) predicate.Runway {
+	return predicate.Runway(func(s *sql.Selector) {
+		s.Where(sql.HasSuffix(s.C(FieldHash), v))
+	})
+}
+
+// HashEqualFold applies the EqualFold predicate on the "hash" field.
+func HashEqualFold(v string) predicate.Runway {
+	return predicate.Runway(func(s *sql.Selector) {
+		s.Where(sql.EqualFold(s.C(FieldHash), v))
+	})
+}
+
+// HashContainsFold applies the ContainsFold predicate on the "hash" field.
+func HashContainsFold(v string) predicate.Runway {
+	return predicate.Runway(func(s *sql.Selector) {
+		s.Where(sql.ContainsFold(s.C(FieldHash), v))
 	})
 }
 
@@ -310,134 +329,6 @@ func ImportFlagEQ(v bool) predicate.Runway {
 func ImportFlagNEQ(v bool) predicate.Runway {
 	return predicate.Runway(func(s *sql.Selector) {
 		s.Where(sql.NEQ(s.C(FieldImportFlag), v))
-	})
-}
-
-// CreateTimeEQ applies the EQ predicate on the "create_time" field.
-func CreateTimeEQ(v time.Time) predicate.Runway {
-	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldCreateTime), v))
-	})
-}
-
-// CreateTimeNEQ applies the NEQ predicate on the "create_time" field.
-func CreateTimeNEQ(v time.Time) predicate.Runway {
-	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldCreateTime), v))
-	})
-}
-
-// CreateTimeIn applies the In predicate on the "create_time" field.
-func CreateTimeIn(vs ...time.Time) predicate.Runway {
-	v := make([]interface{}, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.In(s.C(FieldCreateTime), v...))
-	})
-}
-
-// CreateTimeNotIn applies the NotIn predicate on the "create_time" field.
-func CreateTimeNotIn(vs ...time.Time) predicate.Runway {
-	v := make([]interface{}, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.NotIn(s.C(FieldCreateTime), v...))
-	})
-}
-
-// CreateTimeGT applies the GT predicate on the "create_time" field.
-func CreateTimeGT(v time.Time) predicate.Runway {
-	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldCreateTime), v))
-	})
-}
-
-// CreateTimeGTE applies the GTE predicate on the "create_time" field.
-func CreateTimeGTE(v time.Time) predicate.Runway {
-	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldCreateTime), v))
-	})
-}
-
-// CreateTimeLT applies the LT predicate on the "create_time" field.
-func CreateTimeLT(v time.Time) predicate.Runway {
-	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldCreateTime), v))
-	})
-}
-
-// CreateTimeLTE applies the LTE predicate on the "create_time" field.
-func CreateTimeLTE(v time.Time) predicate.Runway {
-	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldCreateTime), v))
-	})
-}
-
-// UpdateTimeEQ applies the EQ predicate on the "update_time" field.
-func UpdateTimeEQ(v time.Time) predicate.Runway {
-	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldUpdateTime), v))
-	})
-}
-
-// UpdateTimeNEQ applies the NEQ predicate on the "update_time" field.
-func UpdateTimeNEQ(v time.Time) predicate.Runway {
-	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldUpdateTime), v))
-	})
-}
-
-// UpdateTimeIn applies the In predicate on the "update_time" field.
-func UpdateTimeIn(vs ...time.Time) predicate.Runway {
-	v := make([]interface{}, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.In(s.C(FieldUpdateTime), v...))
-	})
-}
-
-// UpdateTimeNotIn applies the NotIn predicate on the "update_time" field.
-func UpdateTimeNotIn(vs ...time.Time) predicate.Runway {
-	v := make([]interface{}, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.NotIn(s.C(FieldUpdateTime), v...))
-	})
-}
-
-// UpdateTimeGT applies the GT predicate on the "update_time" field.
-func UpdateTimeGT(v time.Time) predicate.Runway {
-	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldUpdateTime), v))
-	})
-}
-
-// UpdateTimeGTE applies the GTE predicate on the "update_time" field.
-func UpdateTimeGTE(v time.Time) predicate.Runway {
-	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldUpdateTime), v))
-	})
-}
-
-// UpdateTimeLT applies the LT predicate on the "update_time" field.
-func UpdateTimeLT(v time.Time) predicate.Runway {
-	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldUpdateTime), v))
-	})
-}
-
-// UpdateTimeLTE applies the LTE predicate on the "update_time" field.
-func UpdateTimeLTE(v time.Time) predicate.Runway {
-	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldUpdateTime), v))
 	})
 }
 
@@ -457,7 +348,7 @@ func AirportIdentifierNEQ(v string) predicate.Runway {
 
 // AirportIdentifierIn applies the In predicate on the "airport_identifier" field.
 func AirportIdentifierIn(vs ...string) predicate.Runway {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
@@ -468,7 +359,7 @@ func AirportIdentifierIn(vs ...string) predicate.Runway {
 
 // AirportIdentifierNotIn applies the NotIn predicate on the "airport_identifier" field.
 func AirportIdentifierNotIn(vs ...string) predicate.Runway {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
@@ -556,7 +447,7 @@ func LengthNEQ(v int) predicate.Runway {
 
 // LengthIn applies the In predicate on the "length" field.
 func LengthIn(vs ...int) predicate.Runway {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
@@ -567,7 +458,7 @@ func LengthIn(vs ...int) predicate.Runway {
 
 // LengthNotIn applies the NotIn predicate on the "length" field.
 func LengthNotIn(vs ...int) predicate.Runway {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
@@ -620,7 +511,7 @@ func WidthNEQ(v int) predicate.Runway {
 
 // WidthIn applies the In predicate on the "width" field.
 func WidthIn(vs ...int) predicate.Runway {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
@@ -631,7 +522,7 @@ func WidthIn(vs ...int) predicate.Runway {
 
 // WidthNotIn applies the NotIn predicate on the "width" field.
 func WidthNotIn(vs ...int) predicate.Runway {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
@@ -684,7 +575,7 @@ func SurfaceNEQ(v string) predicate.Runway {
 
 // SurfaceIn applies the In predicate on the "surface" field.
 func SurfaceIn(vs ...string) predicate.Runway {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
@@ -695,7 +586,7 @@ func SurfaceIn(vs ...string) predicate.Runway {
 
 // SurfaceNotIn applies the NotIn predicate on the "surface" field.
 func SurfaceNotIn(vs ...string) predicate.Runway {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
@@ -795,841 +686,981 @@ func ClosedNEQ(v bool) predicate.Runway {
 	})
 }
 
-// LowNumberedRunwayEndIdentifierEQ applies the EQ predicate on the "low_numbered_runway_end_identifier" field.
-func LowNumberedRunwayEndIdentifierEQ(v string) predicate.Runway {
+// LowRunwayIdentifierEQ applies the EQ predicate on the "low_runway_identifier" field.
+func LowRunwayIdentifierEQ(v string) predicate.Runway {
 	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldLowNumberedRunwayEndIdentifier), v))
+		s.Where(sql.EQ(s.C(FieldLowRunwayIdentifier), v))
 	})
 }
 
-// LowNumberedRunwayEndIdentifierNEQ applies the NEQ predicate on the "low_numbered_runway_end_identifier" field.
-func LowNumberedRunwayEndIdentifierNEQ(v string) predicate.Runway {
+// LowRunwayIdentifierNEQ applies the NEQ predicate on the "low_runway_identifier" field.
+func LowRunwayIdentifierNEQ(v string) predicate.Runway {
 	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldLowNumberedRunwayEndIdentifier), v))
+		s.Where(sql.NEQ(s.C(FieldLowRunwayIdentifier), v))
 	})
 }
 
-// LowNumberedRunwayEndIdentifierIn applies the In predicate on the "low_numbered_runway_end_identifier" field.
-func LowNumberedRunwayEndIdentifierIn(vs ...string) predicate.Runway {
-	v := make([]interface{}, len(vs))
+// LowRunwayIdentifierIn applies the In predicate on the "low_runway_identifier" field.
+func LowRunwayIdentifierIn(vs ...string) predicate.Runway {
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
 	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.In(s.C(FieldLowNumberedRunwayEndIdentifier), v...))
+		s.Where(sql.In(s.C(FieldLowRunwayIdentifier), v...))
 	})
 }
 
-// LowNumberedRunwayEndIdentifierNotIn applies the NotIn predicate on the "low_numbered_runway_end_identifier" field.
-func LowNumberedRunwayEndIdentifierNotIn(vs ...string) predicate.Runway {
-	v := make([]interface{}, len(vs))
+// LowRunwayIdentifierNotIn applies the NotIn predicate on the "low_runway_identifier" field.
+func LowRunwayIdentifierNotIn(vs ...string) predicate.Runway {
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
 	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.NotIn(s.C(FieldLowNumberedRunwayEndIdentifier), v...))
+		s.Where(sql.NotIn(s.C(FieldLowRunwayIdentifier), v...))
 	})
 }
 
-// LowNumberedRunwayEndIdentifierGT applies the GT predicate on the "low_numbered_runway_end_identifier" field.
-func LowNumberedRunwayEndIdentifierGT(v string) predicate.Runway {
+// LowRunwayIdentifierGT applies the GT predicate on the "low_runway_identifier" field.
+func LowRunwayIdentifierGT(v string) predicate.Runway {
 	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldLowNumberedRunwayEndIdentifier), v))
+		s.Where(sql.GT(s.C(FieldLowRunwayIdentifier), v))
 	})
 }
 
-// LowNumberedRunwayEndIdentifierGTE applies the GTE predicate on the "low_numbered_runway_end_identifier" field.
-func LowNumberedRunwayEndIdentifierGTE(v string) predicate.Runway {
+// LowRunwayIdentifierGTE applies the GTE predicate on the "low_runway_identifier" field.
+func LowRunwayIdentifierGTE(v string) predicate.Runway {
 	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldLowNumberedRunwayEndIdentifier), v))
+		s.Where(sql.GTE(s.C(FieldLowRunwayIdentifier), v))
 	})
 }
 
-// LowNumberedRunwayEndIdentifierLT applies the LT predicate on the "low_numbered_runway_end_identifier" field.
-func LowNumberedRunwayEndIdentifierLT(v string) predicate.Runway {
+// LowRunwayIdentifierLT applies the LT predicate on the "low_runway_identifier" field.
+func LowRunwayIdentifierLT(v string) predicate.Runway {
 	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldLowNumberedRunwayEndIdentifier), v))
+		s.Where(sql.LT(s.C(FieldLowRunwayIdentifier), v))
 	})
 }
 
-// LowNumberedRunwayEndIdentifierLTE applies the LTE predicate on the "low_numbered_runway_end_identifier" field.
-func LowNumberedRunwayEndIdentifierLTE(v string) predicate.Runway {
+// LowRunwayIdentifierLTE applies the LTE predicate on the "low_runway_identifier" field.
+func LowRunwayIdentifierLTE(v string) predicate.Runway {
 	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldLowNumberedRunwayEndIdentifier), v))
+		s.Where(sql.LTE(s.C(FieldLowRunwayIdentifier), v))
 	})
 }
 
-// LowNumberedRunwayEndIdentifierContains applies the Contains predicate on the "low_numbered_runway_end_identifier" field.
-func LowNumberedRunwayEndIdentifierContains(v string) predicate.Runway {
+// LowRunwayIdentifierContains applies the Contains predicate on the "low_runway_identifier" field.
+func LowRunwayIdentifierContains(v string) predicate.Runway {
 	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.Contains(s.C(FieldLowNumberedRunwayEndIdentifier), v))
+		s.Where(sql.Contains(s.C(FieldLowRunwayIdentifier), v))
 	})
 }
 
-// LowNumberedRunwayEndIdentifierHasPrefix applies the HasPrefix predicate on the "low_numbered_runway_end_identifier" field.
-func LowNumberedRunwayEndIdentifierHasPrefix(v string) predicate.Runway {
+// LowRunwayIdentifierHasPrefix applies the HasPrefix predicate on the "low_runway_identifier" field.
+func LowRunwayIdentifierHasPrefix(v string) predicate.Runway {
 	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.HasPrefix(s.C(FieldLowNumberedRunwayEndIdentifier), v))
+		s.Where(sql.HasPrefix(s.C(FieldLowRunwayIdentifier), v))
 	})
 }
 
-// LowNumberedRunwayEndIdentifierHasSuffix applies the HasSuffix predicate on the "low_numbered_runway_end_identifier" field.
-func LowNumberedRunwayEndIdentifierHasSuffix(v string) predicate.Runway {
+// LowRunwayIdentifierHasSuffix applies the HasSuffix predicate on the "low_runway_identifier" field.
+func LowRunwayIdentifierHasSuffix(v string) predicate.Runway {
 	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.HasSuffix(s.C(FieldLowNumberedRunwayEndIdentifier), v))
+		s.Where(sql.HasSuffix(s.C(FieldLowRunwayIdentifier), v))
 	})
 }
 
-// LowNumberedRunwayEndIdentifierEqualFold applies the EqualFold predicate on the "low_numbered_runway_end_identifier" field.
-func LowNumberedRunwayEndIdentifierEqualFold(v string) predicate.Runway {
+// LowRunwayIdentifierEqualFold applies the EqualFold predicate on the "low_runway_identifier" field.
+func LowRunwayIdentifierEqualFold(v string) predicate.Runway {
 	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.EqualFold(s.C(FieldLowNumberedRunwayEndIdentifier), v))
+		s.Where(sql.EqualFold(s.C(FieldLowRunwayIdentifier), v))
 	})
 }
 
-// LowNumberedRunwayEndIdentifierContainsFold applies the ContainsFold predicate on the "low_numbered_runway_end_identifier" field.
-func LowNumberedRunwayEndIdentifierContainsFold(v string) predicate.Runway {
+// LowRunwayIdentifierContainsFold applies the ContainsFold predicate on the "low_runway_identifier" field.
+func LowRunwayIdentifierContainsFold(v string) predicate.Runway {
 	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.ContainsFold(s.C(FieldLowNumberedRunwayEndIdentifier), v))
+		s.Where(sql.ContainsFold(s.C(FieldLowRunwayIdentifier), v))
 	})
 }
 
-// LowNumberedRunwayEndLatitudeEQ applies the EQ predicate on the "low_numbered_runway_end_latitude" field.
-func LowNumberedRunwayEndLatitudeEQ(v float64) predicate.Runway {
+// LowRunwayLatitudeEQ applies the EQ predicate on the "low_runway_latitude" field.
+func LowRunwayLatitudeEQ(v float64) predicate.Runway {
 	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldLowNumberedRunwayEndLatitude), v))
+		s.Where(sql.EQ(s.C(FieldLowRunwayLatitude), v))
 	})
 }
 
-// LowNumberedRunwayEndLatitudeNEQ applies the NEQ predicate on the "low_numbered_runway_end_latitude" field.
-func LowNumberedRunwayEndLatitudeNEQ(v float64) predicate.Runway {
+// LowRunwayLatitudeNEQ applies the NEQ predicate on the "low_runway_latitude" field.
+func LowRunwayLatitudeNEQ(v float64) predicate.Runway {
 	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldLowNumberedRunwayEndLatitude), v))
+		s.Where(sql.NEQ(s.C(FieldLowRunwayLatitude), v))
 	})
 }
 
-// LowNumberedRunwayEndLatitudeIn applies the In predicate on the "low_numbered_runway_end_latitude" field.
-func LowNumberedRunwayEndLatitudeIn(vs ...float64) predicate.Runway {
-	v := make([]interface{}, len(vs))
+// LowRunwayLatitudeIn applies the In predicate on the "low_runway_latitude" field.
+func LowRunwayLatitudeIn(vs ...float64) predicate.Runway {
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
 	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.In(s.C(FieldLowNumberedRunwayEndLatitude), v...))
+		s.Where(sql.In(s.C(FieldLowRunwayLatitude), v...))
 	})
 }
 
-// LowNumberedRunwayEndLatitudeNotIn applies the NotIn predicate on the "low_numbered_runway_end_latitude" field.
-func LowNumberedRunwayEndLatitudeNotIn(vs ...float64) predicate.Runway {
-	v := make([]interface{}, len(vs))
+// LowRunwayLatitudeNotIn applies the NotIn predicate on the "low_runway_latitude" field.
+func LowRunwayLatitudeNotIn(vs ...float64) predicate.Runway {
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
 	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.NotIn(s.C(FieldLowNumberedRunwayEndLatitude), v...))
+		s.Where(sql.NotIn(s.C(FieldLowRunwayLatitude), v...))
 	})
 }
 
-// LowNumberedRunwayEndLatitudeGT applies the GT predicate on the "low_numbered_runway_end_latitude" field.
-func LowNumberedRunwayEndLatitudeGT(v float64) predicate.Runway {
+// LowRunwayLatitudeGT applies the GT predicate on the "low_runway_latitude" field.
+func LowRunwayLatitudeGT(v float64) predicate.Runway {
 	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldLowNumberedRunwayEndLatitude), v))
+		s.Where(sql.GT(s.C(FieldLowRunwayLatitude), v))
 	})
 }
 
-// LowNumberedRunwayEndLatitudeGTE applies the GTE predicate on the "low_numbered_runway_end_latitude" field.
-func LowNumberedRunwayEndLatitudeGTE(v float64) predicate.Runway {
+// LowRunwayLatitudeGTE applies the GTE predicate on the "low_runway_latitude" field.
+func LowRunwayLatitudeGTE(v float64) predicate.Runway {
 	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldLowNumberedRunwayEndLatitude), v))
+		s.Where(sql.GTE(s.C(FieldLowRunwayLatitude), v))
 	})
 }
 
-// LowNumberedRunwayEndLatitudeLT applies the LT predicate on the "low_numbered_runway_end_latitude" field.
-func LowNumberedRunwayEndLatitudeLT(v float64) predicate.Runway {
+// LowRunwayLatitudeLT applies the LT predicate on the "low_runway_latitude" field.
+func LowRunwayLatitudeLT(v float64) predicate.Runway {
 	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldLowNumberedRunwayEndLatitude), v))
+		s.Where(sql.LT(s.C(FieldLowRunwayLatitude), v))
 	})
 }
 
-// LowNumberedRunwayEndLatitudeLTE applies the LTE predicate on the "low_numbered_runway_end_latitude" field.
-func LowNumberedRunwayEndLatitudeLTE(v float64) predicate.Runway {
+// LowRunwayLatitudeLTE applies the LTE predicate on the "low_runway_latitude" field.
+func LowRunwayLatitudeLTE(v float64) predicate.Runway {
 	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldLowNumberedRunwayEndLatitude), v))
+		s.Where(sql.LTE(s.C(FieldLowRunwayLatitude), v))
 	})
 }
 
-// LowNumberedRunwayEndLongitudeEQ applies the EQ predicate on the "low_numbered_runway_end_longitude" field.
-func LowNumberedRunwayEndLongitudeEQ(v float64) predicate.Runway {
+// LowRunwayLatitudeIsNil applies the IsNil predicate on the "low_runway_latitude" field.
+func LowRunwayLatitudeIsNil() predicate.Runway {
 	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldLowNumberedRunwayEndLongitude), v))
+		s.Where(sql.IsNull(s.C(FieldLowRunwayLatitude)))
 	})
 }
 
-// LowNumberedRunwayEndLongitudeNEQ applies the NEQ predicate on the "low_numbered_runway_end_longitude" field.
-func LowNumberedRunwayEndLongitudeNEQ(v float64) predicate.Runway {
+// LowRunwayLatitudeNotNil applies the NotNil predicate on the "low_runway_latitude" field.
+func LowRunwayLatitudeNotNil() predicate.Runway {
 	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldLowNumberedRunwayEndLongitude), v))
+		s.Where(sql.NotNull(s.C(FieldLowRunwayLatitude)))
 	})
 }
 
-// LowNumberedRunwayEndLongitudeIn applies the In predicate on the "low_numbered_runway_end_longitude" field.
-func LowNumberedRunwayEndLongitudeIn(vs ...float64) predicate.Runway {
-	v := make([]interface{}, len(vs))
+// LowRunwayLongitudeEQ applies the EQ predicate on the "low_runway_longitude" field.
+func LowRunwayLongitudeEQ(v float64) predicate.Runway {
+	return predicate.Runway(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldLowRunwayLongitude), v))
+	})
+}
+
+// LowRunwayLongitudeNEQ applies the NEQ predicate on the "low_runway_longitude" field.
+func LowRunwayLongitudeNEQ(v float64) predicate.Runway {
+	return predicate.Runway(func(s *sql.Selector) {
+		s.Where(sql.NEQ(s.C(FieldLowRunwayLongitude), v))
+	})
+}
+
+// LowRunwayLongitudeIn applies the In predicate on the "low_runway_longitude" field.
+func LowRunwayLongitudeIn(vs ...float64) predicate.Runway {
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
 	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.In(s.C(FieldLowNumberedRunwayEndLongitude), v...))
+		s.Where(sql.In(s.C(FieldLowRunwayLongitude), v...))
 	})
 }
 
-// LowNumberedRunwayEndLongitudeNotIn applies the NotIn predicate on the "low_numbered_runway_end_longitude" field.
-func LowNumberedRunwayEndLongitudeNotIn(vs ...float64) predicate.Runway {
-	v := make([]interface{}, len(vs))
+// LowRunwayLongitudeNotIn applies the NotIn predicate on the "low_runway_longitude" field.
+func LowRunwayLongitudeNotIn(vs ...float64) predicate.Runway {
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
 	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.NotIn(s.C(FieldLowNumberedRunwayEndLongitude), v...))
+		s.Where(sql.NotIn(s.C(FieldLowRunwayLongitude), v...))
 	})
 }
 
-// LowNumberedRunwayEndLongitudeGT applies the GT predicate on the "low_numbered_runway_end_longitude" field.
-func LowNumberedRunwayEndLongitudeGT(v float64) predicate.Runway {
+// LowRunwayLongitudeGT applies the GT predicate on the "low_runway_longitude" field.
+func LowRunwayLongitudeGT(v float64) predicate.Runway {
 	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldLowNumberedRunwayEndLongitude), v))
+		s.Where(sql.GT(s.C(FieldLowRunwayLongitude), v))
 	})
 }
 
-// LowNumberedRunwayEndLongitudeGTE applies the GTE predicate on the "low_numbered_runway_end_longitude" field.
-func LowNumberedRunwayEndLongitudeGTE(v float64) predicate.Runway {
+// LowRunwayLongitudeGTE applies the GTE predicate on the "low_runway_longitude" field.
+func LowRunwayLongitudeGTE(v float64) predicate.Runway {
 	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldLowNumberedRunwayEndLongitude), v))
+		s.Where(sql.GTE(s.C(FieldLowRunwayLongitude), v))
 	})
 }
 
-// LowNumberedRunwayEndLongitudeLT applies the LT predicate on the "low_numbered_runway_end_longitude" field.
-func LowNumberedRunwayEndLongitudeLT(v float64) predicate.Runway {
+// LowRunwayLongitudeLT applies the LT predicate on the "low_runway_longitude" field.
+func LowRunwayLongitudeLT(v float64) predicate.Runway {
 	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldLowNumberedRunwayEndLongitude), v))
+		s.Where(sql.LT(s.C(FieldLowRunwayLongitude), v))
 	})
 }
 
-// LowNumberedRunwayEndLongitudeLTE applies the LTE predicate on the "low_numbered_runway_end_longitude" field.
-func LowNumberedRunwayEndLongitudeLTE(v float64) predicate.Runway {
+// LowRunwayLongitudeLTE applies the LTE predicate on the "low_runway_longitude" field.
+func LowRunwayLongitudeLTE(v float64) predicate.Runway {
 	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldLowNumberedRunwayEndLongitude), v))
+		s.Where(sql.LTE(s.C(FieldLowRunwayLongitude), v))
 	})
 }
 
-// LowNumberedRunwayEndElevationEQ applies the EQ predicate on the "low_numbered_runway_end_elevation" field.
-func LowNumberedRunwayEndElevationEQ(v int) predicate.Runway {
+// LowRunwayLongitudeIsNil applies the IsNil predicate on the "low_runway_longitude" field.
+func LowRunwayLongitudeIsNil() predicate.Runway {
 	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldLowNumberedRunwayEndElevation), v))
+		s.Where(sql.IsNull(s.C(FieldLowRunwayLongitude)))
 	})
 }
 
-// LowNumberedRunwayEndElevationNEQ applies the NEQ predicate on the "low_numbered_runway_end_elevation" field.
-func LowNumberedRunwayEndElevationNEQ(v int) predicate.Runway {
+// LowRunwayLongitudeNotNil applies the NotNil predicate on the "low_runway_longitude" field.
+func LowRunwayLongitudeNotNil() predicate.Runway {
 	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldLowNumberedRunwayEndElevation), v))
+		s.Where(sql.NotNull(s.C(FieldLowRunwayLongitude)))
 	})
 }
 
-// LowNumberedRunwayEndElevationIn applies the In predicate on the "low_numbered_runway_end_elevation" field.
-func LowNumberedRunwayEndElevationIn(vs ...int) predicate.Runway {
-	v := make([]interface{}, len(vs))
+// LowRunwayElevationEQ applies the EQ predicate on the "low_runway_elevation" field.
+func LowRunwayElevationEQ(v int) predicate.Runway {
+	return predicate.Runway(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldLowRunwayElevation), v))
+	})
+}
+
+// LowRunwayElevationNEQ applies the NEQ predicate on the "low_runway_elevation" field.
+func LowRunwayElevationNEQ(v int) predicate.Runway {
+	return predicate.Runway(func(s *sql.Selector) {
+		s.Where(sql.NEQ(s.C(FieldLowRunwayElevation), v))
+	})
+}
+
+// LowRunwayElevationIn applies the In predicate on the "low_runway_elevation" field.
+func LowRunwayElevationIn(vs ...int) predicate.Runway {
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
 	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.In(s.C(FieldLowNumberedRunwayEndElevation), v...))
+		s.Where(sql.In(s.C(FieldLowRunwayElevation), v...))
 	})
 }
 
-// LowNumberedRunwayEndElevationNotIn applies the NotIn predicate on the "low_numbered_runway_end_elevation" field.
-func LowNumberedRunwayEndElevationNotIn(vs ...int) predicate.Runway {
-	v := make([]interface{}, len(vs))
+// LowRunwayElevationNotIn applies the NotIn predicate on the "low_runway_elevation" field.
+func LowRunwayElevationNotIn(vs ...int) predicate.Runway {
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
 	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.NotIn(s.C(FieldLowNumberedRunwayEndElevation), v...))
+		s.Where(sql.NotIn(s.C(FieldLowRunwayElevation), v...))
 	})
 }
 
-// LowNumberedRunwayEndElevationGT applies the GT predicate on the "low_numbered_runway_end_elevation" field.
-func LowNumberedRunwayEndElevationGT(v int) predicate.Runway {
+// LowRunwayElevationGT applies the GT predicate on the "low_runway_elevation" field.
+func LowRunwayElevationGT(v int) predicate.Runway {
 	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldLowNumberedRunwayEndElevation), v))
+		s.Where(sql.GT(s.C(FieldLowRunwayElevation), v))
 	})
 }
 
-// LowNumberedRunwayEndElevationGTE applies the GTE predicate on the "low_numbered_runway_end_elevation" field.
-func LowNumberedRunwayEndElevationGTE(v int) predicate.Runway {
+// LowRunwayElevationGTE applies the GTE predicate on the "low_runway_elevation" field.
+func LowRunwayElevationGTE(v int) predicate.Runway {
 	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldLowNumberedRunwayEndElevation), v))
+		s.Where(sql.GTE(s.C(FieldLowRunwayElevation), v))
 	})
 }
 
-// LowNumberedRunwayEndElevationLT applies the LT predicate on the "low_numbered_runway_end_elevation" field.
-func LowNumberedRunwayEndElevationLT(v int) predicate.Runway {
+// LowRunwayElevationLT applies the LT predicate on the "low_runway_elevation" field.
+func LowRunwayElevationLT(v int) predicate.Runway {
 	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldLowNumberedRunwayEndElevation), v))
+		s.Where(sql.LT(s.C(FieldLowRunwayElevation), v))
 	})
 }
 
-// LowNumberedRunwayEndElevationLTE applies the LTE predicate on the "low_numbered_runway_end_elevation" field.
-func LowNumberedRunwayEndElevationLTE(v int) predicate.Runway {
+// LowRunwayElevationLTE applies the LTE predicate on the "low_runway_elevation" field.
+func LowRunwayElevationLTE(v int) predicate.Runway {
 	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldLowNumberedRunwayEndElevation), v))
+		s.Where(sql.LTE(s.C(FieldLowRunwayElevation), v))
 	})
 }
 
-// LowNumberedRunwayEndHeadingEQ applies the EQ predicate on the "low_numbered_runway_end_heading" field.
-func LowNumberedRunwayEndHeadingEQ(v int) predicate.Runway {
+// LowRunwayElevationIsNil applies the IsNil predicate on the "low_runway_elevation" field.
+func LowRunwayElevationIsNil() predicate.Runway {
 	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldLowNumberedRunwayEndHeading), v))
+		s.Where(sql.IsNull(s.C(FieldLowRunwayElevation)))
 	})
 }
 
-// LowNumberedRunwayEndHeadingNEQ applies the NEQ predicate on the "low_numbered_runway_end_heading" field.
-func LowNumberedRunwayEndHeadingNEQ(v int) predicate.Runway {
+// LowRunwayElevationNotNil applies the NotNil predicate on the "low_runway_elevation" field.
+func LowRunwayElevationNotNil() predicate.Runway {
 	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldLowNumberedRunwayEndHeading), v))
+		s.Where(sql.NotNull(s.C(FieldLowRunwayElevation)))
 	})
 }
 
-// LowNumberedRunwayEndHeadingIn applies the In predicate on the "low_numbered_runway_end_heading" field.
-func LowNumberedRunwayEndHeadingIn(vs ...int) predicate.Runway {
-	v := make([]interface{}, len(vs))
+// LowRunwayHeadingEQ applies the EQ predicate on the "low_runway_heading" field.
+func LowRunwayHeadingEQ(v int) predicate.Runway {
+	return predicate.Runway(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldLowRunwayHeading), v))
+	})
+}
+
+// LowRunwayHeadingNEQ applies the NEQ predicate on the "low_runway_heading" field.
+func LowRunwayHeadingNEQ(v int) predicate.Runway {
+	return predicate.Runway(func(s *sql.Selector) {
+		s.Where(sql.NEQ(s.C(FieldLowRunwayHeading), v))
+	})
+}
+
+// LowRunwayHeadingIn applies the In predicate on the "low_runway_heading" field.
+func LowRunwayHeadingIn(vs ...int) predicate.Runway {
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
 	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.In(s.C(FieldLowNumberedRunwayEndHeading), v...))
+		s.Where(sql.In(s.C(FieldLowRunwayHeading), v...))
 	})
 }
 
-// LowNumberedRunwayEndHeadingNotIn applies the NotIn predicate on the "low_numbered_runway_end_heading" field.
-func LowNumberedRunwayEndHeadingNotIn(vs ...int) predicate.Runway {
-	v := make([]interface{}, len(vs))
+// LowRunwayHeadingNotIn applies the NotIn predicate on the "low_runway_heading" field.
+func LowRunwayHeadingNotIn(vs ...int) predicate.Runway {
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
 	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.NotIn(s.C(FieldLowNumberedRunwayEndHeading), v...))
+		s.Where(sql.NotIn(s.C(FieldLowRunwayHeading), v...))
 	})
 }
 
-// LowNumberedRunwayEndHeadingGT applies the GT predicate on the "low_numbered_runway_end_heading" field.
-func LowNumberedRunwayEndHeadingGT(v int) predicate.Runway {
+// LowRunwayHeadingGT applies the GT predicate on the "low_runway_heading" field.
+func LowRunwayHeadingGT(v int) predicate.Runway {
 	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldLowNumberedRunwayEndHeading), v))
+		s.Where(sql.GT(s.C(FieldLowRunwayHeading), v))
 	})
 }
 
-// LowNumberedRunwayEndHeadingGTE applies the GTE predicate on the "low_numbered_runway_end_heading" field.
-func LowNumberedRunwayEndHeadingGTE(v int) predicate.Runway {
+// LowRunwayHeadingGTE applies the GTE predicate on the "low_runway_heading" field.
+func LowRunwayHeadingGTE(v int) predicate.Runway {
 	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldLowNumberedRunwayEndHeading), v))
+		s.Where(sql.GTE(s.C(FieldLowRunwayHeading), v))
 	})
 }
 
-// LowNumberedRunwayEndHeadingLT applies the LT predicate on the "low_numbered_runway_end_heading" field.
-func LowNumberedRunwayEndHeadingLT(v int) predicate.Runway {
+// LowRunwayHeadingLT applies the LT predicate on the "low_runway_heading" field.
+func LowRunwayHeadingLT(v int) predicate.Runway {
 	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldLowNumberedRunwayEndHeading), v))
+		s.Where(sql.LT(s.C(FieldLowRunwayHeading), v))
 	})
 }
 
-// LowNumberedRunwayEndHeadingLTE applies the LTE predicate on the "low_numbered_runway_end_heading" field.
-func LowNumberedRunwayEndHeadingLTE(v int) predicate.Runway {
+// LowRunwayHeadingLTE applies the LTE predicate on the "low_runway_heading" field.
+func LowRunwayHeadingLTE(v int) predicate.Runway {
 	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldLowNumberedRunwayEndHeading), v))
+		s.Where(sql.LTE(s.C(FieldLowRunwayHeading), v))
 	})
 }
 
-// LowNumberedRunwayEndDisplacedEQ applies the EQ predicate on the "low_numbered_runway_end_displaced" field.
-func LowNumberedRunwayEndDisplacedEQ(v int) predicate.Runway {
+// LowRunwayHeadingIsNil applies the IsNil predicate on the "low_runway_heading" field.
+func LowRunwayHeadingIsNil() predicate.Runway {
 	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldLowNumberedRunwayEndDisplaced), v))
+		s.Where(sql.IsNull(s.C(FieldLowRunwayHeading)))
 	})
 }
 
-// LowNumberedRunwayEndDisplacedNEQ applies the NEQ predicate on the "low_numbered_runway_end_displaced" field.
-func LowNumberedRunwayEndDisplacedNEQ(v int) predicate.Runway {
+// LowRunwayHeadingNotNil applies the NotNil predicate on the "low_runway_heading" field.
+func LowRunwayHeadingNotNil() predicate.Runway {
 	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldLowNumberedRunwayEndDisplaced), v))
+		s.Where(sql.NotNull(s.C(FieldLowRunwayHeading)))
 	})
 }
 
-// LowNumberedRunwayEndDisplacedIn applies the In predicate on the "low_numbered_runway_end_displaced" field.
-func LowNumberedRunwayEndDisplacedIn(vs ...int) predicate.Runway {
-	v := make([]interface{}, len(vs))
+// LowRunwayDisplacedEQ applies the EQ predicate on the "low_runway_displaced" field.
+func LowRunwayDisplacedEQ(v int) predicate.Runway {
+	return predicate.Runway(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldLowRunwayDisplaced), v))
+	})
+}
+
+// LowRunwayDisplacedNEQ applies the NEQ predicate on the "low_runway_displaced" field.
+func LowRunwayDisplacedNEQ(v int) predicate.Runway {
+	return predicate.Runway(func(s *sql.Selector) {
+		s.Where(sql.NEQ(s.C(FieldLowRunwayDisplaced), v))
+	})
+}
+
+// LowRunwayDisplacedIn applies the In predicate on the "low_runway_displaced" field.
+func LowRunwayDisplacedIn(vs ...int) predicate.Runway {
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
 	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.In(s.C(FieldLowNumberedRunwayEndDisplaced), v...))
+		s.Where(sql.In(s.C(FieldLowRunwayDisplaced), v...))
 	})
 }
 
-// LowNumberedRunwayEndDisplacedNotIn applies the NotIn predicate on the "low_numbered_runway_end_displaced" field.
-func LowNumberedRunwayEndDisplacedNotIn(vs ...int) predicate.Runway {
-	v := make([]interface{}, len(vs))
+// LowRunwayDisplacedNotIn applies the NotIn predicate on the "low_runway_displaced" field.
+func LowRunwayDisplacedNotIn(vs ...int) predicate.Runway {
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
 	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.NotIn(s.C(FieldLowNumberedRunwayEndDisplaced), v...))
+		s.Where(sql.NotIn(s.C(FieldLowRunwayDisplaced), v...))
 	})
 }
 
-// LowNumberedRunwayEndDisplacedGT applies the GT predicate on the "low_numbered_runway_end_displaced" field.
-func LowNumberedRunwayEndDisplacedGT(v int) predicate.Runway {
+// LowRunwayDisplacedGT applies the GT predicate on the "low_runway_displaced" field.
+func LowRunwayDisplacedGT(v int) predicate.Runway {
 	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldLowNumberedRunwayEndDisplaced), v))
+		s.Where(sql.GT(s.C(FieldLowRunwayDisplaced), v))
 	})
 }
 
-// LowNumberedRunwayEndDisplacedGTE applies the GTE predicate on the "low_numbered_runway_end_displaced" field.
-func LowNumberedRunwayEndDisplacedGTE(v int) predicate.Runway {
+// LowRunwayDisplacedGTE applies the GTE predicate on the "low_runway_displaced" field.
+func LowRunwayDisplacedGTE(v int) predicate.Runway {
 	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldLowNumberedRunwayEndDisplaced), v))
+		s.Where(sql.GTE(s.C(FieldLowRunwayDisplaced), v))
 	})
 }
 
-// LowNumberedRunwayEndDisplacedLT applies the LT predicate on the "low_numbered_runway_end_displaced" field.
-func LowNumberedRunwayEndDisplacedLT(v int) predicate.Runway {
+// LowRunwayDisplacedLT applies the LT predicate on the "low_runway_displaced" field.
+func LowRunwayDisplacedLT(v int) predicate.Runway {
 	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldLowNumberedRunwayEndDisplaced), v))
+		s.Where(sql.LT(s.C(FieldLowRunwayDisplaced), v))
 	})
 }
 
-// LowNumberedRunwayEndDisplacedLTE applies the LTE predicate on the "low_numbered_runway_end_displaced" field.
-func LowNumberedRunwayEndDisplacedLTE(v int) predicate.Runway {
+// LowRunwayDisplacedLTE applies the LTE predicate on the "low_runway_displaced" field.
+func LowRunwayDisplacedLTE(v int) predicate.Runway {
 	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldLowNumberedRunwayEndDisplaced), v))
+		s.Where(sql.LTE(s.C(FieldLowRunwayDisplaced), v))
 	})
 }
 
-// HighNumberedRunwayEndIdentifierEQ applies the EQ predicate on the "high_numbered_runway_end_identifier" field.
-func HighNumberedRunwayEndIdentifierEQ(v string) predicate.Runway {
+// LowRunwayDisplacedIsNil applies the IsNil predicate on the "low_runway_displaced" field.
+func LowRunwayDisplacedIsNil() predicate.Runway {
 	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldHighNumberedRunwayEndIdentifier), v))
+		s.Where(sql.IsNull(s.C(FieldLowRunwayDisplaced)))
 	})
 }
 
-// HighNumberedRunwayEndIdentifierNEQ applies the NEQ predicate on the "high_numbered_runway_end_identifier" field.
-func HighNumberedRunwayEndIdentifierNEQ(v string) predicate.Runway {
+// LowRunwayDisplacedNotNil applies the NotNil predicate on the "low_runway_displaced" field.
+func LowRunwayDisplacedNotNil() predicate.Runway {
 	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldHighNumberedRunwayEndIdentifier), v))
+		s.Where(sql.NotNull(s.C(FieldLowRunwayDisplaced)))
 	})
 }
 
-// HighNumberedRunwayEndIdentifierIn applies the In predicate on the "high_numbered_runway_end_identifier" field.
-func HighNumberedRunwayEndIdentifierIn(vs ...string) predicate.Runway {
-	v := make([]interface{}, len(vs))
+// HighRunwayIdentifierEQ applies the EQ predicate on the "high_runway_identifier" field.
+func HighRunwayIdentifierEQ(v string) predicate.Runway {
+	return predicate.Runway(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldHighRunwayIdentifier), v))
+	})
+}
+
+// HighRunwayIdentifierNEQ applies the NEQ predicate on the "high_runway_identifier" field.
+func HighRunwayIdentifierNEQ(v string) predicate.Runway {
+	return predicate.Runway(func(s *sql.Selector) {
+		s.Where(sql.NEQ(s.C(FieldHighRunwayIdentifier), v))
+	})
+}
+
+// HighRunwayIdentifierIn applies the In predicate on the "high_runway_identifier" field.
+func HighRunwayIdentifierIn(vs ...string) predicate.Runway {
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
 	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.In(s.C(FieldHighNumberedRunwayEndIdentifier), v...))
+		s.Where(sql.In(s.C(FieldHighRunwayIdentifier), v...))
 	})
 }
 
-// HighNumberedRunwayEndIdentifierNotIn applies the NotIn predicate on the "high_numbered_runway_end_identifier" field.
-func HighNumberedRunwayEndIdentifierNotIn(vs ...string) predicate.Runway {
-	v := make([]interface{}, len(vs))
+// HighRunwayIdentifierNotIn applies the NotIn predicate on the "high_runway_identifier" field.
+func HighRunwayIdentifierNotIn(vs ...string) predicate.Runway {
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
 	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.NotIn(s.C(FieldHighNumberedRunwayEndIdentifier), v...))
+		s.Where(sql.NotIn(s.C(FieldHighRunwayIdentifier), v...))
 	})
 }
 
-// HighNumberedRunwayEndIdentifierGT applies the GT predicate on the "high_numbered_runway_end_identifier" field.
-func HighNumberedRunwayEndIdentifierGT(v string) predicate.Runway {
+// HighRunwayIdentifierGT applies the GT predicate on the "high_runway_identifier" field.
+func HighRunwayIdentifierGT(v string) predicate.Runway {
 	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldHighNumberedRunwayEndIdentifier), v))
+		s.Where(sql.GT(s.C(FieldHighRunwayIdentifier), v))
 	})
 }
 
-// HighNumberedRunwayEndIdentifierGTE applies the GTE predicate on the "high_numbered_runway_end_identifier" field.
-func HighNumberedRunwayEndIdentifierGTE(v string) predicate.Runway {
+// HighRunwayIdentifierGTE applies the GTE predicate on the "high_runway_identifier" field.
+func HighRunwayIdentifierGTE(v string) predicate.Runway {
 	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldHighNumberedRunwayEndIdentifier), v))
+		s.Where(sql.GTE(s.C(FieldHighRunwayIdentifier), v))
 	})
 }
 
-// HighNumberedRunwayEndIdentifierLT applies the LT predicate on the "high_numbered_runway_end_identifier" field.
-func HighNumberedRunwayEndIdentifierLT(v string) predicate.Runway {
+// HighRunwayIdentifierLT applies the LT predicate on the "high_runway_identifier" field.
+func HighRunwayIdentifierLT(v string) predicate.Runway {
 	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldHighNumberedRunwayEndIdentifier), v))
+		s.Where(sql.LT(s.C(FieldHighRunwayIdentifier), v))
 	})
 }
 
-// HighNumberedRunwayEndIdentifierLTE applies the LTE predicate on the "high_numbered_runway_end_identifier" field.
-func HighNumberedRunwayEndIdentifierLTE(v string) predicate.Runway {
+// HighRunwayIdentifierLTE applies the LTE predicate on the "high_runway_identifier" field.
+func HighRunwayIdentifierLTE(v string) predicate.Runway {
 	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldHighNumberedRunwayEndIdentifier), v))
+		s.Where(sql.LTE(s.C(FieldHighRunwayIdentifier), v))
 	})
 }
 
-// HighNumberedRunwayEndIdentifierContains applies the Contains predicate on the "high_numbered_runway_end_identifier" field.
-func HighNumberedRunwayEndIdentifierContains(v string) predicate.Runway {
+// HighRunwayIdentifierContains applies the Contains predicate on the "high_runway_identifier" field.
+func HighRunwayIdentifierContains(v string) predicate.Runway {
 	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.Contains(s.C(FieldHighNumberedRunwayEndIdentifier), v))
+		s.Where(sql.Contains(s.C(FieldHighRunwayIdentifier), v))
 	})
 }
 
-// HighNumberedRunwayEndIdentifierHasPrefix applies the HasPrefix predicate on the "high_numbered_runway_end_identifier" field.
-func HighNumberedRunwayEndIdentifierHasPrefix(v string) predicate.Runway {
+// HighRunwayIdentifierHasPrefix applies the HasPrefix predicate on the "high_runway_identifier" field.
+func HighRunwayIdentifierHasPrefix(v string) predicate.Runway {
 	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.HasPrefix(s.C(FieldHighNumberedRunwayEndIdentifier), v))
+		s.Where(sql.HasPrefix(s.C(FieldHighRunwayIdentifier), v))
 	})
 }
 
-// HighNumberedRunwayEndIdentifierHasSuffix applies the HasSuffix predicate on the "high_numbered_runway_end_identifier" field.
-func HighNumberedRunwayEndIdentifierHasSuffix(v string) predicate.Runway {
+// HighRunwayIdentifierHasSuffix applies the HasSuffix predicate on the "high_runway_identifier" field.
+func HighRunwayIdentifierHasSuffix(v string) predicate.Runway {
 	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.HasSuffix(s.C(FieldHighNumberedRunwayEndIdentifier), v))
+		s.Where(sql.HasSuffix(s.C(FieldHighRunwayIdentifier), v))
 	})
 }
 
-// HighNumberedRunwayEndIdentifierEqualFold applies the EqualFold predicate on the "high_numbered_runway_end_identifier" field.
-func HighNumberedRunwayEndIdentifierEqualFold(v string) predicate.Runway {
+// HighRunwayIdentifierEqualFold applies the EqualFold predicate on the "high_runway_identifier" field.
+func HighRunwayIdentifierEqualFold(v string) predicate.Runway {
 	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.EqualFold(s.C(FieldHighNumberedRunwayEndIdentifier), v))
+		s.Where(sql.EqualFold(s.C(FieldHighRunwayIdentifier), v))
 	})
 }
 
-// HighNumberedRunwayEndIdentifierContainsFold applies the ContainsFold predicate on the "high_numbered_runway_end_identifier" field.
-func HighNumberedRunwayEndIdentifierContainsFold(v string) predicate.Runway {
+// HighRunwayIdentifierContainsFold applies the ContainsFold predicate on the "high_runway_identifier" field.
+func HighRunwayIdentifierContainsFold(v string) predicate.Runway {
 	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.ContainsFold(s.C(FieldHighNumberedRunwayEndIdentifier), v))
+		s.Where(sql.ContainsFold(s.C(FieldHighRunwayIdentifier), v))
 	})
 }
 
-// HighNumberedRunwayEndLatitudeEQ applies the EQ predicate on the "high_numbered_runway_end_latitude" field.
-func HighNumberedRunwayEndLatitudeEQ(v float64) predicate.Runway {
+// HighRunwayLatitudeEQ applies the EQ predicate on the "high_runway_latitude" field.
+func HighRunwayLatitudeEQ(v float64) predicate.Runway {
 	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldHighNumberedRunwayEndLatitude), v))
+		s.Where(sql.EQ(s.C(FieldHighRunwayLatitude), v))
 	})
 }
 
-// HighNumberedRunwayEndLatitudeNEQ applies the NEQ predicate on the "high_numbered_runway_end_latitude" field.
-func HighNumberedRunwayEndLatitudeNEQ(v float64) predicate.Runway {
+// HighRunwayLatitudeNEQ applies the NEQ predicate on the "high_runway_latitude" field.
+func HighRunwayLatitudeNEQ(v float64) predicate.Runway {
 	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldHighNumberedRunwayEndLatitude), v))
+		s.Where(sql.NEQ(s.C(FieldHighRunwayLatitude), v))
 	})
 }
 
-// HighNumberedRunwayEndLatitudeIn applies the In predicate on the "high_numbered_runway_end_latitude" field.
-func HighNumberedRunwayEndLatitudeIn(vs ...float64) predicate.Runway {
-	v := make([]interface{}, len(vs))
+// HighRunwayLatitudeIn applies the In predicate on the "high_runway_latitude" field.
+func HighRunwayLatitudeIn(vs ...float64) predicate.Runway {
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
 	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.In(s.C(FieldHighNumberedRunwayEndLatitude), v...))
+		s.Where(sql.In(s.C(FieldHighRunwayLatitude), v...))
 	})
 }
 
-// HighNumberedRunwayEndLatitudeNotIn applies the NotIn predicate on the "high_numbered_runway_end_latitude" field.
-func HighNumberedRunwayEndLatitudeNotIn(vs ...float64) predicate.Runway {
-	v := make([]interface{}, len(vs))
+// HighRunwayLatitudeNotIn applies the NotIn predicate on the "high_runway_latitude" field.
+func HighRunwayLatitudeNotIn(vs ...float64) predicate.Runway {
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
 	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.NotIn(s.C(FieldHighNumberedRunwayEndLatitude), v...))
+		s.Where(sql.NotIn(s.C(FieldHighRunwayLatitude), v...))
 	})
 }
 
-// HighNumberedRunwayEndLatitudeGT applies the GT predicate on the "high_numbered_runway_end_latitude" field.
-func HighNumberedRunwayEndLatitudeGT(v float64) predicate.Runway {
+// HighRunwayLatitudeGT applies the GT predicate on the "high_runway_latitude" field.
+func HighRunwayLatitudeGT(v float64) predicate.Runway {
 	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldHighNumberedRunwayEndLatitude), v))
+		s.Where(sql.GT(s.C(FieldHighRunwayLatitude), v))
 	})
 }
 
-// HighNumberedRunwayEndLatitudeGTE applies the GTE predicate on the "high_numbered_runway_end_latitude" field.
-func HighNumberedRunwayEndLatitudeGTE(v float64) predicate.Runway {
+// HighRunwayLatitudeGTE applies the GTE predicate on the "high_runway_latitude" field.
+func HighRunwayLatitudeGTE(v float64) predicate.Runway {
 	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldHighNumberedRunwayEndLatitude), v))
+		s.Where(sql.GTE(s.C(FieldHighRunwayLatitude), v))
 	})
 }
 
-// HighNumberedRunwayEndLatitudeLT applies the LT predicate on the "high_numbered_runway_end_latitude" field.
-func HighNumberedRunwayEndLatitudeLT(v float64) predicate.Runway {
+// HighRunwayLatitudeLT applies the LT predicate on the "high_runway_latitude" field.
+func HighRunwayLatitudeLT(v float64) predicate.Runway {
 	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldHighNumberedRunwayEndLatitude), v))
+		s.Where(sql.LT(s.C(FieldHighRunwayLatitude), v))
 	})
 }
 
-// HighNumberedRunwayEndLatitudeLTE applies the LTE predicate on the "high_numbered_runway_end_latitude" field.
-func HighNumberedRunwayEndLatitudeLTE(v float64) predicate.Runway {
+// HighRunwayLatitudeLTE applies the LTE predicate on the "high_runway_latitude" field.
+func HighRunwayLatitudeLTE(v float64) predicate.Runway {
 	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldHighNumberedRunwayEndLatitude), v))
+		s.Where(sql.LTE(s.C(FieldHighRunwayLatitude), v))
 	})
 }
 
-// HighNumberedRunwayEndLongitudeEQ applies the EQ predicate on the "high_numbered_runway_end_longitude" field.
-func HighNumberedRunwayEndLongitudeEQ(v float64) predicate.Runway {
+// HighRunwayLatitudeIsNil applies the IsNil predicate on the "high_runway_latitude" field.
+func HighRunwayLatitudeIsNil() predicate.Runway {
 	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldHighNumberedRunwayEndLongitude), v))
+		s.Where(sql.IsNull(s.C(FieldHighRunwayLatitude)))
 	})
 }
 
-// HighNumberedRunwayEndLongitudeNEQ applies the NEQ predicate on the "high_numbered_runway_end_longitude" field.
-func HighNumberedRunwayEndLongitudeNEQ(v float64) predicate.Runway {
+// HighRunwayLatitudeNotNil applies the NotNil predicate on the "high_runway_latitude" field.
+func HighRunwayLatitudeNotNil() predicate.Runway {
 	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldHighNumberedRunwayEndLongitude), v))
+		s.Where(sql.NotNull(s.C(FieldHighRunwayLatitude)))
 	})
 }
 
-// HighNumberedRunwayEndLongitudeIn applies the In predicate on the "high_numbered_runway_end_longitude" field.
-func HighNumberedRunwayEndLongitudeIn(vs ...float64) predicate.Runway {
-	v := make([]interface{}, len(vs))
+// HighRunwayLongitudeEQ applies the EQ predicate on the "high_runway_longitude" field.
+func HighRunwayLongitudeEQ(v float64) predicate.Runway {
+	return predicate.Runway(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldHighRunwayLongitude), v))
+	})
+}
+
+// HighRunwayLongitudeNEQ applies the NEQ predicate on the "high_runway_longitude" field.
+func HighRunwayLongitudeNEQ(v float64) predicate.Runway {
+	return predicate.Runway(func(s *sql.Selector) {
+		s.Where(sql.NEQ(s.C(FieldHighRunwayLongitude), v))
+	})
+}
+
+// HighRunwayLongitudeIn applies the In predicate on the "high_runway_longitude" field.
+func HighRunwayLongitudeIn(vs ...float64) predicate.Runway {
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
 	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.In(s.C(FieldHighNumberedRunwayEndLongitude), v...))
+		s.Where(sql.In(s.C(FieldHighRunwayLongitude), v...))
 	})
 }
 
-// HighNumberedRunwayEndLongitudeNotIn applies the NotIn predicate on the "high_numbered_runway_end_longitude" field.
-func HighNumberedRunwayEndLongitudeNotIn(vs ...float64) predicate.Runway {
-	v := make([]interface{}, len(vs))
+// HighRunwayLongitudeNotIn applies the NotIn predicate on the "high_runway_longitude" field.
+func HighRunwayLongitudeNotIn(vs ...float64) predicate.Runway {
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
 	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.NotIn(s.C(FieldHighNumberedRunwayEndLongitude), v...))
+		s.Where(sql.NotIn(s.C(FieldHighRunwayLongitude), v...))
 	})
 }
 
-// HighNumberedRunwayEndLongitudeGT applies the GT predicate on the "high_numbered_runway_end_longitude" field.
-func HighNumberedRunwayEndLongitudeGT(v float64) predicate.Runway {
+// HighRunwayLongitudeGT applies the GT predicate on the "high_runway_longitude" field.
+func HighRunwayLongitudeGT(v float64) predicate.Runway {
 	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldHighNumberedRunwayEndLongitude), v))
+		s.Where(sql.GT(s.C(FieldHighRunwayLongitude), v))
 	})
 }
 
-// HighNumberedRunwayEndLongitudeGTE applies the GTE predicate on the "high_numbered_runway_end_longitude" field.
-func HighNumberedRunwayEndLongitudeGTE(v float64) predicate.Runway {
+// HighRunwayLongitudeGTE applies the GTE predicate on the "high_runway_longitude" field.
+func HighRunwayLongitudeGTE(v float64) predicate.Runway {
 	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldHighNumberedRunwayEndLongitude), v))
+		s.Where(sql.GTE(s.C(FieldHighRunwayLongitude), v))
 	})
 }
 
-// HighNumberedRunwayEndLongitudeLT applies the LT predicate on the "high_numbered_runway_end_longitude" field.
-func HighNumberedRunwayEndLongitudeLT(v float64) predicate.Runway {
+// HighRunwayLongitudeLT applies the LT predicate on the "high_runway_longitude" field.
+func HighRunwayLongitudeLT(v float64) predicate.Runway {
 	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldHighNumberedRunwayEndLongitude), v))
+		s.Where(sql.LT(s.C(FieldHighRunwayLongitude), v))
 	})
 }
 
-// HighNumberedRunwayEndLongitudeLTE applies the LTE predicate on the "high_numbered_runway_end_longitude" field.
-func HighNumberedRunwayEndLongitudeLTE(v float64) predicate.Runway {
+// HighRunwayLongitudeLTE applies the LTE predicate on the "high_runway_longitude" field.
+func HighRunwayLongitudeLTE(v float64) predicate.Runway {
 	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldHighNumberedRunwayEndLongitude), v))
+		s.Where(sql.LTE(s.C(FieldHighRunwayLongitude), v))
 	})
 }
 
-// HighNumberedRunwayEndElevationEQ applies the EQ predicate on the "high_numbered_runway_end_elevation" field.
-func HighNumberedRunwayEndElevationEQ(v int) predicate.Runway {
+// HighRunwayLongitudeIsNil applies the IsNil predicate on the "high_runway_longitude" field.
+func HighRunwayLongitudeIsNil() predicate.Runway {
 	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldHighNumberedRunwayEndElevation), v))
+		s.Where(sql.IsNull(s.C(FieldHighRunwayLongitude)))
 	})
 }
 
-// HighNumberedRunwayEndElevationNEQ applies the NEQ predicate on the "high_numbered_runway_end_elevation" field.
-func HighNumberedRunwayEndElevationNEQ(v int) predicate.Runway {
+// HighRunwayLongitudeNotNil applies the NotNil predicate on the "high_runway_longitude" field.
+func HighRunwayLongitudeNotNil() predicate.Runway {
 	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldHighNumberedRunwayEndElevation), v))
+		s.Where(sql.NotNull(s.C(FieldHighRunwayLongitude)))
 	})
 }
 
-// HighNumberedRunwayEndElevationIn applies the In predicate on the "high_numbered_runway_end_elevation" field.
-func HighNumberedRunwayEndElevationIn(vs ...int) predicate.Runway {
-	v := make([]interface{}, len(vs))
+// HighRunwayElevationEQ applies the EQ predicate on the "high_runway_elevation" field.
+func HighRunwayElevationEQ(v int) predicate.Runway {
+	return predicate.Runway(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldHighRunwayElevation), v))
+	})
+}
+
+// HighRunwayElevationNEQ applies the NEQ predicate on the "high_runway_elevation" field.
+func HighRunwayElevationNEQ(v int) predicate.Runway {
+	return predicate.Runway(func(s *sql.Selector) {
+		s.Where(sql.NEQ(s.C(FieldHighRunwayElevation), v))
+	})
+}
+
+// HighRunwayElevationIn applies the In predicate on the "high_runway_elevation" field.
+func HighRunwayElevationIn(vs ...int) predicate.Runway {
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
 	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.In(s.C(FieldHighNumberedRunwayEndElevation), v...))
+		s.Where(sql.In(s.C(FieldHighRunwayElevation), v...))
 	})
 }
 
-// HighNumberedRunwayEndElevationNotIn applies the NotIn predicate on the "high_numbered_runway_end_elevation" field.
-func HighNumberedRunwayEndElevationNotIn(vs ...int) predicate.Runway {
-	v := make([]interface{}, len(vs))
+// HighRunwayElevationNotIn applies the NotIn predicate on the "high_runway_elevation" field.
+func HighRunwayElevationNotIn(vs ...int) predicate.Runway {
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
 	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.NotIn(s.C(FieldHighNumberedRunwayEndElevation), v...))
+		s.Where(sql.NotIn(s.C(FieldHighRunwayElevation), v...))
 	})
 }
 
-// HighNumberedRunwayEndElevationGT applies the GT predicate on the "high_numbered_runway_end_elevation" field.
-func HighNumberedRunwayEndElevationGT(v int) predicate.Runway {
+// HighRunwayElevationGT applies the GT predicate on the "high_runway_elevation" field.
+func HighRunwayElevationGT(v int) predicate.Runway {
 	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldHighNumberedRunwayEndElevation), v))
+		s.Where(sql.GT(s.C(FieldHighRunwayElevation), v))
 	})
 }
 
-// HighNumberedRunwayEndElevationGTE applies the GTE predicate on the "high_numbered_runway_end_elevation" field.
-func HighNumberedRunwayEndElevationGTE(v int) predicate.Runway {
+// HighRunwayElevationGTE applies the GTE predicate on the "high_runway_elevation" field.
+func HighRunwayElevationGTE(v int) predicate.Runway {
 	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldHighNumberedRunwayEndElevation), v))
+		s.Where(sql.GTE(s.C(FieldHighRunwayElevation), v))
 	})
 }
 
-// HighNumberedRunwayEndElevationLT applies the LT predicate on the "high_numbered_runway_end_elevation" field.
-func HighNumberedRunwayEndElevationLT(v int) predicate.Runway {
+// HighRunwayElevationLT applies the LT predicate on the "high_runway_elevation" field.
+func HighRunwayElevationLT(v int) predicate.Runway {
 	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldHighNumberedRunwayEndElevation), v))
+		s.Where(sql.LT(s.C(FieldHighRunwayElevation), v))
 	})
 }
 
-// HighNumberedRunwayEndElevationLTE applies the LTE predicate on the "high_numbered_runway_end_elevation" field.
-func HighNumberedRunwayEndElevationLTE(v int) predicate.Runway {
+// HighRunwayElevationLTE applies the LTE predicate on the "high_runway_elevation" field.
+func HighRunwayElevationLTE(v int) predicate.Runway {
 	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldHighNumberedRunwayEndElevation), v))
+		s.Where(sql.LTE(s.C(FieldHighRunwayElevation), v))
 	})
 }
 
-// HighNumberedRunwayEndHeadingEQ applies the EQ predicate on the "high_numbered_runway_end_heading" field.
-func HighNumberedRunwayEndHeadingEQ(v int) predicate.Runway {
+// HighRunwayElevationIsNil applies the IsNil predicate on the "high_runway_elevation" field.
+func HighRunwayElevationIsNil() predicate.Runway {
 	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldHighNumberedRunwayEndHeading), v))
+		s.Where(sql.IsNull(s.C(FieldHighRunwayElevation)))
 	})
 }
 
-// HighNumberedRunwayEndHeadingNEQ applies the NEQ predicate on the "high_numbered_runway_end_heading" field.
-func HighNumberedRunwayEndHeadingNEQ(v int) predicate.Runway {
+// HighRunwayElevationNotNil applies the NotNil predicate on the "high_runway_elevation" field.
+func HighRunwayElevationNotNil() predicate.Runway {
 	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldHighNumberedRunwayEndHeading), v))
+		s.Where(sql.NotNull(s.C(FieldHighRunwayElevation)))
 	})
 }
 
-// HighNumberedRunwayEndHeadingIn applies the In predicate on the "high_numbered_runway_end_heading" field.
-func HighNumberedRunwayEndHeadingIn(vs ...int) predicate.Runway {
-	v := make([]interface{}, len(vs))
+// HighRunwayHeadingEQ applies the EQ predicate on the "high_runway_heading" field.
+func HighRunwayHeadingEQ(v int) predicate.Runway {
+	return predicate.Runway(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldHighRunwayHeading), v))
+	})
+}
+
+// HighRunwayHeadingNEQ applies the NEQ predicate on the "high_runway_heading" field.
+func HighRunwayHeadingNEQ(v int) predicate.Runway {
+	return predicate.Runway(func(s *sql.Selector) {
+		s.Where(sql.NEQ(s.C(FieldHighRunwayHeading), v))
+	})
+}
+
+// HighRunwayHeadingIn applies the In predicate on the "high_runway_heading" field.
+func HighRunwayHeadingIn(vs ...int) predicate.Runway {
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
 	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.In(s.C(FieldHighNumberedRunwayEndHeading), v...))
+		s.Where(sql.In(s.C(FieldHighRunwayHeading), v...))
 	})
 }
 
-// HighNumberedRunwayEndHeadingNotIn applies the NotIn predicate on the "high_numbered_runway_end_heading" field.
-func HighNumberedRunwayEndHeadingNotIn(vs ...int) predicate.Runway {
-	v := make([]interface{}, len(vs))
+// HighRunwayHeadingNotIn applies the NotIn predicate on the "high_runway_heading" field.
+func HighRunwayHeadingNotIn(vs ...int) predicate.Runway {
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
 	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.NotIn(s.C(FieldHighNumberedRunwayEndHeading), v...))
+		s.Where(sql.NotIn(s.C(FieldHighRunwayHeading), v...))
 	})
 }
 
-// HighNumberedRunwayEndHeadingGT applies the GT predicate on the "high_numbered_runway_end_heading" field.
-func HighNumberedRunwayEndHeadingGT(v int) predicate.Runway {
+// HighRunwayHeadingGT applies the GT predicate on the "high_runway_heading" field.
+func HighRunwayHeadingGT(v int) predicate.Runway {
 	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldHighNumberedRunwayEndHeading), v))
+		s.Where(sql.GT(s.C(FieldHighRunwayHeading), v))
 	})
 }
 
-// HighNumberedRunwayEndHeadingGTE applies the GTE predicate on the "high_numbered_runway_end_heading" field.
-func HighNumberedRunwayEndHeadingGTE(v int) predicate.Runway {
+// HighRunwayHeadingGTE applies the GTE predicate on the "high_runway_heading" field.
+func HighRunwayHeadingGTE(v int) predicate.Runway {
 	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldHighNumberedRunwayEndHeading), v))
+		s.Where(sql.GTE(s.C(FieldHighRunwayHeading), v))
 	})
 }
 
-// HighNumberedRunwayEndHeadingLT applies the LT predicate on the "high_numbered_runway_end_heading" field.
-func HighNumberedRunwayEndHeadingLT(v int) predicate.Runway {
+// HighRunwayHeadingLT applies the LT predicate on the "high_runway_heading" field.
+func HighRunwayHeadingLT(v int) predicate.Runway {
 	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldHighNumberedRunwayEndHeading), v))
+		s.Where(sql.LT(s.C(FieldHighRunwayHeading), v))
 	})
 }
 
-// HighNumberedRunwayEndHeadingLTE applies the LTE predicate on the "high_numbered_runway_end_heading" field.
-func HighNumberedRunwayEndHeadingLTE(v int) predicate.Runway {
+// HighRunwayHeadingLTE applies the LTE predicate on the "high_runway_heading" field.
+func HighRunwayHeadingLTE(v int) predicate.Runway {
 	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldHighNumberedRunwayEndHeading), v))
+		s.Where(sql.LTE(s.C(FieldHighRunwayHeading), v))
 	})
 }
 
-// HighNumberedRunwayEndDisplacedEQ applies the EQ predicate on the "high_numbered_runway_end_displaced" field.
-func HighNumberedRunwayEndDisplacedEQ(v int) predicate.Runway {
+// HighRunwayHeadingIsNil applies the IsNil predicate on the "high_runway_heading" field.
+func HighRunwayHeadingIsNil() predicate.Runway {
 	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldHighNumberedRunwayEndDisplaced), v))
+		s.Where(sql.IsNull(s.C(FieldHighRunwayHeading)))
 	})
 }
 
-// HighNumberedRunwayEndDisplacedNEQ applies the NEQ predicate on the "high_numbered_runway_end_displaced" field.
-func HighNumberedRunwayEndDisplacedNEQ(v int) predicate.Runway {
+// HighRunwayHeadingNotNil applies the NotNil predicate on the "high_runway_heading" field.
+func HighRunwayHeadingNotNil() predicate.Runway {
 	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldHighNumberedRunwayEndDisplaced), v))
+		s.Where(sql.NotNull(s.C(FieldHighRunwayHeading)))
 	})
 }
 
-// HighNumberedRunwayEndDisplacedIn applies the In predicate on the "high_numbered_runway_end_displaced" field.
-func HighNumberedRunwayEndDisplacedIn(vs ...int) predicate.Runway {
-	v := make([]interface{}, len(vs))
+// HighRunwayDisplacedEQ applies the EQ predicate on the "high_runway_displaced" field.
+func HighRunwayDisplacedEQ(v int) predicate.Runway {
+	return predicate.Runway(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldHighRunwayDisplaced), v))
+	})
+}
+
+// HighRunwayDisplacedNEQ applies the NEQ predicate on the "high_runway_displaced" field.
+func HighRunwayDisplacedNEQ(v int) predicate.Runway {
+	return predicate.Runway(func(s *sql.Selector) {
+		s.Where(sql.NEQ(s.C(FieldHighRunwayDisplaced), v))
+	})
+}
+
+// HighRunwayDisplacedIn applies the In predicate on the "high_runway_displaced" field.
+func HighRunwayDisplacedIn(vs ...int) predicate.Runway {
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
 	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.In(s.C(FieldHighNumberedRunwayEndDisplaced), v...))
+		s.Where(sql.In(s.C(FieldHighRunwayDisplaced), v...))
 	})
 }
 
-// HighNumberedRunwayEndDisplacedNotIn applies the NotIn predicate on the "high_numbered_runway_end_displaced" field.
-func HighNumberedRunwayEndDisplacedNotIn(vs ...int) predicate.Runway {
-	v := make([]interface{}, len(vs))
+// HighRunwayDisplacedNotIn applies the NotIn predicate on the "high_runway_displaced" field.
+func HighRunwayDisplacedNotIn(vs ...int) predicate.Runway {
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
 	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.NotIn(s.C(FieldHighNumberedRunwayEndDisplaced), v...))
+		s.Where(sql.NotIn(s.C(FieldHighRunwayDisplaced), v...))
 	})
 }
 
-// HighNumberedRunwayEndDisplacedGT applies the GT predicate on the "high_numbered_runway_end_displaced" field.
-func HighNumberedRunwayEndDisplacedGT(v int) predicate.Runway {
+// HighRunwayDisplacedGT applies the GT predicate on the "high_runway_displaced" field.
+func HighRunwayDisplacedGT(v int) predicate.Runway {
 	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldHighNumberedRunwayEndDisplaced), v))
+		s.Where(sql.GT(s.C(FieldHighRunwayDisplaced), v))
 	})
 }
 
-// HighNumberedRunwayEndDisplacedGTE applies the GTE predicate on the "high_numbered_runway_end_displaced" field.
-func HighNumberedRunwayEndDisplacedGTE(v int) predicate.Runway {
+// HighRunwayDisplacedGTE applies the GTE predicate on the "high_runway_displaced" field.
+func HighRunwayDisplacedGTE(v int) predicate.Runway {
 	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldHighNumberedRunwayEndDisplaced), v))
+		s.Where(sql.GTE(s.C(FieldHighRunwayDisplaced), v))
 	})
 }
 
-// HighNumberedRunwayEndDisplacedLT applies the LT predicate on the "high_numbered_runway_end_displaced" field.
-func HighNumberedRunwayEndDisplacedLT(v int) predicate.Runway {
+// HighRunwayDisplacedLT applies the LT predicate on the "high_runway_displaced" field.
+func HighRunwayDisplacedLT(v int) predicate.Runway {
 	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldHighNumberedRunwayEndDisplaced), v))
+		s.Where(sql.LT(s.C(FieldHighRunwayDisplaced), v))
 	})
 }
 
-// HighNumberedRunwayEndDisplacedLTE applies the LTE predicate on the "high_numbered_runway_end_displaced" field.
-func HighNumberedRunwayEndDisplacedLTE(v int) predicate.Runway {
+// HighRunwayDisplacedLTE applies the LTE predicate on the "high_runway_displaced" field.
+func HighRunwayDisplacedLTE(v int) predicate.Runway {
 	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldHighNumberedRunwayEndDisplaced), v))
+		s.Where(sql.LTE(s.C(FieldHighRunwayDisplaced), v))
+	})
+}
+
+// HighRunwayDisplacedIsNil applies the IsNil predicate on the "high_runway_displaced" field.
+func HighRunwayDisplacedIsNil() predicate.Runway {
+	return predicate.Runway(func(s *sql.Selector) {
+		s.Where(sql.IsNull(s.C(FieldHighRunwayDisplaced)))
+	})
+}
+
+// HighRunwayDisplacedNotNil applies the NotNil predicate on the "high_runway_displaced" field.
+func HighRunwayDisplacedNotNil() predicate.Runway {
+	return predicate.Runway(func(s *sql.Selector) {
+		s.Where(sql.NotNull(s.C(FieldHighRunwayDisplaced)))
 	})
 }
 

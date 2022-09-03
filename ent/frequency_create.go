@@ -138,7 +138,6 @@ func (fc *FrequencyCreate) createSpec() (*Frequency, *sqlgraph.CreateSpec) {
 //			sql.ResolveWithNewValues(),
 //		).
 //		Exec(ctx)
-//
 func (fc *FrequencyCreate) OnConflict(opts ...sql.ConflictOption) *FrequencyUpsertOne {
 	fc.conflict = opts
 	return &FrequencyUpsertOne{
@@ -152,7 +151,6 @@ func (fc *FrequencyCreate) OnConflict(opts ...sql.ConflictOption) *FrequencyUpse
 //	client.Frequency.Create().
 //		OnConflict(sql.ConflictColumns(columns...)).
 //		Exec(ctx)
-//
 func (fc *FrequencyCreate) OnConflictColumns(columns ...string) *FrequencyUpsertOne {
 	fc.conflict = append(fc.conflict, sql.ConflictColumns(columns...))
 	return &FrequencyUpsertOne{
@@ -181,7 +179,6 @@ type (
 //			sql.ResolveWithNewValues(),
 //		).
 //		Exec(ctx)
-//
 func (u *FrequencyUpsertOne) UpdateNewValues() *FrequencyUpsertOne {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
 	return u
@@ -190,10 +187,9 @@ func (u *FrequencyUpsertOne) UpdateNewValues() *FrequencyUpsertOne {
 // Ignore sets each column to itself in case of conflict.
 // Using this option is equivalent to using:
 //
-//  client.Frequency.Create().
-//      OnConflict(sql.ResolveWithIgnore()).
-//      Exec(ctx)
-//
+//	client.Frequency.Create().
+//	    OnConflict(sql.ResolveWithIgnore()).
+//	    Exec(ctx)
 func (u *FrequencyUpsertOne) Ignore() *FrequencyUpsertOne {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithIgnore())
 	return u
@@ -343,7 +339,6 @@ func (fcb *FrequencyCreateBulk) ExecX(ctx context.Context) {
 //			sql.ResolveWithNewValues(),
 //		).
 //		Exec(ctx)
-//
 func (fcb *FrequencyCreateBulk) OnConflict(opts ...sql.ConflictOption) *FrequencyUpsertBulk {
 	fcb.conflict = opts
 	return &FrequencyUpsertBulk{
@@ -357,7 +352,6 @@ func (fcb *FrequencyCreateBulk) OnConflict(opts ...sql.ConflictOption) *Frequenc
 //	client.Frequency.Create().
 //		OnConflict(sql.ConflictColumns(columns...)).
 //		Exec(ctx)
-//
 func (fcb *FrequencyCreateBulk) OnConflictColumns(columns ...string) *FrequencyUpsertBulk {
 	fcb.conflict = append(fcb.conflict, sql.ConflictColumns(columns...))
 	return &FrequencyUpsertBulk{
@@ -379,7 +373,6 @@ type FrequencyUpsertBulk struct {
 //			sql.ResolveWithNewValues(),
 //		).
 //		Exec(ctx)
-//
 func (u *FrequencyUpsertBulk) UpdateNewValues() *FrequencyUpsertBulk {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
 	return u
@@ -391,7 +384,6 @@ func (u *FrequencyUpsertBulk) UpdateNewValues() *FrequencyUpsertBulk {
 //	client.Frequency.Create().
 //		OnConflict(sql.ResolveWithIgnore()).
 //		Exec(ctx)
-//
 func (u *FrequencyUpsertBulk) Ignore() *FrequencyUpsertBulk {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithIgnore())
 	return u

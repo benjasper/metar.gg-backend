@@ -2,10 +2,6 @@
 
 package runway
 
-import (
-	"time"
-)
-
 const (
 	// Label holds the string label denoting the runway type in the database.
 	Label = "runway"
@@ -15,10 +11,6 @@ const (
 	FieldHash = "hash"
 	// FieldImportFlag holds the string denoting the import_flag field in the database.
 	FieldImportFlag = "import_flag"
-	// FieldCreateTime holds the string denoting the create_time field in the database.
-	FieldCreateTime = "create_time"
-	// FieldUpdateTime holds the string denoting the update_time field in the database.
-	FieldUpdateTime = "update_time"
 	// FieldAirportIdentifier holds the string denoting the airport_identifier field in the database.
 	FieldAirportIdentifier = "airport_identifier"
 	// FieldLength holds the string denoting the length field in the database.
@@ -31,30 +23,30 @@ const (
 	FieldLighted = "lighted"
 	// FieldClosed holds the string denoting the closed field in the database.
 	FieldClosed = "closed"
-	// FieldLowNumberedRunwayEndIdentifier holds the string denoting the low_numbered_runway_end_identifier field in the database.
-	FieldLowNumberedRunwayEndIdentifier = "low_numbered_runway_end_identifier"
-	// FieldLowNumberedRunwayEndLatitude holds the string denoting the low_numbered_runway_end_latitude field in the database.
-	FieldLowNumberedRunwayEndLatitude = "low_numbered_runway_end_latitude"
-	// FieldLowNumberedRunwayEndLongitude holds the string denoting the low_numbered_runway_end_longitude field in the database.
-	FieldLowNumberedRunwayEndLongitude = "low_numbered_runway_end_longitude"
-	// FieldLowNumberedRunwayEndElevation holds the string denoting the low_numbered_runway_end_elevation field in the database.
-	FieldLowNumberedRunwayEndElevation = "low_numbered_runway_end_elevation"
-	// FieldLowNumberedRunwayEndHeading holds the string denoting the low_numbered_runway_end_heading field in the database.
-	FieldLowNumberedRunwayEndHeading = "low_numbered_runway_end_heading"
-	// FieldLowNumberedRunwayEndDisplaced holds the string denoting the low_numbered_runway_end_displaced field in the database.
-	FieldLowNumberedRunwayEndDisplaced = "low_numbered_runway_end_displaced"
-	// FieldHighNumberedRunwayEndIdentifier holds the string denoting the high_numbered_runway_end_identifier field in the database.
-	FieldHighNumberedRunwayEndIdentifier = "high_numbered_runway_end_identifier"
-	// FieldHighNumberedRunwayEndLatitude holds the string denoting the high_numbered_runway_end_latitude field in the database.
-	FieldHighNumberedRunwayEndLatitude = "high_numbered_runway_end_latitude"
-	// FieldHighNumberedRunwayEndLongitude holds the string denoting the high_numbered_runway_end_longitude field in the database.
-	FieldHighNumberedRunwayEndLongitude = "high_numbered_runway_end_longitude"
-	// FieldHighNumberedRunwayEndElevation holds the string denoting the high_numbered_runway_end_elevation field in the database.
-	FieldHighNumberedRunwayEndElevation = "high_numbered_runway_end_elevation"
-	// FieldHighNumberedRunwayEndHeading holds the string denoting the high_numbered_runway_end_heading field in the database.
-	FieldHighNumberedRunwayEndHeading = "high_numbered_runway_end_heading"
-	// FieldHighNumberedRunwayEndDisplaced holds the string denoting the high_numbered_runway_end_displaced field in the database.
-	FieldHighNumberedRunwayEndDisplaced = "high_numbered_runway_end_displaced"
+	// FieldLowRunwayIdentifier holds the string denoting the low_runway_identifier field in the database.
+	FieldLowRunwayIdentifier = "low_runway_identifier"
+	// FieldLowRunwayLatitude holds the string denoting the low_runway_latitude field in the database.
+	FieldLowRunwayLatitude = "low_runway_latitude"
+	// FieldLowRunwayLongitude holds the string denoting the low_runway_longitude field in the database.
+	FieldLowRunwayLongitude = "low_runway_longitude"
+	// FieldLowRunwayElevation holds the string denoting the low_runway_elevation field in the database.
+	FieldLowRunwayElevation = "low_runway_elevation"
+	// FieldLowRunwayHeading holds the string denoting the low_runway_heading field in the database.
+	FieldLowRunwayHeading = "low_runway_heading"
+	// FieldLowRunwayDisplaced holds the string denoting the low_runway_displaced field in the database.
+	FieldLowRunwayDisplaced = "low_runway_displaced"
+	// FieldHighRunwayIdentifier holds the string denoting the high_runway_identifier field in the database.
+	FieldHighRunwayIdentifier = "high_runway_identifier"
+	// FieldHighRunwayLatitude holds the string denoting the high_runway_latitude field in the database.
+	FieldHighRunwayLatitude = "high_runway_latitude"
+	// FieldHighRunwayLongitude holds the string denoting the high_runway_longitude field in the database.
+	FieldHighRunwayLongitude = "high_runway_longitude"
+	// FieldHighRunwayElevation holds the string denoting the high_runway_elevation field in the database.
+	FieldHighRunwayElevation = "high_runway_elevation"
+	// FieldHighRunwayHeading holds the string denoting the high_runway_heading field in the database.
+	FieldHighRunwayHeading = "high_runway_heading"
+	// FieldHighRunwayDisplaced holds the string denoting the high_runway_displaced field in the database.
+	FieldHighRunwayDisplaced = "high_runway_displaced"
 	// EdgeAirport holds the string denoting the airport edge name in mutations.
 	EdgeAirport = "airport"
 	// Table holds the table name of the runway in the database.
@@ -73,26 +65,24 @@ var Columns = []string{
 	FieldID,
 	FieldHash,
 	FieldImportFlag,
-	FieldCreateTime,
-	FieldUpdateTime,
 	FieldAirportIdentifier,
 	FieldLength,
 	FieldWidth,
 	FieldSurface,
 	FieldLighted,
 	FieldClosed,
-	FieldLowNumberedRunwayEndIdentifier,
-	FieldLowNumberedRunwayEndLatitude,
-	FieldLowNumberedRunwayEndLongitude,
-	FieldLowNumberedRunwayEndElevation,
-	FieldLowNumberedRunwayEndHeading,
-	FieldLowNumberedRunwayEndDisplaced,
-	FieldHighNumberedRunwayEndIdentifier,
-	FieldHighNumberedRunwayEndLatitude,
-	FieldHighNumberedRunwayEndLongitude,
-	FieldHighNumberedRunwayEndElevation,
-	FieldHighNumberedRunwayEndHeading,
-	FieldHighNumberedRunwayEndDisplaced,
+	FieldLowRunwayIdentifier,
+	FieldLowRunwayLatitude,
+	FieldLowRunwayLongitude,
+	FieldLowRunwayElevation,
+	FieldLowRunwayHeading,
+	FieldLowRunwayDisplaced,
+	FieldHighRunwayIdentifier,
+	FieldHighRunwayLatitude,
+	FieldHighRunwayLongitude,
+	FieldHighRunwayElevation,
+	FieldHighRunwayHeading,
+	FieldHighRunwayDisplaced,
 }
 
 // ForeignKeys holds the SQL foreign-keys that are owned by the "runways"
@@ -119,10 +109,4 @@ func ValidColumn(column string) bool {
 var (
 	// DefaultImportFlag holds the default value on creation for the "import_flag" field.
 	DefaultImportFlag bool
-	// DefaultCreateTime holds the default value on creation for the "create_time" field.
-	DefaultCreateTime func() time.Time
-	// DefaultUpdateTime holds the default value on creation for the "update_time" field.
-	DefaultUpdateTime func() time.Time
-	// UpdateDefaultUpdateTime holds the default value on update for the "update_time" field.
-	UpdateDefaultUpdateTime func() time.Time
 )

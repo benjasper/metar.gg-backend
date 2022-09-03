@@ -4,7 +4,6 @@ import (
 	"entgo.io/ent"
 	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
-	"entgo.io/ent/schema/mixin"
 )
 
 // Runway holds the schema definition for the Runway entity.
@@ -22,19 +21,19 @@ func (Runway) Fields() []ent.Field {
 		field.Bool("lighted"),
 		field.Bool("closed"),
 
-		field.String("low_numbered_runway_end_identifier"),
-		field.Float("low_numbered_runway_end_latitude"),
-		field.Float("low_numbered_runway_end_longitude"),
-		field.Int("low_numbered_runway_end_elevation"),
-		field.Int("low_numbered_runway_end_heading"),
-		field.Int("low_numbered_runway_end_displaced"),
+		field.String("low_runway_identifier").Comment("Low numbered runway identifier, like 18R"),
+		field.Float("low_runway_latitude").Optional().Nillable(),
+		field.Float("low_runway_longitude").Optional().Nillable(),
+		field.Int("low_runway_elevation").Optional().Nillable(),
+		field.Int("low_runway_heading").Optional().Nillable(),
+		field.Int("low_runway_displaced").Optional().Nillable(),
 
-		field.String("high_numbered_runway_end_identifier"),
-		field.Float("high_numbered_runway_end_latitude"),
-		field.Float("high_numbered_runway_end_longitude"),
-		field.Int("high_numbered_runway_end_elevation"),
-		field.Int("high_numbered_runway_end_heading"),
-		field.Int("high_numbered_runway_end_displaced"),
+		field.String("high_runway_identifier").Comment("High numbered runway identifier, like 18R"),
+		field.Float("high_runway_latitude").Optional().Nillable(),
+		field.Float("high_runway_longitude").Optional().Nillable(),
+		field.Int("high_runway_elevation").Optional().Nillable(),
+		field.Int("high_runway_heading").Optional().Nillable(),
+		field.Int("high_runway_displaced").Optional().Nillable(),
 	}
 }
 
@@ -56,6 +55,6 @@ func (Runway) Indexes() []ent.Index {
 func (Runway) Mixin() []ent.Mixin {
 	return []ent.Mixin{
 		ImportMixin{},
-		mixin.Time{},
+		//mixin.Time{},
 	}
 }

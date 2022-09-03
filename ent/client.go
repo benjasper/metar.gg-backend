@@ -30,6 +30,8 @@ type Client struct {
 	Frequency *FrequencyClient
 	// Runway is the client for interacting with the Runway builders.
 	Runway *RunwayClient
+	// additional fields for node api
+	tables tables
 }
 
 // NewClient creates a new client configured with the given options.
@@ -113,7 +115,6 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 //		Airport.
 //		Query().
 //		Count(ctx)
-//
 func (c *Client) Debug() *Client {
 	if c.debug {
 		return c

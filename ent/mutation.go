@@ -7,7 +7,6 @@ import (
 	"errors"
 	"fmt"
 	"sync"
-	"time"
 
 	"metar.gg/ent/airport"
 	"metar.gg/ent/predicate"
@@ -36,13 +35,10 @@ type AirportMutation struct {
 	op                Op
 	typ               string
 	id                *int
-	hash              *uint64
-	addhash           *int64
+	hash              *string
 	import_flag       *bool
-	create_time       *time.Time
-	update_time       *time.Time
 	identifier        *string
-	_type             *string
+	_type             *airport.Type
 	name              *string
 	latitude          *float64
 	addlatitude       *float64
@@ -175,13 +171,12 @@ func (m *AirportMutation) IDs(ctx context.Context) ([]int, error) {
 }
 
 // SetHash sets the "hash" field.
-func (m *AirportMutation) SetHash(u uint64) {
-	m.hash = &u
-	m.addhash = nil
+func (m *AirportMutation) SetHash(s string) {
+	m.hash = &s
 }
 
 // Hash returns the value of the "hash" field in the mutation.
-func (m *AirportMutation) Hash() (r uint64, exists bool) {
+func (m *AirportMutation) Hash() (r string, exists bool) {
 	v := m.hash
 	if v == nil {
 		return
@@ -192,7 +187,7 @@ func (m *AirportMutation) Hash() (r uint64, exists bool) {
 // OldHash returns the old "hash" field's value of the Airport entity.
 // If the Airport object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *AirportMutation) OldHash(ctx context.Context) (v uint64, err error) {
+func (m *AirportMutation) OldHash(ctx context.Context) (v string, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, errors.New("OldHash is only allowed on UpdateOne operations")
 	}
@@ -206,28 +201,9 @@ func (m *AirportMutation) OldHash(ctx context.Context) (v uint64, err error) {
 	return oldValue.Hash, nil
 }
 
-// AddHash adds u to the "hash" field.
-func (m *AirportMutation) AddHash(u int64) {
-	if m.addhash != nil {
-		*m.addhash += u
-	} else {
-		m.addhash = &u
-	}
-}
-
-// AddedHash returns the value that was added to the "hash" field in this mutation.
-func (m *AirportMutation) AddedHash() (r int64, exists bool) {
-	v := m.addhash
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
 // ResetHash resets all changes to the "hash" field.
 func (m *AirportMutation) ResetHash() {
 	m.hash = nil
-	m.addhash = nil
 }
 
 // SetImportFlag sets the "import_flag" field.
@@ -264,78 +240,6 @@ func (m *AirportMutation) OldImportFlag(ctx context.Context) (v bool, err error)
 // ResetImportFlag resets all changes to the "import_flag" field.
 func (m *AirportMutation) ResetImportFlag() {
 	m.import_flag = nil
-}
-
-// SetCreateTime sets the "create_time" field.
-func (m *AirportMutation) SetCreateTime(t time.Time) {
-	m.create_time = &t
-}
-
-// CreateTime returns the value of the "create_time" field in the mutation.
-func (m *AirportMutation) CreateTime() (r time.Time, exists bool) {
-	v := m.create_time
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldCreateTime returns the old "create_time" field's value of the Airport entity.
-// If the Airport object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *AirportMutation) OldCreateTime(ctx context.Context) (v time.Time, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldCreateTime is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldCreateTime requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldCreateTime: %w", err)
-	}
-	return oldValue.CreateTime, nil
-}
-
-// ResetCreateTime resets all changes to the "create_time" field.
-func (m *AirportMutation) ResetCreateTime() {
-	m.create_time = nil
-}
-
-// SetUpdateTime sets the "update_time" field.
-func (m *AirportMutation) SetUpdateTime(t time.Time) {
-	m.update_time = &t
-}
-
-// UpdateTime returns the value of the "update_time" field in the mutation.
-func (m *AirportMutation) UpdateTime() (r time.Time, exists bool) {
-	v := m.update_time
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldUpdateTime returns the old "update_time" field's value of the Airport entity.
-// If the Airport object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *AirportMutation) OldUpdateTime(ctx context.Context) (v time.Time, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldUpdateTime is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldUpdateTime requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldUpdateTime: %w", err)
-	}
-	return oldValue.UpdateTime, nil
-}
-
-// ResetUpdateTime resets all changes to the "update_time" field.
-func (m *AirportMutation) ResetUpdateTime() {
-	m.update_time = nil
 }
 
 // SetIdentifier sets the "identifier" field.
@@ -375,12 +279,12 @@ func (m *AirportMutation) ResetIdentifier() {
 }
 
 // SetType sets the "type" field.
-func (m *AirportMutation) SetType(s string) {
-	m._type = &s
+func (m *AirportMutation) SetType(a airport.Type) {
+	m._type = &a
 }
 
 // GetType returns the value of the "type" field in the mutation.
-func (m *AirportMutation) GetType() (r string, exists bool) {
+func (m *AirportMutation) GetType() (r airport.Type, exists bool) {
 	v := m._type
 	if v == nil {
 		return
@@ -391,7 +295,7 @@ func (m *AirportMutation) GetType() (r string, exists bool) {
 // OldType returns the old "type" field's value of the Airport entity.
 // If the Airport object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *AirportMutation) OldType(ctx context.Context) (v string, err error) {
+func (m *AirportMutation) OldType(ctx context.Context) (v airport.Type, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, errors.New("OldType is only allowed on UpdateOne operations")
 	}
@@ -576,7 +480,7 @@ func (m *AirportMutation) Elevation() (r int, exists bool) {
 // OldElevation returns the old "elevation" field's value of the Airport entity.
 // If the Airport object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *AirportMutation) OldElevation(ctx context.Context) (v int, err error) {
+func (m *AirportMutation) OldElevation(ctx context.Context) (v *int, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, errors.New("OldElevation is only allowed on UpdateOne operations")
 	}
@@ -608,10 +512,24 @@ func (m *AirportMutation) AddedElevation() (r int, exists bool) {
 	return *v, true
 }
 
+// ClearElevation clears the value of the "elevation" field.
+func (m *AirportMutation) ClearElevation() {
+	m.elevation = nil
+	m.addelevation = nil
+	m.clearedFields[airport.FieldElevation] = struct{}{}
+}
+
+// ElevationCleared returns if the "elevation" field was cleared in this mutation.
+func (m *AirportMutation) ElevationCleared() bool {
+	_, ok := m.clearedFields[airport.FieldElevation]
+	return ok
+}
+
 // ResetElevation resets all changes to the "elevation" field.
 func (m *AirportMutation) ResetElevation() {
 	m.elevation = nil
 	m.addelevation = nil
+	delete(m.clearedFields, airport.FieldElevation)
 }
 
 // SetContinent sets the "continent" field.
@@ -811,7 +729,7 @@ func (m *AirportMutation) GpsCode() (r string, exists bool) {
 // OldGpsCode returns the old "gps_code" field's value of the Airport entity.
 // If the Airport object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *AirportMutation) OldGpsCode(ctx context.Context) (v string, err error) {
+func (m *AirportMutation) OldGpsCode(ctx context.Context) (v *string, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, errors.New("OldGpsCode is only allowed on UpdateOne operations")
 	}
@@ -825,9 +743,22 @@ func (m *AirportMutation) OldGpsCode(ctx context.Context) (v string, err error) 
 	return oldValue.GpsCode, nil
 }
 
+// ClearGpsCode clears the value of the "gps_code" field.
+func (m *AirportMutation) ClearGpsCode() {
+	m.gps_code = nil
+	m.clearedFields[airport.FieldGpsCode] = struct{}{}
+}
+
+// GpsCodeCleared returns if the "gps_code" field was cleared in this mutation.
+func (m *AirportMutation) GpsCodeCleared() bool {
+	_, ok := m.clearedFields[airport.FieldGpsCode]
+	return ok
+}
+
 // ResetGpsCode resets all changes to the "gps_code" field.
 func (m *AirportMutation) ResetGpsCode() {
 	m.gps_code = nil
+	delete(m.clearedFields, airport.FieldGpsCode)
 }
 
 // SetIataCode sets the "iata_code" field.
@@ -847,7 +778,7 @@ func (m *AirportMutation) IataCode() (r string, exists bool) {
 // OldIataCode returns the old "iata_code" field's value of the Airport entity.
 // If the Airport object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *AirportMutation) OldIataCode(ctx context.Context) (v string, err error) {
+func (m *AirportMutation) OldIataCode(ctx context.Context) (v *string, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, errors.New("OldIataCode is only allowed on UpdateOne operations")
 	}
@@ -861,9 +792,22 @@ func (m *AirportMutation) OldIataCode(ctx context.Context) (v string, err error)
 	return oldValue.IataCode, nil
 }
 
+// ClearIataCode clears the value of the "iata_code" field.
+func (m *AirportMutation) ClearIataCode() {
+	m.iata_code = nil
+	m.clearedFields[airport.FieldIataCode] = struct{}{}
+}
+
+// IataCodeCleared returns if the "iata_code" field was cleared in this mutation.
+func (m *AirportMutation) IataCodeCleared() bool {
+	_, ok := m.clearedFields[airport.FieldIataCode]
+	return ok
+}
+
 // ResetIataCode resets all changes to the "iata_code" field.
 func (m *AirportMutation) ResetIataCode() {
 	m.iata_code = nil
+	delete(m.clearedFields, airport.FieldIataCode)
 }
 
 // SetLocalCode sets the "local_code" field.
@@ -883,7 +827,7 @@ func (m *AirportMutation) LocalCode() (r string, exists bool) {
 // OldLocalCode returns the old "local_code" field's value of the Airport entity.
 // If the Airport object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *AirportMutation) OldLocalCode(ctx context.Context) (v string, err error) {
+func (m *AirportMutation) OldLocalCode(ctx context.Context) (v *string, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, errors.New("OldLocalCode is only allowed on UpdateOne operations")
 	}
@@ -897,9 +841,22 @@ func (m *AirportMutation) OldLocalCode(ctx context.Context) (v string, err error
 	return oldValue.LocalCode, nil
 }
 
+// ClearLocalCode clears the value of the "local_code" field.
+func (m *AirportMutation) ClearLocalCode() {
+	m.local_code = nil
+	m.clearedFields[airport.FieldLocalCode] = struct{}{}
+}
+
+// LocalCodeCleared returns if the "local_code" field was cleared in this mutation.
+func (m *AirportMutation) LocalCodeCleared() bool {
+	_, ok := m.clearedFields[airport.FieldLocalCode]
+	return ok
+}
+
 // ResetLocalCode resets all changes to the "local_code" field.
 func (m *AirportMutation) ResetLocalCode() {
 	m.local_code = nil
+	delete(m.clearedFields, airport.FieldLocalCode)
 }
 
 // SetWebsite sets the "website" field.
@@ -919,7 +876,7 @@ func (m *AirportMutation) Website() (r string, exists bool) {
 // OldWebsite returns the old "website" field's value of the Airport entity.
 // If the Airport object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *AirportMutation) OldWebsite(ctx context.Context) (v string, err error) {
+func (m *AirportMutation) OldWebsite(ctx context.Context) (v *string, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, errors.New("OldWebsite is only allowed on UpdateOne operations")
 	}
@@ -933,9 +890,22 @@ func (m *AirportMutation) OldWebsite(ctx context.Context) (v string, err error) 
 	return oldValue.Website, nil
 }
 
+// ClearWebsite clears the value of the "website" field.
+func (m *AirportMutation) ClearWebsite() {
+	m.website = nil
+	m.clearedFields[airport.FieldWebsite] = struct{}{}
+}
+
+// WebsiteCleared returns if the "website" field was cleared in this mutation.
+func (m *AirportMutation) WebsiteCleared() bool {
+	_, ok := m.clearedFields[airport.FieldWebsite]
+	return ok
+}
+
 // ResetWebsite resets all changes to the "website" field.
 func (m *AirportMutation) ResetWebsite() {
 	m.website = nil
+	delete(m.clearedFields, airport.FieldWebsite)
 }
 
 // SetWikipedia sets the "wikipedia" field.
@@ -955,7 +925,7 @@ func (m *AirportMutation) Wikipedia() (r string, exists bool) {
 // OldWikipedia returns the old "wikipedia" field's value of the Airport entity.
 // If the Airport object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *AirportMutation) OldWikipedia(ctx context.Context) (v string, err error) {
+func (m *AirportMutation) OldWikipedia(ctx context.Context) (v *string, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, errors.New("OldWikipedia is only allowed on UpdateOne operations")
 	}
@@ -969,9 +939,22 @@ func (m *AirportMutation) OldWikipedia(ctx context.Context) (v string, err error
 	return oldValue.Wikipedia, nil
 }
 
+// ClearWikipedia clears the value of the "wikipedia" field.
+func (m *AirportMutation) ClearWikipedia() {
+	m.wikipedia = nil
+	m.clearedFields[airport.FieldWikipedia] = struct{}{}
+}
+
+// WikipediaCleared returns if the "wikipedia" field was cleared in this mutation.
+func (m *AirportMutation) WikipediaCleared() bool {
+	_, ok := m.clearedFields[airport.FieldWikipedia]
+	return ok
+}
+
 // ResetWikipedia resets all changes to the "wikipedia" field.
 func (m *AirportMutation) ResetWikipedia() {
 	m.wikipedia = nil
+	delete(m.clearedFields, airport.FieldWikipedia)
 }
 
 // SetKeywords sets the "keywords" field.
@@ -1083,18 +1066,12 @@ func (m *AirportMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *AirportMutation) Fields() []string {
-	fields := make([]string, 0, 21)
+	fields := make([]string, 0, 19)
 	if m.hash != nil {
 		fields = append(fields, airport.FieldHash)
 	}
 	if m.import_flag != nil {
 		fields = append(fields, airport.FieldImportFlag)
-	}
-	if m.create_time != nil {
-		fields = append(fields, airport.FieldCreateTime)
-	}
-	if m.update_time != nil {
-		fields = append(fields, airport.FieldUpdateTime)
 	}
 	if m.identifier != nil {
 		fields = append(fields, airport.FieldIdentifier)
@@ -1159,10 +1136,6 @@ func (m *AirportMutation) Field(name string) (ent.Value, bool) {
 		return m.Hash()
 	case airport.FieldImportFlag:
 		return m.ImportFlag()
-	case airport.FieldCreateTime:
-		return m.CreateTime()
-	case airport.FieldUpdateTime:
-		return m.UpdateTime()
 	case airport.FieldIdentifier:
 		return m.Identifier()
 	case airport.FieldType:
@@ -1210,10 +1183,6 @@ func (m *AirportMutation) OldField(ctx context.Context, name string) (ent.Value,
 		return m.OldHash(ctx)
 	case airport.FieldImportFlag:
 		return m.OldImportFlag(ctx)
-	case airport.FieldCreateTime:
-		return m.OldCreateTime(ctx)
-	case airport.FieldUpdateTime:
-		return m.OldUpdateTime(ctx)
 	case airport.FieldIdentifier:
 		return m.OldIdentifier(ctx)
 	case airport.FieldType:
@@ -1258,7 +1227,7 @@ func (m *AirportMutation) OldField(ctx context.Context, name string) (ent.Value,
 func (m *AirportMutation) SetField(name string, value ent.Value) error {
 	switch name {
 	case airport.FieldHash:
-		v, ok := value.(uint64)
+		v, ok := value.(string)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
@@ -1271,20 +1240,6 @@ func (m *AirportMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetImportFlag(v)
 		return nil
-	case airport.FieldCreateTime:
-		v, ok := value.(time.Time)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetCreateTime(v)
-		return nil
-	case airport.FieldUpdateTime:
-		v, ok := value.(time.Time)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetUpdateTime(v)
-		return nil
 	case airport.FieldIdentifier:
 		v, ok := value.(string)
 		if !ok {
@@ -1293,7 +1248,7 @@ func (m *AirportMutation) SetField(name string, value ent.Value) error {
 		m.SetIdentifier(v)
 		return nil
 	case airport.FieldType:
-		v, ok := value.(string)
+		v, ok := value.(airport.Type)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
@@ -1412,9 +1367,6 @@ func (m *AirportMutation) SetField(name string, value ent.Value) error {
 // this mutation.
 func (m *AirportMutation) AddedFields() []string {
 	var fields []string
-	if m.addhash != nil {
-		fields = append(fields, airport.FieldHash)
-	}
 	if m.addlatitude != nil {
 		fields = append(fields, airport.FieldLatitude)
 	}
@@ -1432,8 +1384,6 @@ func (m *AirportMutation) AddedFields() []string {
 // was not set, or was not defined in the schema.
 func (m *AirportMutation) AddedField(name string) (ent.Value, bool) {
 	switch name {
-	case airport.FieldHash:
-		return m.AddedHash()
 	case airport.FieldLatitude:
 		return m.AddedLatitude()
 	case airport.FieldLongitude:
@@ -1449,13 +1399,6 @@ func (m *AirportMutation) AddedField(name string) (ent.Value, bool) {
 // type.
 func (m *AirportMutation) AddField(name string, value ent.Value) error {
 	switch name {
-	case airport.FieldHash:
-		v, ok := value.(int64)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.AddHash(v)
-		return nil
 	case airport.FieldLatitude:
 		v, ok := value.(float64)
 		if !ok {
@@ -1484,7 +1427,26 @@ func (m *AirportMutation) AddField(name string, value ent.Value) error {
 // ClearedFields returns all nullable fields that were cleared during this
 // mutation.
 func (m *AirportMutation) ClearedFields() []string {
-	return nil
+	var fields []string
+	if m.FieldCleared(airport.FieldElevation) {
+		fields = append(fields, airport.FieldElevation)
+	}
+	if m.FieldCleared(airport.FieldGpsCode) {
+		fields = append(fields, airport.FieldGpsCode)
+	}
+	if m.FieldCleared(airport.FieldIataCode) {
+		fields = append(fields, airport.FieldIataCode)
+	}
+	if m.FieldCleared(airport.FieldLocalCode) {
+		fields = append(fields, airport.FieldLocalCode)
+	}
+	if m.FieldCleared(airport.FieldWebsite) {
+		fields = append(fields, airport.FieldWebsite)
+	}
+	if m.FieldCleared(airport.FieldWikipedia) {
+		fields = append(fields, airport.FieldWikipedia)
+	}
+	return fields
 }
 
 // FieldCleared returns a boolean indicating if a field with the given name was
@@ -1497,6 +1459,26 @@ func (m *AirportMutation) FieldCleared(name string) bool {
 // ClearField clears the value of the field with the given name. It returns an
 // error if the field is not defined in the schema.
 func (m *AirportMutation) ClearField(name string) error {
+	switch name {
+	case airport.FieldElevation:
+		m.ClearElevation()
+		return nil
+	case airport.FieldGpsCode:
+		m.ClearGpsCode()
+		return nil
+	case airport.FieldIataCode:
+		m.ClearIataCode()
+		return nil
+	case airport.FieldLocalCode:
+		m.ClearLocalCode()
+		return nil
+	case airport.FieldWebsite:
+		m.ClearWebsite()
+		return nil
+	case airport.FieldWikipedia:
+		m.ClearWikipedia()
+		return nil
+	}
 	return fmt.Errorf("unknown Airport nullable field %s", name)
 }
 
@@ -1509,12 +1491,6 @@ func (m *AirportMutation) ResetField(name string) error {
 		return nil
 	case airport.FieldImportFlag:
 		m.ResetImportFlag()
-		return nil
-	case airport.FieldCreateTime:
-		m.ResetCreateTime()
-		return nil
-	case airport.FieldUpdateTime:
-		m.ResetUpdateTime()
 		return nil
 	case airport.FieldIdentifier:
 		m.ResetIdentifier()
@@ -1907,50 +1883,47 @@ func (m *FrequencyMutation) ResetEdge(name string) error {
 // RunwayMutation represents an operation that mutates the Runway nodes in the graph.
 type RunwayMutation struct {
 	config
-	op                                    Op
-	typ                                   string
-	id                                    *int
-	hash                                  *uint64
-	addhash                               *int64
-	import_flag                           *bool
-	create_time                           *time.Time
-	update_time                           *time.Time
-	airport_identifier                    *string
-	length                                *int
-	addlength                             *int
-	width                                 *int
-	addwidth                              *int
-	surface                               *string
-	lighted                               *bool
-	closed                                *bool
-	low_numbered_runway_end_identifier    *string
-	low_numbered_runway_end_latitude      *float64
-	addlow_numbered_runway_end_latitude   *float64
-	low_numbered_runway_end_longitude     *float64
-	addlow_numbered_runway_end_longitude  *float64
-	low_numbered_runway_end_elevation     *int
-	addlow_numbered_runway_end_elevation  *int
-	low_numbered_runway_end_heading       *int
-	addlow_numbered_runway_end_heading    *int
-	low_numbered_runway_end_displaced     *int
-	addlow_numbered_runway_end_displaced  *int
-	high_numbered_runway_end_identifier   *string
-	high_numbered_runway_end_latitude     *float64
-	addhigh_numbered_runway_end_latitude  *float64
-	high_numbered_runway_end_longitude    *float64
-	addhigh_numbered_runway_end_longitude *float64
-	high_numbered_runway_end_elevation    *int
-	addhigh_numbered_runway_end_elevation *int
-	high_numbered_runway_end_heading      *int
-	addhigh_numbered_runway_end_heading   *int
-	high_numbered_runway_end_displaced    *int
-	addhigh_numbered_runway_end_displaced *int
-	clearedFields                         map[string]struct{}
-	airport                               *int
-	clearedairport                        bool
-	done                                  bool
-	oldValue                              func(context.Context) (*Runway, error)
-	predicates                            []predicate.Runway
+	op                       Op
+	typ                      string
+	id                       *int
+	hash                     *string
+	import_flag              *bool
+	airport_identifier       *string
+	length                   *int
+	addlength                *int
+	width                    *int
+	addwidth                 *int
+	surface                  *string
+	lighted                  *bool
+	closed                   *bool
+	low_runway_identifier    *string
+	low_runway_latitude      *float64
+	addlow_runway_latitude   *float64
+	low_runway_longitude     *float64
+	addlow_runway_longitude  *float64
+	low_runway_elevation     *int
+	addlow_runway_elevation  *int
+	low_runway_heading       *int
+	addlow_runway_heading    *int
+	low_runway_displaced     *int
+	addlow_runway_displaced  *int
+	high_runway_identifier   *string
+	high_runway_latitude     *float64
+	addhigh_runway_latitude  *float64
+	high_runway_longitude    *float64
+	addhigh_runway_longitude *float64
+	high_runway_elevation    *int
+	addhigh_runway_elevation *int
+	high_runway_heading      *int
+	addhigh_runway_heading   *int
+	high_runway_displaced    *int
+	addhigh_runway_displaced *int
+	clearedFields            map[string]struct{}
+	airport                  *int
+	clearedairport           bool
+	done                     bool
+	oldValue                 func(context.Context) (*Runway, error)
+	predicates               []predicate.Runway
 }
 
 var _ ent.Mutation = (*RunwayMutation)(nil)
@@ -2058,13 +2031,12 @@ func (m *RunwayMutation) IDs(ctx context.Context) ([]int, error) {
 }
 
 // SetHash sets the "hash" field.
-func (m *RunwayMutation) SetHash(u uint64) {
-	m.hash = &u
-	m.addhash = nil
+func (m *RunwayMutation) SetHash(s string) {
+	m.hash = &s
 }
 
 // Hash returns the value of the "hash" field in the mutation.
-func (m *RunwayMutation) Hash() (r uint64, exists bool) {
+func (m *RunwayMutation) Hash() (r string, exists bool) {
 	v := m.hash
 	if v == nil {
 		return
@@ -2075,7 +2047,7 @@ func (m *RunwayMutation) Hash() (r uint64, exists bool) {
 // OldHash returns the old "hash" field's value of the Runway entity.
 // If the Runway object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *RunwayMutation) OldHash(ctx context.Context) (v uint64, err error) {
+func (m *RunwayMutation) OldHash(ctx context.Context) (v string, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, errors.New("OldHash is only allowed on UpdateOne operations")
 	}
@@ -2089,28 +2061,9 @@ func (m *RunwayMutation) OldHash(ctx context.Context) (v uint64, err error) {
 	return oldValue.Hash, nil
 }
 
-// AddHash adds u to the "hash" field.
-func (m *RunwayMutation) AddHash(u int64) {
-	if m.addhash != nil {
-		*m.addhash += u
-	} else {
-		m.addhash = &u
-	}
-}
-
-// AddedHash returns the value that was added to the "hash" field in this mutation.
-func (m *RunwayMutation) AddedHash() (r int64, exists bool) {
-	v := m.addhash
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
 // ResetHash resets all changes to the "hash" field.
 func (m *RunwayMutation) ResetHash() {
 	m.hash = nil
-	m.addhash = nil
 }
 
 // SetImportFlag sets the "import_flag" field.
@@ -2147,78 +2100,6 @@ func (m *RunwayMutation) OldImportFlag(ctx context.Context) (v bool, err error) 
 // ResetImportFlag resets all changes to the "import_flag" field.
 func (m *RunwayMutation) ResetImportFlag() {
 	m.import_flag = nil
-}
-
-// SetCreateTime sets the "create_time" field.
-func (m *RunwayMutation) SetCreateTime(t time.Time) {
-	m.create_time = &t
-}
-
-// CreateTime returns the value of the "create_time" field in the mutation.
-func (m *RunwayMutation) CreateTime() (r time.Time, exists bool) {
-	v := m.create_time
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldCreateTime returns the old "create_time" field's value of the Runway entity.
-// If the Runway object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *RunwayMutation) OldCreateTime(ctx context.Context) (v time.Time, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldCreateTime is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldCreateTime requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldCreateTime: %w", err)
-	}
-	return oldValue.CreateTime, nil
-}
-
-// ResetCreateTime resets all changes to the "create_time" field.
-func (m *RunwayMutation) ResetCreateTime() {
-	m.create_time = nil
-}
-
-// SetUpdateTime sets the "update_time" field.
-func (m *RunwayMutation) SetUpdateTime(t time.Time) {
-	m.update_time = &t
-}
-
-// UpdateTime returns the value of the "update_time" field in the mutation.
-func (m *RunwayMutation) UpdateTime() (r time.Time, exists bool) {
-	v := m.update_time
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldUpdateTime returns the old "update_time" field's value of the Runway entity.
-// If the Runway object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *RunwayMutation) OldUpdateTime(ctx context.Context) (v time.Time, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldUpdateTime is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldUpdateTime requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldUpdateTime: %w", err)
-	}
-	return oldValue.UpdateTime, nil
-}
-
-// ResetUpdateTime resets all changes to the "update_time" field.
-func (m *RunwayMutation) ResetUpdateTime() {
-	m.update_time = nil
 }
 
 // SetAirportIdentifier sets the "airport_identifier" field.
@@ -2477,636 +2358,776 @@ func (m *RunwayMutation) ResetClosed() {
 	m.closed = nil
 }
 
-// SetLowNumberedRunwayEndIdentifier sets the "low_numbered_runway_end_identifier" field.
-func (m *RunwayMutation) SetLowNumberedRunwayEndIdentifier(s string) {
-	m.low_numbered_runway_end_identifier = &s
+// SetLowRunwayIdentifier sets the "low_runway_identifier" field.
+func (m *RunwayMutation) SetLowRunwayIdentifier(s string) {
+	m.low_runway_identifier = &s
 }
 
-// LowNumberedRunwayEndIdentifier returns the value of the "low_numbered_runway_end_identifier" field in the mutation.
-func (m *RunwayMutation) LowNumberedRunwayEndIdentifier() (r string, exists bool) {
-	v := m.low_numbered_runway_end_identifier
+// LowRunwayIdentifier returns the value of the "low_runway_identifier" field in the mutation.
+func (m *RunwayMutation) LowRunwayIdentifier() (r string, exists bool) {
+	v := m.low_runway_identifier
 	if v == nil {
 		return
 	}
 	return *v, true
 }
 
-// OldLowNumberedRunwayEndIdentifier returns the old "low_numbered_runway_end_identifier" field's value of the Runway entity.
+// OldLowRunwayIdentifier returns the old "low_runway_identifier" field's value of the Runway entity.
 // If the Runway object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *RunwayMutation) OldLowNumberedRunwayEndIdentifier(ctx context.Context) (v string, err error) {
+func (m *RunwayMutation) OldLowRunwayIdentifier(ctx context.Context) (v string, err error) {
 	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldLowNumberedRunwayEndIdentifier is only allowed on UpdateOne operations")
+		return v, errors.New("OldLowRunwayIdentifier is only allowed on UpdateOne operations")
 	}
 	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldLowNumberedRunwayEndIdentifier requires an ID field in the mutation")
+		return v, errors.New("OldLowRunwayIdentifier requires an ID field in the mutation")
 	}
 	oldValue, err := m.oldValue(ctx)
 	if err != nil {
-		return v, fmt.Errorf("querying old value for OldLowNumberedRunwayEndIdentifier: %w", err)
+		return v, fmt.Errorf("querying old value for OldLowRunwayIdentifier: %w", err)
 	}
-	return oldValue.LowNumberedRunwayEndIdentifier, nil
+	return oldValue.LowRunwayIdentifier, nil
 }
 
-// ResetLowNumberedRunwayEndIdentifier resets all changes to the "low_numbered_runway_end_identifier" field.
-func (m *RunwayMutation) ResetLowNumberedRunwayEndIdentifier() {
-	m.low_numbered_runway_end_identifier = nil
+// ResetLowRunwayIdentifier resets all changes to the "low_runway_identifier" field.
+func (m *RunwayMutation) ResetLowRunwayIdentifier() {
+	m.low_runway_identifier = nil
 }
 
-// SetLowNumberedRunwayEndLatitude sets the "low_numbered_runway_end_latitude" field.
-func (m *RunwayMutation) SetLowNumberedRunwayEndLatitude(f float64) {
-	m.low_numbered_runway_end_latitude = &f
-	m.addlow_numbered_runway_end_latitude = nil
+// SetLowRunwayLatitude sets the "low_runway_latitude" field.
+func (m *RunwayMutation) SetLowRunwayLatitude(f float64) {
+	m.low_runway_latitude = &f
+	m.addlow_runway_latitude = nil
 }
 
-// LowNumberedRunwayEndLatitude returns the value of the "low_numbered_runway_end_latitude" field in the mutation.
-func (m *RunwayMutation) LowNumberedRunwayEndLatitude() (r float64, exists bool) {
-	v := m.low_numbered_runway_end_latitude
+// LowRunwayLatitude returns the value of the "low_runway_latitude" field in the mutation.
+func (m *RunwayMutation) LowRunwayLatitude() (r float64, exists bool) {
+	v := m.low_runway_latitude
 	if v == nil {
 		return
 	}
 	return *v, true
 }
 
-// OldLowNumberedRunwayEndLatitude returns the old "low_numbered_runway_end_latitude" field's value of the Runway entity.
+// OldLowRunwayLatitude returns the old "low_runway_latitude" field's value of the Runway entity.
 // If the Runway object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *RunwayMutation) OldLowNumberedRunwayEndLatitude(ctx context.Context) (v float64, err error) {
+func (m *RunwayMutation) OldLowRunwayLatitude(ctx context.Context) (v *float64, err error) {
 	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldLowNumberedRunwayEndLatitude is only allowed on UpdateOne operations")
+		return v, errors.New("OldLowRunwayLatitude is only allowed on UpdateOne operations")
 	}
 	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldLowNumberedRunwayEndLatitude requires an ID field in the mutation")
+		return v, errors.New("OldLowRunwayLatitude requires an ID field in the mutation")
 	}
 	oldValue, err := m.oldValue(ctx)
 	if err != nil {
-		return v, fmt.Errorf("querying old value for OldLowNumberedRunwayEndLatitude: %w", err)
+		return v, fmt.Errorf("querying old value for OldLowRunwayLatitude: %w", err)
 	}
-	return oldValue.LowNumberedRunwayEndLatitude, nil
+	return oldValue.LowRunwayLatitude, nil
 }
 
-// AddLowNumberedRunwayEndLatitude adds f to the "low_numbered_runway_end_latitude" field.
-func (m *RunwayMutation) AddLowNumberedRunwayEndLatitude(f float64) {
-	if m.addlow_numbered_runway_end_latitude != nil {
-		*m.addlow_numbered_runway_end_latitude += f
+// AddLowRunwayLatitude adds f to the "low_runway_latitude" field.
+func (m *RunwayMutation) AddLowRunwayLatitude(f float64) {
+	if m.addlow_runway_latitude != nil {
+		*m.addlow_runway_latitude += f
 	} else {
-		m.addlow_numbered_runway_end_latitude = &f
+		m.addlow_runway_latitude = &f
 	}
 }
 
-// AddedLowNumberedRunwayEndLatitude returns the value that was added to the "low_numbered_runway_end_latitude" field in this mutation.
-func (m *RunwayMutation) AddedLowNumberedRunwayEndLatitude() (r float64, exists bool) {
-	v := m.addlow_numbered_runway_end_latitude
+// AddedLowRunwayLatitude returns the value that was added to the "low_runway_latitude" field in this mutation.
+func (m *RunwayMutation) AddedLowRunwayLatitude() (r float64, exists bool) {
+	v := m.addlow_runway_latitude
 	if v == nil {
 		return
 	}
 	return *v, true
 }
 
-// ResetLowNumberedRunwayEndLatitude resets all changes to the "low_numbered_runway_end_latitude" field.
-func (m *RunwayMutation) ResetLowNumberedRunwayEndLatitude() {
-	m.low_numbered_runway_end_latitude = nil
-	m.addlow_numbered_runway_end_latitude = nil
+// ClearLowRunwayLatitude clears the value of the "low_runway_latitude" field.
+func (m *RunwayMutation) ClearLowRunwayLatitude() {
+	m.low_runway_latitude = nil
+	m.addlow_runway_latitude = nil
+	m.clearedFields[runway.FieldLowRunwayLatitude] = struct{}{}
 }
 
-// SetLowNumberedRunwayEndLongitude sets the "low_numbered_runway_end_longitude" field.
-func (m *RunwayMutation) SetLowNumberedRunwayEndLongitude(f float64) {
-	m.low_numbered_runway_end_longitude = &f
-	m.addlow_numbered_runway_end_longitude = nil
+// LowRunwayLatitudeCleared returns if the "low_runway_latitude" field was cleared in this mutation.
+func (m *RunwayMutation) LowRunwayLatitudeCleared() bool {
+	_, ok := m.clearedFields[runway.FieldLowRunwayLatitude]
+	return ok
 }
 
-// LowNumberedRunwayEndLongitude returns the value of the "low_numbered_runway_end_longitude" field in the mutation.
-func (m *RunwayMutation) LowNumberedRunwayEndLongitude() (r float64, exists bool) {
-	v := m.low_numbered_runway_end_longitude
+// ResetLowRunwayLatitude resets all changes to the "low_runway_latitude" field.
+func (m *RunwayMutation) ResetLowRunwayLatitude() {
+	m.low_runway_latitude = nil
+	m.addlow_runway_latitude = nil
+	delete(m.clearedFields, runway.FieldLowRunwayLatitude)
+}
+
+// SetLowRunwayLongitude sets the "low_runway_longitude" field.
+func (m *RunwayMutation) SetLowRunwayLongitude(f float64) {
+	m.low_runway_longitude = &f
+	m.addlow_runway_longitude = nil
+}
+
+// LowRunwayLongitude returns the value of the "low_runway_longitude" field in the mutation.
+func (m *RunwayMutation) LowRunwayLongitude() (r float64, exists bool) {
+	v := m.low_runway_longitude
 	if v == nil {
 		return
 	}
 	return *v, true
 }
 
-// OldLowNumberedRunwayEndLongitude returns the old "low_numbered_runway_end_longitude" field's value of the Runway entity.
+// OldLowRunwayLongitude returns the old "low_runway_longitude" field's value of the Runway entity.
 // If the Runway object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *RunwayMutation) OldLowNumberedRunwayEndLongitude(ctx context.Context) (v float64, err error) {
+func (m *RunwayMutation) OldLowRunwayLongitude(ctx context.Context) (v *float64, err error) {
 	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldLowNumberedRunwayEndLongitude is only allowed on UpdateOne operations")
+		return v, errors.New("OldLowRunwayLongitude is only allowed on UpdateOne operations")
 	}
 	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldLowNumberedRunwayEndLongitude requires an ID field in the mutation")
+		return v, errors.New("OldLowRunwayLongitude requires an ID field in the mutation")
 	}
 	oldValue, err := m.oldValue(ctx)
 	if err != nil {
-		return v, fmt.Errorf("querying old value for OldLowNumberedRunwayEndLongitude: %w", err)
+		return v, fmt.Errorf("querying old value for OldLowRunwayLongitude: %w", err)
 	}
-	return oldValue.LowNumberedRunwayEndLongitude, nil
+	return oldValue.LowRunwayLongitude, nil
 }
 
-// AddLowNumberedRunwayEndLongitude adds f to the "low_numbered_runway_end_longitude" field.
-func (m *RunwayMutation) AddLowNumberedRunwayEndLongitude(f float64) {
-	if m.addlow_numbered_runway_end_longitude != nil {
-		*m.addlow_numbered_runway_end_longitude += f
+// AddLowRunwayLongitude adds f to the "low_runway_longitude" field.
+func (m *RunwayMutation) AddLowRunwayLongitude(f float64) {
+	if m.addlow_runway_longitude != nil {
+		*m.addlow_runway_longitude += f
 	} else {
-		m.addlow_numbered_runway_end_longitude = &f
+		m.addlow_runway_longitude = &f
 	}
 }
 
-// AddedLowNumberedRunwayEndLongitude returns the value that was added to the "low_numbered_runway_end_longitude" field in this mutation.
-func (m *RunwayMutation) AddedLowNumberedRunwayEndLongitude() (r float64, exists bool) {
-	v := m.addlow_numbered_runway_end_longitude
+// AddedLowRunwayLongitude returns the value that was added to the "low_runway_longitude" field in this mutation.
+func (m *RunwayMutation) AddedLowRunwayLongitude() (r float64, exists bool) {
+	v := m.addlow_runway_longitude
 	if v == nil {
 		return
 	}
 	return *v, true
 }
 
-// ResetLowNumberedRunwayEndLongitude resets all changes to the "low_numbered_runway_end_longitude" field.
-func (m *RunwayMutation) ResetLowNumberedRunwayEndLongitude() {
-	m.low_numbered_runway_end_longitude = nil
-	m.addlow_numbered_runway_end_longitude = nil
+// ClearLowRunwayLongitude clears the value of the "low_runway_longitude" field.
+func (m *RunwayMutation) ClearLowRunwayLongitude() {
+	m.low_runway_longitude = nil
+	m.addlow_runway_longitude = nil
+	m.clearedFields[runway.FieldLowRunwayLongitude] = struct{}{}
 }
 
-// SetLowNumberedRunwayEndElevation sets the "low_numbered_runway_end_elevation" field.
-func (m *RunwayMutation) SetLowNumberedRunwayEndElevation(i int) {
-	m.low_numbered_runway_end_elevation = &i
-	m.addlow_numbered_runway_end_elevation = nil
+// LowRunwayLongitudeCleared returns if the "low_runway_longitude" field was cleared in this mutation.
+func (m *RunwayMutation) LowRunwayLongitudeCleared() bool {
+	_, ok := m.clearedFields[runway.FieldLowRunwayLongitude]
+	return ok
 }
 
-// LowNumberedRunwayEndElevation returns the value of the "low_numbered_runway_end_elevation" field in the mutation.
-func (m *RunwayMutation) LowNumberedRunwayEndElevation() (r int, exists bool) {
-	v := m.low_numbered_runway_end_elevation
+// ResetLowRunwayLongitude resets all changes to the "low_runway_longitude" field.
+func (m *RunwayMutation) ResetLowRunwayLongitude() {
+	m.low_runway_longitude = nil
+	m.addlow_runway_longitude = nil
+	delete(m.clearedFields, runway.FieldLowRunwayLongitude)
+}
+
+// SetLowRunwayElevation sets the "low_runway_elevation" field.
+func (m *RunwayMutation) SetLowRunwayElevation(i int) {
+	m.low_runway_elevation = &i
+	m.addlow_runway_elevation = nil
+}
+
+// LowRunwayElevation returns the value of the "low_runway_elevation" field in the mutation.
+func (m *RunwayMutation) LowRunwayElevation() (r int, exists bool) {
+	v := m.low_runway_elevation
 	if v == nil {
 		return
 	}
 	return *v, true
 }
 
-// OldLowNumberedRunwayEndElevation returns the old "low_numbered_runway_end_elevation" field's value of the Runway entity.
+// OldLowRunwayElevation returns the old "low_runway_elevation" field's value of the Runway entity.
 // If the Runway object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *RunwayMutation) OldLowNumberedRunwayEndElevation(ctx context.Context) (v int, err error) {
+func (m *RunwayMutation) OldLowRunwayElevation(ctx context.Context) (v *int, err error) {
 	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldLowNumberedRunwayEndElevation is only allowed on UpdateOne operations")
+		return v, errors.New("OldLowRunwayElevation is only allowed on UpdateOne operations")
 	}
 	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldLowNumberedRunwayEndElevation requires an ID field in the mutation")
+		return v, errors.New("OldLowRunwayElevation requires an ID field in the mutation")
 	}
 	oldValue, err := m.oldValue(ctx)
 	if err != nil {
-		return v, fmt.Errorf("querying old value for OldLowNumberedRunwayEndElevation: %w", err)
+		return v, fmt.Errorf("querying old value for OldLowRunwayElevation: %w", err)
 	}
-	return oldValue.LowNumberedRunwayEndElevation, nil
+	return oldValue.LowRunwayElevation, nil
 }
 
-// AddLowNumberedRunwayEndElevation adds i to the "low_numbered_runway_end_elevation" field.
-func (m *RunwayMutation) AddLowNumberedRunwayEndElevation(i int) {
-	if m.addlow_numbered_runway_end_elevation != nil {
-		*m.addlow_numbered_runway_end_elevation += i
+// AddLowRunwayElevation adds i to the "low_runway_elevation" field.
+func (m *RunwayMutation) AddLowRunwayElevation(i int) {
+	if m.addlow_runway_elevation != nil {
+		*m.addlow_runway_elevation += i
 	} else {
-		m.addlow_numbered_runway_end_elevation = &i
+		m.addlow_runway_elevation = &i
 	}
 }
 
-// AddedLowNumberedRunwayEndElevation returns the value that was added to the "low_numbered_runway_end_elevation" field in this mutation.
-func (m *RunwayMutation) AddedLowNumberedRunwayEndElevation() (r int, exists bool) {
-	v := m.addlow_numbered_runway_end_elevation
+// AddedLowRunwayElevation returns the value that was added to the "low_runway_elevation" field in this mutation.
+func (m *RunwayMutation) AddedLowRunwayElevation() (r int, exists bool) {
+	v := m.addlow_runway_elevation
 	if v == nil {
 		return
 	}
 	return *v, true
 }
 
-// ResetLowNumberedRunwayEndElevation resets all changes to the "low_numbered_runway_end_elevation" field.
-func (m *RunwayMutation) ResetLowNumberedRunwayEndElevation() {
-	m.low_numbered_runway_end_elevation = nil
-	m.addlow_numbered_runway_end_elevation = nil
+// ClearLowRunwayElevation clears the value of the "low_runway_elevation" field.
+func (m *RunwayMutation) ClearLowRunwayElevation() {
+	m.low_runway_elevation = nil
+	m.addlow_runway_elevation = nil
+	m.clearedFields[runway.FieldLowRunwayElevation] = struct{}{}
 }
 
-// SetLowNumberedRunwayEndHeading sets the "low_numbered_runway_end_heading" field.
-func (m *RunwayMutation) SetLowNumberedRunwayEndHeading(i int) {
-	m.low_numbered_runway_end_heading = &i
-	m.addlow_numbered_runway_end_heading = nil
+// LowRunwayElevationCleared returns if the "low_runway_elevation" field was cleared in this mutation.
+func (m *RunwayMutation) LowRunwayElevationCleared() bool {
+	_, ok := m.clearedFields[runway.FieldLowRunwayElevation]
+	return ok
 }
 
-// LowNumberedRunwayEndHeading returns the value of the "low_numbered_runway_end_heading" field in the mutation.
-func (m *RunwayMutation) LowNumberedRunwayEndHeading() (r int, exists bool) {
-	v := m.low_numbered_runway_end_heading
+// ResetLowRunwayElevation resets all changes to the "low_runway_elevation" field.
+func (m *RunwayMutation) ResetLowRunwayElevation() {
+	m.low_runway_elevation = nil
+	m.addlow_runway_elevation = nil
+	delete(m.clearedFields, runway.FieldLowRunwayElevation)
+}
+
+// SetLowRunwayHeading sets the "low_runway_heading" field.
+func (m *RunwayMutation) SetLowRunwayHeading(i int) {
+	m.low_runway_heading = &i
+	m.addlow_runway_heading = nil
+}
+
+// LowRunwayHeading returns the value of the "low_runway_heading" field in the mutation.
+func (m *RunwayMutation) LowRunwayHeading() (r int, exists bool) {
+	v := m.low_runway_heading
 	if v == nil {
 		return
 	}
 	return *v, true
 }
 
-// OldLowNumberedRunwayEndHeading returns the old "low_numbered_runway_end_heading" field's value of the Runway entity.
+// OldLowRunwayHeading returns the old "low_runway_heading" field's value of the Runway entity.
 // If the Runway object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *RunwayMutation) OldLowNumberedRunwayEndHeading(ctx context.Context) (v int, err error) {
+func (m *RunwayMutation) OldLowRunwayHeading(ctx context.Context) (v *int, err error) {
 	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldLowNumberedRunwayEndHeading is only allowed on UpdateOne operations")
+		return v, errors.New("OldLowRunwayHeading is only allowed on UpdateOne operations")
 	}
 	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldLowNumberedRunwayEndHeading requires an ID field in the mutation")
+		return v, errors.New("OldLowRunwayHeading requires an ID field in the mutation")
 	}
 	oldValue, err := m.oldValue(ctx)
 	if err != nil {
-		return v, fmt.Errorf("querying old value for OldLowNumberedRunwayEndHeading: %w", err)
+		return v, fmt.Errorf("querying old value for OldLowRunwayHeading: %w", err)
 	}
-	return oldValue.LowNumberedRunwayEndHeading, nil
+	return oldValue.LowRunwayHeading, nil
 }
 
-// AddLowNumberedRunwayEndHeading adds i to the "low_numbered_runway_end_heading" field.
-func (m *RunwayMutation) AddLowNumberedRunwayEndHeading(i int) {
-	if m.addlow_numbered_runway_end_heading != nil {
-		*m.addlow_numbered_runway_end_heading += i
+// AddLowRunwayHeading adds i to the "low_runway_heading" field.
+func (m *RunwayMutation) AddLowRunwayHeading(i int) {
+	if m.addlow_runway_heading != nil {
+		*m.addlow_runway_heading += i
 	} else {
-		m.addlow_numbered_runway_end_heading = &i
+		m.addlow_runway_heading = &i
 	}
 }
 
-// AddedLowNumberedRunwayEndHeading returns the value that was added to the "low_numbered_runway_end_heading" field in this mutation.
-func (m *RunwayMutation) AddedLowNumberedRunwayEndHeading() (r int, exists bool) {
-	v := m.addlow_numbered_runway_end_heading
+// AddedLowRunwayHeading returns the value that was added to the "low_runway_heading" field in this mutation.
+func (m *RunwayMutation) AddedLowRunwayHeading() (r int, exists bool) {
+	v := m.addlow_runway_heading
 	if v == nil {
 		return
 	}
 	return *v, true
 }
 
-// ResetLowNumberedRunwayEndHeading resets all changes to the "low_numbered_runway_end_heading" field.
-func (m *RunwayMutation) ResetLowNumberedRunwayEndHeading() {
-	m.low_numbered_runway_end_heading = nil
-	m.addlow_numbered_runway_end_heading = nil
+// ClearLowRunwayHeading clears the value of the "low_runway_heading" field.
+func (m *RunwayMutation) ClearLowRunwayHeading() {
+	m.low_runway_heading = nil
+	m.addlow_runway_heading = nil
+	m.clearedFields[runway.FieldLowRunwayHeading] = struct{}{}
 }
 
-// SetLowNumberedRunwayEndDisplaced sets the "low_numbered_runway_end_displaced" field.
-func (m *RunwayMutation) SetLowNumberedRunwayEndDisplaced(i int) {
-	m.low_numbered_runway_end_displaced = &i
-	m.addlow_numbered_runway_end_displaced = nil
+// LowRunwayHeadingCleared returns if the "low_runway_heading" field was cleared in this mutation.
+func (m *RunwayMutation) LowRunwayHeadingCleared() bool {
+	_, ok := m.clearedFields[runway.FieldLowRunwayHeading]
+	return ok
 }
 
-// LowNumberedRunwayEndDisplaced returns the value of the "low_numbered_runway_end_displaced" field in the mutation.
-func (m *RunwayMutation) LowNumberedRunwayEndDisplaced() (r int, exists bool) {
-	v := m.low_numbered_runway_end_displaced
+// ResetLowRunwayHeading resets all changes to the "low_runway_heading" field.
+func (m *RunwayMutation) ResetLowRunwayHeading() {
+	m.low_runway_heading = nil
+	m.addlow_runway_heading = nil
+	delete(m.clearedFields, runway.FieldLowRunwayHeading)
+}
+
+// SetLowRunwayDisplaced sets the "low_runway_displaced" field.
+func (m *RunwayMutation) SetLowRunwayDisplaced(i int) {
+	m.low_runway_displaced = &i
+	m.addlow_runway_displaced = nil
+}
+
+// LowRunwayDisplaced returns the value of the "low_runway_displaced" field in the mutation.
+func (m *RunwayMutation) LowRunwayDisplaced() (r int, exists bool) {
+	v := m.low_runway_displaced
 	if v == nil {
 		return
 	}
 	return *v, true
 }
 
-// OldLowNumberedRunwayEndDisplaced returns the old "low_numbered_runway_end_displaced" field's value of the Runway entity.
+// OldLowRunwayDisplaced returns the old "low_runway_displaced" field's value of the Runway entity.
 // If the Runway object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *RunwayMutation) OldLowNumberedRunwayEndDisplaced(ctx context.Context) (v int, err error) {
+func (m *RunwayMutation) OldLowRunwayDisplaced(ctx context.Context) (v *int, err error) {
 	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldLowNumberedRunwayEndDisplaced is only allowed on UpdateOne operations")
+		return v, errors.New("OldLowRunwayDisplaced is only allowed on UpdateOne operations")
 	}
 	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldLowNumberedRunwayEndDisplaced requires an ID field in the mutation")
+		return v, errors.New("OldLowRunwayDisplaced requires an ID field in the mutation")
 	}
 	oldValue, err := m.oldValue(ctx)
 	if err != nil {
-		return v, fmt.Errorf("querying old value for OldLowNumberedRunwayEndDisplaced: %w", err)
+		return v, fmt.Errorf("querying old value for OldLowRunwayDisplaced: %w", err)
 	}
-	return oldValue.LowNumberedRunwayEndDisplaced, nil
+	return oldValue.LowRunwayDisplaced, nil
 }
 
-// AddLowNumberedRunwayEndDisplaced adds i to the "low_numbered_runway_end_displaced" field.
-func (m *RunwayMutation) AddLowNumberedRunwayEndDisplaced(i int) {
-	if m.addlow_numbered_runway_end_displaced != nil {
-		*m.addlow_numbered_runway_end_displaced += i
+// AddLowRunwayDisplaced adds i to the "low_runway_displaced" field.
+func (m *RunwayMutation) AddLowRunwayDisplaced(i int) {
+	if m.addlow_runway_displaced != nil {
+		*m.addlow_runway_displaced += i
 	} else {
-		m.addlow_numbered_runway_end_displaced = &i
+		m.addlow_runway_displaced = &i
 	}
 }
 
-// AddedLowNumberedRunwayEndDisplaced returns the value that was added to the "low_numbered_runway_end_displaced" field in this mutation.
-func (m *RunwayMutation) AddedLowNumberedRunwayEndDisplaced() (r int, exists bool) {
-	v := m.addlow_numbered_runway_end_displaced
+// AddedLowRunwayDisplaced returns the value that was added to the "low_runway_displaced" field in this mutation.
+func (m *RunwayMutation) AddedLowRunwayDisplaced() (r int, exists bool) {
+	v := m.addlow_runway_displaced
 	if v == nil {
 		return
 	}
 	return *v, true
 }
 
-// ResetLowNumberedRunwayEndDisplaced resets all changes to the "low_numbered_runway_end_displaced" field.
-func (m *RunwayMutation) ResetLowNumberedRunwayEndDisplaced() {
-	m.low_numbered_runway_end_displaced = nil
-	m.addlow_numbered_runway_end_displaced = nil
+// ClearLowRunwayDisplaced clears the value of the "low_runway_displaced" field.
+func (m *RunwayMutation) ClearLowRunwayDisplaced() {
+	m.low_runway_displaced = nil
+	m.addlow_runway_displaced = nil
+	m.clearedFields[runway.FieldLowRunwayDisplaced] = struct{}{}
 }
 
-// SetHighNumberedRunwayEndIdentifier sets the "high_numbered_runway_end_identifier" field.
-func (m *RunwayMutation) SetHighNumberedRunwayEndIdentifier(s string) {
-	m.high_numbered_runway_end_identifier = &s
+// LowRunwayDisplacedCleared returns if the "low_runway_displaced" field was cleared in this mutation.
+func (m *RunwayMutation) LowRunwayDisplacedCleared() bool {
+	_, ok := m.clearedFields[runway.FieldLowRunwayDisplaced]
+	return ok
 }
 
-// HighNumberedRunwayEndIdentifier returns the value of the "high_numbered_runway_end_identifier" field in the mutation.
-func (m *RunwayMutation) HighNumberedRunwayEndIdentifier() (r string, exists bool) {
-	v := m.high_numbered_runway_end_identifier
+// ResetLowRunwayDisplaced resets all changes to the "low_runway_displaced" field.
+func (m *RunwayMutation) ResetLowRunwayDisplaced() {
+	m.low_runway_displaced = nil
+	m.addlow_runway_displaced = nil
+	delete(m.clearedFields, runway.FieldLowRunwayDisplaced)
+}
+
+// SetHighRunwayIdentifier sets the "high_runway_identifier" field.
+func (m *RunwayMutation) SetHighRunwayIdentifier(s string) {
+	m.high_runway_identifier = &s
+}
+
+// HighRunwayIdentifier returns the value of the "high_runway_identifier" field in the mutation.
+func (m *RunwayMutation) HighRunwayIdentifier() (r string, exists bool) {
+	v := m.high_runway_identifier
 	if v == nil {
 		return
 	}
 	return *v, true
 }
 
-// OldHighNumberedRunwayEndIdentifier returns the old "high_numbered_runway_end_identifier" field's value of the Runway entity.
+// OldHighRunwayIdentifier returns the old "high_runway_identifier" field's value of the Runway entity.
 // If the Runway object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *RunwayMutation) OldHighNumberedRunwayEndIdentifier(ctx context.Context) (v string, err error) {
+func (m *RunwayMutation) OldHighRunwayIdentifier(ctx context.Context) (v string, err error) {
 	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldHighNumberedRunwayEndIdentifier is only allowed on UpdateOne operations")
+		return v, errors.New("OldHighRunwayIdentifier is only allowed on UpdateOne operations")
 	}
 	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldHighNumberedRunwayEndIdentifier requires an ID field in the mutation")
+		return v, errors.New("OldHighRunwayIdentifier requires an ID field in the mutation")
 	}
 	oldValue, err := m.oldValue(ctx)
 	if err != nil {
-		return v, fmt.Errorf("querying old value for OldHighNumberedRunwayEndIdentifier: %w", err)
+		return v, fmt.Errorf("querying old value for OldHighRunwayIdentifier: %w", err)
 	}
-	return oldValue.HighNumberedRunwayEndIdentifier, nil
+	return oldValue.HighRunwayIdentifier, nil
 }
 
-// ResetHighNumberedRunwayEndIdentifier resets all changes to the "high_numbered_runway_end_identifier" field.
-func (m *RunwayMutation) ResetHighNumberedRunwayEndIdentifier() {
-	m.high_numbered_runway_end_identifier = nil
+// ResetHighRunwayIdentifier resets all changes to the "high_runway_identifier" field.
+func (m *RunwayMutation) ResetHighRunwayIdentifier() {
+	m.high_runway_identifier = nil
 }
 
-// SetHighNumberedRunwayEndLatitude sets the "high_numbered_runway_end_latitude" field.
-func (m *RunwayMutation) SetHighNumberedRunwayEndLatitude(f float64) {
-	m.high_numbered_runway_end_latitude = &f
-	m.addhigh_numbered_runway_end_latitude = nil
+// SetHighRunwayLatitude sets the "high_runway_latitude" field.
+func (m *RunwayMutation) SetHighRunwayLatitude(f float64) {
+	m.high_runway_latitude = &f
+	m.addhigh_runway_latitude = nil
 }
 
-// HighNumberedRunwayEndLatitude returns the value of the "high_numbered_runway_end_latitude" field in the mutation.
-func (m *RunwayMutation) HighNumberedRunwayEndLatitude() (r float64, exists bool) {
-	v := m.high_numbered_runway_end_latitude
+// HighRunwayLatitude returns the value of the "high_runway_latitude" field in the mutation.
+func (m *RunwayMutation) HighRunwayLatitude() (r float64, exists bool) {
+	v := m.high_runway_latitude
 	if v == nil {
 		return
 	}
 	return *v, true
 }
 
-// OldHighNumberedRunwayEndLatitude returns the old "high_numbered_runway_end_latitude" field's value of the Runway entity.
+// OldHighRunwayLatitude returns the old "high_runway_latitude" field's value of the Runway entity.
 // If the Runway object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *RunwayMutation) OldHighNumberedRunwayEndLatitude(ctx context.Context) (v float64, err error) {
+func (m *RunwayMutation) OldHighRunwayLatitude(ctx context.Context) (v *float64, err error) {
 	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldHighNumberedRunwayEndLatitude is only allowed on UpdateOne operations")
+		return v, errors.New("OldHighRunwayLatitude is only allowed on UpdateOne operations")
 	}
 	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldHighNumberedRunwayEndLatitude requires an ID field in the mutation")
+		return v, errors.New("OldHighRunwayLatitude requires an ID field in the mutation")
 	}
 	oldValue, err := m.oldValue(ctx)
 	if err != nil {
-		return v, fmt.Errorf("querying old value for OldHighNumberedRunwayEndLatitude: %w", err)
+		return v, fmt.Errorf("querying old value for OldHighRunwayLatitude: %w", err)
 	}
-	return oldValue.HighNumberedRunwayEndLatitude, nil
+	return oldValue.HighRunwayLatitude, nil
 }
 
-// AddHighNumberedRunwayEndLatitude adds f to the "high_numbered_runway_end_latitude" field.
-func (m *RunwayMutation) AddHighNumberedRunwayEndLatitude(f float64) {
-	if m.addhigh_numbered_runway_end_latitude != nil {
-		*m.addhigh_numbered_runway_end_latitude += f
+// AddHighRunwayLatitude adds f to the "high_runway_latitude" field.
+func (m *RunwayMutation) AddHighRunwayLatitude(f float64) {
+	if m.addhigh_runway_latitude != nil {
+		*m.addhigh_runway_latitude += f
 	} else {
-		m.addhigh_numbered_runway_end_latitude = &f
+		m.addhigh_runway_latitude = &f
 	}
 }
 
-// AddedHighNumberedRunwayEndLatitude returns the value that was added to the "high_numbered_runway_end_latitude" field in this mutation.
-func (m *RunwayMutation) AddedHighNumberedRunwayEndLatitude() (r float64, exists bool) {
-	v := m.addhigh_numbered_runway_end_latitude
+// AddedHighRunwayLatitude returns the value that was added to the "high_runway_latitude" field in this mutation.
+func (m *RunwayMutation) AddedHighRunwayLatitude() (r float64, exists bool) {
+	v := m.addhigh_runway_latitude
 	if v == nil {
 		return
 	}
 	return *v, true
 }
 
-// ResetHighNumberedRunwayEndLatitude resets all changes to the "high_numbered_runway_end_latitude" field.
-func (m *RunwayMutation) ResetHighNumberedRunwayEndLatitude() {
-	m.high_numbered_runway_end_latitude = nil
-	m.addhigh_numbered_runway_end_latitude = nil
+// ClearHighRunwayLatitude clears the value of the "high_runway_latitude" field.
+func (m *RunwayMutation) ClearHighRunwayLatitude() {
+	m.high_runway_latitude = nil
+	m.addhigh_runway_latitude = nil
+	m.clearedFields[runway.FieldHighRunwayLatitude] = struct{}{}
 }
 
-// SetHighNumberedRunwayEndLongitude sets the "high_numbered_runway_end_longitude" field.
-func (m *RunwayMutation) SetHighNumberedRunwayEndLongitude(f float64) {
-	m.high_numbered_runway_end_longitude = &f
-	m.addhigh_numbered_runway_end_longitude = nil
+// HighRunwayLatitudeCleared returns if the "high_runway_latitude" field was cleared in this mutation.
+func (m *RunwayMutation) HighRunwayLatitudeCleared() bool {
+	_, ok := m.clearedFields[runway.FieldHighRunwayLatitude]
+	return ok
 }
 
-// HighNumberedRunwayEndLongitude returns the value of the "high_numbered_runway_end_longitude" field in the mutation.
-func (m *RunwayMutation) HighNumberedRunwayEndLongitude() (r float64, exists bool) {
-	v := m.high_numbered_runway_end_longitude
+// ResetHighRunwayLatitude resets all changes to the "high_runway_latitude" field.
+func (m *RunwayMutation) ResetHighRunwayLatitude() {
+	m.high_runway_latitude = nil
+	m.addhigh_runway_latitude = nil
+	delete(m.clearedFields, runway.FieldHighRunwayLatitude)
+}
+
+// SetHighRunwayLongitude sets the "high_runway_longitude" field.
+func (m *RunwayMutation) SetHighRunwayLongitude(f float64) {
+	m.high_runway_longitude = &f
+	m.addhigh_runway_longitude = nil
+}
+
+// HighRunwayLongitude returns the value of the "high_runway_longitude" field in the mutation.
+func (m *RunwayMutation) HighRunwayLongitude() (r float64, exists bool) {
+	v := m.high_runway_longitude
 	if v == nil {
 		return
 	}
 	return *v, true
 }
 
-// OldHighNumberedRunwayEndLongitude returns the old "high_numbered_runway_end_longitude" field's value of the Runway entity.
+// OldHighRunwayLongitude returns the old "high_runway_longitude" field's value of the Runway entity.
 // If the Runway object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *RunwayMutation) OldHighNumberedRunwayEndLongitude(ctx context.Context) (v float64, err error) {
+func (m *RunwayMutation) OldHighRunwayLongitude(ctx context.Context) (v *float64, err error) {
 	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldHighNumberedRunwayEndLongitude is only allowed on UpdateOne operations")
+		return v, errors.New("OldHighRunwayLongitude is only allowed on UpdateOne operations")
 	}
 	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldHighNumberedRunwayEndLongitude requires an ID field in the mutation")
+		return v, errors.New("OldHighRunwayLongitude requires an ID field in the mutation")
 	}
 	oldValue, err := m.oldValue(ctx)
 	if err != nil {
-		return v, fmt.Errorf("querying old value for OldHighNumberedRunwayEndLongitude: %w", err)
+		return v, fmt.Errorf("querying old value for OldHighRunwayLongitude: %w", err)
 	}
-	return oldValue.HighNumberedRunwayEndLongitude, nil
+	return oldValue.HighRunwayLongitude, nil
 }
 
-// AddHighNumberedRunwayEndLongitude adds f to the "high_numbered_runway_end_longitude" field.
-func (m *RunwayMutation) AddHighNumberedRunwayEndLongitude(f float64) {
-	if m.addhigh_numbered_runway_end_longitude != nil {
-		*m.addhigh_numbered_runway_end_longitude += f
+// AddHighRunwayLongitude adds f to the "high_runway_longitude" field.
+func (m *RunwayMutation) AddHighRunwayLongitude(f float64) {
+	if m.addhigh_runway_longitude != nil {
+		*m.addhigh_runway_longitude += f
 	} else {
-		m.addhigh_numbered_runway_end_longitude = &f
+		m.addhigh_runway_longitude = &f
 	}
 }
 
-// AddedHighNumberedRunwayEndLongitude returns the value that was added to the "high_numbered_runway_end_longitude" field in this mutation.
-func (m *RunwayMutation) AddedHighNumberedRunwayEndLongitude() (r float64, exists bool) {
-	v := m.addhigh_numbered_runway_end_longitude
+// AddedHighRunwayLongitude returns the value that was added to the "high_runway_longitude" field in this mutation.
+func (m *RunwayMutation) AddedHighRunwayLongitude() (r float64, exists bool) {
+	v := m.addhigh_runway_longitude
 	if v == nil {
 		return
 	}
 	return *v, true
 }
 
-// ResetHighNumberedRunwayEndLongitude resets all changes to the "high_numbered_runway_end_longitude" field.
-func (m *RunwayMutation) ResetHighNumberedRunwayEndLongitude() {
-	m.high_numbered_runway_end_longitude = nil
-	m.addhigh_numbered_runway_end_longitude = nil
+// ClearHighRunwayLongitude clears the value of the "high_runway_longitude" field.
+func (m *RunwayMutation) ClearHighRunwayLongitude() {
+	m.high_runway_longitude = nil
+	m.addhigh_runway_longitude = nil
+	m.clearedFields[runway.FieldHighRunwayLongitude] = struct{}{}
 }
 
-// SetHighNumberedRunwayEndElevation sets the "high_numbered_runway_end_elevation" field.
-func (m *RunwayMutation) SetHighNumberedRunwayEndElevation(i int) {
-	m.high_numbered_runway_end_elevation = &i
-	m.addhigh_numbered_runway_end_elevation = nil
+// HighRunwayLongitudeCleared returns if the "high_runway_longitude" field was cleared in this mutation.
+func (m *RunwayMutation) HighRunwayLongitudeCleared() bool {
+	_, ok := m.clearedFields[runway.FieldHighRunwayLongitude]
+	return ok
 }
 
-// HighNumberedRunwayEndElevation returns the value of the "high_numbered_runway_end_elevation" field in the mutation.
-func (m *RunwayMutation) HighNumberedRunwayEndElevation() (r int, exists bool) {
-	v := m.high_numbered_runway_end_elevation
+// ResetHighRunwayLongitude resets all changes to the "high_runway_longitude" field.
+func (m *RunwayMutation) ResetHighRunwayLongitude() {
+	m.high_runway_longitude = nil
+	m.addhigh_runway_longitude = nil
+	delete(m.clearedFields, runway.FieldHighRunwayLongitude)
+}
+
+// SetHighRunwayElevation sets the "high_runway_elevation" field.
+func (m *RunwayMutation) SetHighRunwayElevation(i int) {
+	m.high_runway_elevation = &i
+	m.addhigh_runway_elevation = nil
+}
+
+// HighRunwayElevation returns the value of the "high_runway_elevation" field in the mutation.
+func (m *RunwayMutation) HighRunwayElevation() (r int, exists bool) {
+	v := m.high_runway_elevation
 	if v == nil {
 		return
 	}
 	return *v, true
 }
 
-// OldHighNumberedRunwayEndElevation returns the old "high_numbered_runway_end_elevation" field's value of the Runway entity.
+// OldHighRunwayElevation returns the old "high_runway_elevation" field's value of the Runway entity.
 // If the Runway object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *RunwayMutation) OldHighNumberedRunwayEndElevation(ctx context.Context) (v int, err error) {
+func (m *RunwayMutation) OldHighRunwayElevation(ctx context.Context) (v *int, err error) {
 	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldHighNumberedRunwayEndElevation is only allowed on UpdateOne operations")
+		return v, errors.New("OldHighRunwayElevation is only allowed on UpdateOne operations")
 	}
 	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldHighNumberedRunwayEndElevation requires an ID field in the mutation")
+		return v, errors.New("OldHighRunwayElevation requires an ID field in the mutation")
 	}
 	oldValue, err := m.oldValue(ctx)
 	if err != nil {
-		return v, fmt.Errorf("querying old value for OldHighNumberedRunwayEndElevation: %w", err)
+		return v, fmt.Errorf("querying old value for OldHighRunwayElevation: %w", err)
 	}
-	return oldValue.HighNumberedRunwayEndElevation, nil
+	return oldValue.HighRunwayElevation, nil
 }
 
-// AddHighNumberedRunwayEndElevation adds i to the "high_numbered_runway_end_elevation" field.
-func (m *RunwayMutation) AddHighNumberedRunwayEndElevation(i int) {
-	if m.addhigh_numbered_runway_end_elevation != nil {
-		*m.addhigh_numbered_runway_end_elevation += i
+// AddHighRunwayElevation adds i to the "high_runway_elevation" field.
+func (m *RunwayMutation) AddHighRunwayElevation(i int) {
+	if m.addhigh_runway_elevation != nil {
+		*m.addhigh_runway_elevation += i
 	} else {
-		m.addhigh_numbered_runway_end_elevation = &i
+		m.addhigh_runway_elevation = &i
 	}
 }
 
-// AddedHighNumberedRunwayEndElevation returns the value that was added to the "high_numbered_runway_end_elevation" field in this mutation.
-func (m *RunwayMutation) AddedHighNumberedRunwayEndElevation() (r int, exists bool) {
-	v := m.addhigh_numbered_runway_end_elevation
+// AddedHighRunwayElevation returns the value that was added to the "high_runway_elevation" field in this mutation.
+func (m *RunwayMutation) AddedHighRunwayElevation() (r int, exists bool) {
+	v := m.addhigh_runway_elevation
 	if v == nil {
 		return
 	}
 	return *v, true
 }
 
-// ResetHighNumberedRunwayEndElevation resets all changes to the "high_numbered_runway_end_elevation" field.
-func (m *RunwayMutation) ResetHighNumberedRunwayEndElevation() {
-	m.high_numbered_runway_end_elevation = nil
-	m.addhigh_numbered_runway_end_elevation = nil
+// ClearHighRunwayElevation clears the value of the "high_runway_elevation" field.
+func (m *RunwayMutation) ClearHighRunwayElevation() {
+	m.high_runway_elevation = nil
+	m.addhigh_runway_elevation = nil
+	m.clearedFields[runway.FieldHighRunwayElevation] = struct{}{}
 }
 
-// SetHighNumberedRunwayEndHeading sets the "high_numbered_runway_end_heading" field.
-func (m *RunwayMutation) SetHighNumberedRunwayEndHeading(i int) {
-	m.high_numbered_runway_end_heading = &i
-	m.addhigh_numbered_runway_end_heading = nil
+// HighRunwayElevationCleared returns if the "high_runway_elevation" field was cleared in this mutation.
+func (m *RunwayMutation) HighRunwayElevationCleared() bool {
+	_, ok := m.clearedFields[runway.FieldHighRunwayElevation]
+	return ok
 }
 
-// HighNumberedRunwayEndHeading returns the value of the "high_numbered_runway_end_heading" field in the mutation.
-func (m *RunwayMutation) HighNumberedRunwayEndHeading() (r int, exists bool) {
-	v := m.high_numbered_runway_end_heading
+// ResetHighRunwayElevation resets all changes to the "high_runway_elevation" field.
+func (m *RunwayMutation) ResetHighRunwayElevation() {
+	m.high_runway_elevation = nil
+	m.addhigh_runway_elevation = nil
+	delete(m.clearedFields, runway.FieldHighRunwayElevation)
+}
+
+// SetHighRunwayHeading sets the "high_runway_heading" field.
+func (m *RunwayMutation) SetHighRunwayHeading(i int) {
+	m.high_runway_heading = &i
+	m.addhigh_runway_heading = nil
+}
+
+// HighRunwayHeading returns the value of the "high_runway_heading" field in the mutation.
+func (m *RunwayMutation) HighRunwayHeading() (r int, exists bool) {
+	v := m.high_runway_heading
 	if v == nil {
 		return
 	}
 	return *v, true
 }
 
-// OldHighNumberedRunwayEndHeading returns the old "high_numbered_runway_end_heading" field's value of the Runway entity.
+// OldHighRunwayHeading returns the old "high_runway_heading" field's value of the Runway entity.
 // If the Runway object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *RunwayMutation) OldHighNumberedRunwayEndHeading(ctx context.Context) (v int, err error) {
+func (m *RunwayMutation) OldHighRunwayHeading(ctx context.Context) (v *int, err error) {
 	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldHighNumberedRunwayEndHeading is only allowed on UpdateOne operations")
+		return v, errors.New("OldHighRunwayHeading is only allowed on UpdateOne operations")
 	}
 	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldHighNumberedRunwayEndHeading requires an ID field in the mutation")
+		return v, errors.New("OldHighRunwayHeading requires an ID field in the mutation")
 	}
 	oldValue, err := m.oldValue(ctx)
 	if err != nil {
-		return v, fmt.Errorf("querying old value for OldHighNumberedRunwayEndHeading: %w", err)
+		return v, fmt.Errorf("querying old value for OldHighRunwayHeading: %w", err)
 	}
-	return oldValue.HighNumberedRunwayEndHeading, nil
+	return oldValue.HighRunwayHeading, nil
 }
 
-// AddHighNumberedRunwayEndHeading adds i to the "high_numbered_runway_end_heading" field.
-func (m *RunwayMutation) AddHighNumberedRunwayEndHeading(i int) {
-	if m.addhigh_numbered_runway_end_heading != nil {
-		*m.addhigh_numbered_runway_end_heading += i
+// AddHighRunwayHeading adds i to the "high_runway_heading" field.
+func (m *RunwayMutation) AddHighRunwayHeading(i int) {
+	if m.addhigh_runway_heading != nil {
+		*m.addhigh_runway_heading += i
 	} else {
-		m.addhigh_numbered_runway_end_heading = &i
+		m.addhigh_runway_heading = &i
 	}
 }
 
-// AddedHighNumberedRunwayEndHeading returns the value that was added to the "high_numbered_runway_end_heading" field in this mutation.
-func (m *RunwayMutation) AddedHighNumberedRunwayEndHeading() (r int, exists bool) {
-	v := m.addhigh_numbered_runway_end_heading
+// AddedHighRunwayHeading returns the value that was added to the "high_runway_heading" field in this mutation.
+func (m *RunwayMutation) AddedHighRunwayHeading() (r int, exists bool) {
+	v := m.addhigh_runway_heading
 	if v == nil {
 		return
 	}
 	return *v, true
 }
 
-// ResetHighNumberedRunwayEndHeading resets all changes to the "high_numbered_runway_end_heading" field.
-func (m *RunwayMutation) ResetHighNumberedRunwayEndHeading() {
-	m.high_numbered_runway_end_heading = nil
-	m.addhigh_numbered_runway_end_heading = nil
+// ClearHighRunwayHeading clears the value of the "high_runway_heading" field.
+func (m *RunwayMutation) ClearHighRunwayHeading() {
+	m.high_runway_heading = nil
+	m.addhigh_runway_heading = nil
+	m.clearedFields[runway.FieldHighRunwayHeading] = struct{}{}
 }
 
-// SetHighNumberedRunwayEndDisplaced sets the "high_numbered_runway_end_displaced" field.
-func (m *RunwayMutation) SetHighNumberedRunwayEndDisplaced(i int) {
-	m.high_numbered_runway_end_displaced = &i
-	m.addhigh_numbered_runway_end_displaced = nil
+// HighRunwayHeadingCleared returns if the "high_runway_heading" field was cleared in this mutation.
+func (m *RunwayMutation) HighRunwayHeadingCleared() bool {
+	_, ok := m.clearedFields[runway.FieldHighRunwayHeading]
+	return ok
 }
 
-// HighNumberedRunwayEndDisplaced returns the value of the "high_numbered_runway_end_displaced" field in the mutation.
-func (m *RunwayMutation) HighNumberedRunwayEndDisplaced() (r int, exists bool) {
-	v := m.high_numbered_runway_end_displaced
+// ResetHighRunwayHeading resets all changes to the "high_runway_heading" field.
+func (m *RunwayMutation) ResetHighRunwayHeading() {
+	m.high_runway_heading = nil
+	m.addhigh_runway_heading = nil
+	delete(m.clearedFields, runway.FieldHighRunwayHeading)
+}
+
+// SetHighRunwayDisplaced sets the "high_runway_displaced" field.
+func (m *RunwayMutation) SetHighRunwayDisplaced(i int) {
+	m.high_runway_displaced = &i
+	m.addhigh_runway_displaced = nil
+}
+
+// HighRunwayDisplaced returns the value of the "high_runway_displaced" field in the mutation.
+func (m *RunwayMutation) HighRunwayDisplaced() (r int, exists bool) {
+	v := m.high_runway_displaced
 	if v == nil {
 		return
 	}
 	return *v, true
 }
 
-// OldHighNumberedRunwayEndDisplaced returns the old "high_numbered_runway_end_displaced" field's value of the Runway entity.
+// OldHighRunwayDisplaced returns the old "high_runway_displaced" field's value of the Runway entity.
 // If the Runway object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *RunwayMutation) OldHighNumberedRunwayEndDisplaced(ctx context.Context) (v int, err error) {
+func (m *RunwayMutation) OldHighRunwayDisplaced(ctx context.Context) (v *int, err error) {
 	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldHighNumberedRunwayEndDisplaced is only allowed on UpdateOne operations")
+		return v, errors.New("OldHighRunwayDisplaced is only allowed on UpdateOne operations")
 	}
 	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldHighNumberedRunwayEndDisplaced requires an ID field in the mutation")
+		return v, errors.New("OldHighRunwayDisplaced requires an ID field in the mutation")
 	}
 	oldValue, err := m.oldValue(ctx)
 	if err != nil {
-		return v, fmt.Errorf("querying old value for OldHighNumberedRunwayEndDisplaced: %w", err)
+		return v, fmt.Errorf("querying old value for OldHighRunwayDisplaced: %w", err)
 	}
-	return oldValue.HighNumberedRunwayEndDisplaced, nil
+	return oldValue.HighRunwayDisplaced, nil
 }
 
-// AddHighNumberedRunwayEndDisplaced adds i to the "high_numbered_runway_end_displaced" field.
-func (m *RunwayMutation) AddHighNumberedRunwayEndDisplaced(i int) {
-	if m.addhigh_numbered_runway_end_displaced != nil {
-		*m.addhigh_numbered_runway_end_displaced += i
+// AddHighRunwayDisplaced adds i to the "high_runway_displaced" field.
+func (m *RunwayMutation) AddHighRunwayDisplaced(i int) {
+	if m.addhigh_runway_displaced != nil {
+		*m.addhigh_runway_displaced += i
 	} else {
-		m.addhigh_numbered_runway_end_displaced = &i
+		m.addhigh_runway_displaced = &i
 	}
 }
 
-// AddedHighNumberedRunwayEndDisplaced returns the value that was added to the "high_numbered_runway_end_displaced" field in this mutation.
-func (m *RunwayMutation) AddedHighNumberedRunwayEndDisplaced() (r int, exists bool) {
-	v := m.addhigh_numbered_runway_end_displaced
+// AddedHighRunwayDisplaced returns the value that was added to the "high_runway_displaced" field in this mutation.
+func (m *RunwayMutation) AddedHighRunwayDisplaced() (r int, exists bool) {
+	v := m.addhigh_runway_displaced
 	if v == nil {
 		return
 	}
 	return *v, true
 }
 
-// ResetHighNumberedRunwayEndDisplaced resets all changes to the "high_numbered_runway_end_displaced" field.
-func (m *RunwayMutation) ResetHighNumberedRunwayEndDisplaced() {
-	m.high_numbered_runway_end_displaced = nil
-	m.addhigh_numbered_runway_end_displaced = nil
+// ClearHighRunwayDisplaced clears the value of the "high_runway_displaced" field.
+func (m *RunwayMutation) ClearHighRunwayDisplaced() {
+	m.high_runway_displaced = nil
+	m.addhigh_runway_displaced = nil
+	m.clearedFields[runway.FieldHighRunwayDisplaced] = struct{}{}
+}
+
+// HighRunwayDisplacedCleared returns if the "high_runway_displaced" field was cleared in this mutation.
+func (m *RunwayMutation) HighRunwayDisplacedCleared() bool {
+	_, ok := m.clearedFields[runway.FieldHighRunwayDisplaced]
+	return ok
+}
+
+// ResetHighRunwayDisplaced resets all changes to the "high_runway_displaced" field.
+func (m *RunwayMutation) ResetHighRunwayDisplaced() {
+	m.high_runway_displaced = nil
+	m.addhigh_runway_displaced = nil
+	delete(m.clearedFields, runway.FieldHighRunwayDisplaced)
 }
 
 // SetAirportID sets the "airport" edge to the Airport entity by id.
@@ -3167,18 +3188,12 @@ func (m *RunwayMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *RunwayMutation) Fields() []string {
-	fields := make([]string, 0, 22)
+	fields := make([]string, 0, 20)
 	if m.hash != nil {
 		fields = append(fields, runway.FieldHash)
 	}
 	if m.import_flag != nil {
 		fields = append(fields, runway.FieldImportFlag)
-	}
-	if m.create_time != nil {
-		fields = append(fields, runway.FieldCreateTime)
-	}
-	if m.update_time != nil {
-		fields = append(fields, runway.FieldUpdateTime)
 	}
 	if m.airport_identifier != nil {
 		fields = append(fields, runway.FieldAirportIdentifier)
@@ -3198,41 +3213,41 @@ func (m *RunwayMutation) Fields() []string {
 	if m.closed != nil {
 		fields = append(fields, runway.FieldClosed)
 	}
-	if m.low_numbered_runway_end_identifier != nil {
-		fields = append(fields, runway.FieldLowNumberedRunwayEndIdentifier)
+	if m.low_runway_identifier != nil {
+		fields = append(fields, runway.FieldLowRunwayIdentifier)
 	}
-	if m.low_numbered_runway_end_latitude != nil {
-		fields = append(fields, runway.FieldLowNumberedRunwayEndLatitude)
+	if m.low_runway_latitude != nil {
+		fields = append(fields, runway.FieldLowRunwayLatitude)
 	}
-	if m.low_numbered_runway_end_longitude != nil {
-		fields = append(fields, runway.FieldLowNumberedRunwayEndLongitude)
+	if m.low_runway_longitude != nil {
+		fields = append(fields, runway.FieldLowRunwayLongitude)
 	}
-	if m.low_numbered_runway_end_elevation != nil {
-		fields = append(fields, runway.FieldLowNumberedRunwayEndElevation)
+	if m.low_runway_elevation != nil {
+		fields = append(fields, runway.FieldLowRunwayElevation)
 	}
-	if m.low_numbered_runway_end_heading != nil {
-		fields = append(fields, runway.FieldLowNumberedRunwayEndHeading)
+	if m.low_runway_heading != nil {
+		fields = append(fields, runway.FieldLowRunwayHeading)
 	}
-	if m.low_numbered_runway_end_displaced != nil {
-		fields = append(fields, runway.FieldLowNumberedRunwayEndDisplaced)
+	if m.low_runway_displaced != nil {
+		fields = append(fields, runway.FieldLowRunwayDisplaced)
 	}
-	if m.high_numbered_runway_end_identifier != nil {
-		fields = append(fields, runway.FieldHighNumberedRunwayEndIdentifier)
+	if m.high_runway_identifier != nil {
+		fields = append(fields, runway.FieldHighRunwayIdentifier)
 	}
-	if m.high_numbered_runway_end_latitude != nil {
-		fields = append(fields, runway.FieldHighNumberedRunwayEndLatitude)
+	if m.high_runway_latitude != nil {
+		fields = append(fields, runway.FieldHighRunwayLatitude)
 	}
-	if m.high_numbered_runway_end_longitude != nil {
-		fields = append(fields, runway.FieldHighNumberedRunwayEndLongitude)
+	if m.high_runway_longitude != nil {
+		fields = append(fields, runway.FieldHighRunwayLongitude)
 	}
-	if m.high_numbered_runway_end_elevation != nil {
-		fields = append(fields, runway.FieldHighNumberedRunwayEndElevation)
+	if m.high_runway_elevation != nil {
+		fields = append(fields, runway.FieldHighRunwayElevation)
 	}
-	if m.high_numbered_runway_end_heading != nil {
-		fields = append(fields, runway.FieldHighNumberedRunwayEndHeading)
+	if m.high_runway_heading != nil {
+		fields = append(fields, runway.FieldHighRunwayHeading)
 	}
-	if m.high_numbered_runway_end_displaced != nil {
-		fields = append(fields, runway.FieldHighNumberedRunwayEndDisplaced)
+	if m.high_runway_displaced != nil {
+		fields = append(fields, runway.FieldHighRunwayDisplaced)
 	}
 	return fields
 }
@@ -3246,10 +3261,6 @@ func (m *RunwayMutation) Field(name string) (ent.Value, bool) {
 		return m.Hash()
 	case runway.FieldImportFlag:
 		return m.ImportFlag()
-	case runway.FieldCreateTime:
-		return m.CreateTime()
-	case runway.FieldUpdateTime:
-		return m.UpdateTime()
 	case runway.FieldAirportIdentifier:
 		return m.AirportIdentifier()
 	case runway.FieldLength:
@@ -3262,30 +3273,30 @@ func (m *RunwayMutation) Field(name string) (ent.Value, bool) {
 		return m.Lighted()
 	case runway.FieldClosed:
 		return m.Closed()
-	case runway.FieldLowNumberedRunwayEndIdentifier:
-		return m.LowNumberedRunwayEndIdentifier()
-	case runway.FieldLowNumberedRunwayEndLatitude:
-		return m.LowNumberedRunwayEndLatitude()
-	case runway.FieldLowNumberedRunwayEndLongitude:
-		return m.LowNumberedRunwayEndLongitude()
-	case runway.FieldLowNumberedRunwayEndElevation:
-		return m.LowNumberedRunwayEndElevation()
-	case runway.FieldLowNumberedRunwayEndHeading:
-		return m.LowNumberedRunwayEndHeading()
-	case runway.FieldLowNumberedRunwayEndDisplaced:
-		return m.LowNumberedRunwayEndDisplaced()
-	case runway.FieldHighNumberedRunwayEndIdentifier:
-		return m.HighNumberedRunwayEndIdentifier()
-	case runway.FieldHighNumberedRunwayEndLatitude:
-		return m.HighNumberedRunwayEndLatitude()
-	case runway.FieldHighNumberedRunwayEndLongitude:
-		return m.HighNumberedRunwayEndLongitude()
-	case runway.FieldHighNumberedRunwayEndElevation:
-		return m.HighNumberedRunwayEndElevation()
-	case runway.FieldHighNumberedRunwayEndHeading:
-		return m.HighNumberedRunwayEndHeading()
-	case runway.FieldHighNumberedRunwayEndDisplaced:
-		return m.HighNumberedRunwayEndDisplaced()
+	case runway.FieldLowRunwayIdentifier:
+		return m.LowRunwayIdentifier()
+	case runway.FieldLowRunwayLatitude:
+		return m.LowRunwayLatitude()
+	case runway.FieldLowRunwayLongitude:
+		return m.LowRunwayLongitude()
+	case runway.FieldLowRunwayElevation:
+		return m.LowRunwayElevation()
+	case runway.FieldLowRunwayHeading:
+		return m.LowRunwayHeading()
+	case runway.FieldLowRunwayDisplaced:
+		return m.LowRunwayDisplaced()
+	case runway.FieldHighRunwayIdentifier:
+		return m.HighRunwayIdentifier()
+	case runway.FieldHighRunwayLatitude:
+		return m.HighRunwayLatitude()
+	case runway.FieldHighRunwayLongitude:
+		return m.HighRunwayLongitude()
+	case runway.FieldHighRunwayElevation:
+		return m.HighRunwayElevation()
+	case runway.FieldHighRunwayHeading:
+		return m.HighRunwayHeading()
+	case runway.FieldHighRunwayDisplaced:
+		return m.HighRunwayDisplaced()
 	}
 	return nil, false
 }
@@ -3299,10 +3310,6 @@ func (m *RunwayMutation) OldField(ctx context.Context, name string) (ent.Value, 
 		return m.OldHash(ctx)
 	case runway.FieldImportFlag:
 		return m.OldImportFlag(ctx)
-	case runway.FieldCreateTime:
-		return m.OldCreateTime(ctx)
-	case runway.FieldUpdateTime:
-		return m.OldUpdateTime(ctx)
 	case runway.FieldAirportIdentifier:
 		return m.OldAirportIdentifier(ctx)
 	case runway.FieldLength:
@@ -3315,30 +3322,30 @@ func (m *RunwayMutation) OldField(ctx context.Context, name string) (ent.Value, 
 		return m.OldLighted(ctx)
 	case runway.FieldClosed:
 		return m.OldClosed(ctx)
-	case runway.FieldLowNumberedRunwayEndIdentifier:
-		return m.OldLowNumberedRunwayEndIdentifier(ctx)
-	case runway.FieldLowNumberedRunwayEndLatitude:
-		return m.OldLowNumberedRunwayEndLatitude(ctx)
-	case runway.FieldLowNumberedRunwayEndLongitude:
-		return m.OldLowNumberedRunwayEndLongitude(ctx)
-	case runway.FieldLowNumberedRunwayEndElevation:
-		return m.OldLowNumberedRunwayEndElevation(ctx)
-	case runway.FieldLowNumberedRunwayEndHeading:
-		return m.OldLowNumberedRunwayEndHeading(ctx)
-	case runway.FieldLowNumberedRunwayEndDisplaced:
-		return m.OldLowNumberedRunwayEndDisplaced(ctx)
-	case runway.FieldHighNumberedRunwayEndIdentifier:
-		return m.OldHighNumberedRunwayEndIdentifier(ctx)
-	case runway.FieldHighNumberedRunwayEndLatitude:
-		return m.OldHighNumberedRunwayEndLatitude(ctx)
-	case runway.FieldHighNumberedRunwayEndLongitude:
-		return m.OldHighNumberedRunwayEndLongitude(ctx)
-	case runway.FieldHighNumberedRunwayEndElevation:
-		return m.OldHighNumberedRunwayEndElevation(ctx)
-	case runway.FieldHighNumberedRunwayEndHeading:
-		return m.OldHighNumberedRunwayEndHeading(ctx)
-	case runway.FieldHighNumberedRunwayEndDisplaced:
-		return m.OldHighNumberedRunwayEndDisplaced(ctx)
+	case runway.FieldLowRunwayIdentifier:
+		return m.OldLowRunwayIdentifier(ctx)
+	case runway.FieldLowRunwayLatitude:
+		return m.OldLowRunwayLatitude(ctx)
+	case runway.FieldLowRunwayLongitude:
+		return m.OldLowRunwayLongitude(ctx)
+	case runway.FieldLowRunwayElevation:
+		return m.OldLowRunwayElevation(ctx)
+	case runway.FieldLowRunwayHeading:
+		return m.OldLowRunwayHeading(ctx)
+	case runway.FieldLowRunwayDisplaced:
+		return m.OldLowRunwayDisplaced(ctx)
+	case runway.FieldHighRunwayIdentifier:
+		return m.OldHighRunwayIdentifier(ctx)
+	case runway.FieldHighRunwayLatitude:
+		return m.OldHighRunwayLatitude(ctx)
+	case runway.FieldHighRunwayLongitude:
+		return m.OldHighRunwayLongitude(ctx)
+	case runway.FieldHighRunwayElevation:
+		return m.OldHighRunwayElevation(ctx)
+	case runway.FieldHighRunwayHeading:
+		return m.OldHighRunwayHeading(ctx)
+	case runway.FieldHighRunwayDisplaced:
+		return m.OldHighRunwayDisplaced(ctx)
 	}
 	return nil, fmt.Errorf("unknown Runway field %s", name)
 }
@@ -3349,7 +3356,7 @@ func (m *RunwayMutation) OldField(ctx context.Context, name string) (ent.Value, 
 func (m *RunwayMutation) SetField(name string, value ent.Value) error {
 	switch name {
 	case runway.FieldHash:
-		v, ok := value.(uint64)
+		v, ok := value.(string)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
@@ -3361,20 +3368,6 @@ func (m *RunwayMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetImportFlag(v)
-		return nil
-	case runway.FieldCreateTime:
-		v, ok := value.(time.Time)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetCreateTime(v)
-		return nil
-	case runway.FieldUpdateTime:
-		v, ok := value.(time.Time)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetUpdateTime(v)
 		return nil
 	case runway.FieldAirportIdentifier:
 		v, ok := value.(string)
@@ -3418,89 +3411,89 @@ func (m *RunwayMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetClosed(v)
 		return nil
-	case runway.FieldLowNumberedRunwayEndIdentifier:
+	case runway.FieldLowRunwayIdentifier:
 		v, ok := value.(string)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
-		m.SetLowNumberedRunwayEndIdentifier(v)
+		m.SetLowRunwayIdentifier(v)
 		return nil
-	case runway.FieldLowNumberedRunwayEndLatitude:
+	case runway.FieldLowRunwayLatitude:
 		v, ok := value.(float64)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
-		m.SetLowNumberedRunwayEndLatitude(v)
+		m.SetLowRunwayLatitude(v)
 		return nil
-	case runway.FieldLowNumberedRunwayEndLongitude:
+	case runway.FieldLowRunwayLongitude:
 		v, ok := value.(float64)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
-		m.SetLowNumberedRunwayEndLongitude(v)
+		m.SetLowRunwayLongitude(v)
 		return nil
-	case runway.FieldLowNumberedRunwayEndElevation:
+	case runway.FieldLowRunwayElevation:
 		v, ok := value.(int)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
-		m.SetLowNumberedRunwayEndElevation(v)
+		m.SetLowRunwayElevation(v)
 		return nil
-	case runway.FieldLowNumberedRunwayEndHeading:
+	case runway.FieldLowRunwayHeading:
 		v, ok := value.(int)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
-		m.SetLowNumberedRunwayEndHeading(v)
+		m.SetLowRunwayHeading(v)
 		return nil
-	case runway.FieldLowNumberedRunwayEndDisplaced:
+	case runway.FieldLowRunwayDisplaced:
 		v, ok := value.(int)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
-		m.SetLowNumberedRunwayEndDisplaced(v)
+		m.SetLowRunwayDisplaced(v)
 		return nil
-	case runway.FieldHighNumberedRunwayEndIdentifier:
+	case runway.FieldHighRunwayIdentifier:
 		v, ok := value.(string)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
-		m.SetHighNumberedRunwayEndIdentifier(v)
+		m.SetHighRunwayIdentifier(v)
 		return nil
-	case runway.FieldHighNumberedRunwayEndLatitude:
+	case runway.FieldHighRunwayLatitude:
 		v, ok := value.(float64)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
-		m.SetHighNumberedRunwayEndLatitude(v)
+		m.SetHighRunwayLatitude(v)
 		return nil
-	case runway.FieldHighNumberedRunwayEndLongitude:
+	case runway.FieldHighRunwayLongitude:
 		v, ok := value.(float64)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
-		m.SetHighNumberedRunwayEndLongitude(v)
+		m.SetHighRunwayLongitude(v)
 		return nil
-	case runway.FieldHighNumberedRunwayEndElevation:
+	case runway.FieldHighRunwayElevation:
 		v, ok := value.(int)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
-		m.SetHighNumberedRunwayEndElevation(v)
+		m.SetHighRunwayElevation(v)
 		return nil
-	case runway.FieldHighNumberedRunwayEndHeading:
+	case runway.FieldHighRunwayHeading:
 		v, ok := value.(int)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
-		m.SetHighNumberedRunwayEndHeading(v)
+		m.SetHighRunwayHeading(v)
 		return nil
-	case runway.FieldHighNumberedRunwayEndDisplaced:
+	case runway.FieldHighRunwayDisplaced:
 		v, ok := value.(int)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
-		m.SetHighNumberedRunwayEndDisplaced(v)
+		m.SetHighRunwayDisplaced(v)
 		return nil
 	}
 	return fmt.Errorf("unknown Runway field %s", name)
@@ -3510,44 +3503,41 @@ func (m *RunwayMutation) SetField(name string, value ent.Value) error {
 // this mutation.
 func (m *RunwayMutation) AddedFields() []string {
 	var fields []string
-	if m.addhash != nil {
-		fields = append(fields, runway.FieldHash)
-	}
 	if m.addlength != nil {
 		fields = append(fields, runway.FieldLength)
 	}
 	if m.addwidth != nil {
 		fields = append(fields, runway.FieldWidth)
 	}
-	if m.addlow_numbered_runway_end_latitude != nil {
-		fields = append(fields, runway.FieldLowNumberedRunwayEndLatitude)
+	if m.addlow_runway_latitude != nil {
+		fields = append(fields, runway.FieldLowRunwayLatitude)
 	}
-	if m.addlow_numbered_runway_end_longitude != nil {
-		fields = append(fields, runway.FieldLowNumberedRunwayEndLongitude)
+	if m.addlow_runway_longitude != nil {
+		fields = append(fields, runway.FieldLowRunwayLongitude)
 	}
-	if m.addlow_numbered_runway_end_elevation != nil {
-		fields = append(fields, runway.FieldLowNumberedRunwayEndElevation)
+	if m.addlow_runway_elevation != nil {
+		fields = append(fields, runway.FieldLowRunwayElevation)
 	}
-	if m.addlow_numbered_runway_end_heading != nil {
-		fields = append(fields, runway.FieldLowNumberedRunwayEndHeading)
+	if m.addlow_runway_heading != nil {
+		fields = append(fields, runway.FieldLowRunwayHeading)
 	}
-	if m.addlow_numbered_runway_end_displaced != nil {
-		fields = append(fields, runway.FieldLowNumberedRunwayEndDisplaced)
+	if m.addlow_runway_displaced != nil {
+		fields = append(fields, runway.FieldLowRunwayDisplaced)
 	}
-	if m.addhigh_numbered_runway_end_latitude != nil {
-		fields = append(fields, runway.FieldHighNumberedRunwayEndLatitude)
+	if m.addhigh_runway_latitude != nil {
+		fields = append(fields, runway.FieldHighRunwayLatitude)
 	}
-	if m.addhigh_numbered_runway_end_longitude != nil {
-		fields = append(fields, runway.FieldHighNumberedRunwayEndLongitude)
+	if m.addhigh_runway_longitude != nil {
+		fields = append(fields, runway.FieldHighRunwayLongitude)
 	}
-	if m.addhigh_numbered_runway_end_elevation != nil {
-		fields = append(fields, runway.FieldHighNumberedRunwayEndElevation)
+	if m.addhigh_runway_elevation != nil {
+		fields = append(fields, runway.FieldHighRunwayElevation)
 	}
-	if m.addhigh_numbered_runway_end_heading != nil {
-		fields = append(fields, runway.FieldHighNumberedRunwayEndHeading)
+	if m.addhigh_runway_heading != nil {
+		fields = append(fields, runway.FieldHighRunwayHeading)
 	}
-	if m.addhigh_numbered_runway_end_displaced != nil {
-		fields = append(fields, runway.FieldHighNumberedRunwayEndDisplaced)
+	if m.addhigh_runway_displaced != nil {
+		fields = append(fields, runway.FieldHighRunwayDisplaced)
 	}
 	return fields
 }
@@ -3557,32 +3547,30 @@ func (m *RunwayMutation) AddedFields() []string {
 // was not set, or was not defined in the schema.
 func (m *RunwayMutation) AddedField(name string) (ent.Value, bool) {
 	switch name {
-	case runway.FieldHash:
-		return m.AddedHash()
 	case runway.FieldLength:
 		return m.AddedLength()
 	case runway.FieldWidth:
 		return m.AddedWidth()
-	case runway.FieldLowNumberedRunwayEndLatitude:
-		return m.AddedLowNumberedRunwayEndLatitude()
-	case runway.FieldLowNumberedRunwayEndLongitude:
-		return m.AddedLowNumberedRunwayEndLongitude()
-	case runway.FieldLowNumberedRunwayEndElevation:
-		return m.AddedLowNumberedRunwayEndElevation()
-	case runway.FieldLowNumberedRunwayEndHeading:
-		return m.AddedLowNumberedRunwayEndHeading()
-	case runway.FieldLowNumberedRunwayEndDisplaced:
-		return m.AddedLowNumberedRunwayEndDisplaced()
-	case runway.FieldHighNumberedRunwayEndLatitude:
-		return m.AddedHighNumberedRunwayEndLatitude()
-	case runway.FieldHighNumberedRunwayEndLongitude:
-		return m.AddedHighNumberedRunwayEndLongitude()
-	case runway.FieldHighNumberedRunwayEndElevation:
-		return m.AddedHighNumberedRunwayEndElevation()
-	case runway.FieldHighNumberedRunwayEndHeading:
-		return m.AddedHighNumberedRunwayEndHeading()
-	case runway.FieldHighNumberedRunwayEndDisplaced:
-		return m.AddedHighNumberedRunwayEndDisplaced()
+	case runway.FieldLowRunwayLatitude:
+		return m.AddedLowRunwayLatitude()
+	case runway.FieldLowRunwayLongitude:
+		return m.AddedLowRunwayLongitude()
+	case runway.FieldLowRunwayElevation:
+		return m.AddedLowRunwayElevation()
+	case runway.FieldLowRunwayHeading:
+		return m.AddedLowRunwayHeading()
+	case runway.FieldLowRunwayDisplaced:
+		return m.AddedLowRunwayDisplaced()
+	case runway.FieldHighRunwayLatitude:
+		return m.AddedHighRunwayLatitude()
+	case runway.FieldHighRunwayLongitude:
+		return m.AddedHighRunwayLongitude()
+	case runway.FieldHighRunwayElevation:
+		return m.AddedHighRunwayElevation()
+	case runway.FieldHighRunwayHeading:
+		return m.AddedHighRunwayHeading()
+	case runway.FieldHighRunwayDisplaced:
+		return m.AddedHighRunwayDisplaced()
 	}
 	return nil, false
 }
@@ -3592,13 +3580,6 @@ func (m *RunwayMutation) AddedField(name string) (ent.Value, bool) {
 // type.
 func (m *RunwayMutation) AddField(name string, value ent.Value) error {
 	switch name {
-	case runway.FieldHash:
-		v, ok := value.(int64)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.AddHash(v)
-		return nil
 	case runway.FieldLength:
 		v, ok := value.(int)
 		if !ok {
@@ -3613,75 +3594,75 @@ func (m *RunwayMutation) AddField(name string, value ent.Value) error {
 		}
 		m.AddWidth(v)
 		return nil
-	case runway.FieldLowNumberedRunwayEndLatitude:
+	case runway.FieldLowRunwayLatitude:
 		v, ok := value.(float64)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
-		m.AddLowNumberedRunwayEndLatitude(v)
+		m.AddLowRunwayLatitude(v)
 		return nil
-	case runway.FieldLowNumberedRunwayEndLongitude:
+	case runway.FieldLowRunwayLongitude:
 		v, ok := value.(float64)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
-		m.AddLowNumberedRunwayEndLongitude(v)
+		m.AddLowRunwayLongitude(v)
 		return nil
-	case runway.FieldLowNumberedRunwayEndElevation:
+	case runway.FieldLowRunwayElevation:
 		v, ok := value.(int)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
-		m.AddLowNumberedRunwayEndElevation(v)
+		m.AddLowRunwayElevation(v)
 		return nil
-	case runway.FieldLowNumberedRunwayEndHeading:
+	case runway.FieldLowRunwayHeading:
 		v, ok := value.(int)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
-		m.AddLowNumberedRunwayEndHeading(v)
+		m.AddLowRunwayHeading(v)
 		return nil
-	case runway.FieldLowNumberedRunwayEndDisplaced:
+	case runway.FieldLowRunwayDisplaced:
 		v, ok := value.(int)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
-		m.AddLowNumberedRunwayEndDisplaced(v)
+		m.AddLowRunwayDisplaced(v)
 		return nil
-	case runway.FieldHighNumberedRunwayEndLatitude:
+	case runway.FieldHighRunwayLatitude:
 		v, ok := value.(float64)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
-		m.AddHighNumberedRunwayEndLatitude(v)
+		m.AddHighRunwayLatitude(v)
 		return nil
-	case runway.FieldHighNumberedRunwayEndLongitude:
+	case runway.FieldHighRunwayLongitude:
 		v, ok := value.(float64)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
-		m.AddHighNumberedRunwayEndLongitude(v)
+		m.AddHighRunwayLongitude(v)
 		return nil
-	case runway.FieldHighNumberedRunwayEndElevation:
+	case runway.FieldHighRunwayElevation:
 		v, ok := value.(int)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
-		m.AddHighNumberedRunwayEndElevation(v)
+		m.AddHighRunwayElevation(v)
 		return nil
-	case runway.FieldHighNumberedRunwayEndHeading:
+	case runway.FieldHighRunwayHeading:
 		v, ok := value.(int)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
-		m.AddHighNumberedRunwayEndHeading(v)
+		m.AddHighRunwayHeading(v)
 		return nil
-	case runway.FieldHighNumberedRunwayEndDisplaced:
+	case runway.FieldHighRunwayDisplaced:
 		v, ok := value.(int)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
-		m.AddHighNumberedRunwayEndDisplaced(v)
+		m.AddHighRunwayDisplaced(v)
 		return nil
 	}
 	return fmt.Errorf("unknown Runway numeric field %s", name)
@@ -3690,7 +3671,38 @@ func (m *RunwayMutation) AddField(name string, value ent.Value) error {
 // ClearedFields returns all nullable fields that were cleared during this
 // mutation.
 func (m *RunwayMutation) ClearedFields() []string {
-	return nil
+	var fields []string
+	if m.FieldCleared(runway.FieldLowRunwayLatitude) {
+		fields = append(fields, runway.FieldLowRunwayLatitude)
+	}
+	if m.FieldCleared(runway.FieldLowRunwayLongitude) {
+		fields = append(fields, runway.FieldLowRunwayLongitude)
+	}
+	if m.FieldCleared(runway.FieldLowRunwayElevation) {
+		fields = append(fields, runway.FieldLowRunwayElevation)
+	}
+	if m.FieldCleared(runway.FieldLowRunwayHeading) {
+		fields = append(fields, runway.FieldLowRunwayHeading)
+	}
+	if m.FieldCleared(runway.FieldLowRunwayDisplaced) {
+		fields = append(fields, runway.FieldLowRunwayDisplaced)
+	}
+	if m.FieldCleared(runway.FieldHighRunwayLatitude) {
+		fields = append(fields, runway.FieldHighRunwayLatitude)
+	}
+	if m.FieldCleared(runway.FieldHighRunwayLongitude) {
+		fields = append(fields, runway.FieldHighRunwayLongitude)
+	}
+	if m.FieldCleared(runway.FieldHighRunwayElevation) {
+		fields = append(fields, runway.FieldHighRunwayElevation)
+	}
+	if m.FieldCleared(runway.FieldHighRunwayHeading) {
+		fields = append(fields, runway.FieldHighRunwayHeading)
+	}
+	if m.FieldCleared(runway.FieldHighRunwayDisplaced) {
+		fields = append(fields, runway.FieldHighRunwayDisplaced)
+	}
+	return fields
 }
 
 // FieldCleared returns a boolean indicating if a field with the given name was
@@ -3703,6 +3715,38 @@ func (m *RunwayMutation) FieldCleared(name string) bool {
 // ClearField clears the value of the field with the given name. It returns an
 // error if the field is not defined in the schema.
 func (m *RunwayMutation) ClearField(name string) error {
+	switch name {
+	case runway.FieldLowRunwayLatitude:
+		m.ClearLowRunwayLatitude()
+		return nil
+	case runway.FieldLowRunwayLongitude:
+		m.ClearLowRunwayLongitude()
+		return nil
+	case runway.FieldLowRunwayElevation:
+		m.ClearLowRunwayElevation()
+		return nil
+	case runway.FieldLowRunwayHeading:
+		m.ClearLowRunwayHeading()
+		return nil
+	case runway.FieldLowRunwayDisplaced:
+		m.ClearLowRunwayDisplaced()
+		return nil
+	case runway.FieldHighRunwayLatitude:
+		m.ClearHighRunwayLatitude()
+		return nil
+	case runway.FieldHighRunwayLongitude:
+		m.ClearHighRunwayLongitude()
+		return nil
+	case runway.FieldHighRunwayElevation:
+		m.ClearHighRunwayElevation()
+		return nil
+	case runway.FieldHighRunwayHeading:
+		m.ClearHighRunwayHeading()
+		return nil
+	case runway.FieldHighRunwayDisplaced:
+		m.ClearHighRunwayDisplaced()
+		return nil
+	}
 	return fmt.Errorf("unknown Runway nullable field %s", name)
 }
 
@@ -3715,12 +3759,6 @@ func (m *RunwayMutation) ResetField(name string) error {
 		return nil
 	case runway.FieldImportFlag:
 		m.ResetImportFlag()
-		return nil
-	case runway.FieldCreateTime:
-		m.ResetCreateTime()
-		return nil
-	case runway.FieldUpdateTime:
-		m.ResetUpdateTime()
 		return nil
 	case runway.FieldAirportIdentifier:
 		m.ResetAirportIdentifier()
@@ -3740,41 +3778,41 @@ func (m *RunwayMutation) ResetField(name string) error {
 	case runway.FieldClosed:
 		m.ResetClosed()
 		return nil
-	case runway.FieldLowNumberedRunwayEndIdentifier:
-		m.ResetLowNumberedRunwayEndIdentifier()
+	case runway.FieldLowRunwayIdentifier:
+		m.ResetLowRunwayIdentifier()
 		return nil
-	case runway.FieldLowNumberedRunwayEndLatitude:
-		m.ResetLowNumberedRunwayEndLatitude()
+	case runway.FieldLowRunwayLatitude:
+		m.ResetLowRunwayLatitude()
 		return nil
-	case runway.FieldLowNumberedRunwayEndLongitude:
-		m.ResetLowNumberedRunwayEndLongitude()
+	case runway.FieldLowRunwayLongitude:
+		m.ResetLowRunwayLongitude()
 		return nil
-	case runway.FieldLowNumberedRunwayEndElevation:
-		m.ResetLowNumberedRunwayEndElevation()
+	case runway.FieldLowRunwayElevation:
+		m.ResetLowRunwayElevation()
 		return nil
-	case runway.FieldLowNumberedRunwayEndHeading:
-		m.ResetLowNumberedRunwayEndHeading()
+	case runway.FieldLowRunwayHeading:
+		m.ResetLowRunwayHeading()
 		return nil
-	case runway.FieldLowNumberedRunwayEndDisplaced:
-		m.ResetLowNumberedRunwayEndDisplaced()
+	case runway.FieldLowRunwayDisplaced:
+		m.ResetLowRunwayDisplaced()
 		return nil
-	case runway.FieldHighNumberedRunwayEndIdentifier:
-		m.ResetHighNumberedRunwayEndIdentifier()
+	case runway.FieldHighRunwayIdentifier:
+		m.ResetHighRunwayIdentifier()
 		return nil
-	case runway.FieldHighNumberedRunwayEndLatitude:
-		m.ResetHighNumberedRunwayEndLatitude()
+	case runway.FieldHighRunwayLatitude:
+		m.ResetHighRunwayLatitude()
 		return nil
-	case runway.FieldHighNumberedRunwayEndLongitude:
-		m.ResetHighNumberedRunwayEndLongitude()
+	case runway.FieldHighRunwayLongitude:
+		m.ResetHighRunwayLongitude()
 		return nil
-	case runway.FieldHighNumberedRunwayEndElevation:
-		m.ResetHighNumberedRunwayEndElevation()
+	case runway.FieldHighRunwayElevation:
+		m.ResetHighRunwayElevation()
 		return nil
-	case runway.FieldHighNumberedRunwayEndHeading:
-		m.ResetHighNumberedRunwayEndHeading()
+	case runway.FieldHighRunwayHeading:
+		m.ResetHighRunwayHeading()
 		return nil
-	case runway.FieldHighNumberedRunwayEndDisplaced:
-		m.ResetHighNumberedRunwayEndDisplaced()
+	case runway.FieldHighRunwayDisplaced:
+		m.ResetHighRunwayDisplaced()
 		return nil
 	}
 	return fmt.Errorf("unknown Runway field %s", name)
@@ -3810,8 +3848,6 @@ func (m *RunwayMutation) RemovedEdges() []string {
 // RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
 // the given name in this mutation.
 func (m *RunwayMutation) RemovedIDs(name string) []ent.Value {
-	switch name {
-	}
 	return nil
 }
 

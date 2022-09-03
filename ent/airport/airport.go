@@ -3,7 +3,9 @@
 package airport
 
 import (
-	"time"
+	"fmt"
+	"io"
+	"strconv"
 )
 
 const (
@@ -15,10 +17,6 @@ const (
 	FieldHash = "hash"
 	// FieldImportFlag holds the string denoting the import_flag field in the database.
 	FieldImportFlag = "import_flag"
-	// FieldCreateTime holds the string denoting the create_time field in the database.
-	FieldCreateTime = "create_time"
-	// FieldUpdateTime holds the string denoting the update_time field in the database.
-	FieldUpdateTime = "update_time"
 	// FieldIdentifier holds the string denoting the identifier field in the database.
 	FieldIdentifier = "identifier"
 	// FieldType holds the string denoting the type field in the database.
@@ -71,8 +69,6 @@ var Columns = []string{
 	FieldID,
 	FieldHash,
 	FieldImportFlag,
-	FieldCreateTime,
-	FieldUpdateTime,
 	FieldIdentifier,
 	FieldType,
 	FieldName,
@@ -105,10 +101,49 @@ func ValidColumn(column string) bool {
 var (
 	// DefaultImportFlag holds the default value on creation for the "import_flag" field.
 	DefaultImportFlag bool
-	// DefaultCreateTime holds the default value on creation for the "create_time" field.
-	DefaultCreateTime func() time.Time
-	// DefaultUpdateTime holds the default value on creation for the "update_time" field.
-	DefaultUpdateTime func() time.Time
-	// UpdateDefaultUpdateTime holds the default value on update for the "update_time" field.
-	UpdateDefaultUpdateTime func() time.Time
 )
+
+// Type defines the type for the "type" enum field.
+type Type string
+
+// Type values.
+const (
+	TypeLargeAirport  Type = "large_airport"
+	TypeMediumAirport Type = "medium_airport"
+	TypeSmallAirport  Type = "small_airport"
+	TypeClosedAirport Type = "closed_airport"
+	TypeHeliport      Type = "heliport"
+	TypeSeaplaneBase  Type = "seaplane_base"
+)
+
+func (_type Type) String() string {
+	return string(_type)
+}
+
+// TypeValidator is a validator for the "type" field enum values. It is called by the builders before save.
+func TypeValidator(_type Type) error {
+	switch _type {
+	case TypeLargeAirport, TypeMediumAirport, TypeSmallAirport, TypeClosedAirport, TypeHeliport, TypeSeaplaneBase:
+		return nil
+	default:
+		return fmt.Errorf("airport: invalid enum value for type field: %q", _type)
+	}
+}
+
+// MarshalGQL implements graphql.Marshaler interface.
+func (e Type) MarshalGQL(w io.Writer) {
+	io.WriteString(w, strconv.Quote(e.String()))
+}
+
+// UnmarshalGQL implements graphql.Unmarshaler interface.
+func (e *Type) UnmarshalGQL(val interface{}) error {
+	str, ok := val.(string)
+	if !ok {
+		return fmt.Errorf("enum %T must be a string", val)
+	}
+	*e = Type(str)
+	if err := TypeValidator(*e); err != nil {
+		return fmt.Errorf("%s is not a valid Type", str)
+	}
+	return nil
+}

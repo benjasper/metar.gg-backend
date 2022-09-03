@@ -6,7 +6,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"time"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
@@ -24,8 +23,8 @@ type RunwayCreate struct {
 }
 
 // SetHash sets the "hash" field.
-func (rc *RunwayCreate) SetHash(u uint64) *RunwayCreate {
-	rc.mutation.SetHash(u)
+func (rc *RunwayCreate) SetHash(s string) *RunwayCreate {
+	rc.mutation.SetHash(s)
 	return rc
 }
 
@@ -39,34 +38,6 @@ func (rc *RunwayCreate) SetImportFlag(b bool) *RunwayCreate {
 func (rc *RunwayCreate) SetNillableImportFlag(b *bool) *RunwayCreate {
 	if b != nil {
 		rc.SetImportFlag(*b)
-	}
-	return rc
-}
-
-// SetCreateTime sets the "create_time" field.
-func (rc *RunwayCreate) SetCreateTime(t time.Time) *RunwayCreate {
-	rc.mutation.SetCreateTime(t)
-	return rc
-}
-
-// SetNillableCreateTime sets the "create_time" field if the given value is not nil.
-func (rc *RunwayCreate) SetNillableCreateTime(t *time.Time) *RunwayCreate {
-	if t != nil {
-		rc.SetCreateTime(*t)
-	}
-	return rc
-}
-
-// SetUpdateTime sets the "update_time" field.
-func (rc *RunwayCreate) SetUpdateTime(t time.Time) *RunwayCreate {
-	rc.mutation.SetUpdateTime(t)
-	return rc
-}
-
-// SetNillableUpdateTime sets the "update_time" field if the given value is not nil.
-func (rc *RunwayCreate) SetNillableUpdateTime(t *time.Time) *RunwayCreate {
-	if t != nil {
-		rc.SetUpdateTime(*t)
 	}
 	return rc
 }
@@ -107,75 +78,155 @@ func (rc *RunwayCreate) SetClosed(b bool) *RunwayCreate {
 	return rc
 }
 
-// SetLowNumberedRunwayEndIdentifier sets the "low_numbered_runway_end_identifier" field.
-func (rc *RunwayCreate) SetLowNumberedRunwayEndIdentifier(s string) *RunwayCreate {
-	rc.mutation.SetLowNumberedRunwayEndIdentifier(s)
+// SetLowRunwayIdentifier sets the "low_runway_identifier" field.
+func (rc *RunwayCreate) SetLowRunwayIdentifier(s string) *RunwayCreate {
+	rc.mutation.SetLowRunwayIdentifier(s)
 	return rc
 }
 
-// SetLowNumberedRunwayEndLatitude sets the "low_numbered_runway_end_latitude" field.
-func (rc *RunwayCreate) SetLowNumberedRunwayEndLatitude(f float64) *RunwayCreate {
-	rc.mutation.SetLowNumberedRunwayEndLatitude(f)
+// SetLowRunwayLatitude sets the "low_runway_latitude" field.
+func (rc *RunwayCreate) SetLowRunwayLatitude(f float64) *RunwayCreate {
+	rc.mutation.SetLowRunwayLatitude(f)
 	return rc
 }
 
-// SetLowNumberedRunwayEndLongitude sets the "low_numbered_runway_end_longitude" field.
-func (rc *RunwayCreate) SetLowNumberedRunwayEndLongitude(f float64) *RunwayCreate {
-	rc.mutation.SetLowNumberedRunwayEndLongitude(f)
+// SetNillableLowRunwayLatitude sets the "low_runway_latitude" field if the given value is not nil.
+func (rc *RunwayCreate) SetNillableLowRunwayLatitude(f *float64) *RunwayCreate {
+	if f != nil {
+		rc.SetLowRunwayLatitude(*f)
+	}
 	return rc
 }
 
-// SetLowNumberedRunwayEndElevation sets the "low_numbered_runway_end_elevation" field.
-func (rc *RunwayCreate) SetLowNumberedRunwayEndElevation(i int) *RunwayCreate {
-	rc.mutation.SetLowNumberedRunwayEndElevation(i)
+// SetLowRunwayLongitude sets the "low_runway_longitude" field.
+func (rc *RunwayCreate) SetLowRunwayLongitude(f float64) *RunwayCreate {
+	rc.mutation.SetLowRunwayLongitude(f)
 	return rc
 }
 
-// SetLowNumberedRunwayEndHeading sets the "low_numbered_runway_end_heading" field.
-func (rc *RunwayCreate) SetLowNumberedRunwayEndHeading(i int) *RunwayCreate {
-	rc.mutation.SetLowNumberedRunwayEndHeading(i)
+// SetNillableLowRunwayLongitude sets the "low_runway_longitude" field if the given value is not nil.
+func (rc *RunwayCreate) SetNillableLowRunwayLongitude(f *float64) *RunwayCreate {
+	if f != nil {
+		rc.SetLowRunwayLongitude(*f)
+	}
 	return rc
 }
 
-// SetLowNumberedRunwayEndDisplaced sets the "low_numbered_runway_end_displaced" field.
-func (rc *RunwayCreate) SetLowNumberedRunwayEndDisplaced(i int) *RunwayCreate {
-	rc.mutation.SetLowNumberedRunwayEndDisplaced(i)
+// SetLowRunwayElevation sets the "low_runway_elevation" field.
+func (rc *RunwayCreate) SetLowRunwayElevation(i int) *RunwayCreate {
+	rc.mutation.SetLowRunwayElevation(i)
 	return rc
 }
 
-// SetHighNumberedRunwayEndIdentifier sets the "high_numbered_runway_end_identifier" field.
-func (rc *RunwayCreate) SetHighNumberedRunwayEndIdentifier(s string) *RunwayCreate {
-	rc.mutation.SetHighNumberedRunwayEndIdentifier(s)
+// SetNillableLowRunwayElevation sets the "low_runway_elevation" field if the given value is not nil.
+func (rc *RunwayCreate) SetNillableLowRunwayElevation(i *int) *RunwayCreate {
+	if i != nil {
+		rc.SetLowRunwayElevation(*i)
+	}
 	return rc
 }
 
-// SetHighNumberedRunwayEndLatitude sets the "high_numbered_runway_end_latitude" field.
-func (rc *RunwayCreate) SetHighNumberedRunwayEndLatitude(f float64) *RunwayCreate {
-	rc.mutation.SetHighNumberedRunwayEndLatitude(f)
+// SetLowRunwayHeading sets the "low_runway_heading" field.
+func (rc *RunwayCreate) SetLowRunwayHeading(i int) *RunwayCreate {
+	rc.mutation.SetLowRunwayHeading(i)
 	return rc
 }
 
-// SetHighNumberedRunwayEndLongitude sets the "high_numbered_runway_end_longitude" field.
-func (rc *RunwayCreate) SetHighNumberedRunwayEndLongitude(f float64) *RunwayCreate {
-	rc.mutation.SetHighNumberedRunwayEndLongitude(f)
+// SetNillableLowRunwayHeading sets the "low_runway_heading" field if the given value is not nil.
+func (rc *RunwayCreate) SetNillableLowRunwayHeading(i *int) *RunwayCreate {
+	if i != nil {
+		rc.SetLowRunwayHeading(*i)
+	}
 	return rc
 }
 
-// SetHighNumberedRunwayEndElevation sets the "high_numbered_runway_end_elevation" field.
-func (rc *RunwayCreate) SetHighNumberedRunwayEndElevation(i int) *RunwayCreate {
-	rc.mutation.SetHighNumberedRunwayEndElevation(i)
+// SetLowRunwayDisplaced sets the "low_runway_displaced" field.
+func (rc *RunwayCreate) SetLowRunwayDisplaced(i int) *RunwayCreate {
+	rc.mutation.SetLowRunwayDisplaced(i)
 	return rc
 }
 
-// SetHighNumberedRunwayEndHeading sets the "high_numbered_runway_end_heading" field.
-func (rc *RunwayCreate) SetHighNumberedRunwayEndHeading(i int) *RunwayCreate {
-	rc.mutation.SetHighNumberedRunwayEndHeading(i)
+// SetNillableLowRunwayDisplaced sets the "low_runway_displaced" field if the given value is not nil.
+func (rc *RunwayCreate) SetNillableLowRunwayDisplaced(i *int) *RunwayCreate {
+	if i != nil {
+		rc.SetLowRunwayDisplaced(*i)
+	}
 	return rc
 }
 
-// SetHighNumberedRunwayEndDisplaced sets the "high_numbered_runway_end_displaced" field.
-func (rc *RunwayCreate) SetHighNumberedRunwayEndDisplaced(i int) *RunwayCreate {
-	rc.mutation.SetHighNumberedRunwayEndDisplaced(i)
+// SetHighRunwayIdentifier sets the "high_runway_identifier" field.
+func (rc *RunwayCreate) SetHighRunwayIdentifier(s string) *RunwayCreate {
+	rc.mutation.SetHighRunwayIdentifier(s)
+	return rc
+}
+
+// SetHighRunwayLatitude sets the "high_runway_latitude" field.
+func (rc *RunwayCreate) SetHighRunwayLatitude(f float64) *RunwayCreate {
+	rc.mutation.SetHighRunwayLatitude(f)
+	return rc
+}
+
+// SetNillableHighRunwayLatitude sets the "high_runway_latitude" field if the given value is not nil.
+func (rc *RunwayCreate) SetNillableHighRunwayLatitude(f *float64) *RunwayCreate {
+	if f != nil {
+		rc.SetHighRunwayLatitude(*f)
+	}
+	return rc
+}
+
+// SetHighRunwayLongitude sets the "high_runway_longitude" field.
+func (rc *RunwayCreate) SetHighRunwayLongitude(f float64) *RunwayCreate {
+	rc.mutation.SetHighRunwayLongitude(f)
+	return rc
+}
+
+// SetNillableHighRunwayLongitude sets the "high_runway_longitude" field if the given value is not nil.
+func (rc *RunwayCreate) SetNillableHighRunwayLongitude(f *float64) *RunwayCreate {
+	if f != nil {
+		rc.SetHighRunwayLongitude(*f)
+	}
+	return rc
+}
+
+// SetHighRunwayElevation sets the "high_runway_elevation" field.
+func (rc *RunwayCreate) SetHighRunwayElevation(i int) *RunwayCreate {
+	rc.mutation.SetHighRunwayElevation(i)
+	return rc
+}
+
+// SetNillableHighRunwayElevation sets the "high_runway_elevation" field if the given value is not nil.
+func (rc *RunwayCreate) SetNillableHighRunwayElevation(i *int) *RunwayCreate {
+	if i != nil {
+		rc.SetHighRunwayElevation(*i)
+	}
+	return rc
+}
+
+// SetHighRunwayHeading sets the "high_runway_heading" field.
+func (rc *RunwayCreate) SetHighRunwayHeading(i int) *RunwayCreate {
+	rc.mutation.SetHighRunwayHeading(i)
+	return rc
+}
+
+// SetNillableHighRunwayHeading sets the "high_runway_heading" field if the given value is not nil.
+func (rc *RunwayCreate) SetNillableHighRunwayHeading(i *int) *RunwayCreate {
+	if i != nil {
+		rc.SetHighRunwayHeading(*i)
+	}
+	return rc
+}
+
+// SetHighRunwayDisplaced sets the "high_runway_displaced" field.
+func (rc *RunwayCreate) SetHighRunwayDisplaced(i int) *RunwayCreate {
+	rc.mutation.SetHighRunwayDisplaced(i)
+	return rc
+}
+
+// SetNillableHighRunwayDisplaced sets the "high_runway_displaced" field if the given value is not nil.
+func (rc *RunwayCreate) SetNillableHighRunwayDisplaced(i *int) *RunwayCreate {
+	if i != nil {
+		rc.SetHighRunwayDisplaced(*i)
+	}
 	return rc
 }
 
@@ -285,14 +336,6 @@ func (rc *RunwayCreate) defaults() {
 		v := runway.DefaultImportFlag
 		rc.mutation.SetImportFlag(v)
 	}
-	if _, ok := rc.mutation.CreateTime(); !ok {
-		v := runway.DefaultCreateTime()
-		rc.mutation.SetCreateTime(v)
-	}
-	if _, ok := rc.mutation.UpdateTime(); !ok {
-		v := runway.DefaultUpdateTime()
-		rc.mutation.SetUpdateTime(v)
-	}
 }
 
 // check runs all checks and user-defined validators on the builder.
@@ -302,12 +345,6 @@ func (rc *RunwayCreate) check() error {
 	}
 	if _, ok := rc.mutation.ImportFlag(); !ok {
 		return &ValidationError{Name: "import_flag", err: errors.New(`ent: missing required field "Runway.import_flag"`)}
-	}
-	if _, ok := rc.mutation.CreateTime(); !ok {
-		return &ValidationError{Name: "create_time", err: errors.New(`ent: missing required field "Runway.create_time"`)}
-	}
-	if _, ok := rc.mutation.UpdateTime(); !ok {
-		return &ValidationError{Name: "update_time", err: errors.New(`ent: missing required field "Runway.update_time"`)}
 	}
 	if _, ok := rc.mutation.AirportIdentifier(); !ok {
 		return &ValidationError{Name: "airport_identifier", err: errors.New(`ent: missing required field "Runway.airport_identifier"`)}
@@ -327,41 +364,11 @@ func (rc *RunwayCreate) check() error {
 	if _, ok := rc.mutation.Closed(); !ok {
 		return &ValidationError{Name: "closed", err: errors.New(`ent: missing required field "Runway.closed"`)}
 	}
-	if _, ok := rc.mutation.LowNumberedRunwayEndIdentifier(); !ok {
-		return &ValidationError{Name: "low_numbered_runway_end_identifier", err: errors.New(`ent: missing required field "Runway.low_numbered_runway_end_identifier"`)}
+	if _, ok := rc.mutation.LowRunwayIdentifier(); !ok {
+		return &ValidationError{Name: "low_runway_identifier", err: errors.New(`ent: missing required field "Runway.low_runway_identifier"`)}
 	}
-	if _, ok := rc.mutation.LowNumberedRunwayEndLatitude(); !ok {
-		return &ValidationError{Name: "low_numbered_runway_end_latitude", err: errors.New(`ent: missing required field "Runway.low_numbered_runway_end_latitude"`)}
-	}
-	if _, ok := rc.mutation.LowNumberedRunwayEndLongitude(); !ok {
-		return &ValidationError{Name: "low_numbered_runway_end_longitude", err: errors.New(`ent: missing required field "Runway.low_numbered_runway_end_longitude"`)}
-	}
-	if _, ok := rc.mutation.LowNumberedRunwayEndElevation(); !ok {
-		return &ValidationError{Name: "low_numbered_runway_end_elevation", err: errors.New(`ent: missing required field "Runway.low_numbered_runway_end_elevation"`)}
-	}
-	if _, ok := rc.mutation.LowNumberedRunwayEndHeading(); !ok {
-		return &ValidationError{Name: "low_numbered_runway_end_heading", err: errors.New(`ent: missing required field "Runway.low_numbered_runway_end_heading"`)}
-	}
-	if _, ok := rc.mutation.LowNumberedRunwayEndDisplaced(); !ok {
-		return &ValidationError{Name: "low_numbered_runway_end_displaced", err: errors.New(`ent: missing required field "Runway.low_numbered_runway_end_displaced"`)}
-	}
-	if _, ok := rc.mutation.HighNumberedRunwayEndIdentifier(); !ok {
-		return &ValidationError{Name: "high_numbered_runway_end_identifier", err: errors.New(`ent: missing required field "Runway.high_numbered_runway_end_identifier"`)}
-	}
-	if _, ok := rc.mutation.HighNumberedRunwayEndLatitude(); !ok {
-		return &ValidationError{Name: "high_numbered_runway_end_latitude", err: errors.New(`ent: missing required field "Runway.high_numbered_runway_end_latitude"`)}
-	}
-	if _, ok := rc.mutation.HighNumberedRunwayEndLongitude(); !ok {
-		return &ValidationError{Name: "high_numbered_runway_end_longitude", err: errors.New(`ent: missing required field "Runway.high_numbered_runway_end_longitude"`)}
-	}
-	if _, ok := rc.mutation.HighNumberedRunwayEndElevation(); !ok {
-		return &ValidationError{Name: "high_numbered_runway_end_elevation", err: errors.New(`ent: missing required field "Runway.high_numbered_runway_end_elevation"`)}
-	}
-	if _, ok := rc.mutation.HighNumberedRunwayEndHeading(); !ok {
-		return &ValidationError{Name: "high_numbered_runway_end_heading", err: errors.New(`ent: missing required field "Runway.high_numbered_runway_end_heading"`)}
-	}
-	if _, ok := rc.mutation.HighNumberedRunwayEndDisplaced(); !ok {
-		return &ValidationError{Name: "high_numbered_runway_end_displaced", err: errors.New(`ent: missing required field "Runway.high_numbered_runway_end_displaced"`)}
+	if _, ok := rc.mutation.HighRunwayIdentifier(); !ok {
+		return &ValidationError{Name: "high_runway_identifier", err: errors.New(`ent: missing required field "Runway.high_runway_identifier"`)}
 	}
 	return nil
 }
@@ -399,7 +406,7 @@ func (rc *RunwayCreate) createSpec() (*Runway, *sqlgraph.CreateSpec) {
 	}
 	if value, ok := rc.mutation.Hash(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeUint64,
+			Type:   field.TypeString,
 			Value:  value,
 			Column: runway.FieldHash,
 		})
@@ -412,22 +419,6 @@ func (rc *RunwayCreate) createSpec() (*Runway, *sqlgraph.CreateSpec) {
 			Column: runway.FieldImportFlag,
 		})
 		_node.ImportFlag = value
-	}
-	if value, ok := rc.mutation.CreateTime(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Value:  value,
-			Column: runway.FieldCreateTime,
-		})
-		_node.CreateTime = value
-	}
-	if value, ok := rc.mutation.UpdateTime(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Value:  value,
-			Column: runway.FieldUpdateTime,
-		})
-		_node.UpdateTime = value
 	}
 	if value, ok := rc.mutation.AirportIdentifier(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
@@ -477,101 +468,101 @@ func (rc *RunwayCreate) createSpec() (*Runway, *sqlgraph.CreateSpec) {
 		})
 		_node.Closed = value
 	}
-	if value, ok := rc.mutation.LowNumberedRunwayEndIdentifier(); ok {
+	if value, ok := rc.mutation.LowRunwayIdentifier(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
 			Value:  value,
-			Column: runway.FieldLowNumberedRunwayEndIdentifier,
+			Column: runway.FieldLowRunwayIdentifier,
 		})
-		_node.LowNumberedRunwayEndIdentifier = value
+		_node.LowRunwayIdentifier = value
 	}
-	if value, ok := rc.mutation.LowNumberedRunwayEndLatitude(); ok {
+	if value, ok := rc.mutation.LowRunwayLatitude(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
 			Type:   field.TypeFloat64,
 			Value:  value,
-			Column: runway.FieldLowNumberedRunwayEndLatitude,
+			Column: runway.FieldLowRunwayLatitude,
 		})
-		_node.LowNumberedRunwayEndLatitude = value
+		_node.LowRunwayLatitude = &value
 	}
-	if value, ok := rc.mutation.LowNumberedRunwayEndLongitude(); ok {
+	if value, ok := rc.mutation.LowRunwayLongitude(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
 			Type:   field.TypeFloat64,
 			Value:  value,
-			Column: runway.FieldLowNumberedRunwayEndLongitude,
+			Column: runway.FieldLowRunwayLongitude,
 		})
-		_node.LowNumberedRunwayEndLongitude = value
+		_node.LowRunwayLongitude = &value
 	}
-	if value, ok := rc.mutation.LowNumberedRunwayEndElevation(); ok {
+	if value, ok := rc.mutation.LowRunwayElevation(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
 			Type:   field.TypeInt,
 			Value:  value,
-			Column: runway.FieldLowNumberedRunwayEndElevation,
+			Column: runway.FieldLowRunwayElevation,
 		})
-		_node.LowNumberedRunwayEndElevation = value
+		_node.LowRunwayElevation = &value
 	}
-	if value, ok := rc.mutation.LowNumberedRunwayEndHeading(); ok {
+	if value, ok := rc.mutation.LowRunwayHeading(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
 			Type:   field.TypeInt,
 			Value:  value,
-			Column: runway.FieldLowNumberedRunwayEndHeading,
+			Column: runway.FieldLowRunwayHeading,
 		})
-		_node.LowNumberedRunwayEndHeading = value
+		_node.LowRunwayHeading = &value
 	}
-	if value, ok := rc.mutation.LowNumberedRunwayEndDisplaced(); ok {
+	if value, ok := rc.mutation.LowRunwayDisplaced(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
 			Type:   field.TypeInt,
 			Value:  value,
-			Column: runway.FieldLowNumberedRunwayEndDisplaced,
+			Column: runway.FieldLowRunwayDisplaced,
 		})
-		_node.LowNumberedRunwayEndDisplaced = value
+		_node.LowRunwayDisplaced = &value
 	}
-	if value, ok := rc.mutation.HighNumberedRunwayEndIdentifier(); ok {
+	if value, ok := rc.mutation.HighRunwayIdentifier(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
 			Value:  value,
-			Column: runway.FieldHighNumberedRunwayEndIdentifier,
+			Column: runway.FieldHighRunwayIdentifier,
 		})
-		_node.HighNumberedRunwayEndIdentifier = value
+		_node.HighRunwayIdentifier = value
 	}
-	if value, ok := rc.mutation.HighNumberedRunwayEndLatitude(); ok {
+	if value, ok := rc.mutation.HighRunwayLatitude(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
 			Type:   field.TypeFloat64,
 			Value:  value,
-			Column: runway.FieldHighNumberedRunwayEndLatitude,
+			Column: runway.FieldHighRunwayLatitude,
 		})
-		_node.HighNumberedRunwayEndLatitude = value
+		_node.HighRunwayLatitude = &value
 	}
-	if value, ok := rc.mutation.HighNumberedRunwayEndLongitude(); ok {
+	if value, ok := rc.mutation.HighRunwayLongitude(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
 			Type:   field.TypeFloat64,
 			Value:  value,
-			Column: runway.FieldHighNumberedRunwayEndLongitude,
+			Column: runway.FieldHighRunwayLongitude,
 		})
-		_node.HighNumberedRunwayEndLongitude = value
+		_node.HighRunwayLongitude = &value
 	}
-	if value, ok := rc.mutation.HighNumberedRunwayEndElevation(); ok {
+	if value, ok := rc.mutation.HighRunwayElevation(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
 			Type:   field.TypeInt,
 			Value:  value,
-			Column: runway.FieldHighNumberedRunwayEndElevation,
+			Column: runway.FieldHighRunwayElevation,
 		})
-		_node.HighNumberedRunwayEndElevation = value
+		_node.HighRunwayElevation = &value
 	}
-	if value, ok := rc.mutation.HighNumberedRunwayEndHeading(); ok {
+	if value, ok := rc.mutation.HighRunwayHeading(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
 			Type:   field.TypeInt,
 			Value:  value,
-			Column: runway.FieldHighNumberedRunwayEndHeading,
+			Column: runway.FieldHighRunwayHeading,
 		})
-		_node.HighNumberedRunwayEndHeading = value
+		_node.HighRunwayHeading = &value
 	}
-	if value, ok := rc.mutation.HighNumberedRunwayEndDisplaced(); ok {
+	if value, ok := rc.mutation.HighRunwayDisplaced(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
 			Type:   field.TypeInt,
 			Value:  value,
-			Column: runway.FieldHighNumberedRunwayEndDisplaced,
+			Column: runway.FieldHighRunwayDisplaced,
 		})
-		_node.HighNumberedRunwayEndDisplaced = value
+		_node.HighRunwayDisplaced = &value
 	}
 	if nodes := rc.mutation.AirportIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
@@ -612,7 +603,6 @@ func (rc *RunwayCreate) createSpec() (*Runway, *sqlgraph.CreateSpec) {
 //			SetHash(v+v).
 //		}).
 //		Exec(ctx)
-//
 func (rc *RunwayCreate) OnConflict(opts ...sql.ConflictOption) *RunwayUpsertOne {
 	rc.conflict = opts
 	return &RunwayUpsertOne{
@@ -626,7 +616,6 @@ func (rc *RunwayCreate) OnConflict(opts ...sql.ConflictOption) *RunwayUpsertOne 
 //	client.Runway.Create().
 //		OnConflict(sql.ConflictColumns(columns...)).
 //		Exec(ctx)
-//
 func (rc *RunwayCreate) OnConflictColumns(columns ...string) *RunwayUpsertOne {
 	rc.conflict = append(rc.conflict, sql.ConflictColumns(columns...))
 	return &RunwayUpsertOne{
@@ -648,7 +637,7 @@ type (
 )
 
 // SetHash sets the "hash" field.
-func (u *RunwayUpsert) SetHash(v uint64) *RunwayUpsert {
+func (u *RunwayUpsert) SetHash(v string) *RunwayUpsert {
 	u.Set(runway.FieldHash, v)
 	return u
 }
@@ -656,12 +645,6 @@ func (u *RunwayUpsert) SetHash(v uint64) *RunwayUpsert {
 // UpdateHash sets the "hash" field to the value that was provided on create.
 func (u *RunwayUpsert) UpdateHash() *RunwayUpsert {
 	u.SetExcluded(runway.FieldHash)
-	return u
-}
-
-// AddHash adds v to the "hash" field.
-func (u *RunwayUpsert) AddHash(v uint64) *RunwayUpsert {
-	u.Add(runway.FieldHash, v)
 	return u
 }
 
@@ -674,30 +657,6 @@ func (u *RunwayUpsert) SetImportFlag(v bool) *RunwayUpsert {
 // UpdateImportFlag sets the "import_flag" field to the value that was provided on create.
 func (u *RunwayUpsert) UpdateImportFlag() *RunwayUpsert {
 	u.SetExcluded(runway.FieldImportFlag)
-	return u
-}
-
-// SetCreateTime sets the "create_time" field.
-func (u *RunwayUpsert) SetCreateTime(v time.Time) *RunwayUpsert {
-	u.Set(runway.FieldCreateTime, v)
-	return u
-}
-
-// UpdateCreateTime sets the "create_time" field to the value that was provided on create.
-func (u *RunwayUpsert) UpdateCreateTime() *RunwayUpsert {
-	u.SetExcluded(runway.FieldCreateTime)
-	return u
-}
-
-// SetUpdateTime sets the "update_time" field.
-func (u *RunwayUpsert) SetUpdateTime(v time.Time) *RunwayUpsert {
-	u.Set(runway.FieldUpdateTime, v)
-	return u
-}
-
-// UpdateUpdateTime sets the "update_time" field to the value that was provided on create.
-func (u *RunwayUpsert) UpdateUpdateTime() *RunwayUpsert {
-	u.SetExcluded(runway.FieldUpdateTime)
 	return u
 }
 
@@ -785,207 +744,267 @@ func (u *RunwayUpsert) UpdateClosed() *RunwayUpsert {
 	return u
 }
 
-// SetLowNumberedRunwayEndIdentifier sets the "low_numbered_runway_end_identifier" field.
-func (u *RunwayUpsert) SetLowNumberedRunwayEndIdentifier(v string) *RunwayUpsert {
-	u.Set(runway.FieldLowNumberedRunwayEndIdentifier, v)
+// SetLowRunwayIdentifier sets the "low_runway_identifier" field.
+func (u *RunwayUpsert) SetLowRunwayIdentifier(v string) *RunwayUpsert {
+	u.Set(runway.FieldLowRunwayIdentifier, v)
 	return u
 }
 
-// UpdateLowNumberedRunwayEndIdentifier sets the "low_numbered_runway_end_identifier" field to the value that was provided on create.
-func (u *RunwayUpsert) UpdateLowNumberedRunwayEndIdentifier() *RunwayUpsert {
-	u.SetExcluded(runway.FieldLowNumberedRunwayEndIdentifier)
+// UpdateLowRunwayIdentifier sets the "low_runway_identifier" field to the value that was provided on create.
+func (u *RunwayUpsert) UpdateLowRunwayIdentifier() *RunwayUpsert {
+	u.SetExcluded(runway.FieldLowRunwayIdentifier)
 	return u
 }
 
-// SetLowNumberedRunwayEndLatitude sets the "low_numbered_runway_end_latitude" field.
-func (u *RunwayUpsert) SetLowNumberedRunwayEndLatitude(v float64) *RunwayUpsert {
-	u.Set(runway.FieldLowNumberedRunwayEndLatitude, v)
+// SetLowRunwayLatitude sets the "low_runway_latitude" field.
+func (u *RunwayUpsert) SetLowRunwayLatitude(v float64) *RunwayUpsert {
+	u.Set(runway.FieldLowRunwayLatitude, v)
 	return u
 }
 
-// UpdateLowNumberedRunwayEndLatitude sets the "low_numbered_runway_end_latitude" field to the value that was provided on create.
-func (u *RunwayUpsert) UpdateLowNumberedRunwayEndLatitude() *RunwayUpsert {
-	u.SetExcluded(runway.FieldLowNumberedRunwayEndLatitude)
+// UpdateLowRunwayLatitude sets the "low_runway_latitude" field to the value that was provided on create.
+func (u *RunwayUpsert) UpdateLowRunwayLatitude() *RunwayUpsert {
+	u.SetExcluded(runway.FieldLowRunwayLatitude)
 	return u
 }
 
-// AddLowNumberedRunwayEndLatitude adds v to the "low_numbered_runway_end_latitude" field.
-func (u *RunwayUpsert) AddLowNumberedRunwayEndLatitude(v float64) *RunwayUpsert {
-	u.Add(runway.FieldLowNumberedRunwayEndLatitude, v)
+// AddLowRunwayLatitude adds v to the "low_runway_latitude" field.
+func (u *RunwayUpsert) AddLowRunwayLatitude(v float64) *RunwayUpsert {
+	u.Add(runway.FieldLowRunwayLatitude, v)
 	return u
 }
 
-// SetLowNumberedRunwayEndLongitude sets the "low_numbered_runway_end_longitude" field.
-func (u *RunwayUpsert) SetLowNumberedRunwayEndLongitude(v float64) *RunwayUpsert {
-	u.Set(runway.FieldLowNumberedRunwayEndLongitude, v)
+// ClearLowRunwayLatitude clears the value of the "low_runway_latitude" field.
+func (u *RunwayUpsert) ClearLowRunwayLatitude() *RunwayUpsert {
+	u.SetNull(runway.FieldLowRunwayLatitude)
 	return u
 }
 
-// UpdateLowNumberedRunwayEndLongitude sets the "low_numbered_runway_end_longitude" field to the value that was provided on create.
-func (u *RunwayUpsert) UpdateLowNumberedRunwayEndLongitude() *RunwayUpsert {
-	u.SetExcluded(runway.FieldLowNumberedRunwayEndLongitude)
+// SetLowRunwayLongitude sets the "low_runway_longitude" field.
+func (u *RunwayUpsert) SetLowRunwayLongitude(v float64) *RunwayUpsert {
+	u.Set(runway.FieldLowRunwayLongitude, v)
 	return u
 }
 
-// AddLowNumberedRunwayEndLongitude adds v to the "low_numbered_runway_end_longitude" field.
-func (u *RunwayUpsert) AddLowNumberedRunwayEndLongitude(v float64) *RunwayUpsert {
-	u.Add(runway.FieldLowNumberedRunwayEndLongitude, v)
+// UpdateLowRunwayLongitude sets the "low_runway_longitude" field to the value that was provided on create.
+func (u *RunwayUpsert) UpdateLowRunwayLongitude() *RunwayUpsert {
+	u.SetExcluded(runway.FieldLowRunwayLongitude)
 	return u
 }
 
-// SetLowNumberedRunwayEndElevation sets the "low_numbered_runway_end_elevation" field.
-func (u *RunwayUpsert) SetLowNumberedRunwayEndElevation(v int) *RunwayUpsert {
-	u.Set(runway.FieldLowNumberedRunwayEndElevation, v)
+// AddLowRunwayLongitude adds v to the "low_runway_longitude" field.
+func (u *RunwayUpsert) AddLowRunwayLongitude(v float64) *RunwayUpsert {
+	u.Add(runway.FieldLowRunwayLongitude, v)
 	return u
 }
 
-// UpdateLowNumberedRunwayEndElevation sets the "low_numbered_runway_end_elevation" field to the value that was provided on create.
-func (u *RunwayUpsert) UpdateLowNumberedRunwayEndElevation() *RunwayUpsert {
-	u.SetExcluded(runway.FieldLowNumberedRunwayEndElevation)
+// ClearLowRunwayLongitude clears the value of the "low_runway_longitude" field.
+func (u *RunwayUpsert) ClearLowRunwayLongitude() *RunwayUpsert {
+	u.SetNull(runway.FieldLowRunwayLongitude)
 	return u
 }
 
-// AddLowNumberedRunwayEndElevation adds v to the "low_numbered_runway_end_elevation" field.
-func (u *RunwayUpsert) AddLowNumberedRunwayEndElevation(v int) *RunwayUpsert {
-	u.Add(runway.FieldLowNumberedRunwayEndElevation, v)
+// SetLowRunwayElevation sets the "low_runway_elevation" field.
+func (u *RunwayUpsert) SetLowRunwayElevation(v int) *RunwayUpsert {
+	u.Set(runway.FieldLowRunwayElevation, v)
 	return u
 }
 
-// SetLowNumberedRunwayEndHeading sets the "low_numbered_runway_end_heading" field.
-func (u *RunwayUpsert) SetLowNumberedRunwayEndHeading(v int) *RunwayUpsert {
-	u.Set(runway.FieldLowNumberedRunwayEndHeading, v)
+// UpdateLowRunwayElevation sets the "low_runway_elevation" field to the value that was provided on create.
+func (u *RunwayUpsert) UpdateLowRunwayElevation() *RunwayUpsert {
+	u.SetExcluded(runway.FieldLowRunwayElevation)
 	return u
 }
 
-// UpdateLowNumberedRunwayEndHeading sets the "low_numbered_runway_end_heading" field to the value that was provided on create.
-func (u *RunwayUpsert) UpdateLowNumberedRunwayEndHeading() *RunwayUpsert {
-	u.SetExcluded(runway.FieldLowNumberedRunwayEndHeading)
+// AddLowRunwayElevation adds v to the "low_runway_elevation" field.
+func (u *RunwayUpsert) AddLowRunwayElevation(v int) *RunwayUpsert {
+	u.Add(runway.FieldLowRunwayElevation, v)
 	return u
 }
 
-// AddLowNumberedRunwayEndHeading adds v to the "low_numbered_runway_end_heading" field.
-func (u *RunwayUpsert) AddLowNumberedRunwayEndHeading(v int) *RunwayUpsert {
-	u.Add(runway.FieldLowNumberedRunwayEndHeading, v)
+// ClearLowRunwayElevation clears the value of the "low_runway_elevation" field.
+func (u *RunwayUpsert) ClearLowRunwayElevation() *RunwayUpsert {
+	u.SetNull(runway.FieldLowRunwayElevation)
 	return u
 }
 
-// SetLowNumberedRunwayEndDisplaced sets the "low_numbered_runway_end_displaced" field.
-func (u *RunwayUpsert) SetLowNumberedRunwayEndDisplaced(v int) *RunwayUpsert {
-	u.Set(runway.FieldLowNumberedRunwayEndDisplaced, v)
+// SetLowRunwayHeading sets the "low_runway_heading" field.
+func (u *RunwayUpsert) SetLowRunwayHeading(v int) *RunwayUpsert {
+	u.Set(runway.FieldLowRunwayHeading, v)
 	return u
 }
 
-// UpdateLowNumberedRunwayEndDisplaced sets the "low_numbered_runway_end_displaced" field to the value that was provided on create.
-func (u *RunwayUpsert) UpdateLowNumberedRunwayEndDisplaced() *RunwayUpsert {
-	u.SetExcluded(runway.FieldLowNumberedRunwayEndDisplaced)
+// UpdateLowRunwayHeading sets the "low_runway_heading" field to the value that was provided on create.
+func (u *RunwayUpsert) UpdateLowRunwayHeading() *RunwayUpsert {
+	u.SetExcluded(runway.FieldLowRunwayHeading)
 	return u
 }
 
-// AddLowNumberedRunwayEndDisplaced adds v to the "low_numbered_runway_end_displaced" field.
-func (u *RunwayUpsert) AddLowNumberedRunwayEndDisplaced(v int) *RunwayUpsert {
-	u.Add(runway.FieldLowNumberedRunwayEndDisplaced, v)
+// AddLowRunwayHeading adds v to the "low_runway_heading" field.
+func (u *RunwayUpsert) AddLowRunwayHeading(v int) *RunwayUpsert {
+	u.Add(runway.FieldLowRunwayHeading, v)
 	return u
 }
 
-// SetHighNumberedRunwayEndIdentifier sets the "high_numbered_runway_end_identifier" field.
-func (u *RunwayUpsert) SetHighNumberedRunwayEndIdentifier(v string) *RunwayUpsert {
-	u.Set(runway.FieldHighNumberedRunwayEndIdentifier, v)
+// ClearLowRunwayHeading clears the value of the "low_runway_heading" field.
+func (u *RunwayUpsert) ClearLowRunwayHeading() *RunwayUpsert {
+	u.SetNull(runway.FieldLowRunwayHeading)
 	return u
 }
 
-// UpdateHighNumberedRunwayEndIdentifier sets the "high_numbered_runway_end_identifier" field to the value that was provided on create.
-func (u *RunwayUpsert) UpdateHighNumberedRunwayEndIdentifier() *RunwayUpsert {
-	u.SetExcluded(runway.FieldHighNumberedRunwayEndIdentifier)
+// SetLowRunwayDisplaced sets the "low_runway_displaced" field.
+func (u *RunwayUpsert) SetLowRunwayDisplaced(v int) *RunwayUpsert {
+	u.Set(runway.FieldLowRunwayDisplaced, v)
 	return u
 }
 
-// SetHighNumberedRunwayEndLatitude sets the "high_numbered_runway_end_latitude" field.
-func (u *RunwayUpsert) SetHighNumberedRunwayEndLatitude(v float64) *RunwayUpsert {
-	u.Set(runway.FieldHighNumberedRunwayEndLatitude, v)
+// UpdateLowRunwayDisplaced sets the "low_runway_displaced" field to the value that was provided on create.
+func (u *RunwayUpsert) UpdateLowRunwayDisplaced() *RunwayUpsert {
+	u.SetExcluded(runway.FieldLowRunwayDisplaced)
 	return u
 }
 
-// UpdateHighNumberedRunwayEndLatitude sets the "high_numbered_runway_end_latitude" field to the value that was provided on create.
-func (u *RunwayUpsert) UpdateHighNumberedRunwayEndLatitude() *RunwayUpsert {
-	u.SetExcluded(runway.FieldHighNumberedRunwayEndLatitude)
+// AddLowRunwayDisplaced adds v to the "low_runway_displaced" field.
+func (u *RunwayUpsert) AddLowRunwayDisplaced(v int) *RunwayUpsert {
+	u.Add(runway.FieldLowRunwayDisplaced, v)
 	return u
 }
 
-// AddHighNumberedRunwayEndLatitude adds v to the "high_numbered_runway_end_latitude" field.
-func (u *RunwayUpsert) AddHighNumberedRunwayEndLatitude(v float64) *RunwayUpsert {
-	u.Add(runway.FieldHighNumberedRunwayEndLatitude, v)
+// ClearLowRunwayDisplaced clears the value of the "low_runway_displaced" field.
+func (u *RunwayUpsert) ClearLowRunwayDisplaced() *RunwayUpsert {
+	u.SetNull(runway.FieldLowRunwayDisplaced)
 	return u
 }
 
-// SetHighNumberedRunwayEndLongitude sets the "high_numbered_runway_end_longitude" field.
-func (u *RunwayUpsert) SetHighNumberedRunwayEndLongitude(v float64) *RunwayUpsert {
-	u.Set(runway.FieldHighNumberedRunwayEndLongitude, v)
+// SetHighRunwayIdentifier sets the "high_runway_identifier" field.
+func (u *RunwayUpsert) SetHighRunwayIdentifier(v string) *RunwayUpsert {
+	u.Set(runway.FieldHighRunwayIdentifier, v)
 	return u
 }
 
-// UpdateHighNumberedRunwayEndLongitude sets the "high_numbered_runway_end_longitude" field to the value that was provided on create.
-func (u *RunwayUpsert) UpdateHighNumberedRunwayEndLongitude() *RunwayUpsert {
-	u.SetExcluded(runway.FieldHighNumberedRunwayEndLongitude)
+// UpdateHighRunwayIdentifier sets the "high_runway_identifier" field to the value that was provided on create.
+func (u *RunwayUpsert) UpdateHighRunwayIdentifier() *RunwayUpsert {
+	u.SetExcluded(runway.FieldHighRunwayIdentifier)
 	return u
 }
 
-// AddHighNumberedRunwayEndLongitude adds v to the "high_numbered_runway_end_longitude" field.
-func (u *RunwayUpsert) AddHighNumberedRunwayEndLongitude(v float64) *RunwayUpsert {
-	u.Add(runway.FieldHighNumberedRunwayEndLongitude, v)
+// SetHighRunwayLatitude sets the "high_runway_latitude" field.
+func (u *RunwayUpsert) SetHighRunwayLatitude(v float64) *RunwayUpsert {
+	u.Set(runway.FieldHighRunwayLatitude, v)
 	return u
 }
 
-// SetHighNumberedRunwayEndElevation sets the "high_numbered_runway_end_elevation" field.
-func (u *RunwayUpsert) SetHighNumberedRunwayEndElevation(v int) *RunwayUpsert {
-	u.Set(runway.FieldHighNumberedRunwayEndElevation, v)
+// UpdateHighRunwayLatitude sets the "high_runway_latitude" field to the value that was provided on create.
+func (u *RunwayUpsert) UpdateHighRunwayLatitude() *RunwayUpsert {
+	u.SetExcluded(runway.FieldHighRunwayLatitude)
 	return u
 }
 
-// UpdateHighNumberedRunwayEndElevation sets the "high_numbered_runway_end_elevation" field to the value that was provided on create.
-func (u *RunwayUpsert) UpdateHighNumberedRunwayEndElevation() *RunwayUpsert {
-	u.SetExcluded(runway.FieldHighNumberedRunwayEndElevation)
+// AddHighRunwayLatitude adds v to the "high_runway_latitude" field.
+func (u *RunwayUpsert) AddHighRunwayLatitude(v float64) *RunwayUpsert {
+	u.Add(runway.FieldHighRunwayLatitude, v)
 	return u
 }
 
-// AddHighNumberedRunwayEndElevation adds v to the "high_numbered_runway_end_elevation" field.
-func (u *RunwayUpsert) AddHighNumberedRunwayEndElevation(v int) *RunwayUpsert {
-	u.Add(runway.FieldHighNumberedRunwayEndElevation, v)
+// ClearHighRunwayLatitude clears the value of the "high_runway_latitude" field.
+func (u *RunwayUpsert) ClearHighRunwayLatitude() *RunwayUpsert {
+	u.SetNull(runway.FieldHighRunwayLatitude)
 	return u
 }
 
-// SetHighNumberedRunwayEndHeading sets the "high_numbered_runway_end_heading" field.
-func (u *RunwayUpsert) SetHighNumberedRunwayEndHeading(v int) *RunwayUpsert {
-	u.Set(runway.FieldHighNumberedRunwayEndHeading, v)
+// SetHighRunwayLongitude sets the "high_runway_longitude" field.
+func (u *RunwayUpsert) SetHighRunwayLongitude(v float64) *RunwayUpsert {
+	u.Set(runway.FieldHighRunwayLongitude, v)
 	return u
 }
 
-// UpdateHighNumberedRunwayEndHeading sets the "high_numbered_runway_end_heading" field to the value that was provided on create.
-func (u *RunwayUpsert) UpdateHighNumberedRunwayEndHeading() *RunwayUpsert {
-	u.SetExcluded(runway.FieldHighNumberedRunwayEndHeading)
+// UpdateHighRunwayLongitude sets the "high_runway_longitude" field to the value that was provided on create.
+func (u *RunwayUpsert) UpdateHighRunwayLongitude() *RunwayUpsert {
+	u.SetExcluded(runway.FieldHighRunwayLongitude)
 	return u
 }
 
-// AddHighNumberedRunwayEndHeading adds v to the "high_numbered_runway_end_heading" field.
-func (u *RunwayUpsert) AddHighNumberedRunwayEndHeading(v int) *RunwayUpsert {
-	u.Add(runway.FieldHighNumberedRunwayEndHeading, v)
+// AddHighRunwayLongitude adds v to the "high_runway_longitude" field.
+func (u *RunwayUpsert) AddHighRunwayLongitude(v float64) *RunwayUpsert {
+	u.Add(runway.FieldHighRunwayLongitude, v)
 	return u
 }
 
-// SetHighNumberedRunwayEndDisplaced sets the "high_numbered_runway_end_displaced" field.
-func (u *RunwayUpsert) SetHighNumberedRunwayEndDisplaced(v int) *RunwayUpsert {
-	u.Set(runway.FieldHighNumberedRunwayEndDisplaced, v)
+// ClearHighRunwayLongitude clears the value of the "high_runway_longitude" field.
+func (u *RunwayUpsert) ClearHighRunwayLongitude() *RunwayUpsert {
+	u.SetNull(runway.FieldHighRunwayLongitude)
 	return u
 }
 
-// UpdateHighNumberedRunwayEndDisplaced sets the "high_numbered_runway_end_displaced" field to the value that was provided on create.
-func (u *RunwayUpsert) UpdateHighNumberedRunwayEndDisplaced() *RunwayUpsert {
-	u.SetExcluded(runway.FieldHighNumberedRunwayEndDisplaced)
+// SetHighRunwayElevation sets the "high_runway_elevation" field.
+func (u *RunwayUpsert) SetHighRunwayElevation(v int) *RunwayUpsert {
+	u.Set(runway.FieldHighRunwayElevation, v)
 	return u
 }
 
-// AddHighNumberedRunwayEndDisplaced adds v to the "high_numbered_runway_end_displaced" field.
-func (u *RunwayUpsert) AddHighNumberedRunwayEndDisplaced(v int) *RunwayUpsert {
-	u.Add(runway.FieldHighNumberedRunwayEndDisplaced, v)
+// UpdateHighRunwayElevation sets the "high_runway_elevation" field to the value that was provided on create.
+func (u *RunwayUpsert) UpdateHighRunwayElevation() *RunwayUpsert {
+	u.SetExcluded(runway.FieldHighRunwayElevation)
+	return u
+}
+
+// AddHighRunwayElevation adds v to the "high_runway_elevation" field.
+func (u *RunwayUpsert) AddHighRunwayElevation(v int) *RunwayUpsert {
+	u.Add(runway.FieldHighRunwayElevation, v)
+	return u
+}
+
+// ClearHighRunwayElevation clears the value of the "high_runway_elevation" field.
+func (u *RunwayUpsert) ClearHighRunwayElevation() *RunwayUpsert {
+	u.SetNull(runway.FieldHighRunwayElevation)
+	return u
+}
+
+// SetHighRunwayHeading sets the "high_runway_heading" field.
+func (u *RunwayUpsert) SetHighRunwayHeading(v int) *RunwayUpsert {
+	u.Set(runway.FieldHighRunwayHeading, v)
+	return u
+}
+
+// UpdateHighRunwayHeading sets the "high_runway_heading" field to the value that was provided on create.
+func (u *RunwayUpsert) UpdateHighRunwayHeading() *RunwayUpsert {
+	u.SetExcluded(runway.FieldHighRunwayHeading)
+	return u
+}
+
+// AddHighRunwayHeading adds v to the "high_runway_heading" field.
+func (u *RunwayUpsert) AddHighRunwayHeading(v int) *RunwayUpsert {
+	u.Add(runway.FieldHighRunwayHeading, v)
+	return u
+}
+
+// ClearHighRunwayHeading clears the value of the "high_runway_heading" field.
+func (u *RunwayUpsert) ClearHighRunwayHeading() *RunwayUpsert {
+	u.SetNull(runway.FieldHighRunwayHeading)
+	return u
+}
+
+// SetHighRunwayDisplaced sets the "high_runway_displaced" field.
+func (u *RunwayUpsert) SetHighRunwayDisplaced(v int) *RunwayUpsert {
+	u.Set(runway.FieldHighRunwayDisplaced, v)
+	return u
+}
+
+// UpdateHighRunwayDisplaced sets the "high_runway_displaced" field to the value that was provided on create.
+func (u *RunwayUpsert) UpdateHighRunwayDisplaced() *RunwayUpsert {
+	u.SetExcluded(runway.FieldHighRunwayDisplaced)
+	return u
+}
+
+// AddHighRunwayDisplaced adds v to the "high_runway_displaced" field.
+func (u *RunwayUpsert) AddHighRunwayDisplaced(v int) *RunwayUpsert {
+	u.Add(runway.FieldHighRunwayDisplaced, v)
+	return u
+}
+
+// ClearHighRunwayDisplaced clears the value of the "high_runway_displaced" field.
+func (u *RunwayUpsert) ClearHighRunwayDisplaced() *RunwayUpsert {
+	u.SetNull(runway.FieldHighRunwayDisplaced)
 	return u
 }
 
@@ -1000,15 +1019,11 @@ func (u *RunwayUpsert) AddHighNumberedRunwayEndDisplaced(v int) *RunwayUpsert {
 //			}),
 //		).
 //		Exec(ctx)
-//
 func (u *RunwayUpsertOne) UpdateNewValues() *RunwayUpsertOne {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
 	u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(s *sql.UpdateSet) {
 		if _, exists := u.create.mutation.ID(); exists {
 			s.SetIgnore(runway.FieldID)
-		}
-		if _, exists := u.create.mutation.CreateTime(); exists {
-			s.SetIgnore(runway.FieldCreateTime)
 		}
 	}))
 	return u
@@ -1017,10 +1032,9 @@ func (u *RunwayUpsertOne) UpdateNewValues() *RunwayUpsertOne {
 // Ignore sets each column to itself in case of conflict.
 // Using this option is equivalent to using:
 //
-//  client.Runway.Create().
-//      OnConflict(sql.ResolveWithIgnore()).
-//      Exec(ctx)
-//
+//	client.Runway.Create().
+//	    OnConflict(sql.ResolveWithIgnore()).
+//	    Exec(ctx)
 func (u *RunwayUpsertOne) Ignore() *RunwayUpsertOne {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithIgnore())
 	return u
@@ -1043,16 +1057,9 @@ func (u *RunwayUpsertOne) Update(set func(*RunwayUpsert)) *RunwayUpsertOne {
 }
 
 // SetHash sets the "hash" field.
-func (u *RunwayUpsertOne) SetHash(v uint64) *RunwayUpsertOne {
+func (u *RunwayUpsertOne) SetHash(v string) *RunwayUpsertOne {
 	return u.Update(func(s *RunwayUpsert) {
 		s.SetHash(v)
-	})
-}
-
-// AddHash adds v to the "hash" field.
-func (u *RunwayUpsertOne) AddHash(v uint64) *RunwayUpsertOne {
-	return u.Update(func(s *RunwayUpsert) {
-		s.AddHash(v)
 	})
 }
 
@@ -1074,34 +1081,6 @@ func (u *RunwayUpsertOne) SetImportFlag(v bool) *RunwayUpsertOne {
 func (u *RunwayUpsertOne) UpdateImportFlag() *RunwayUpsertOne {
 	return u.Update(func(s *RunwayUpsert) {
 		s.UpdateImportFlag()
-	})
-}
-
-// SetCreateTime sets the "create_time" field.
-func (u *RunwayUpsertOne) SetCreateTime(v time.Time) *RunwayUpsertOne {
-	return u.Update(func(s *RunwayUpsert) {
-		s.SetCreateTime(v)
-	})
-}
-
-// UpdateCreateTime sets the "create_time" field to the value that was provided on create.
-func (u *RunwayUpsertOne) UpdateCreateTime() *RunwayUpsertOne {
-	return u.Update(func(s *RunwayUpsert) {
-		s.UpdateCreateTime()
-	})
-}
-
-// SetUpdateTime sets the "update_time" field.
-func (u *RunwayUpsertOne) SetUpdateTime(v time.Time) *RunwayUpsertOne {
-	return u.Update(func(s *RunwayUpsert) {
-		s.SetUpdateTime(v)
-	})
-}
-
-// UpdateUpdateTime sets the "update_time" field to the value that was provided on create.
-func (u *RunwayUpsertOne) UpdateUpdateTime() *RunwayUpsertOne {
-	return u.Update(func(s *RunwayUpsert) {
-		s.UpdateUpdateTime()
 	})
 }
 
@@ -1203,241 +1182,311 @@ func (u *RunwayUpsertOne) UpdateClosed() *RunwayUpsertOne {
 	})
 }
 
-// SetLowNumberedRunwayEndIdentifier sets the "low_numbered_runway_end_identifier" field.
-func (u *RunwayUpsertOne) SetLowNumberedRunwayEndIdentifier(v string) *RunwayUpsertOne {
+// SetLowRunwayIdentifier sets the "low_runway_identifier" field.
+func (u *RunwayUpsertOne) SetLowRunwayIdentifier(v string) *RunwayUpsertOne {
 	return u.Update(func(s *RunwayUpsert) {
-		s.SetLowNumberedRunwayEndIdentifier(v)
+		s.SetLowRunwayIdentifier(v)
 	})
 }
 
-// UpdateLowNumberedRunwayEndIdentifier sets the "low_numbered_runway_end_identifier" field to the value that was provided on create.
-func (u *RunwayUpsertOne) UpdateLowNumberedRunwayEndIdentifier() *RunwayUpsertOne {
+// UpdateLowRunwayIdentifier sets the "low_runway_identifier" field to the value that was provided on create.
+func (u *RunwayUpsertOne) UpdateLowRunwayIdentifier() *RunwayUpsertOne {
 	return u.Update(func(s *RunwayUpsert) {
-		s.UpdateLowNumberedRunwayEndIdentifier()
+		s.UpdateLowRunwayIdentifier()
 	})
 }
 
-// SetLowNumberedRunwayEndLatitude sets the "low_numbered_runway_end_latitude" field.
-func (u *RunwayUpsertOne) SetLowNumberedRunwayEndLatitude(v float64) *RunwayUpsertOne {
+// SetLowRunwayLatitude sets the "low_runway_latitude" field.
+func (u *RunwayUpsertOne) SetLowRunwayLatitude(v float64) *RunwayUpsertOne {
 	return u.Update(func(s *RunwayUpsert) {
-		s.SetLowNumberedRunwayEndLatitude(v)
+		s.SetLowRunwayLatitude(v)
 	})
 }
 
-// AddLowNumberedRunwayEndLatitude adds v to the "low_numbered_runway_end_latitude" field.
-func (u *RunwayUpsertOne) AddLowNumberedRunwayEndLatitude(v float64) *RunwayUpsertOne {
+// AddLowRunwayLatitude adds v to the "low_runway_latitude" field.
+func (u *RunwayUpsertOne) AddLowRunwayLatitude(v float64) *RunwayUpsertOne {
 	return u.Update(func(s *RunwayUpsert) {
-		s.AddLowNumberedRunwayEndLatitude(v)
+		s.AddLowRunwayLatitude(v)
 	})
 }
 
-// UpdateLowNumberedRunwayEndLatitude sets the "low_numbered_runway_end_latitude" field to the value that was provided on create.
-func (u *RunwayUpsertOne) UpdateLowNumberedRunwayEndLatitude() *RunwayUpsertOne {
+// UpdateLowRunwayLatitude sets the "low_runway_latitude" field to the value that was provided on create.
+func (u *RunwayUpsertOne) UpdateLowRunwayLatitude() *RunwayUpsertOne {
 	return u.Update(func(s *RunwayUpsert) {
-		s.UpdateLowNumberedRunwayEndLatitude()
+		s.UpdateLowRunwayLatitude()
 	})
 }
 
-// SetLowNumberedRunwayEndLongitude sets the "low_numbered_runway_end_longitude" field.
-func (u *RunwayUpsertOne) SetLowNumberedRunwayEndLongitude(v float64) *RunwayUpsertOne {
+// ClearLowRunwayLatitude clears the value of the "low_runway_latitude" field.
+func (u *RunwayUpsertOne) ClearLowRunwayLatitude() *RunwayUpsertOne {
 	return u.Update(func(s *RunwayUpsert) {
-		s.SetLowNumberedRunwayEndLongitude(v)
+		s.ClearLowRunwayLatitude()
 	})
 }
 
-// AddLowNumberedRunwayEndLongitude adds v to the "low_numbered_runway_end_longitude" field.
-func (u *RunwayUpsertOne) AddLowNumberedRunwayEndLongitude(v float64) *RunwayUpsertOne {
+// SetLowRunwayLongitude sets the "low_runway_longitude" field.
+func (u *RunwayUpsertOne) SetLowRunwayLongitude(v float64) *RunwayUpsertOne {
 	return u.Update(func(s *RunwayUpsert) {
-		s.AddLowNumberedRunwayEndLongitude(v)
+		s.SetLowRunwayLongitude(v)
 	})
 }
 
-// UpdateLowNumberedRunwayEndLongitude sets the "low_numbered_runway_end_longitude" field to the value that was provided on create.
-func (u *RunwayUpsertOne) UpdateLowNumberedRunwayEndLongitude() *RunwayUpsertOne {
+// AddLowRunwayLongitude adds v to the "low_runway_longitude" field.
+func (u *RunwayUpsertOne) AddLowRunwayLongitude(v float64) *RunwayUpsertOne {
 	return u.Update(func(s *RunwayUpsert) {
-		s.UpdateLowNumberedRunwayEndLongitude()
+		s.AddLowRunwayLongitude(v)
 	})
 }
 
-// SetLowNumberedRunwayEndElevation sets the "low_numbered_runway_end_elevation" field.
-func (u *RunwayUpsertOne) SetLowNumberedRunwayEndElevation(v int) *RunwayUpsertOne {
+// UpdateLowRunwayLongitude sets the "low_runway_longitude" field to the value that was provided on create.
+func (u *RunwayUpsertOne) UpdateLowRunwayLongitude() *RunwayUpsertOne {
 	return u.Update(func(s *RunwayUpsert) {
-		s.SetLowNumberedRunwayEndElevation(v)
+		s.UpdateLowRunwayLongitude()
 	})
 }
 
-// AddLowNumberedRunwayEndElevation adds v to the "low_numbered_runway_end_elevation" field.
-func (u *RunwayUpsertOne) AddLowNumberedRunwayEndElevation(v int) *RunwayUpsertOne {
+// ClearLowRunwayLongitude clears the value of the "low_runway_longitude" field.
+func (u *RunwayUpsertOne) ClearLowRunwayLongitude() *RunwayUpsertOne {
 	return u.Update(func(s *RunwayUpsert) {
-		s.AddLowNumberedRunwayEndElevation(v)
+		s.ClearLowRunwayLongitude()
 	})
 }
 
-// UpdateLowNumberedRunwayEndElevation sets the "low_numbered_runway_end_elevation" field to the value that was provided on create.
-func (u *RunwayUpsertOne) UpdateLowNumberedRunwayEndElevation() *RunwayUpsertOne {
+// SetLowRunwayElevation sets the "low_runway_elevation" field.
+func (u *RunwayUpsertOne) SetLowRunwayElevation(v int) *RunwayUpsertOne {
 	return u.Update(func(s *RunwayUpsert) {
-		s.UpdateLowNumberedRunwayEndElevation()
+		s.SetLowRunwayElevation(v)
 	})
 }
 
-// SetLowNumberedRunwayEndHeading sets the "low_numbered_runway_end_heading" field.
-func (u *RunwayUpsertOne) SetLowNumberedRunwayEndHeading(v int) *RunwayUpsertOne {
+// AddLowRunwayElevation adds v to the "low_runway_elevation" field.
+func (u *RunwayUpsertOne) AddLowRunwayElevation(v int) *RunwayUpsertOne {
 	return u.Update(func(s *RunwayUpsert) {
-		s.SetLowNumberedRunwayEndHeading(v)
+		s.AddLowRunwayElevation(v)
 	})
 }
 
-// AddLowNumberedRunwayEndHeading adds v to the "low_numbered_runway_end_heading" field.
-func (u *RunwayUpsertOne) AddLowNumberedRunwayEndHeading(v int) *RunwayUpsertOne {
+// UpdateLowRunwayElevation sets the "low_runway_elevation" field to the value that was provided on create.
+func (u *RunwayUpsertOne) UpdateLowRunwayElevation() *RunwayUpsertOne {
 	return u.Update(func(s *RunwayUpsert) {
-		s.AddLowNumberedRunwayEndHeading(v)
+		s.UpdateLowRunwayElevation()
 	})
 }
 
-// UpdateLowNumberedRunwayEndHeading sets the "low_numbered_runway_end_heading" field to the value that was provided on create.
-func (u *RunwayUpsertOne) UpdateLowNumberedRunwayEndHeading() *RunwayUpsertOne {
+// ClearLowRunwayElevation clears the value of the "low_runway_elevation" field.
+func (u *RunwayUpsertOne) ClearLowRunwayElevation() *RunwayUpsertOne {
 	return u.Update(func(s *RunwayUpsert) {
-		s.UpdateLowNumberedRunwayEndHeading()
+		s.ClearLowRunwayElevation()
 	})
 }
 
-// SetLowNumberedRunwayEndDisplaced sets the "low_numbered_runway_end_displaced" field.
-func (u *RunwayUpsertOne) SetLowNumberedRunwayEndDisplaced(v int) *RunwayUpsertOne {
+// SetLowRunwayHeading sets the "low_runway_heading" field.
+func (u *RunwayUpsertOne) SetLowRunwayHeading(v int) *RunwayUpsertOne {
 	return u.Update(func(s *RunwayUpsert) {
-		s.SetLowNumberedRunwayEndDisplaced(v)
+		s.SetLowRunwayHeading(v)
 	})
 }
 
-// AddLowNumberedRunwayEndDisplaced adds v to the "low_numbered_runway_end_displaced" field.
-func (u *RunwayUpsertOne) AddLowNumberedRunwayEndDisplaced(v int) *RunwayUpsertOne {
+// AddLowRunwayHeading adds v to the "low_runway_heading" field.
+func (u *RunwayUpsertOne) AddLowRunwayHeading(v int) *RunwayUpsertOne {
 	return u.Update(func(s *RunwayUpsert) {
-		s.AddLowNumberedRunwayEndDisplaced(v)
+		s.AddLowRunwayHeading(v)
 	})
 }
 
-// UpdateLowNumberedRunwayEndDisplaced sets the "low_numbered_runway_end_displaced" field to the value that was provided on create.
-func (u *RunwayUpsertOne) UpdateLowNumberedRunwayEndDisplaced() *RunwayUpsertOne {
+// UpdateLowRunwayHeading sets the "low_runway_heading" field to the value that was provided on create.
+func (u *RunwayUpsertOne) UpdateLowRunwayHeading() *RunwayUpsertOne {
 	return u.Update(func(s *RunwayUpsert) {
-		s.UpdateLowNumberedRunwayEndDisplaced()
+		s.UpdateLowRunwayHeading()
 	})
 }
 
-// SetHighNumberedRunwayEndIdentifier sets the "high_numbered_runway_end_identifier" field.
-func (u *RunwayUpsertOne) SetHighNumberedRunwayEndIdentifier(v string) *RunwayUpsertOne {
+// ClearLowRunwayHeading clears the value of the "low_runway_heading" field.
+func (u *RunwayUpsertOne) ClearLowRunwayHeading() *RunwayUpsertOne {
 	return u.Update(func(s *RunwayUpsert) {
-		s.SetHighNumberedRunwayEndIdentifier(v)
+		s.ClearLowRunwayHeading()
 	})
 }
 
-// UpdateHighNumberedRunwayEndIdentifier sets the "high_numbered_runway_end_identifier" field to the value that was provided on create.
-func (u *RunwayUpsertOne) UpdateHighNumberedRunwayEndIdentifier() *RunwayUpsertOne {
+// SetLowRunwayDisplaced sets the "low_runway_displaced" field.
+func (u *RunwayUpsertOne) SetLowRunwayDisplaced(v int) *RunwayUpsertOne {
 	return u.Update(func(s *RunwayUpsert) {
-		s.UpdateHighNumberedRunwayEndIdentifier()
+		s.SetLowRunwayDisplaced(v)
 	})
 }
 
-// SetHighNumberedRunwayEndLatitude sets the "high_numbered_runway_end_latitude" field.
-func (u *RunwayUpsertOne) SetHighNumberedRunwayEndLatitude(v float64) *RunwayUpsertOne {
+// AddLowRunwayDisplaced adds v to the "low_runway_displaced" field.
+func (u *RunwayUpsertOne) AddLowRunwayDisplaced(v int) *RunwayUpsertOne {
 	return u.Update(func(s *RunwayUpsert) {
-		s.SetHighNumberedRunwayEndLatitude(v)
+		s.AddLowRunwayDisplaced(v)
 	})
 }
 
-// AddHighNumberedRunwayEndLatitude adds v to the "high_numbered_runway_end_latitude" field.
-func (u *RunwayUpsertOne) AddHighNumberedRunwayEndLatitude(v float64) *RunwayUpsertOne {
+// UpdateLowRunwayDisplaced sets the "low_runway_displaced" field to the value that was provided on create.
+func (u *RunwayUpsertOne) UpdateLowRunwayDisplaced() *RunwayUpsertOne {
 	return u.Update(func(s *RunwayUpsert) {
-		s.AddHighNumberedRunwayEndLatitude(v)
+		s.UpdateLowRunwayDisplaced()
 	})
 }
 
-// UpdateHighNumberedRunwayEndLatitude sets the "high_numbered_runway_end_latitude" field to the value that was provided on create.
-func (u *RunwayUpsertOne) UpdateHighNumberedRunwayEndLatitude() *RunwayUpsertOne {
+// ClearLowRunwayDisplaced clears the value of the "low_runway_displaced" field.
+func (u *RunwayUpsertOne) ClearLowRunwayDisplaced() *RunwayUpsertOne {
 	return u.Update(func(s *RunwayUpsert) {
-		s.UpdateHighNumberedRunwayEndLatitude()
+		s.ClearLowRunwayDisplaced()
 	})
 }
 
-// SetHighNumberedRunwayEndLongitude sets the "high_numbered_runway_end_longitude" field.
-func (u *RunwayUpsertOne) SetHighNumberedRunwayEndLongitude(v float64) *RunwayUpsertOne {
+// SetHighRunwayIdentifier sets the "high_runway_identifier" field.
+func (u *RunwayUpsertOne) SetHighRunwayIdentifier(v string) *RunwayUpsertOne {
 	return u.Update(func(s *RunwayUpsert) {
-		s.SetHighNumberedRunwayEndLongitude(v)
+		s.SetHighRunwayIdentifier(v)
 	})
 }
 
-// AddHighNumberedRunwayEndLongitude adds v to the "high_numbered_runway_end_longitude" field.
-func (u *RunwayUpsertOne) AddHighNumberedRunwayEndLongitude(v float64) *RunwayUpsertOne {
+// UpdateHighRunwayIdentifier sets the "high_runway_identifier" field to the value that was provided on create.
+func (u *RunwayUpsertOne) UpdateHighRunwayIdentifier() *RunwayUpsertOne {
 	return u.Update(func(s *RunwayUpsert) {
-		s.AddHighNumberedRunwayEndLongitude(v)
+		s.UpdateHighRunwayIdentifier()
 	})
 }
 
-// UpdateHighNumberedRunwayEndLongitude sets the "high_numbered_runway_end_longitude" field to the value that was provided on create.
-func (u *RunwayUpsertOne) UpdateHighNumberedRunwayEndLongitude() *RunwayUpsertOne {
+// SetHighRunwayLatitude sets the "high_runway_latitude" field.
+func (u *RunwayUpsertOne) SetHighRunwayLatitude(v float64) *RunwayUpsertOne {
 	return u.Update(func(s *RunwayUpsert) {
-		s.UpdateHighNumberedRunwayEndLongitude()
+		s.SetHighRunwayLatitude(v)
 	})
 }
 
-// SetHighNumberedRunwayEndElevation sets the "high_numbered_runway_end_elevation" field.
-func (u *RunwayUpsertOne) SetHighNumberedRunwayEndElevation(v int) *RunwayUpsertOne {
+// AddHighRunwayLatitude adds v to the "high_runway_latitude" field.
+func (u *RunwayUpsertOne) AddHighRunwayLatitude(v float64) *RunwayUpsertOne {
 	return u.Update(func(s *RunwayUpsert) {
-		s.SetHighNumberedRunwayEndElevation(v)
+		s.AddHighRunwayLatitude(v)
 	})
 }
 
-// AddHighNumberedRunwayEndElevation adds v to the "high_numbered_runway_end_elevation" field.
-func (u *RunwayUpsertOne) AddHighNumberedRunwayEndElevation(v int) *RunwayUpsertOne {
+// UpdateHighRunwayLatitude sets the "high_runway_latitude" field to the value that was provided on create.
+func (u *RunwayUpsertOne) UpdateHighRunwayLatitude() *RunwayUpsertOne {
 	return u.Update(func(s *RunwayUpsert) {
-		s.AddHighNumberedRunwayEndElevation(v)
+		s.UpdateHighRunwayLatitude()
 	})
 }
 
-// UpdateHighNumberedRunwayEndElevation sets the "high_numbered_runway_end_elevation" field to the value that was provided on create.
-func (u *RunwayUpsertOne) UpdateHighNumberedRunwayEndElevation() *RunwayUpsertOne {
+// ClearHighRunwayLatitude clears the value of the "high_runway_latitude" field.
+func (u *RunwayUpsertOne) ClearHighRunwayLatitude() *RunwayUpsertOne {
 	return u.Update(func(s *RunwayUpsert) {
-		s.UpdateHighNumberedRunwayEndElevation()
+		s.ClearHighRunwayLatitude()
 	})
 }
 
-// SetHighNumberedRunwayEndHeading sets the "high_numbered_runway_end_heading" field.
-func (u *RunwayUpsertOne) SetHighNumberedRunwayEndHeading(v int) *RunwayUpsertOne {
+// SetHighRunwayLongitude sets the "high_runway_longitude" field.
+func (u *RunwayUpsertOne) SetHighRunwayLongitude(v float64) *RunwayUpsertOne {
 	return u.Update(func(s *RunwayUpsert) {
-		s.SetHighNumberedRunwayEndHeading(v)
+		s.SetHighRunwayLongitude(v)
 	})
 }
 
-// AddHighNumberedRunwayEndHeading adds v to the "high_numbered_runway_end_heading" field.
-func (u *RunwayUpsertOne) AddHighNumberedRunwayEndHeading(v int) *RunwayUpsertOne {
+// AddHighRunwayLongitude adds v to the "high_runway_longitude" field.
+func (u *RunwayUpsertOne) AddHighRunwayLongitude(v float64) *RunwayUpsertOne {
 	return u.Update(func(s *RunwayUpsert) {
-		s.AddHighNumberedRunwayEndHeading(v)
+		s.AddHighRunwayLongitude(v)
 	})
 }
 
-// UpdateHighNumberedRunwayEndHeading sets the "high_numbered_runway_end_heading" field to the value that was provided on create.
-func (u *RunwayUpsertOne) UpdateHighNumberedRunwayEndHeading() *RunwayUpsertOne {
+// UpdateHighRunwayLongitude sets the "high_runway_longitude" field to the value that was provided on create.
+func (u *RunwayUpsertOne) UpdateHighRunwayLongitude() *RunwayUpsertOne {
 	return u.Update(func(s *RunwayUpsert) {
-		s.UpdateHighNumberedRunwayEndHeading()
+		s.UpdateHighRunwayLongitude()
 	})
 }
 
-// SetHighNumberedRunwayEndDisplaced sets the "high_numbered_runway_end_displaced" field.
-func (u *RunwayUpsertOne) SetHighNumberedRunwayEndDisplaced(v int) *RunwayUpsertOne {
+// ClearHighRunwayLongitude clears the value of the "high_runway_longitude" field.
+func (u *RunwayUpsertOne) ClearHighRunwayLongitude() *RunwayUpsertOne {
 	return u.Update(func(s *RunwayUpsert) {
-		s.SetHighNumberedRunwayEndDisplaced(v)
+		s.ClearHighRunwayLongitude()
 	})
 }
 
-// AddHighNumberedRunwayEndDisplaced adds v to the "high_numbered_runway_end_displaced" field.
-func (u *RunwayUpsertOne) AddHighNumberedRunwayEndDisplaced(v int) *RunwayUpsertOne {
+// SetHighRunwayElevation sets the "high_runway_elevation" field.
+func (u *RunwayUpsertOne) SetHighRunwayElevation(v int) *RunwayUpsertOne {
 	return u.Update(func(s *RunwayUpsert) {
-		s.AddHighNumberedRunwayEndDisplaced(v)
+		s.SetHighRunwayElevation(v)
 	})
 }
 
-// UpdateHighNumberedRunwayEndDisplaced sets the "high_numbered_runway_end_displaced" field to the value that was provided on create.
-func (u *RunwayUpsertOne) UpdateHighNumberedRunwayEndDisplaced() *RunwayUpsertOne {
+// AddHighRunwayElevation adds v to the "high_runway_elevation" field.
+func (u *RunwayUpsertOne) AddHighRunwayElevation(v int) *RunwayUpsertOne {
 	return u.Update(func(s *RunwayUpsert) {
-		s.UpdateHighNumberedRunwayEndDisplaced()
+		s.AddHighRunwayElevation(v)
+	})
+}
+
+// UpdateHighRunwayElevation sets the "high_runway_elevation" field to the value that was provided on create.
+func (u *RunwayUpsertOne) UpdateHighRunwayElevation() *RunwayUpsertOne {
+	return u.Update(func(s *RunwayUpsert) {
+		s.UpdateHighRunwayElevation()
+	})
+}
+
+// ClearHighRunwayElevation clears the value of the "high_runway_elevation" field.
+func (u *RunwayUpsertOne) ClearHighRunwayElevation() *RunwayUpsertOne {
+	return u.Update(func(s *RunwayUpsert) {
+		s.ClearHighRunwayElevation()
+	})
+}
+
+// SetHighRunwayHeading sets the "high_runway_heading" field.
+func (u *RunwayUpsertOne) SetHighRunwayHeading(v int) *RunwayUpsertOne {
+	return u.Update(func(s *RunwayUpsert) {
+		s.SetHighRunwayHeading(v)
+	})
+}
+
+// AddHighRunwayHeading adds v to the "high_runway_heading" field.
+func (u *RunwayUpsertOne) AddHighRunwayHeading(v int) *RunwayUpsertOne {
+	return u.Update(func(s *RunwayUpsert) {
+		s.AddHighRunwayHeading(v)
+	})
+}
+
+// UpdateHighRunwayHeading sets the "high_runway_heading" field to the value that was provided on create.
+func (u *RunwayUpsertOne) UpdateHighRunwayHeading() *RunwayUpsertOne {
+	return u.Update(func(s *RunwayUpsert) {
+		s.UpdateHighRunwayHeading()
+	})
+}
+
+// ClearHighRunwayHeading clears the value of the "high_runway_heading" field.
+func (u *RunwayUpsertOne) ClearHighRunwayHeading() *RunwayUpsertOne {
+	return u.Update(func(s *RunwayUpsert) {
+		s.ClearHighRunwayHeading()
+	})
+}
+
+// SetHighRunwayDisplaced sets the "high_runway_displaced" field.
+func (u *RunwayUpsertOne) SetHighRunwayDisplaced(v int) *RunwayUpsertOne {
+	return u.Update(func(s *RunwayUpsert) {
+		s.SetHighRunwayDisplaced(v)
+	})
+}
+
+// AddHighRunwayDisplaced adds v to the "high_runway_displaced" field.
+func (u *RunwayUpsertOne) AddHighRunwayDisplaced(v int) *RunwayUpsertOne {
+	return u.Update(func(s *RunwayUpsert) {
+		s.AddHighRunwayDisplaced(v)
+	})
+}
+
+// UpdateHighRunwayDisplaced sets the "high_runway_displaced" field to the value that was provided on create.
+func (u *RunwayUpsertOne) UpdateHighRunwayDisplaced() *RunwayUpsertOne {
+	return u.Update(func(s *RunwayUpsert) {
+		s.UpdateHighRunwayDisplaced()
+	})
+}
+
+// ClearHighRunwayDisplaced clears the value of the "high_runway_displaced" field.
+func (u *RunwayUpsertOne) ClearHighRunwayDisplaced() *RunwayUpsertOne {
+	return u.Update(func(s *RunwayUpsert) {
+		s.ClearHighRunwayDisplaced()
 	})
 }
 
@@ -1575,7 +1624,6 @@ func (rcb *RunwayCreateBulk) ExecX(ctx context.Context) {
 //			SetHash(v+v).
 //		}).
 //		Exec(ctx)
-//
 func (rcb *RunwayCreateBulk) OnConflict(opts ...sql.ConflictOption) *RunwayUpsertBulk {
 	rcb.conflict = opts
 	return &RunwayUpsertBulk{
@@ -1589,7 +1637,6 @@ func (rcb *RunwayCreateBulk) OnConflict(opts ...sql.ConflictOption) *RunwayUpser
 //	client.Runway.Create().
 //		OnConflict(sql.ConflictColumns(columns...)).
 //		Exec(ctx)
-//
 func (rcb *RunwayCreateBulk) OnConflictColumns(columns ...string) *RunwayUpsertBulk {
 	rcb.conflict = append(rcb.conflict, sql.ConflictColumns(columns...))
 	return &RunwayUpsertBulk{
@@ -1614,17 +1661,12 @@ type RunwayUpsertBulk struct {
 //			}),
 //		).
 //		Exec(ctx)
-//
 func (u *RunwayUpsertBulk) UpdateNewValues() *RunwayUpsertBulk {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
 	u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(s *sql.UpdateSet) {
 		for _, b := range u.create.builders {
 			if _, exists := b.mutation.ID(); exists {
 				s.SetIgnore(runway.FieldID)
-				return
-			}
-			if _, exists := b.mutation.CreateTime(); exists {
-				s.SetIgnore(runway.FieldCreateTime)
 			}
 		}
 	}))
@@ -1637,7 +1679,6 @@ func (u *RunwayUpsertBulk) UpdateNewValues() *RunwayUpsertBulk {
 //	client.Runway.Create().
 //		OnConflict(sql.ResolveWithIgnore()).
 //		Exec(ctx)
-//
 func (u *RunwayUpsertBulk) Ignore() *RunwayUpsertBulk {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithIgnore())
 	return u
@@ -1660,16 +1701,9 @@ func (u *RunwayUpsertBulk) Update(set func(*RunwayUpsert)) *RunwayUpsertBulk {
 }
 
 // SetHash sets the "hash" field.
-func (u *RunwayUpsertBulk) SetHash(v uint64) *RunwayUpsertBulk {
+func (u *RunwayUpsertBulk) SetHash(v string) *RunwayUpsertBulk {
 	return u.Update(func(s *RunwayUpsert) {
 		s.SetHash(v)
-	})
-}
-
-// AddHash adds v to the "hash" field.
-func (u *RunwayUpsertBulk) AddHash(v uint64) *RunwayUpsertBulk {
-	return u.Update(func(s *RunwayUpsert) {
-		s.AddHash(v)
 	})
 }
 
@@ -1691,34 +1725,6 @@ func (u *RunwayUpsertBulk) SetImportFlag(v bool) *RunwayUpsertBulk {
 func (u *RunwayUpsertBulk) UpdateImportFlag() *RunwayUpsertBulk {
 	return u.Update(func(s *RunwayUpsert) {
 		s.UpdateImportFlag()
-	})
-}
-
-// SetCreateTime sets the "create_time" field.
-func (u *RunwayUpsertBulk) SetCreateTime(v time.Time) *RunwayUpsertBulk {
-	return u.Update(func(s *RunwayUpsert) {
-		s.SetCreateTime(v)
-	})
-}
-
-// UpdateCreateTime sets the "create_time" field to the value that was provided on create.
-func (u *RunwayUpsertBulk) UpdateCreateTime() *RunwayUpsertBulk {
-	return u.Update(func(s *RunwayUpsert) {
-		s.UpdateCreateTime()
-	})
-}
-
-// SetUpdateTime sets the "update_time" field.
-func (u *RunwayUpsertBulk) SetUpdateTime(v time.Time) *RunwayUpsertBulk {
-	return u.Update(func(s *RunwayUpsert) {
-		s.SetUpdateTime(v)
-	})
-}
-
-// UpdateUpdateTime sets the "update_time" field to the value that was provided on create.
-func (u *RunwayUpsertBulk) UpdateUpdateTime() *RunwayUpsertBulk {
-	return u.Update(func(s *RunwayUpsert) {
-		s.UpdateUpdateTime()
 	})
 }
 
@@ -1820,241 +1826,311 @@ func (u *RunwayUpsertBulk) UpdateClosed() *RunwayUpsertBulk {
 	})
 }
 
-// SetLowNumberedRunwayEndIdentifier sets the "low_numbered_runway_end_identifier" field.
-func (u *RunwayUpsertBulk) SetLowNumberedRunwayEndIdentifier(v string) *RunwayUpsertBulk {
+// SetLowRunwayIdentifier sets the "low_runway_identifier" field.
+func (u *RunwayUpsertBulk) SetLowRunwayIdentifier(v string) *RunwayUpsertBulk {
 	return u.Update(func(s *RunwayUpsert) {
-		s.SetLowNumberedRunwayEndIdentifier(v)
+		s.SetLowRunwayIdentifier(v)
 	})
 }
 
-// UpdateLowNumberedRunwayEndIdentifier sets the "low_numbered_runway_end_identifier" field to the value that was provided on create.
-func (u *RunwayUpsertBulk) UpdateLowNumberedRunwayEndIdentifier() *RunwayUpsertBulk {
+// UpdateLowRunwayIdentifier sets the "low_runway_identifier" field to the value that was provided on create.
+func (u *RunwayUpsertBulk) UpdateLowRunwayIdentifier() *RunwayUpsertBulk {
 	return u.Update(func(s *RunwayUpsert) {
-		s.UpdateLowNumberedRunwayEndIdentifier()
+		s.UpdateLowRunwayIdentifier()
 	})
 }
 
-// SetLowNumberedRunwayEndLatitude sets the "low_numbered_runway_end_latitude" field.
-func (u *RunwayUpsertBulk) SetLowNumberedRunwayEndLatitude(v float64) *RunwayUpsertBulk {
+// SetLowRunwayLatitude sets the "low_runway_latitude" field.
+func (u *RunwayUpsertBulk) SetLowRunwayLatitude(v float64) *RunwayUpsertBulk {
 	return u.Update(func(s *RunwayUpsert) {
-		s.SetLowNumberedRunwayEndLatitude(v)
+		s.SetLowRunwayLatitude(v)
 	})
 }
 
-// AddLowNumberedRunwayEndLatitude adds v to the "low_numbered_runway_end_latitude" field.
-func (u *RunwayUpsertBulk) AddLowNumberedRunwayEndLatitude(v float64) *RunwayUpsertBulk {
+// AddLowRunwayLatitude adds v to the "low_runway_latitude" field.
+func (u *RunwayUpsertBulk) AddLowRunwayLatitude(v float64) *RunwayUpsertBulk {
 	return u.Update(func(s *RunwayUpsert) {
-		s.AddLowNumberedRunwayEndLatitude(v)
+		s.AddLowRunwayLatitude(v)
 	})
 }
 
-// UpdateLowNumberedRunwayEndLatitude sets the "low_numbered_runway_end_latitude" field to the value that was provided on create.
-func (u *RunwayUpsertBulk) UpdateLowNumberedRunwayEndLatitude() *RunwayUpsertBulk {
+// UpdateLowRunwayLatitude sets the "low_runway_latitude" field to the value that was provided on create.
+func (u *RunwayUpsertBulk) UpdateLowRunwayLatitude() *RunwayUpsertBulk {
 	return u.Update(func(s *RunwayUpsert) {
-		s.UpdateLowNumberedRunwayEndLatitude()
+		s.UpdateLowRunwayLatitude()
 	})
 }
 
-// SetLowNumberedRunwayEndLongitude sets the "low_numbered_runway_end_longitude" field.
-func (u *RunwayUpsertBulk) SetLowNumberedRunwayEndLongitude(v float64) *RunwayUpsertBulk {
+// ClearLowRunwayLatitude clears the value of the "low_runway_latitude" field.
+func (u *RunwayUpsertBulk) ClearLowRunwayLatitude() *RunwayUpsertBulk {
 	return u.Update(func(s *RunwayUpsert) {
-		s.SetLowNumberedRunwayEndLongitude(v)
+		s.ClearLowRunwayLatitude()
 	})
 }
 
-// AddLowNumberedRunwayEndLongitude adds v to the "low_numbered_runway_end_longitude" field.
-func (u *RunwayUpsertBulk) AddLowNumberedRunwayEndLongitude(v float64) *RunwayUpsertBulk {
+// SetLowRunwayLongitude sets the "low_runway_longitude" field.
+func (u *RunwayUpsertBulk) SetLowRunwayLongitude(v float64) *RunwayUpsertBulk {
 	return u.Update(func(s *RunwayUpsert) {
-		s.AddLowNumberedRunwayEndLongitude(v)
+		s.SetLowRunwayLongitude(v)
 	})
 }
 
-// UpdateLowNumberedRunwayEndLongitude sets the "low_numbered_runway_end_longitude" field to the value that was provided on create.
-func (u *RunwayUpsertBulk) UpdateLowNumberedRunwayEndLongitude() *RunwayUpsertBulk {
+// AddLowRunwayLongitude adds v to the "low_runway_longitude" field.
+func (u *RunwayUpsertBulk) AddLowRunwayLongitude(v float64) *RunwayUpsertBulk {
 	return u.Update(func(s *RunwayUpsert) {
-		s.UpdateLowNumberedRunwayEndLongitude()
+		s.AddLowRunwayLongitude(v)
 	})
 }
 
-// SetLowNumberedRunwayEndElevation sets the "low_numbered_runway_end_elevation" field.
-func (u *RunwayUpsertBulk) SetLowNumberedRunwayEndElevation(v int) *RunwayUpsertBulk {
+// UpdateLowRunwayLongitude sets the "low_runway_longitude" field to the value that was provided on create.
+func (u *RunwayUpsertBulk) UpdateLowRunwayLongitude() *RunwayUpsertBulk {
 	return u.Update(func(s *RunwayUpsert) {
-		s.SetLowNumberedRunwayEndElevation(v)
+		s.UpdateLowRunwayLongitude()
 	})
 }
 
-// AddLowNumberedRunwayEndElevation adds v to the "low_numbered_runway_end_elevation" field.
-func (u *RunwayUpsertBulk) AddLowNumberedRunwayEndElevation(v int) *RunwayUpsertBulk {
+// ClearLowRunwayLongitude clears the value of the "low_runway_longitude" field.
+func (u *RunwayUpsertBulk) ClearLowRunwayLongitude() *RunwayUpsertBulk {
 	return u.Update(func(s *RunwayUpsert) {
-		s.AddLowNumberedRunwayEndElevation(v)
+		s.ClearLowRunwayLongitude()
 	})
 }
 
-// UpdateLowNumberedRunwayEndElevation sets the "low_numbered_runway_end_elevation" field to the value that was provided on create.
-func (u *RunwayUpsertBulk) UpdateLowNumberedRunwayEndElevation() *RunwayUpsertBulk {
+// SetLowRunwayElevation sets the "low_runway_elevation" field.
+func (u *RunwayUpsertBulk) SetLowRunwayElevation(v int) *RunwayUpsertBulk {
 	return u.Update(func(s *RunwayUpsert) {
-		s.UpdateLowNumberedRunwayEndElevation()
+		s.SetLowRunwayElevation(v)
 	})
 }
 
-// SetLowNumberedRunwayEndHeading sets the "low_numbered_runway_end_heading" field.
-func (u *RunwayUpsertBulk) SetLowNumberedRunwayEndHeading(v int) *RunwayUpsertBulk {
+// AddLowRunwayElevation adds v to the "low_runway_elevation" field.
+func (u *RunwayUpsertBulk) AddLowRunwayElevation(v int) *RunwayUpsertBulk {
 	return u.Update(func(s *RunwayUpsert) {
-		s.SetLowNumberedRunwayEndHeading(v)
+		s.AddLowRunwayElevation(v)
 	})
 }
 
-// AddLowNumberedRunwayEndHeading adds v to the "low_numbered_runway_end_heading" field.
-func (u *RunwayUpsertBulk) AddLowNumberedRunwayEndHeading(v int) *RunwayUpsertBulk {
+// UpdateLowRunwayElevation sets the "low_runway_elevation" field to the value that was provided on create.
+func (u *RunwayUpsertBulk) UpdateLowRunwayElevation() *RunwayUpsertBulk {
 	return u.Update(func(s *RunwayUpsert) {
-		s.AddLowNumberedRunwayEndHeading(v)
+		s.UpdateLowRunwayElevation()
 	})
 }
 
-// UpdateLowNumberedRunwayEndHeading sets the "low_numbered_runway_end_heading" field to the value that was provided on create.
-func (u *RunwayUpsertBulk) UpdateLowNumberedRunwayEndHeading() *RunwayUpsertBulk {
+// ClearLowRunwayElevation clears the value of the "low_runway_elevation" field.
+func (u *RunwayUpsertBulk) ClearLowRunwayElevation() *RunwayUpsertBulk {
 	return u.Update(func(s *RunwayUpsert) {
-		s.UpdateLowNumberedRunwayEndHeading()
+		s.ClearLowRunwayElevation()
 	})
 }
 
-// SetLowNumberedRunwayEndDisplaced sets the "low_numbered_runway_end_displaced" field.
-func (u *RunwayUpsertBulk) SetLowNumberedRunwayEndDisplaced(v int) *RunwayUpsertBulk {
+// SetLowRunwayHeading sets the "low_runway_heading" field.
+func (u *RunwayUpsertBulk) SetLowRunwayHeading(v int) *RunwayUpsertBulk {
 	return u.Update(func(s *RunwayUpsert) {
-		s.SetLowNumberedRunwayEndDisplaced(v)
+		s.SetLowRunwayHeading(v)
 	})
 }
 
-// AddLowNumberedRunwayEndDisplaced adds v to the "low_numbered_runway_end_displaced" field.
-func (u *RunwayUpsertBulk) AddLowNumberedRunwayEndDisplaced(v int) *RunwayUpsertBulk {
+// AddLowRunwayHeading adds v to the "low_runway_heading" field.
+func (u *RunwayUpsertBulk) AddLowRunwayHeading(v int) *RunwayUpsertBulk {
 	return u.Update(func(s *RunwayUpsert) {
-		s.AddLowNumberedRunwayEndDisplaced(v)
+		s.AddLowRunwayHeading(v)
 	})
 }
 
-// UpdateLowNumberedRunwayEndDisplaced sets the "low_numbered_runway_end_displaced" field to the value that was provided on create.
-func (u *RunwayUpsertBulk) UpdateLowNumberedRunwayEndDisplaced() *RunwayUpsertBulk {
+// UpdateLowRunwayHeading sets the "low_runway_heading" field to the value that was provided on create.
+func (u *RunwayUpsertBulk) UpdateLowRunwayHeading() *RunwayUpsertBulk {
 	return u.Update(func(s *RunwayUpsert) {
-		s.UpdateLowNumberedRunwayEndDisplaced()
+		s.UpdateLowRunwayHeading()
 	})
 }
 
-// SetHighNumberedRunwayEndIdentifier sets the "high_numbered_runway_end_identifier" field.
-func (u *RunwayUpsertBulk) SetHighNumberedRunwayEndIdentifier(v string) *RunwayUpsertBulk {
+// ClearLowRunwayHeading clears the value of the "low_runway_heading" field.
+func (u *RunwayUpsertBulk) ClearLowRunwayHeading() *RunwayUpsertBulk {
 	return u.Update(func(s *RunwayUpsert) {
-		s.SetHighNumberedRunwayEndIdentifier(v)
+		s.ClearLowRunwayHeading()
 	})
 }
 
-// UpdateHighNumberedRunwayEndIdentifier sets the "high_numbered_runway_end_identifier" field to the value that was provided on create.
-func (u *RunwayUpsertBulk) UpdateHighNumberedRunwayEndIdentifier() *RunwayUpsertBulk {
+// SetLowRunwayDisplaced sets the "low_runway_displaced" field.
+func (u *RunwayUpsertBulk) SetLowRunwayDisplaced(v int) *RunwayUpsertBulk {
 	return u.Update(func(s *RunwayUpsert) {
-		s.UpdateHighNumberedRunwayEndIdentifier()
+		s.SetLowRunwayDisplaced(v)
 	})
 }
 
-// SetHighNumberedRunwayEndLatitude sets the "high_numbered_runway_end_latitude" field.
-func (u *RunwayUpsertBulk) SetHighNumberedRunwayEndLatitude(v float64) *RunwayUpsertBulk {
+// AddLowRunwayDisplaced adds v to the "low_runway_displaced" field.
+func (u *RunwayUpsertBulk) AddLowRunwayDisplaced(v int) *RunwayUpsertBulk {
 	return u.Update(func(s *RunwayUpsert) {
-		s.SetHighNumberedRunwayEndLatitude(v)
+		s.AddLowRunwayDisplaced(v)
 	})
 }
 
-// AddHighNumberedRunwayEndLatitude adds v to the "high_numbered_runway_end_latitude" field.
-func (u *RunwayUpsertBulk) AddHighNumberedRunwayEndLatitude(v float64) *RunwayUpsertBulk {
+// UpdateLowRunwayDisplaced sets the "low_runway_displaced" field to the value that was provided on create.
+func (u *RunwayUpsertBulk) UpdateLowRunwayDisplaced() *RunwayUpsertBulk {
 	return u.Update(func(s *RunwayUpsert) {
-		s.AddHighNumberedRunwayEndLatitude(v)
+		s.UpdateLowRunwayDisplaced()
 	})
 }
 
-// UpdateHighNumberedRunwayEndLatitude sets the "high_numbered_runway_end_latitude" field to the value that was provided on create.
-func (u *RunwayUpsertBulk) UpdateHighNumberedRunwayEndLatitude() *RunwayUpsertBulk {
+// ClearLowRunwayDisplaced clears the value of the "low_runway_displaced" field.
+func (u *RunwayUpsertBulk) ClearLowRunwayDisplaced() *RunwayUpsertBulk {
 	return u.Update(func(s *RunwayUpsert) {
-		s.UpdateHighNumberedRunwayEndLatitude()
+		s.ClearLowRunwayDisplaced()
 	})
 }
 
-// SetHighNumberedRunwayEndLongitude sets the "high_numbered_runway_end_longitude" field.
-func (u *RunwayUpsertBulk) SetHighNumberedRunwayEndLongitude(v float64) *RunwayUpsertBulk {
+// SetHighRunwayIdentifier sets the "high_runway_identifier" field.
+func (u *RunwayUpsertBulk) SetHighRunwayIdentifier(v string) *RunwayUpsertBulk {
 	return u.Update(func(s *RunwayUpsert) {
-		s.SetHighNumberedRunwayEndLongitude(v)
+		s.SetHighRunwayIdentifier(v)
 	})
 }
 
-// AddHighNumberedRunwayEndLongitude adds v to the "high_numbered_runway_end_longitude" field.
-func (u *RunwayUpsertBulk) AddHighNumberedRunwayEndLongitude(v float64) *RunwayUpsertBulk {
+// UpdateHighRunwayIdentifier sets the "high_runway_identifier" field to the value that was provided on create.
+func (u *RunwayUpsertBulk) UpdateHighRunwayIdentifier() *RunwayUpsertBulk {
 	return u.Update(func(s *RunwayUpsert) {
-		s.AddHighNumberedRunwayEndLongitude(v)
+		s.UpdateHighRunwayIdentifier()
 	})
 }
 
-// UpdateHighNumberedRunwayEndLongitude sets the "high_numbered_runway_end_longitude" field to the value that was provided on create.
-func (u *RunwayUpsertBulk) UpdateHighNumberedRunwayEndLongitude() *RunwayUpsertBulk {
+// SetHighRunwayLatitude sets the "high_runway_latitude" field.
+func (u *RunwayUpsertBulk) SetHighRunwayLatitude(v float64) *RunwayUpsertBulk {
 	return u.Update(func(s *RunwayUpsert) {
-		s.UpdateHighNumberedRunwayEndLongitude()
+		s.SetHighRunwayLatitude(v)
 	})
 }
 
-// SetHighNumberedRunwayEndElevation sets the "high_numbered_runway_end_elevation" field.
-func (u *RunwayUpsertBulk) SetHighNumberedRunwayEndElevation(v int) *RunwayUpsertBulk {
+// AddHighRunwayLatitude adds v to the "high_runway_latitude" field.
+func (u *RunwayUpsertBulk) AddHighRunwayLatitude(v float64) *RunwayUpsertBulk {
 	return u.Update(func(s *RunwayUpsert) {
-		s.SetHighNumberedRunwayEndElevation(v)
+		s.AddHighRunwayLatitude(v)
 	})
 }
 
-// AddHighNumberedRunwayEndElevation adds v to the "high_numbered_runway_end_elevation" field.
-func (u *RunwayUpsertBulk) AddHighNumberedRunwayEndElevation(v int) *RunwayUpsertBulk {
+// UpdateHighRunwayLatitude sets the "high_runway_latitude" field to the value that was provided on create.
+func (u *RunwayUpsertBulk) UpdateHighRunwayLatitude() *RunwayUpsertBulk {
 	return u.Update(func(s *RunwayUpsert) {
-		s.AddHighNumberedRunwayEndElevation(v)
+		s.UpdateHighRunwayLatitude()
 	})
 }
 
-// UpdateHighNumberedRunwayEndElevation sets the "high_numbered_runway_end_elevation" field to the value that was provided on create.
-func (u *RunwayUpsertBulk) UpdateHighNumberedRunwayEndElevation() *RunwayUpsertBulk {
+// ClearHighRunwayLatitude clears the value of the "high_runway_latitude" field.
+func (u *RunwayUpsertBulk) ClearHighRunwayLatitude() *RunwayUpsertBulk {
 	return u.Update(func(s *RunwayUpsert) {
-		s.UpdateHighNumberedRunwayEndElevation()
+		s.ClearHighRunwayLatitude()
 	})
 }
 
-// SetHighNumberedRunwayEndHeading sets the "high_numbered_runway_end_heading" field.
-func (u *RunwayUpsertBulk) SetHighNumberedRunwayEndHeading(v int) *RunwayUpsertBulk {
+// SetHighRunwayLongitude sets the "high_runway_longitude" field.
+func (u *RunwayUpsertBulk) SetHighRunwayLongitude(v float64) *RunwayUpsertBulk {
 	return u.Update(func(s *RunwayUpsert) {
-		s.SetHighNumberedRunwayEndHeading(v)
+		s.SetHighRunwayLongitude(v)
 	})
 }
 
-// AddHighNumberedRunwayEndHeading adds v to the "high_numbered_runway_end_heading" field.
-func (u *RunwayUpsertBulk) AddHighNumberedRunwayEndHeading(v int) *RunwayUpsertBulk {
+// AddHighRunwayLongitude adds v to the "high_runway_longitude" field.
+func (u *RunwayUpsertBulk) AddHighRunwayLongitude(v float64) *RunwayUpsertBulk {
 	return u.Update(func(s *RunwayUpsert) {
-		s.AddHighNumberedRunwayEndHeading(v)
+		s.AddHighRunwayLongitude(v)
 	})
 }
 
-// UpdateHighNumberedRunwayEndHeading sets the "high_numbered_runway_end_heading" field to the value that was provided on create.
-func (u *RunwayUpsertBulk) UpdateHighNumberedRunwayEndHeading() *RunwayUpsertBulk {
+// UpdateHighRunwayLongitude sets the "high_runway_longitude" field to the value that was provided on create.
+func (u *RunwayUpsertBulk) UpdateHighRunwayLongitude() *RunwayUpsertBulk {
 	return u.Update(func(s *RunwayUpsert) {
-		s.UpdateHighNumberedRunwayEndHeading()
+		s.UpdateHighRunwayLongitude()
 	})
 }
 
-// SetHighNumberedRunwayEndDisplaced sets the "high_numbered_runway_end_displaced" field.
-func (u *RunwayUpsertBulk) SetHighNumberedRunwayEndDisplaced(v int) *RunwayUpsertBulk {
+// ClearHighRunwayLongitude clears the value of the "high_runway_longitude" field.
+func (u *RunwayUpsertBulk) ClearHighRunwayLongitude() *RunwayUpsertBulk {
 	return u.Update(func(s *RunwayUpsert) {
-		s.SetHighNumberedRunwayEndDisplaced(v)
+		s.ClearHighRunwayLongitude()
 	})
 }
 
-// AddHighNumberedRunwayEndDisplaced adds v to the "high_numbered_runway_end_displaced" field.
-func (u *RunwayUpsertBulk) AddHighNumberedRunwayEndDisplaced(v int) *RunwayUpsertBulk {
+// SetHighRunwayElevation sets the "high_runway_elevation" field.
+func (u *RunwayUpsertBulk) SetHighRunwayElevation(v int) *RunwayUpsertBulk {
 	return u.Update(func(s *RunwayUpsert) {
-		s.AddHighNumberedRunwayEndDisplaced(v)
+		s.SetHighRunwayElevation(v)
 	})
 }
 
-// UpdateHighNumberedRunwayEndDisplaced sets the "high_numbered_runway_end_displaced" field to the value that was provided on create.
-func (u *RunwayUpsertBulk) UpdateHighNumberedRunwayEndDisplaced() *RunwayUpsertBulk {
+// AddHighRunwayElevation adds v to the "high_runway_elevation" field.
+func (u *RunwayUpsertBulk) AddHighRunwayElevation(v int) *RunwayUpsertBulk {
 	return u.Update(func(s *RunwayUpsert) {
-		s.UpdateHighNumberedRunwayEndDisplaced()
+		s.AddHighRunwayElevation(v)
+	})
+}
+
+// UpdateHighRunwayElevation sets the "high_runway_elevation" field to the value that was provided on create.
+func (u *RunwayUpsertBulk) UpdateHighRunwayElevation() *RunwayUpsertBulk {
+	return u.Update(func(s *RunwayUpsert) {
+		s.UpdateHighRunwayElevation()
+	})
+}
+
+// ClearHighRunwayElevation clears the value of the "high_runway_elevation" field.
+func (u *RunwayUpsertBulk) ClearHighRunwayElevation() *RunwayUpsertBulk {
+	return u.Update(func(s *RunwayUpsert) {
+		s.ClearHighRunwayElevation()
+	})
+}
+
+// SetHighRunwayHeading sets the "high_runway_heading" field.
+func (u *RunwayUpsertBulk) SetHighRunwayHeading(v int) *RunwayUpsertBulk {
+	return u.Update(func(s *RunwayUpsert) {
+		s.SetHighRunwayHeading(v)
+	})
+}
+
+// AddHighRunwayHeading adds v to the "high_runway_heading" field.
+func (u *RunwayUpsertBulk) AddHighRunwayHeading(v int) *RunwayUpsertBulk {
+	return u.Update(func(s *RunwayUpsert) {
+		s.AddHighRunwayHeading(v)
+	})
+}
+
+// UpdateHighRunwayHeading sets the "high_runway_heading" field to the value that was provided on create.
+func (u *RunwayUpsertBulk) UpdateHighRunwayHeading() *RunwayUpsertBulk {
+	return u.Update(func(s *RunwayUpsert) {
+		s.UpdateHighRunwayHeading()
+	})
+}
+
+// ClearHighRunwayHeading clears the value of the "high_runway_heading" field.
+func (u *RunwayUpsertBulk) ClearHighRunwayHeading() *RunwayUpsertBulk {
+	return u.Update(func(s *RunwayUpsert) {
+		s.ClearHighRunwayHeading()
+	})
+}
+
+// SetHighRunwayDisplaced sets the "high_runway_displaced" field.
+func (u *RunwayUpsertBulk) SetHighRunwayDisplaced(v int) *RunwayUpsertBulk {
+	return u.Update(func(s *RunwayUpsert) {
+		s.SetHighRunwayDisplaced(v)
+	})
+}
+
+// AddHighRunwayDisplaced adds v to the "high_runway_displaced" field.
+func (u *RunwayUpsertBulk) AddHighRunwayDisplaced(v int) *RunwayUpsertBulk {
+	return u.Update(func(s *RunwayUpsert) {
+		s.AddHighRunwayDisplaced(v)
+	})
+}
+
+// UpdateHighRunwayDisplaced sets the "high_runway_displaced" field to the value that was provided on create.
+func (u *RunwayUpsertBulk) UpdateHighRunwayDisplaced() *RunwayUpsertBulk {
+	return u.Update(func(s *RunwayUpsert) {
+		s.UpdateHighRunwayDisplaced()
+	})
+}
+
+// ClearHighRunwayDisplaced clears the value of the "high_runway_displaced" field.
+func (u *RunwayUpsertBulk) ClearHighRunwayDisplaced() *RunwayUpsertBulk {
+	return u.Update(func(s *RunwayUpsert) {
+		s.ClearHighRunwayDisplaced()
 	})
 }
 

@@ -6,7 +6,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"time"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
@@ -24,8 +23,8 @@ type AirportCreate struct {
 }
 
 // SetHash sets the "hash" field.
-func (ac *AirportCreate) SetHash(u uint64) *AirportCreate {
-	ac.mutation.SetHash(u)
+func (ac *AirportCreate) SetHash(s string) *AirportCreate {
+	ac.mutation.SetHash(s)
 	return ac
 }
 
@@ -43,34 +42,6 @@ func (ac *AirportCreate) SetNillableImportFlag(b *bool) *AirportCreate {
 	return ac
 }
 
-// SetCreateTime sets the "create_time" field.
-func (ac *AirportCreate) SetCreateTime(t time.Time) *AirportCreate {
-	ac.mutation.SetCreateTime(t)
-	return ac
-}
-
-// SetNillableCreateTime sets the "create_time" field if the given value is not nil.
-func (ac *AirportCreate) SetNillableCreateTime(t *time.Time) *AirportCreate {
-	if t != nil {
-		ac.SetCreateTime(*t)
-	}
-	return ac
-}
-
-// SetUpdateTime sets the "update_time" field.
-func (ac *AirportCreate) SetUpdateTime(t time.Time) *AirportCreate {
-	ac.mutation.SetUpdateTime(t)
-	return ac
-}
-
-// SetNillableUpdateTime sets the "update_time" field if the given value is not nil.
-func (ac *AirportCreate) SetNillableUpdateTime(t *time.Time) *AirportCreate {
-	if t != nil {
-		ac.SetUpdateTime(*t)
-	}
-	return ac
-}
-
 // SetIdentifier sets the "identifier" field.
 func (ac *AirportCreate) SetIdentifier(s string) *AirportCreate {
 	ac.mutation.SetIdentifier(s)
@@ -78,8 +49,8 @@ func (ac *AirportCreate) SetIdentifier(s string) *AirportCreate {
 }
 
 // SetType sets the "type" field.
-func (ac *AirportCreate) SetType(s string) *AirportCreate {
-	ac.mutation.SetType(s)
+func (ac *AirportCreate) SetType(a airport.Type) *AirportCreate {
+	ac.mutation.SetType(a)
 	return ac
 }
 
@@ -104,6 +75,14 @@ func (ac *AirportCreate) SetLongitude(f float64) *AirportCreate {
 // SetElevation sets the "elevation" field.
 func (ac *AirportCreate) SetElevation(i int) *AirportCreate {
 	ac.mutation.SetElevation(i)
+	return ac
+}
+
+// SetNillableElevation sets the "elevation" field if the given value is not nil.
+func (ac *AirportCreate) SetNillableElevation(i *int) *AirportCreate {
+	if i != nil {
+		ac.SetElevation(*i)
+	}
 	return ac
 }
 
@@ -143,9 +122,25 @@ func (ac *AirportCreate) SetGpsCode(s string) *AirportCreate {
 	return ac
 }
 
+// SetNillableGpsCode sets the "gps_code" field if the given value is not nil.
+func (ac *AirportCreate) SetNillableGpsCode(s *string) *AirportCreate {
+	if s != nil {
+		ac.SetGpsCode(*s)
+	}
+	return ac
+}
+
 // SetIataCode sets the "iata_code" field.
 func (ac *AirportCreate) SetIataCode(s string) *AirportCreate {
 	ac.mutation.SetIataCode(s)
+	return ac
+}
+
+// SetNillableIataCode sets the "iata_code" field if the given value is not nil.
+func (ac *AirportCreate) SetNillableIataCode(s *string) *AirportCreate {
+	if s != nil {
+		ac.SetIataCode(*s)
+	}
 	return ac
 }
 
@@ -155,15 +150,39 @@ func (ac *AirportCreate) SetLocalCode(s string) *AirportCreate {
 	return ac
 }
 
+// SetNillableLocalCode sets the "local_code" field if the given value is not nil.
+func (ac *AirportCreate) SetNillableLocalCode(s *string) *AirportCreate {
+	if s != nil {
+		ac.SetLocalCode(*s)
+	}
+	return ac
+}
+
 // SetWebsite sets the "website" field.
 func (ac *AirportCreate) SetWebsite(s string) *AirportCreate {
 	ac.mutation.SetWebsite(s)
 	return ac
 }
 
+// SetNillableWebsite sets the "website" field if the given value is not nil.
+func (ac *AirportCreate) SetNillableWebsite(s *string) *AirportCreate {
+	if s != nil {
+		ac.SetWebsite(*s)
+	}
+	return ac
+}
+
 // SetWikipedia sets the "wikipedia" field.
 func (ac *AirportCreate) SetWikipedia(s string) *AirportCreate {
 	ac.mutation.SetWikipedia(s)
+	return ac
+}
+
+// SetNillableWikipedia sets the "wikipedia" field if the given value is not nil.
+func (ac *AirportCreate) SetNillableWikipedia(s *string) *AirportCreate {
+	if s != nil {
+		ac.SetWikipedia(*s)
+	}
 	return ac
 }
 
@@ -275,14 +294,6 @@ func (ac *AirportCreate) defaults() {
 		v := airport.DefaultImportFlag
 		ac.mutation.SetImportFlag(v)
 	}
-	if _, ok := ac.mutation.CreateTime(); !ok {
-		v := airport.DefaultCreateTime()
-		ac.mutation.SetCreateTime(v)
-	}
-	if _, ok := ac.mutation.UpdateTime(); !ok {
-		v := airport.DefaultUpdateTime()
-		ac.mutation.SetUpdateTime(v)
-	}
 }
 
 // check runs all checks and user-defined validators on the builder.
@@ -293,17 +304,16 @@ func (ac *AirportCreate) check() error {
 	if _, ok := ac.mutation.ImportFlag(); !ok {
 		return &ValidationError{Name: "import_flag", err: errors.New(`ent: missing required field "Airport.import_flag"`)}
 	}
-	if _, ok := ac.mutation.CreateTime(); !ok {
-		return &ValidationError{Name: "create_time", err: errors.New(`ent: missing required field "Airport.create_time"`)}
-	}
-	if _, ok := ac.mutation.UpdateTime(); !ok {
-		return &ValidationError{Name: "update_time", err: errors.New(`ent: missing required field "Airport.update_time"`)}
-	}
 	if _, ok := ac.mutation.Identifier(); !ok {
 		return &ValidationError{Name: "identifier", err: errors.New(`ent: missing required field "Airport.identifier"`)}
 	}
 	if _, ok := ac.mutation.GetType(); !ok {
 		return &ValidationError{Name: "type", err: errors.New(`ent: missing required field "Airport.type"`)}
+	}
+	if v, ok := ac.mutation.GetType(); ok {
+		if err := airport.TypeValidator(v); err != nil {
+			return &ValidationError{Name: "type", err: fmt.Errorf(`ent: validator failed for field "Airport.type": %w`, err)}
+		}
 	}
 	if _, ok := ac.mutation.Name(); !ok {
 		return &ValidationError{Name: "name", err: errors.New(`ent: missing required field "Airport.name"`)}
@@ -313,9 +323,6 @@ func (ac *AirportCreate) check() error {
 	}
 	if _, ok := ac.mutation.Longitude(); !ok {
 		return &ValidationError{Name: "longitude", err: errors.New(`ent: missing required field "Airport.longitude"`)}
-	}
-	if _, ok := ac.mutation.Elevation(); !ok {
-		return &ValidationError{Name: "elevation", err: errors.New(`ent: missing required field "Airport.elevation"`)}
 	}
 	if _, ok := ac.mutation.Continent(); !ok {
 		return &ValidationError{Name: "continent", err: errors.New(`ent: missing required field "Airport.continent"`)}
@@ -332,23 +339,11 @@ func (ac *AirportCreate) check() error {
 	if _, ok := ac.mutation.ScheduledService(); !ok {
 		return &ValidationError{Name: "scheduled_service", err: errors.New(`ent: missing required field "Airport.scheduled_service"`)}
 	}
-	if _, ok := ac.mutation.GpsCode(); !ok {
-		return &ValidationError{Name: "gps_code", err: errors.New(`ent: missing required field "Airport.gps_code"`)}
-	}
-	if _, ok := ac.mutation.IataCode(); !ok {
-		return &ValidationError{Name: "iata_code", err: errors.New(`ent: missing required field "Airport.iata_code"`)}
-	}
-	if _, ok := ac.mutation.LocalCode(); !ok {
-		return &ValidationError{Name: "local_code", err: errors.New(`ent: missing required field "Airport.local_code"`)}
-	}
-	if _, ok := ac.mutation.Website(); !ok {
-		return &ValidationError{Name: "website", err: errors.New(`ent: missing required field "Airport.website"`)}
-	}
-	if _, ok := ac.mutation.Wikipedia(); !ok {
-		return &ValidationError{Name: "wikipedia", err: errors.New(`ent: missing required field "Airport.wikipedia"`)}
-	}
 	if _, ok := ac.mutation.Keywords(); !ok {
 		return &ValidationError{Name: "keywords", err: errors.New(`ent: missing required field "Airport.keywords"`)}
+	}
+	if len(ac.mutation.RunwaysIDs()) == 0 {
+		return &ValidationError{Name: "runways", err: errors.New(`ent: missing required edge "Airport.runways"`)}
 	}
 	return nil
 }
@@ -386,7 +381,7 @@ func (ac *AirportCreate) createSpec() (*Airport, *sqlgraph.CreateSpec) {
 	}
 	if value, ok := ac.mutation.Hash(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeUint64,
+			Type:   field.TypeString,
 			Value:  value,
 			Column: airport.FieldHash,
 		})
@@ -400,22 +395,6 @@ func (ac *AirportCreate) createSpec() (*Airport, *sqlgraph.CreateSpec) {
 		})
 		_node.ImportFlag = value
 	}
-	if value, ok := ac.mutation.CreateTime(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Value:  value,
-			Column: airport.FieldCreateTime,
-		})
-		_node.CreateTime = value
-	}
-	if value, ok := ac.mutation.UpdateTime(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Value:  value,
-			Column: airport.FieldUpdateTime,
-		})
-		_node.UpdateTime = value
-	}
 	if value, ok := ac.mutation.Identifier(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
@@ -426,7 +405,7 @@ func (ac *AirportCreate) createSpec() (*Airport, *sqlgraph.CreateSpec) {
 	}
 	if value, ok := ac.mutation.GetType(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
+			Type:   field.TypeEnum,
 			Value:  value,
 			Column: airport.FieldType,
 		})
@@ -462,7 +441,7 @@ func (ac *AirportCreate) createSpec() (*Airport, *sqlgraph.CreateSpec) {
 			Value:  value,
 			Column: airport.FieldElevation,
 		})
-		_node.Elevation = value
+		_node.Elevation = &value
 	}
 	if value, ok := ac.mutation.Continent(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
@@ -510,7 +489,7 @@ func (ac *AirportCreate) createSpec() (*Airport, *sqlgraph.CreateSpec) {
 			Value:  value,
 			Column: airport.FieldGpsCode,
 		})
-		_node.GpsCode = value
+		_node.GpsCode = &value
 	}
 	if value, ok := ac.mutation.IataCode(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
@@ -518,7 +497,7 @@ func (ac *AirportCreate) createSpec() (*Airport, *sqlgraph.CreateSpec) {
 			Value:  value,
 			Column: airport.FieldIataCode,
 		})
-		_node.IataCode = value
+		_node.IataCode = &value
 	}
 	if value, ok := ac.mutation.LocalCode(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
@@ -526,7 +505,7 @@ func (ac *AirportCreate) createSpec() (*Airport, *sqlgraph.CreateSpec) {
 			Value:  value,
 			Column: airport.FieldLocalCode,
 		})
-		_node.LocalCode = value
+		_node.LocalCode = &value
 	}
 	if value, ok := ac.mutation.Website(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
@@ -534,7 +513,7 @@ func (ac *AirportCreate) createSpec() (*Airport, *sqlgraph.CreateSpec) {
 			Value:  value,
 			Column: airport.FieldWebsite,
 		})
-		_node.Website = value
+		_node.Website = &value
 	}
 	if value, ok := ac.mutation.Wikipedia(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
@@ -542,7 +521,7 @@ func (ac *AirportCreate) createSpec() (*Airport, *sqlgraph.CreateSpec) {
 			Value:  value,
 			Column: airport.FieldWikipedia,
 		})
-		_node.Wikipedia = value
+		_node.Wikipedia = &value
 	}
 	if value, ok := ac.mutation.Keywords(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
@@ -590,7 +569,6 @@ func (ac *AirportCreate) createSpec() (*Airport, *sqlgraph.CreateSpec) {
 //			SetHash(v+v).
 //		}).
 //		Exec(ctx)
-//
 func (ac *AirportCreate) OnConflict(opts ...sql.ConflictOption) *AirportUpsertOne {
 	ac.conflict = opts
 	return &AirportUpsertOne{
@@ -604,7 +582,6 @@ func (ac *AirportCreate) OnConflict(opts ...sql.ConflictOption) *AirportUpsertOn
 //	client.Airport.Create().
 //		OnConflict(sql.ConflictColumns(columns...)).
 //		Exec(ctx)
-//
 func (ac *AirportCreate) OnConflictColumns(columns ...string) *AirportUpsertOne {
 	ac.conflict = append(ac.conflict, sql.ConflictColumns(columns...))
 	return &AirportUpsertOne{
@@ -626,7 +603,7 @@ type (
 )
 
 // SetHash sets the "hash" field.
-func (u *AirportUpsert) SetHash(v uint64) *AirportUpsert {
+func (u *AirportUpsert) SetHash(v string) *AirportUpsert {
 	u.Set(airport.FieldHash, v)
 	return u
 }
@@ -634,12 +611,6 @@ func (u *AirportUpsert) SetHash(v uint64) *AirportUpsert {
 // UpdateHash sets the "hash" field to the value that was provided on create.
 func (u *AirportUpsert) UpdateHash() *AirportUpsert {
 	u.SetExcluded(airport.FieldHash)
-	return u
-}
-
-// AddHash adds v to the "hash" field.
-func (u *AirportUpsert) AddHash(v uint64) *AirportUpsert {
-	u.Add(airport.FieldHash, v)
 	return u
 }
 
@@ -652,30 +623,6 @@ func (u *AirportUpsert) SetImportFlag(v bool) *AirportUpsert {
 // UpdateImportFlag sets the "import_flag" field to the value that was provided on create.
 func (u *AirportUpsert) UpdateImportFlag() *AirportUpsert {
 	u.SetExcluded(airport.FieldImportFlag)
-	return u
-}
-
-// SetCreateTime sets the "create_time" field.
-func (u *AirportUpsert) SetCreateTime(v time.Time) *AirportUpsert {
-	u.Set(airport.FieldCreateTime, v)
-	return u
-}
-
-// UpdateCreateTime sets the "create_time" field to the value that was provided on create.
-func (u *AirportUpsert) UpdateCreateTime() *AirportUpsert {
-	u.SetExcluded(airport.FieldCreateTime)
-	return u
-}
-
-// SetUpdateTime sets the "update_time" field.
-func (u *AirportUpsert) SetUpdateTime(v time.Time) *AirportUpsert {
-	u.Set(airport.FieldUpdateTime, v)
-	return u
-}
-
-// UpdateUpdateTime sets the "update_time" field to the value that was provided on create.
-func (u *AirportUpsert) UpdateUpdateTime() *AirportUpsert {
-	u.SetExcluded(airport.FieldUpdateTime)
 	return u
 }
 
@@ -692,7 +639,7 @@ func (u *AirportUpsert) UpdateIdentifier() *AirportUpsert {
 }
 
 // SetType sets the "type" field.
-func (u *AirportUpsert) SetType(v string) *AirportUpsert {
+func (u *AirportUpsert) SetType(v airport.Type) *AirportUpsert {
 	u.Set(airport.FieldType, v)
 	return u
 }
@@ -769,6 +716,12 @@ func (u *AirportUpsert) AddElevation(v int) *AirportUpsert {
 	return u
 }
 
+// ClearElevation clears the value of the "elevation" field.
+func (u *AirportUpsert) ClearElevation() *AirportUpsert {
+	u.SetNull(airport.FieldElevation)
+	return u
+}
+
 // SetContinent sets the "continent" field.
 func (u *AirportUpsert) SetContinent(v string) *AirportUpsert {
 	u.Set(airport.FieldContinent, v)
@@ -841,6 +794,12 @@ func (u *AirportUpsert) UpdateGpsCode() *AirportUpsert {
 	return u
 }
 
+// ClearGpsCode clears the value of the "gps_code" field.
+func (u *AirportUpsert) ClearGpsCode() *AirportUpsert {
+	u.SetNull(airport.FieldGpsCode)
+	return u
+}
+
 // SetIataCode sets the "iata_code" field.
 func (u *AirportUpsert) SetIataCode(v string) *AirportUpsert {
 	u.Set(airport.FieldIataCode, v)
@@ -850,6 +809,12 @@ func (u *AirportUpsert) SetIataCode(v string) *AirportUpsert {
 // UpdateIataCode sets the "iata_code" field to the value that was provided on create.
 func (u *AirportUpsert) UpdateIataCode() *AirportUpsert {
 	u.SetExcluded(airport.FieldIataCode)
+	return u
+}
+
+// ClearIataCode clears the value of the "iata_code" field.
+func (u *AirportUpsert) ClearIataCode() *AirportUpsert {
+	u.SetNull(airport.FieldIataCode)
 	return u
 }
 
@@ -865,6 +830,12 @@ func (u *AirportUpsert) UpdateLocalCode() *AirportUpsert {
 	return u
 }
 
+// ClearLocalCode clears the value of the "local_code" field.
+func (u *AirportUpsert) ClearLocalCode() *AirportUpsert {
+	u.SetNull(airport.FieldLocalCode)
+	return u
+}
+
 // SetWebsite sets the "website" field.
 func (u *AirportUpsert) SetWebsite(v string) *AirportUpsert {
 	u.Set(airport.FieldWebsite, v)
@@ -877,6 +848,12 @@ func (u *AirportUpsert) UpdateWebsite() *AirportUpsert {
 	return u
 }
 
+// ClearWebsite clears the value of the "website" field.
+func (u *AirportUpsert) ClearWebsite() *AirportUpsert {
+	u.SetNull(airport.FieldWebsite)
+	return u
+}
+
 // SetWikipedia sets the "wikipedia" field.
 func (u *AirportUpsert) SetWikipedia(v string) *AirportUpsert {
 	u.Set(airport.FieldWikipedia, v)
@@ -886,6 +863,12 @@ func (u *AirportUpsert) SetWikipedia(v string) *AirportUpsert {
 // UpdateWikipedia sets the "wikipedia" field to the value that was provided on create.
 func (u *AirportUpsert) UpdateWikipedia() *AirportUpsert {
 	u.SetExcluded(airport.FieldWikipedia)
+	return u
+}
+
+// ClearWikipedia clears the value of the "wikipedia" field.
+func (u *AirportUpsert) ClearWikipedia() *AirportUpsert {
+	u.SetNull(airport.FieldWikipedia)
 	return u
 }
 
@@ -912,15 +895,11 @@ func (u *AirportUpsert) UpdateKeywords() *AirportUpsert {
 //			}),
 //		).
 //		Exec(ctx)
-//
 func (u *AirportUpsertOne) UpdateNewValues() *AirportUpsertOne {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
 	u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(s *sql.UpdateSet) {
 		if _, exists := u.create.mutation.ID(); exists {
 			s.SetIgnore(airport.FieldID)
-		}
-		if _, exists := u.create.mutation.CreateTime(); exists {
-			s.SetIgnore(airport.FieldCreateTime)
 		}
 	}))
 	return u
@@ -929,10 +908,9 @@ func (u *AirportUpsertOne) UpdateNewValues() *AirportUpsertOne {
 // Ignore sets each column to itself in case of conflict.
 // Using this option is equivalent to using:
 //
-//  client.Airport.Create().
-//      OnConflict(sql.ResolveWithIgnore()).
-//      Exec(ctx)
-//
+//	client.Airport.Create().
+//	    OnConflict(sql.ResolveWithIgnore()).
+//	    Exec(ctx)
 func (u *AirportUpsertOne) Ignore() *AirportUpsertOne {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithIgnore())
 	return u
@@ -955,16 +933,9 @@ func (u *AirportUpsertOne) Update(set func(*AirportUpsert)) *AirportUpsertOne {
 }
 
 // SetHash sets the "hash" field.
-func (u *AirportUpsertOne) SetHash(v uint64) *AirportUpsertOne {
+func (u *AirportUpsertOne) SetHash(v string) *AirportUpsertOne {
 	return u.Update(func(s *AirportUpsert) {
 		s.SetHash(v)
-	})
-}
-
-// AddHash adds v to the "hash" field.
-func (u *AirportUpsertOne) AddHash(v uint64) *AirportUpsertOne {
-	return u.Update(func(s *AirportUpsert) {
-		s.AddHash(v)
 	})
 }
 
@@ -989,34 +960,6 @@ func (u *AirportUpsertOne) UpdateImportFlag() *AirportUpsertOne {
 	})
 }
 
-// SetCreateTime sets the "create_time" field.
-func (u *AirportUpsertOne) SetCreateTime(v time.Time) *AirportUpsertOne {
-	return u.Update(func(s *AirportUpsert) {
-		s.SetCreateTime(v)
-	})
-}
-
-// UpdateCreateTime sets the "create_time" field to the value that was provided on create.
-func (u *AirportUpsertOne) UpdateCreateTime() *AirportUpsertOne {
-	return u.Update(func(s *AirportUpsert) {
-		s.UpdateCreateTime()
-	})
-}
-
-// SetUpdateTime sets the "update_time" field.
-func (u *AirportUpsertOne) SetUpdateTime(v time.Time) *AirportUpsertOne {
-	return u.Update(func(s *AirportUpsert) {
-		s.SetUpdateTime(v)
-	})
-}
-
-// UpdateUpdateTime sets the "update_time" field to the value that was provided on create.
-func (u *AirportUpsertOne) UpdateUpdateTime() *AirportUpsertOne {
-	return u.Update(func(s *AirportUpsert) {
-		s.UpdateUpdateTime()
-	})
-}
-
 // SetIdentifier sets the "identifier" field.
 func (u *AirportUpsertOne) SetIdentifier(v string) *AirportUpsertOne {
 	return u.Update(func(s *AirportUpsert) {
@@ -1032,7 +975,7 @@ func (u *AirportUpsertOne) UpdateIdentifier() *AirportUpsertOne {
 }
 
 // SetType sets the "type" field.
-func (u *AirportUpsertOne) SetType(v string) *AirportUpsertOne {
+func (u *AirportUpsertOne) SetType(v airport.Type) *AirportUpsertOne {
 	return u.Update(func(s *AirportUpsert) {
 		s.SetType(v)
 	})
@@ -1122,6 +1065,13 @@ func (u *AirportUpsertOne) UpdateElevation() *AirportUpsertOne {
 	})
 }
 
+// ClearElevation clears the value of the "elevation" field.
+func (u *AirportUpsertOne) ClearElevation() *AirportUpsertOne {
+	return u.Update(func(s *AirportUpsert) {
+		s.ClearElevation()
+	})
+}
+
 // SetContinent sets the "continent" field.
 func (u *AirportUpsertOne) SetContinent(v string) *AirportUpsertOne {
 	return u.Update(func(s *AirportUpsert) {
@@ -1206,6 +1156,13 @@ func (u *AirportUpsertOne) UpdateGpsCode() *AirportUpsertOne {
 	})
 }
 
+// ClearGpsCode clears the value of the "gps_code" field.
+func (u *AirportUpsertOne) ClearGpsCode() *AirportUpsertOne {
+	return u.Update(func(s *AirportUpsert) {
+		s.ClearGpsCode()
+	})
+}
+
 // SetIataCode sets the "iata_code" field.
 func (u *AirportUpsertOne) SetIataCode(v string) *AirportUpsertOne {
 	return u.Update(func(s *AirportUpsert) {
@@ -1217,6 +1174,13 @@ func (u *AirportUpsertOne) SetIataCode(v string) *AirportUpsertOne {
 func (u *AirportUpsertOne) UpdateIataCode() *AirportUpsertOne {
 	return u.Update(func(s *AirportUpsert) {
 		s.UpdateIataCode()
+	})
+}
+
+// ClearIataCode clears the value of the "iata_code" field.
+func (u *AirportUpsertOne) ClearIataCode() *AirportUpsertOne {
+	return u.Update(func(s *AirportUpsert) {
+		s.ClearIataCode()
 	})
 }
 
@@ -1234,6 +1198,13 @@ func (u *AirportUpsertOne) UpdateLocalCode() *AirportUpsertOne {
 	})
 }
 
+// ClearLocalCode clears the value of the "local_code" field.
+func (u *AirportUpsertOne) ClearLocalCode() *AirportUpsertOne {
+	return u.Update(func(s *AirportUpsert) {
+		s.ClearLocalCode()
+	})
+}
+
 // SetWebsite sets the "website" field.
 func (u *AirportUpsertOne) SetWebsite(v string) *AirportUpsertOne {
 	return u.Update(func(s *AirportUpsert) {
@@ -1248,6 +1219,13 @@ func (u *AirportUpsertOne) UpdateWebsite() *AirportUpsertOne {
 	})
 }
 
+// ClearWebsite clears the value of the "website" field.
+func (u *AirportUpsertOne) ClearWebsite() *AirportUpsertOne {
+	return u.Update(func(s *AirportUpsert) {
+		s.ClearWebsite()
+	})
+}
+
 // SetWikipedia sets the "wikipedia" field.
 func (u *AirportUpsertOne) SetWikipedia(v string) *AirportUpsertOne {
 	return u.Update(func(s *AirportUpsert) {
@@ -1259,6 +1237,13 @@ func (u *AirportUpsertOne) SetWikipedia(v string) *AirportUpsertOne {
 func (u *AirportUpsertOne) UpdateWikipedia() *AirportUpsertOne {
 	return u.Update(func(s *AirportUpsert) {
 		s.UpdateWikipedia()
+	})
+}
+
+// ClearWikipedia clears the value of the "wikipedia" field.
+func (u *AirportUpsertOne) ClearWikipedia() *AirportUpsertOne {
+	return u.Update(func(s *AirportUpsert) {
+		s.ClearWikipedia()
 	})
 }
 
@@ -1410,7 +1395,6 @@ func (acb *AirportCreateBulk) ExecX(ctx context.Context) {
 //			SetHash(v+v).
 //		}).
 //		Exec(ctx)
-//
 func (acb *AirportCreateBulk) OnConflict(opts ...sql.ConflictOption) *AirportUpsertBulk {
 	acb.conflict = opts
 	return &AirportUpsertBulk{
@@ -1424,7 +1408,6 @@ func (acb *AirportCreateBulk) OnConflict(opts ...sql.ConflictOption) *AirportUps
 //	client.Airport.Create().
 //		OnConflict(sql.ConflictColumns(columns...)).
 //		Exec(ctx)
-//
 func (acb *AirportCreateBulk) OnConflictColumns(columns ...string) *AirportUpsertBulk {
 	acb.conflict = append(acb.conflict, sql.ConflictColumns(columns...))
 	return &AirportUpsertBulk{
@@ -1449,17 +1432,12 @@ type AirportUpsertBulk struct {
 //			}),
 //		).
 //		Exec(ctx)
-//
 func (u *AirportUpsertBulk) UpdateNewValues() *AirportUpsertBulk {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
 	u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(s *sql.UpdateSet) {
 		for _, b := range u.create.builders {
 			if _, exists := b.mutation.ID(); exists {
 				s.SetIgnore(airport.FieldID)
-				return
-			}
-			if _, exists := b.mutation.CreateTime(); exists {
-				s.SetIgnore(airport.FieldCreateTime)
 			}
 		}
 	}))
@@ -1472,7 +1450,6 @@ func (u *AirportUpsertBulk) UpdateNewValues() *AirportUpsertBulk {
 //	client.Airport.Create().
 //		OnConflict(sql.ResolveWithIgnore()).
 //		Exec(ctx)
-//
 func (u *AirportUpsertBulk) Ignore() *AirportUpsertBulk {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithIgnore())
 	return u
@@ -1495,16 +1472,9 @@ func (u *AirportUpsertBulk) Update(set func(*AirportUpsert)) *AirportUpsertBulk 
 }
 
 // SetHash sets the "hash" field.
-func (u *AirportUpsertBulk) SetHash(v uint64) *AirportUpsertBulk {
+func (u *AirportUpsertBulk) SetHash(v string) *AirportUpsertBulk {
 	return u.Update(func(s *AirportUpsert) {
 		s.SetHash(v)
-	})
-}
-
-// AddHash adds v to the "hash" field.
-func (u *AirportUpsertBulk) AddHash(v uint64) *AirportUpsertBulk {
-	return u.Update(func(s *AirportUpsert) {
-		s.AddHash(v)
 	})
 }
 
@@ -1529,34 +1499,6 @@ func (u *AirportUpsertBulk) UpdateImportFlag() *AirportUpsertBulk {
 	})
 }
 
-// SetCreateTime sets the "create_time" field.
-func (u *AirportUpsertBulk) SetCreateTime(v time.Time) *AirportUpsertBulk {
-	return u.Update(func(s *AirportUpsert) {
-		s.SetCreateTime(v)
-	})
-}
-
-// UpdateCreateTime sets the "create_time" field to the value that was provided on create.
-func (u *AirportUpsertBulk) UpdateCreateTime() *AirportUpsertBulk {
-	return u.Update(func(s *AirportUpsert) {
-		s.UpdateCreateTime()
-	})
-}
-
-// SetUpdateTime sets the "update_time" field.
-func (u *AirportUpsertBulk) SetUpdateTime(v time.Time) *AirportUpsertBulk {
-	return u.Update(func(s *AirportUpsert) {
-		s.SetUpdateTime(v)
-	})
-}
-
-// UpdateUpdateTime sets the "update_time" field to the value that was provided on create.
-func (u *AirportUpsertBulk) UpdateUpdateTime() *AirportUpsertBulk {
-	return u.Update(func(s *AirportUpsert) {
-		s.UpdateUpdateTime()
-	})
-}
-
 // SetIdentifier sets the "identifier" field.
 func (u *AirportUpsertBulk) SetIdentifier(v string) *AirportUpsertBulk {
 	return u.Update(func(s *AirportUpsert) {
@@ -1572,7 +1514,7 @@ func (u *AirportUpsertBulk) UpdateIdentifier() *AirportUpsertBulk {
 }
 
 // SetType sets the "type" field.
-func (u *AirportUpsertBulk) SetType(v string) *AirportUpsertBulk {
+func (u *AirportUpsertBulk) SetType(v airport.Type) *AirportUpsertBulk {
 	return u.Update(func(s *AirportUpsert) {
 		s.SetType(v)
 	})
@@ -1662,6 +1604,13 @@ func (u *AirportUpsertBulk) UpdateElevation() *AirportUpsertBulk {
 	})
 }
 
+// ClearElevation clears the value of the "elevation" field.
+func (u *AirportUpsertBulk) ClearElevation() *AirportUpsertBulk {
+	return u.Update(func(s *AirportUpsert) {
+		s.ClearElevation()
+	})
+}
+
 // SetContinent sets the "continent" field.
 func (u *AirportUpsertBulk) SetContinent(v string) *AirportUpsertBulk {
 	return u.Update(func(s *AirportUpsert) {
@@ -1746,6 +1695,13 @@ func (u *AirportUpsertBulk) UpdateGpsCode() *AirportUpsertBulk {
 	})
 }
 
+// ClearGpsCode clears the value of the "gps_code" field.
+func (u *AirportUpsertBulk) ClearGpsCode() *AirportUpsertBulk {
+	return u.Update(func(s *AirportUpsert) {
+		s.ClearGpsCode()
+	})
+}
+
 // SetIataCode sets the "iata_code" field.
 func (u *AirportUpsertBulk) SetIataCode(v string) *AirportUpsertBulk {
 	return u.Update(func(s *AirportUpsert) {
@@ -1757,6 +1713,13 @@ func (u *AirportUpsertBulk) SetIataCode(v string) *AirportUpsertBulk {
 func (u *AirportUpsertBulk) UpdateIataCode() *AirportUpsertBulk {
 	return u.Update(func(s *AirportUpsert) {
 		s.UpdateIataCode()
+	})
+}
+
+// ClearIataCode clears the value of the "iata_code" field.
+func (u *AirportUpsertBulk) ClearIataCode() *AirportUpsertBulk {
+	return u.Update(func(s *AirportUpsert) {
+		s.ClearIataCode()
 	})
 }
 
@@ -1774,6 +1737,13 @@ func (u *AirportUpsertBulk) UpdateLocalCode() *AirportUpsertBulk {
 	})
 }
 
+// ClearLocalCode clears the value of the "local_code" field.
+func (u *AirportUpsertBulk) ClearLocalCode() *AirportUpsertBulk {
+	return u.Update(func(s *AirportUpsert) {
+		s.ClearLocalCode()
+	})
+}
+
 // SetWebsite sets the "website" field.
 func (u *AirportUpsertBulk) SetWebsite(v string) *AirportUpsertBulk {
 	return u.Update(func(s *AirportUpsert) {
@@ -1788,6 +1758,13 @@ func (u *AirportUpsertBulk) UpdateWebsite() *AirportUpsertBulk {
 	})
 }
 
+// ClearWebsite clears the value of the "website" field.
+func (u *AirportUpsertBulk) ClearWebsite() *AirportUpsertBulk {
+	return u.Update(func(s *AirportUpsert) {
+		s.ClearWebsite()
+	})
+}
+
 // SetWikipedia sets the "wikipedia" field.
 func (u *AirportUpsertBulk) SetWikipedia(v string) *AirportUpsertBulk {
 	return u.Update(func(s *AirportUpsert) {
@@ -1799,6 +1776,13 @@ func (u *AirportUpsertBulk) SetWikipedia(v string) *AirportUpsertBulk {
 func (u *AirportUpsertBulk) UpdateWikipedia() *AirportUpsertBulk {
 	return u.Update(func(s *AirportUpsert) {
 		s.UpdateWikipedia()
+	})
+}
+
+// ClearWikipedia clears the value of the "wikipedia" field.
+func (u *AirportUpsertBulk) ClearWikipedia() *AirportUpsertBulk {
+	return u.Update(func(s *AirportUpsert) {
+		s.ClearWikipedia()
 	})
 }
 

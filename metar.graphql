@@ -1,0 +1,27 @@
+scalar Cursor
+
+type PageInfo {
+    hasNextPage: Boolean!
+    hasPreviousPage: Boolean!
+    startCursor: Cursor
+    endCursor: Cursor
+}
+
+type AirportConnection {
+    totalCount: Int!
+    pageInfo: PageInfo!
+    edges: [AirportEdge]
+}
+
+type AirportEdge {
+    node: Airport
+    cursor: Cursor!
+}
+
+type Query {
+    getAirports(
+        after: Cursor
+        first: Int
+        before: Cursor
+        last: Int): AirportConnection
+}

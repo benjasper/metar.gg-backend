@@ -1,0 +1,66 @@
+directive @goField(forceResolver: Boolean, name: String) on FIELD_DEFINITION | INPUT_FIELD_DEFINITION
+directive @goModel(model: String, models: [String!]) on OBJECT | INPUT_OBJECT | SCALAR | ENUM | INTERFACE | UNION
+type Airport {
+  id: ID!
+  identifier: String!
+  type: AirportType!
+  name: String!
+  latitude: Float!
+  longitude: Float!
+  elevation: Int
+  continent: String!
+  country: String!
+  region: String!
+  municipality: String!
+  scheduledService: Boolean!
+  gpsCode: String
+  iataCode: String
+  localCode: String
+  website: String
+  wikipedia: String
+  keywords: [String!]!
+  runways: [Runway!]!
+}
+"""AirportType is enum for the field type"""
+enum AirportType @goModel(model: "metar.gg/ent/airport.Type") {
+  large_airport
+  medium_airport
+  small_airport
+  closed_airport
+  heliport
+  seaplane_base
+}
+type Frequency {
+  id: ID!
+}
+"""Possible directions in which to order a list of items when provided an `orderBy` argument."""
+enum OrderDirection {
+  """Specifies an ascending order for a given `orderBy` argument."""
+  ASC
+  """Specifies a descending order for a given `orderBy` argument."""
+  DESC
+}
+type Runway {
+  id: ID!
+  airportIdentifier: String!
+  length: Int!
+  width: Int!
+  surface: String!
+  lighted: Boolean!
+  closed: Boolean!
+  """Low numbered runway identifier, like 18R"""
+  lowRunwayIdentifier: String!
+  lowRunwayLatitude: Float
+  lowRunwayLongitude: Float
+  lowRunwayElevation: Int
+  lowRunwayHeading: Int
+  lowRunwayDisplaced: Int
+  """High numbered runway identifier, like 18R"""
+  highRunwayIdentifier: String!
+  highRunwayLatitude: Float
+  highRunwayLongitude: Float
+  highRunwayElevation: Int
+  highRunwayHeading: Int
+  highRunwayDisplaced: Int
+  airport: Airport
+}

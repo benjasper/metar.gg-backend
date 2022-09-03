@@ -5,7 +5,6 @@ import (
 	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
 	"entgo.io/ent/schema/index"
-	"entgo.io/ent/schema/mixin"
 )
 
 // Airport holds the schema definition for the Airport entity.
@@ -17,21 +16,21 @@ type Airport struct {
 func (Airport) Fields() []ent.Field {
 	return []ent.Field{
 		field.String("identifier"),
-		field.String("type"),
+		field.Enum("type").Values("large_airport", "medium_airport", "small_airport", "closed_airport", "heliport", "seaplane_base"),
 		field.String("name"),
 		field.Float("latitude"),
 		field.Float("longitude"),
-		field.Int("elevation"),
+		field.Int("elevation").Optional().Nillable(),
 		field.String("continent"),
 		field.String("country"),
 		field.String("region"),
 		field.String("municipality"),
 		field.Bool("scheduled_service"),
-		field.String("gps_code"),
-		field.String("iata_code"),
-		field.String("local_code"),
-		field.String("website"),
-		field.String("wikipedia"),
+		field.String("gps_code").Optional().Nillable(),
+		field.String("iata_code").Optional().Nillable(),
+		field.String("local_code").Optional().Nillable(),
+		field.String("website").Optional().Nillable(),
+		field.String("wikipedia").Optional().Nillable(),
 		field.Strings("keywords"),
 	}
 }
@@ -39,7 +38,7 @@ func (Airport) Fields() []ent.Field {
 // Edges of the Airport.
 func (Airport) Edges() []ent.Edge {
 	return []ent.Edge{
-		edge.To("runways", Runway.Type),
+		edge.To("runways", Runway.Type).Required(),
 	}
 }
 
@@ -54,6 +53,6 @@ func (Airport) Indexes() []ent.Index {
 func (Airport) Mixin() []ent.Mixin {
 	return []ent.Mixin{
 		ImportMixin{},
-		mixin.Time{},
+		//mixin.Time{},
 	}
 }

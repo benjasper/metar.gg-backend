@@ -6,7 +6,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"time"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
@@ -30,15 +29,8 @@ func (au *AirportUpdate) Where(ps ...predicate.Airport) *AirportUpdate {
 }
 
 // SetHash sets the "hash" field.
-func (au *AirportUpdate) SetHash(u uint64) *AirportUpdate {
-	au.mutation.ResetHash()
-	au.mutation.SetHash(u)
-	return au
-}
-
-// AddHash adds u to the "hash" field.
-func (au *AirportUpdate) AddHash(u int64) *AirportUpdate {
-	au.mutation.AddHash(u)
+func (au *AirportUpdate) SetHash(s string) *AirportUpdate {
+	au.mutation.SetHash(s)
 	return au
 }
 
@@ -56,12 +48,6 @@ func (au *AirportUpdate) SetNillableImportFlag(b *bool) *AirportUpdate {
 	return au
 }
 
-// SetUpdateTime sets the "update_time" field.
-func (au *AirportUpdate) SetUpdateTime(t time.Time) *AirportUpdate {
-	au.mutation.SetUpdateTime(t)
-	return au
-}
-
 // SetIdentifier sets the "identifier" field.
 func (au *AirportUpdate) SetIdentifier(s string) *AirportUpdate {
 	au.mutation.SetIdentifier(s)
@@ -69,8 +55,8 @@ func (au *AirportUpdate) SetIdentifier(s string) *AirportUpdate {
 }
 
 // SetType sets the "type" field.
-func (au *AirportUpdate) SetType(s string) *AirportUpdate {
-	au.mutation.SetType(s)
+func (au *AirportUpdate) SetType(a airport.Type) *AirportUpdate {
+	au.mutation.SetType(a)
 	return au
 }
 
@@ -113,9 +99,23 @@ func (au *AirportUpdate) SetElevation(i int) *AirportUpdate {
 	return au
 }
 
+// SetNillableElevation sets the "elevation" field if the given value is not nil.
+func (au *AirportUpdate) SetNillableElevation(i *int) *AirportUpdate {
+	if i != nil {
+		au.SetElevation(*i)
+	}
+	return au
+}
+
 // AddElevation adds i to the "elevation" field.
 func (au *AirportUpdate) AddElevation(i int) *AirportUpdate {
 	au.mutation.AddElevation(i)
+	return au
+}
+
+// ClearElevation clears the value of the "elevation" field.
+func (au *AirportUpdate) ClearElevation() *AirportUpdate {
+	au.mutation.ClearElevation()
 	return au
 }
 
@@ -155,9 +155,37 @@ func (au *AirportUpdate) SetGpsCode(s string) *AirportUpdate {
 	return au
 }
 
+// SetNillableGpsCode sets the "gps_code" field if the given value is not nil.
+func (au *AirportUpdate) SetNillableGpsCode(s *string) *AirportUpdate {
+	if s != nil {
+		au.SetGpsCode(*s)
+	}
+	return au
+}
+
+// ClearGpsCode clears the value of the "gps_code" field.
+func (au *AirportUpdate) ClearGpsCode() *AirportUpdate {
+	au.mutation.ClearGpsCode()
+	return au
+}
+
 // SetIataCode sets the "iata_code" field.
 func (au *AirportUpdate) SetIataCode(s string) *AirportUpdate {
 	au.mutation.SetIataCode(s)
+	return au
+}
+
+// SetNillableIataCode sets the "iata_code" field if the given value is not nil.
+func (au *AirportUpdate) SetNillableIataCode(s *string) *AirportUpdate {
+	if s != nil {
+		au.SetIataCode(*s)
+	}
+	return au
+}
+
+// ClearIataCode clears the value of the "iata_code" field.
+func (au *AirportUpdate) ClearIataCode() *AirportUpdate {
+	au.mutation.ClearIataCode()
 	return au
 }
 
@@ -167,15 +195,57 @@ func (au *AirportUpdate) SetLocalCode(s string) *AirportUpdate {
 	return au
 }
 
+// SetNillableLocalCode sets the "local_code" field if the given value is not nil.
+func (au *AirportUpdate) SetNillableLocalCode(s *string) *AirportUpdate {
+	if s != nil {
+		au.SetLocalCode(*s)
+	}
+	return au
+}
+
+// ClearLocalCode clears the value of the "local_code" field.
+func (au *AirportUpdate) ClearLocalCode() *AirportUpdate {
+	au.mutation.ClearLocalCode()
+	return au
+}
+
 // SetWebsite sets the "website" field.
 func (au *AirportUpdate) SetWebsite(s string) *AirportUpdate {
 	au.mutation.SetWebsite(s)
 	return au
 }
 
+// SetNillableWebsite sets the "website" field if the given value is not nil.
+func (au *AirportUpdate) SetNillableWebsite(s *string) *AirportUpdate {
+	if s != nil {
+		au.SetWebsite(*s)
+	}
+	return au
+}
+
+// ClearWebsite clears the value of the "website" field.
+func (au *AirportUpdate) ClearWebsite() *AirportUpdate {
+	au.mutation.ClearWebsite()
+	return au
+}
+
 // SetWikipedia sets the "wikipedia" field.
 func (au *AirportUpdate) SetWikipedia(s string) *AirportUpdate {
 	au.mutation.SetWikipedia(s)
+	return au
+}
+
+// SetNillableWikipedia sets the "wikipedia" field if the given value is not nil.
+func (au *AirportUpdate) SetNillableWikipedia(s *string) *AirportUpdate {
+	if s != nil {
+		au.SetWikipedia(*s)
+	}
+	return au
+}
+
+// ClearWikipedia clears the value of the "wikipedia" field.
+func (au *AirportUpdate) ClearWikipedia() *AirportUpdate {
+	au.mutation.ClearWikipedia()
 	return au
 }
 
@@ -232,14 +302,19 @@ func (au *AirportUpdate) Save(ctx context.Context) (int, error) {
 		err      error
 		affected int
 	)
-	au.defaults()
 	if len(au.hooks) == 0 {
+		if err = au.check(); err != nil {
+			return 0, err
+		}
 		affected, err = au.sqlSave(ctx)
 	} else {
 		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 			mutation, ok := m.(*AirportMutation)
 			if !ok {
 				return nil, fmt.Errorf("unexpected mutation type %T", m)
+			}
+			if err = au.check(); err != nil {
+				return 0, err
 			}
 			au.mutation = mutation
 			affected, err = au.sqlSave(ctx)
@@ -281,12 +356,14 @@ func (au *AirportUpdate) ExecX(ctx context.Context) {
 	}
 }
 
-// defaults sets the default values of the builder before save.
-func (au *AirportUpdate) defaults() {
-	if _, ok := au.mutation.UpdateTime(); !ok {
-		v := airport.UpdateDefaultUpdateTime()
-		au.mutation.SetUpdateTime(v)
+// check runs all checks and user-defined validators on the builder.
+func (au *AirportUpdate) check() error {
+	if v, ok := au.mutation.GetType(); ok {
+		if err := airport.TypeValidator(v); err != nil {
+			return &ValidationError{Name: "type", err: fmt.Errorf(`ent: validator failed for field "Airport.type": %w`, err)}
+		}
 	}
+	return nil
 }
 
 func (au *AirportUpdate) sqlSave(ctx context.Context) (n int, err error) {
@@ -309,14 +386,7 @@ func (au *AirportUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	if value, ok := au.mutation.Hash(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeUint64,
-			Value:  value,
-			Column: airport.FieldHash,
-		})
-	}
-	if value, ok := au.mutation.AddedHash(); ok {
-		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
-			Type:   field.TypeUint64,
+			Type:   field.TypeString,
 			Value:  value,
 			Column: airport.FieldHash,
 		})
@@ -328,13 +398,6 @@ func (au *AirportUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Column: airport.FieldImportFlag,
 		})
 	}
-	if value, ok := au.mutation.UpdateTime(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Value:  value,
-			Column: airport.FieldUpdateTime,
-		})
-	}
 	if value, ok := au.mutation.Identifier(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
@@ -344,7 +407,7 @@ func (au *AirportUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	if value, ok := au.mutation.GetType(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
+			Type:   field.TypeEnum,
 			Value:  value,
 			Column: airport.FieldType,
 		})
@@ -398,6 +461,12 @@ func (au *AirportUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Column: airport.FieldElevation,
 		})
 	}
+	if au.mutation.ElevationCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt,
+			Column: airport.FieldElevation,
+		})
+	}
 	if value, ok := au.mutation.Continent(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
@@ -440,10 +509,22 @@ func (au *AirportUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Column: airport.FieldGpsCode,
 		})
 	}
+	if au.mutation.GpsCodeCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Column: airport.FieldGpsCode,
+		})
+	}
 	if value, ok := au.mutation.IataCode(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
 			Value:  value,
+			Column: airport.FieldIataCode,
+		})
+	}
+	if au.mutation.IataCodeCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
 			Column: airport.FieldIataCode,
 		})
 	}
@@ -454,6 +535,12 @@ func (au *AirportUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Column: airport.FieldLocalCode,
 		})
 	}
+	if au.mutation.LocalCodeCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Column: airport.FieldLocalCode,
+		})
+	}
 	if value, ok := au.mutation.Website(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
@@ -461,10 +548,22 @@ func (au *AirportUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Column: airport.FieldWebsite,
 		})
 	}
+	if au.mutation.WebsiteCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Column: airport.FieldWebsite,
+		})
+	}
 	if value, ok := au.mutation.Wikipedia(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
 			Value:  value,
+			Column: airport.FieldWikipedia,
+		})
+	}
+	if au.mutation.WikipediaCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
 			Column: airport.FieldWikipedia,
 		})
 	}
@@ -549,15 +648,8 @@ type AirportUpdateOne struct {
 }
 
 // SetHash sets the "hash" field.
-func (auo *AirportUpdateOne) SetHash(u uint64) *AirportUpdateOne {
-	auo.mutation.ResetHash()
-	auo.mutation.SetHash(u)
-	return auo
-}
-
-// AddHash adds u to the "hash" field.
-func (auo *AirportUpdateOne) AddHash(u int64) *AirportUpdateOne {
-	auo.mutation.AddHash(u)
+func (auo *AirportUpdateOne) SetHash(s string) *AirportUpdateOne {
+	auo.mutation.SetHash(s)
 	return auo
 }
 
@@ -575,12 +667,6 @@ func (auo *AirportUpdateOne) SetNillableImportFlag(b *bool) *AirportUpdateOne {
 	return auo
 }
 
-// SetUpdateTime sets the "update_time" field.
-func (auo *AirportUpdateOne) SetUpdateTime(t time.Time) *AirportUpdateOne {
-	auo.mutation.SetUpdateTime(t)
-	return auo
-}
-
 // SetIdentifier sets the "identifier" field.
 func (auo *AirportUpdateOne) SetIdentifier(s string) *AirportUpdateOne {
 	auo.mutation.SetIdentifier(s)
@@ -588,8 +674,8 @@ func (auo *AirportUpdateOne) SetIdentifier(s string) *AirportUpdateOne {
 }
 
 // SetType sets the "type" field.
-func (auo *AirportUpdateOne) SetType(s string) *AirportUpdateOne {
-	auo.mutation.SetType(s)
+func (auo *AirportUpdateOne) SetType(a airport.Type) *AirportUpdateOne {
+	auo.mutation.SetType(a)
 	return auo
 }
 
@@ -632,9 +718,23 @@ func (auo *AirportUpdateOne) SetElevation(i int) *AirportUpdateOne {
 	return auo
 }
 
+// SetNillableElevation sets the "elevation" field if the given value is not nil.
+func (auo *AirportUpdateOne) SetNillableElevation(i *int) *AirportUpdateOne {
+	if i != nil {
+		auo.SetElevation(*i)
+	}
+	return auo
+}
+
 // AddElevation adds i to the "elevation" field.
 func (auo *AirportUpdateOne) AddElevation(i int) *AirportUpdateOne {
 	auo.mutation.AddElevation(i)
+	return auo
+}
+
+// ClearElevation clears the value of the "elevation" field.
+func (auo *AirportUpdateOne) ClearElevation() *AirportUpdateOne {
+	auo.mutation.ClearElevation()
 	return auo
 }
 
@@ -674,9 +774,37 @@ func (auo *AirportUpdateOne) SetGpsCode(s string) *AirportUpdateOne {
 	return auo
 }
 
+// SetNillableGpsCode sets the "gps_code" field if the given value is not nil.
+func (auo *AirportUpdateOne) SetNillableGpsCode(s *string) *AirportUpdateOne {
+	if s != nil {
+		auo.SetGpsCode(*s)
+	}
+	return auo
+}
+
+// ClearGpsCode clears the value of the "gps_code" field.
+func (auo *AirportUpdateOne) ClearGpsCode() *AirportUpdateOne {
+	auo.mutation.ClearGpsCode()
+	return auo
+}
+
 // SetIataCode sets the "iata_code" field.
 func (auo *AirportUpdateOne) SetIataCode(s string) *AirportUpdateOne {
 	auo.mutation.SetIataCode(s)
+	return auo
+}
+
+// SetNillableIataCode sets the "iata_code" field if the given value is not nil.
+func (auo *AirportUpdateOne) SetNillableIataCode(s *string) *AirportUpdateOne {
+	if s != nil {
+		auo.SetIataCode(*s)
+	}
+	return auo
+}
+
+// ClearIataCode clears the value of the "iata_code" field.
+func (auo *AirportUpdateOne) ClearIataCode() *AirportUpdateOne {
+	auo.mutation.ClearIataCode()
 	return auo
 }
 
@@ -686,15 +814,57 @@ func (auo *AirportUpdateOne) SetLocalCode(s string) *AirportUpdateOne {
 	return auo
 }
 
+// SetNillableLocalCode sets the "local_code" field if the given value is not nil.
+func (auo *AirportUpdateOne) SetNillableLocalCode(s *string) *AirportUpdateOne {
+	if s != nil {
+		auo.SetLocalCode(*s)
+	}
+	return auo
+}
+
+// ClearLocalCode clears the value of the "local_code" field.
+func (auo *AirportUpdateOne) ClearLocalCode() *AirportUpdateOne {
+	auo.mutation.ClearLocalCode()
+	return auo
+}
+
 // SetWebsite sets the "website" field.
 func (auo *AirportUpdateOne) SetWebsite(s string) *AirportUpdateOne {
 	auo.mutation.SetWebsite(s)
 	return auo
 }
 
+// SetNillableWebsite sets the "website" field if the given value is not nil.
+func (auo *AirportUpdateOne) SetNillableWebsite(s *string) *AirportUpdateOne {
+	if s != nil {
+		auo.SetWebsite(*s)
+	}
+	return auo
+}
+
+// ClearWebsite clears the value of the "website" field.
+func (auo *AirportUpdateOne) ClearWebsite() *AirportUpdateOne {
+	auo.mutation.ClearWebsite()
+	return auo
+}
+
 // SetWikipedia sets the "wikipedia" field.
 func (auo *AirportUpdateOne) SetWikipedia(s string) *AirportUpdateOne {
 	auo.mutation.SetWikipedia(s)
+	return auo
+}
+
+// SetNillableWikipedia sets the "wikipedia" field if the given value is not nil.
+func (auo *AirportUpdateOne) SetNillableWikipedia(s *string) *AirportUpdateOne {
+	if s != nil {
+		auo.SetWikipedia(*s)
+	}
+	return auo
+}
+
+// ClearWikipedia clears the value of the "wikipedia" field.
+func (auo *AirportUpdateOne) ClearWikipedia() *AirportUpdateOne {
+	auo.mutation.ClearWikipedia()
 	return auo
 }
 
@@ -758,14 +928,19 @@ func (auo *AirportUpdateOne) Save(ctx context.Context) (*Airport, error) {
 		err  error
 		node *Airport
 	)
-	auo.defaults()
 	if len(auo.hooks) == 0 {
+		if err = auo.check(); err != nil {
+			return nil, err
+		}
 		node, err = auo.sqlSave(ctx)
 	} else {
 		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 			mutation, ok := m.(*AirportMutation)
 			if !ok {
 				return nil, fmt.Errorf("unexpected mutation type %T", m)
+			}
+			if err = auo.check(); err != nil {
+				return nil, err
 			}
 			auo.mutation = mutation
 			node, err = auo.sqlSave(ctx)
@@ -813,12 +988,14 @@ func (auo *AirportUpdateOne) ExecX(ctx context.Context) {
 	}
 }
 
-// defaults sets the default values of the builder before save.
-func (auo *AirportUpdateOne) defaults() {
-	if _, ok := auo.mutation.UpdateTime(); !ok {
-		v := airport.UpdateDefaultUpdateTime()
-		auo.mutation.SetUpdateTime(v)
+// check runs all checks and user-defined validators on the builder.
+func (auo *AirportUpdateOne) check() error {
+	if v, ok := auo.mutation.GetType(); ok {
+		if err := airport.TypeValidator(v); err != nil {
+			return &ValidationError{Name: "type", err: fmt.Errorf(`ent: validator failed for field "Airport.type": %w`, err)}
+		}
 	}
+	return nil
 }
 
 func (auo *AirportUpdateOne) sqlSave(ctx context.Context) (_node *Airport, err error) {
@@ -858,14 +1035,7 @@ func (auo *AirportUpdateOne) sqlSave(ctx context.Context) (_node *Airport, err e
 	}
 	if value, ok := auo.mutation.Hash(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeUint64,
-			Value:  value,
-			Column: airport.FieldHash,
-		})
-	}
-	if value, ok := auo.mutation.AddedHash(); ok {
-		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
-			Type:   field.TypeUint64,
+			Type:   field.TypeString,
 			Value:  value,
 			Column: airport.FieldHash,
 		})
@@ -877,13 +1047,6 @@ func (auo *AirportUpdateOne) sqlSave(ctx context.Context) (_node *Airport, err e
 			Column: airport.FieldImportFlag,
 		})
 	}
-	if value, ok := auo.mutation.UpdateTime(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Value:  value,
-			Column: airport.FieldUpdateTime,
-		})
-	}
 	if value, ok := auo.mutation.Identifier(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
@@ -893,7 +1056,7 @@ func (auo *AirportUpdateOne) sqlSave(ctx context.Context) (_node *Airport, err e
 	}
 	if value, ok := auo.mutation.GetType(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
+			Type:   field.TypeEnum,
 			Value:  value,
 			Column: airport.FieldType,
 		})
@@ -947,6 +1110,12 @@ func (auo *AirportUpdateOne) sqlSave(ctx context.Context) (_node *Airport, err e
 			Column: airport.FieldElevation,
 		})
 	}
+	if auo.mutation.ElevationCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt,
+			Column: airport.FieldElevation,
+		})
+	}
 	if value, ok := auo.mutation.Continent(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
@@ -989,10 +1158,22 @@ func (auo *AirportUpdateOne) sqlSave(ctx context.Context) (_node *Airport, err e
 			Column: airport.FieldGpsCode,
 		})
 	}
+	if auo.mutation.GpsCodeCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Column: airport.FieldGpsCode,
+		})
+	}
 	if value, ok := auo.mutation.IataCode(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
 			Value:  value,
+			Column: airport.FieldIataCode,
+		})
+	}
+	if auo.mutation.IataCodeCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
 			Column: airport.FieldIataCode,
 		})
 	}
@@ -1003,6 +1184,12 @@ func (auo *AirportUpdateOne) sqlSave(ctx context.Context) (_node *Airport, err e
 			Column: airport.FieldLocalCode,
 		})
 	}
+	if auo.mutation.LocalCodeCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Column: airport.FieldLocalCode,
+		})
+	}
 	if value, ok := auo.mutation.Website(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
@@ -1010,10 +1197,22 @@ func (auo *AirportUpdateOne) sqlSave(ctx context.Context) (_node *Airport, err e
 			Column: airport.FieldWebsite,
 		})
 	}
+	if auo.mutation.WebsiteCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Column: airport.FieldWebsite,
+		})
+	}
 	if value, ok := auo.mutation.Wikipedia(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
 			Value:  value,
+			Column: airport.FieldWikipedia,
+		})
+	}
+	if auo.mutation.WikipediaCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
 			Column: airport.FieldWikipedia,
 		})
 	}

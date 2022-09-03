@@ -6,7 +6,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"time"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
@@ -30,15 +29,8 @@ func (ru *RunwayUpdate) Where(ps ...predicate.Runway) *RunwayUpdate {
 }
 
 // SetHash sets the "hash" field.
-func (ru *RunwayUpdate) SetHash(u uint64) *RunwayUpdate {
-	ru.mutation.ResetHash()
-	ru.mutation.SetHash(u)
-	return ru
-}
-
-// AddHash adds u to the "hash" field.
-func (ru *RunwayUpdate) AddHash(u int64) *RunwayUpdate {
-	ru.mutation.AddHash(u)
+func (ru *RunwayUpdate) SetHash(s string) *RunwayUpdate {
+	ru.mutation.SetHash(s)
 	return ru
 }
 
@@ -53,12 +45,6 @@ func (ru *RunwayUpdate) SetNillableImportFlag(b *bool) *RunwayUpdate {
 	if b != nil {
 		ru.SetImportFlag(*b)
 	}
-	return ru
-}
-
-// SetUpdateTime sets the "update_time" field.
-func (ru *RunwayUpdate) SetUpdateTime(t time.Time) *RunwayUpdate {
-	ru.mutation.SetUpdateTime(t)
 	return ru
 }
 
@@ -112,145 +98,285 @@ func (ru *RunwayUpdate) SetClosed(b bool) *RunwayUpdate {
 	return ru
 }
 
-// SetLowNumberedRunwayEndIdentifier sets the "low_numbered_runway_end_identifier" field.
-func (ru *RunwayUpdate) SetLowNumberedRunwayEndIdentifier(s string) *RunwayUpdate {
-	ru.mutation.SetLowNumberedRunwayEndIdentifier(s)
+// SetLowRunwayIdentifier sets the "low_runway_identifier" field.
+func (ru *RunwayUpdate) SetLowRunwayIdentifier(s string) *RunwayUpdate {
+	ru.mutation.SetLowRunwayIdentifier(s)
 	return ru
 }
 
-// SetLowNumberedRunwayEndLatitude sets the "low_numbered_runway_end_latitude" field.
-func (ru *RunwayUpdate) SetLowNumberedRunwayEndLatitude(f float64) *RunwayUpdate {
-	ru.mutation.ResetLowNumberedRunwayEndLatitude()
-	ru.mutation.SetLowNumberedRunwayEndLatitude(f)
+// SetLowRunwayLatitude sets the "low_runway_latitude" field.
+func (ru *RunwayUpdate) SetLowRunwayLatitude(f float64) *RunwayUpdate {
+	ru.mutation.ResetLowRunwayLatitude()
+	ru.mutation.SetLowRunwayLatitude(f)
 	return ru
 }
 
-// AddLowNumberedRunwayEndLatitude adds f to the "low_numbered_runway_end_latitude" field.
-func (ru *RunwayUpdate) AddLowNumberedRunwayEndLatitude(f float64) *RunwayUpdate {
-	ru.mutation.AddLowNumberedRunwayEndLatitude(f)
+// SetNillableLowRunwayLatitude sets the "low_runway_latitude" field if the given value is not nil.
+func (ru *RunwayUpdate) SetNillableLowRunwayLatitude(f *float64) *RunwayUpdate {
+	if f != nil {
+		ru.SetLowRunwayLatitude(*f)
+	}
 	return ru
 }
 
-// SetLowNumberedRunwayEndLongitude sets the "low_numbered_runway_end_longitude" field.
-func (ru *RunwayUpdate) SetLowNumberedRunwayEndLongitude(f float64) *RunwayUpdate {
-	ru.mutation.ResetLowNumberedRunwayEndLongitude()
-	ru.mutation.SetLowNumberedRunwayEndLongitude(f)
+// AddLowRunwayLatitude adds f to the "low_runway_latitude" field.
+func (ru *RunwayUpdate) AddLowRunwayLatitude(f float64) *RunwayUpdate {
+	ru.mutation.AddLowRunwayLatitude(f)
 	return ru
 }
 
-// AddLowNumberedRunwayEndLongitude adds f to the "low_numbered_runway_end_longitude" field.
-func (ru *RunwayUpdate) AddLowNumberedRunwayEndLongitude(f float64) *RunwayUpdate {
-	ru.mutation.AddLowNumberedRunwayEndLongitude(f)
+// ClearLowRunwayLatitude clears the value of the "low_runway_latitude" field.
+func (ru *RunwayUpdate) ClearLowRunwayLatitude() *RunwayUpdate {
+	ru.mutation.ClearLowRunwayLatitude()
 	return ru
 }
 
-// SetLowNumberedRunwayEndElevation sets the "low_numbered_runway_end_elevation" field.
-func (ru *RunwayUpdate) SetLowNumberedRunwayEndElevation(i int) *RunwayUpdate {
-	ru.mutation.ResetLowNumberedRunwayEndElevation()
-	ru.mutation.SetLowNumberedRunwayEndElevation(i)
+// SetLowRunwayLongitude sets the "low_runway_longitude" field.
+func (ru *RunwayUpdate) SetLowRunwayLongitude(f float64) *RunwayUpdate {
+	ru.mutation.ResetLowRunwayLongitude()
+	ru.mutation.SetLowRunwayLongitude(f)
 	return ru
 }
 
-// AddLowNumberedRunwayEndElevation adds i to the "low_numbered_runway_end_elevation" field.
-func (ru *RunwayUpdate) AddLowNumberedRunwayEndElevation(i int) *RunwayUpdate {
-	ru.mutation.AddLowNumberedRunwayEndElevation(i)
+// SetNillableLowRunwayLongitude sets the "low_runway_longitude" field if the given value is not nil.
+func (ru *RunwayUpdate) SetNillableLowRunwayLongitude(f *float64) *RunwayUpdate {
+	if f != nil {
+		ru.SetLowRunwayLongitude(*f)
+	}
 	return ru
 }
 
-// SetLowNumberedRunwayEndHeading sets the "low_numbered_runway_end_heading" field.
-func (ru *RunwayUpdate) SetLowNumberedRunwayEndHeading(i int) *RunwayUpdate {
-	ru.mutation.ResetLowNumberedRunwayEndHeading()
-	ru.mutation.SetLowNumberedRunwayEndHeading(i)
+// AddLowRunwayLongitude adds f to the "low_runway_longitude" field.
+func (ru *RunwayUpdate) AddLowRunwayLongitude(f float64) *RunwayUpdate {
+	ru.mutation.AddLowRunwayLongitude(f)
 	return ru
 }
 
-// AddLowNumberedRunwayEndHeading adds i to the "low_numbered_runway_end_heading" field.
-func (ru *RunwayUpdate) AddLowNumberedRunwayEndHeading(i int) *RunwayUpdate {
-	ru.mutation.AddLowNumberedRunwayEndHeading(i)
+// ClearLowRunwayLongitude clears the value of the "low_runway_longitude" field.
+func (ru *RunwayUpdate) ClearLowRunwayLongitude() *RunwayUpdate {
+	ru.mutation.ClearLowRunwayLongitude()
 	return ru
 }
 
-// SetLowNumberedRunwayEndDisplaced sets the "low_numbered_runway_end_displaced" field.
-func (ru *RunwayUpdate) SetLowNumberedRunwayEndDisplaced(i int) *RunwayUpdate {
-	ru.mutation.ResetLowNumberedRunwayEndDisplaced()
-	ru.mutation.SetLowNumberedRunwayEndDisplaced(i)
+// SetLowRunwayElevation sets the "low_runway_elevation" field.
+func (ru *RunwayUpdate) SetLowRunwayElevation(i int) *RunwayUpdate {
+	ru.mutation.ResetLowRunwayElevation()
+	ru.mutation.SetLowRunwayElevation(i)
 	return ru
 }
 
-// AddLowNumberedRunwayEndDisplaced adds i to the "low_numbered_runway_end_displaced" field.
-func (ru *RunwayUpdate) AddLowNumberedRunwayEndDisplaced(i int) *RunwayUpdate {
-	ru.mutation.AddLowNumberedRunwayEndDisplaced(i)
+// SetNillableLowRunwayElevation sets the "low_runway_elevation" field if the given value is not nil.
+func (ru *RunwayUpdate) SetNillableLowRunwayElevation(i *int) *RunwayUpdate {
+	if i != nil {
+		ru.SetLowRunwayElevation(*i)
+	}
 	return ru
 }
 
-// SetHighNumberedRunwayEndIdentifier sets the "high_numbered_runway_end_identifier" field.
-func (ru *RunwayUpdate) SetHighNumberedRunwayEndIdentifier(s string) *RunwayUpdate {
-	ru.mutation.SetHighNumberedRunwayEndIdentifier(s)
+// AddLowRunwayElevation adds i to the "low_runway_elevation" field.
+func (ru *RunwayUpdate) AddLowRunwayElevation(i int) *RunwayUpdate {
+	ru.mutation.AddLowRunwayElevation(i)
 	return ru
 }
 
-// SetHighNumberedRunwayEndLatitude sets the "high_numbered_runway_end_latitude" field.
-func (ru *RunwayUpdate) SetHighNumberedRunwayEndLatitude(f float64) *RunwayUpdate {
-	ru.mutation.ResetHighNumberedRunwayEndLatitude()
-	ru.mutation.SetHighNumberedRunwayEndLatitude(f)
+// ClearLowRunwayElevation clears the value of the "low_runway_elevation" field.
+func (ru *RunwayUpdate) ClearLowRunwayElevation() *RunwayUpdate {
+	ru.mutation.ClearLowRunwayElevation()
 	return ru
 }
 
-// AddHighNumberedRunwayEndLatitude adds f to the "high_numbered_runway_end_latitude" field.
-func (ru *RunwayUpdate) AddHighNumberedRunwayEndLatitude(f float64) *RunwayUpdate {
-	ru.mutation.AddHighNumberedRunwayEndLatitude(f)
+// SetLowRunwayHeading sets the "low_runway_heading" field.
+func (ru *RunwayUpdate) SetLowRunwayHeading(i int) *RunwayUpdate {
+	ru.mutation.ResetLowRunwayHeading()
+	ru.mutation.SetLowRunwayHeading(i)
 	return ru
 }
 
-// SetHighNumberedRunwayEndLongitude sets the "high_numbered_runway_end_longitude" field.
-func (ru *RunwayUpdate) SetHighNumberedRunwayEndLongitude(f float64) *RunwayUpdate {
-	ru.mutation.ResetHighNumberedRunwayEndLongitude()
-	ru.mutation.SetHighNumberedRunwayEndLongitude(f)
+// SetNillableLowRunwayHeading sets the "low_runway_heading" field if the given value is not nil.
+func (ru *RunwayUpdate) SetNillableLowRunwayHeading(i *int) *RunwayUpdate {
+	if i != nil {
+		ru.SetLowRunwayHeading(*i)
+	}
 	return ru
 }
 
-// AddHighNumberedRunwayEndLongitude adds f to the "high_numbered_runway_end_longitude" field.
-func (ru *RunwayUpdate) AddHighNumberedRunwayEndLongitude(f float64) *RunwayUpdate {
-	ru.mutation.AddHighNumberedRunwayEndLongitude(f)
+// AddLowRunwayHeading adds i to the "low_runway_heading" field.
+func (ru *RunwayUpdate) AddLowRunwayHeading(i int) *RunwayUpdate {
+	ru.mutation.AddLowRunwayHeading(i)
 	return ru
 }
 
-// SetHighNumberedRunwayEndElevation sets the "high_numbered_runway_end_elevation" field.
-func (ru *RunwayUpdate) SetHighNumberedRunwayEndElevation(i int) *RunwayUpdate {
-	ru.mutation.ResetHighNumberedRunwayEndElevation()
-	ru.mutation.SetHighNumberedRunwayEndElevation(i)
+// ClearLowRunwayHeading clears the value of the "low_runway_heading" field.
+func (ru *RunwayUpdate) ClearLowRunwayHeading() *RunwayUpdate {
+	ru.mutation.ClearLowRunwayHeading()
 	return ru
 }
 
-// AddHighNumberedRunwayEndElevation adds i to the "high_numbered_runway_end_elevation" field.
-func (ru *RunwayUpdate) AddHighNumberedRunwayEndElevation(i int) *RunwayUpdate {
-	ru.mutation.AddHighNumberedRunwayEndElevation(i)
+// SetLowRunwayDisplaced sets the "low_runway_displaced" field.
+func (ru *RunwayUpdate) SetLowRunwayDisplaced(i int) *RunwayUpdate {
+	ru.mutation.ResetLowRunwayDisplaced()
+	ru.mutation.SetLowRunwayDisplaced(i)
 	return ru
 }
 
-// SetHighNumberedRunwayEndHeading sets the "high_numbered_runway_end_heading" field.
-func (ru *RunwayUpdate) SetHighNumberedRunwayEndHeading(i int) *RunwayUpdate {
-	ru.mutation.ResetHighNumberedRunwayEndHeading()
-	ru.mutation.SetHighNumberedRunwayEndHeading(i)
+// SetNillableLowRunwayDisplaced sets the "low_runway_displaced" field if the given value is not nil.
+func (ru *RunwayUpdate) SetNillableLowRunwayDisplaced(i *int) *RunwayUpdate {
+	if i != nil {
+		ru.SetLowRunwayDisplaced(*i)
+	}
 	return ru
 }
 
-// AddHighNumberedRunwayEndHeading adds i to the "high_numbered_runway_end_heading" field.
-func (ru *RunwayUpdate) AddHighNumberedRunwayEndHeading(i int) *RunwayUpdate {
-	ru.mutation.AddHighNumberedRunwayEndHeading(i)
+// AddLowRunwayDisplaced adds i to the "low_runway_displaced" field.
+func (ru *RunwayUpdate) AddLowRunwayDisplaced(i int) *RunwayUpdate {
+	ru.mutation.AddLowRunwayDisplaced(i)
 	return ru
 }
 
-// SetHighNumberedRunwayEndDisplaced sets the "high_numbered_runway_end_displaced" field.
-func (ru *RunwayUpdate) SetHighNumberedRunwayEndDisplaced(i int) *RunwayUpdate {
-	ru.mutation.ResetHighNumberedRunwayEndDisplaced()
-	ru.mutation.SetHighNumberedRunwayEndDisplaced(i)
+// ClearLowRunwayDisplaced clears the value of the "low_runway_displaced" field.
+func (ru *RunwayUpdate) ClearLowRunwayDisplaced() *RunwayUpdate {
+	ru.mutation.ClearLowRunwayDisplaced()
 	return ru
 }
 
-// AddHighNumberedRunwayEndDisplaced adds i to the "high_numbered_runway_end_displaced" field.
-func (ru *RunwayUpdate) AddHighNumberedRunwayEndDisplaced(i int) *RunwayUpdate {
-	ru.mutation.AddHighNumberedRunwayEndDisplaced(i)
+// SetHighRunwayIdentifier sets the "high_runway_identifier" field.
+func (ru *RunwayUpdate) SetHighRunwayIdentifier(s string) *RunwayUpdate {
+	ru.mutation.SetHighRunwayIdentifier(s)
+	return ru
+}
+
+// SetHighRunwayLatitude sets the "high_runway_latitude" field.
+func (ru *RunwayUpdate) SetHighRunwayLatitude(f float64) *RunwayUpdate {
+	ru.mutation.ResetHighRunwayLatitude()
+	ru.mutation.SetHighRunwayLatitude(f)
+	return ru
+}
+
+// SetNillableHighRunwayLatitude sets the "high_runway_latitude" field if the given value is not nil.
+func (ru *RunwayUpdate) SetNillableHighRunwayLatitude(f *float64) *RunwayUpdate {
+	if f != nil {
+		ru.SetHighRunwayLatitude(*f)
+	}
+	return ru
+}
+
+// AddHighRunwayLatitude adds f to the "high_runway_latitude" field.
+func (ru *RunwayUpdate) AddHighRunwayLatitude(f float64) *RunwayUpdate {
+	ru.mutation.AddHighRunwayLatitude(f)
+	return ru
+}
+
+// ClearHighRunwayLatitude clears the value of the "high_runway_latitude" field.
+func (ru *RunwayUpdate) ClearHighRunwayLatitude() *RunwayUpdate {
+	ru.mutation.ClearHighRunwayLatitude()
+	return ru
+}
+
+// SetHighRunwayLongitude sets the "high_runway_longitude" field.
+func (ru *RunwayUpdate) SetHighRunwayLongitude(f float64) *RunwayUpdate {
+	ru.mutation.ResetHighRunwayLongitude()
+	ru.mutation.SetHighRunwayLongitude(f)
+	return ru
+}
+
+// SetNillableHighRunwayLongitude sets the "high_runway_longitude" field if the given value is not nil.
+func (ru *RunwayUpdate) SetNillableHighRunwayLongitude(f *float64) *RunwayUpdate {
+	if f != nil {
+		ru.SetHighRunwayLongitude(*f)
+	}
+	return ru
+}
+
+// AddHighRunwayLongitude adds f to the "high_runway_longitude" field.
+func (ru *RunwayUpdate) AddHighRunwayLongitude(f float64) *RunwayUpdate {
+	ru.mutation.AddHighRunwayLongitude(f)
+	return ru
+}
+
+// ClearHighRunwayLongitude clears the value of the "high_runway_longitude" field.
+func (ru *RunwayUpdate) ClearHighRunwayLongitude() *RunwayUpdate {
+	ru.mutation.ClearHighRunwayLongitude()
+	return ru
+}
+
+// SetHighRunwayElevation sets the "high_runway_elevation" field.
+func (ru *RunwayUpdate) SetHighRunwayElevation(i int) *RunwayUpdate {
+	ru.mutation.ResetHighRunwayElevation()
+	ru.mutation.SetHighRunwayElevation(i)
+	return ru
+}
+
+// SetNillableHighRunwayElevation sets the "high_runway_elevation" field if the given value is not nil.
+func (ru *RunwayUpdate) SetNillableHighRunwayElevation(i *int) *RunwayUpdate {
+	if i != nil {
+		ru.SetHighRunwayElevation(*i)
+	}
+	return ru
+}
+
+// AddHighRunwayElevation adds i to the "high_runway_elevation" field.
+func (ru *RunwayUpdate) AddHighRunwayElevation(i int) *RunwayUpdate {
+	ru.mutation.AddHighRunwayElevation(i)
+	return ru
+}
+
+// ClearHighRunwayElevation clears the value of the "high_runway_elevation" field.
+func (ru *RunwayUpdate) ClearHighRunwayElevation() *RunwayUpdate {
+	ru.mutation.ClearHighRunwayElevation()
+	return ru
+}
+
+// SetHighRunwayHeading sets the "high_runway_heading" field.
+func (ru *RunwayUpdate) SetHighRunwayHeading(i int) *RunwayUpdate {
+	ru.mutation.ResetHighRunwayHeading()
+	ru.mutation.SetHighRunwayHeading(i)
+	return ru
+}
+
+// SetNillableHighRunwayHeading sets the "high_runway_heading" field if the given value is not nil.
+func (ru *RunwayUpdate) SetNillableHighRunwayHeading(i *int) *RunwayUpdate {
+	if i != nil {
+		ru.SetHighRunwayHeading(*i)
+	}
+	return ru
+}
+
+// AddHighRunwayHeading adds i to the "high_runway_heading" field.
+func (ru *RunwayUpdate) AddHighRunwayHeading(i int) *RunwayUpdate {
+	ru.mutation.AddHighRunwayHeading(i)
+	return ru
+}
+
+// ClearHighRunwayHeading clears the value of the "high_runway_heading" field.
+func (ru *RunwayUpdate) ClearHighRunwayHeading() *RunwayUpdate {
+	ru.mutation.ClearHighRunwayHeading()
+	return ru
+}
+
+// SetHighRunwayDisplaced sets the "high_runway_displaced" field.
+func (ru *RunwayUpdate) SetHighRunwayDisplaced(i int) *RunwayUpdate {
+	ru.mutation.ResetHighRunwayDisplaced()
+	ru.mutation.SetHighRunwayDisplaced(i)
+	return ru
+}
+
+// SetNillableHighRunwayDisplaced sets the "high_runway_displaced" field if the given value is not nil.
+func (ru *RunwayUpdate) SetNillableHighRunwayDisplaced(i *int) *RunwayUpdate {
+	if i != nil {
+		ru.SetHighRunwayDisplaced(*i)
+	}
+	return ru
+}
+
+// AddHighRunwayDisplaced adds i to the "high_runway_displaced" field.
+func (ru *RunwayUpdate) AddHighRunwayDisplaced(i int) *RunwayUpdate {
+	ru.mutation.AddHighRunwayDisplaced(i)
+	return ru
+}
+
+// ClearHighRunwayDisplaced clears the value of the "high_runway_displaced" field.
+func (ru *RunwayUpdate) ClearHighRunwayDisplaced() *RunwayUpdate {
+	ru.mutation.ClearHighRunwayDisplaced()
 	return ru
 }
 
@@ -290,7 +416,6 @@ func (ru *RunwayUpdate) Save(ctx context.Context) (int, error) {
 		err      error
 		affected int
 	)
-	ru.defaults()
 	if len(ru.hooks) == 0 {
 		affected, err = ru.sqlSave(ctx)
 	} else {
@@ -339,14 +464,6 @@ func (ru *RunwayUpdate) ExecX(ctx context.Context) {
 	}
 }
 
-// defaults sets the default values of the builder before save.
-func (ru *RunwayUpdate) defaults() {
-	if _, ok := ru.mutation.UpdateTime(); !ok {
-		v := runway.UpdateDefaultUpdateTime()
-		ru.mutation.SetUpdateTime(v)
-	}
-}
-
 func (ru *RunwayUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	_spec := &sqlgraph.UpdateSpec{
 		Node: &sqlgraph.NodeSpec{
@@ -367,14 +484,7 @@ func (ru *RunwayUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	if value, ok := ru.mutation.Hash(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeUint64,
-			Value:  value,
-			Column: runway.FieldHash,
-		})
-	}
-	if value, ok := ru.mutation.AddedHash(); ok {
-		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
-			Type:   field.TypeUint64,
+			Type:   field.TypeString,
 			Value:  value,
 			Column: runway.FieldHash,
 		})
@@ -384,13 +494,6 @@ func (ru *RunwayUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Type:   field.TypeBool,
 			Value:  value,
 			Column: runway.FieldImportFlag,
-		})
-	}
-	if value, ok := ru.mutation.UpdateTime(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Value:  value,
-			Column: runway.FieldUpdateTime,
 		})
 	}
 	if value, ok := ru.mutation.AirportIdentifier(); ok {
@@ -449,158 +552,218 @@ func (ru *RunwayUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Column: runway.FieldClosed,
 		})
 	}
-	if value, ok := ru.mutation.LowNumberedRunwayEndIdentifier(); ok {
+	if value, ok := ru.mutation.LowRunwayIdentifier(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
 			Value:  value,
-			Column: runway.FieldLowNumberedRunwayEndIdentifier,
+			Column: runway.FieldLowRunwayIdentifier,
 		})
 	}
-	if value, ok := ru.mutation.LowNumberedRunwayEndLatitude(); ok {
+	if value, ok := ru.mutation.LowRunwayLatitude(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeFloat64,
 			Value:  value,
-			Column: runway.FieldLowNumberedRunwayEndLatitude,
+			Column: runway.FieldLowRunwayLatitude,
 		})
 	}
-	if value, ok := ru.mutation.AddedLowNumberedRunwayEndLatitude(); ok {
+	if value, ok := ru.mutation.AddedLowRunwayLatitude(); ok {
 		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
 			Type:   field.TypeFloat64,
 			Value:  value,
-			Column: runway.FieldLowNumberedRunwayEndLatitude,
+			Column: runway.FieldLowRunwayLatitude,
 		})
 	}
-	if value, ok := ru.mutation.LowNumberedRunwayEndLongitude(); ok {
+	if ru.mutation.LowRunwayLatitudeCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeFloat64,
+			Column: runway.FieldLowRunwayLatitude,
+		})
+	}
+	if value, ok := ru.mutation.LowRunwayLongitude(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeFloat64,
 			Value:  value,
-			Column: runway.FieldLowNumberedRunwayEndLongitude,
+			Column: runway.FieldLowRunwayLongitude,
 		})
 	}
-	if value, ok := ru.mutation.AddedLowNumberedRunwayEndLongitude(); ok {
+	if value, ok := ru.mutation.AddedLowRunwayLongitude(); ok {
 		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
 			Type:   field.TypeFloat64,
 			Value:  value,
-			Column: runway.FieldLowNumberedRunwayEndLongitude,
+			Column: runway.FieldLowRunwayLongitude,
 		})
 	}
-	if value, ok := ru.mutation.LowNumberedRunwayEndElevation(); ok {
+	if ru.mutation.LowRunwayLongitudeCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeFloat64,
+			Column: runway.FieldLowRunwayLongitude,
+		})
+	}
+	if value, ok := ru.mutation.LowRunwayElevation(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeInt,
 			Value:  value,
-			Column: runway.FieldLowNumberedRunwayEndElevation,
+			Column: runway.FieldLowRunwayElevation,
 		})
 	}
-	if value, ok := ru.mutation.AddedLowNumberedRunwayEndElevation(); ok {
+	if value, ok := ru.mutation.AddedLowRunwayElevation(); ok {
 		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
 			Type:   field.TypeInt,
 			Value:  value,
-			Column: runway.FieldLowNumberedRunwayEndElevation,
+			Column: runway.FieldLowRunwayElevation,
 		})
 	}
-	if value, ok := ru.mutation.LowNumberedRunwayEndHeading(); ok {
+	if ru.mutation.LowRunwayElevationCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt,
+			Column: runway.FieldLowRunwayElevation,
+		})
+	}
+	if value, ok := ru.mutation.LowRunwayHeading(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeInt,
 			Value:  value,
-			Column: runway.FieldLowNumberedRunwayEndHeading,
+			Column: runway.FieldLowRunwayHeading,
 		})
 	}
-	if value, ok := ru.mutation.AddedLowNumberedRunwayEndHeading(); ok {
+	if value, ok := ru.mutation.AddedLowRunwayHeading(); ok {
 		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
 			Type:   field.TypeInt,
 			Value:  value,
-			Column: runway.FieldLowNumberedRunwayEndHeading,
+			Column: runway.FieldLowRunwayHeading,
 		})
 	}
-	if value, ok := ru.mutation.LowNumberedRunwayEndDisplaced(); ok {
+	if ru.mutation.LowRunwayHeadingCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt,
+			Column: runway.FieldLowRunwayHeading,
+		})
+	}
+	if value, ok := ru.mutation.LowRunwayDisplaced(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeInt,
 			Value:  value,
-			Column: runway.FieldLowNumberedRunwayEndDisplaced,
+			Column: runway.FieldLowRunwayDisplaced,
 		})
 	}
-	if value, ok := ru.mutation.AddedLowNumberedRunwayEndDisplaced(); ok {
+	if value, ok := ru.mutation.AddedLowRunwayDisplaced(); ok {
 		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
 			Type:   field.TypeInt,
 			Value:  value,
-			Column: runway.FieldLowNumberedRunwayEndDisplaced,
+			Column: runway.FieldLowRunwayDisplaced,
 		})
 	}
-	if value, ok := ru.mutation.HighNumberedRunwayEndIdentifier(); ok {
+	if ru.mutation.LowRunwayDisplacedCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt,
+			Column: runway.FieldLowRunwayDisplaced,
+		})
+	}
+	if value, ok := ru.mutation.HighRunwayIdentifier(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
 			Value:  value,
-			Column: runway.FieldHighNumberedRunwayEndIdentifier,
+			Column: runway.FieldHighRunwayIdentifier,
 		})
 	}
-	if value, ok := ru.mutation.HighNumberedRunwayEndLatitude(); ok {
+	if value, ok := ru.mutation.HighRunwayLatitude(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeFloat64,
 			Value:  value,
-			Column: runway.FieldHighNumberedRunwayEndLatitude,
+			Column: runway.FieldHighRunwayLatitude,
 		})
 	}
-	if value, ok := ru.mutation.AddedHighNumberedRunwayEndLatitude(); ok {
+	if value, ok := ru.mutation.AddedHighRunwayLatitude(); ok {
 		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
 			Type:   field.TypeFloat64,
 			Value:  value,
-			Column: runway.FieldHighNumberedRunwayEndLatitude,
+			Column: runway.FieldHighRunwayLatitude,
 		})
 	}
-	if value, ok := ru.mutation.HighNumberedRunwayEndLongitude(); ok {
+	if ru.mutation.HighRunwayLatitudeCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeFloat64,
+			Column: runway.FieldHighRunwayLatitude,
+		})
+	}
+	if value, ok := ru.mutation.HighRunwayLongitude(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeFloat64,
 			Value:  value,
-			Column: runway.FieldHighNumberedRunwayEndLongitude,
+			Column: runway.FieldHighRunwayLongitude,
 		})
 	}
-	if value, ok := ru.mutation.AddedHighNumberedRunwayEndLongitude(); ok {
+	if value, ok := ru.mutation.AddedHighRunwayLongitude(); ok {
 		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
 			Type:   field.TypeFloat64,
 			Value:  value,
-			Column: runway.FieldHighNumberedRunwayEndLongitude,
+			Column: runway.FieldHighRunwayLongitude,
 		})
 	}
-	if value, ok := ru.mutation.HighNumberedRunwayEndElevation(); ok {
+	if ru.mutation.HighRunwayLongitudeCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeFloat64,
+			Column: runway.FieldHighRunwayLongitude,
+		})
+	}
+	if value, ok := ru.mutation.HighRunwayElevation(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeInt,
 			Value:  value,
-			Column: runway.FieldHighNumberedRunwayEndElevation,
+			Column: runway.FieldHighRunwayElevation,
 		})
 	}
-	if value, ok := ru.mutation.AddedHighNumberedRunwayEndElevation(); ok {
+	if value, ok := ru.mutation.AddedHighRunwayElevation(); ok {
 		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
 			Type:   field.TypeInt,
 			Value:  value,
-			Column: runway.FieldHighNumberedRunwayEndElevation,
+			Column: runway.FieldHighRunwayElevation,
 		})
 	}
-	if value, ok := ru.mutation.HighNumberedRunwayEndHeading(); ok {
+	if ru.mutation.HighRunwayElevationCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt,
+			Column: runway.FieldHighRunwayElevation,
+		})
+	}
+	if value, ok := ru.mutation.HighRunwayHeading(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeInt,
 			Value:  value,
-			Column: runway.FieldHighNumberedRunwayEndHeading,
+			Column: runway.FieldHighRunwayHeading,
 		})
 	}
-	if value, ok := ru.mutation.AddedHighNumberedRunwayEndHeading(); ok {
+	if value, ok := ru.mutation.AddedHighRunwayHeading(); ok {
 		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
 			Type:   field.TypeInt,
 			Value:  value,
-			Column: runway.FieldHighNumberedRunwayEndHeading,
+			Column: runway.FieldHighRunwayHeading,
 		})
 	}
-	if value, ok := ru.mutation.HighNumberedRunwayEndDisplaced(); ok {
+	if ru.mutation.HighRunwayHeadingCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt,
+			Column: runway.FieldHighRunwayHeading,
+		})
+	}
+	if value, ok := ru.mutation.HighRunwayDisplaced(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeInt,
 			Value:  value,
-			Column: runway.FieldHighNumberedRunwayEndDisplaced,
+			Column: runway.FieldHighRunwayDisplaced,
 		})
 	}
-	if value, ok := ru.mutation.AddedHighNumberedRunwayEndDisplaced(); ok {
+	if value, ok := ru.mutation.AddedHighRunwayDisplaced(); ok {
 		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
 			Type:   field.TypeInt,
 			Value:  value,
-			Column: runway.FieldHighNumberedRunwayEndDisplaced,
+			Column: runway.FieldHighRunwayDisplaced,
+		})
+	}
+	if ru.mutation.HighRunwayDisplacedCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt,
+			Column: runway.FieldHighRunwayDisplaced,
 		})
 	}
 	if ru.mutation.AirportCleared() {
@@ -658,15 +821,8 @@ type RunwayUpdateOne struct {
 }
 
 // SetHash sets the "hash" field.
-func (ruo *RunwayUpdateOne) SetHash(u uint64) *RunwayUpdateOne {
-	ruo.mutation.ResetHash()
-	ruo.mutation.SetHash(u)
-	return ruo
-}
-
-// AddHash adds u to the "hash" field.
-func (ruo *RunwayUpdateOne) AddHash(u int64) *RunwayUpdateOne {
-	ruo.mutation.AddHash(u)
+func (ruo *RunwayUpdateOne) SetHash(s string) *RunwayUpdateOne {
+	ruo.mutation.SetHash(s)
 	return ruo
 }
 
@@ -681,12 +837,6 @@ func (ruo *RunwayUpdateOne) SetNillableImportFlag(b *bool) *RunwayUpdateOne {
 	if b != nil {
 		ruo.SetImportFlag(*b)
 	}
-	return ruo
-}
-
-// SetUpdateTime sets the "update_time" field.
-func (ruo *RunwayUpdateOne) SetUpdateTime(t time.Time) *RunwayUpdateOne {
-	ruo.mutation.SetUpdateTime(t)
 	return ruo
 }
 
@@ -740,145 +890,285 @@ func (ruo *RunwayUpdateOne) SetClosed(b bool) *RunwayUpdateOne {
 	return ruo
 }
 
-// SetLowNumberedRunwayEndIdentifier sets the "low_numbered_runway_end_identifier" field.
-func (ruo *RunwayUpdateOne) SetLowNumberedRunwayEndIdentifier(s string) *RunwayUpdateOne {
-	ruo.mutation.SetLowNumberedRunwayEndIdentifier(s)
+// SetLowRunwayIdentifier sets the "low_runway_identifier" field.
+func (ruo *RunwayUpdateOne) SetLowRunwayIdentifier(s string) *RunwayUpdateOne {
+	ruo.mutation.SetLowRunwayIdentifier(s)
 	return ruo
 }
 
-// SetLowNumberedRunwayEndLatitude sets the "low_numbered_runway_end_latitude" field.
-func (ruo *RunwayUpdateOne) SetLowNumberedRunwayEndLatitude(f float64) *RunwayUpdateOne {
-	ruo.mutation.ResetLowNumberedRunwayEndLatitude()
-	ruo.mutation.SetLowNumberedRunwayEndLatitude(f)
+// SetLowRunwayLatitude sets the "low_runway_latitude" field.
+func (ruo *RunwayUpdateOne) SetLowRunwayLatitude(f float64) *RunwayUpdateOne {
+	ruo.mutation.ResetLowRunwayLatitude()
+	ruo.mutation.SetLowRunwayLatitude(f)
 	return ruo
 }
 
-// AddLowNumberedRunwayEndLatitude adds f to the "low_numbered_runway_end_latitude" field.
-func (ruo *RunwayUpdateOne) AddLowNumberedRunwayEndLatitude(f float64) *RunwayUpdateOne {
-	ruo.mutation.AddLowNumberedRunwayEndLatitude(f)
+// SetNillableLowRunwayLatitude sets the "low_runway_latitude" field if the given value is not nil.
+func (ruo *RunwayUpdateOne) SetNillableLowRunwayLatitude(f *float64) *RunwayUpdateOne {
+	if f != nil {
+		ruo.SetLowRunwayLatitude(*f)
+	}
 	return ruo
 }
 
-// SetLowNumberedRunwayEndLongitude sets the "low_numbered_runway_end_longitude" field.
-func (ruo *RunwayUpdateOne) SetLowNumberedRunwayEndLongitude(f float64) *RunwayUpdateOne {
-	ruo.mutation.ResetLowNumberedRunwayEndLongitude()
-	ruo.mutation.SetLowNumberedRunwayEndLongitude(f)
+// AddLowRunwayLatitude adds f to the "low_runway_latitude" field.
+func (ruo *RunwayUpdateOne) AddLowRunwayLatitude(f float64) *RunwayUpdateOne {
+	ruo.mutation.AddLowRunwayLatitude(f)
 	return ruo
 }
 
-// AddLowNumberedRunwayEndLongitude adds f to the "low_numbered_runway_end_longitude" field.
-func (ruo *RunwayUpdateOne) AddLowNumberedRunwayEndLongitude(f float64) *RunwayUpdateOne {
-	ruo.mutation.AddLowNumberedRunwayEndLongitude(f)
+// ClearLowRunwayLatitude clears the value of the "low_runway_latitude" field.
+func (ruo *RunwayUpdateOne) ClearLowRunwayLatitude() *RunwayUpdateOne {
+	ruo.mutation.ClearLowRunwayLatitude()
 	return ruo
 }
 
-// SetLowNumberedRunwayEndElevation sets the "low_numbered_runway_end_elevation" field.
-func (ruo *RunwayUpdateOne) SetLowNumberedRunwayEndElevation(i int) *RunwayUpdateOne {
-	ruo.mutation.ResetLowNumberedRunwayEndElevation()
-	ruo.mutation.SetLowNumberedRunwayEndElevation(i)
+// SetLowRunwayLongitude sets the "low_runway_longitude" field.
+func (ruo *RunwayUpdateOne) SetLowRunwayLongitude(f float64) *RunwayUpdateOne {
+	ruo.mutation.ResetLowRunwayLongitude()
+	ruo.mutation.SetLowRunwayLongitude(f)
 	return ruo
 }
 
-// AddLowNumberedRunwayEndElevation adds i to the "low_numbered_runway_end_elevation" field.
-func (ruo *RunwayUpdateOne) AddLowNumberedRunwayEndElevation(i int) *RunwayUpdateOne {
-	ruo.mutation.AddLowNumberedRunwayEndElevation(i)
+// SetNillableLowRunwayLongitude sets the "low_runway_longitude" field if the given value is not nil.
+func (ruo *RunwayUpdateOne) SetNillableLowRunwayLongitude(f *float64) *RunwayUpdateOne {
+	if f != nil {
+		ruo.SetLowRunwayLongitude(*f)
+	}
 	return ruo
 }
 
-// SetLowNumberedRunwayEndHeading sets the "low_numbered_runway_end_heading" field.
-func (ruo *RunwayUpdateOne) SetLowNumberedRunwayEndHeading(i int) *RunwayUpdateOne {
-	ruo.mutation.ResetLowNumberedRunwayEndHeading()
-	ruo.mutation.SetLowNumberedRunwayEndHeading(i)
+// AddLowRunwayLongitude adds f to the "low_runway_longitude" field.
+func (ruo *RunwayUpdateOne) AddLowRunwayLongitude(f float64) *RunwayUpdateOne {
+	ruo.mutation.AddLowRunwayLongitude(f)
 	return ruo
 }
 
-// AddLowNumberedRunwayEndHeading adds i to the "low_numbered_runway_end_heading" field.
-func (ruo *RunwayUpdateOne) AddLowNumberedRunwayEndHeading(i int) *RunwayUpdateOne {
-	ruo.mutation.AddLowNumberedRunwayEndHeading(i)
+// ClearLowRunwayLongitude clears the value of the "low_runway_longitude" field.
+func (ruo *RunwayUpdateOne) ClearLowRunwayLongitude() *RunwayUpdateOne {
+	ruo.mutation.ClearLowRunwayLongitude()
 	return ruo
 }
 
-// SetLowNumberedRunwayEndDisplaced sets the "low_numbered_runway_end_displaced" field.
-func (ruo *RunwayUpdateOne) SetLowNumberedRunwayEndDisplaced(i int) *RunwayUpdateOne {
-	ruo.mutation.ResetLowNumberedRunwayEndDisplaced()
-	ruo.mutation.SetLowNumberedRunwayEndDisplaced(i)
+// SetLowRunwayElevation sets the "low_runway_elevation" field.
+func (ruo *RunwayUpdateOne) SetLowRunwayElevation(i int) *RunwayUpdateOne {
+	ruo.mutation.ResetLowRunwayElevation()
+	ruo.mutation.SetLowRunwayElevation(i)
 	return ruo
 }
 
-// AddLowNumberedRunwayEndDisplaced adds i to the "low_numbered_runway_end_displaced" field.
-func (ruo *RunwayUpdateOne) AddLowNumberedRunwayEndDisplaced(i int) *RunwayUpdateOne {
-	ruo.mutation.AddLowNumberedRunwayEndDisplaced(i)
+// SetNillableLowRunwayElevation sets the "low_runway_elevation" field if the given value is not nil.
+func (ruo *RunwayUpdateOne) SetNillableLowRunwayElevation(i *int) *RunwayUpdateOne {
+	if i != nil {
+		ruo.SetLowRunwayElevation(*i)
+	}
 	return ruo
 }
 
-// SetHighNumberedRunwayEndIdentifier sets the "high_numbered_runway_end_identifier" field.
-func (ruo *RunwayUpdateOne) SetHighNumberedRunwayEndIdentifier(s string) *RunwayUpdateOne {
-	ruo.mutation.SetHighNumberedRunwayEndIdentifier(s)
+// AddLowRunwayElevation adds i to the "low_runway_elevation" field.
+func (ruo *RunwayUpdateOne) AddLowRunwayElevation(i int) *RunwayUpdateOne {
+	ruo.mutation.AddLowRunwayElevation(i)
 	return ruo
 }
 
-// SetHighNumberedRunwayEndLatitude sets the "high_numbered_runway_end_latitude" field.
-func (ruo *RunwayUpdateOne) SetHighNumberedRunwayEndLatitude(f float64) *RunwayUpdateOne {
-	ruo.mutation.ResetHighNumberedRunwayEndLatitude()
-	ruo.mutation.SetHighNumberedRunwayEndLatitude(f)
+// ClearLowRunwayElevation clears the value of the "low_runway_elevation" field.
+func (ruo *RunwayUpdateOne) ClearLowRunwayElevation() *RunwayUpdateOne {
+	ruo.mutation.ClearLowRunwayElevation()
 	return ruo
 }
 
-// AddHighNumberedRunwayEndLatitude adds f to the "high_numbered_runway_end_latitude" field.
-func (ruo *RunwayUpdateOne) AddHighNumberedRunwayEndLatitude(f float64) *RunwayUpdateOne {
-	ruo.mutation.AddHighNumberedRunwayEndLatitude(f)
+// SetLowRunwayHeading sets the "low_runway_heading" field.
+func (ruo *RunwayUpdateOne) SetLowRunwayHeading(i int) *RunwayUpdateOne {
+	ruo.mutation.ResetLowRunwayHeading()
+	ruo.mutation.SetLowRunwayHeading(i)
 	return ruo
 }
 
-// SetHighNumberedRunwayEndLongitude sets the "high_numbered_runway_end_longitude" field.
-func (ruo *RunwayUpdateOne) SetHighNumberedRunwayEndLongitude(f float64) *RunwayUpdateOne {
-	ruo.mutation.ResetHighNumberedRunwayEndLongitude()
-	ruo.mutation.SetHighNumberedRunwayEndLongitude(f)
+// SetNillableLowRunwayHeading sets the "low_runway_heading" field if the given value is not nil.
+func (ruo *RunwayUpdateOne) SetNillableLowRunwayHeading(i *int) *RunwayUpdateOne {
+	if i != nil {
+		ruo.SetLowRunwayHeading(*i)
+	}
 	return ruo
 }
 
-// AddHighNumberedRunwayEndLongitude adds f to the "high_numbered_runway_end_longitude" field.
-func (ruo *RunwayUpdateOne) AddHighNumberedRunwayEndLongitude(f float64) *RunwayUpdateOne {
-	ruo.mutation.AddHighNumberedRunwayEndLongitude(f)
+// AddLowRunwayHeading adds i to the "low_runway_heading" field.
+func (ruo *RunwayUpdateOne) AddLowRunwayHeading(i int) *RunwayUpdateOne {
+	ruo.mutation.AddLowRunwayHeading(i)
 	return ruo
 }
 
-// SetHighNumberedRunwayEndElevation sets the "high_numbered_runway_end_elevation" field.
-func (ruo *RunwayUpdateOne) SetHighNumberedRunwayEndElevation(i int) *RunwayUpdateOne {
-	ruo.mutation.ResetHighNumberedRunwayEndElevation()
-	ruo.mutation.SetHighNumberedRunwayEndElevation(i)
+// ClearLowRunwayHeading clears the value of the "low_runway_heading" field.
+func (ruo *RunwayUpdateOne) ClearLowRunwayHeading() *RunwayUpdateOne {
+	ruo.mutation.ClearLowRunwayHeading()
 	return ruo
 }
 
-// AddHighNumberedRunwayEndElevation adds i to the "high_numbered_runway_end_elevation" field.
-func (ruo *RunwayUpdateOne) AddHighNumberedRunwayEndElevation(i int) *RunwayUpdateOne {
-	ruo.mutation.AddHighNumberedRunwayEndElevation(i)
+// SetLowRunwayDisplaced sets the "low_runway_displaced" field.
+func (ruo *RunwayUpdateOne) SetLowRunwayDisplaced(i int) *RunwayUpdateOne {
+	ruo.mutation.ResetLowRunwayDisplaced()
+	ruo.mutation.SetLowRunwayDisplaced(i)
 	return ruo
 }
 
-// SetHighNumberedRunwayEndHeading sets the "high_numbered_runway_end_heading" field.
-func (ruo *RunwayUpdateOne) SetHighNumberedRunwayEndHeading(i int) *RunwayUpdateOne {
-	ruo.mutation.ResetHighNumberedRunwayEndHeading()
-	ruo.mutation.SetHighNumberedRunwayEndHeading(i)
+// SetNillableLowRunwayDisplaced sets the "low_runway_displaced" field if the given value is not nil.
+func (ruo *RunwayUpdateOne) SetNillableLowRunwayDisplaced(i *int) *RunwayUpdateOne {
+	if i != nil {
+		ruo.SetLowRunwayDisplaced(*i)
+	}
 	return ruo
 }
 
-// AddHighNumberedRunwayEndHeading adds i to the "high_numbered_runway_end_heading" field.
-func (ruo *RunwayUpdateOne) AddHighNumberedRunwayEndHeading(i int) *RunwayUpdateOne {
-	ruo.mutation.AddHighNumberedRunwayEndHeading(i)
+// AddLowRunwayDisplaced adds i to the "low_runway_displaced" field.
+func (ruo *RunwayUpdateOne) AddLowRunwayDisplaced(i int) *RunwayUpdateOne {
+	ruo.mutation.AddLowRunwayDisplaced(i)
 	return ruo
 }
 
-// SetHighNumberedRunwayEndDisplaced sets the "high_numbered_runway_end_displaced" field.
-func (ruo *RunwayUpdateOne) SetHighNumberedRunwayEndDisplaced(i int) *RunwayUpdateOne {
-	ruo.mutation.ResetHighNumberedRunwayEndDisplaced()
-	ruo.mutation.SetHighNumberedRunwayEndDisplaced(i)
+// ClearLowRunwayDisplaced clears the value of the "low_runway_displaced" field.
+func (ruo *RunwayUpdateOne) ClearLowRunwayDisplaced() *RunwayUpdateOne {
+	ruo.mutation.ClearLowRunwayDisplaced()
 	return ruo
 }
 
-// AddHighNumberedRunwayEndDisplaced adds i to the "high_numbered_runway_end_displaced" field.
-func (ruo *RunwayUpdateOne) AddHighNumberedRunwayEndDisplaced(i int) *RunwayUpdateOne {
-	ruo.mutation.AddHighNumberedRunwayEndDisplaced(i)
+// SetHighRunwayIdentifier sets the "high_runway_identifier" field.
+func (ruo *RunwayUpdateOne) SetHighRunwayIdentifier(s string) *RunwayUpdateOne {
+	ruo.mutation.SetHighRunwayIdentifier(s)
+	return ruo
+}
+
+// SetHighRunwayLatitude sets the "high_runway_latitude" field.
+func (ruo *RunwayUpdateOne) SetHighRunwayLatitude(f float64) *RunwayUpdateOne {
+	ruo.mutation.ResetHighRunwayLatitude()
+	ruo.mutation.SetHighRunwayLatitude(f)
+	return ruo
+}
+
+// SetNillableHighRunwayLatitude sets the "high_runway_latitude" field if the given value is not nil.
+func (ruo *RunwayUpdateOne) SetNillableHighRunwayLatitude(f *float64) *RunwayUpdateOne {
+	if f != nil {
+		ruo.SetHighRunwayLatitude(*f)
+	}
+	return ruo
+}
+
+// AddHighRunwayLatitude adds f to the "high_runway_latitude" field.
+func (ruo *RunwayUpdateOne) AddHighRunwayLatitude(f float64) *RunwayUpdateOne {
+	ruo.mutation.AddHighRunwayLatitude(f)
+	return ruo
+}
+
+// ClearHighRunwayLatitude clears the value of the "high_runway_latitude" field.
+func (ruo *RunwayUpdateOne) ClearHighRunwayLatitude() *RunwayUpdateOne {
+	ruo.mutation.ClearHighRunwayLatitude()
+	return ruo
+}
+
+// SetHighRunwayLongitude sets the "high_runway_longitude" field.
+func (ruo *RunwayUpdateOne) SetHighRunwayLongitude(f float64) *RunwayUpdateOne {
+	ruo.mutation.ResetHighRunwayLongitude()
+	ruo.mutation.SetHighRunwayLongitude(f)
+	return ruo
+}
+
+// SetNillableHighRunwayLongitude sets the "high_runway_longitude" field if the given value is not nil.
+func (ruo *RunwayUpdateOne) SetNillableHighRunwayLongitude(f *float64) *RunwayUpdateOne {
+	if f != nil {
+		ruo.SetHighRunwayLongitude(*f)
+	}
+	return ruo
+}
+
+// AddHighRunwayLongitude adds f to the "high_runway_longitude" field.
+func (ruo *RunwayUpdateOne) AddHighRunwayLongitude(f float64) *RunwayUpdateOne {
+	ruo.mutation.AddHighRunwayLongitude(f)
+	return ruo
+}
+
+// ClearHighRunwayLongitude clears the value of the "high_runway_longitude" field.
+func (ruo *RunwayUpdateOne) ClearHighRunwayLongitude() *RunwayUpdateOne {
+	ruo.mutation.ClearHighRunwayLongitude()
+	return ruo
+}
+
+// SetHighRunwayElevation sets the "high_runway_elevation" field.
+func (ruo *RunwayUpdateOne) SetHighRunwayElevation(i int) *RunwayUpdateOne {
+	ruo.mutation.ResetHighRunwayElevation()
+	ruo.mutation.SetHighRunwayElevation(i)
+	return ruo
+}
+
+// SetNillableHighRunwayElevation sets the "high_runway_elevation" field if the given value is not nil.
+func (ruo *RunwayUpdateOne) SetNillableHighRunwayElevation(i *int) *RunwayUpdateOne {
+	if i != nil {
+		ruo.SetHighRunwayElevation(*i)
+	}
+	return ruo
+}
+
+// AddHighRunwayElevation adds i to the "high_runway_elevation" field.
+func (ruo *RunwayUpdateOne) AddHighRunwayElevation(i int) *RunwayUpdateOne {
+	ruo.mutation.AddHighRunwayElevation(i)
+	return ruo
+}
+
+// ClearHighRunwayElevation clears the value of the "high_runway_elevation" field.
+func (ruo *RunwayUpdateOne) ClearHighRunwayElevation() *RunwayUpdateOne {
+	ruo.mutation.ClearHighRunwayElevation()
+	return ruo
+}
+
+// SetHighRunwayHeading sets the "high_runway_heading" field.
+func (ruo *RunwayUpdateOne) SetHighRunwayHeading(i int) *RunwayUpdateOne {
+	ruo.mutation.ResetHighRunwayHeading()
+	ruo.mutation.SetHighRunwayHeading(i)
+	return ruo
+}
+
+// SetNillableHighRunwayHeading sets the "high_runway_heading" field if the given value is not nil.
+func (ruo *RunwayUpdateOne) SetNillableHighRunwayHeading(i *int) *RunwayUpdateOne {
+	if i != nil {
+		ruo.SetHighRunwayHeading(*i)
+	}
+	return ruo
+}
+
+// AddHighRunwayHeading adds i to the "high_runway_heading" field.
+func (ruo *RunwayUpdateOne) AddHighRunwayHeading(i int) *RunwayUpdateOne {
+	ruo.mutation.AddHighRunwayHeading(i)
+	return ruo
+}
+
+// ClearHighRunwayHeading clears the value of the "high_runway_heading" field.
+func (ruo *RunwayUpdateOne) ClearHighRunwayHeading() *RunwayUpdateOne {
+	ruo.mutation.ClearHighRunwayHeading()
+	return ruo
+}
+
+// SetHighRunwayDisplaced sets the "high_runway_displaced" field.
+func (ruo *RunwayUpdateOne) SetHighRunwayDisplaced(i int) *RunwayUpdateOne {
+	ruo.mutation.ResetHighRunwayDisplaced()
+	ruo.mutation.SetHighRunwayDisplaced(i)
+	return ruo
+}
+
+// SetNillableHighRunwayDisplaced sets the "high_runway_displaced" field if the given value is not nil.
+func (ruo *RunwayUpdateOne) SetNillableHighRunwayDisplaced(i *int) *RunwayUpdateOne {
+	if i != nil {
+		ruo.SetHighRunwayDisplaced(*i)
+	}
+	return ruo
+}
+
+// AddHighRunwayDisplaced adds i to the "high_runway_displaced" field.
+func (ruo *RunwayUpdateOne) AddHighRunwayDisplaced(i int) *RunwayUpdateOne {
+	ruo.mutation.AddHighRunwayDisplaced(i)
+	return ruo
+}
+
+// ClearHighRunwayDisplaced clears the value of the "high_runway_displaced" field.
+func (ruo *RunwayUpdateOne) ClearHighRunwayDisplaced() *RunwayUpdateOne {
+	ruo.mutation.ClearHighRunwayDisplaced()
 	return ruo
 }
 
@@ -925,7 +1215,6 @@ func (ruo *RunwayUpdateOne) Save(ctx context.Context) (*Runway, error) {
 		err  error
 		node *Runway
 	)
-	ruo.defaults()
 	if len(ruo.hooks) == 0 {
 		node, err = ruo.sqlSave(ctx)
 	} else {
@@ -980,14 +1269,6 @@ func (ruo *RunwayUpdateOne) ExecX(ctx context.Context) {
 	}
 }
 
-// defaults sets the default values of the builder before save.
-func (ruo *RunwayUpdateOne) defaults() {
-	if _, ok := ruo.mutation.UpdateTime(); !ok {
-		v := runway.UpdateDefaultUpdateTime()
-		ruo.mutation.SetUpdateTime(v)
-	}
-}
-
 func (ruo *RunwayUpdateOne) sqlSave(ctx context.Context) (_node *Runway, err error) {
 	_spec := &sqlgraph.UpdateSpec{
 		Node: &sqlgraph.NodeSpec{
@@ -1025,14 +1306,7 @@ func (ruo *RunwayUpdateOne) sqlSave(ctx context.Context) (_node *Runway, err err
 	}
 	if value, ok := ruo.mutation.Hash(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeUint64,
-			Value:  value,
-			Column: runway.FieldHash,
-		})
-	}
-	if value, ok := ruo.mutation.AddedHash(); ok {
-		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
-			Type:   field.TypeUint64,
+			Type:   field.TypeString,
 			Value:  value,
 			Column: runway.FieldHash,
 		})
@@ -1042,13 +1316,6 @@ func (ruo *RunwayUpdateOne) sqlSave(ctx context.Context) (_node *Runway, err err
 			Type:   field.TypeBool,
 			Value:  value,
 			Column: runway.FieldImportFlag,
-		})
-	}
-	if value, ok := ruo.mutation.UpdateTime(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Value:  value,
-			Column: runway.FieldUpdateTime,
 		})
 	}
 	if value, ok := ruo.mutation.AirportIdentifier(); ok {
@@ -1107,158 +1374,218 @@ func (ruo *RunwayUpdateOne) sqlSave(ctx context.Context) (_node *Runway, err err
 			Column: runway.FieldClosed,
 		})
 	}
-	if value, ok := ruo.mutation.LowNumberedRunwayEndIdentifier(); ok {
+	if value, ok := ruo.mutation.LowRunwayIdentifier(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
 			Value:  value,
-			Column: runway.FieldLowNumberedRunwayEndIdentifier,
+			Column: runway.FieldLowRunwayIdentifier,
 		})
 	}
-	if value, ok := ruo.mutation.LowNumberedRunwayEndLatitude(); ok {
+	if value, ok := ruo.mutation.LowRunwayLatitude(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeFloat64,
 			Value:  value,
-			Column: runway.FieldLowNumberedRunwayEndLatitude,
+			Column: runway.FieldLowRunwayLatitude,
 		})
 	}
-	if value, ok := ruo.mutation.AddedLowNumberedRunwayEndLatitude(); ok {
+	if value, ok := ruo.mutation.AddedLowRunwayLatitude(); ok {
 		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
 			Type:   field.TypeFloat64,
 			Value:  value,
-			Column: runway.FieldLowNumberedRunwayEndLatitude,
+			Column: runway.FieldLowRunwayLatitude,
 		})
 	}
-	if value, ok := ruo.mutation.LowNumberedRunwayEndLongitude(); ok {
+	if ruo.mutation.LowRunwayLatitudeCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeFloat64,
+			Column: runway.FieldLowRunwayLatitude,
+		})
+	}
+	if value, ok := ruo.mutation.LowRunwayLongitude(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeFloat64,
 			Value:  value,
-			Column: runway.FieldLowNumberedRunwayEndLongitude,
+			Column: runway.FieldLowRunwayLongitude,
 		})
 	}
-	if value, ok := ruo.mutation.AddedLowNumberedRunwayEndLongitude(); ok {
+	if value, ok := ruo.mutation.AddedLowRunwayLongitude(); ok {
 		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
 			Type:   field.TypeFloat64,
 			Value:  value,
-			Column: runway.FieldLowNumberedRunwayEndLongitude,
+			Column: runway.FieldLowRunwayLongitude,
 		})
 	}
-	if value, ok := ruo.mutation.LowNumberedRunwayEndElevation(); ok {
+	if ruo.mutation.LowRunwayLongitudeCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeFloat64,
+			Column: runway.FieldLowRunwayLongitude,
+		})
+	}
+	if value, ok := ruo.mutation.LowRunwayElevation(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeInt,
 			Value:  value,
-			Column: runway.FieldLowNumberedRunwayEndElevation,
+			Column: runway.FieldLowRunwayElevation,
 		})
 	}
-	if value, ok := ruo.mutation.AddedLowNumberedRunwayEndElevation(); ok {
+	if value, ok := ruo.mutation.AddedLowRunwayElevation(); ok {
 		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
 			Type:   field.TypeInt,
 			Value:  value,
-			Column: runway.FieldLowNumberedRunwayEndElevation,
+			Column: runway.FieldLowRunwayElevation,
 		})
 	}
-	if value, ok := ruo.mutation.LowNumberedRunwayEndHeading(); ok {
+	if ruo.mutation.LowRunwayElevationCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt,
+			Column: runway.FieldLowRunwayElevation,
+		})
+	}
+	if value, ok := ruo.mutation.LowRunwayHeading(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeInt,
 			Value:  value,
-			Column: runway.FieldLowNumberedRunwayEndHeading,
+			Column: runway.FieldLowRunwayHeading,
 		})
 	}
-	if value, ok := ruo.mutation.AddedLowNumberedRunwayEndHeading(); ok {
+	if value, ok := ruo.mutation.AddedLowRunwayHeading(); ok {
 		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
 			Type:   field.TypeInt,
 			Value:  value,
-			Column: runway.FieldLowNumberedRunwayEndHeading,
+			Column: runway.FieldLowRunwayHeading,
 		})
 	}
-	if value, ok := ruo.mutation.LowNumberedRunwayEndDisplaced(); ok {
+	if ruo.mutation.LowRunwayHeadingCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt,
+			Column: runway.FieldLowRunwayHeading,
+		})
+	}
+	if value, ok := ruo.mutation.LowRunwayDisplaced(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeInt,
 			Value:  value,
-			Column: runway.FieldLowNumberedRunwayEndDisplaced,
+			Column: runway.FieldLowRunwayDisplaced,
 		})
 	}
-	if value, ok := ruo.mutation.AddedLowNumberedRunwayEndDisplaced(); ok {
+	if value, ok := ruo.mutation.AddedLowRunwayDisplaced(); ok {
 		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
 			Type:   field.TypeInt,
 			Value:  value,
-			Column: runway.FieldLowNumberedRunwayEndDisplaced,
+			Column: runway.FieldLowRunwayDisplaced,
 		})
 	}
-	if value, ok := ruo.mutation.HighNumberedRunwayEndIdentifier(); ok {
+	if ruo.mutation.LowRunwayDisplacedCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt,
+			Column: runway.FieldLowRunwayDisplaced,
+		})
+	}
+	if value, ok := ruo.mutation.HighRunwayIdentifier(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
 			Value:  value,
-			Column: runway.FieldHighNumberedRunwayEndIdentifier,
+			Column: runway.FieldHighRunwayIdentifier,
 		})
 	}
-	if value, ok := ruo.mutation.HighNumberedRunwayEndLatitude(); ok {
+	if value, ok := ruo.mutation.HighRunwayLatitude(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeFloat64,
 			Value:  value,
-			Column: runway.FieldHighNumberedRunwayEndLatitude,
+			Column: runway.FieldHighRunwayLatitude,
 		})
 	}
-	if value, ok := ruo.mutation.AddedHighNumberedRunwayEndLatitude(); ok {
+	if value, ok := ruo.mutation.AddedHighRunwayLatitude(); ok {
 		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
 			Type:   field.TypeFloat64,
 			Value:  value,
-			Column: runway.FieldHighNumberedRunwayEndLatitude,
+			Column: runway.FieldHighRunwayLatitude,
 		})
 	}
-	if value, ok := ruo.mutation.HighNumberedRunwayEndLongitude(); ok {
+	if ruo.mutation.HighRunwayLatitudeCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeFloat64,
+			Column: runway.FieldHighRunwayLatitude,
+		})
+	}
+	if value, ok := ruo.mutation.HighRunwayLongitude(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeFloat64,
 			Value:  value,
-			Column: runway.FieldHighNumberedRunwayEndLongitude,
+			Column: runway.FieldHighRunwayLongitude,
 		})
 	}
-	if value, ok := ruo.mutation.AddedHighNumberedRunwayEndLongitude(); ok {
+	if value, ok := ruo.mutation.AddedHighRunwayLongitude(); ok {
 		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
 			Type:   field.TypeFloat64,
 			Value:  value,
-			Column: runway.FieldHighNumberedRunwayEndLongitude,
+			Column: runway.FieldHighRunwayLongitude,
 		})
 	}
-	if value, ok := ruo.mutation.HighNumberedRunwayEndElevation(); ok {
+	if ruo.mutation.HighRunwayLongitudeCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeFloat64,
+			Column: runway.FieldHighRunwayLongitude,
+		})
+	}
+	if value, ok := ruo.mutation.HighRunwayElevation(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeInt,
 			Value:  value,
-			Column: runway.FieldHighNumberedRunwayEndElevation,
+			Column: runway.FieldHighRunwayElevation,
 		})
 	}
-	if value, ok := ruo.mutation.AddedHighNumberedRunwayEndElevation(); ok {
+	if value, ok := ruo.mutation.AddedHighRunwayElevation(); ok {
 		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
 			Type:   field.TypeInt,
 			Value:  value,
-			Column: runway.FieldHighNumberedRunwayEndElevation,
+			Column: runway.FieldHighRunwayElevation,
 		})
 	}
-	if value, ok := ruo.mutation.HighNumberedRunwayEndHeading(); ok {
+	if ruo.mutation.HighRunwayElevationCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt,
+			Column: runway.FieldHighRunwayElevation,
+		})
+	}
+	if value, ok := ruo.mutation.HighRunwayHeading(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeInt,
 			Value:  value,
-			Column: runway.FieldHighNumberedRunwayEndHeading,
+			Column: runway.FieldHighRunwayHeading,
 		})
 	}
-	if value, ok := ruo.mutation.AddedHighNumberedRunwayEndHeading(); ok {
+	if value, ok := ruo.mutation.AddedHighRunwayHeading(); ok {
 		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
 			Type:   field.TypeInt,
 			Value:  value,
-			Column: runway.FieldHighNumberedRunwayEndHeading,
+			Column: runway.FieldHighRunwayHeading,
 		})
 	}
-	if value, ok := ruo.mutation.HighNumberedRunwayEndDisplaced(); ok {
+	if ruo.mutation.HighRunwayHeadingCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt,
+			Column: runway.FieldHighRunwayHeading,
+		})
+	}
+	if value, ok := ruo.mutation.HighRunwayDisplaced(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeInt,
 			Value:  value,
-			Column: runway.FieldHighNumberedRunwayEndDisplaced,
+			Column: runway.FieldHighRunwayDisplaced,
 		})
 	}
-	if value, ok := ruo.mutation.AddedHighNumberedRunwayEndDisplaced(); ok {
+	if value, ok := ruo.mutation.AddedHighRunwayDisplaced(); ok {
 		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
 			Type:   field.TypeInt,
 			Value:  value,
-			Column: runway.FieldHighNumberedRunwayEndDisplaced,
+			Column: runway.FieldHighRunwayDisplaced,
+		})
+	}
+	if ruo.mutation.HighRunwayDisplacedCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt,
+			Column: runway.FieldHighRunwayDisplaced,
 		})
 	}
 	if ruo.mutation.AirportCleared() {

@@ -23,6 +23,8 @@ type FrequencyQuery struct {
 	order      []OrderFunc
 	fields     []string
 	predicates []predicate.Frequency
+	modifiers  []func(*sql.Selector)
+	loadTotal  []func(context.Context, []*Frequency) error
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -294,13 +296,16 @@ func (fq *FrequencyQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Fr
 		nodes = []*Frequency{}
 		_spec = fq.querySpec()
 	)
-	_spec.ScanValues = func(columns []string) ([]interface{}, error) {
+	_spec.ScanValues = func(columns []string) ([]any, error) {
 		return (*Frequency).scanValues(nil, columns)
 	}
-	_spec.Assign = func(columns []string, values []interface{}) error {
+	_spec.Assign = func(columns []string, values []any) error {
 		node := &Frequency{config: fq.config}
 		nodes = append(nodes, node)
 		return node.assignValues(columns, values)
+	}
+	if len(fq.modifiers) > 0 {
+		_spec.Modifiers = fq.modifiers
 	}
 	for i := range hooks {
 		hooks[i](ctx, _spec)
@@ -311,11 +316,19 @@ func (fq *FrequencyQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Fr
 	if len(nodes) == 0 {
 		return nodes, nil
 	}
+	for i := range fq.loadTotal {
+		if err := fq.loadTotal[i](ctx, nodes); err != nil {
+			return nil, err
+		}
+	}
 	return nodes, nil
 }
 
 func (fq *FrequencyQuery) sqlCount(ctx context.Context) (int, error) {
 	_spec := fq.querySpec()
+	if len(fq.modifiers) > 0 {
+		_spec.Modifiers = fq.modifiers
+	}
 	_spec.Node.Columns = fq.fields
 	if len(fq.fields) > 0 {
 		_spec.Unique = fq.unique != nil && *fq.unique
@@ -429,7 +442,7 @@ func (fgb *FrequencyGroupBy) Aggregate(fns ...AggregateFunc) *FrequencyGroupBy {
 }
 
 // Scan applies the group-by query and scans the result into the given value.
-func (fgb *FrequencyGroupBy) Scan(ctx context.Context, v interface{}) error {
+func (fgb *FrequencyGroupBy) Scan(ctx context.Context, v any) error {
 	query, err := fgb.path(ctx)
 	if err != nil {
 		return err
@@ -438,7 +451,7 @@ func (fgb *FrequencyGroupBy) Scan(ctx context.Context, v interface{}) error {
 	return fgb.sqlScan(ctx, v)
 }
 
-func (fgb *FrequencyGroupBy) sqlScan(ctx context.Context, v interface{}) error {
+func (fgb *FrequencyGroupBy) sqlScan(ctx context.Context, v any) error {
 	for _, f := range fgb.fields {
 		if !frequency.ValidColumn(f) {
 			return &ValidationError{Name: f, err: fmt.Errorf("invalid field %q for group-by", f)}
@@ -485,7 +498,7 @@ type FrequencySelect struct {
 }
 
 // Scan applies the selector query and scans the result into the given value.
-func (fs *FrequencySelect) Scan(ctx context.Context, v interface{}) error {
+func (fs *FrequencySelect) Scan(ctx context.Context, v any) error {
 	if err := fs.prepareQuery(ctx); err != nil {
 		return err
 	}
@@ -493,7 +506,7 @@ func (fs *FrequencySelect) Scan(ctx context.Context, v interface{}) error {
 	return fs.sqlScan(ctx, v)
 }
 
-func (fs *FrequencySelect) sqlScan(ctx context.Context, v interface{}) error {
+func (fs *FrequencySelect) sqlScan(ctx context.Context, v any) error {
 	rows := &sql.Rows{}
 	query, args := fs.sql.Query()
 	if err := fs.driver.Query(ctx, query, args, rows); err != nil {

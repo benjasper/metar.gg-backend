@@ -26,6 +26,8 @@ type RunwayQuery struct {
 	predicates  []predicate.Runway
 	withAirport *AirportQuery
 	withFKs     bool
+	modifiers   []func(*sql.Selector)
+	loadTotal   []func(context.Context, []*Runway) error
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -290,7 +292,7 @@ func (rq *RunwayQuery) WithAirport(opts ...func(*AirportQuery)) *RunwayQuery {
 // Example:
 //
 //	var v []struct {
-//		Hash uint64 `json:"hash,omitempty"`
+//		Hash string `json:"hash,omitempty"`
 //		Count int `json:"count,omitempty"`
 //	}
 //
@@ -298,7 +300,6 @@ func (rq *RunwayQuery) WithAirport(opts ...func(*AirportQuery)) *RunwayQuery {
 //		GroupBy(runway.FieldHash).
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
-//
 func (rq *RunwayQuery) GroupBy(field string, fields ...string) *RunwayGroupBy {
 	grbuild := &RunwayGroupBy{config: rq.config}
 	grbuild.fields = append([]string{field}, fields...)
@@ -319,13 +320,12 @@ func (rq *RunwayQuery) GroupBy(field string, fields ...string) *RunwayGroupBy {
 // Example:
 //
 //	var v []struct {
-//		Hash uint64 `json:"hash,omitempty"`
+//		Hash string `json:"hash,omitempty"`
 //	}
 //
 //	client.Runway.Query().
 //		Select(runway.FieldHash).
 //		Scan(ctx, &v)
-//
 func (rq *RunwayQuery) Select(fields ...string) *RunwaySelect {
 	rq.fields = append(rq.fields, fields...)
 	selbuild := &RunwaySelect{RunwayQuery: rq}
@@ -365,14 +365,17 @@ func (rq *RunwayQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Runwa
 	if withFKs {
 		_spec.Node.Columns = append(_spec.Node.Columns, runway.ForeignKeys...)
 	}
-	_spec.ScanValues = func(columns []string) ([]interface{}, error) {
+	_spec.ScanValues = func(columns []string) ([]any, error) {
 		return (*Runway).scanValues(nil, columns)
 	}
-	_spec.Assign = func(columns []string, values []interface{}) error {
+	_spec.Assign = func(columns []string, values []any) error {
 		node := &Runway{config: rq.config}
 		nodes = append(nodes, node)
 		node.Edges.loadedTypes = loadedTypes
 		return node.assignValues(columns, values)
+	}
+	if len(rq.modifiers) > 0 {
+		_spec.Modifiers = rq.modifiers
 	}
 	for i := range hooks {
 		hooks[i](ctx, _spec)
@@ -386,6 +389,11 @@ func (rq *RunwayQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Runwa
 	if query := rq.withAirport; query != nil {
 		if err := rq.loadAirport(ctx, query, nodes, nil,
 			func(n *Runway, e *Airport) { n.Edges.Airport = e }); err != nil {
+			return nil, err
+		}
+	}
+	for i := range rq.loadTotal {
+		if err := rq.loadTotal[i](ctx, nodes); err != nil {
 			return nil, err
 		}
 	}
@@ -424,6 +432,9 @@ func (rq *RunwayQuery) loadAirport(ctx context.Context, query *AirportQuery, nod
 
 func (rq *RunwayQuery) sqlCount(ctx context.Context) (int, error) {
 	_spec := rq.querySpec()
+	if len(rq.modifiers) > 0 {
+		_spec.Modifiers = rq.modifiers
+	}
 	_spec.Node.Columns = rq.fields
 	if len(rq.fields) > 0 {
 		_spec.Unique = rq.unique != nil && *rq.unique
@@ -537,7 +548,7 @@ func (rgb *RunwayGroupBy) Aggregate(fns ...AggregateFunc) *RunwayGroupBy {
 }
 
 // Scan applies the group-by query and scans the result into the given value.
-func (rgb *RunwayGroupBy) Scan(ctx context.Context, v interface{}) error {
+func (rgb *RunwayGroupBy) Scan(ctx context.Context, v any) error {
 	query, err := rgb.path(ctx)
 	if err != nil {
 		return err
@@ -546,7 +557,7 @@ func (rgb *RunwayGroupBy) Scan(ctx context.Context, v interface{}) error {
 	return rgb.sqlScan(ctx, v)
 }
 
-func (rgb *RunwayGroupBy) sqlScan(ctx context.Context, v interface{}) error {
+func (rgb *RunwayGroupBy) sqlScan(ctx context.Context, v any) error {
 	for _, f := range rgb.fields {
 		if !runway.ValidColumn(f) {
 			return &ValidationError{Name: f, err: fmt.Errorf("invalid field %q for group-by", f)}
@@ -593,7 +604,7 @@ type RunwaySelect struct {
 }
 
 // Scan applies the selector query and scans the result into the given value.
-func (rs *RunwaySelect) Scan(ctx context.Context, v interface{}) error {
+func (rs *RunwaySelect) Scan(ctx context.Context, v any) error {
 	if err := rs.prepareQuery(ctx); err != nil {
 		return err
 	}
@@ -601,7 +612,7 @@ func (rs *RunwaySelect) Scan(ctx context.Context, v interface{}) error {
 	return rs.sqlScan(ctx, v)
 }
 
-func (rs *RunwaySelect) sqlScan(ctx context.Context, v interface{}) error {
+func (rs *RunwaySelect) sqlScan(ctx context.Context, v any) error {
 	rows := &sql.Rows{}
 	query, args := rs.sql.Query()
 	if err := rs.driver.Query(ctx, query, args, rows); err != nil {
