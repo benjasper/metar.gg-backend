@@ -72,7 +72,7 @@ type Runway {
   """Width of the runway surface in feet."""
   width: Int!
   """Code for the runway surface type. This is not yet a controlled vocabulary, but probably will be soon. Some common values include "ASP" (asphalt), "TURF" (turf), "CON" (concrete), "GRS" (grass), "GRE" (gravel), "WATER" (water), and "UNK" (unknown)."""
-  surface: String!
+  surface: String
   """Whether the runway is lighted at night or not."""
   lighted: Boolean!
   """Whether the runway is currently closed or not."""

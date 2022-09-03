@@ -25,7 +25,7 @@ type Runway struct {
 	// Width of the runway surface in feet.
 	Width int `json:"width,omitempty"`
 	// Code for the runway surface type. This is not yet a controlled vocabulary, but probably will be soon. Some common values include "ASP" (asphalt), "TURF" (turf), "CON" (concrete), "GRS" (grass), "GRE" (gravel), "WATER" (water), and "UNK" (unknown).
-	Surface string `json:"surface,omitempty"`
+	Surface *string `json:"surface,omitempty"`
 	// Whether the runway is lighted at night or not.
 	Lighted bool `json:"lighted,omitempty"`
 	// Whether the runway is currently closed or not.
@@ -148,7 +148,8 @@ func (r *Runway) assignValues(columns []string, values []any) error {
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field surface", values[i])
 			} else if value.Valid {
-				r.Surface = value.String
+				r.Surface = new(string)
+				*r.Surface = value.String
 			}
 		case runway.FieldLighted:
 			if value, ok := values[i].(*sql.NullBool); !ok {
@@ -296,8 +297,10 @@ func (r *Runway) String() string {
 	builder.WriteString("width=")
 	builder.WriteString(fmt.Sprintf("%v", r.Width))
 	builder.WriteString(", ")
-	builder.WriteString("surface=")
-	builder.WriteString(r.Surface)
+	if v := r.Surface; v != nil {
+		builder.WriteString("surface=")
+		builder.WriteString(*v)
+	}
 	builder.WriteString(", ")
 	builder.WriteString("lighted=")
 	builder.WriteString(fmt.Sprintf("%v", r.Lighted))

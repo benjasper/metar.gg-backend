@@ -66,7 +66,7 @@ var (
 		{Name: "import_flag", Type: field.TypeBool, Default: false},
 		{Name: "length", Type: field.TypeInt},
 		{Name: "width", Type: field.TypeInt},
-		{Name: "surface", Type: field.TypeString},
+		{Name: "surface", Type: field.TypeString, Nullable: true},
 		{Name: "lighted", Type: field.TypeBool},
 		{Name: "closed", Type: field.TypeBool},
 		{Name: "low_runway_identifier", Type: field.TypeString},

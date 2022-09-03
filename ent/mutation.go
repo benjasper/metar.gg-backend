@@ -2249,7 +2249,7 @@ func (m *RunwayMutation) Surface() (r string, exists bool) {
 // OldSurface returns the old "surface" field's value of the Runway entity.
 // If the Runway object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *RunwayMutation) OldSurface(ctx context.Context) (v string, err error) {
+func (m *RunwayMutation) OldSurface(ctx context.Context) (v *string, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, errors.New("OldSurface is only allowed on UpdateOne operations")
 	}
@@ -2263,9 +2263,22 @@ func (m *RunwayMutation) OldSurface(ctx context.Context) (v string, err error) {
 	return oldValue.Surface, nil
 }
 
+// ClearSurface clears the value of the "surface" field.
+func (m *RunwayMutation) ClearSurface() {
+	m.surface = nil
+	m.clearedFields[runway.FieldSurface] = struct{}{}
+}
+
+// SurfaceCleared returns if the "surface" field was cleared in this mutation.
+func (m *RunwayMutation) SurfaceCleared() bool {
+	_, ok := m.clearedFields[runway.FieldSurface]
+	return ok
+}
+
 // ResetSurface resets all changes to the "surface" field.
 func (m *RunwayMutation) ResetSurface() {
 	m.surface = nil
+	delete(m.clearedFields, runway.FieldSurface)
 }
 
 // SetLighted sets the "lighted" field.
@@ -3640,6 +3653,9 @@ func (m *RunwayMutation) AddField(name string, value ent.Value) error {
 // mutation.
 func (m *RunwayMutation) ClearedFields() []string {
 	var fields []string
+	if m.FieldCleared(runway.FieldSurface) {
+		fields = append(fields, runway.FieldSurface)
+	}
 	if m.FieldCleared(runway.FieldLowRunwayLatitude) {
 		fields = append(fields, runway.FieldLowRunwayLatitude)
 	}
@@ -3684,6 +3700,9 @@ func (m *RunwayMutation) FieldCleared(name string) bool {
 // error if the field is not defined in the schema.
 func (m *RunwayMutation) ClearField(name string) error {
 	switch name {
+	case runway.FieldSurface:
+		m.ClearSurface()
+		return nil
 	case runway.FieldLowRunwayLatitude:
 		m.ClearLowRunwayLatitude()
 		return nil

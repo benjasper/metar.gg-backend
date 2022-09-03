@@ -80,6 +80,20 @@ func (ru *RunwayUpdate) SetSurface(s string) *RunwayUpdate {
 	return ru
 }
 
+// SetNillableSurface sets the "surface" field if the given value is not nil.
+func (ru *RunwayUpdate) SetNillableSurface(s *string) *RunwayUpdate {
+	if s != nil {
+		ru.SetSurface(*s)
+	}
+	return ru
+}
+
+// ClearSurface clears the value of the "surface" field.
+func (ru *RunwayUpdate) ClearSurface() *RunwayUpdate {
+	ru.mutation.ClearSurface()
+	return ru
+}
+
 // SetLighted sets the "lighted" field.
 func (ru *RunwayUpdate) SetLighted(b bool) *RunwayUpdate {
 	ru.mutation.SetLighted(b)
@@ -525,6 +539,12 @@ func (ru *RunwayUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Column: runway.FieldSurface,
 		})
 	}
+	if ru.mutation.SurfaceCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Column: runway.FieldSurface,
+		})
+	}
 	if value, ok := ru.mutation.Lighted(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeBool,
@@ -856,6 +876,20 @@ func (ruo *RunwayUpdateOne) AddWidth(i int) *RunwayUpdateOne {
 // SetSurface sets the "surface" field.
 func (ruo *RunwayUpdateOne) SetSurface(s string) *RunwayUpdateOne {
 	ruo.mutation.SetSurface(s)
+	return ruo
+}
+
+// SetNillableSurface sets the "surface" field if the given value is not nil.
+func (ruo *RunwayUpdateOne) SetNillableSurface(s *string) *RunwayUpdateOne {
+	if s != nil {
+		ruo.SetSurface(*s)
+	}
+	return ruo
+}
+
+// ClearSurface clears the value of the "surface" field.
+func (ruo *RunwayUpdateOne) ClearSurface() *RunwayUpdateOne {
+	ruo.mutation.ClearSurface()
 	return ruo
 }
 
@@ -1331,6 +1365,12 @@ func (ruo *RunwayUpdateOne) sqlSave(ctx context.Context) (_node *Runway, err err
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
 			Value:  value,
+			Column: runway.FieldSurface,
+		})
+	}
+	if ruo.mutation.SurfaceCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
 			Column: runway.FieldSurface,
 		})
 	}

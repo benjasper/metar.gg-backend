@@ -60,6 +60,14 @@ func (rc *RunwayCreate) SetSurface(s string) *RunwayCreate {
 	return rc
 }
 
+// SetNillableSurface sets the "surface" field if the given value is not nil.
+func (rc *RunwayCreate) SetNillableSurface(s *string) *RunwayCreate {
+	if s != nil {
+		rc.SetSurface(*s)
+	}
+	return rc
+}
+
 // SetLighted sets the "lighted" field.
 func (rc *RunwayCreate) SetLighted(b bool) *RunwayCreate {
 	rc.mutation.SetLighted(b)
@@ -346,9 +354,6 @@ func (rc *RunwayCreate) check() error {
 	if _, ok := rc.mutation.Width(); !ok {
 		return &ValidationError{Name: "width", err: errors.New(`ent: missing required field "Runway.width"`)}
 	}
-	if _, ok := rc.mutation.Surface(); !ok {
-		return &ValidationError{Name: "surface", err: errors.New(`ent: missing required field "Runway.surface"`)}
-	}
 	if _, ok := rc.mutation.Lighted(); !ok {
 		return &ValidationError{Name: "lighted", err: errors.New(`ent: missing required field "Runway.lighted"`)}
 	}
@@ -433,7 +438,7 @@ func (rc *RunwayCreate) createSpec() (*Runway, *sqlgraph.CreateSpec) {
 			Value:  value,
 			Column: runway.FieldSurface,
 		})
-		_node.Surface = value
+		_node.Surface = &value
 	}
 	if value, ok := rc.mutation.Lighted(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
@@ -688,6 +693,12 @@ func (u *RunwayUpsert) SetSurface(v string) *RunwayUpsert {
 // UpdateSurface sets the "surface" field to the value that was provided on create.
 func (u *RunwayUpsert) UpdateSurface() *RunwayUpsert {
 	u.SetExcluded(runway.FieldSurface)
+	return u
+}
+
+// ClearSurface clears the value of the "surface" field.
+func (u *RunwayUpsert) ClearSurface() *RunwayUpsert {
+	u.SetNull(runway.FieldSurface)
 	return u
 }
 
@@ -1108,6 +1119,13 @@ func (u *RunwayUpsertOne) SetSurface(v string) *RunwayUpsertOne {
 func (u *RunwayUpsertOne) UpdateSurface() *RunwayUpsertOne {
 	return u.Update(func(s *RunwayUpsert) {
 		s.UpdateSurface()
+	})
+}
+
+// ClearSurface clears the value of the "surface" field.
+func (u *RunwayUpsertOne) ClearSurface() *RunwayUpsertOne {
+	return u.Update(func(s *RunwayUpsert) {
+		s.ClearSurface()
 	})
 }
 
@@ -1738,6 +1756,13 @@ func (u *RunwayUpsertBulk) SetSurface(v string) *RunwayUpsertBulk {
 func (u *RunwayUpsertBulk) UpdateSurface() *RunwayUpsertBulk {
 	return u.Update(func(s *RunwayUpsert) {
 		s.UpdateSurface()
+	})
+}
+
+// ClearSurface clears the value of the "surface" field.
+func (u *RunwayUpsertBulk) ClearSurface() *RunwayUpsertBulk {
+	return u.Update(func(s *RunwayUpsert) {
+		s.ClearSurface()
 	})
 }
 

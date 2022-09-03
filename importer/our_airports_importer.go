@@ -336,7 +336,7 @@ func (i *Importer) importRunwayLine(data []string) error {
 		SetAirportID(int(airportID)).
 		SetLength(int(length)).
 		SetWidth(int(width)).
-		SetSurface(data[5]).
+		SetNillableSurface(utils.NillableString(data[5])).
 		SetLighted(isLighted).
 		SetClosed(isClosed).
 		SetLowRunwayIdentifier(data[8]).

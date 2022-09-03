@@ -538,6 +538,20 @@ func SurfaceHasSuffix(v string) predicate.Runway {
 	})
 }
 
+// SurfaceIsNil applies the IsNil predicate on the "surface" field.
+func SurfaceIsNil() predicate.Runway {
+	return predicate.Runway(func(s *sql.Selector) {
+		s.Where(sql.IsNull(s.C(FieldSurface)))
+	})
+}
+
+// SurfaceNotNil applies the NotNil predicate on the "surface" field.
+func SurfaceNotNil() predicate.Runway {
+	return predicate.Runway(func(s *sql.Selector) {
+		s.Where(sql.NotNull(s.C(FieldSurface)))
+	})
+}
+
 // SurfaceEqualFold applies the EqualFold predicate on the "surface" field.
 func SurfaceEqualFold(v string) predicate.Runway {
 	return predicate.Runway(func(s *sql.Selector) {
