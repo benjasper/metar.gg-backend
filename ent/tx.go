@@ -16,8 +16,12 @@ type Tx struct {
 	Airport *AirportClient
 	// Frequency is the client for interacting with the Frequency builders.
 	Frequency *FrequencyClient
+	// Metar is the client for interacting with the Metar builders.
+	Metar *MetarClient
 	// Runway is the client for interacting with the Runway builders.
 	Runway *RunwayClient
+	// SkyCondition is the client for interacting with the SkyCondition builders.
+	SkyCondition *SkyConditionClient
 
 	// lazily loaded.
 	client     *Client
@@ -155,7 +159,9 @@ func (tx *Tx) Client() *Client {
 func (tx *Tx) init() {
 	tx.Airport = NewAirportClient(tx.config)
 	tx.Frequency = NewFrequencyClient(tx.config)
+	tx.Metar = NewMetarClient(tx.config)
 	tx.Runway = NewRunwayClient(tx.config)
+	tx.SkyCondition = NewSkyConditionClient(tx.config)
 }
 
 // txDriver wraps the given dialect.Tx with a nop dialect.Driver implementation.

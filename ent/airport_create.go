@@ -6,12 +6,14 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"time"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"metar.gg/ent/airport"
 	"metar.gg/ent/frequency"
+	"metar.gg/ent/metar"
 	"metar.gg/ent/runway"
 )
 
@@ -39,6 +41,20 @@ func (ac *AirportCreate) SetImportFlag(b bool) *AirportCreate {
 func (ac *AirportCreate) SetNillableImportFlag(b *bool) *AirportCreate {
 	if b != nil {
 		ac.SetImportFlag(*b)
+	}
+	return ac
+}
+
+// SetLastUpdated sets the "last_updated" field.
+func (ac *AirportCreate) SetLastUpdated(t time.Time) *AirportCreate {
+	ac.mutation.SetLastUpdated(t)
+	return ac
+}
+
+// SetNillableLastUpdated sets the "last_updated" field if the given value is not nil.
+func (ac *AirportCreate) SetNillableLastUpdated(t *time.Time) *AirportCreate {
+	if t != nil {
+		ac.SetLastUpdated(*t)
 	}
 	return ac
 }
@@ -102,6 +118,20 @@ func (ac *AirportCreate) SetCountry(s string) *AirportCreate {
 // SetRegion sets the "region" field.
 func (ac *AirportCreate) SetRegion(s string) *AirportCreate {
 	ac.mutation.SetRegion(s)
+	return ac
+}
+
+// SetHasWeather sets the "has_weather" field.
+func (ac *AirportCreate) SetHasWeather(b bool) *AirportCreate {
+	ac.mutation.SetHasWeather(b)
+	return ac
+}
+
+// SetNillableHasWeather sets the "has_weather" field if the given value is not nil.
+func (ac *AirportCreate) SetNillableHasWeather(b *bool) *AirportCreate {
+	if b != nil {
+		ac.SetHasWeather(*b)
+	}
 	return ac
 }
 
@@ -237,6 +267,21 @@ func (ac *AirportCreate) AddFrequencies(f ...*Frequency) *AirportCreate {
 	return ac.AddFrequencyIDs(ids...)
 }
 
+// AddMetarIDs adds the "metars" edge to the Metar entity by IDs.
+func (ac *AirportCreate) AddMetarIDs(ids ...int) *AirportCreate {
+	ac.mutation.AddMetarIDs(ids...)
+	return ac
+}
+
+// AddMetars adds the "metars" edges to the Metar entity.
+func (ac *AirportCreate) AddMetars(m ...*Metar) *AirportCreate {
+	ids := make([]int, len(m))
+	for i := range m {
+		ids[i] = m[i].ID
+	}
+	return ac.AddMetarIDs(ids...)
+}
+
 // Mutation returns the AirportMutation object of the builder.
 func (ac *AirportCreate) Mutation() *AirportMutation {
 	return ac.mutation
@@ -318,6 +363,14 @@ func (ac *AirportCreate) defaults() {
 		v := airport.DefaultImportFlag
 		ac.mutation.SetImportFlag(v)
 	}
+	if _, ok := ac.mutation.LastUpdated(); !ok {
+		v := airport.DefaultLastUpdated()
+		ac.mutation.SetLastUpdated(v)
+	}
+	if _, ok := ac.mutation.HasWeather(); !ok {
+		v := airport.DefaultHasWeather
+		ac.mutation.SetHasWeather(v)
+	}
 }
 
 // check runs all checks and user-defined validators on the builder.
@@ -327,6 +380,9 @@ func (ac *AirportCreate) check() error {
 	}
 	if _, ok := ac.mutation.ImportFlag(); !ok {
 		return &ValidationError{Name: "import_flag", err: errors.New(`ent: missing required field "Airport.import_flag"`)}
+	}
+	if _, ok := ac.mutation.LastUpdated(); !ok {
+		return &ValidationError{Name: "last_updated", err: errors.New(`ent: missing required field "Airport.last_updated"`)}
 	}
 	if _, ok := ac.mutation.Identifier(); !ok {
 		return &ValidationError{Name: "identifier", err: errors.New(`ent: missing required field "Airport.identifier"`)}
@@ -361,6 +417,9 @@ func (ac *AirportCreate) check() error {
 	}
 	if _, ok := ac.mutation.Region(); !ok {
 		return &ValidationError{Name: "region", err: errors.New(`ent: missing required field "Airport.region"`)}
+	}
+	if _, ok := ac.mutation.HasWeather(); !ok {
+		return &ValidationError{Name: "has_weather", err: errors.New(`ent: missing required field "Airport.has_weather"`)}
 	}
 	if _, ok := ac.mutation.ScheduledService(); !ok {
 		return &ValidationError{Name: "scheduled_service", err: errors.New(`ent: missing required field "Airport.scheduled_service"`)}
@@ -417,6 +476,14 @@ func (ac *AirportCreate) createSpec() (*Airport, *sqlgraph.CreateSpec) {
 			Column: airport.FieldImportFlag,
 		})
 		_node.ImportFlag = value
+	}
+	if value, ok := ac.mutation.LastUpdated(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeTime,
+			Value:  value,
+			Column: airport.FieldLastUpdated,
+		})
+		_node.LastUpdated = value
 	}
 	if value, ok := ac.mutation.Identifier(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
@@ -489,6 +556,14 @@ func (ac *AirportCreate) createSpec() (*Airport, *sqlgraph.CreateSpec) {
 			Column: airport.FieldRegion,
 		})
 		_node.Region = value
+	}
+	if value, ok := ac.mutation.HasWeather(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeBool,
+			Value:  value,
+			Column: airport.FieldHasWeather,
+		})
+		_node.HasWeather = value
 	}
 	if value, ok := ac.mutation.Municipality(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
@@ -592,6 +667,25 @@ func (ac *AirportCreate) createSpec() (*Airport, *sqlgraph.CreateSpec) {
 		}
 		_spec.Edges = append(_spec.Edges, edge)
 	}
+	if nodes := ac.mutation.MetarsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   airport.MetarsTable,
+			Columns: []string{airport.MetarsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: metar.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
 	return _node, _spec
 }
 
@@ -665,6 +759,18 @@ func (u *AirportUpsert) SetImportFlag(v bool) *AirportUpsert {
 // UpdateImportFlag sets the "import_flag" field to the value that was provided on create.
 func (u *AirportUpsert) UpdateImportFlag() *AirportUpsert {
 	u.SetExcluded(airport.FieldImportFlag)
+	return u
+}
+
+// SetLastUpdated sets the "last_updated" field.
+func (u *AirportUpsert) SetLastUpdated(v time.Time) *AirportUpsert {
+	u.Set(airport.FieldLastUpdated, v)
+	return u
+}
+
+// UpdateLastUpdated sets the "last_updated" field to the value that was provided on create.
+func (u *AirportUpsert) UpdateLastUpdated() *AirportUpsert {
+	u.SetExcluded(airport.FieldLastUpdated)
 	return u
 }
 
@@ -797,6 +903,18 @@ func (u *AirportUpsert) SetRegion(v string) *AirportUpsert {
 // UpdateRegion sets the "region" field to the value that was provided on create.
 func (u *AirportUpsert) UpdateRegion() *AirportUpsert {
 	u.SetExcluded(airport.FieldRegion)
+	return u
+}
+
+// SetHasWeather sets the "has_weather" field.
+func (u *AirportUpsert) SetHasWeather(v bool) *AirportUpsert {
+	u.Set(airport.FieldHasWeather, v)
+	return u
+}
+
+// UpdateHasWeather sets the "has_weather" field to the value that was provided on create.
+func (u *AirportUpsert) UpdateHasWeather() *AirportUpsert {
+	u.SetExcluded(airport.FieldHasWeather)
 	return u
 }
 
@@ -1008,6 +1126,20 @@ func (u *AirportUpsertOne) UpdateImportFlag() *AirportUpsertOne {
 	})
 }
 
+// SetLastUpdated sets the "last_updated" field.
+func (u *AirportUpsertOne) SetLastUpdated(v time.Time) *AirportUpsertOne {
+	return u.Update(func(s *AirportUpsert) {
+		s.SetLastUpdated(v)
+	})
+}
+
+// UpdateLastUpdated sets the "last_updated" field to the value that was provided on create.
+func (u *AirportUpsertOne) UpdateLastUpdated() *AirportUpsertOne {
+	return u.Update(func(s *AirportUpsert) {
+		s.UpdateLastUpdated()
+	})
+}
+
 // SetIdentifier sets the "identifier" field.
 func (u *AirportUpsertOne) SetIdentifier(v string) *AirportUpsertOne {
 	return u.Update(func(s *AirportUpsert) {
@@ -1159,6 +1291,20 @@ func (u *AirportUpsertOne) SetRegion(v string) *AirportUpsertOne {
 func (u *AirportUpsertOne) UpdateRegion() *AirportUpsertOne {
 	return u.Update(func(s *AirportUpsert) {
 		s.UpdateRegion()
+	})
+}
+
+// SetHasWeather sets the "has_weather" field.
+func (u *AirportUpsertOne) SetHasWeather(v bool) *AirportUpsertOne {
+	return u.Update(func(s *AirportUpsert) {
+		s.SetHasWeather(v)
+	})
+}
+
+// UpdateHasWeather sets the "has_weather" field to the value that was provided on create.
+func (u *AirportUpsertOne) UpdateHasWeather() *AirportUpsertOne {
+	return u.Update(func(s *AirportUpsert) {
+		s.UpdateHasWeather()
 	})
 }
 
@@ -1554,6 +1700,20 @@ func (u *AirportUpsertBulk) UpdateImportFlag() *AirportUpsertBulk {
 	})
 }
 
+// SetLastUpdated sets the "last_updated" field.
+func (u *AirportUpsertBulk) SetLastUpdated(v time.Time) *AirportUpsertBulk {
+	return u.Update(func(s *AirportUpsert) {
+		s.SetLastUpdated(v)
+	})
+}
+
+// UpdateLastUpdated sets the "last_updated" field to the value that was provided on create.
+func (u *AirportUpsertBulk) UpdateLastUpdated() *AirportUpsertBulk {
+	return u.Update(func(s *AirportUpsert) {
+		s.UpdateLastUpdated()
+	})
+}
+
 // SetIdentifier sets the "identifier" field.
 func (u *AirportUpsertBulk) SetIdentifier(v string) *AirportUpsertBulk {
 	return u.Update(func(s *AirportUpsert) {
@@ -1705,6 +1865,20 @@ func (u *AirportUpsertBulk) SetRegion(v string) *AirportUpsertBulk {
 func (u *AirportUpsertBulk) UpdateRegion() *AirportUpsertBulk {
 	return u.Update(func(s *AirportUpsert) {
 		s.UpdateRegion()
+	})
+}
+
+// SetHasWeather sets the "has_weather" field.
+func (u *AirportUpsertBulk) SetHasWeather(v bool) *AirportUpsertBulk {
+	return u.Update(func(s *AirportUpsert) {
+		s.SetHasWeather(v)
+	})
+}
+
+// UpdateHasWeather sets the "has_weather" field to the value that was provided on create.
+func (u *AirportUpsertBulk) UpdateHasWeather() *AirportUpsertBulk {
+	return u.Update(func(s *AirportUpsert) {
+		s.UpdateHasWeather()
 	})
 }
 

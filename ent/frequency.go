@@ -5,6 +5,7 @@ package ent
 import (
 	"fmt"
 	"strings"
+	"time"
 
 	"entgo.io/ent/dialect/sql"
 	"metar.gg/ent/airport"
@@ -20,6 +21,8 @@ type Frequency struct {
 	Hash string `json:"hash,omitempty"`
 	// ImportFlag holds the value of the "import_flag" field.
 	ImportFlag bool `json:"import_flag,omitempty"`
+	// LastUpdated holds the value of the "last_updated" field.
+	LastUpdated time.Time `json:"last_updated,omitempty"`
 	// A code for the frequency type. Some common values are "TWR" (tower), "ATF" or "CTAF" (common traffic frequency), "GND" (ground control), "RMP" (ramp control), "ATIS" (automated weather), "RCO" (remote radio outlet), "ARR" (arrivals), "DEP" (departures), "UNICOM" (monitored ground station), and "RDO" (a flight-service station).
 	Type string `json:"type,omitempty"`
 	// A description of the frequency.
@@ -69,6 +72,8 @@ func (*Frequency) scanValues(columns []string) ([]any, error) {
 			values[i] = new(sql.NullInt64)
 		case frequency.FieldHash, frequency.FieldType, frequency.FieldDescription:
 			values[i] = new(sql.NullString)
+		case frequency.FieldLastUpdated:
+			values[i] = new(sql.NullTime)
 		case frequency.ForeignKeys[0]: // airport_frequencies
 			values[i] = new(sql.NullInt64)
 		default:
@@ -103,6 +108,12 @@ func (f *Frequency) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field import_flag", values[i])
 			} else if value.Valid {
 				f.ImportFlag = value.Bool
+			}
+		case frequency.FieldLastUpdated:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field last_updated", values[i])
+			} else if value.Valid {
+				f.LastUpdated = value.Time
 			}
 		case frequency.FieldType:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -167,6 +178,9 @@ func (f *Frequency) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("import_flag=")
 	builder.WriteString(fmt.Sprintf("%v", f.ImportFlag))
+	builder.WriteString(", ")
+	builder.WriteString("last_updated=")
+	builder.WriteString(f.LastUpdated.Format(time.ANSIC))
 	builder.WriteString(", ")
 	builder.WriteString("type=")
 	builder.WriteString(f.Type)

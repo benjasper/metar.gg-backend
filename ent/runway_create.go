@@ -6,6 +6,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"time"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
@@ -38,6 +39,20 @@ func (rc *RunwayCreate) SetImportFlag(b bool) *RunwayCreate {
 func (rc *RunwayCreate) SetNillableImportFlag(b *bool) *RunwayCreate {
 	if b != nil {
 		rc.SetImportFlag(*b)
+	}
+	return rc
+}
+
+// SetLastUpdated sets the "last_updated" field.
+func (rc *RunwayCreate) SetLastUpdated(t time.Time) *RunwayCreate {
+	rc.mutation.SetLastUpdated(t)
+	return rc
+}
+
+// SetNillableLastUpdated sets the "last_updated" field if the given value is not nil.
+func (rc *RunwayCreate) SetNillableLastUpdated(t *time.Time) *RunwayCreate {
+	if t != nil {
+		rc.SetLastUpdated(*t)
 	}
 	return rc
 }
@@ -338,6 +353,10 @@ func (rc *RunwayCreate) defaults() {
 		v := runway.DefaultImportFlag
 		rc.mutation.SetImportFlag(v)
 	}
+	if _, ok := rc.mutation.LastUpdated(); !ok {
+		v := runway.DefaultLastUpdated()
+		rc.mutation.SetLastUpdated(v)
+	}
 }
 
 // check runs all checks and user-defined validators on the builder.
@@ -347,6 +366,9 @@ func (rc *RunwayCreate) check() error {
 	}
 	if _, ok := rc.mutation.ImportFlag(); !ok {
 		return &ValidationError{Name: "import_flag", err: errors.New(`ent: missing required field "Runway.import_flag"`)}
+	}
+	if _, ok := rc.mutation.LastUpdated(); !ok {
+		return &ValidationError{Name: "last_updated", err: errors.New(`ent: missing required field "Runway.last_updated"`)}
 	}
 	if _, ok := rc.mutation.Length(); !ok {
 		return &ValidationError{Name: "length", err: errors.New(`ent: missing required field "Runway.length"`)}
@@ -415,6 +437,14 @@ func (rc *RunwayCreate) createSpec() (*Runway, *sqlgraph.CreateSpec) {
 			Column: runway.FieldImportFlag,
 		})
 		_node.ImportFlag = value
+	}
+	if value, ok := rc.mutation.LastUpdated(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeTime,
+			Value:  value,
+			Column: runway.FieldLastUpdated,
+		})
+		_node.LastUpdated = value
 	}
 	if value, ok := rc.mutation.Length(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
@@ -645,6 +675,18 @@ func (u *RunwayUpsert) SetImportFlag(v bool) *RunwayUpsert {
 // UpdateImportFlag sets the "import_flag" field to the value that was provided on create.
 func (u *RunwayUpsert) UpdateImportFlag() *RunwayUpsert {
 	u.SetExcluded(runway.FieldImportFlag)
+	return u
+}
+
+// SetLastUpdated sets the "last_updated" field.
+func (u *RunwayUpsert) SetLastUpdated(v time.Time) *RunwayUpsert {
+	u.Set(runway.FieldLastUpdated, v)
+	return u
+}
+
+// UpdateLastUpdated sets the "last_updated" field to the value that was provided on create.
+func (u *RunwayUpsert) UpdateLastUpdated() *RunwayUpsert {
+	u.SetExcluded(runway.FieldLastUpdated)
 	return u
 }
 
@@ -1063,6 +1105,20 @@ func (u *RunwayUpsertOne) SetImportFlag(v bool) *RunwayUpsertOne {
 func (u *RunwayUpsertOne) UpdateImportFlag() *RunwayUpsertOne {
 	return u.Update(func(s *RunwayUpsert) {
 		s.UpdateImportFlag()
+	})
+}
+
+// SetLastUpdated sets the "last_updated" field.
+func (u *RunwayUpsertOne) SetLastUpdated(v time.Time) *RunwayUpsertOne {
+	return u.Update(func(s *RunwayUpsert) {
+		s.SetLastUpdated(v)
+	})
+}
+
+// UpdateLastUpdated sets the "last_updated" field to the value that was provided on create.
+func (u *RunwayUpsertOne) UpdateLastUpdated() *RunwayUpsertOne {
+	return u.Update(func(s *RunwayUpsert) {
+		s.UpdateLastUpdated()
 	})
 }
 
@@ -1700,6 +1756,20 @@ func (u *RunwayUpsertBulk) SetImportFlag(v bool) *RunwayUpsertBulk {
 func (u *RunwayUpsertBulk) UpdateImportFlag() *RunwayUpsertBulk {
 	return u.Update(func(s *RunwayUpsert) {
 		s.UpdateImportFlag()
+	})
+}
+
+// SetLastUpdated sets the "last_updated" field.
+func (u *RunwayUpsertBulk) SetLastUpdated(v time.Time) *RunwayUpsertBulk {
+	return u.Update(func(s *RunwayUpsert) {
+		s.SetLastUpdated(v)
+	})
+}
+
+// UpdateLastUpdated sets the "last_updated" field to the value that was provided on create.
+func (u *RunwayUpsertBulk) UpdateLastUpdated() *RunwayUpsertBulk {
+	return u.Update(func(s *RunwayUpsert) {
+		s.UpdateLastUpdated()
 	})
 }
 

@@ -35,6 +35,19 @@ func (f FrequencyFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, e
 	return f(ctx, mv)
 }
 
+// The MetarFunc type is an adapter to allow the use of ordinary
+// function as Metar mutator.
+type MetarFunc func(context.Context, *ent.MetarMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f MetarFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	mv, ok := m.(*ent.MetarMutation)
+	if !ok {
+		return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.MetarMutation", m)
+	}
+	return f(ctx, mv)
+}
+
 // The RunwayFunc type is an adapter to allow the use of ordinary
 // function as Runway mutator.
 type RunwayFunc func(context.Context, *ent.RunwayMutation) (ent.Value, error)
@@ -44,6 +57,19 @@ func (f RunwayFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, erro
 	mv, ok := m.(*ent.RunwayMutation)
 	if !ok {
 		return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.RunwayMutation", m)
+	}
+	return f(ctx, mv)
+}
+
+// The SkyConditionFunc type is an adapter to allow the use of ordinary
+// function as SkyCondition mutator.
+type SkyConditionFunc func(context.Context, *ent.SkyConditionMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f SkyConditionFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	mv, ok := m.(*ent.SkyConditionMutation)
+	if !ok {
+		return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.SkyConditionMutation", m)
 	}
 	return f(ctx, mv)
 }

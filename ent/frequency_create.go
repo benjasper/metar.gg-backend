@@ -6,6 +6,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"time"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
@@ -38,6 +39,20 @@ func (fc *FrequencyCreate) SetImportFlag(b bool) *FrequencyCreate {
 func (fc *FrequencyCreate) SetNillableImportFlag(b *bool) *FrequencyCreate {
 	if b != nil {
 		fc.SetImportFlag(*b)
+	}
+	return fc
+}
+
+// SetLastUpdated sets the "last_updated" field.
+func (fc *FrequencyCreate) SetLastUpdated(t time.Time) *FrequencyCreate {
+	fc.mutation.SetLastUpdated(t)
+	return fc
+}
+
+// SetNillableLastUpdated sets the "last_updated" field if the given value is not nil.
+func (fc *FrequencyCreate) SetNillableLastUpdated(t *time.Time) *FrequencyCreate {
+	if t != nil {
+		fc.SetLastUpdated(*t)
 	}
 	return fc
 }
@@ -166,6 +181,10 @@ func (fc *FrequencyCreate) defaults() {
 		v := frequency.DefaultImportFlag
 		fc.mutation.SetImportFlag(v)
 	}
+	if _, ok := fc.mutation.LastUpdated(); !ok {
+		v := frequency.DefaultLastUpdated()
+		fc.mutation.SetLastUpdated(v)
+	}
 }
 
 // check runs all checks and user-defined validators on the builder.
@@ -175,6 +194,9 @@ func (fc *FrequencyCreate) check() error {
 	}
 	if _, ok := fc.mutation.ImportFlag(); !ok {
 		return &ValidationError{Name: "import_flag", err: errors.New(`ent: missing required field "Frequency.import_flag"`)}
+	}
+	if _, ok := fc.mutation.LastUpdated(); !ok {
+		return &ValidationError{Name: "last_updated", err: errors.New(`ent: missing required field "Frequency.last_updated"`)}
 	}
 	if _, ok := fc.mutation.GetType(); !ok {
 		return &ValidationError{Name: "type", err: errors.New(`ent: missing required field "Frequency.type"`)}
@@ -234,6 +256,14 @@ func (fc *FrequencyCreate) createSpec() (*Frequency, *sqlgraph.CreateSpec) {
 			Column: frequency.FieldImportFlag,
 		})
 		_node.ImportFlag = value
+	}
+	if value, ok := fc.mutation.LastUpdated(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeTime,
+			Value:  value,
+			Column: frequency.FieldLastUpdated,
+		})
+		_node.LastUpdated = value
 	}
 	if value, ok := fc.mutation.GetType(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
@@ -355,6 +385,18 @@ func (u *FrequencyUpsert) UpdateImportFlag() *FrequencyUpsert {
 	return u
 }
 
+// SetLastUpdated sets the "last_updated" field.
+func (u *FrequencyUpsert) SetLastUpdated(v time.Time) *FrequencyUpsert {
+	u.Set(frequency.FieldLastUpdated, v)
+	return u
+}
+
+// UpdateLastUpdated sets the "last_updated" field to the value that was provided on create.
+func (u *FrequencyUpsert) UpdateLastUpdated() *FrequencyUpsert {
+	u.SetExcluded(frequency.FieldLastUpdated)
+	return u
+}
+
 // SetType sets the "type" field.
 func (u *FrequencyUpsert) SetType(v string) *FrequencyUpsert {
 	u.Set(frequency.FieldType, v)
@@ -470,6 +512,20 @@ func (u *FrequencyUpsertOne) SetImportFlag(v bool) *FrequencyUpsertOne {
 func (u *FrequencyUpsertOne) UpdateImportFlag() *FrequencyUpsertOne {
 	return u.Update(func(s *FrequencyUpsert) {
 		s.UpdateImportFlag()
+	})
+}
+
+// SetLastUpdated sets the "last_updated" field.
+func (u *FrequencyUpsertOne) SetLastUpdated(v time.Time) *FrequencyUpsertOne {
+	return u.Update(func(s *FrequencyUpsert) {
+		s.SetLastUpdated(v)
+	})
+}
+
+// UpdateLastUpdated sets the "last_updated" field to the value that was provided on create.
+func (u *FrequencyUpsertOne) UpdateLastUpdated() *FrequencyUpsertOne {
+	return u.Update(func(s *FrequencyUpsert) {
+		s.UpdateLastUpdated()
 	})
 }
 
@@ -757,6 +813,20 @@ func (u *FrequencyUpsertBulk) SetImportFlag(v bool) *FrequencyUpsertBulk {
 func (u *FrequencyUpsertBulk) UpdateImportFlag() *FrequencyUpsertBulk {
 	return u.Update(func(s *FrequencyUpsert) {
 		s.UpdateImportFlag()
+	})
+}
+
+// SetLastUpdated sets the "last_updated" field.
+func (u *FrequencyUpsertBulk) SetLastUpdated(v time.Time) *FrequencyUpsertBulk {
+	return u.Update(func(s *FrequencyUpsert) {
+		s.SetLastUpdated(v)
+	})
+}
+
+// UpdateLastUpdated sets the "last_updated" field to the value that was provided on create.
+func (u *FrequencyUpsertBulk) UpdateLastUpdated() *FrequencyUpsertBulk {
+	return u.Update(func(s *FrequencyUpsert) {
+		s.UpdateLastUpdated()
 	})
 }
 

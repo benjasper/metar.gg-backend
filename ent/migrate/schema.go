@@ -13,6 +13,7 @@ var (
 		{Name: "id", Type: field.TypeInt, Increment: true},
 		{Name: "hash", Type: field.TypeString},
 		{Name: "import_flag", Type: field.TypeBool, Default: false},
+		{Name: "last_updated", Type: field.TypeTime},
 		{Name: "identifier", Type: field.TypeString, Unique: true},
 		{Name: "type", Type: field.TypeEnum, Enums: []string{"large_airport", "medium_airport", "small_airport", "closed_airport", "heliport", "seaplane_base"}},
 		{Name: "name", Type: field.TypeString},
@@ -22,6 +23,7 @@ var (
 		{Name: "continent", Type: field.TypeEnum, Enums: []string{"AF", "AN", "AS", "EU", "NA", "SA", "OC"}},
 		{Name: "country", Type: field.TypeString},
 		{Name: "region", Type: field.TypeString},
+		{Name: "has_weather", Type: field.TypeBool, Default: false},
 		{Name: "municipality", Type: field.TypeString, Nullable: true},
 		{Name: "scheduled_service", Type: field.TypeBool},
 		{Name: "gps_code", Type: field.TypeString, Nullable: true},
@@ -45,7 +47,7 @@ var (
 			{
 				Name:    "airport_identifier",
 				Unique:  false,
-				Columns: []*schema.Column{AirportsColumns[3]},
+				Columns: []*schema.Column{AirportsColumns[4]},
 			},
 		},
 	}
@@ -54,6 +56,7 @@ var (
 		{Name: "id", Type: field.TypeInt, Increment: true},
 		{Name: "hash", Type: field.TypeString},
 		{Name: "import_flag", Type: field.TypeBool, Default: false},
+		{Name: "last_updated", Type: field.TypeTime},
 		{Name: "type", Type: field.TypeString},
 		{Name: "description", Type: field.TypeString},
 		{Name: "frequency", Type: field.TypeFloat64},
@@ -67,7 +70,7 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "frequencies_airports_frequencies",
-				Columns:    []*schema.Column{FrequenciesColumns[6]},
+				Columns:    []*schema.Column{FrequenciesColumns[7]},
 				RefColumns: []*schema.Column{AirportsColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
@@ -80,11 +83,73 @@ var (
 			},
 		},
 	}
+	// MetarsColumns holds the columns for the "metars" table.
+	MetarsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "raw_text", Type: field.TypeString},
+		{Name: "observation_time", Type: field.TypeTime},
+		{Name: "latitude", Type: field.TypeFloat64, Nullable: true},
+		{Name: "longitude", Type: field.TypeFloat64, Nullable: true},
+		{Name: "elevation", Type: field.TypeFloat64, Nullable: true},
+		{Name: "temperature", Type: field.TypeFloat64},
+		{Name: "dewpoint", Type: field.TypeFloat64},
+		{Name: "wind_speed", Type: field.TypeInt},
+		{Name: "wind_gust", Type: field.TypeInt},
+		{Name: "wind_direction", Type: field.TypeInt},
+		{Name: "visibility", Type: field.TypeFloat64},
+		{Name: "altimeter", Type: field.TypeFloat64},
+		{Name: "present_weather", Type: field.TypeString, Nullable: true},
+		{Name: "flight_category", Type: field.TypeEnum, Nullable: true, Enums: []string{"VFR", "MVFR", "IFR", "LIFR"}},
+		{Name: "quality_control_corrected", Type: field.TypeBool, Nullable: true},
+		{Name: "quality_control_auto_station", Type: field.TypeBool},
+		{Name: "quality_control_maintenance_indicator_on", Type: field.TypeBool},
+		{Name: "quality_control_no_signal", Type: field.TypeBool},
+		{Name: "quality_control_lightning_sensor_off", Type: field.TypeBool},
+		{Name: "quality_control_freezing_rain_sensor_off", Type: field.TypeBool},
+		{Name: "quality_control_present_weather_sensor_off", Type: field.TypeBool},
+		{Name: "sea_level_pressure", Type: field.TypeFloat64, Nullable: true},
+		{Name: "pressure_tendency", Type: field.TypeFloat64, Nullable: true},
+		{Name: "max_temp_6", Type: field.TypeFloat64, Nullable: true},
+		{Name: "min_temp_6", Type: field.TypeFloat64, Nullable: true},
+		{Name: "max_temp_24", Type: field.TypeFloat64, Nullable: true},
+		{Name: "min_temp_24", Type: field.TypeFloat64, Nullable: true},
+		{Name: "precipitation", Type: field.TypeFloat64, Nullable: true},
+		{Name: "precipitation_3", Type: field.TypeFloat64, Nullable: true},
+		{Name: "precipitation_6", Type: field.TypeFloat64, Nullable: true},
+		{Name: "precipitation_24", Type: field.TypeFloat64, Nullable: true},
+		{Name: "snow_depth", Type: field.TypeFloat64, Nullable: true},
+		{Name: "vert_vis", Type: field.TypeFloat64, Nullable: true},
+		{Name: "metar_type", Type: field.TypeEnum, Enums: []string{"METAR", "SPECI"}},
+		{Name: "hash", Type: field.TypeString},
+		{Name: "airport_metars", Type: field.TypeInt, Nullable: true},
+	}
+	// MetarsTable holds the schema information for the "metars" table.
+	MetarsTable = &schema.Table{
+		Name:       "metars",
+		Columns:    MetarsColumns,
+		PrimaryKey: []*schema.Column{MetarsColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "metars_airports_metars",
+				Columns:    []*schema.Column{MetarsColumns[36]},
+				RefColumns: []*schema.Column{AirportsColumns[0]},
+				OnDelete:   schema.SetNull,
+			},
+		},
+		Indexes: []*schema.Index{
+			{
+				Name:    "metar_observation_time",
+				Unique:  false,
+				Columns: []*schema.Column{MetarsColumns[2]},
+			},
+		},
+	}
 	// RunwaysColumns holds the columns for the "runways" table.
 	RunwaysColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
 		{Name: "hash", Type: field.TypeString},
 		{Name: "import_flag", Type: field.TypeBool, Default: false},
+		{Name: "last_updated", Type: field.TypeTime},
 		{Name: "length", Type: field.TypeInt},
 		{Name: "width", Type: field.TypeInt},
 		{Name: "surface", Type: field.TypeString, Nullable: true},
@@ -112,7 +177,7 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "runways_airports_runways",
-				Columns:    []*schema.Column{RunwaysColumns[20]},
+				Columns:    []*schema.Column{RunwaysColumns[21]},
 				RefColumns: []*schema.Column{AirportsColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
@@ -125,15 +190,40 @@ var (
 			},
 		},
 	}
+	// SkyConditionsColumns holds the columns for the "sky_conditions" table.
+	SkyConditionsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "sky_cover", Type: field.TypeEnum, Enums: []string{"SKC", "FEW", "SCT", "CLR", "BKN", "OVC", "OVX", "CAVOK"}},
+		{Name: "cloud_base", Type: field.TypeInt, Nullable: true},
+		{Name: "metar_sky_conditions", Type: field.TypeInt},
+	}
+	// SkyConditionsTable holds the schema information for the "sky_conditions" table.
+	SkyConditionsTable = &schema.Table{
+		Name:       "sky_conditions",
+		Columns:    SkyConditionsColumns,
+		PrimaryKey: []*schema.Column{SkyConditionsColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "sky_conditions_metars_sky_conditions",
+				Columns:    []*schema.Column{SkyConditionsColumns[3]},
+				RefColumns: []*schema.Column{MetarsColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+		},
+	}
 	// Tables holds all the tables in the schema.
 	Tables = []*schema.Table{
 		AirportsTable,
 		FrequenciesTable,
+		MetarsTable,
 		RunwaysTable,
+		SkyConditionsTable,
 	}
 )
 
 func init() {
 	FrequenciesTable.ForeignKeys[0].RefTable = AirportsTable
+	MetarsTable.ForeignKeys[0].RefTable = AirportsTable
 	RunwaysTable.ForeignKeys[0].RefTable = AirportsTable
+	SkyConditionsTable.ForeignKeys[0].RefTable = MetarsTable
 }

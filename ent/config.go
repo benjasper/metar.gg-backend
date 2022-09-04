@@ -24,9 +24,11 @@ type config struct {
 
 // hooks per client, for fast access.
 type hooks struct {
-	Airport   []ent.Hook
-	Frequency []ent.Hook
-	Runway    []ent.Hook
+	Airport      []ent.Hook
+	Frequency    []ent.Hook
+	Metar        []ent.Hook
+	Runway       []ent.Hook
+	SkyCondition []ent.Hook
 }
 
 // Options applies the options on the config object.

@@ -6,6 +6,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"time"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
@@ -44,6 +45,20 @@ func (ru *RunwayUpdate) SetImportFlag(b bool) *RunwayUpdate {
 func (ru *RunwayUpdate) SetNillableImportFlag(b *bool) *RunwayUpdate {
 	if b != nil {
 		ru.SetImportFlag(*b)
+	}
+	return ru
+}
+
+// SetLastUpdated sets the "last_updated" field.
+func (ru *RunwayUpdate) SetLastUpdated(t time.Time) *RunwayUpdate {
+	ru.mutation.SetLastUpdated(t)
+	return ru
+}
+
+// SetNillableLastUpdated sets the "last_updated" field if the given value is not nil.
+func (ru *RunwayUpdate) SetNillableLastUpdated(t *time.Time) *RunwayUpdate {
+	if t != nil {
+		ru.SetLastUpdated(*t)
 	}
 	return ru
 }
@@ -504,6 +519,13 @@ func (ru *RunwayUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Column: runway.FieldImportFlag,
 		})
 	}
+	if value, ok := ru.mutation.LastUpdated(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeTime,
+			Value:  value,
+			Column: runway.FieldLastUpdated,
+		})
+	}
 	if value, ok := ru.mutation.Length(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeInt,
@@ -843,6 +865,20 @@ func (ruo *RunwayUpdateOne) SetImportFlag(b bool) *RunwayUpdateOne {
 func (ruo *RunwayUpdateOne) SetNillableImportFlag(b *bool) *RunwayUpdateOne {
 	if b != nil {
 		ruo.SetImportFlag(*b)
+	}
+	return ruo
+}
+
+// SetLastUpdated sets the "last_updated" field.
+func (ruo *RunwayUpdateOne) SetLastUpdated(t time.Time) *RunwayUpdateOne {
+	ruo.mutation.SetLastUpdated(t)
+	return ruo
+}
+
+// SetNillableLastUpdated sets the "last_updated" field if the given value is not nil.
+func (ruo *RunwayUpdateOne) SetNillableLastUpdated(t *time.Time) *RunwayUpdateOne {
+	if t != nil {
+		ruo.SetLastUpdated(*t)
 	}
 	return ruo
 }
@@ -1331,6 +1367,13 @@ func (ruo *RunwayUpdateOne) sqlSave(ctx context.Context) (_node *Runway, err err
 			Type:   field.TypeBool,
 			Value:  value,
 			Column: runway.FieldImportFlag,
+		})
+	}
+	if value, ok := ruo.mutation.LastUpdated(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeTime,
+			Value:  value,
+			Column: runway.FieldLastUpdated,
 		})
 	}
 	if value, ok := ruo.mutation.Length(); ok {

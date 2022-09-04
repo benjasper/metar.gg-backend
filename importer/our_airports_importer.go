@@ -12,10 +12,10 @@ import (
 	"metar.gg/ent/frequency"
 	"metar.gg/ent/runway"
 	"metar.gg/utils"
-	"net/http"
 	"os"
 	"strconv"
 	"strings"
+	"time"
 )
 
 type Importer struct {
@@ -28,31 +28,11 @@ func NewImporter(db *ent.Client) *Importer {
 	}
 }
 
-type ImportLineFunction func(data []string) error
-type CleanupImportFunction func() error
+type ImportLineFunction func(ctx context.Context, data []string) error
+type CleanupImportFunction func(ctx context.Context) error
 
-// Download file and save it to disk.
-func (i *Importer) downloadFile(url string, filepath string) error {
-	out, err := os.Create(filepath)
-	if err != nil {
-		return err
-	}
-	defer out.Close()
-
-	// Get the data
-	resp, err := http.Get(url)
-	if err != nil {
-		return err
-	}
-	defer resp.Body.Close()
-
-	// Check server response
-	if resp.StatusCode != http.StatusOK {
-		return fmt.Errorf("could not download file from %s: %s", url, resp.Status)
-	}
-
-	// Writer the body to file
-	_, err = io.Copy(out, resp.Body)
+func (i *Importer) ImportAirports(ctx context.Context, url string) error {
+	err := i.importModelType(ctx, url, i.importAirportLine, i.cleanupAirports)
 	if err != nil {
 		return err
 	}
@@ -60,8 +40,8 @@ func (i *Importer) downloadFile(url string, filepath string) error {
 	return nil
 }
 
-func (i *Importer) ImportAirports(url string) error {
-	err := i.importModelType(url, i.importAirportLine, i.cleanupAirports)
+func (i *Importer) ImportRunways(ctx context.Context, url string) error {
+	err := i.importModelType(ctx, url, i.importRunwayLine, i.cleanupRunways)
 	if err != nil {
 		return err
 	}
@@ -69,8 +49,8 @@ func (i *Importer) ImportAirports(url string) error {
 	return nil
 }
 
-func (i *Importer) ImportRunways(url string) error {
-	err := i.importModelType(url, i.importRunwayLine, i.cleanupRunways)
+func (i *Importer) ImportFrequencies(ctx context.Context, url string) error {
+	err := i.importModelType(ctx, url, i.importFrequencyLine, i.cleanupFrequencies)
 	if err != nil {
 		return err
 	}
@@ -78,20 +58,11 @@ func (i *Importer) ImportRunways(url string) error {
 	return nil
 }
 
-func (i *Importer) ImportFrequencies(url string) error {
-	err := i.importModelType(url, i.importFrequencyLine, i.cleanupFrequencies)
-	if err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func (i *Importer) importModelType(url string, importFunction ImportLineFunction, cleanupFunction CleanupImportFunction) error {
+func (i *Importer) importModelType(ctx context.Context, url string, importFunction ImportLineFunction, cleanupFunction CleanupImportFunction) error {
 	fmt.Println("Importing ", url)
 
 	filepath := "file.csv"
-	err := i.downloadFile(url, filepath)
+	err := utils.DownloadFile(url, filepath)
 	if err != nil {
 		return err
 	}
@@ -131,7 +102,7 @@ func (i *Importer) importModelType(url string, importFunction ImportLineFunction
 			record := record
 
 			defer func() { <-guard }()
-			return importFunction(record)
+			return importFunction(ctx, record)
 		})
 	}
 
@@ -140,7 +111,7 @@ func (i *Importer) importModelType(url string, importFunction ImportLineFunction
 		return err
 	}
 
-	err = cleanupFunction()
+	err = cleanupFunction(ctx)
 	if err != nil {
 		return err
 	}
@@ -152,13 +123,11 @@ func (i *Importer) importModelType(url string, importFunction ImportLineFunction
 }
 
 // CSV file format: "id","ident","type","name","latitude_deg","longitude_deg","elevation_ft","continent","iso_country","iso_region","municipality","scheduled_service","gps_code","iata_code","local_code","home_link","wikipedia_link","keywords"
-func (i *Importer) importAirportLine(data []string) error {
+func (i *Importer) importAirportLine(ctx context.Context, data []string) error {
 	// Hash the current line via md5
 	line := strings.Join(data, "")
 	hash := strconv.FormatUint(fnv1a.HashString64(line), 10)
 	ourAirportID, _ := strconv.ParseInt(data[0], 10, 64)
-
-	ctx := context.TODO()
 
 	found, err := i.db.Airport.Update().Where(
 		airport.Hash(hash),
@@ -245,7 +214,7 @@ func (i *Importer) importAirportLine(data []string) error {
 		SetName(data[3]).
 		SetLatitude(lat).
 		SetLongitude(lon).
-		SetNillableElevation(utils.Nillable(data[6], int(elevation))).
+		SetNillableElevation(utils.NillableWithInput(data[6], int(elevation))).
 		SetContinent(continent).
 		SetCountry(data[8]).
 		SetRegion(data[9]).
@@ -257,6 +226,7 @@ func (i *Importer) importAirportLine(data []string) error {
 		SetNillableWebsite(utils.NillableString(data[15])).
 		SetNillableWikipedia(utils.NillableString(data[16])).
 		SetKeywords(keywords).
+		SetLastUpdated(time.Now()).
 		OnConflict().
 		UpdateNewValues().
 		Exec(ctx)
@@ -267,8 +237,7 @@ func (i *Importer) importAirportLine(data []string) error {
 	return nil
 }
 
-func (i *Importer) cleanupAirports() error {
-	ctx := context.TODO()
+func (i *Importer) cleanupAirports(ctx context.Context) error {
 	deleted, err := i.db.Airport.Delete().Where(
 		airport.ImportFlag(false),
 	).Exec(ctx)
@@ -294,13 +263,11 @@ func (i *Importer) cleanupAirports() error {
 // "lighted","closed","le_ident","le_latitude_deg","le_longitude_deg","le_elevation_ft","le_heading_degT",
 // "le_displaced_threshold_ft","he_ident","he_latitude_deg","he_longitude_deg","he_elevation_ft","he_heading_degT",
 // "he_displaced_threshold_ft"
-func (i *Importer) importRunwayLine(data []string) error {
+func (i *Importer) importRunwayLine(ctx context.Context, data []string) error {
 	// Hash the current line via md5
 	line := strings.Join(data, "")
 	hash := strconv.FormatUint(fnv1a.HashString64(line), 10)
 	runwayID, _ := strconv.ParseInt(data[0], 10, 64)
-
-	ctx := context.TODO()
 
 	found, err := i.db.Airport.Update().Where(
 		airport.Hash(hash),
@@ -350,17 +317,18 @@ func (i *Importer) importRunwayLine(data []string) error {
 		SetLighted(isLighted).
 		SetClosed(isClosed).
 		SetLowRunwayIdentifier(data[8]).
-		SetNillableLowRunwayLatitude(utils.Nillable(data[9], leLatitude)).
-		SetNillableLowRunwayLongitude(utils.Nillable(data[10], leLongitude)).
-		SetNillableLowRunwayElevation(utils.Nillable(data[11], int(leElevation))).
-		SetNillableLowRunwayHeading(utils.Nillable(data[12], leHeading)).
-		SetNillableLowRunwayDisplacedThreshold(utils.Nillable(data[13], int(leDisplacedThreshold))).
+		SetNillableLowRunwayLatitude(utils.NillableWithInput(data[9], leLatitude)).
+		SetNillableLowRunwayLongitude(utils.NillableWithInput(data[10], leLongitude)).
+		SetNillableLowRunwayElevation(utils.NillableWithInput(data[11], int(leElevation))).
+		SetNillableLowRunwayHeading(utils.NillableWithInput(data[12], leHeading)).
+		SetNillableLowRunwayDisplacedThreshold(utils.NillableWithInput(data[13], int(leDisplacedThreshold))).
 		SetHighRunwayIdentifier(data[14]).
-		SetNillableHighRunwayLatitude(utils.Nillable(data[15], heLatitude)).
-		SetNillableHighRunwayLongitude(utils.Nillable(data[16], heLongitude)).
-		SetNillableHighRunwayElevation(utils.Nillable(data[17], int(heElevation))).
-		SetNillableHighRunwayHeading(utils.Nillable(data[18], heHeading)).
-		SetNillableHighRunwayDisplacedThreshold(utils.Nillable(data[19], int(heDisplacedThreshold))).
+		SetNillableHighRunwayLatitude(utils.NillableWithInput(data[15], heLatitude)).
+		SetNillableHighRunwayLongitude(utils.NillableWithInput(data[16], heLongitude)).
+		SetNillableHighRunwayElevation(utils.NillableWithInput(data[17], int(heElevation))).
+		SetNillableHighRunwayHeading(utils.NillableWithInput(data[18], heHeading)).
+		SetNillableHighRunwayDisplacedThreshold(utils.NillableWithInput(data[19], int(heDisplacedThreshold))).
+		SetLastUpdated(time.Now()).
 		OnConflict().
 		UpdateNewValues().
 		Exec(ctx)
@@ -371,8 +339,7 @@ func (i *Importer) importRunwayLine(data []string) error {
 	return nil
 }
 
-func (i *Importer) cleanupRunways() error {
-	ctx := context.TODO()
+func (i *Importer) cleanupRunways(ctx context.Context) error {
 	deleted, err := i.db.Runway.Delete().Where(
 		runway.ImportFlag(false),
 	).Exec(ctx)
@@ -395,13 +362,11 @@ func (i *Importer) cleanupRunways() error {
 }
 
 // The raw data is in the following order: "id","airport_ref","airport_ident","type","description","frequency_mhz"
-func (i *Importer) importFrequencyLine(data []string) error {
+func (i *Importer) importFrequencyLine(ctx context.Context, data []string) error {
 	// Hash the current line via md5
 	line := strings.Join(data, "")
 	hash := strconv.FormatUint(fnv1a.HashString64(line), 10)
 	frequencyID, _ := strconv.ParseInt(data[0], 10, 64)
-
-	ctx := context.TODO()
 
 	found, err := i.db.Airport.Update().Where(
 		airport.Hash(hash),
@@ -433,6 +398,7 @@ func (i *Importer) importFrequencyLine(data []string) error {
 		SetType(data[3]).
 		SetDescription(data[4]).
 		SetFrequency(frequency).
+		SetLastUpdated(time.Now()).
 		OnConflict().
 		UpdateNewValues().
 		Exec(ctx)
@@ -443,8 +409,7 @@ func (i *Importer) importFrequencyLine(data []string) error {
 	return nil
 }
 
-func (i *Importer) cleanupFrequencies() error {
-	ctx := context.TODO()
+func (i *Importer) cleanupFrequencies(ctx context.Context) error {
 	deleted, err := i.db.Frequency.Delete().Where(
 		frequency.ImportFlag(false),
 	).Exec(ctx)

@@ -3,6 +3,8 @@
 package airport
 
 import (
+	"time"
+
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"metar.gg/ent/predicate"
@@ -93,6 +95,13 @@ func ImportFlag(v bool) predicate.Airport {
 	})
 }
 
+// LastUpdated applies equality check predicate on the "last_updated" field. It's identical to LastUpdatedEQ.
+func LastUpdated(v time.Time) predicate.Airport {
+	return predicate.Airport(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldLastUpdated), v))
+	})
+}
+
 // Identifier applies equality check predicate on the "identifier" field. It's identical to IdentifierEQ.
 func Identifier(v string) predicate.Airport {
 	return predicate.Airport(func(s *sql.Selector) {
@@ -139,6 +148,13 @@ func Country(v string) predicate.Airport {
 func Region(v string) predicate.Airport {
 	return predicate.Airport(func(s *sql.Selector) {
 		s.Where(sql.EQ(s.C(FieldRegion), v))
+	})
+}
+
+// HasWeather applies equality check predicate on the "has_weather" field. It's identical to HasWeatherEQ.
+func HasWeather(v bool) predicate.Airport {
+	return predicate.Airport(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldHasWeather), v))
 	})
 }
 
@@ -301,6 +317,70 @@ func ImportFlagEQ(v bool) predicate.Airport {
 func ImportFlagNEQ(v bool) predicate.Airport {
 	return predicate.Airport(func(s *sql.Selector) {
 		s.Where(sql.NEQ(s.C(FieldImportFlag), v))
+	})
+}
+
+// LastUpdatedEQ applies the EQ predicate on the "last_updated" field.
+func LastUpdatedEQ(v time.Time) predicate.Airport {
+	return predicate.Airport(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldLastUpdated), v))
+	})
+}
+
+// LastUpdatedNEQ applies the NEQ predicate on the "last_updated" field.
+func LastUpdatedNEQ(v time.Time) predicate.Airport {
+	return predicate.Airport(func(s *sql.Selector) {
+		s.Where(sql.NEQ(s.C(FieldLastUpdated), v))
+	})
+}
+
+// LastUpdatedIn applies the In predicate on the "last_updated" field.
+func LastUpdatedIn(vs ...time.Time) predicate.Airport {
+	v := make([]any, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.Airport(func(s *sql.Selector) {
+		s.Where(sql.In(s.C(FieldLastUpdated), v...))
+	})
+}
+
+// LastUpdatedNotIn applies the NotIn predicate on the "last_updated" field.
+func LastUpdatedNotIn(vs ...time.Time) predicate.Airport {
+	v := make([]any, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.Airport(func(s *sql.Selector) {
+		s.Where(sql.NotIn(s.C(FieldLastUpdated), v...))
+	})
+}
+
+// LastUpdatedGT applies the GT predicate on the "last_updated" field.
+func LastUpdatedGT(v time.Time) predicate.Airport {
+	return predicate.Airport(func(s *sql.Selector) {
+		s.Where(sql.GT(s.C(FieldLastUpdated), v))
+	})
+}
+
+// LastUpdatedGTE applies the GTE predicate on the "last_updated" field.
+func LastUpdatedGTE(v time.Time) predicate.Airport {
+	return predicate.Airport(func(s *sql.Selector) {
+		s.Where(sql.GTE(s.C(FieldLastUpdated), v))
+	})
+}
+
+// LastUpdatedLT applies the LT predicate on the "last_updated" field.
+func LastUpdatedLT(v time.Time) predicate.Airport {
+	return predicate.Airport(func(s *sql.Selector) {
+		s.Where(sql.LT(s.C(FieldLastUpdated), v))
+	})
+}
+
+// LastUpdatedLTE applies the LTE predicate on the "last_updated" field.
+func LastUpdatedLTE(v time.Time) predicate.Airport {
+	return predicate.Airport(func(s *sql.Selector) {
+		s.Where(sql.LTE(s.C(FieldLastUpdated), v))
 	})
 }
 
@@ -975,6 +1055,20 @@ func RegionEqualFold(v string) predicate.Airport {
 func RegionContainsFold(v string) predicate.Airport {
 	return predicate.Airport(func(s *sql.Selector) {
 		s.Where(sql.ContainsFold(s.C(FieldRegion), v))
+	})
+}
+
+// HasWeatherEQ applies the EQ predicate on the "has_weather" field.
+func HasWeatherEQ(v bool) predicate.Airport {
+	return predicate.Airport(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldHasWeather), v))
+	})
+}
+
+// HasWeatherNEQ applies the NEQ predicate on the "has_weather" field.
+func HasWeatherNEQ(v bool) predicate.Airport {
+	return predicate.Airport(func(s *sql.Selector) {
+		s.Where(sql.NEQ(s.C(FieldHasWeather), v))
 	})
 }
 
@@ -1717,6 +1811,34 @@ func HasFrequenciesWith(preds ...predicate.Frequency) predicate.Airport {
 			sqlgraph.From(Table, FieldID),
 			sqlgraph.To(FrequenciesInverseTable, FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, false, FrequenciesTable, FrequenciesColumn),
+		)
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
+// HasMetars applies the HasEdge predicate on the "metars" edge.
+func HasMetars() predicate.Airport {
+	return predicate.Airport(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.To(MetarsTable, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, MetarsTable, MetarsColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasMetarsWith applies the HasEdge predicate on the "metars" edge with a given conditions (other predicates).
+func HasMetarsWith(preds ...predicate.Metar) predicate.Airport {
+	return predicate.Airport(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.To(MetarsInverseTable, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, MetarsTable, MetarsColumn),
 		)
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {

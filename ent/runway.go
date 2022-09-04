@@ -5,6 +5,7 @@ package ent
 import (
 	"fmt"
 	"strings"
+	"time"
 
 	"entgo.io/ent/dialect/sql"
 	"metar.gg/ent/airport"
@@ -20,6 +21,8 @@ type Runway struct {
 	Hash string `json:"hash,omitempty"`
 	// ImportFlag holds the value of the "import_flag" field.
 	ImportFlag bool `json:"import_flag,omitempty"`
+	// LastUpdated holds the value of the "last_updated" field.
+	LastUpdated time.Time `json:"last_updated,omitempty"`
 	// Length of the runway in feet.
 	Length int `json:"length,omitempty"`
 	// Width of the runway surface in feet.
@@ -97,6 +100,8 @@ func (*Runway) scanValues(columns []string) ([]any, error) {
 			values[i] = new(sql.NullInt64)
 		case runway.FieldHash, runway.FieldSurface, runway.FieldLowRunwayIdentifier, runway.FieldHighRunwayIdentifier:
 			values[i] = new(sql.NullString)
+		case runway.FieldLastUpdated:
+			values[i] = new(sql.NullTime)
 		case runway.ForeignKeys[0]: // airport_runways
 			values[i] = new(sql.NullInt64)
 		default:
@@ -131,6 +136,12 @@ func (r *Runway) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field import_flag", values[i])
 			} else if value.Valid {
 				r.ImportFlag = value.Bool
+			}
+		case runway.FieldLastUpdated:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field last_updated", values[i])
+			} else if value.Valid {
+				r.LastUpdated = value.Time
 			}
 		case runway.FieldLength:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
@@ -290,6 +301,9 @@ func (r *Runway) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("import_flag=")
 	builder.WriteString(fmt.Sprintf("%v", r.ImportFlag))
+	builder.WriteString(", ")
+	builder.WriteString("last_updated=")
+	builder.WriteString(r.LastUpdated.Format(time.ANSIC))
 	builder.WriteString(", ")
 	builder.WriteString("length=")
 	builder.WriteString(fmt.Sprintf("%v", r.Length))

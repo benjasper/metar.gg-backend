@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"strconv"
+	"time"
 )
 
 const (
@@ -17,6 +18,8 @@ const (
 	FieldHash = "hash"
 	// FieldImportFlag holds the string denoting the import_flag field in the database.
 	FieldImportFlag = "import_flag"
+	// FieldLastUpdated holds the string denoting the last_updated field in the database.
+	FieldLastUpdated = "last_updated"
 	// FieldIdentifier holds the string denoting the identifier field in the database.
 	FieldIdentifier = "identifier"
 	// FieldType holds the string denoting the type field in the database.
@@ -35,6 +38,8 @@ const (
 	FieldCountry = "country"
 	// FieldRegion holds the string denoting the region field in the database.
 	FieldRegion = "region"
+	// FieldHasWeather holds the string denoting the has_weather field in the database.
+	FieldHasWeather = "has_weather"
 	// FieldMunicipality holds the string denoting the municipality field in the database.
 	FieldMunicipality = "municipality"
 	// FieldScheduledService holds the string denoting the scheduled_service field in the database.
@@ -55,6 +60,8 @@ const (
 	EdgeRunways = "runways"
 	// EdgeFrequencies holds the string denoting the frequencies edge name in mutations.
 	EdgeFrequencies = "frequencies"
+	// EdgeMetars holds the string denoting the metars edge name in mutations.
+	EdgeMetars = "metars"
 	// Table holds the table name of the airport in the database.
 	Table = "airports"
 	// RunwaysTable is the table that holds the runways relation/edge.
@@ -71,6 +78,13 @@ const (
 	FrequenciesInverseTable = "frequencies"
 	// FrequenciesColumn is the table column denoting the frequencies relation/edge.
 	FrequenciesColumn = "airport_frequencies"
+	// MetarsTable is the table that holds the metars relation/edge.
+	MetarsTable = "metars"
+	// MetarsInverseTable is the table name for the Metar entity.
+	// It exists in this package in order to avoid circular dependency with the "metar" package.
+	MetarsInverseTable = "metars"
+	// MetarsColumn is the table column denoting the metars relation/edge.
+	MetarsColumn = "airport_metars"
 )
 
 // Columns holds all SQL columns for airport fields.
@@ -78,6 +92,7 @@ var Columns = []string{
 	FieldID,
 	FieldHash,
 	FieldImportFlag,
+	FieldLastUpdated,
 	FieldIdentifier,
 	FieldType,
 	FieldName,
@@ -87,6 +102,7 @@ var Columns = []string{
 	FieldContinent,
 	FieldCountry,
 	FieldRegion,
+	FieldHasWeather,
 	FieldMunicipality,
 	FieldScheduledService,
 	FieldGpsCode,
@@ -110,6 +126,10 @@ func ValidColumn(column string) bool {
 var (
 	// DefaultImportFlag holds the default value on creation for the "import_flag" field.
 	DefaultImportFlag bool
+	// DefaultLastUpdated holds the default value on creation for the "last_updated" field.
+	DefaultLastUpdated func() time.Time
+	// DefaultHasWeather holds the default value on creation for the "has_weather" field.
+	DefaultHasWeather bool
 )
 
 // Type defines the type for the "type" enum field.

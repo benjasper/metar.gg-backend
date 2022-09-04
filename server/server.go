@@ -2,10 +2,11 @@ package server
 
 import (
 	"context"
+	"fmt"
 	"github.com/99designs/gqlgen/graphql/handler"
-	"log"
 	"metar.gg/ent"
 	"metar.gg/graph"
+	"metar.gg/logging"
 	"net/http"
 )
 
@@ -16,20 +17,21 @@ func NewServer() *Server {
 	return &Server{}
 }
 
-func (s *Server) Run(db *ent.Client) error {
-
+func (s *Server) Run(db *ent.Client, logger *logging.Logger) error {
 	if err := db.Schema.Create(
 		context.Background(),
 	); err != nil {
-		log.Fatal("opening ent client", err)
+		logger.Fatal(err)
 	}
+
+	port := "80"
 
 	// Configure the server and start listening on :80.
 	srv := handler.NewDefaultServer(graph.NewSchema(db))
 	http.Handle("/graphql", srv)
-	log.Println("listening on :80")
-	if err := http.ListenAndServe(":80", nil); err != nil {
-		log.Fatal("http server terminated", err)
+	logger.Info(fmt.Sprintf("Server started and listening on port %s", port))
+	if err := http.ListenAndServe(":"+port, nil); err != nil {
+		return err
 	}
 
 	return nil

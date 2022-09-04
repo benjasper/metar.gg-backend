@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"strings"
+	"time"
 
 	"entgo.io/ent/dialect/sql"
 	"metar.gg/ent/airport"
@@ -20,6 +21,8 @@ type Airport struct {
 	Hash string `json:"hash,omitempty"`
 	// ImportFlag holds the value of the "import_flag" field.
 	ImportFlag bool `json:"import_flag,omitempty"`
+	// LastUpdated holds the value of the "last_updated" field.
+	LastUpdated time.Time `json:"last_updated,omitempty"`
 	// This will be the ICAO code if available. Otherwise, it will be a local airport code (if no conflict), or if nothing else is available, an internally-generated code starting with the ISO2 country code, followed by a dash and a four-digit number.
 	Identifier string `json:"identifier,omitempty"`
 	// Type of airport.
@@ -38,6 +41,8 @@ type Airport struct {
 	Country string `json:"country,omitempty"`
 	// Region holds the value of the "region" field.
 	Region string `json:"region,omitempty"`
+	// Whether the airport has weather reporting and a metar is available.
+	HasWeather bool `json:"has_weather,omitempty"`
 	// The primary municipality that the airport serves (when available). Note that this is not necessarily the municipality where the airport is physically located.
 	Municipality *string `json:"municipality,omitempty"`
 	// Whether the airport has scheduled airline service.
@@ -65,14 +70,17 @@ type AirportEdges struct {
 	Runways []*Runway `json:"runways,omitempty"`
 	// Frequencies at the airport.
 	Frequencies []*Frequency `json:"frequencies,omitempty"`
+	// METARs at the airport.
+	Metars []*Metar `json:"metars,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [2]bool
+	loadedTypes [3]bool
 	// totalCount holds the count of the edges above.
 	totalCount [1]map[string]int
 
 	namedRunways     map[string][]*Runway
 	namedFrequencies map[string][]*Frequency
+	namedMetars      map[string][]*Metar
 }
 
 // RunwaysOrErr returns the Runways value or an error if the edge
@@ -93,6 +101,15 @@ func (e AirportEdges) FrequenciesOrErr() ([]*Frequency, error) {
 	return nil, &NotLoadedError{edge: "frequencies"}
 }
 
+// MetarsOrErr returns the Metars value or an error if the edge
+// was not loaded in eager-loading.
+func (e AirportEdges) MetarsOrErr() ([]*Metar, error) {
+	if e.loadedTypes[2] {
+		return e.Metars, nil
+	}
+	return nil, &NotLoadedError{edge: "metars"}
+}
+
 // scanValues returns the types for scanning values from sql.Rows.
 func (*Airport) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
@@ -100,7 +117,7 @@ func (*Airport) scanValues(columns []string) ([]any, error) {
 		switch columns[i] {
 		case airport.FieldKeywords:
 			values[i] = new([]byte)
-		case airport.FieldImportFlag, airport.FieldScheduledService:
+		case airport.FieldImportFlag, airport.FieldHasWeather, airport.FieldScheduledService:
 			values[i] = new(sql.NullBool)
 		case airport.FieldLatitude, airport.FieldLongitude:
 			values[i] = new(sql.NullFloat64)
@@ -108,6 +125,8 @@ func (*Airport) scanValues(columns []string) ([]any, error) {
 			values[i] = new(sql.NullInt64)
 		case airport.FieldHash, airport.FieldIdentifier, airport.FieldType, airport.FieldName, airport.FieldContinent, airport.FieldCountry, airport.FieldRegion, airport.FieldMunicipality, airport.FieldGpsCode, airport.FieldIataCode, airport.FieldLocalCode, airport.FieldWebsite, airport.FieldWikipedia:
 			values[i] = new(sql.NullString)
+		case airport.FieldLastUpdated:
+			values[i] = new(sql.NullTime)
 		default:
 			return nil, fmt.Errorf("unexpected column %q for type Airport", columns[i])
 		}
@@ -140,6 +159,12 @@ func (a *Airport) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field import_flag", values[i])
 			} else if value.Valid {
 				a.ImportFlag = value.Bool
+			}
+		case airport.FieldLastUpdated:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field last_updated", values[i])
+			} else if value.Valid {
+				a.LastUpdated = value.Time
 			}
 		case airport.FieldIdentifier:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -195,6 +220,12 @@ func (a *Airport) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field region", values[i])
 			} else if value.Valid {
 				a.Region = value.String
+			}
+		case airport.FieldHasWeather:
+			if value, ok := values[i].(*sql.NullBool); !ok {
+				return fmt.Errorf("unexpected type %T for field has_weather", values[i])
+			} else if value.Valid {
+				a.HasWeather = value.Bool
 			}
 		case airport.FieldMunicipality:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -267,6 +298,11 @@ func (a *Airport) QueryFrequencies() *FrequencyQuery {
 	return (&AirportClient{config: a.config}).QueryFrequencies(a)
 }
 
+// QueryMetars queries the "metars" edge of the Airport entity.
+func (a *Airport) QueryMetars() *MetarQuery {
+	return (&AirportClient{config: a.config}).QueryMetars(a)
+}
+
 // Update returns a builder for updating this Airport.
 // Note that you need to call Airport.Unwrap() before calling this method if this Airport
 // was returned from a transaction, and the transaction was committed or rolled back.
@@ -296,6 +332,9 @@ func (a *Airport) String() string {
 	builder.WriteString("import_flag=")
 	builder.WriteString(fmt.Sprintf("%v", a.ImportFlag))
 	builder.WriteString(", ")
+	builder.WriteString("last_updated=")
+	builder.WriteString(a.LastUpdated.Format(time.ANSIC))
+	builder.WriteString(", ")
 	builder.WriteString("identifier=")
 	builder.WriteString(a.Identifier)
 	builder.WriteString(", ")
@@ -324,6 +363,9 @@ func (a *Airport) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("region=")
 	builder.WriteString(a.Region)
+	builder.WriteString(", ")
+	builder.WriteString("has_weather=")
+	builder.WriteString(fmt.Sprintf("%v", a.HasWeather))
 	builder.WriteString(", ")
 	if v := a.Municipality; v != nil {
 		builder.WriteString("municipality=")
@@ -409,6 +451,30 @@ func (a *Airport) appendNamedFrequencies(name string, edges ...*Frequency) {
 		a.Edges.namedFrequencies[name] = []*Frequency{}
 	} else {
 		a.Edges.namedFrequencies[name] = append(a.Edges.namedFrequencies[name], edges...)
+	}
+}
+
+// NamedMetars returns the Metars named value or an error if the edge was not
+// loaded in eager-loading with this name.
+func (a *Airport) NamedMetars(name string) ([]*Metar, error) {
+	if a.Edges.namedMetars == nil {
+		return nil, &NotLoadedError{edge: name}
+	}
+	nodes, ok := a.Edges.namedMetars[name]
+	if !ok {
+		return nil, &NotLoadedError{edge: name}
+	}
+	return nodes, nil
+}
+
+func (a *Airport) appendNamedMetars(name string, edges ...*Metar) {
+	if a.Edges.namedMetars == nil {
+		a.Edges.namedMetars = make(map[string][]*Metar)
+	}
+	if len(edges) == 0 {
+		a.Edges.namedMetars[name] = []*Metar{}
+	} else {
+		a.Edges.namedMetars[name] = append(a.Edges.namedMetars[name], edges...)
 	}
 }
 

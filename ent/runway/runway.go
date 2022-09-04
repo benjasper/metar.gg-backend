@@ -2,6 +2,10 @@
 
 package runway
 
+import (
+	"time"
+)
+
 const (
 	// Label holds the string label denoting the runway type in the database.
 	Label = "runway"
@@ -11,6 +15,8 @@ const (
 	FieldHash = "hash"
 	// FieldImportFlag holds the string denoting the import_flag field in the database.
 	FieldImportFlag = "import_flag"
+	// FieldLastUpdated holds the string denoting the last_updated field in the database.
+	FieldLastUpdated = "last_updated"
 	// FieldLength holds the string denoting the length field in the database.
 	FieldLength = "length"
 	// FieldWidth holds the string denoting the width field in the database.
@@ -63,6 +69,7 @@ var Columns = []string{
 	FieldID,
 	FieldHash,
 	FieldImportFlag,
+	FieldLastUpdated,
 	FieldLength,
 	FieldWidth,
 	FieldSurface,
@@ -106,4 +113,6 @@ func ValidColumn(column string) bool {
 var (
 	// DefaultImportFlag holds the default value on creation for the "import_flag" field.
 	DefaultImportFlag bool
+	// DefaultLastUpdated holds the default value on creation for the "last_updated" field.
+	DefaultLastUpdated func() time.Time
 )

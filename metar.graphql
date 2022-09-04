@@ -1,10 +1,11 @@
 scalar Cursor
+scalar Time
 
 type PageInfo {
     hasNextPage: Boolean!
     hasPreviousPage: Boolean!
-    startCursor: Cursor!
-    endCursor: Cursor!
+    startCursor: Cursor
+    endCursor: Cursor
 }
 
 type AirportConnection {
@@ -25,9 +26,11 @@ type Query {
         before: Cursor
         last: Int
         identifier: String
+        hasWeather: Boolean
     ): AirportConnection!
 }
 
 extend type Airport {
     runways(closed: Boolean): [Runway!]! @goField(forceResolver: true)
+    metars(first: Int = 1): [Metar!]! @goField(forceResolver: true)
 }

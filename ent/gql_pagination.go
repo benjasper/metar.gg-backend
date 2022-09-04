@@ -18,7 +18,9 @@ import (
 	"github.com/vmihailenco/msgpack/v5"
 	"metar.gg/ent/airport"
 	"metar.gg/ent/frequency"
+	"metar.gg/ent/metar"
 	"metar.gg/ent/runway"
+	"metar.gg/ent/skycondition"
 )
 
 // OrderDirection defines the directions in which to order a list of items.
@@ -705,6 +707,237 @@ func (f *Frequency) ToEdge(order *FrequencyOrder) *FrequencyEdge {
 	}
 }
 
+// MetarEdge is the edge representation of Metar.
+type MetarEdge struct {
+	Node   *Metar `json:"node"`
+	Cursor Cursor `json:"cursor"`
+}
+
+// MetarConnection is the connection containing edges to Metar.
+type MetarConnection struct {
+	Edges      []*MetarEdge `json:"edges"`
+	PageInfo   PageInfo     `json:"pageInfo"`
+	TotalCount int          `json:"totalCount"`
+}
+
+func (c *MetarConnection) build(nodes []*Metar, pager *metarPager, after *Cursor, first *int, before *Cursor, last *int) {
+	c.PageInfo.HasNextPage = before != nil
+	c.PageInfo.HasPreviousPage = after != nil
+	if first != nil && *first+1 == len(nodes) {
+		c.PageInfo.HasNextPage = true
+		nodes = nodes[:len(nodes)-1]
+	} else if last != nil && *last+1 == len(nodes) {
+		c.PageInfo.HasPreviousPage = true
+		nodes = nodes[:len(nodes)-1]
+	}
+	var nodeAt func(int) *Metar
+	if last != nil {
+		n := len(nodes) - 1
+		nodeAt = func(i int) *Metar {
+			return nodes[n-i]
+		}
+	} else {
+		nodeAt = func(i int) *Metar {
+			return nodes[i]
+		}
+	}
+	c.Edges = make([]*MetarEdge, len(nodes))
+	for i := range nodes {
+		node := nodeAt(i)
+		c.Edges[i] = &MetarEdge{
+			Node:   node,
+			Cursor: pager.toCursor(node),
+		}
+	}
+	if l := len(c.Edges); l > 0 {
+		c.PageInfo.StartCursor = &c.Edges[0].Cursor
+		c.PageInfo.EndCursor = &c.Edges[l-1].Cursor
+	}
+	if c.TotalCount == 0 {
+		c.TotalCount = len(nodes)
+	}
+}
+
+// MetarPaginateOption enables pagination customization.
+type MetarPaginateOption func(*metarPager) error
+
+// WithMetarOrder configures pagination ordering.
+func WithMetarOrder(order *MetarOrder) MetarPaginateOption {
+	if order == nil {
+		order = DefaultMetarOrder
+	}
+	o := *order
+	return func(pager *metarPager) error {
+		if err := o.Direction.Validate(); err != nil {
+			return err
+		}
+		if o.Field == nil {
+			o.Field = DefaultMetarOrder.Field
+		}
+		pager.order = &o
+		return nil
+	}
+}
+
+// WithMetarFilter configures pagination filter.
+func WithMetarFilter(filter func(*MetarQuery) (*MetarQuery, error)) MetarPaginateOption {
+	return func(pager *metarPager) error {
+		if filter == nil {
+			return errors.New("MetarQuery filter cannot be nil")
+		}
+		pager.filter = filter
+		return nil
+	}
+}
+
+type metarPager struct {
+	order  *MetarOrder
+	filter func(*MetarQuery) (*MetarQuery, error)
+}
+
+func newMetarPager(opts []MetarPaginateOption) (*metarPager, error) {
+	pager := &metarPager{}
+	for _, opt := range opts {
+		if err := opt(pager); err != nil {
+			return nil, err
+		}
+	}
+	if pager.order == nil {
+		pager.order = DefaultMetarOrder
+	}
+	return pager, nil
+}
+
+func (p *metarPager) applyFilter(query *MetarQuery) (*MetarQuery, error) {
+	if p.filter != nil {
+		return p.filter(query)
+	}
+	return query, nil
+}
+
+func (p *metarPager) toCursor(m *Metar) Cursor {
+	return p.order.Field.toCursor(m)
+}
+
+func (p *metarPager) applyCursors(query *MetarQuery, after, before *Cursor) *MetarQuery {
+	for _, predicate := range cursorsToPredicates(
+		p.order.Direction, after, before,
+		p.order.Field.field, DefaultMetarOrder.Field.field,
+	) {
+		query = query.Where(predicate)
+	}
+	return query
+}
+
+func (p *metarPager) applyOrder(query *MetarQuery, reverse bool) *MetarQuery {
+	direction := p.order.Direction
+	if reverse {
+		direction = direction.reverse()
+	}
+	query = query.Order(direction.orderFunc(p.order.Field.field))
+	if p.order.Field != DefaultMetarOrder.Field {
+		query = query.Order(direction.orderFunc(DefaultMetarOrder.Field.field))
+	}
+	return query
+}
+
+func (p *metarPager) orderExpr(reverse bool) sql.Querier {
+	direction := p.order.Direction
+	if reverse {
+		direction = direction.reverse()
+	}
+	return sql.ExprFunc(func(b *sql.Builder) {
+		b.Ident(p.order.Field.field).Pad().WriteString(string(direction))
+		if p.order.Field != DefaultMetarOrder.Field {
+			b.Comma().Ident(DefaultMetarOrder.Field.field).Pad().WriteString(string(direction))
+		}
+	})
+}
+
+// Paginate executes the query and returns a relay based cursor connection to Metar.
+func (m *MetarQuery) Paginate(
+	ctx context.Context, after *Cursor, first *int,
+	before *Cursor, last *int, opts ...MetarPaginateOption,
+) (*MetarConnection, error) {
+	if err := validateFirstLast(first, last); err != nil {
+		return nil, err
+	}
+	pager, err := newMetarPager(opts)
+	if err != nil {
+		return nil, err
+	}
+	if m, err = pager.applyFilter(m); err != nil {
+		return nil, err
+	}
+	conn := &MetarConnection{Edges: []*MetarEdge{}}
+	ignoredEdges := !hasCollectedField(ctx, edgesField)
+	if hasCollectedField(ctx, totalCountField) || hasCollectedField(ctx, pageInfoField) {
+		hasPagination := after != nil || first != nil || before != nil || last != nil
+		if hasPagination || ignoredEdges {
+			if conn.TotalCount, err = m.Count(ctx); err != nil {
+				return nil, err
+			}
+			conn.PageInfo.HasNextPage = first != nil && conn.TotalCount > 0
+			conn.PageInfo.HasPreviousPage = last != nil && conn.TotalCount > 0
+		}
+	}
+	if ignoredEdges || (first != nil && *first == 0) || (last != nil && *last == 0) {
+		return conn, nil
+	}
+
+	m = pager.applyCursors(m, after, before)
+	m = pager.applyOrder(m, last != nil)
+	if limit := paginateLimit(first, last); limit != 0 {
+		m.Limit(limit)
+	}
+	if field := collectedField(ctx, edgesField, nodeField); field != nil {
+		if err := m.collectField(ctx, graphql.GetOperationContext(ctx), *field, []string{edgesField, nodeField}); err != nil {
+			return nil, err
+		}
+	}
+
+	nodes, err := m.All(ctx)
+	if err != nil {
+		return nil, err
+	}
+	conn.build(nodes, pager, after, first, before, last)
+	return conn, nil
+}
+
+// MetarOrderField defines the ordering field of Metar.
+type MetarOrderField struct {
+	field    string
+	toCursor func(*Metar) Cursor
+}
+
+// MetarOrder defines the ordering of Metar.
+type MetarOrder struct {
+	Direction OrderDirection   `json:"direction"`
+	Field     *MetarOrderField `json:"field"`
+}
+
+// DefaultMetarOrder is the default ordering of Metar.
+var DefaultMetarOrder = &MetarOrder{
+	Direction: OrderDirectionAsc,
+	Field: &MetarOrderField{
+		field: metar.FieldID,
+		toCursor: func(m *Metar) Cursor {
+			return Cursor{ID: m.ID}
+		},
+	},
+}
+
+// ToEdge converts Metar into MetarEdge.
+func (m *Metar) ToEdge(order *MetarOrder) *MetarEdge {
+	if order == nil {
+		order = DefaultMetarOrder
+	}
+	return &MetarEdge{
+		Node:   m,
+		Cursor: order.Field.toCursor(m),
+	}
+}
+
 // RunwayEdge is the edge representation of Runway.
 type RunwayEdge struct {
 	Node   *Runway `json:"node"`
@@ -933,5 +1166,236 @@ func (r *Runway) ToEdge(order *RunwayOrder) *RunwayEdge {
 	return &RunwayEdge{
 		Node:   r,
 		Cursor: order.Field.toCursor(r),
+	}
+}
+
+// SkyConditionEdge is the edge representation of SkyCondition.
+type SkyConditionEdge struct {
+	Node   *SkyCondition `json:"node"`
+	Cursor Cursor        `json:"cursor"`
+}
+
+// SkyConditionConnection is the connection containing edges to SkyCondition.
+type SkyConditionConnection struct {
+	Edges      []*SkyConditionEdge `json:"edges"`
+	PageInfo   PageInfo            `json:"pageInfo"`
+	TotalCount int                 `json:"totalCount"`
+}
+
+func (c *SkyConditionConnection) build(nodes []*SkyCondition, pager *skyconditionPager, after *Cursor, first *int, before *Cursor, last *int) {
+	c.PageInfo.HasNextPage = before != nil
+	c.PageInfo.HasPreviousPage = after != nil
+	if first != nil && *first+1 == len(nodes) {
+		c.PageInfo.HasNextPage = true
+		nodes = nodes[:len(nodes)-1]
+	} else if last != nil && *last+1 == len(nodes) {
+		c.PageInfo.HasPreviousPage = true
+		nodes = nodes[:len(nodes)-1]
+	}
+	var nodeAt func(int) *SkyCondition
+	if last != nil {
+		n := len(nodes) - 1
+		nodeAt = func(i int) *SkyCondition {
+			return nodes[n-i]
+		}
+	} else {
+		nodeAt = func(i int) *SkyCondition {
+			return nodes[i]
+		}
+	}
+	c.Edges = make([]*SkyConditionEdge, len(nodes))
+	for i := range nodes {
+		node := nodeAt(i)
+		c.Edges[i] = &SkyConditionEdge{
+			Node:   node,
+			Cursor: pager.toCursor(node),
+		}
+	}
+	if l := len(c.Edges); l > 0 {
+		c.PageInfo.StartCursor = &c.Edges[0].Cursor
+		c.PageInfo.EndCursor = &c.Edges[l-1].Cursor
+	}
+	if c.TotalCount == 0 {
+		c.TotalCount = len(nodes)
+	}
+}
+
+// SkyConditionPaginateOption enables pagination customization.
+type SkyConditionPaginateOption func(*skyconditionPager) error
+
+// WithSkyConditionOrder configures pagination ordering.
+func WithSkyConditionOrder(order *SkyConditionOrder) SkyConditionPaginateOption {
+	if order == nil {
+		order = DefaultSkyConditionOrder
+	}
+	o := *order
+	return func(pager *skyconditionPager) error {
+		if err := o.Direction.Validate(); err != nil {
+			return err
+		}
+		if o.Field == nil {
+			o.Field = DefaultSkyConditionOrder.Field
+		}
+		pager.order = &o
+		return nil
+	}
+}
+
+// WithSkyConditionFilter configures pagination filter.
+func WithSkyConditionFilter(filter func(*SkyConditionQuery) (*SkyConditionQuery, error)) SkyConditionPaginateOption {
+	return func(pager *skyconditionPager) error {
+		if filter == nil {
+			return errors.New("SkyConditionQuery filter cannot be nil")
+		}
+		pager.filter = filter
+		return nil
+	}
+}
+
+type skyconditionPager struct {
+	order  *SkyConditionOrder
+	filter func(*SkyConditionQuery) (*SkyConditionQuery, error)
+}
+
+func newSkyConditionPager(opts []SkyConditionPaginateOption) (*skyconditionPager, error) {
+	pager := &skyconditionPager{}
+	for _, opt := range opts {
+		if err := opt(pager); err != nil {
+			return nil, err
+		}
+	}
+	if pager.order == nil {
+		pager.order = DefaultSkyConditionOrder
+	}
+	return pager, nil
+}
+
+func (p *skyconditionPager) applyFilter(query *SkyConditionQuery) (*SkyConditionQuery, error) {
+	if p.filter != nil {
+		return p.filter(query)
+	}
+	return query, nil
+}
+
+func (p *skyconditionPager) toCursor(sc *SkyCondition) Cursor {
+	return p.order.Field.toCursor(sc)
+}
+
+func (p *skyconditionPager) applyCursors(query *SkyConditionQuery, after, before *Cursor) *SkyConditionQuery {
+	for _, predicate := range cursorsToPredicates(
+		p.order.Direction, after, before,
+		p.order.Field.field, DefaultSkyConditionOrder.Field.field,
+	) {
+		query = query.Where(predicate)
+	}
+	return query
+}
+
+func (p *skyconditionPager) applyOrder(query *SkyConditionQuery, reverse bool) *SkyConditionQuery {
+	direction := p.order.Direction
+	if reverse {
+		direction = direction.reverse()
+	}
+	query = query.Order(direction.orderFunc(p.order.Field.field))
+	if p.order.Field != DefaultSkyConditionOrder.Field {
+		query = query.Order(direction.orderFunc(DefaultSkyConditionOrder.Field.field))
+	}
+	return query
+}
+
+func (p *skyconditionPager) orderExpr(reverse bool) sql.Querier {
+	direction := p.order.Direction
+	if reverse {
+		direction = direction.reverse()
+	}
+	return sql.ExprFunc(func(b *sql.Builder) {
+		b.Ident(p.order.Field.field).Pad().WriteString(string(direction))
+		if p.order.Field != DefaultSkyConditionOrder.Field {
+			b.Comma().Ident(DefaultSkyConditionOrder.Field.field).Pad().WriteString(string(direction))
+		}
+	})
+}
+
+// Paginate executes the query and returns a relay based cursor connection to SkyCondition.
+func (sc *SkyConditionQuery) Paginate(
+	ctx context.Context, after *Cursor, first *int,
+	before *Cursor, last *int, opts ...SkyConditionPaginateOption,
+) (*SkyConditionConnection, error) {
+	if err := validateFirstLast(first, last); err != nil {
+		return nil, err
+	}
+	pager, err := newSkyConditionPager(opts)
+	if err != nil {
+		return nil, err
+	}
+	if sc, err = pager.applyFilter(sc); err != nil {
+		return nil, err
+	}
+	conn := &SkyConditionConnection{Edges: []*SkyConditionEdge{}}
+	ignoredEdges := !hasCollectedField(ctx, edgesField)
+	if hasCollectedField(ctx, totalCountField) || hasCollectedField(ctx, pageInfoField) {
+		hasPagination := after != nil || first != nil || before != nil || last != nil
+		if hasPagination || ignoredEdges {
+			if conn.TotalCount, err = sc.Count(ctx); err != nil {
+				return nil, err
+			}
+			conn.PageInfo.HasNextPage = first != nil && conn.TotalCount > 0
+			conn.PageInfo.HasPreviousPage = last != nil && conn.TotalCount > 0
+		}
+	}
+	if ignoredEdges || (first != nil && *first == 0) || (last != nil && *last == 0) {
+		return conn, nil
+	}
+
+	sc = pager.applyCursors(sc, after, before)
+	sc = pager.applyOrder(sc, last != nil)
+	if limit := paginateLimit(first, last); limit != 0 {
+		sc.Limit(limit)
+	}
+	if field := collectedField(ctx, edgesField, nodeField); field != nil {
+		if err := sc.collectField(ctx, graphql.GetOperationContext(ctx), *field, []string{edgesField, nodeField}); err != nil {
+			return nil, err
+		}
+	}
+
+	nodes, err := sc.All(ctx)
+	if err != nil {
+		return nil, err
+	}
+	conn.build(nodes, pager, after, first, before, last)
+	return conn, nil
+}
+
+// SkyConditionOrderField defines the ordering field of SkyCondition.
+type SkyConditionOrderField struct {
+	field    string
+	toCursor func(*SkyCondition) Cursor
+}
+
+// SkyConditionOrder defines the ordering of SkyCondition.
+type SkyConditionOrder struct {
+	Direction OrderDirection          `json:"direction"`
+	Field     *SkyConditionOrderField `json:"field"`
+}
+
+// DefaultSkyConditionOrder is the default ordering of SkyCondition.
+var DefaultSkyConditionOrder = &SkyConditionOrder{
+	Direction: OrderDirectionAsc,
+	Field: &SkyConditionOrderField{
+		field: skycondition.FieldID,
+		toCursor: func(sc *SkyCondition) Cursor {
+			return Cursor{ID: sc.ID}
+		},
+	},
+}
+
+// ToEdge converts SkyCondition into SkyConditionEdge.
+func (sc *SkyCondition) ToEdge(order *SkyConditionOrder) *SkyConditionEdge {
+	if order == nil {
+		order = DefaultSkyConditionOrder
+	}
+	return &SkyConditionEdge{
+		Node:   sc,
+		Cursor: order.Field.toCursor(sc),
 	}
 }

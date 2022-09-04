@@ -12,7 +12,9 @@ import (
 
 	"metar.gg/ent/airport"
 	"metar.gg/ent/frequency"
+	"metar.gg/ent/metar"
 	"metar.gg/ent/runway"
+	"metar.gg/ent/skycondition"
 
 	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/sql"
@@ -28,8 +30,12 @@ type Client struct {
 	Airport *AirportClient
 	// Frequency is the client for interacting with the Frequency builders.
 	Frequency *FrequencyClient
+	// Metar is the client for interacting with the Metar builders.
+	Metar *MetarClient
 	// Runway is the client for interacting with the Runway builders.
 	Runway *RunwayClient
+	// SkyCondition is the client for interacting with the SkyCondition builders.
+	SkyCondition *SkyConditionClient
 	// additional fields for node api
 	tables tables
 }
@@ -47,7 +53,9 @@ func (c *Client) init() {
 	c.Schema = migrate.NewSchema(c.driver)
 	c.Airport = NewAirportClient(c.config)
 	c.Frequency = NewFrequencyClient(c.config)
+	c.Metar = NewMetarClient(c.config)
 	c.Runway = NewRunwayClient(c.config)
+	c.SkyCondition = NewSkyConditionClient(c.config)
 }
 
 // Open opens a database/sql.DB specified by the driver name and
@@ -79,11 +87,13 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 	cfg := c.config
 	cfg.driver = tx
 	return &Tx{
-		ctx:       ctx,
-		config:    cfg,
-		Airport:   NewAirportClient(cfg),
-		Frequency: NewFrequencyClient(cfg),
-		Runway:    NewRunwayClient(cfg),
+		ctx:          ctx,
+		config:       cfg,
+		Airport:      NewAirportClient(cfg),
+		Frequency:    NewFrequencyClient(cfg),
+		Metar:        NewMetarClient(cfg),
+		Runway:       NewRunwayClient(cfg),
+		SkyCondition: NewSkyConditionClient(cfg),
 	}, nil
 }
 
@@ -101,11 +111,13 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 	cfg := c.config
 	cfg.driver = &txDriver{tx: tx, drv: c.driver}
 	return &Tx{
-		ctx:       ctx,
-		config:    cfg,
-		Airport:   NewAirportClient(cfg),
-		Frequency: NewFrequencyClient(cfg),
-		Runway:    NewRunwayClient(cfg),
+		ctx:          ctx,
+		config:       cfg,
+		Airport:      NewAirportClient(cfg),
+		Frequency:    NewFrequencyClient(cfg),
+		Metar:        NewMetarClient(cfg),
+		Runway:       NewRunwayClient(cfg),
+		SkyCondition: NewSkyConditionClient(cfg),
 	}, nil
 }
 
@@ -136,7 +148,9 @@ func (c *Client) Close() error {
 func (c *Client) Use(hooks ...Hook) {
 	c.Airport.Use(hooks...)
 	c.Frequency.Use(hooks...)
+	c.Metar.Use(hooks...)
 	c.Runway.Use(hooks...)
+	c.SkyCondition.Use(hooks...)
 }
 
 // AirportClient is a client for the Airport schema.
@@ -256,6 +270,22 @@ func (c *AirportClient) QueryFrequencies(a *Airport) *FrequencyQuery {
 	return query
 }
 
+// QueryMetars queries the metars edge of a Airport.
+func (c *AirportClient) QueryMetars(a *Airport) *MetarQuery {
+	query := &MetarQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := a.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(airport.Table, airport.FieldID, id),
+			sqlgraph.To(metar.Table, metar.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, airport.MetarsTable, airport.MetarsColumn),
+		)
+		fromV = sqlgraph.Neighbors(a.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // Hooks returns the client hooks.
 func (c *AirportClient) Hooks() []Hook {
 	return c.hooks.Airport
@@ -367,6 +397,128 @@ func (c *FrequencyClient) Hooks() []Hook {
 	return c.hooks.Frequency
 }
 
+// MetarClient is a client for the Metar schema.
+type MetarClient struct {
+	config
+}
+
+// NewMetarClient returns a client for the Metar from the given config.
+func NewMetarClient(c config) *MetarClient {
+	return &MetarClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `metar.Hooks(f(g(h())))`.
+func (c *MetarClient) Use(hooks ...Hook) {
+	c.hooks.Metar = append(c.hooks.Metar, hooks...)
+}
+
+// Create returns a builder for creating a Metar entity.
+func (c *MetarClient) Create() *MetarCreate {
+	mutation := newMetarMutation(c.config, OpCreate)
+	return &MetarCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of Metar entities.
+func (c *MetarClient) CreateBulk(builders ...*MetarCreate) *MetarCreateBulk {
+	return &MetarCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for Metar.
+func (c *MetarClient) Update() *MetarUpdate {
+	mutation := newMetarMutation(c.config, OpUpdate)
+	return &MetarUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *MetarClient) UpdateOne(m *Metar) *MetarUpdateOne {
+	mutation := newMetarMutation(c.config, OpUpdateOne, withMetar(m))
+	return &MetarUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *MetarClient) UpdateOneID(id int) *MetarUpdateOne {
+	mutation := newMetarMutation(c.config, OpUpdateOne, withMetarID(id))
+	return &MetarUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for Metar.
+func (c *MetarClient) Delete() *MetarDelete {
+	mutation := newMetarMutation(c.config, OpDelete)
+	return &MetarDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *MetarClient) DeleteOne(m *Metar) *MetarDeleteOne {
+	return c.DeleteOneID(m.ID)
+}
+
+// DeleteOne returns a builder for deleting the given entity by its id.
+func (c *MetarClient) DeleteOneID(id int) *MetarDeleteOne {
+	builder := c.Delete().Where(metar.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &MetarDeleteOne{builder}
+}
+
+// Query returns a query builder for Metar.
+func (c *MetarClient) Query() *MetarQuery {
+	return &MetarQuery{
+		config: c.config,
+	}
+}
+
+// Get returns a Metar entity by its id.
+func (c *MetarClient) Get(ctx context.Context, id int) (*Metar, error) {
+	return c.Query().Where(metar.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *MetarClient) GetX(ctx context.Context, id int) *Metar {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryAirport queries the airport edge of a Metar.
+func (c *MetarClient) QueryAirport(m *Metar) *AirportQuery {
+	query := &AirportQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(metar.Table, metar.FieldID, id),
+			sqlgraph.To(airport.Table, airport.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, metar.AirportTable, metar.AirportColumn),
+		)
+		fromV = sqlgraph.Neighbors(m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QuerySkyConditions queries the sky_conditions edge of a Metar.
+func (c *MetarClient) QuerySkyConditions(m *Metar) *SkyConditionQuery {
+	query := &SkyConditionQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(metar.Table, metar.FieldID, id),
+			sqlgraph.To(skycondition.Table, skycondition.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, metar.SkyConditionsTable, metar.SkyConditionsColumn),
+		)
+		fromV = sqlgraph.Neighbors(m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *MetarClient) Hooks() []Hook {
+	return c.hooks.Metar
+}
+
 // RunwayClient is a client for the Runway schema.
 type RunwayClient struct {
 	config
@@ -471,4 +623,110 @@ func (c *RunwayClient) QueryAirport(r *Runway) *AirportQuery {
 // Hooks returns the client hooks.
 func (c *RunwayClient) Hooks() []Hook {
 	return c.hooks.Runway
+}
+
+// SkyConditionClient is a client for the SkyCondition schema.
+type SkyConditionClient struct {
+	config
+}
+
+// NewSkyConditionClient returns a client for the SkyCondition from the given config.
+func NewSkyConditionClient(c config) *SkyConditionClient {
+	return &SkyConditionClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `skycondition.Hooks(f(g(h())))`.
+func (c *SkyConditionClient) Use(hooks ...Hook) {
+	c.hooks.SkyCondition = append(c.hooks.SkyCondition, hooks...)
+}
+
+// Create returns a builder for creating a SkyCondition entity.
+func (c *SkyConditionClient) Create() *SkyConditionCreate {
+	mutation := newSkyConditionMutation(c.config, OpCreate)
+	return &SkyConditionCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of SkyCondition entities.
+func (c *SkyConditionClient) CreateBulk(builders ...*SkyConditionCreate) *SkyConditionCreateBulk {
+	return &SkyConditionCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for SkyCondition.
+func (c *SkyConditionClient) Update() *SkyConditionUpdate {
+	mutation := newSkyConditionMutation(c.config, OpUpdate)
+	return &SkyConditionUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *SkyConditionClient) UpdateOne(sc *SkyCondition) *SkyConditionUpdateOne {
+	mutation := newSkyConditionMutation(c.config, OpUpdateOne, withSkyCondition(sc))
+	return &SkyConditionUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *SkyConditionClient) UpdateOneID(id int) *SkyConditionUpdateOne {
+	mutation := newSkyConditionMutation(c.config, OpUpdateOne, withSkyConditionID(id))
+	return &SkyConditionUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for SkyCondition.
+func (c *SkyConditionClient) Delete() *SkyConditionDelete {
+	mutation := newSkyConditionMutation(c.config, OpDelete)
+	return &SkyConditionDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *SkyConditionClient) DeleteOne(sc *SkyCondition) *SkyConditionDeleteOne {
+	return c.DeleteOneID(sc.ID)
+}
+
+// DeleteOne returns a builder for deleting the given entity by its id.
+func (c *SkyConditionClient) DeleteOneID(id int) *SkyConditionDeleteOne {
+	builder := c.Delete().Where(skycondition.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &SkyConditionDeleteOne{builder}
+}
+
+// Query returns a query builder for SkyCondition.
+func (c *SkyConditionClient) Query() *SkyConditionQuery {
+	return &SkyConditionQuery{
+		config: c.config,
+	}
+}
+
+// Get returns a SkyCondition entity by its id.
+func (c *SkyConditionClient) Get(ctx context.Context, id int) (*SkyCondition, error) {
+	return c.Query().Where(skycondition.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *SkyConditionClient) GetX(ctx context.Context, id int) *SkyCondition {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryMetar queries the metar edge of a SkyCondition.
+func (c *SkyConditionClient) QueryMetar(sc *SkyCondition) *MetarQuery {
+	query := &MetarQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := sc.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(skycondition.Table, skycondition.FieldID, id),
+			sqlgraph.To(metar.Table, metar.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, skycondition.MetarTable, skycondition.MetarColumn),
+		)
+		fromV = sqlgraph.Neighbors(sc.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *SkyConditionClient) Hooks() []Hook {
+	return c.hooks.SkyCondition
 }

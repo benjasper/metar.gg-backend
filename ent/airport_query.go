@@ -13,6 +13,7 @@ import (
 	"entgo.io/ent/schema/field"
 	"metar.gg/ent/airport"
 	"metar.gg/ent/frequency"
+	"metar.gg/ent/metar"
 	"metar.gg/ent/predicate"
 	"metar.gg/ent/runway"
 )
@@ -28,10 +29,12 @@ type AirportQuery struct {
 	predicates           []predicate.Airport
 	withRunways          *RunwayQuery
 	withFrequencies      *FrequencyQuery
+	withMetars           *MetarQuery
 	modifiers            []func(*sql.Selector)
 	loadTotal            []func(context.Context, []*Airport) error
 	withNamedRunways     map[string]*RunwayQuery
 	withNamedFrequencies map[string]*FrequencyQuery
+	withNamedMetars      map[string]*MetarQuery
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -105,6 +108,28 @@ func (aq *AirportQuery) QueryFrequencies() *FrequencyQuery {
 			sqlgraph.From(airport.Table, airport.FieldID, selector),
 			sqlgraph.To(frequency.Table, frequency.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, false, airport.FrequenciesTable, airport.FrequenciesColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(aq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryMetars chains the current query on the "metars" edge.
+func (aq *AirportQuery) QueryMetars() *MetarQuery {
+	query := &MetarQuery{config: aq.config}
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := aq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := aq.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(airport.Table, airport.FieldID, selector),
+			sqlgraph.To(metar.Table, metar.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, airport.MetarsTable, airport.MetarsColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(aq.driver.Dialect(), step)
 		return fromU, nil
@@ -295,6 +320,7 @@ func (aq *AirportQuery) Clone() *AirportQuery {
 		predicates:      append([]predicate.Airport{}, aq.predicates...),
 		withRunways:     aq.withRunways.Clone(),
 		withFrequencies: aq.withFrequencies.Clone(),
+		withMetars:      aq.withMetars.Clone(),
 		// clone intermediate query.
 		sql:    aq.sql.Clone(),
 		path:   aq.path,
@@ -321,6 +347,17 @@ func (aq *AirportQuery) WithFrequencies(opts ...func(*FrequencyQuery)) *AirportQ
 		opt(query)
 	}
 	aq.withFrequencies = query
+	return aq
+}
+
+// WithMetars tells the query-builder to eager-load the nodes that are connected to
+// the "metars" edge. The optional arguments are used to configure the query builder of the edge.
+func (aq *AirportQuery) WithMetars(opts ...func(*MetarQuery)) *AirportQuery {
+	query := &MetarQuery{config: aq.config}
+	for _, opt := range opts {
+		opt(query)
+	}
+	aq.withMetars = query
 	return aq
 }
 
@@ -392,9 +429,10 @@ func (aq *AirportQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Airp
 	var (
 		nodes       = []*Airport{}
 		_spec       = aq.querySpec()
-		loadedTypes = [2]bool{
+		loadedTypes = [3]bool{
 			aq.withRunways != nil,
 			aq.withFrequencies != nil,
+			aq.withMetars != nil,
 		}
 	)
 	_spec.ScanValues = func(columns []string) ([]any, error) {
@@ -432,6 +470,13 @@ func (aq *AirportQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Airp
 			return nil, err
 		}
 	}
+	if query := aq.withMetars; query != nil {
+		if err := aq.loadMetars(ctx, query, nodes,
+			func(n *Airport) { n.Edges.Metars = []*Metar{} },
+			func(n *Airport, e *Metar) { n.Edges.Metars = append(n.Edges.Metars, e) }); err != nil {
+			return nil, err
+		}
+	}
 	for name, query := range aq.withNamedRunways {
 		if err := aq.loadRunways(ctx, query, nodes,
 			func(n *Airport) { n.appendNamedRunways(name) },
@@ -443,6 +488,13 @@ func (aq *AirportQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Airp
 		if err := aq.loadFrequencies(ctx, query, nodes,
 			func(n *Airport) { n.appendNamedFrequencies(name) },
 			func(n *Airport, e *Frequency) { n.appendNamedFrequencies(name, e) }); err != nil {
+			return nil, err
+		}
+	}
+	for name, query := range aq.withNamedMetars {
+		if err := aq.loadMetars(ctx, query, nodes,
+			func(n *Airport) { n.appendNamedMetars(name) },
+			func(n *Airport, e *Metar) { n.appendNamedMetars(name, e) }); err != nil {
 			return nil, err
 		}
 	}
@@ -511,6 +563,37 @@ func (aq *AirportQuery) loadFrequencies(ctx context.Context, query *FrequencyQue
 		node, ok := nodeids[*fk]
 		if !ok {
 			return fmt.Errorf(`unexpected foreign-key "airport_frequencies" returned %v for node %v`, *fk, n.ID)
+		}
+		assign(node, n)
+	}
+	return nil
+}
+func (aq *AirportQuery) loadMetars(ctx context.Context, query *MetarQuery, nodes []*Airport, init func(*Airport), assign func(*Airport, *Metar)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[int]*Airport)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
+		}
+	}
+	query.withFKs = true
+	query.Where(predicate.Metar(func(s *sql.Selector) {
+		s.Where(sql.InValues(airport.MetarsColumn, fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.airport_metars
+		if fk == nil {
+			return fmt.Errorf(`foreign-key "airport_metars" is nil for node %v`, n.ID)
+		}
+		node, ok := nodeids[*fk]
+		if !ok {
+			return fmt.Errorf(`unexpected foreign-key "airport_metars" returned %v for node %v`, *fk, n.ID)
 		}
 		assign(node, n)
 	}
@@ -642,6 +725,20 @@ func (aq *AirportQuery) WithNamedFrequencies(name string, opts ...func(*Frequenc
 		aq.withNamedFrequencies = make(map[string]*FrequencyQuery)
 	}
 	aq.withNamedFrequencies[name] = query
+	return aq
+}
+
+// WithNamedMetars tells the query-builder to eager-load the nodes that are connected to the "metars"
+// edge with the given name. The optional arguments are used to configure the query builder of the edge.
+func (aq *AirportQuery) WithNamedMetars(name string, opts ...func(*MetarQuery)) *AirportQuery {
+	query := &MetarQuery{config: aq.config}
+	for _, opt := range opts {
+		opt(query)
+	}
+	if aq.withNamedMetars == nil {
+		aq.withNamedMetars = make(map[string]*MetarQuery)
+	}
+	aq.withNamedMetars[name] = query
 	return aq
 }
 

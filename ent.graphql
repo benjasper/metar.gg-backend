@@ -2,6 +2,7 @@ directive @goField(forceResolver: Boolean, name: String) on FIELD_DEFINITION | I
 directive @goModel(model: String, models: [String!]) on OBJECT | INPUT_OBJECT | SCALAR | ENUM | INTERFACE | UNION
 type Airport {
   id: ID!
+  lastUpdated: Time!
   """This will be the ICAO code if available. Otherwise, it will be a local airport code (if no conflict), or if nothing else is available, an internally-generated code starting with the ISO2 country code, followed by a dash and a four-digit number."""
   identifier: String!
   """Type of airport."""
@@ -18,6 +19,8 @@ type Airport {
   continent: AirportContinent!
   country: String!
   region: String!
+  """Whether the airport has weather reporting and a metar is available."""
+  hasWeather: Boolean!
   """The primary municipality that the airport serves (when available). Note that this is not necessarily the municipality where the airport is physically located."""
   municipality: String
   """Whether the airport has scheduled airline service."""
@@ -57,6 +60,7 @@ enum AirportType @goModel(model: "metar.gg/ent/airport.Type") {
 }
 type Frequency {
   id: ID!
+  lastUpdated: Time!
   """A code for the frequency type. Some common values are "TWR" (tower), "ATF" or "CTAF" (common traffic frequency), "GND" (ground control), "RMP" (ramp control), "ATIS" (automated weather), "RCO" (remote radio outlet), "ARR" (arrivals), "DEP" (departures), "UNICOM" (monitored ground station), and "RDO" (a flight-service station)."""
   type: String!
   """A description of the frequency."""
@@ -64,6 +68,88 @@ type Frequency {
   """Radio frequency in megahertz. Note that the same frequency may appear multiple times for an airport, serving different functions"""
   frequency: Float!
   airport: Airport
+}
+type Metar {
+  """The raw METAR text."""
+  rawText: String!
+  """The time the METAR was observed."""
+  observationTime: Time!
+  """The latitude in decimal degrees of the station."""
+  latitude: Float
+  """The longitude in decimal degrees of the station."""
+  longitude: Float
+  """The elevation in meters of the station."""
+  elevation: Float
+  """The temperature in Celsius."""
+  temperature: Float!
+  """The dewpoint in Celsius."""
+  dewpoint: Float!
+  """The wind speed in knots, or 0 if calm."""
+  windSpeed: Int!
+  """The wind gust in knots."""
+  windGust: Int!
+  """The wind direction in degrees, or 0 if calm."""
+  windDirection: Int!
+  """The visibility in statute miles."""
+  visibility: Float!
+  """The altimeter setting in inches of mercury."""
+  altimeter: Float!
+  """The present weather string."""
+  presentWeather: String
+  flightCategory: MetarFlightCategory
+  """Quality control corrected."""
+  qualityControlCorrected: Boolean
+  """Whether it's an automated station, of one of the following types A01|A01A|A02|A02A|AOA|AWOS."""
+  qualityControlAutoStation: Boolean!
+  """Maintenance check indicator - maintenance is needed."""
+  qualityControlMaintenanceIndicatorOn: Boolean!
+  """No signal."""
+  qualityControlNoSignal: Boolean!
+  """Whether Lightning sensor is off."""
+  qualityControlLightningSensorOff: Boolean!
+  """Whether Freezing rain sensor is off."""
+  qualityControlFreezingRainSensorOff: Boolean!
+  """Whether Present weather sensor is off."""
+  qualityControlPresentWeatherSensorOff: Boolean!
+  """The sea level pressure in hectopascal.s"""
+  seaLevelPressure: Float
+  """The pressur_6e tendency in hectopascals."""
+  pressureTendency: Float
+  """The maximum air temperature in Celsius from the past 6 hours."""
+  maxTemp6: Float
+  """The minimum air temperature in Celsius from the past 6 hours."""
+  minTemp6: Float
+  """The maximum air temperature in Celsius from the past 24 hours."""
+  maxTemp24: Float
+  """The minimum air temperature in Celsius from the past 24 hours."""
+  minTemp24: Float
+  """The precipitation in inches from since the last observation. 0.0005 in = trace precipitation"""
+  precipitation: Float
+  """The precipitation in inches from the past 3 hours. 0.0005 in = trace precipitation"""
+  precipitation3: Float
+  """The precipitation in inches from the past 6 hours. 0.0005 in = trace precipitation"""
+  precipitation6: Float
+  """The precipitation in inches from the past 24 hours. 0.0005 in = trace precipitation"""
+  precipitation24: Float
+  """The snow depth in inches."""
+  snowDepth: Float
+  """The vertical visibility in feet."""
+  vertVis: Float
+  metarType: MetarMetarType!
+  airport: Airport
+  skyConditions: [SkyCondition!]
+}
+"""MetarFlightCategory is enum for the field flight_category"""
+enum MetarFlightCategory @goModel(model: "metar.gg/ent/metar.FlightCategory") {
+  VFR
+  MVFR
+  IFR
+  LIFR
+}
+"""MetarMetarType is enum for the field metar_type"""
+enum MetarMetarType @goModel(model: "metar.gg/ent/metar.MetarType") {
+  METAR
+  SPECI
 }
 """Possible directions in which to order a list of items when provided an `orderBy` argument."""
 enum OrderDirection {
@@ -74,6 +160,7 @@ enum OrderDirection {
 }
 type Runway {
   id: ID!
+  lastUpdated: Time!
   """Length of the runway in feet."""
   length: Int!
   """Width of the runway surface in feet."""
@@ -109,4 +196,21 @@ type Runway {
   """Displaced threshold length of the higher numbered runway end, in feet."""
   highRunwayDisplacedThreshold: Int
   airport: Airport
+}
+type SkyCondition {
+  skyCover: SkyConditionSkyCover!
+  """Cloud base in feet."""
+  cloudBase: Int
+  metar: Metar!
+}
+"""SkyConditionSkyCover is enum for the field sky_cover"""
+enum SkyConditionSkyCover @goModel(model: "metar.gg/ent/skycondition.SkyCover") {
+  SKC
+  FEW
+  SCT
+  CLR
+  BKN
+  OVC
+  OVX
+  CAVOK
 }

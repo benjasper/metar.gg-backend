@@ -12,5 +12,11 @@ type Airport func(*sql.Selector)
 // Frequency is the predicate function for frequency builders.
 type Frequency func(*sql.Selector)
 
+// Metar is the predicate function for metar builders.
+type Metar func(*sql.Selector)
+
 // Runway is the predicate function for runway builders.
 type Runway func(*sql.Selector)
+
+// SkyCondition is the predicate function for skycondition builders.
+type SkyCondition func(*sql.Selector)

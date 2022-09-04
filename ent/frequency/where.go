@@ -3,6 +3,8 @@
 package frequency
 
 import (
+	"time"
+
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"metar.gg/ent/predicate"
@@ -90,6 +92,13 @@ func Hash(v string) predicate.Frequency {
 func ImportFlag(v bool) predicate.Frequency {
 	return predicate.Frequency(func(s *sql.Selector) {
 		s.Where(sql.EQ(s.C(FieldImportFlag), v))
+	})
+}
+
+// LastUpdated applies equality check predicate on the "last_updated" field. It's identical to LastUpdatedEQ.
+func LastUpdated(v time.Time) predicate.Frequency {
+	return predicate.Frequency(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldLastUpdated), v))
 	})
 }
 
@@ -224,6 +233,70 @@ func ImportFlagEQ(v bool) predicate.Frequency {
 func ImportFlagNEQ(v bool) predicate.Frequency {
 	return predicate.Frequency(func(s *sql.Selector) {
 		s.Where(sql.NEQ(s.C(FieldImportFlag), v))
+	})
+}
+
+// LastUpdatedEQ applies the EQ predicate on the "last_updated" field.
+func LastUpdatedEQ(v time.Time) predicate.Frequency {
+	return predicate.Frequency(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldLastUpdated), v))
+	})
+}
+
+// LastUpdatedNEQ applies the NEQ predicate on the "last_updated" field.
+func LastUpdatedNEQ(v time.Time) predicate.Frequency {
+	return predicate.Frequency(func(s *sql.Selector) {
+		s.Where(sql.NEQ(s.C(FieldLastUpdated), v))
+	})
+}
+
+// LastUpdatedIn applies the In predicate on the "last_updated" field.
+func LastUpdatedIn(vs ...time.Time) predicate.Frequency {
+	v := make([]any, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.Frequency(func(s *sql.Selector) {
+		s.Where(sql.In(s.C(FieldLastUpdated), v...))
+	})
+}
+
+// LastUpdatedNotIn applies the NotIn predicate on the "last_updated" field.
+func LastUpdatedNotIn(vs ...time.Time) predicate.Frequency {
+	v := make([]any, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.Frequency(func(s *sql.Selector) {
+		s.Where(sql.NotIn(s.C(FieldLastUpdated), v...))
+	})
+}
+
+// LastUpdatedGT applies the GT predicate on the "last_updated" field.
+func LastUpdatedGT(v time.Time) predicate.Frequency {
+	return predicate.Frequency(func(s *sql.Selector) {
+		s.Where(sql.GT(s.C(FieldLastUpdated), v))
+	})
+}
+
+// LastUpdatedGTE applies the GTE predicate on the "last_updated" field.
+func LastUpdatedGTE(v time.Time) predicate.Frequency {
+	return predicate.Frequency(func(s *sql.Selector) {
+		s.Where(sql.GTE(s.C(FieldLastUpdated), v))
+	})
+}
+
+// LastUpdatedLT applies the LT predicate on the "last_updated" field.
+func LastUpdatedLT(v time.Time) predicate.Frequency {
+	return predicate.Frequency(func(s *sql.Selector) {
+		s.Where(sql.LT(s.C(FieldLastUpdated), v))
+	})
+}
+
+// LastUpdatedLTE applies the LTE predicate on the "last_updated" field.
+func LastUpdatedLTE(v time.Time) predicate.Frequency {
+	return predicate.Frequency(func(s *sql.Selector) {
+		s.Where(sql.LTE(s.C(FieldLastUpdated), v))
 	})
 }
 

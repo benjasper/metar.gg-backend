@@ -6,6 +6,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"time"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
@@ -44,6 +45,20 @@ func (fu *FrequencyUpdate) SetImportFlag(b bool) *FrequencyUpdate {
 func (fu *FrequencyUpdate) SetNillableImportFlag(b *bool) *FrequencyUpdate {
 	if b != nil {
 		fu.SetImportFlag(*b)
+	}
+	return fu
+}
+
+// SetLastUpdated sets the "last_updated" field.
+func (fu *FrequencyUpdate) SetLastUpdated(t time.Time) *FrequencyUpdate {
+	fu.mutation.SetLastUpdated(t)
+	return fu
+}
+
+// SetNillableLastUpdated sets the "last_updated" field if the given value is not nil.
+func (fu *FrequencyUpdate) SetNillableLastUpdated(t *time.Time) *FrequencyUpdate {
+	if t != nil {
+		fu.SetLastUpdated(*t)
 	}
 	return fu
 }
@@ -189,6 +204,13 @@ func (fu *FrequencyUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Column: frequency.FieldImportFlag,
 		})
 	}
+	if value, ok := fu.mutation.LastUpdated(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeTime,
+			Value:  value,
+			Column: frequency.FieldLastUpdated,
+		})
+	}
 	if value, ok := fu.mutation.GetType(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
@@ -287,6 +309,20 @@ func (fuo *FrequencyUpdateOne) SetImportFlag(b bool) *FrequencyUpdateOne {
 func (fuo *FrequencyUpdateOne) SetNillableImportFlag(b *bool) *FrequencyUpdateOne {
 	if b != nil {
 		fuo.SetImportFlag(*b)
+	}
+	return fuo
+}
+
+// SetLastUpdated sets the "last_updated" field.
+func (fuo *FrequencyUpdateOne) SetLastUpdated(t time.Time) *FrequencyUpdateOne {
+	fuo.mutation.SetLastUpdated(t)
+	return fuo
+}
+
+// SetNillableLastUpdated sets the "last_updated" field if the given value is not nil.
+func (fuo *FrequencyUpdateOne) SetNillableLastUpdated(t *time.Time) *FrequencyUpdateOne {
+	if t != nil {
+		fuo.SetLastUpdated(*t)
 	}
 	return fuo
 }
@@ -460,6 +496,13 @@ func (fuo *FrequencyUpdateOne) sqlSave(ctx context.Context) (_node *Frequency, e
 			Type:   field.TypeBool,
 			Value:  value,
 			Column: frequency.FieldImportFlag,
+		})
+	}
+	if value, ok := fuo.mutation.LastUpdated(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeTime,
+			Value:  value,
+			Column: frequency.FieldLastUpdated,
 		})
 	}
 	if value, ok := fuo.mutation.GetType(); ok {

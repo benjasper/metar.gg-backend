@@ -3,6 +3,8 @@
 package ent
 
 import (
+	"time"
+
 	"metar.gg/ent/airport"
 	"metar.gg/ent/frequency"
 	"metar.gg/ent/runway"
@@ -22,6 +24,14 @@ func init() {
 	airportDescImportFlag := airportMixinFields0[2].Descriptor()
 	// airport.DefaultImportFlag holds the default value on creation for the import_flag field.
 	airport.DefaultImportFlag = airportDescImportFlag.Default.(bool)
+	// airportDescLastUpdated is the schema descriptor for last_updated field.
+	airportDescLastUpdated := airportMixinFields0[3].Descriptor()
+	// airport.DefaultLastUpdated holds the default value on creation for the last_updated field.
+	airport.DefaultLastUpdated = airportDescLastUpdated.Default.(func() time.Time)
+	// airportDescHasWeather is the schema descriptor for has_weather field.
+	airportDescHasWeather := airportFields[9].Descriptor()
+	// airport.DefaultHasWeather holds the default value on creation for the has_weather field.
+	airport.DefaultHasWeather = airportDescHasWeather.Default.(bool)
 	frequencyMixin := schema.Frequency{}.Mixin()
 	frequencyMixinFields0 := frequencyMixin[0].Fields()
 	_ = frequencyMixinFields0
@@ -31,6 +41,10 @@ func init() {
 	frequencyDescImportFlag := frequencyMixinFields0[2].Descriptor()
 	// frequency.DefaultImportFlag holds the default value on creation for the import_flag field.
 	frequency.DefaultImportFlag = frequencyDescImportFlag.Default.(bool)
+	// frequencyDescLastUpdated is the schema descriptor for last_updated field.
+	frequencyDescLastUpdated := frequencyMixinFields0[3].Descriptor()
+	// frequency.DefaultLastUpdated holds the default value on creation for the last_updated field.
+	frequency.DefaultLastUpdated = frequencyDescLastUpdated.Default.(func() time.Time)
 	runwayMixin := schema.Runway{}.Mixin()
 	runwayMixinFields0 := runwayMixin[0].Fields()
 	_ = runwayMixinFields0
@@ -40,4 +54,8 @@ func init() {
 	runwayDescImportFlag := runwayMixinFields0[2].Descriptor()
 	// runway.DefaultImportFlag holds the default value on creation for the import_flag field.
 	runway.DefaultImportFlag = runwayDescImportFlag.Default.(bool)
+	// runwayDescLastUpdated is the schema descriptor for last_updated field.
+	runwayDescLastUpdated := runwayMixinFields0[3].Descriptor()
+	// runway.DefaultLastUpdated holds the default value on creation for the last_updated field.
+	runway.DefaultLastUpdated = runwayDescLastUpdated.Default.(func() time.Time)
 }
