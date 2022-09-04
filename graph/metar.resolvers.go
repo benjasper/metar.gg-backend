@@ -53,7 +53,7 @@ func (r *queryResolver) GetAirports(ctx context.Context, after *ent.Cursor, firs
 
 	var where []predicate.Airport
 	if identifier != nil {
-		where = append(where, airport.Identifier(*identifier))
+		where = append(where, airport.IdentifierEqualFold(*identifier))
 	}
 
 	if hasWeather != nil {

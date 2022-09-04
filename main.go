@@ -61,9 +61,7 @@ func RunServer(db *ent.Client, logger *logging.Logger) error {
 }
 
 func RunImport(ctx context.Context, db *ent.Client, logger *logging.Logger) {
-	imp := importer.NewImporter(db)
-
-	logger.Info("Importing airports...")
+	imp := importer.NewImporter(db, logger)
 
 	err := imp.ImportAirports(ctx, "https://raw.githubusercontent.com/davidmegginson/ourairports-data/main/airports.csv")
 	if err != nil {
@@ -71,38 +69,24 @@ func RunImport(ctx context.Context, db *ent.Client, logger *logging.Logger) {
 		return
 	}
 
-	logger.Info("Finished importing airports")
-
-	logger.Info("Importing runways...")
-
 	err = imp.ImportRunways(ctx, "https://raw.githubusercontent.com/davidmegginson/ourairports-data/main/runways.csv")
 	if err != nil {
 		logger.Fatal(err)
 		return
 	}
 
-	logger.Info("Finished importing runways")
-
-	logger.Info("Importing frequencies...")
-
 	err = imp.ImportFrequencies(ctx, "https://raw.githubusercontent.com/davidmegginson/ourairports-data/main/airport-frequencies.csv")
 	if err != nil {
 		logger.Fatal(err)
 		return
 	}
-
-	logger.Info("Finished importing frequencies")
 }
 
 func RunWeatherImport(ctx context.Context, db *ent.Client, logger *logging.Logger) {
-	logger.Info("Importing weather...")
-
-	metarImporter := importer.NewNoaaMetarImporter(db)
+	metarImporter := importer.NewNoaaMetarImporter(db, logger)
 	err := metarImporter.ImportMetars("https://www.aviationweather.gov/adds/dataserver_current/current/metars.cache.xml", ctx)
 	if err != nil {
 		logger.Fatal(err)
 		return
 	}
-
-	logger.Info("Finished importing weather")
 }

@@ -71,16 +71,20 @@ func (x *XmlMetar) Hash() string {
 type NoaaMetarImporter struct {
 	db     *ent.Client
 	logger *logging.Logger
+	stats  *ImportStatistics
 }
 
 func NewNoaaMetarImporter(db *ent.Client, logger *logging.Logger) *NoaaMetarImporter {
 	return &NoaaMetarImporter{
 		db:     db,
 		logger: logger,
+		stats:  NewImportStatistics("METAR", logger),
 	}
 }
 
 func (i *NoaaMetarImporter) ImportMetars(url string, ctx context.Context) error {
+	i.stats.Start()
+
 	filepath := "metars.xml"
 	err := utils.DownloadFile(url, filepath)
 	if err != nil {
@@ -123,6 +127,7 @@ func (i *NoaaMetarImporter) ImportMetars(url string, ctx context.Context) error 
 				}
 
 				guard <- struct{}{} // would block if guard channel is already filled
+				i.stats.AddTotal()
 				wg.Go(func() error {
 					defer func() { <-guard }()
 					return i.importMetar(&metar, ctx)
@@ -141,6 +146,8 @@ func (i *NoaaMetarImporter) ImportMetars(url string, ctx context.Context) error 
 	if err != nil {
 		return err
 	}
+
+	i.stats.End()
 
 	return nil
 }
@@ -291,7 +298,7 @@ func (i *NoaaMetarImporter) importMetar(x *XmlMetar, ctx context.Context) error 
 		return err
 	}
 
-	i.logger.Info(fmt.Sprintf("Updated m for %s\n", x.StationId))
+	i.stats.AddUpdated()
 
 	return err
 }

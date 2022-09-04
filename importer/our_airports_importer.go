@@ -3,7 +3,6 @@ package importer
 import (
 	"context"
 	"encoding/csv"
-	"fmt"
 	"github.com/segmentio/fasthash/fnv1a"
 	"golang.org/x/sync/errgroup"
 	"io"
@@ -11,6 +10,7 @@ import (
 	"metar.gg/ent/airport"
 	"metar.gg/ent/frequency"
 	"metar.gg/ent/runway"
+	"metar.gg/logging"
 	"metar.gg/utils"
 	"os"
 	"strconv"
@@ -19,12 +19,16 @@ import (
 )
 
 type Importer struct {
-	db *ent.Client
+	db     *ent.Client
+	logger *logging.Logger
+	stats  *ImportStatistics
 }
 
-func NewImporter(db *ent.Client) *Importer {
+func NewImporter(db *ent.Client, logger *logging.Logger) *Importer {
 	return &Importer{
-		db: db,
+		db:     db,
+		logger: logger,
+		stats:  NewImportStatistics("", logger),
 	}
 }
 
@@ -32,6 +36,8 @@ type ImportLineFunction func(ctx context.Context, data []string) error
 type CleanupImportFunction func(ctx context.Context) error
 
 func (i *Importer) ImportAirports(ctx context.Context, url string) error {
+	i.stats = NewImportStatistics("AIRPORTS", i.logger)
+
 	err := i.importModelType(ctx, url, i.importAirportLine, i.cleanupAirports)
 	if err != nil {
 		return err
@@ -41,6 +47,8 @@ func (i *Importer) ImportAirports(ctx context.Context, url string) error {
 }
 
 func (i *Importer) ImportRunways(ctx context.Context, url string) error {
+	i.stats = NewImportStatistics("RUNWAYS", i.logger)
+
 	err := i.importModelType(ctx, url, i.importRunwayLine, i.cleanupRunways)
 	if err != nil {
 		return err
@@ -50,6 +58,8 @@ func (i *Importer) ImportRunways(ctx context.Context, url string) error {
 }
 
 func (i *Importer) ImportFrequencies(ctx context.Context, url string) error {
+	i.stats = NewImportStatistics("FREQUENCIES", i.logger)
+
 	err := i.importModelType(ctx, url, i.importFrequencyLine, i.cleanupFrequencies)
 	if err != nil {
 		return err
@@ -59,7 +69,7 @@ func (i *Importer) ImportFrequencies(ctx context.Context, url string) error {
 }
 
 func (i *Importer) importModelType(ctx context.Context, url string, importFunction ImportLineFunction, cleanupFunction CleanupImportFunction) error {
-	fmt.Println("Importing ", url)
+	i.stats.Start()
 
 	filepath := "file.csv"
 	err := utils.DownloadFile(url, filepath)
@@ -72,7 +82,9 @@ func (i *Importer) importModelType(ctx context.Context, url string, importFuncti
 	if err != nil {
 		return err
 	}
-	defer f.Close()
+	defer func(f *os.File) {
+		_ = f.Close()
+	}(f)
 
 	csvReader := csv.NewReader(f)
 
@@ -98,6 +110,7 @@ func (i *Importer) importModelType(ctx context.Context, url string, importFuncti
 		}
 
 		guard <- struct{}{} // would block if guard channel is already filled
+		i.stats.AddTotal()
 		wg.Go(func() error {
 			record := record
 
@@ -118,6 +131,8 @@ func (i *Importer) importModelType(ctx context.Context, url string, importFuncti
 
 	// Delete the file after import.
 	err = os.Remove(filepath)
+
+	i.stats.End()
 
 	return err
 }
@@ -234,6 +249,8 @@ func (i *Importer) importAirportLine(ctx context.Context, data []string) error {
 		return err
 	}
 
+	i.stats.AddUpdated()
+
 	return nil
 }
 
@@ -245,16 +262,14 @@ func (i *Importer) cleanupAirports(ctx context.Context) error {
 		return err
 	}
 
-	fmt.Println("Deleted ", deleted, " rows from airports")
+	i.stats.AddMultipleDeleted(deleted)
 
-	saved, err := i.db.Airport.Update().Where(
+	_, err = i.db.Airport.Update().Where(
 		airport.ImportFlag(true),
 	).SetImportFlag(false).Save(ctx)
 	if err != nil {
 		return err
 	}
-
-	println("Total airports ", saved, " rows")
 
 	return nil
 }
@@ -269,9 +284,9 @@ func (i *Importer) importRunwayLine(ctx context.Context, data []string) error {
 	hash := strconv.FormatUint(fnv1a.HashString64(line), 10)
 	runwayID, _ := strconv.ParseInt(data[0], 10, 64)
 
-	found, err := i.db.Airport.Update().Where(
-		airport.Hash(hash),
-		airport.ID(int(runwayID)),
+	found, err := i.db.Runway.Update().Where(
+		runway.Hash(hash),
+		runway.ID(int(runwayID)),
 	).
 		SetImportFlag(true).
 		Save(ctx)
@@ -336,6 +351,8 @@ func (i *Importer) importRunwayLine(ctx context.Context, data []string) error {
 		return err
 	}
 
+	i.stats.AddUpdated()
+
 	return nil
 }
 
@@ -347,16 +364,14 @@ func (i *Importer) cleanupRunways(ctx context.Context) error {
 		return err
 	}
 
-	fmt.Println("Deleted ", deleted, " rows from runways")
+	i.stats.AddMultipleDeleted(deleted)
 
-	saved, err := i.db.Runway.Update().Where(
+	_, err = i.db.Runway.Update().Where(
 		runway.ImportFlag(true),
 	).SetImportFlag(false).Save(ctx)
 	if err != nil {
 		return err
 	}
-
-	println("Total runways ", saved, " rows")
 
 	return nil
 }
@@ -368,9 +383,9 @@ func (i *Importer) importFrequencyLine(ctx context.Context, data []string) error
 	hash := strconv.FormatUint(fnv1a.HashString64(line), 10)
 	frequencyID, _ := strconv.ParseInt(data[0], 10, 64)
 
-	found, err := i.db.Airport.Update().Where(
-		airport.Hash(hash),
-		airport.ID(int(frequencyID)),
+	found, err := i.db.Frequency.Update().Where(
+		frequency.Hash(hash),
+		frequency.ID(int(frequencyID)),
 	).
 		SetImportFlag(true).
 		Save(ctx)
@@ -388,7 +403,7 @@ func (i *Importer) importFrequencyLine(ctx context.Context, data []string) error
 		return err
 	}
 
-	frequency, _ := strconv.ParseFloat(data[5], 64)
+	f, _ := strconv.ParseFloat(data[5], 64)
 
 	err = i.db.Frequency.Create().
 		SetImportFlag(true).
@@ -397,7 +412,7 @@ func (i *Importer) importFrequencyLine(ctx context.Context, data []string) error
 		SetAirportID(int(airportID)).
 		SetType(data[3]).
 		SetDescription(data[4]).
-		SetFrequency(frequency).
+		SetFrequency(f).
 		SetLastUpdated(time.Now()).
 		OnConflict().
 		UpdateNewValues().
@@ -405,6 +420,8 @@ func (i *Importer) importFrequencyLine(ctx context.Context, data []string) error
 	if err != nil {
 		return err
 	}
+
+	i.stats.AddUpdated()
 
 	return nil
 }
@@ -417,16 +434,14 @@ func (i *Importer) cleanupFrequencies(ctx context.Context) error {
 		return err
 	}
 
-	fmt.Println("Deleted ", deleted, " rows from frequencies")
+	i.stats.AddMultipleDeleted(deleted)
 
-	saved, err := i.db.Frequency.Update().Where(
+	_, err = i.db.Frequency.Update().Where(
 		frequency.ImportFlag(true),
 	).SetImportFlag(false).Save(ctx)
 	if err != nil {
 		return err
 	}
-
-	println("Total frequencies ", saved, " rows")
 
 	return nil
 }
