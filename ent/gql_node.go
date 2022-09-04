@@ -53,7 +53,7 @@ func (a *Airport) Node(ctx context.Context) (node *Node, err error) {
 		ID:     a.ID,
 		Type:   "Airport",
 		Fields: make([]*Field, 17),
-		Edges:  make([]*Edge, 2),
+		Edges:  make([]*Edge, 1),
 	}
 	var buf []byte
 	if buf, err = json.Marshal(a.Identifier); err != nil {
@@ -193,22 +193,12 @@ func (a *Airport) Node(ctx context.Context) (node *Node, err error) {
 		Value: string(buf),
 	}
 	node.Edges[0] = &Edge{
-		Type: "Runway",
-		Name: "runways",
-	}
-	err = a.QueryRunways().
-		Select(runway.FieldID).
-		Scan(ctx, &node.Edges[0].IDs)
-	if err != nil {
-		return nil, err
-	}
-	node.Edges[1] = &Edge{
 		Type: "Frequency",
 		Name: "frequencies",
 	}
 	err = a.QueryFrequencies().
 		Select(frequency.FieldID).
-		Scan(ctx, &node.Edges[1].IDs)
+		Scan(ctx, &node.Edges[0].IDs)
 	if err != nil {
 		return nil, err
 	}

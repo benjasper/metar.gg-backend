@@ -1,6 +1,7 @@
 package schema
 
 import (
+	"entgo.io/contrib/entgql"
 	"entgo.io/ent"
 	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
@@ -38,7 +39,7 @@ func (Airport) Fields() []ent.Field {
 // Edges of the Airport.
 func (Airport) Edges() []ent.Edge {
 	return []ent.Edge{
-		edge.To("runways", Runway.Type).Comment("Runways at the airport."),
+		edge.To("runways", Runway.Type).Comment("Runways at the airport.").Annotations(entgql.Skip()),
 		edge.To("frequencies", Frequency.Type).Comment("Frequencies at the airport."),
 	}
 }

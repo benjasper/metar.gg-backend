@@ -18,9 +18,28 @@ import (
 
 // region    ************************** generated!.gotpl **************************
 
+type AirportResolver interface {
+	Runways(ctx context.Context, obj *ent.Airport, closed *bool) ([]*ent.Runway, error)
+}
+
 // endregion ************************** generated!.gotpl **************************
 
 // region    ***************************** args.gotpl *****************************
+
+func (ec *executionContext) field_Airport_runways_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 *bool
+	if tmp, ok := rawArgs["closed"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("closed"))
+		arg0, err = ec.unmarshalOBoolean2ᚖbool(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["closed"] = arg0
+	return args, nil
+}
 
 // endregion ***************************** args.gotpl *****************************
 
@@ -801,87 +820,6 @@ func (ec *executionContext) fieldContext_Airport_keywords(ctx context.Context, f
 	return fc, nil
 }
 
-func (ec *executionContext) _Airport_runways(ctx context.Context, field graphql.CollectedField, obj *ent.Airport) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Airport_runways(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Runways(ctx)
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		return graphql.Null
-	}
-	res := resTmp.([]*ent.Runway)
-	fc.Result = res
-	return ec.marshalORunway2ᚕᚖmetarᚗggᚋentᚐRunwayᚄ(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_Airport_runways(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Airport",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "id":
-				return ec.fieldContext_Runway_id(ctx, field)
-			case "length":
-				return ec.fieldContext_Runway_length(ctx, field)
-			case "width":
-				return ec.fieldContext_Runway_width(ctx, field)
-			case "surface":
-				return ec.fieldContext_Runway_surface(ctx, field)
-			case "lighted":
-				return ec.fieldContext_Runway_lighted(ctx, field)
-			case "closed":
-				return ec.fieldContext_Runway_closed(ctx, field)
-			case "lowRunwayIdentifier":
-				return ec.fieldContext_Runway_lowRunwayIdentifier(ctx, field)
-			case "lowRunwayLatitude":
-				return ec.fieldContext_Runway_lowRunwayLatitude(ctx, field)
-			case "lowRunwayLongitude":
-				return ec.fieldContext_Runway_lowRunwayLongitude(ctx, field)
-			case "lowRunwayElevation":
-				return ec.fieldContext_Runway_lowRunwayElevation(ctx, field)
-			case "lowRunwayHeading":
-				return ec.fieldContext_Runway_lowRunwayHeading(ctx, field)
-			case "lowRunwayDisplacedThreshold":
-				return ec.fieldContext_Runway_lowRunwayDisplacedThreshold(ctx, field)
-			case "highRunwayIdentifier":
-				return ec.fieldContext_Runway_highRunwayIdentifier(ctx, field)
-			case "highRunwayLatitude":
-				return ec.fieldContext_Runway_highRunwayLatitude(ctx, field)
-			case "highRunwayLongitude":
-				return ec.fieldContext_Runway_highRunwayLongitude(ctx, field)
-			case "highRunwayElevation":
-				return ec.fieldContext_Runway_highRunwayElevation(ctx, field)
-			case "highRunwayHeading":
-				return ec.fieldContext_Runway_highRunwayHeading(ctx, field)
-			case "highRunwayDisplacedThreshold":
-				return ec.fieldContext_Runway_highRunwayDisplacedThreshold(ctx, field)
-			case "airport":
-				return ec.fieldContext_Runway_airport(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type Runway", field.Name)
-		},
-	}
-	return fc, nil
-}
-
 func (ec *executionContext) _Airport_frequencies(ctx context.Context, field graphql.CollectedField, obj *ent.Airport) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_Airport_frequencies(ctx, field)
 	if err != nil {
@@ -931,6 +869,101 @@ func (ec *executionContext) fieldContext_Airport_frequencies(ctx context.Context
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Frequency", field.Name)
 		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Airport_runways(ctx context.Context, field graphql.CollectedField, obj *ent.Airport) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Airport_runways(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Airport().Runways(rctx, obj, fc.Args["closed"].(*bool))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]*ent.Runway)
+	fc.Result = res
+	return ec.marshalNRunway2ᚕᚖmetarᚗggᚋentᚐRunwayᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Airport_runways(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Airport",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_Runway_id(ctx, field)
+			case "length":
+				return ec.fieldContext_Runway_length(ctx, field)
+			case "width":
+				return ec.fieldContext_Runway_width(ctx, field)
+			case "surface":
+				return ec.fieldContext_Runway_surface(ctx, field)
+			case "lighted":
+				return ec.fieldContext_Runway_lighted(ctx, field)
+			case "closed":
+				return ec.fieldContext_Runway_closed(ctx, field)
+			case "lowRunwayIdentifier":
+				return ec.fieldContext_Runway_lowRunwayIdentifier(ctx, field)
+			case "lowRunwayLatitude":
+				return ec.fieldContext_Runway_lowRunwayLatitude(ctx, field)
+			case "lowRunwayLongitude":
+				return ec.fieldContext_Runway_lowRunwayLongitude(ctx, field)
+			case "lowRunwayElevation":
+				return ec.fieldContext_Runway_lowRunwayElevation(ctx, field)
+			case "lowRunwayHeading":
+				return ec.fieldContext_Runway_lowRunwayHeading(ctx, field)
+			case "lowRunwayDisplacedThreshold":
+				return ec.fieldContext_Runway_lowRunwayDisplacedThreshold(ctx, field)
+			case "highRunwayIdentifier":
+				return ec.fieldContext_Runway_highRunwayIdentifier(ctx, field)
+			case "highRunwayLatitude":
+				return ec.fieldContext_Runway_highRunwayLatitude(ctx, field)
+			case "highRunwayLongitude":
+				return ec.fieldContext_Runway_highRunwayLongitude(ctx, field)
+			case "highRunwayElevation":
+				return ec.fieldContext_Runway_highRunwayElevation(ctx, field)
+			case "highRunwayHeading":
+				return ec.fieldContext_Runway_highRunwayHeading(ctx, field)
+			case "highRunwayDisplacedThreshold":
+				return ec.fieldContext_Runway_highRunwayDisplacedThreshold(ctx, field)
+			case "airport":
+				return ec.fieldContext_Runway_airport(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type Runway", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Airport_runways_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return
 	}
 	return fc, nil
 }
@@ -1183,10 +1216,10 @@ func (ec *executionContext) fieldContext_Frequency_airport(ctx context.Context, 
 				return ec.fieldContext_Airport_wikipedia(ctx, field)
 			case "keywords":
 				return ec.fieldContext_Airport_keywords(ctx, field)
-			case "runways":
-				return ec.fieldContext_Airport_runways(ctx, field)
 			case "frequencies":
 				return ec.fieldContext_Airport_frequencies(ctx, field)
+			case "runways":
+				return ec.fieldContext_Airport_runways(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Airport", field.Name)
 		},
@@ -2025,10 +2058,10 @@ func (ec *executionContext) fieldContext_Runway_airport(ctx context.Context, fie
 				return ec.fieldContext_Airport_wikipedia(ctx, field)
 			case "keywords":
 				return ec.fieldContext_Airport_keywords(ctx, field)
-			case "runways":
-				return ec.fieldContext_Airport_runways(ctx, field)
 			case "frequencies":
 				return ec.fieldContext_Airport_frequencies(ctx, field)
+			case "runways":
+				return ec.fieldContext_Airport_runways(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Airport", field.Name)
 		},
@@ -2163,23 +2196,6 @@ func (ec *executionContext) _Airport(ctx context.Context, sel ast.SelectionSet, 
 			if out.Values[i] == graphql.Null {
 				atomic.AddUint32(&invalids, 1)
 			}
-		case "runways":
-			field := field
-
-			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
-				defer func() {
-					if r := recover(); r != nil {
-						ec.Error(ctx, ec.Recover(ctx, r))
-					}
-				}()
-				res = ec._Airport_runways(ctx, field, obj)
-				return res
-			}
-
-			out.Concurrently(i, func() graphql.Marshaler {
-				return innerFunc(ctx)
-
-			})
 		case "frequencies":
 			field := field
 
@@ -2190,6 +2206,26 @@ func (ec *executionContext) _Airport(ctx context.Context, sel ast.SelectionSet, 
 					}
 				}()
 				res = ec._Airport_frequencies(ctx, field, obj)
+				return res
+			}
+
+			out.Concurrently(i, func() graphql.Marshaler {
+				return innerFunc(ctx)
+
+			})
+		case "runways":
+			field := field
+
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Airport_runways(ctx, field, obj)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
 				return res
 			}
 
@@ -2449,6 +2485,50 @@ func (ec *executionContext) marshalNFrequency2ᚖmetarᚗggᚋentᚐFrequency(ct
 	return ec._Frequency(ctx, sel, v)
 }
 
+func (ec *executionContext) marshalNRunway2ᚕᚖmetarᚗggᚋentᚐRunwayᚄ(ctx context.Context, sel ast.SelectionSet, v []*ent.Runway) graphql.Marshaler {
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		fc := &graphql.FieldContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithFieldContext(ctx, fc)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalNRunway2ᚖmetarᚗggᚋentᚐRunway(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+
+	for _, e := range ret {
+		if e == graphql.Null {
+			return graphql.Null
+		}
+	}
+
+	return ret
+}
+
 func (ec *executionContext) marshalNRunway2ᚖmetarᚗggᚋentᚐRunway(ctx context.Context, sel ast.SelectionSet, v *ent.Runway) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
@@ -2494,53 +2574,6 @@ func (ec *executionContext) marshalOFrequency2ᚕᚖmetarᚗggᚋentᚐFrequency
 				defer wg.Done()
 			}
 			ret[i] = ec.marshalNFrequency2ᚖmetarᚗggᚋentᚐFrequency(ctx, sel, v[i])
-		}
-		if isLen1 {
-			f(i)
-		} else {
-			go f(i)
-		}
-
-	}
-	wg.Wait()
-
-	for _, e := range ret {
-		if e == graphql.Null {
-			return graphql.Null
-		}
-	}
-
-	return ret
-}
-
-func (ec *executionContext) marshalORunway2ᚕᚖmetarᚗggᚋentᚐRunwayᚄ(ctx context.Context, sel ast.SelectionSet, v []*ent.Runway) graphql.Marshaler {
-	if v == nil {
-		return graphql.Null
-	}
-	ret := make(graphql.Array, len(v))
-	var wg sync.WaitGroup
-	isLen1 := len(v) == 1
-	if !isLen1 {
-		wg.Add(len(v))
-	}
-	for i := range v {
-		i := i
-		fc := &graphql.FieldContext{
-			Index:  &i,
-			Result: &v[i],
-		}
-		ctx := graphql.WithFieldContext(ctx, fc)
-		f := func(i int) {
-			defer func() {
-				if r := recover(); r != nil {
-					ec.Error(ctx, ec.Recover(ctx, r))
-					ret = nil
-				}
-			}()
-			if !isLen1 {
-				defer wg.Done()
-			}
-			ret[i] = ec.marshalNRunway2ᚖmetarᚗggᚋentᚐRunway(ctx, sel, v[i])
 		}
 		if isLen1 {
 			f(i)

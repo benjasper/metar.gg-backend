@@ -30,6 +30,7 @@ type Config struct {
 }
 
 type ResolverRoot interface {
+	Airport() AirportResolver
 	Query() QueryResolver
 }
 
@@ -53,7 +54,7 @@ type ComplexityRoot struct {
 		Municipality     func(childComplexity int) int
 		Name             func(childComplexity int) int
 		Region           func(childComplexity int) int
-		Runways          func(childComplexity int) int
+		Runways          func(childComplexity int, closed *bool) int
 		ScheduledService func(childComplexity int) int
 		Type             func(childComplexity int) int
 		Website          func(childComplexity int) int
@@ -238,7 +239,12 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			break
 		}
 
-		return e.complexity.Airport.Runways(childComplexity), true
+		args, err := ec.field_Airport_runways_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Airport.Runways(childComplexity, args["closed"].(*bool)), true
 
 	case "Airport.scheduledService":
 		if e.complexity.Airport.ScheduledService == nil {
@@ -599,7 +605,6 @@ type Airport {
   wikipedia: String
   """Extra keywords/phrases to assist with search. May include former names for the airport, alternate codes, names in other languages, nearby tourist destinations, etc."""
   keywords: [String!]!
-  runways: [Runway!]
   frequencies: [Frequency!]
 }
 """AirportContinent is enum for the field continent"""
@@ -705,6 +710,10 @@ type Query {
         last: Int
         identifier: String
     ): AirportConnection!
+}
+
+extend type Airport {
+    runways(closed: Boolean): [Runway!]! @goField(forceResolver: true)
 }`, BuiltIn: false},
 }
 var parsedSchema = gqlparser.MustLoadSchema(sources...)

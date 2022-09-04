@@ -34,7 +34,6 @@ type Airport {
   wikipedia: String
   """Extra keywords/phrases to assist with search. May include former names for the airport, alternate codes, names in other languages, nearby tourist destinations, etc."""
   keywords: [String!]!
-  runways: [Runway!]
   frequencies: [Frequency!]
 }
 """AirportContinent is enum for the field continent"""

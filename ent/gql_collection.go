@@ -25,18 +25,6 @@ func (a *AirportQuery) collectField(ctx context.Context, op *graphql.OperationCo
 	path = append([]string(nil), path...)
 	for _, field := range graphql.CollectFields(op, field.Selections, satisfies) {
 		switch field.Name {
-		case "runways":
-			var (
-				alias = field.Alias
-				path  = append(path, alias)
-				query = &RunwayQuery{config: a.config}
-			)
-			if err := query.collectField(ctx, op, field, path, satisfies...); err != nil {
-				return err
-			}
-			a.WithNamedRunways(alias, func(wq *RunwayQuery) {
-				*wq = *query
-			})
 		case "frequencies":
 			var (
 				alias = field.Alias

@@ -8,14 +8,6 @@ import (
 	"github.com/99designs/gqlgen/graphql"
 )
 
-func (a *Airport) Runways(ctx context.Context) ([]*Runway, error) {
-	result, err := a.NamedRunways(graphql.GetFieldContext(ctx).Field.Alias)
-	if IsNotLoaded(err) {
-		result, err = a.QueryRunways().All(ctx)
-	}
-	return result, err
-}
-
 func (a *Airport) Frequencies(ctx context.Context) ([]*Frequency, error) {
 	result, err := a.NamedFrequencies(graphql.GetFieldContext(ctx).Field.Alias)
 	if IsNotLoaded(err) {

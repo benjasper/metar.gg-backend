@@ -27,3 +27,7 @@ type Query {
         identifier: String
     ): AirportConnection!
 }
+
+extend type Airport {
+    runways(closed: Boolean): [Runway!]! @goField(forceResolver: true)
+}
