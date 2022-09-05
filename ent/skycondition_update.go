@@ -18,8 +18,9 @@ import (
 // SkyConditionUpdate is the builder for updating SkyCondition entities.
 type SkyConditionUpdate struct {
 	config
-	hooks    []Hook
-	mutation *SkyConditionMutation
+	hooks     []Hook
+	mutation  *SkyConditionMutation
+	modifiers []func(*sql.UpdateBuilder)
 }
 
 // Where appends a list predicates to the SkyConditionUpdate builder.
@@ -156,6 +157,12 @@ func (scu *SkyConditionUpdate) check() error {
 	return nil
 }
 
+// Modify adds a statement modifier for attaching custom logic to the UPDATE statement.
+func (scu *SkyConditionUpdate) Modify(modifiers ...func(u *sql.UpdateBuilder)) *SkyConditionUpdate {
+	scu.modifiers = append(scu.modifiers, modifiers...)
+	return scu
+}
+
 func (scu *SkyConditionUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	_spec := &sqlgraph.UpdateSpec{
 		Node: &sqlgraph.NodeSpec{
@@ -236,6 +243,7 @@ func (scu *SkyConditionUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
+	_spec.Modifiers = scu.modifiers
 	if n, err = sqlgraph.UpdateNodes(ctx, scu.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{skycondition.Label}
@@ -250,9 +258,10 @@ func (scu *SkyConditionUpdate) sqlSave(ctx context.Context) (n int, err error) {
 // SkyConditionUpdateOne is the builder for updating a single SkyCondition entity.
 type SkyConditionUpdateOne struct {
 	config
-	fields   []string
-	hooks    []Hook
-	mutation *SkyConditionMutation
+	fields    []string
+	hooks     []Hook
+	mutation  *SkyConditionMutation
+	modifiers []func(*sql.UpdateBuilder)
 }
 
 // SetSkyCover sets the "sky_cover" field.
@@ -396,6 +405,12 @@ func (scuo *SkyConditionUpdateOne) check() error {
 	return nil
 }
 
+// Modify adds a statement modifier for attaching custom logic to the UPDATE statement.
+func (scuo *SkyConditionUpdateOne) Modify(modifiers ...func(u *sql.UpdateBuilder)) *SkyConditionUpdateOne {
+	scuo.modifiers = append(scuo.modifiers, modifiers...)
+	return scuo
+}
+
 func (scuo *SkyConditionUpdateOne) sqlSave(ctx context.Context) (_node *SkyCondition, err error) {
 	_spec := &sqlgraph.UpdateSpec{
 		Node: &sqlgraph.NodeSpec{
@@ -493,6 +508,7 @@ func (scuo *SkyConditionUpdateOne) sqlSave(ctx context.Context) (_node *SkyCondi
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
+	_spec.Modifiers = scuo.modifiers
 	_node = &SkyCondition{config: scuo.config}
 	_spec.Assign = _node.assignValues
 	_spec.ScanValues = _node.scanValues

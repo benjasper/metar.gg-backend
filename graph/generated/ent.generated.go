@@ -17,6 +17,7 @@ import (
 	"metar.gg/ent/airport"
 	"metar.gg/ent/metar"
 	"metar.gg/ent/skycondition"
+	"metar.gg/graph/model"
 )
 
 // region    ************************** generated!.gotpl **************************
@@ -24,11 +25,27 @@ import (
 type AirportResolver interface {
 	Runways(ctx context.Context, obj *ent.Airport, closed *bool) ([]*ent.Runway, error)
 	Metars(ctx context.Context, obj *ent.Airport, first *int) ([]*ent.Metar, error)
+	MetarsVicinity(ctx context.Context, obj *ent.Airport, first *int) ([]*model.MetarWithDistance, error)
 }
 
 // endregion ************************** generated!.gotpl **************************
 
 // region    ***************************** args.gotpl *****************************
+
+func (ec *executionContext) field_Airport_metarsVicinity_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 *int
+	if tmp, ok := rawArgs["first"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("first"))
+		arg0, err = ec.unmarshalOInt2ᚖint(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["first"] = arg0
+	return args, nil
+}
 
 func (ec *executionContext) field_Airport_metars_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
@@ -1208,6 +1225,67 @@ func (ec *executionContext) fieldContext_Airport_metars(ctx context.Context, fie
 	return fc, nil
 }
 
+func (ec *executionContext) _Airport_metarsVicinity(ctx context.Context, field graphql.CollectedField, obj *ent.Airport) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Airport_metarsVicinity(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Airport().MetarsVicinity(rctx, obj, fc.Args["first"].(*int))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]*model.MetarWithDistance)
+	fc.Result = res
+	return ec.marshalNMetarWithDistance2ᚕᚖmetarᚗggᚋgraphᚋmodelᚐMetarWithDistanceᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Airport_metarsVicinity(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Airport",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "distance":
+				return ec.fieldContext_MetarWithDistance_distance(ctx, field)
+			case "metar":
+				return ec.fieldContext_MetarWithDistance_metar(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type MetarWithDistance", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Airport_metarsVicinity_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _Frequency_id(ctx context.Context, field graphql.CollectedField, obj *ent.Frequency) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_Frequency_id(ctx, field)
 	if err != nil {
@@ -1510,6 +1588,8 @@ func (ec *executionContext) fieldContext_Frequency_airport(ctx context.Context, 
 				return ec.fieldContext_Airport_runways(ctx, field)
 			case "metars":
 				return ec.fieldContext_Airport_metars(ctx, field)
+			case "metarsVicinity":
+				return ec.fieldContext_Airport_metarsVicinity(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Airport", field.Name)
 		},
@@ -3041,6 +3121,8 @@ func (ec *executionContext) fieldContext_Metar_airport(ctx context.Context, fiel
 				return ec.fieldContext_Airport_runways(ctx, field)
 			case "metars":
 				return ec.fieldContext_Airport_metars(ctx, field)
+			case "metarsVicinity":
+				return ec.fieldContext_Airport_metarsVicinity(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Airport", field.Name)
 		},
@@ -3982,6 +4064,8 @@ func (ec *executionContext) fieldContext_Runway_airport(ctx context.Context, fie
 				return ec.fieldContext_Airport_runways(ctx, field)
 			case "metars":
 				return ec.fieldContext_Airport_metars(ctx, field)
+			case "metarsVicinity":
+				return ec.fieldContext_Airport_metarsVicinity(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Airport", field.Name)
 		},
@@ -4380,6 +4464,26 @@ func (ec *executionContext) _Airport(ctx context.Context, sel ast.SelectionSet, 
 					}
 				}()
 				res = ec._Airport_metars(ctx, field, obj)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
+				return res
+			}
+
+			out.Concurrently(i, func() graphql.Marshaler {
+				return innerFunc(ctx)
+
+			})
+		case "metarsVicinity":
+			field := field
+
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Airport_metarsVicinity(ctx, field, obj)
 				if res == graphql.Null {
 					atomic.AddUint32(&invalids, 1)
 				}
@@ -5137,6 +5241,13 @@ func (ec *executionContext) marshalOFrequency2ᚕᚖmetarᚗggᚋentᚐFrequency
 	}
 
 	return ret
+}
+
+func (ec *executionContext) marshalOMetar2ᚖmetarᚗggᚋentᚐMetar(ctx context.Context, sel ast.SelectionSet, v *ent.Metar) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._Metar(ctx, sel, v)
 }
 
 func (ec *executionContext) unmarshalOMetarFlightCategory2ᚖmetarᚗggᚋentᚋmetarᚐFlightCategory(ctx context.Context, v interface{}) (*metar.FlightCategory, error) {

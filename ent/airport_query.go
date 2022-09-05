@@ -30,8 +30,8 @@ type AirportQuery struct {
 	withRunways          *RunwayQuery
 	withFrequencies      *FrequencyQuery
 	withMetars           *MetarQuery
-	modifiers            []func(*sql.Selector)
 	loadTotal            []func(context.Context, []*Airport) error
+	modifiers            []func(*sql.Selector)
 	withNamedRunways     map[string]*RunwayQuery
 	withNamedFrequencies map[string]*FrequencyQuery
 	withNamedMetars      map[string]*MetarQuery
@@ -683,6 +683,9 @@ func (aq *AirportQuery) sqlQuery(ctx context.Context) *sql.Selector {
 	if aq.unique != nil && *aq.unique {
 		selector.Distinct()
 	}
+	for _, m := range aq.modifiers {
+		m(selector)
+	}
 	for _, p := range aq.predicates {
 		p(selector)
 	}
@@ -698,6 +701,12 @@ func (aq *AirportQuery) sqlQuery(ctx context.Context) *sql.Selector {
 		selector.Limit(*limit)
 	}
 	return selector
+}
+
+// Modify adds a query modifier for attaching custom logic to queries.
+func (aq *AirportQuery) Modify(modifiers ...func(s *sql.Selector)) *AirportSelect {
+	aq.modifiers = append(aq.modifiers, modifiers...)
+	return aq.Select()
 }
 
 // WithNamedRunways tells the query-builder to eager-load the nodes that are connected to the "runways"
@@ -832,4 +841,10 @@ func (as *AirportSelect) sqlScan(ctx context.Context, v any) error {
 	}
 	defer rows.Close()
 	return sql.ScanSlice(rows, v)
+}
+
+// Modify adds a query modifier for attaching custom logic to queries.
+func (as *AirportSelect) Modify(modifiers ...func(s *sql.Selector)) *AirportSelect {
+	as.modifiers = append(as.modifiers, modifiers...)
+	return as
 }

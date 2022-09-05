@@ -16,7 +16,7 @@ import (
 type Metar struct {
 	config `json:"-"`
 	// ID of the ent.
-	ID int `json:"id,omitempty"`
+	ID int `json:"id,omitempty" db:"-"`
 	// The raw METAR text.
 	RawText string `json:"raw_text,omitempty"`
 	// The time the METAR was observed.

@@ -25,6 +25,7 @@ func main() {
 	opts := []entc.Option{
 		entc.Extensions(ex),
 		entc.FeatureNames("sql/upsert"),
+		entc.FeatureNames("sql/modifier"),
 	}
 
 	if err := entc.Generate("./ent/schema", &gen.Config{}, opts...); err != nil {

@@ -30,7 +30,13 @@ type Query {
     ): AirportConnection!
 }
 
+type MetarWithDistance {
+    distance: Float
+    metar: Metar
+}
+
 extend type Airport {
     runways(closed: Boolean): [Runway!]! @goField(forceResolver: true)
     metars(first: Int = 1): [Metar!]! @goField(forceResolver: true)
+    metarsVicinity(first: Int = 1): [MetarWithDistance!]! @goField(forceResolver: true)
 }

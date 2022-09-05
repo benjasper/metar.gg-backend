@@ -29,8 +29,8 @@ type MetarQuery struct {
 	withAirport            *AirportQuery
 	withSkyConditions      *SkyConditionQuery
 	withFKs                bool
-	modifiers              []func(*sql.Selector)
 	loadTotal              []func(context.Context, []*Metar) error
+	modifiers              []func(*sql.Selector)
 	withNamedSkyConditions map[string]*SkyConditionQuery
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
@@ -597,6 +597,9 @@ func (mq *MetarQuery) sqlQuery(ctx context.Context) *sql.Selector {
 	if mq.unique != nil && *mq.unique {
 		selector.Distinct()
 	}
+	for _, m := range mq.modifiers {
+		m(selector)
+	}
 	for _, p := range mq.predicates {
 		p(selector)
 	}
@@ -612,6 +615,12 @@ func (mq *MetarQuery) sqlQuery(ctx context.Context) *sql.Selector {
 		selector.Limit(*limit)
 	}
 	return selector
+}
+
+// Modify adds a query modifier for attaching custom logic to queries.
+func (mq *MetarQuery) Modify(modifiers ...func(s *sql.Selector)) *MetarSelect {
+	mq.modifiers = append(mq.modifiers, modifiers...)
+	return mq.Select()
 }
 
 // WithNamedSkyConditions tells the query-builder to eager-load the nodes that are connected to the "sky_conditions"
@@ -718,4 +727,10 @@ func (ms *MetarSelect) sqlScan(ctx context.Context, v any) error {
 	}
 	defer rows.Close()
 	return sql.ScanSlice(rows, v)
+}
+
+// Modify adds a query modifier for attaching custom logic to queries.
+func (ms *MetarSelect) Modify(modifiers ...func(s *sql.Selector)) *MetarSelect {
+	ms.modifiers = append(ms.modifiers, modifiers...)
+	return ms
 }

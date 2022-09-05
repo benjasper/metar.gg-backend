@@ -3,6 +3,7 @@ package utils
 import (
 	"fmt"
 	"io"
+	"math"
 	"net/http"
 	"os"
 )
@@ -66,4 +67,14 @@ func DownloadFile(url string, filepath string) error {
 	}
 
 	return nil
+}
+
+// RadiansToDegrees Converts Radians to Degrees
+func RadiansToDegrees(radians float64) float64 {
+	return radians * 180 / math.Pi
+}
+
+// DegreesToRadians Converts Degrees to Radians
+func DegreesToRadians(degrees float64) float64 {
+	return degrees * math.Pi / 180
 }

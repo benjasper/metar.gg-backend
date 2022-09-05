@@ -19,8 +19,9 @@ import (
 // RunwayUpdate is the builder for updating Runway entities.
 type RunwayUpdate struct {
 	config
-	hooks    []Hook
-	mutation *RunwayMutation
+	hooks     []Hook
+	mutation  *RunwayMutation
+	modifiers []func(*sql.UpdateBuilder)
 }
 
 // Where appends a list predicates to the RunwayUpdate builder.
@@ -487,6 +488,12 @@ func (ru *RunwayUpdate) ExecX(ctx context.Context) {
 	}
 }
 
+// Modify adds a statement modifier for attaching custom logic to the UPDATE statement.
+func (ru *RunwayUpdate) Modify(modifiers ...func(u *sql.UpdateBuilder)) *RunwayUpdate {
+	ru.modifiers = append(ru.modifiers, modifiers...)
+	return ru
+}
+
 func (ru *RunwayUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	_spec := &sqlgraph.UpdateSpec{
 		Node: &sqlgraph.NodeSpec{
@@ -830,6 +837,7 @@ func (ru *RunwayUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
+	_spec.Modifiers = ru.modifiers
 	if n, err = sqlgraph.UpdateNodes(ctx, ru.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{runway.Label}
@@ -844,9 +852,10 @@ func (ru *RunwayUpdate) sqlSave(ctx context.Context) (n int, err error) {
 // RunwayUpdateOne is the builder for updating a single Runway entity.
 type RunwayUpdateOne struct {
 	config
-	fields   []string
-	hooks    []Hook
-	mutation *RunwayMutation
+	fields    []string
+	hooks     []Hook
+	mutation  *RunwayMutation
+	modifiers []func(*sql.UpdateBuilder)
 }
 
 // SetHash sets the "hash" field.
@@ -1320,6 +1329,12 @@ func (ruo *RunwayUpdateOne) ExecX(ctx context.Context) {
 	}
 }
 
+// Modify adds a statement modifier for attaching custom logic to the UPDATE statement.
+func (ruo *RunwayUpdateOne) Modify(modifiers ...func(u *sql.UpdateBuilder)) *RunwayUpdateOne {
+	ruo.modifiers = append(ruo.modifiers, modifiers...)
+	return ruo
+}
+
 func (ruo *RunwayUpdateOne) sqlSave(ctx context.Context) (_node *Runway, err error) {
 	_spec := &sqlgraph.UpdateSpec{
 		Node: &sqlgraph.NodeSpec{
@@ -1680,6 +1695,7 @@ func (ruo *RunwayUpdateOne) sqlSave(ctx context.Context) (_node *Runway, err err
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
+	_spec.Modifiers = ruo.modifiers
 	_node = &Runway{config: ruo.config}
 	_spec.Assign = _node.assignValues
 	_spec.ScanValues = _node.scanValues

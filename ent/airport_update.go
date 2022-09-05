@@ -21,8 +21,9 @@ import (
 // AirportUpdate is the builder for updating Airport entities.
 type AirportUpdate struct {
 	config
-	hooks    []Hook
-	mutation *AirportMutation
+	hooks     []Hook
+	mutation  *AirportMutation
+	modifiers []func(*sql.UpdateBuilder)
 }
 
 // Where appends a list predicates to the AirportUpdate builder.
@@ -488,6 +489,12 @@ func (au *AirportUpdate) check() error {
 	return nil
 }
 
+// Modify adds a statement modifier for attaching custom logic to the UPDATE statement.
+func (au *AirportUpdate) Modify(modifiers ...func(u *sql.UpdateBuilder)) *AirportUpdate {
+	au.modifiers = append(au.modifiers, modifiers...)
+	return au
+}
+
 func (au *AirportUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	_spec := &sqlgraph.UpdateSpec{
 		Node: &sqlgraph.NodeSpec{
@@ -878,6 +885,7 @@ func (au *AirportUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
+	_spec.Modifiers = au.modifiers
 	if n, err = sqlgraph.UpdateNodes(ctx, au.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{airport.Label}
@@ -892,9 +900,10 @@ func (au *AirportUpdate) sqlSave(ctx context.Context) (n int, err error) {
 // AirportUpdateOne is the builder for updating a single Airport entity.
 type AirportUpdateOne struct {
 	config
-	fields   []string
-	hooks    []Hook
-	mutation *AirportMutation
+	fields    []string
+	hooks     []Hook
+	mutation  *AirportMutation
+	modifiers []func(*sql.UpdateBuilder)
 }
 
 // SetHash sets the "hash" field.
@@ -1367,6 +1376,12 @@ func (auo *AirportUpdateOne) check() error {
 	return nil
 }
 
+// Modify adds a statement modifier for attaching custom logic to the UPDATE statement.
+func (auo *AirportUpdateOne) Modify(modifiers ...func(u *sql.UpdateBuilder)) *AirportUpdateOne {
+	auo.modifiers = append(auo.modifiers, modifiers...)
+	return auo
+}
+
 func (auo *AirportUpdateOne) sqlSave(ctx context.Context) (_node *Airport, err error) {
 	_spec := &sqlgraph.UpdateSpec{
 		Node: &sqlgraph.NodeSpec{
@@ -1774,6 +1789,7 @@ func (auo *AirportUpdateOne) sqlSave(ctx context.Context) (_node *Airport, err e
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
+	_spec.Modifiers = auo.modifiers
 	_node = &Airport{config: auo.config}
 	_spec.Assign = _node.assignValues
 	_spec.ScanValues = _node.scanValues

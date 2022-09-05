@@ -13,6 +13,10 @@ exec:
   dir: graph/generated
   package: generated
 
+model:
+  filename: graph/model/models_gen.go
+  package: model
+
 
 # autobind tells gqlgen to search for any type names in the GraphQL schema in the
 # provided Go package. If they match it will use them, otherwise it will generate new ones.

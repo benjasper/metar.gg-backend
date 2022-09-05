@@ -19,8 +19,9 @@ import (
 // FrequencyUpdate is the builder for updating Frequency entities.
 type FrequencyUpdate struct {
 	config
-	hooks    []Hook
-	mutation *FrequencyMutation
+	hooks     []Hook
+	mutation  *FrequencyMutation
+	modifiers []func(*sql.UpdateBuilder)
 }
 
 // Where appends a list predicates to the FrequencyUpdate builder.
@@ -172,6 +173,12 @@ func (fu *FrequencyUpdate) ExecX(ctx context.Context) {
 	}
 }
 
+// Modify adds a statement modifier for attaching custom logic to the UPDATE statement.
+func (fu *FrequencyUpdate) Modify(modifiers ...func(u *sql.UpdateBuilder)) *FrequencyUpdate {
+	fu.modifiers = append(fu.modifiers, modifiers...)
+	return fu
+}
+
 func (fu *FrequencyUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	_spec := &sqlgraph.UpdateSpec{
 		Node: &sqlgraph.NodeSpec{
@@ -274,6 +281,7 @@ func (fu *FrequencyUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
+	_spec.Modifiers = fu.modifiers
 	if n, err = sqlgraph.UpdateNodes(ctx, fu.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{frequency.Label}
@@ -288,9 +296,10 @@ func (fu *FrequencyUpdate) sqlSave(ctx context.Context) (n int, err error) {
 // FrequencyUpdateOne is the builder for updating a single Frequency entity.
 type FrequencyUpdateOne struct {
 	config
-	fields   []string
-	hooks    []Hook
-	mutation *FrequencyMutation
+	fields    []string
+	hooks     []Hook
+	mutation  *FrequencyMutation
+	modifiers []func(*sql.UpdateBuilder)
 }
 
 // SetHash sets the "hash" field.
@@ -449,6 +458,12 @@ func (fuo *FrequencyUpdateOne) ExecX(ctx context.Context) {
 	}
 }
 
+// Modify adds a statement modifier for attaching custom logic to the UPDATE statement.
+func (fuo *FrequencyUpdateOne) Modify(modifiers ...func(u *sql.UpdateBuilder)) *FrequencyUpdateOne {
+	fuo.modifiers = append(fuo.modifiers, modifiers...)
+	return fuo
+}
+
 func (fuo *FrequencyUpdateOne) sqlSave(ctx context.Context) (_node *Frequency, err error) {
 	_spec := &sqlgraph.UpdateSpec{
 		Node: &sqlgraph.NodeSpec{
@@ -568,6 +583,7 @@ func (fuo *FrequencyUpdateOne) sqlSave(ctx context.Context) (_node *Frequency, e
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
+	_spec.Modifiers = fuo.modifiers
 	_node = &Frequency{config: fuo.config}
 	_spec.Assign = _node.assignValues
 	_spec.ScanValues = _node.scanValues

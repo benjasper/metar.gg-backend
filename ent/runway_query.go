@@ -26,8 +26,8 @@ type RunwayQuery struct {
 	predicates  []predicate.Runway
 	withAirport *AirportQuery
 	withFKs     bool
-	modifiers   []func(*sql.Selector)
 	loadTotal   []func(context.Context, []*Runway) error
+	modifiers   []func(*sql.Selector)
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -513,6 +513,9 @@ func (rq *RunwayQuery) sqlQuery(ctx context.Context) *sql.Selector {
 	if rq.unique != nil && *rq.unique {
 		selector.Distinct()
 	}
+	for _, m := range rq.modifiers {
+		m(selector)
+	}
 	for _, p := range rq.predicates {
 		p(selector)
 	}
@@ -528,6 +531,12 @@ func (rq *RunwayQuery) sqlQuery(ctx context.Context) *sql.Selector {
 		selector.Limit(*limit)
 	}
 	return selector
+}
+
+// Modify adds a query modifier for attaching custom logic to queries.
+func (rq *RunwayQuery) Modify(modifiers ...func(s *sql.Selector)) *RunwaySelect {
+	rq.modifiers = append(rq.modifiers, modifiers...)
+	return rq.Select()
 }
 
 // RunwayGroupBy is the group-by builder for Runway entities.
@@ -620,4 +629,10 @@ func (rs *RunwaySelect) sqlScan(ctx context.Context, v any) error {
 	}
 	defer rows.Close()
 	return sql.ScanSlice(rows, v)
+}
+
+// Modify adds a query modifier for attaching custom logic to queries.
+func (rs *RunwaySelect) Modify(modifiers ...func(s *sql.Selector)) *RunwaySelect {
+	rs.modifiers = append(rs.modifiers, modifiers...)
+	return rs
 }

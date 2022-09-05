@@ -20,8 +20,9 @@ import (
 // MetarUpdate is the builder for updating Metar entities.
 type MetarUpdate struct {
 	config
-	hooks    []Hook
-	mutation *MetarMutation
+	hooks     []Hook
+	mutation  *MetarMutation
+	modifiers []func(*sql.UpdateBuilder)
 }
 
 // Where appends a list predicates to the MetarUpdate builder.
@@ -787,6 +788,12 @@ func (mu *MetarUpdate) check() error {
 	return nil
 }
 
+// Modify adds a statement modifier for attaching custom logic to the UPDATE statement.
+func (mu *MetarUpdate) Modify(modifiers ...func(u *sql.UpdateBuilder)) *MetarUpdate {
+	mu.modifiers = append(mu.modifiers, modifiers...)
+	return mu
+}
+
 func (mu *MetarUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	_spec := &sqlgraph.UpdateSpec{
 		Node: &sqlgraph.NodeSpec{
@@ -1401,6 +1408,7 @@ func (mu *MetarUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
+	_spec.Modifiers = mu.modifiers
 	if n, err = sqlgraph.UpdateNodes(ctx, mu.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{metar.Label}
@@ -1415,9 +1423,10 @@ func (mu *MetarUpdate) sqlSave(ctx context.Context) (n int, err error) {
 // MetarUpdateOne is the builder for updating a single Metar entity.
 type MetarUpdateOne struct {
 	config
-	fields   []string
-	hooks    []Hook
-	mutation *MetarMutation
+	fields    []string
+	hooks     []Hook
+	mutation  *MetarMutation
+	modifiers []func(*sql.UpdateBuilder)
 }
 
 // SetRawText sets the "raw_text" field.
@@ -2190,6 +2199,12 @@ func (muo *MetarUpdateOne) check() error {
 	return nil
 }
 
+// Modify adds a statement modifier for attaching custom logic to the UPDATE statement.
+func (muo *MetarUpdateOne) Modify(modifiers ...func(u *sql.UpdateBuilder)) *MetarUpdateOne {
+	muo.modifiers = append(muo.modifiers, modifiers...)
+	return muo
+}
+
 func (muo *MetarUpdateOne) sqlSave(ctx context.Context) (_node *Metar, err error) {
 	_spec := &sqlgraph.UpdateSpec{
 		Node: &sqlgraph.NodeSpec{
@@ -2821,6 +2836,7 @@ func (muo *MetarUpdateOne) sqlSave(ctx context.Context) (_node *Metar, err error
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
+	_spec.Modifiers = muo.modifiers
 	_node = &Metar{config: muo.config}
 	_spec.Assign = _node.assignValues
 	_spec.ScanValues = _node.scanValues

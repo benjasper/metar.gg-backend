@@ -26,8 +26,8 @@ type SkyConditionQuery struct {
 	predicates []predicate.SkyCondition
 	withMetar  *MetarQuery
 	withFKs    bool
-	modifiers  []func(*sql.Selector)
 	loadTotal  []func(context.Context, []*SkyCondition) error
+	modifiers  []func(*sql.Selector)
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -513,6 +513,9 @@ func (scq *SkyConditionQuery) sqlQuery(ctx context.Context) *sql.Selector {
 	if scq.unique != nil && *scq.unique {
 		selector.Distinct()
 	}
+	for _, m := range scq.modifiers {
+		m(selector)
+	}
 	for _, p := range scq.predicates {
 		p(selector)
 	}
@@ -528,6 +531,12 @@ func (scq *SkyConditionQuery) sqlQuery(ctx context.Context) *sql.Selector {
 		selector.Limit(*limit)
 	}
 	return selector
+}
+
+// Modify adds a query modifier for attaching custom logic to queries.
+func (scq *SkyConditionQuery) Modify(modifiers ...func(s *sql.Selector)) *SkyConditionSelect {
+	scq.modifiers = append(scq.modifiers, modifiers...)
+	return scq.Select()
 }
 
 // SkyConditionGroupBy is the group-by builder for SkyCondition entities.
@@ -620,4 +629,10 @@ func (scs *SkyConditionSelect) sqlScan(ctx context.Context, v any) error {
 	}
 	defer rows.Close()
 	return sql.ScanSlice(rows, v)
+}
+
+// Modify adds a query modifier for attaching custom logic to queries.
+func (scs *SkyConditionSelect) Modify(modifiers ...func(s *sql.Selector)) *SkyConditionSelect {
+	scs.modifiers = append(scs.modifiers, modifiers...)
+	return scs
 }

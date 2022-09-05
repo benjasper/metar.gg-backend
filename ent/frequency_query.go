@@ -26,8 +26,8 @@ type FrequencyQuery struct {
 	predicates  []predicate.Frequency
 	withAirport *AirportQuery
 	withFKs     bool
-	modifiers   []func(*sql.Selector)
 	loadTotal   []func(context.Context, []*Frequency) error
+	modifiers   []func(*sql.Selector)
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -513,6 +513,9 @@ func (fq *FrequencyQuery) sqlQuery(ctx context.Context) *sql.Selector {
 	if fq.unique != nil && *fq.unique {
 		selector.Distinct()
 	}
+	for _, m := range fq.modifiers {
+		m(selector)
+	}
 	for _, p := range fq.predicates {
 		p(selector)
 	}
@@ -528,6 +531,12 @@ func (fq *FrequencyQuery) sqlQuery(ctx context.Context) *sql.Selector {
 		selector.Limit(*limit)
 	}
 	return selector
+}
+
+// Modify adds a query modifier for attaching custom logic to queries.
+func (fq *FrequencyQuery) Modify(modifiers ...func(s *sql.Selector)) *FrequencySelect {
+	fq.modifiers = append(fq.modifiers, modifiers...)
+	return fq.Select()
 }
 
 // FrequencyGroupBy is the group-by builder for Frequency entities.
@@ -620,4 +629,10 @@ func (fs *FrequencySelect) sqlScan(ctx context.Context, v any) error {
 	}
 	defer rows.Close()
 	return sql.ScanSlice(rows, v)
+}
+
+// Modify adds a query modifier for attaching custom logic to queries.
+func (fs *FrequencySelect) Modify(modifiers ...func(s *sql.Selector)) *FrequencySelect {
+	fs.modifiers = append(fs.modifiers, modifiers...)
+	return fs
 }

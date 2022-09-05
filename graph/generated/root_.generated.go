@@ -54,6 +54,7 @@ type ComplexityRoot struct {
 		LocalCode        func(childComplexity int) int
 		Longitude        func(childComplexity int) int
 		Metars           func(childComplexity int, first *int) int
+		MetarsVicinity   func(childComplexity int, first *int) int
 		Municipality     func(childComplexity int) int
 		Name             func(childComplexity int) int
 		Region           func(childComplexity int) int
@@ -121,6 +122,11 @@ type ComplexityRoot struct {
 		WindDirection                         func(childComplexity int) int
 		WindGust                              func(childComplexity int) int
 		WindSpeed                             func(childComplexity int) int
+	}
+
+	MetarWithDistance struct {
+		Distance func(childComplexity int) int
+		Metar    func(childComplexity int) int
 	}
 
 	PageInfo struct {
@@ -288,6 +294,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Airport.Metars(childComplexity, args["first"].(*int)), true
+
+	case "Airport.metarsVicinity":
+		if e.complexity.Airport.MetarsVicinity == nil {
+			break
+		}
+
+		args, err := ec.field_Airport_metarsVicinity_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Airport.MetarsVicinity(childComplexity, args["first"].(*int)), true
 
 	case "Airport.municipality":
 		if e.complexity.Airport.Municipality == nil {
@@ -678,6 +696,20 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Metar.WindSpeed(childComplexity), true
+
+	case "MetarWithDistance.distance":
+		if e.complexity.MetarWithDistance.Distance == nil {
+			break
+		}
+
+		return e.complexity.MetarWithDistance.Distance(childComplexity), true
+
+	case "MetarWithDistance.metar":
+		if e.complexity.MetarWithDistance.Metar == nil {
+			break
+		}
+
+		return e.complexity.MetarWithDistance.Metar(childComplexity), true
 
 	case "PageInfo.endCursor":
 		if e.complexity.PageInfo.EndCursor == nil {
@@ -1181,9 +1213,15 @@ type Query {
     ): AirportConnection!
 }
 
+type MetarWithDistance {
+    distance: Float
+    metar: Metar
+}
+
 extend type Airport {
     runways(closed: Boolean): [Runway!]! @goField(forceResolver: true)
     metars(first: Int = 1): [Metar!]! @goField(forceResolver: true)
+    metarsVicinity(first: Int = 1): [MetarWithDistance!]! @goField(forceResolver: true)
 }`, BuiltIn: false},
 }
 var parsedSchema = gqlparser.MustLoadSchema(sources...)
