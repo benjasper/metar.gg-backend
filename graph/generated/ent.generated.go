@@ -1135,6 +1135,8 @@ func (ec *executionContext) fieldContext_Airport_metars(ctx context.Context, fie
 		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			switch field.Name {
+			case "stationID":
+				return ec.fieldContext_Metar_stationID(ctx, field)
 			case "rawText":
 				return ec.fieldContext_Metar_rawText(ctx, field)
 			case "observationTime":
@@ -1592,6 +1594,50 @@ func (ec *executionContext) fieldContext_Frequency_airport(ctx context.Context, 
 				return ec.fieldContext_Airport_metarsVicinity(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Airport", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Metar_stationID(ctx context.Context, field graphql.CollectedField, obj *ent.Metar) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Metar_stationID(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.StationID, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Metar_stationID(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Metar",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
 		},
 	}
 	return fc, nil
@@ -4197,6 +4243,8 @@ func (ec *executionContext) fieldContext_SkyCondition_metar(ctx context.Context,
 		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			switch field.Name {
+			case "stationID":
+				return ec.fieldContext_Metar_stationID(ctx, field)
 			case "rawText":
 				return ec.fieldContext_Metar_rawText(ctx, field)
 			case "observationTime":
@@ -4588,6 +4636,13 @@ func (ec *executionContext) _Metar(ctx context.Context, sel ast.SelectionSet, ob
 		switch field.Name {
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("Metar")
+		case "stationID":
+
+			out.Values[i] = ec._Metar_stationID(ctx, field, obj)
+
+			if out.Values[i] == graphql.Null {
+				atomic.AddUint32(&invalids, 1)
+			}
 		case "rawText":
 
 			out.Values[i] = ec._Metar_rawText(ctx, field, obj)

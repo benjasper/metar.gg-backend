@@ -17,6 +17,7 @@ type Metar struct {
 func (Metar) Fields() []ent.Field {
 	return []ent.Field{
 		field.Int("id").Annotations(entgql.Skip()),
+		field.String("station_id").Immutable().Comment("The ICAO identifier of the station that provided the METAR or identifier of the weather station."),
 		field.String("raw_text").Comment("The raw METAR text."),
 		field.Time("observation_time").Comment("The time the METAR was observed."),
 		field.Float("latitude").Optional().Nillable().Comment("The latitude in decimal degrees of the station."),
@@ -50,7 +51,7 @@ func (Metar) Fields() []ent.Field {
 		field.Float("precipitation_24").Optional().Nillable().Comment("The precipitation in inches from the past 24 hours. 0.0005 in = trace precipitation"),
 		field.Float("snow_depth").Optional().Nillable().Comment("The snow depth in inches."),
 		field.Float("vert_vis").Optional().Nillable().Comment("The vertical visibility in feet."),
-		field.Enum("metar_type").Values("METAR", "SPECI"),
+		field.Enum("metar_type").Values("METAR", "SPECI").Comment("The type of METAR."),
 		field.String("hash").Annotations(entgql.Skip()),
 	}
 }
@@ -58,8 +59,8 @@ func (Metar) Fields() []ent.Field {
 // Edges of the Metar.
 func (Metar) Edges() []ent.Edge {
 	return []ent.Edge{
-		edge.From("airport", Airport.Type).Ref("metars").Unique(),
-		edge.To("sky_conditions", SkyCondition.Type),
+		edge.From("airport", Airport.Type).Ref("metars").Unique().Comment("The airport that reported this metar. This can also be empty if the metar is from a weather station."),
+		edge.To("sky_conditions", SkyCondition.Type).Comment("The sky conditions."),
 	}
 }
 
@@ -67,6 +68,9 @@ func (Metar) Edges() []ent.Edge {
 func (Metar) Indexes() []ent.Index {
 	return []ent.Index{
 		index.Fields("observation_time"),
+		index.Fields("station_id"),
+		index.Fields("latitude"),
+		index.Fields("longitude"),
 	}
 }
 

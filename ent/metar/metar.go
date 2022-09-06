@@ -13,6 +13,8 @@ const (
 	Label = "metar"
 	// FieldID holds the string denoting the id field in the database.
 	FieldID = "id"
+	// FieldStationID holds the string denoting the station_id field in the database.
+	FieldStationID = "station_id"
 	// FieldRawText holds the string denoting the raw_text field in the database.
 	FieldRawText = "raw_text"
 	// FieldObservationTime holds the string denoting the observation_time field in the database.
@@ -108,6 +110,7 @@ const (
 // Columns holds all SQL columns for metar fields.
 var Columns = []string{
 	FieldID,
+	FieldStationID,
 	FieldRawText,
 	FieldObservationTime,
 	FieldLatitude,

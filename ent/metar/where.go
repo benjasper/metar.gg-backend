@@ -81,6 +81,13 @@ func IDLTE(id int) predicate.Metar {
 	})
 }
 
+// StationID applies equality check predicate on the "station_id" field. It's identical to StationIDEQ.
+func StationID(v string) predicate.Metar {
+	return predicate.Metar(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldStationID), v))
+	})
+}
+
 // RawText applies equality check predicate on the "raw_text" field. It's identical to RawTextEQ.
 func RawText(v string) predicate.Metar {
 	return predicate.Metar(func(s *sql.Selector) {
@@ -309,6 +316,105 @@ func VertVis(v float64) predicate.Metar {
 func Hash(v string) predicate.Metar {
 	return predicate.Metar(func(s *sql.Selector) {
 		s.Where(sql.EQ(s.C(FieldHash), v))
+	})
+}
+
+// StationIDEQ applies the EQ predicate on the "station_id" field.
+func StationIDEQ(v string) predicate.Metar {
+	return predicate.Metar(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldStationID), v))
+	})
+}
+
+// StationIDNEQ applies the NEQ predicate on the "station_id" field.
+func StationIDNEQ(v string) predicate.Metar {
+	return predicate.Metar(func(s *sql.Selector) {
+		s.Where(sql.NEQ(s.C(FieldStationID), v))
+	})
+}
+
+// StationIDIn applies the In predicate on the "station_id" field.
+func StationIDIn(vs ...string) predicate.Metar {
+	v := make([]any, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.Metar(func(s *sql.Selector) {
+		s.Where(sql.In(s.C(FieldStationID), v...))
+	})
+}
+
+// StationIDNotIn applies the NotIn predicate on the "station_id" field.
+func StationIDNotIn(vs ...string) predicate.Metar {
+	v := make([]any, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.Metar(func(s *sql.Selector) {
+		s.Where(sql.NotIn(s.C(FieldStationID), v...))
+	})
+}
+
+// StationIDGT applies the GT predicate on the "station_id" field.
+func StationIDGT(v string) predicate.Metar {
+	return predicate.Metar(func(s *sql.Selector) {
+		s.Where(sql.GT(s.C(FieldStationID), v))
+	})
+}
+
+// StationIDGTE applies the GTE predicate on the "station_id" field.
+func StationIDGTE(v string) predicate.Metar {
+	return predicate.Metar(func(s *sql.Selector) {
+		s.Where(sql.GTE(s.C(FieldStationID), v))
+	})
+}
+
+// StationIDLT applies the LT predicate on the "station_id" field.
+func StationIDLT(v string) predicate.Metar {
+	return predicate.Metar(func(s *sql.Selector) {
+		s.Where(sql.LT(s.C(FieldStationID), v))
+	})
+}
+
+// StationIDLTE applies the LTE predicate on the "station_id" field.
+func StationIDLTE(v string) predicate.Metar {
+	return predicate.Metar(func(s *sql.Selector) {
+		s.Where(sql.LTE(s.C(FieldStationID), v))
+	})
+}
+
+// StationIDContains applies the Contains predicate on the "station_id" field.
+func StationIDContains(v string) predicate.Metar {
+	return predicate.Metar(func(s *sql.Selector) {
+		s.Where(sql.Contains(s.C(FieldStationID), v))
+	})
+}
+
+// StationIDHasPrefix applies the HasPrefix predicate on the "station_id" field.
+func StationIDHasPrefix(v string) predicate.Metar {
+	return predicate.Metar(func(s *sql.Selector) {
+		s.Where(sql.HasPrefix(s.C(FieldStationID), v))
+	})
+}
+
+// StationIDHasSuffix applies the HasSuffix predicate on the "station_id" field.
+func StationIDHasSuffix(v string) predicate.Metar {
+	return predicate.Metar(func(s *sql.Selector) {
+		s.Where(sql.HasSuffix(s.C(FieldStationID), v))
+	})
+}
+
+// StationIDEqualFold applies the EqualFold predicate on the "station_id" field.
+func StationIDEqualFold(v string) predicate.Metar {
+	return predicate.Metar(func(s *sql.Selector) {
+		s.Where(sql.EqualFold(s.C(FieldStationID), v))
+	})
+}
+
+// StationIDContainsFold applies the ContainsFold predicate on the "station_id" field.
+func StationIDContainsFold(v string) predicate.Metar {
+	return predicate.Metar(func(s *sql.Selector) {
+		s.Where(sql.ContainsFold(s.C(FieldStationID), v))
 	})
 }
 

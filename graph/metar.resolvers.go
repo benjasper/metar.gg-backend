@@ -66,7 +66,7 @@ func (r *airportResolver) MetarsVicinity(ctx context.Context, obj *ent.Airport, 
 		s.Where(sql.ExprP(fmt.Sprintf("m2.id is null AND acos(sin(radians(%f)) * sin(radians(metars.latitude)) + cos(radians(%f)) * cos(radians(metars.latitude)) * cos(radians(metars.longitude) - radians(%f))) * %f < %f", obj.Latitude, obj.Latitude, obj.Longitude, R, radius)))
 		s.OrderExpr(sql.Expr("distance ASC"))
 		// TODO change to metar identifier
-		s.LeftJoin(t2).OnP(sql.ExprP("(metars.airport_metars = m2.airport_metars AND metars.observation_time > m2.observation_time)"))
+		s.LeftJoin(t2).OnP(sql.ExprP("(metars.station_id = m2.station_id AND metars.observation_time > m2.observation_time)"))
 	}).Limit(*first).Select("id").Scan(ctx, &metarsWithIDAndDistance)
 	if err != nil {
 		return nil, err

@@ -24,6 +24,12 @@ type MetarCreate struct {
 	conflict []sql.ConflictOption
 }
 
+// SetStationID sets the "station_id" field.
+func (mc *MetarCreate) SetStationID(s string) *MetarCreate {
+	mc.mutation.SetStationID(s)
+	return mc
+}
+
 // SetRawText sets the "raw_text" field.
 func (mc *MetarCreate) SetRawText(s string) *MetarCreate {
 	mc.mutation.SetRawText(s)
@@ -494,6 +500,9 @@ func (mc *MetarCreate) ExecX(ctx context.Context) {
 
 // check runs all checks and user-defined validators on the builder.
 func (mc *MetarCreate) check() error {
+	if _, ok := mc.mutation.StationID(); !ok {
+		return &ValidationError{Name: "station_id", err: errors.New(`ent: missing required field "Metar.station_id"`)}
+	}
 	if _, ok := mc.mutation.RawText(); !ok {
 		return &ValidationError{Name: "raw_text", err: errors.New(`ent: missing required field "Metar.raw_text"`)}
 	}
@@ -588,6 +597,14 @@ func (mc *MetarCreate) createSpec() (*Metar, *sqlgraph.CreateSpec) {
 	if id, ok := mc.mutation.ID(); ok {
 		_node.ID = id
 		_spec.ID.Value = id
+	}
+	if value, ok := mc.mutation.StationID(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: metar.FieldStationID,
+		})
+		_node.StationID = value
 	}
 	if value, ok := mc.mutation.RawText(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
@@ -915,7 +932,7 @@ func (mc *MetarCreate) createSpec() (*Metar, *sqlgraph.CreateSpec) {
 // of the `INSERT` statement. For example:
 //
 //	client.Metar.Create().
-//		SetRawText(v).
+//		SetStationID(v).
 //		OnConflict(
 //			// Update the row with the new values
 //			// the was proposed for insertion.
@@ -924,7 +941,7 @@ func (mc *MetarCreate) createSpec() (*Metar, *sqlgraph.CreateSpec) {
 //		// Override some of the fields with custom
 //		// update values.
 //		Update(func(u *ent.MetarUpsert) {
-//			SetRawText(v+v).
+//			SetStationID(v+v).
 //		}).
 //		Exec(ctx)
 func (mc *MetarCreate) OnConflict(opts ...sql.ConflictOption) *MetarUpsertOne {
@@ -1636,6 +1653,9 @@ func (u *MetarUpsertOne) UpdateNewValues() *MetarUpsertOne {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(s *sql.UpdateSet) {
 		if _, exists := u.create.mutation.ID(); exists {
 			s.SetIgnore(metar.FieldID)
+		}
+		if _, exists := u.create.mutation.StationID(); exists {
+			s.SetIgnore(metar.FieldStationID)
 		}
 	}))
 	return u
@@ -2568,7 +2588,7 @@ func (mcb *MetarCreateBulk) ExecX(ctx context.Context) {
 //		// Override some of the fields with custom
 //		// update values.
 //		Update(func(u *ent.MetarUpsert) {
-//			SetRawText(v+v).
+//			SetStationID(v+v).
 //		}).
 //		Exec(ctx)
 func (mcb *MetarCreateBulk) OnConflict(opts ...sql.ConflictOption) *MetarUpsertBulk {
@@ -2614,6 +2634,9 @@ func (u *MetarUpsertBulk) UpdateNewValues() *MetarUpsertBulk {
 		for _, b := range u.create.builders {
 			if _, exists := b.mutation.ID(); exists {
 				s.SetIgnore(metar.FieldID)
+			}
+			if _, exists := b.mutation.StationID(); exists {
+				s.SetIgnore(metar.FieldStationID)
 			}
 		}
 	}))

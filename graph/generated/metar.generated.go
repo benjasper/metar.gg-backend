@@ -474,6 +474,8 @@ func (ec *executionContext) fieldContext_MetarWithDistance_metar(ctx context.Con
 		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			switch field.Name {
+			case "stationID":
+				return ec.fieldContext_Metar_stationID(ctx, field)
 			case "rawText":
 				return ec.fieldContext_Metar_rawText(ctx, field)
 			case "observationTime":

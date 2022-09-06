@@ -70,6 +70,8 @@ type Frequency {
   airport: Airport
 }
 type Metar {
+  """The ICAO identifier of the station that provided the METAR or identifier of the weather station."""
+  stationID: String!
   """The raw METAR text."""
   rawText: String!
   """The time the METAR was observed."""

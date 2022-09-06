@@ -16,7 +16,9 @@ import (
 type Metar struct {
 	config `json:"-"`
 	// ID of the ent.
-	ID int `json:"id,omitempty" db:"-"`
+	ID int `json:"id,omitempty"`
+	// The ICAO identifier of the station that provided the METAR or identifier of the weather station.
+	StationID string `json:"station_id,omitempty"`
 	// The raw METAR text.
 	RawText string `json:"raw_text,omitempty"`
 	// The time the METAR was observed.
@@ -141,7 +143,7 @@ func (*Metar) scanValues(columns []string) ([]any, error) {
 			values[i] = new(sql.NullFloat64)
 		case metar.FieldID, metar.FieldWindSpeed, metar.FieldWindGust, metar.FieldWindDirection:
 			values[i] = new(sql.NullInt64)
-		case metar.FieldRawText, metar.FieldPresentWeather, metar.FieldFlightCategory, metar.FieldMetarType, metar.FieldHash:
+		case metar.FieldStationID, metar.FieldRawText, metar.FieldPresentWeather, metar.FieldFlightCategory, metar.FieldMetarType, metar.FieldHash:
 			values[i] = new(sql.NullString)
 		case metar.FieldObservationTime:
 			values[i] = new(sql.NullTime)
@@ -168,6 +170,12 @@ func (m *Metar) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field id", value)
 			}
 			m.ID = int(value.Int64)
+		case metar.FieldStationID:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field station_id", values[i])
+			} else if value.Valid {
+				m.StationID = value.String
+			}
 		case metar.FieldRawText:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field raw_text", values[i])
@@ -441,6 +449,9 @@ func (m *Metar) String() string {
 	var builder strings.Builder
 	builder.WriteString("Metar(")
 	builder.WriteString(fmt.Sprintf("id=%v, ", m.ID))
+	builder.WriteString("station_id=")
+	builder.WriteString(m.StationID)
+	builder.WriteString(", ")
 	builder.WriteString("raw_text=")
 	builder.WriteString(m.RawText)
 	builder.WriteString(", ")

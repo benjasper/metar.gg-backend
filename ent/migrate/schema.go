@@ -86,6 +86,7 @@ var (
 	// MetarsColumns holds the columns for the "metars" table.
 	MetarsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "station_id", Type: field.TypeString},
 		{Name: "raw_text", Type: field.TypeString},
 		{Name: "observation_time", Type: field.TypeTime},
 		{Name: "latitude", Type: field.TypeFloat64, Nullable: true},
@@ -131,7 +132,7 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "metars_airports_metars",
-				Columns:    []*schema.Column{MetarsColumns[36]},
+				Columns:    []*schema.Column{MetarsColumns[37]},
 				RefColumns: []*schema.Column{AirportsColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
@@ -140,7 +141,7 @@ var (
 			{
 				Name:    "metar_observation_time",
 				Unique:  false,
-				Columns: []*schema.Column{MetarsColumns[2]},
+				Columns: []*schema.Column{MetarsColumns[3]},
 			},
 		},
 	}

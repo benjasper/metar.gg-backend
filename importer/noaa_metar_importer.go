@@ -153,9 +153,9 @@ func (i *NoaaMetarImporter) ImportMetars(url string, ctx context.Context) error 
 }
 
 func (i *NoaaMetarImporter) importMetar(x *XmlMetar, ctx context.Context) error {
-	a, err := i.db.Airport.Query().Where(airport.Identifier(x.StationId)).Only(ctx)
-	if err != nil {
-		i.logger.Warn(fmt.Sprintf("Could not find airport with identifier %s", x.StationId))
+	a, _ := i.db.Airport.Query().Where(airport.Identifier(x.StationId)).Only(ctx)
+	if x.StationId == "" {
+		i.logger.Error(fmt.Sprintf("Could not find airport with identifier %s and metar %s", x.StationId, x.RawText))
 		return nil
 	}
 
@@ -168,7 +168,7 @@ func (i *NoaaMetarImporter) importMetar(x *XmlMetar, ctx context.Context) error 
 	hash := x.Hash()
 
 	// Check if m already exists
-	_, err = i.db.Metar.Query().Where(metar.Hash(hash)).First(ctx)
+	_, err := i.db.Metar.Query().Where(metar.Hash(hash)).First(ctx)
 	if err == nil {
 		// Metar already exists
 		return nil
@@ -201,8 +201,8 @@ func (i *NoaaMetarImporter) importMetar(x *XmlMetar, ctx context.Context) error 
 		metarType = metar.MetarTypeSPECI
 	}
 
-	m, err := transaction.Metar.Create().
-		SetAirport(a).
+	t := transaction.Metar.Create().
+		SetStationID(x.StationId).
 		SetRawText(x.RawText).
 		SetObservationTime(x.ObservationTime).
 		SetNillableLatitude(x.Latitude).
@@ -237,9 +237,13 @@ func (i *NoaaMetarImporter) importMetar(x *XmlMetar, ctx context.Context) error 
 		SetNillableVertVis(x.VertVisFt).
 		SetMetarType(metarType).
 		SetNillableElevation(x.Elevation).
-		SetHash(hash).
-		Save(ctx)
+		SetHash(hash)
 
+	if a != nil {
+		t.SetAirportID(a.ID)
+	}
+
+	m, err := t.Save(ctx)
 	if err != nil {
 		return err
 	}
@@ -286,7 +290,7 @@ func (i *NoaaMetarImporter) importMetar(x *XmlMetar, ctx context.Context) error 
 		}
 	}
 
-	if a.HasWeather == false {
+	if a != nil && a.HasWeather == false {
 		err = transaction.Airport.Update().Where(airport.ID(a.ID)).SetHasWeather(true).Exec(ctx)
 		if err != nil {
 			return err

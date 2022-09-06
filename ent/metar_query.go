@@ -330,12 +330,12 @@ func (mq *MetarQuery) WithSkyConditions(opts ...func(*SkyConditionQuery)) *Metar
 // Example:
 //
 //	var v []struct {
-//		RawText string `json:"raw_text,omitempty"`
+//		StationID string `json:"station_id,omitempty"`
 //		Count int `json:"count,omitempty"`
 //	}
 //
 //	client.Metar.Query().
-//		GroupBy(metar.FieldRawText).
+//		GroupBy(metar.FieldStationID).
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
 func (mq *MetarQuery) GroupBy(field string, fields ...string) *MetarGroupBy {
@@ -358,11 +358,11 @@ func (mq *MetarQuery) GroupBy(field string, fields ...string) *MetarGroupBy {
 // Example:
 //
 //	var v []struct {
-//		RawText string `json:"raw_text,omitempty"`
+//		StationID string `json:"station_id,omitempty"`
 //	}
 //
 //	client.Metar.Query().
-//		Select(metar.FieldRawText).
+//		Select(metar.FieldStationID).
 //		Scan(ctx, &v)
 func (mq *MetarQuery) Select(fields ...string) *MetarSelect {
 	mq.fields = append(mq.fields, fields...)

@@ -116,6 +116,7 @@ type ComplexityRoot struct {
 		SeaLevelPressure                      func(childComplexity int) int
 		SkyConditions                         func(childComplexity int) int
 		SnowDepth                             func(childComplexity int) int
+		StationID                             func(childComplexity int) int
 		Temperature                           func(childComplexity int) int
 		VertVis                               func(childComplexity int) int
 		Visibility                            func(childComplexity int) int
@@ -655,6 +656,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Metar.SnowDepth(childComplexity), true
 
+	case "Metar.stationID":
+		if e.complexity.Metar.StationID == nil {
+			break
+		}
+
+		return e.complexity.Metar.StationID(childComplexity), true
+
 	case "Metar.temperature":
 		if e.complexity.Metar.Temperature == nil {
 			break
@@ -1036,6 +1044,8 @@ type Frequency {
   airport: Airport
 }
 type Metar {
+  """The ICAO identifier of the station that provided the METAR or identifier of the weather station."""
+  stationID: String!
   """The raw METAR text."""
   rawText: String!
   """The time the METAR was observed."""
