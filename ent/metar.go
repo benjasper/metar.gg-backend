@@ -85,7 +85,7 @@ type Metar struct {
 	SnowDepth *float64 `json:"snow_depth,omitempty"`
 	// The vertical visibility in feet.
 	VertVis *float64 `json:"vert_vis,omitempty"`
-	// MetarType holds the value of the "metar_type" field.
+	// The type of METAR.
 	MetarType metar.MetarType `json:"metar_type,omitempty"`
 	// Hash holds the value of the "hash" field.
 	Hash string `json:"hash,omitempty"`
@@ -97,9 +97,9 @@ type Metar struct {
 
 // MetarEdges holds the relations/edges for other nodes in the graph.
 type MetarEdges struct {
-	// Airport holds the value of the airport edge.
+	// The airport that reported this metar. This can also be empty if the metar is from a weather station.
 	Airport *Airport `json:"airport,omitempty"`
-	// SkyConditions holds the value of the sky_conditions edge.
+	// The sky conditions.
 	SkyConditions []*SkyCondition `json:"sky_conditions,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.

@@ -54,7 +54,7 @@ type ComplexityRoot struct {
 		LocalCode        func(childComplexity int) int
 		Longitude        func(childComplexity int) int
 		Metars           func(childComplexity int, first *int) int
-		MetarsVicinity   func(childComplexity int, first *int) int
+		MetarsVicinity   func(childComplexity int, first *int, radius *float64) int
 		Municipality     func(childComplexity int) int
 		Name             func(childComplexity int) int
 		Region           func(childComplexity int) int
@@ -306,7 +306,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Airport.MetarsVicinity(childComplexity, args["first"].(*int)), true
+		return e.complexity.Airport.MetarsVicinity(childComplexity, args["first"].(*int), args["radius"].(*float64)), true
 
 	case "Airport.municipality":
 		if e.complexity.Airport.Municipality == nil {
@@ -993,7 +993,7 @@ type Airport {
   continent: AirportContinent!
   country: String!
   region: String!
-  """Whether the airport has weather reporting and a metar is available."""
+  """Whether the airport has weather reporting and a metar by the airport is available."""
   hasWeather: Boolean!
   """The primary municipality that the airport serves (when available). Note that this is not necessarily the municipality where the airport is physically located."""
   municipality: String
@@ -1111,6 +1111,7 @@ type Metar {
   snowDepth: Float
   """The vertical visibility in feet."""
   vertVis: Float
+  """The type of METAR."""
   metarType: MetarMetarType!
   airport: Airport
   skyConditions: [SkyCondition!]
@@ -1229,9 +1230,14 @@ type MetarWithDistance {
 }
 
 extend type Airport {
+    """Returns all Runways for this Airport They can be filtered with the closed parameter."""
     runways(closed: Boolean): [Runway!]! @goField(forceResolver: true)
+
+    """Returns last METARs reported by this airport."""
     metars(first: Int = 1): [Metar!]! @goField(forceResolver: true)
-    metarsVicinity(first: Int = 1): [MetarWithDistance!]! @goField(forceResolver: true)
+
+    """Returns the closest METAR to the airport, within the given radius (in km)."""
+    metarsVicinity(first: Int = 1, radius: Float = 50.0): [MetarWithDistance!]! @goField(forceResolver: true)
 }`, BuiltIn: false},
 }
 var parsedSchema = gqlparser.MustLoadSchema(sources...)

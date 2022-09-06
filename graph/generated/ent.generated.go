@@ -25,7 +25,7 @@ import (
 type AirportResolver interface {
 	Runways(ctx context.Context, obj *ent.Airport, closed *bool) ([]*ent.Runway, error)
 	Metars(ctx context.Context, obj *ent.Airport, first *int) ([]*ent.Metar, error)
-	MetarsVicinity(ctx context.Context, obj *ent.Airport, first *int) ([]*model.MetarWithDistance, error)
+	MetarsVicinity(ctx context.Context, obj *ent.Airport, first *int, radius *float64) ([]*model.MetarWithDistance, error)
 }
 
 // endregion ************************** generated!.gotpl **************************
@@ -44,6 +44,15 @@ func (ec *executionContext) field_Airport_metarsVicinity_args(ctx context.Contex
 		}
 	}
 	args["first"] = arg0
+	var arg1 *float64
+	if tmp, ok := rawArgs["radius"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("radius"))
+		arg1, err = ec.unmarshalOFloat2ᚖfloat64(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["radius"] = arg1
 	return args, nil
 }
 
@@ -1241,7 +1250,7 @@ func (ec *executionContext) _Airport_metarsVicinity(ctx context.Context, field g
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Airport().MetarsVicinity(rctx, obj, fc.Args["first"].(*int))
+		return ec.resolvers.Airport().MetarsVicinity(rctx, obj, fc.Args["first"].(*int), fc.Args["radius"].(*float64))
 	})
 	if err != nil {
 		ec.Error(ctx, err)

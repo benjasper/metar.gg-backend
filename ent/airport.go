@@ -41,7 +41,7 @@ type Airport struct {
 	Country string `json:"country,omitempty"`
 	// Region holds the value of the "region" field.
 	Region string `json:"region,omitempty"`
-	// Whether the airport has weather reporting and a metar is available.
+	// Whether the airport has weather reporting and a metar by the airport is available.
 	HasWeather bool `json:"has_weather,omitempty"`
 	// The primary municipality that the airport serves (when available). Note that this is not necessarily the municipality where the airport is physically located.
 	Municipality *string `json:"municipality,omitempty"`

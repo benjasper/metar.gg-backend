@@ -89,5 +89,5 @@ func (i *ImportStatistics) End() {
 }
 
 func (i *ImportStatistics) logStats() string {
-	return fmt.Sprintf("[IMPORT] Report for %s import: %d available form import, %d updated, %d deleted. Time: %s", i.name, i.total, i.updated, i.deleted, i.endTime.Sub(i.startTime))
+	return fmt.Sprintf("[IMPORT] Report for %s import: %d available for import, %d updated, %d deleted. Time: %s", i.name, i.total, i.updated, i.deleted, i.endTime.Sub(i.startTime))
 }

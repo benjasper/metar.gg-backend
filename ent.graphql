@@ -19,7 +19,7 @@ type Airport {
   continent: AirportContinent!
   country: String!
   region: String!
-  """Whether the airport has weather reporting and a metar is available."""
+  """Whether the airport has weather reporting and a metar by the airport is available."""
   hasWeather: Boolean!
   """The primary municipality that the airport serves (when available). Note that this is not necessarily the municipality where the airport is physically located."""
   municipality: String
@@ -137,6 +137,7 @@ type Metar {
   snowDepth: Float
   """The vertical visibility in feet."""
   vertVis: Float
+  """The type of METAR."""
   metarType: MetarMetarType!
   airport: Airport
   skyConditions: [SkyCondition!]

@@ -5,10 +5,8 @@ package graph
 
 import (
 	"context"
-	"fmt"
-	"math"
-
 	"entgo.io/ent/dialect/sql"
+	"fmt"
 	"metar.gg/ent"
 	"metar.gg/ent/airport"
 	"metar.gg/ent/metar"
@@ -16,7 +14,6 @@ import (
 	"metar.gg/ent/runway"
 	"metar.gg/graph/generated"
 	"metar.gg/graph/model"
-	"metar.gg/utils"
 )
 
 // Runways is the resolver for the runways field.
@@ -43,17 +40,20 @@ func (r *airportResolver) Metars(ctx context.Context, obj *ent.Airport, first *i
 }
 
 // MetarsVicinity is the resolver for the metarsVicinity field.
-func (r *airportResolver) MetarsVicinity(ctx context.Context, obj *ent.Airport, first *int) ([]*model.MetarWithDistance, error) {
-	const R = 6371.0 // km
+func (r *airportResolver) MetarsVicinity(ctx context.Context, obj *ent.Airport, first *int, radius *float64) ([]*model.MetarWithDistance, error) {
+	if radius == nil || *radius == 0 {
+		*radius = 50.0
+	}
 
-	radius := 40.0
+	if radius != nil && *radius > 500.0 {
+		return nil, fmt.Errorf("radius must be less than 500km")
+	}
 
-	maxLat := obj.Latitude + utils.RadiansToDegrees(radius/R)
-	minLat := obj.Latitude - utils.RadiansToDegrees(radius/R)
-	maxLon := obj.Longitude + utils.RadiansToDegrees(math.Asin(radius/R)/math.Cos(utils.DegreesToRadians(obj.Latitude)))
-	minLon := obj.Longitude - utils.RadiansToDegrees(math.Asin(radius/R)/math.Cos(utils.DegreesToRadians(obj.Latitude)))
+	minLat, maxLat, minLon, maxLon := GetMinMaxLatLongForGeoQuery(obj.Latitude, obj.Longitude, *radius)
 
-	var metarsWithIDAndDistance []*MetarWithDistance
+	geoSQLQuery := GetGeoQuerySQL(obj.Latitude, obj.Longitude, "metars.latitude", "metars.longitude")
+
+	var metarsWithIDAndDistance []*model.MetarWithDistanceUnstructured
 
 	err := r.client.Metar.Query().Where(
 		metar.LatitudeLTE(maxLat), metar.LatitudeGTE(minLat), metar.LongitudeLTE(maxLon), metar.LongitudeGTE(minLon),
@@ -62,10 +62,9 @@ func (r *airportResolver) MetarsVicinity(ctx context.Context, obj *ent.Airport, 
 		t2 := sql.Table(metar.Table).As("m2")
 
 		s.From(t1)
-		s.AppendSelect(fmt.Sprintf("acos(sin(radians(%f)) * sin(radians(metars.latitude)) + cos(radians(%f)) * cos(radians(metars.latitude)) * cos(radians(metars.longitude) - radians(%f))) * %f as distance", obj.Latitude, obj.Latitude, obj.Longitude, R))
-		s.Where(sql.ExprP(fmt.Sprintf("m2.id is null AND acos(sin(radians(%f)) * sin(radians(metars.latitude)) + cos(radians(%f)) * cos(radians(metars.latitude)) * cos(radians(metars.longitude) - radians(%f))) * %f < %f", obj.Latitude, obj.Latitude, obj.Longitude, R, radius)))
+		s.AppendSelect(fmt.Sprintf("%s as distance", geoSQLQuery))
+		s.Where(sql.ExprP(fmt.Sprintf("m2.id is null AND %s < %f", geoSQLQuery, *radius)))
 		s.OrderExpr(sql.Expr("distance ASC"))
-		// TODO change to metar identifier
 		s.LeftJoin(t2).OnP(sql.ExprP("(metars.station_id = m2.station_id AND metars.observation_time > m2.observation_time)"))
 	}).Limit(*first).Select("id").Scan(ctx, &metarsWithIDAndDistance)
 	if err != nil {
@@ -83,10 +82,10 @@ func (r *airportResolver) MetarsVicinity(ctx context.Context, obj *ent.Airport, 
 		return nil, err
 	}
 
-	// Create a map of id -> metar
+	// Create a map of id -> m
 	metarsMap := make(map[int]*ent.Metar)
-	for _, metar := range metars {
-		metarsMap[metar.ID] = metar
+	for _, m := range metars {
+		metarsMap[m.ID] = m
 	}
 
 	// Map the results to the model
@@ -138,15 +137,3 @@ func (r *queryResolver) GetAirports(ctx context.Context, after *ent.Cursor, firs
 func (r *Resolver) Query() generated.QueryResolver { return &queryResolver{r} }
 
 type queryResolver struct{ *Resolver }
-
-// !!! WARNING !!!
-// The code below was going to be deleted when updating resolvers. It has been copied here so you have
-// one last chance to move it out of harms way if you want. There are two reasons this happens:
-//   - When renaming or deleting a resolver the old code will be put in here. You can safely delete
-//     it when you're done.
-//   - You have helper methods in this file. Move them out to keep these resolver files clean.
-type MetarWithDistance struct {
-	ID            int     `json:"id"`
-	Distance      float64 `json:"distance"`
-	AirportMetars int     `json:"airport_metars"`
-}

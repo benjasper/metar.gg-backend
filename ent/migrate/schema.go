@@ -143,6 +143,21 @@ var (
 				Unique:  false,
 				Columns: []*schema.Column{MetarsColumns[3]},
 			},
+			{
+				Name:    "metar_station_id",
+				Unique:  false,
+				Columns: []*schema.Column{MetarsColumns[1]},
+			},
+			{
+				Name:    "metar_latitude",
+				Unique:  false,
+				Columns: []*schema.Column{MetarsColumns[4]},
+			},
+			{
+				Name:    "metar_longitude",
+				Unique:  false,
+				Columns: []*schema.Column{MetarsColumns[5]},
+			},
 		},
 	}
 	// RunwaysColumns holds the columns for the "runways" table.
