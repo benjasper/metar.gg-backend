@@ -24,7 +24,7 @@ import (
 
 type AirportResolver interface {
 	Runways(ctx context.Context, obj *ent.Airport, closed *bool) ([]*ent.Runway, error)
-	Metars(ctx context.Context, obj *ent.Airport, first *int) ([]*ent.Metar, error)
+	Metars(ctx context.Context, obj *ent.Airport, after *ent.Cursor, first *int, before *ent.Cursor, last *int) (*ent.MetarConnection, error)
 	MetarsVicinity(ctx context.Context, obj *ent.Airport, first *int, radius *float64) ([]*model.MetarWithDistance, error)
 }
 
@@ -59,15 +59,42 @@ func (ec *executionContext) field_Airport_metarsVicinity_args(ctx context.Contex
 func (ec *executionContext) field_Airport_metars_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 *int
-	if tmp, ok := rawArgs["first"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("first"))
-		arg0, err = ec.unmarshalOInt2ᚖint(ctx, tmp)
+	var arg0 *ent.Cursor
+	if tmp, ok := rawArgs["after"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("after"))
+		arg0, err = ec.unmarshalOCursor2ᚖmetarᚗggᚋentᚐCursor(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["first"] = arg0
+	args["after"] = arg0
+	var arg1 *int
+	if tmp, ok := rawArgs["first"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("first"))
+		arg1, err = ec.unmarshalOInt2ᚖint(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["first"] = arg1
+	var arg2 *ent.Cursor
+	if tmp, ok := rawArgs["before"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("before"))
+		arg2, err = ec.unmarshalOCursor2ᚖmetarᚗggᚋentᚐCursor(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["before"] = arg2
+	var arg3 *int
+	if tmp, ok := rawArgs["last"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("last"))
+		arg3, err = ec.unmarshalOInt2ᚖint(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["last"] = arg3
 	return args, nil
 }
 
@@ -1119,7 +1146,7 @@ func (ec *executionContext) _Airport_metars(ctx context.Context, field graphql.C
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Airport().Metars(rctx, obj, fc.Args["first"].(*int))
+		return ec.resolvers.Airport().Metars(rctx, obj, fc.Args["after"].(*ent.Cursor), fc.Args["first"].(*int), fc.Args["before"].(*ent.Cursor), fc.Args["last"].(*int))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -1131,9 +1158,9 @@ func (ec *executionContext) _Airport_metars(ctx context.Context, field graphql.C
 		}
 		return graphql.Null
 	}
-	res := resTmp.([]*ent.Metar)
+	res := resTmp.(*ent.MetarConnection)
 	fc.Result = res
-	return ec.marshalNMetar2ᚕᚖmetarᚗggᚋentᚐMetarᚄ(ctx, field.Selections, res)
+	return ec.marshalNMetarConnection2ᚖmetarᚗggᚋentᚐMetarConnection(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Airport_metars(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -1144,82 +1171,14 @@ func (ec *executionContext) fieldContext_Airport_metars(ctx context.Context, fie
 		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			switch field.Name {
-			case "stationID":
-				return ec.fieldContext_Metar_stationID(ctx, field)
-			case "rawText":
-				return ec.fieldContext_Metar_rawText(ctx, field)
-			case "observationTime":
-				return ec.fieldContext_Metar_observationTime(ctx, field)
-			case "latitude":
-				return ec.fieldContext_Metar_latitude(ctx, field)
-			case "longitude":
-				return ec.fieldContext_Metar_longitude(ctx, field)
-			case "elevation":
-				return ec.fieldContext_Metar_elevation(ctx, field)
-			case "temperature":
-				return ec.fieldContext_Metar_temperature(ctx, field)
-			case "dewpoint":
-				return ec.fieldContext_Metar_dewpoint(ctx, field)
-			case "windSpeed":
-				return ec.fieldContext_Metar_windSpeed(ctx, field)
-			case "windGust":
-				return ec.fieldContext_Metar_windGust(ctx, field)
-			case "windDirection":
-				return ec.fieldContext_Metar_windDirection(ctx, field)
-			case "visibility":
-				return ec.fieldContext_Metar_visibility(ctx, field)
-			case "altimeter":
-				return ec.fieldContext_Metar_altimeter(ctx, field)
-			case "presentWeather":
-				return ec.fieldContext_Metar_presentWeather(ctx, field)
-			case "flightCategory":
-				return ec.fieldContext_Metar_flightCategory(ctx, field)
-			case "qualityControlCorrected":
-				return ec.fieldContext_Metar_qualityControlCorrected(ctx, field)
-			case "qualityControlAutoStation":
-				return ec.fieldContext_Metar_qualityControlAutoStation(ctx, field)
-			case "qualityControlMaintenanceIndicatorOn":
-				return ec.fieldContext_Metar_qualityControlMaintenanceIndicatorOn(ctx, field)
-			case "qualityControlNoSignal":
-				return ec.fieldContext_Metar_qualityControlNoSignal(ctx, field)
-			case "qualityControlLightningSensorOff":
-				return ec.fieldContext_Metar_qualityControlLightningSensorOff(ctx, field)
-			case "qualityControlFreezingRainSensorOff":
-				return ec.fieldContext_Metar_qualityControlFreezingRainSensorOff(ctx, field)
-			case "qualityControlPresentWeatherSensorOff":
-				return ec.fieldContext_Metar_qualityControlPresentWeatherSensorOff(ctx, field)
-			case "seaLevelPressure":
-				return ec.fieldContext_Metar_seaLevelPressure(ctx, field)
-			case "pressureTendency":
-				return ec.fieldContext_Metar_pressureTendency(ctx, field)
-			case "maxTemp6":
-				return ec.fieldContext_Metar_maxTemp6(ctx, field)
-			case "minTemp6":
-				return ec.fieldContext_Metar_minTemp6(ctx, field)
-			case "maxTemp24":
-				return ec.fieldContext_Metar_maxTemp24(ctx, field)
-			case "minTemp24":
-				return ec.fieldContext_Metar_minTemp24(ctx, field)
-			case "precipitation":
-				return ec.fieldContext_Metar_precipitation(ctx, field)
-			case "precipitation3":
-				return ec.fieldContext_Metar_precipitation3(ctx, field)
-			case "precipitation6":
-				return ec.fieldContext_Metar_precipitation6(ctx, field)
-			case "precipitation24":
-				return ec.fieldContext_Metar_precipitation24(ctx, field)
-			case "snowDepth":
-				return ec.fieldContext_Metar_snowDepth(ctx, field)
-			case "vertVis":
-				return ec.fieldContext_Metar_vertVis(ctx, field)
-			case "metarType":
-				return ec.fieldContext_Metar_metarType(ctx, field)
-			case "airport":
-				return ec.fieldContext_Metar_airport(ctx, field)
-			case "skyConditions":
-				return ec.fieldContext_Metar_skyConditions(ctx, field)
+			case "totalCount":
+				return ec.fieldContext_MetarConnection_totalCount(ctx, field)
+			case "pageInfo":
+				return ec.fieldContext_MetarConnection_pageInfo(ctx, field)
+			case "edges":
+				return ec.fieldContext_MetarConnection_edges(ctx, field)
 			}
-			return nil, fmt.Errorf("no field named %q was found under type Metar", field.Name)
+			return nil, fmt.Errorf("no field named %q was found under type MetarConnection", field.Name)
 		},
 	}
 	defer func() {
@@ -5113,50 +5072,6 @@ func (ec *executionContext) marshalNFrequency2ᚖmetarᚗggᚋentᚐFrequency(ct
 		return graphql.Null
 	}
 	return ec._Frequency(ctx, sel, v)
-}
-
-func (ec *executionContext) marshalNMetar2ᚕᚖmetarᚗggᚋentᚐMetarᚄ(ctx context.Context, sel ast.SelectionSet, v []*ent.Metar) graphql.Marshaler {
-	ret := make(graphql.Array, len(v))
-	var wg sync.WaitGroup
-	isLen1 := len(v) == 1
-	if !isLen1 {
-		wg.Add(len(v))
-	}
-	for i := range v {
-		i := i
-		fc := &graphql.FieldContext{
-			Index:  &i,
-			Result: &v[i],
-		}
-		ctx := graphql.WithFieldContext(ctx, fc)
-		f := func(i int) {
-			defer func() {
-				if r := recover(); r != nil {
-					ec.Error(ctx, ec.Recover(ctx, r))
-					ret = nil
-				}
-			}()
-			if !isLen1 {
-				defer wg.Done()
-			}
-			ret[i] = ec.marshalNMetar2ᚖmetarᚗggᚋentᚐMetar(ctx, sel, v[i])
-		}
-		if isLen1 {
-			f(i)
-		} else {
-			go f(i)
-		}
-
-	}
-	wg.Wait()
-
-	for _, e := range ret {
-		if e == graphql.Null {
-			return graphql.Null
-		}
-	}
-
-	return ret
 }
 
 func (ec *executionContext) marshalNMetar2ᚖmetarᚗggᚋentᚐMetar(ctx context.Context, sel ast.SelectionSet, v *ent.Metar) graphql.Marshaler {

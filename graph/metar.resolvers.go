@@ -5,8 +5,9 @@ package graph
 
 import (
 	"context"
-	"entgo.io/ent/dialect/sql"
 	"fmt"
+
+	"entgo.io/ent/dialect/sql"
 	"metar.gg/ent"
 	"metar.gg/ent/airport"
 	"metar.gg/ent/metar"
@@ -27,16 +28,15 @@ func (r *airportResolver) Runways(ctx context.Context, obj *ent.Airport, closed 
 }
 
 // Metars is the resolver for the metars field.
-func (r *airportResolver) Metars(ctx context.Context, obj *ent.Airport, first *int) ([]*ent.Metar, error) {
-	if first == nil {
-		*first = 1
+func (r *airportResolver) Metars(ctx context.Context, obj *ent.Airport, after *ent.Cursor, first *int, before *ent.Cursor, last *int) (*ent.MetarConnection, error) {
+	first, last = BoundsForPagination(first, last)
+
+	m, err := obj.QueryMetars().Order(ent.Desc(metar.FieldObservationTime)).Paginate(ctx, after, first, before, last)
+	if err != nil {
+		return nil, err
 	}
 
-	if (*first) > 12 {
-		*first = 12
-	}
-
-	return obj.QueryMetars().Order(ent.Desc(metar.FieldObservationTime)).Limit(*first).All(ctx)
+	return m, nil
 }
 
 // MetarsVicinity is the resolver for the metarsVicinity field.
@@ -73,8 +73,8 @@ func (r *airportResolver) MetarsVicinity(ctx context.Context, obj *ent.Airport, 
 
 	// Get all ids of metarsWithIDAndDistance
 	var ids []int
-	for _, metar := range metarsWithIDAndDistance {
-		ids = append(ids, metar.ID)
+	for _, m := range metarsWithIDAndDistance {
+		ids = append(ids, m.ID)
 	}
 
 	metars, err := r.client.Metar.Query().Where(metar.IDIn(ids...)).All(ctx)
@@ -102,17 +102,7 @@ func (r *airportResolver) MetarsVicinity(ctx context.Context, obj *ent.Airport, 
 
 // GetAirports is the resolver for the getAirports field.
 func (r *queryResolver) GetAirports(ctx context.Context, after *ent.Cursor, first *int, before *ent.Cursor, last *int, identifier *string, hasWeather *bool) (*ent.AirportConnection, error) {
-	if first == nil && last == nil {
-		*first = 10
-	}
-
-	if first != nil && *first > 10 {
-		*first = 10
-	}
-
-	if last != nil && *last > 10 {
-		*last = 10
-	}
+	first, last = BoundsForPagination(first, last)
 
 	var where []predicate.Airport
 	if identifier != nil {

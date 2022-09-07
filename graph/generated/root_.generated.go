@@ -53,7 +53,7 @@ type ComplexityRoot struct {
 		Latitude         func(childComplexity int) int
 		LocalCode        func(childComplexity int) int
 		Longitude        func(childComplexity int) int
-		Metars           func(childComplexity int, first *int) int
+		Metars           func(childComplexity int, after *ent.Cursor, first *int, before *ent.Cursor, last *int) int
 		MetarsVicinity   func(childComplexity int, first *int, radius *float64) int
 		Municipality     func(childComplexity int) int
 		Name             func(childComplexity int) int
@@ -123,6 +123,17 @@ type ComplexityRoot struct {
 		WindDirection                         func(childComplexity int) int
 		WindGust                              func(childComplexity int) int
 		WindSpeed                             func(childComplexity int) int
+	}
+
+	MetarConnection struct {
+		Edges      func(childComplexity int) int
+		PageInfo   func(childComplexity int) int
+		TotalCount func(childComplexity int) int
+	}
+
+	MetarEdge struct {
+		Cursor func(childComplexity int) int
+		Node   func(childComplexity int) int
 	}
 
 	MetarWithDistance struct {
@@ -294,7 +305,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Airport.Metars(childComplexity, args["first"].(*int)), true
+		return e.complexity.Airport.Metars(childComplexity, args["after"].(*ent.Cursor), args["first"].(*int), args["before"].(*ent.Cursor), args["last"].(*int)), true
 
 	case "Airport.metarsVicinity":
 		if e.complexity.Airport.MetarsVicinity == nil {
@@ -704,6 +715,41 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Metar.WindSpeed(childComplexity), true
+
+	case "MetarConnection.edges":
+		if e.complexity.MetarConnection.Edges == nil {
+			break
+		}
+
+		return e.complexity.MetarConnection.Edges(childComplexity), true
+
+	case "MetarConnection.pageInfo":
+		if e.complexity.MetarConnection.PageInfo == nil {
+			break
+		}
+
+		return e.complexity.MetarConnection.PageInfo(childComplexity), true
+
+	case "MetarConnection.totalCount":
+		if e.complexity.MetarConnection.TotalCount == nil {
+			break
+		}
+
+		return e.complexity.MetarConnection.TotalCount(childComplexity), true
+
+	case "MetarEdge.cursor":
+		if e.complexity.MetarEdge.Cursor == nil {
+			break
+		}
+
+		return e.complexity.MetarEdge.Cursor(childComplexity), true
+
+	case "MetarEdge.node":
+		if e.complexity.MetarEdge.Node == nil {
+			break
+		}
+
+		return e.complexity.MetarEdge.Node(childComplexity), true
 
 	case "MetarWithDistance.distance":
 		if e.complexity.MetarWithDistance.Distance == nil {
@@ -1213,6 +1259,17 @@ type AirportEdge {
     cursor: Cursor!
 }
 
+type MetarConnection {
+    totalCount: Int!
+    pageInfo: PageInfo!
+    edges: [MetarEdge!]!
+}
+
+type MetarEdge {
+    node: Metar!
+    cursor: Cursor!
+}
+
 type Query {
     getAirports(
         after: Cursor
@@ -1230,11 +1287,11 @@ type MetarWithDistance {
 }
 
 extend type Airport {
-    """Returns all Runways for this Airport They can be filtered with the closed parameter."""
+    """Returns all Runways for this Airport. They can be filtered with the closed parameter."""
     runways(closed: Boolean): [Runway!]! @goField(forceResolver: true)
 
     """Returns last METARs reported by this airport."""
-    metars(first: Int = 1): [Metar!]! @goField(forceResolver: true)
+    metars(after: Cursor, first: Int, before: Cursor, last: Int): MetarConnection! @goField(forceResolver: true)
 
     """Returns the closest METAR to the airport, within the given radius (in km)."""
     metarsVicinity(first: Int = 1, radius: Float = 50.0): [MetarWithDistance!]! @goField(forceResolver: true)

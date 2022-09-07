@@ -25,3 +25,33 @@ func GetMinMaxLatLongForGeoQuery(latitude float64, longitude float64, distance f
 func GetGeoQuerySQL(latitude float64, longitude float64, latitudeField string, longitudeField string) string {
 	return fmt.Sprintf("acos(sin(radians(%f)) * sin(radians(%s)) + cos(radians(%f)) * cos(radians(%s)) * cos(radians(%s) - radians(%f))) * %f", latitude, latitudeField, latitude, latitudeField, longitudeField, longitude, R)
 }
+
+// BoundsForPagination for first and last arguments
+func BoundsForPagination(first *int, last *int) (*int, *int) {
+	if first == nil && last == nil {
+		first = Pointer(5)
+		return first, last
+	}
+
+	if first != nil && *first < 0 {
+		first = Pointer(5)
+	}
+
+	if last != nil && *last < 0 {
+		last = Pointer(5)
+	}
+
+	if first != nil && *first > 10 {
+		first = Pointer(10)
+	}
+
+	if last != nil && *last > 10 {
+		last = Pointer(10)
+	}
+
+	return first, last
+}
+
+func Pointer[T any](v T) *T {
+	return &v
+}

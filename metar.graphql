@@ -19,6 +19,17 @@ type AirportEdge {
     cursor: Cursor!
 }
 
+type MetarConnection {
+    totalCount: Int!
+    pageInfo: PageInfo!
+    edges: [MetarEdge!]!
+}
+
+type MetarEdge {
+    node: Metar!
+    cursor: Cursor!
+}
+
 type Query {
     getAirports(
         after: Cursor
@@ -40,7 +51,7 @@ extend type Airport {
     runways(closed: Boolean): [Runway!]! @goField(forceResolver: true)
 
     """Returns last METARs reported by this airport."""
-    metars(first: Int = 1): [Metar!]! @goField(forceResolver: true)
+    metars(after: Cursor, first: Int, before: Cursor, last: Int): MetarConnection! @goField(forceResolver: true)
 
     """Returns the closest METAR to the airport, within the given radius (in km)."""
     metarsVicinity(first: Int = 1, radius: Float = 50.0): [MetarWithDistance!]! @goField(forceResolver: true)
