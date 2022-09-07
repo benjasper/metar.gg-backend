@@ -2,9 +2,13 @@ scalar Cursor
 scalar Time
 
 type PageInfo {
+    """Whether there is at least one more page"""
     hasNextPage: Boolean!
+    """Whether there is a previous page"""
     hasPreviousPage: Boolean!
+    """The cursor to the first element of the current page"""
     startCursor: Cursor
+    """The cursor to the last element of the current page"""
     endCursor: Cursor
 }
 
@@ -12,6 +16,9 @@ type AirportConnection {
     totalCount: Int!
     pageInfo: PageInfo!
     edges: [AirportEdge!]!
+
+    """A structured list of the edges without a cursor. Use this to quickly explore the API."""
+    nodes: [Airport!]!
 }
 
 type AirportEdge {
@@ -23,6 +30,9 @@ type MetarConnection {
     totalCount: Int!
     pageInfo: PageInfo!
     edges: [MetarEdge!]!
+
+    """A structured list of the edges without a cursor. Use this to quickly explore the API."""
+    nodes: [Metar!]!
 }
 
 type MetarEdge {
@@ -42,7 +52,10 @@ type Query {
 }
 
 type MetarWithDistance {
+    """The distance in meters from the given location to the airport"""
     distance: Float
+
+    """The METAR for the station"""
     metar: Metar
 }
 
@@ -53,6 +66,6 @@ extend type Airport {
     """Returns last METARs reported by this airport."""
     metars(after: Cursor, first: Int, before: Cursor, last: Int): MetarConnection! @goField(forceResolver: true)
 
-    """Returns the closest METAR to the airport, within the given radius (in km)."""
+    """Returns the closest METAR to the airport, within the given radius (in km). It's also the latest METAR for each station."""
     metarsVicinity(first: Int = 1, radius: Float = 50.0): [MetarWithDistance!]! @goField(forceResolver: true)
 }

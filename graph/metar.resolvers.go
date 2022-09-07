@@ -100,6 +100,28 @@ func (r *airportResolver) MetarsVicinity(ctx context.Context, obj *ent.Airport, 
 	return results, nil
 }
 
+// Nodes is the resolver for the nodes field.
+func (r *airportConnectionResolver) Nodes(ctx context.Context, obj *ent.AirportConnection) ([]*ent.Airport, error) {
+	// Destructure the edges
+	var airports []*ent.Airport
+	for _, edge := range obj.Edges {
+		airports = append(airports, edge.Node)
+	}
+
+	return airports, nil
+}
+
+// Nodes is the resolver for the nodes field.
+func (r *metarConnectionResolver) Nodes(ctx context.Context, obj *ent.MetarConnection) ([]*ent.Metar, error) {
+	// Destructure the edges
+	var metars []*ent.Metar
+	for _, edge := range obj.Edges {
+		metars = append(metars, edge.Node)
+	}
+
+	return metars, nil
+}
+
 // GetAirports is the resolver for the getAirports field.
 func (r *queryResolver) GetAirports(ctx context.Context, after *ent.Cursor, first *int, before *ent.Cursor, last *int, identifier *string, hasWeather *bool) (*ent.AirportConnection, error) {
 	first, last = BoundsForPagination(first, last)
@@ -123,7 +145,19 @@ func (r *queryResolver) GetAirports(ctx context.Context, after *ent.Cursor, firs
 	return connection, nil
 }
 
+// AirportConnection returns generated.AirportConnectionResolver implementation.
+func (r *Resolver) AirportConnection() generated.AirportConnectionResolver {
+	return &airportConnectionResolver{r}
+}
+
+// MetarConnection returns generated.MetarConnectionResolver implementation.
+func (r *Resolver) MetarConnection() generated.MetarConnectionResolver {
+	return &metarConnectionResolver{r}
+}
+
 // Query returns generated.QueryResolver implementation.
 func (r *Resolver) Query() generated.QueryResolver { return &queryResolver{r} }
 
+type airportConnectionResolver struct{ *Resolver }
+type metarConnectionResolver struct{ *Resolver }
 type queryResolver struct{ *Resolver }

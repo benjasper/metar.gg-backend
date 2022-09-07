@@ -31,6 +31,8 @@ type Config struct {
 
 type ResolverRoot interface {
 	Airport() AirportResolver
+	AirportConnection() AirportConnectionResolver
+	MetarConnection() MetarConnectionResolver
 	Query() QueryResolver
 }
 
@@ -67,6 +69,7 @@ type ComplexityRoot struct {
 
 	AirportConnection struct {
 		Edges      func(childComplexity int) int
+		Nodes      func(childComplexity int) int
 		PageInfo   func(childComplexity int) int
 		TotalCount func(childComplexity int) int
 	}
@@ -127,6 +130,7 @@ type ComplexityRoot struct {
 
 	MetarConnection struct {
 		Edges      func(childComplexity int) int
+		Nodes      func(childComplexity int) int
 		PageInfo   func(childComplexity int) int
 		TotalCount func(childComplexity int) int
 	}
@@ -386,6 +390,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.AirportConnection.Edges(childComplexity), true
+
+	case "AirportConnection.nodes":
+		if e.complexity.AirportConnection.Nodes == nil {
+			break
+		}
+
+		return e.complexity.AirportConnection.Nodes(childComplexity), true
 
 	case "AirportConnection.pageInfo":
 		if e.complexity.AirportConnection.PageInfo == nil {
@@ -722,6 +733,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.MetarConnection.Edges(childComplexity), true
+
+	case "MetarConnection.nodes":
+		if e.complexity.MetarConnection.Nodes == nil {
+			break
+		}
+
+		return e.complexity.MetarConnection.Nodes(childComplexity), true
 
 	case "MetarConnection.pageInfo":
 		if e.complexity.MetarConnection.PageInfo == nil {
@@ -1242,9 +1260,13 @@ enum SkyConditionSkyCover @goModel(model: "metar.gg/ent/skycondition.SkyCover") 
 scalar Time
 
 type PageInfo {
+    """Whether there is at least one more page"""
     hasNextPage: Boolean!
+    """Whether there is a previous page"""
     hasPreviousPage: Boolean!
+    """The cursor to the first element of the current page"""
     startCursor: Cursor
+    """The cursor to the last element of the current page"""
     endCursor: Cursor
 }
 
@@ -1252,6 +1274,9 @@ type AirportConnection {
     totalCount: Int!
     pageInfo: PageInfo!
     edges: [AirportEdge!]!
+
+    """A structured list of the edges without a cursor. Use this to quickly explore the API."""
+    nodes: [Airport!]!
 }
 
 type AirportEdge {
@@ -1263,6 +1288,9 @@ type MetarConnection {
     totalCount: Int!
     pageInfo: PageInfo!
     edges: [MetarEdge!]!
+
+    """A structured list of the edges without a cursor. Use this to quickly explore the API."""
+    nodes: [Metar!]!
 }
 
 type MetarEdge {

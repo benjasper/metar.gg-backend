@@ -1177,6 +1177,8 @@ func (ec *executionContext) fieldContext_Airport_metars(ctx context.Context, fie
 				return ec.fieldContext_MetarConnection_pageInfo(ctx, field)
 			case "edges":
 				return ec.fieldContext_MetarConnection_edges(ctx, field)
+			case "nodes":
+				return ec.fieldContext_MetarConnection_nodes(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type MetarConnection", field.Name)
 		},
@@ -5034,6 +5036,50 @@ func (ec *executionContext) _SkyCondition(ctx context.Context, sel ast.Selection
 
 // region    ***************************** type.gotpl *****************************
 
+func (ec *executionContext) marshalNAirport2ᚕᚖmetarᚗggᚋentᚐAirportᚄ(ctx context.Context, sel ast.SelectionSet, v []*ent.Airport) graphql.Marshaler {
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		fc := &graphql.FieldContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithFieldContext(ctx, fc)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalNAirport2ᚖmetarᚗggᚋentᚐAirport(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+
+	for _, e := range ret {
+		if e == graphql.Null {
+			return graphql.Null
+		}
+	}
+
+	return ret
+}
+
 func (ec *executionContext) marshalNAirport2ᚖmetarᚗggᚋentᚐAirport(ctx context.Context, sel ast.SelectionSet, v *ent.Airport) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
@@ -5072,6 +5118,50 @@ func (ec *executionContext) marshalNFrequency2ᚖmetarᚗggᚋentᚐFrequency(ct
 		return graphql.Null
 	}
 	return ec._Frequency(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalNMetar2ᚕᚖmetarᚗggᚋentᚐMetarᚄ(ctx context.Context, sel ast.SelectionSet, v []*ent.Metar) graphql.Marshaler {
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		fc := &graphql.FieldContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithFieldContext(ctx, fc)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalNMetar2ᚖmetarᚗggᚋentᚐMetar(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+
+	for _, e := range ret {
+		if e == graphql.Null {
+			return graphql.Null
+		}
+	}
+
+	return ret
 }
 
 func (ec *executionContext) marshalNMetar2ᚖmetarᚗggᚋentᚐMetar(ctx context.Context, sel ast.SelectionSet, v *ent.Metar) graphql.Marshaler {
