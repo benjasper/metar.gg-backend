@@ -5,7 +5,7 @@ import (
 	_ "github.com/go-sql-driver/mysql"
 	"golang.org/x/sync/errgroup"
 	"metar.gg/ent"
-	"metar.gg/importer"
+	"metar.gg/environment"
 	"metar.gg/logging"
 	"metar.gg/server"
 )
@@ -13,11 +13,13 @@ import (
 func main() {
 	logger := logging.NewLogger()
 
+	environment.Initialize(logger)
+
 	logger.Info("Starting up...")
 
 	logger.Info("Connecting to database...")
 
-	client, err := ent.Open("mysql", "root:123@tcp(localhost:3306)/metargg?parseTime=True")
+	client, err := ent.Open("mysql", environment.Global.Database)
 	if err != nil {
 		logger.Fatal(err)
 	}
@@ -35,15 +37,10 @@ func main() {
 
 	logger.Info("Migrations ran successfully")
 
-	ctx := context.TODO()
-
 	wg := errgroup.Group{}
 	wg.Go(func() error {
 		return RunServer(client, logger)
 	})
-
-	//RunImport(ctx, client, logger)
-	RunWeatherImport(ctx, client, logger)
 
 	err = wg.Wait()
 	if err != nil {
@@ -58,35 +55,4 @@ func RunServer(db *ent.Client, logger *logging.Logger) error {
 	}
 
 	return nil
-}
-
-func RunImport(ctx context.Context, db *ent.Client, logger *logging.Logger) {
-	imp := importer.NewImporter(db, logger)
-
-	err := imp.ImportAirports(ctx, "https://raw.githubusercontent.com/davidmegginson/ourairports-data/main/airports.csv")
-	if err != nil {
-		logger.Fatal(err)
-		return
-	}
-
-	err = imp.ImportRunways(ctx, "https://raw.githubusercontent.com/davidmegginson/ourairports-data/main/runways.csv")
-	if err != nil {
-		logger.Fatal(err)
-		return
-	}
-
-	err = imp.ImportFrequencies(ctx, "https://raw.githubusercontent.com/davidmegginson/ourairports-data/main/airport-frequencies.csv")
-	if err != nil {
-		logger.Fatal(err)
-		return
-	}
-}
-
-func RunWeatherImport(ctx context.Context, db *ent.Client, logger *logging.Logger) {
-	metarImporter := importer.NewNoaaMetarImporter(db, logger)
-	err := metarImporter.ImportMetars("https://www.aviationweather.gov/adds/dataserver_current/current/metars.cache.xml", ctx)
-	if err != nil {
-		logger.Fatal(err)
-		return
-	}
 }
