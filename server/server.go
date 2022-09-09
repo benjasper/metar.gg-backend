@@ -2,9 +2,9 @@ package server
 
 import (
 	"context"
-	"fmt"
 	"github.com/99designs/gqlgen/graphql/handler"
-	"github.com/julienschmidt/httprouter"
+	"github.com/gin-contrib/cors"
+	"github.com/gin-gonic/gin"
 	"metar.gg/ent"
 	"metar.gg/environment"
 	"metar.gg/graph"
@@ -29,10 +29,25 @@ func (s *Server) Run(db *ent.Client, logger *logging.Logger) error {
 
 	port := environment.Global.Port
 
-	router := httprouter.New()
+	srv := handler.NewDefaultServer(graph.NewSchema(db))
 
-	router.POST("/import/weather", func(w http.ResponseWriter, r *http.Request, params httprouter.Params) {
-		if !isAuthorized(w, r) {
+	r := gin.New()
+
+	config := cors.DefaultConfig()
+	config.AllowAllOrigins = true
+
+	err := r.SetTrustedProxies(nil)
+	if err != nil {
+		return err
+	}
+
+	r.Use(cors.New(config))
+
+	r.POST("/graphql", gin.WrapH(srv))
+	r.GET("/graphql", gin.WrapH(srv))
+
+	r.POST("/import/weather", func(c *gin.Context) {
+		if !isAuthorized(c.Writer, c.Request) {
 			return
 		}
 
@@ -40,11 +55,11 @@ func (s *Server) Run(db *ent.Client, logger *logging.Logger) error {
 			RunWeatherImport(context.Background(), db, logger)
 		}()
 
-		w.WriteHeader(http.StatusOK)
+		c.Status(http.StatusNoContent)
 	})
 
-	router.POST("/import/airports", func(w http.ResponseWriter, r *http.Request, params httprouter.Params) {
-		if !isAuthorized(w, r) {
+	r.POST("/import/airports", func(c *gin.Context) {
+		if !isAuthorized(c.Writer, c.Request) {
 			return
 		}
 
@@ -52,17 +67,12 @@ func (s *Server) Run(db *ent.Client, logger *logging.Logger) error {
 			RunAirportImport(context.Background(), db, logger)
 		}()
 
-		w.WriteHeader(http.StatusOK)
+		c.Status(http.StatusNoContent)
 	})
 
-	srv := handler.NewDefaultServer(graph.NewSchema(db))
-	router.Handler(http.MethodPost, "/graphql", srv)
-	router.Handler(http.MethodGet, "/graphql", srv)
+	logger.Info("Starting server on port " + port)
 
-	logger.Info(fmt.Sprintf("Server started and listening on port %s", port))
-	if err := http.ListenAndServe(":"+port, router); err != nil {
-		return err
-	}
+	r.Run(":" + port)
 
 	return nil
 }

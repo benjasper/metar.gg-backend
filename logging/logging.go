@@ -141,6 +141,11 @@ func (l *Logger) uploadLog() {
 		return
 	}
 
+	dataset := os.Getenv("AXIOM_DATASET")
+	if dataset == "" {
+		return
+	}
+
 	log.Println("Uploading log file to Axiom")
 
 	// Rename the file to prevent loss of data
@@ -160,15 +165,11 @@ func (l *Logger) uploadLog() {
 	l.logger.SetOutput(file)
 
 	// Upload the file to a remote server
-	l.uploadLogToAxiom(renamedFile)
+	l.uploadLogToAxiom(renamedFile, dataset)
 }
 
-func (l *Logger) uploadLogToAxiom(file string) {
+func (l *Logger) uploadLogToAxiom(file string, dataset string) {
 	// Upload the file to Axiom
-	dataset := os.Getenv("AXIOM_DATASET")
-	if dataset == "" {
-		return
-	}
 
 	// 1. Open the file to ingest.
 	f, err := os.Open(file)
