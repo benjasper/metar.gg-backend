@@ -27,6 +27,14 @@ func (m *Message) String() string {
 }
 
 func NewLogger() *Logger {
+	// If the tmp directory does not exist, create it
+	if _, err := os.Stat("./tmp"); os.IsNotExist(err) {
+		err = os.Mkdir("./tmp", 0755)
+		if err != nil {
+			log.Fatal(err)
+		}
+	}
+
 	file, err := os.OpenFile(logFile, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0666)
 	if err != nil {
 		log.Fatal(err)
