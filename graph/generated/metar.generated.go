@@ -326,8 +326,6 @@ func (ec *executionContext) fieldContext_AirportConnection_nodes(ctx context.Con
 				return ec.fieldContext_Airport_country(ctx, field)
 			case "region":
 				return ec.fieldContext_Airport_region(ctx, field)
-			case "hasWeather":
-				return ec.fieldContext_Airport_hasWeather(ctx, field)
 			case "municipality":
 				return ec.fieldContext_Airport_municipality(ctx, field)
 			case "scheduledService":
@@ -344,14 +342,12 @@ func (ec *executionContext) fieldContext_AirportConnection_nodes(ctx context.Con
 				return ec.fieldContext_Airport_wikipedia(ctx, field)
 			case "keywords":
 				return ec.fieldContext_Airport_keywords(ctx, field)
+			case "station":
+				return ec.fieldContext_Airport_station(ctx, field)
 			case "frequencies":
 				return ec.fieldContext_Airport_frequencies(ctx, field)
 			case "runways":
 				return ec.fieldContext_Airport_runways(ctx, field)
-			case "metars":
-				return ec.fieldContext_Airport_metars(ctx, field)
-			case "metarsVicinity":
-				return ec.fieldContext_Airport_metarsVicinity(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Airport", field.Name)
 		},
@@ -420,8 +416,6 @@ func (ec *executionContext) fieldContext_AirportEdge_node(ctx context.Context, f
 				return ec.fieldContext_Airport_country(ctx, field)
 			case "region":
 				return ec.fieldContext_Airport_region(ctx, field)
-			case "hasWeather":
-				return ec.fieldContext_Airport_hasWeather(ctx, field)
 			case "municipality":
 				return ec.fieldContext_Airport_municipality(ctx, field)
 			case "scheduledService":
@@ -438,14 +432,12 @@ func (ec *executionContext) fieldContext_AirportEdge_node(ctx context.Context, f
 				return ec.fieldContext_Airport_wikipedia(ctx, field)
 			case "keywords":
 				return ec.fieldContext_Airport_keywords(ctx, field)
+			case "station":
+				return ec.fieldContext_Airport_station(ctx, field)
 			case "frequencies":
 				return ec.fieldContext_Airport_frequencies(ctx, field)
 			case "runways":
 				return ec.fieldContext_Airport_runways(ctx, field)
-			case "metars":
-				return ec.fieldContext_Airport_metars(ctx, field)
-			case "metarsVicinity":
-				return ec.fieldContext_Airport_metarsVicinity(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Airport", field.Name)
 		},
@@ -684,8 +676,6 @@ func (ec *executionContext) fieldContext_MetarConnection_nodes(ctx context.Conte
 		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			switch field.Name {
-			case "stationID":
-				return ec.fieldContext_Metar_stationID(ctx, field)
 			case "rawText":
 				return ec.fieldContext_Metar_rawText(ctx, field)
 			case "observationTime":
@@ -754,8 +744,8 @@ func (ec *executionContext) fieldContext_MetarConnection_nodes(ctx context.Conte
 				return ec.fieldContext_Metar_vertVis(ctx, field)
 			case "metarType":
 				return ec.fieldContext_Metar_metarType(ctx, field)
-			case "airport":
-				return ec.fieldContext_Metar_airport(ctx, field)
+			case "station":
+				return ec.fieldContext_Metar_station(ctx, field)
 			case "skyConditions":
 				return ec.fieldContext_Metar_skyConditions(ctx, field)
 			}
@@ -804,8 +794,6 @@ func (ec *executionContext) fieldContext_MetarEdge_node(ctx context.Context, fie
 		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			switch field.Name {
-			case "stationID":
-				return ec.fieldContext_Metar_stationID(ctx, field)
 			case "rawText":
 				return ec.fieldContext_Metar_rawText(ctx, field)
 			case "observationTime":
@@ -874,8 +862,8 @@ func (ec *executionContext) fieldContext_MetarEdge_node(ctx context.Context, fie
 				return ec.fieldContext_Metar_vertVis(ctx, field)
 			case "metarType":
 				return ec.fieldContext_Metar_metarType(ctx, field)
-			case "airport":
-				return ec.fieldContext_Metar_airport(ctx, field)
+			case "station":
+				return ec.fieldContext_Metar_station(ctx, field)
 			case "skyConditions":
 				return ec.fieldContext_Metar_skyConditions(ctx, field)
 			}
@@ -1006,8 +994,6 @@ func (ec *executionContext) fieldContext_MetarWithDistance_metar(ctx context.Con
 		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			switch field.Name {
-			case "stationID":
-				return ec.fieldContext_Metar_stationID(ctx, field)
 			case "rawText":
 				return ec.fieldContext_Metar_rawText(ctx, field)
 			case "observationTime":
@@ -1076,8 +1062,8 @@ func (ec *executionContext) fieldContext_MetarWithDistance_metar(ctx context.Con
 				return ec.fieldContext_Metar_vertVis(ctx, field)
 			case "metarType":
 				return ec.fieldContext_Metar_metarType(ctx, field)
-			case "airport":
-				return ec.fieldContext_Metar_airport(ctx, field)
+			case "station":
+				return ec.fieldContext_Metar_station(ctx, field)
 			case "skyConditions":
 				return ec.fieldContext_Metar_skyConditions(ctx, field)
 			}
@@ -1874,20 +1860,6 @@ func (ec *executionContext) unmarshalNCursor2metarᚗggᚋentᚐCursor(ctx conte
 
 func (ec *executionContext) marshalNCursor2metarᚗggᚋentᚐCursor(ctx context.Context, sel ast.SelectionSet, v ent.Cursor) graphql.Marshaler {
 	return v
-}
-
-func (ec *executionContext) marshalNMetarConnection2metarᚗggᚋentᚐMetarConnection(ctx context.Context, sel ast.SelectionSet, v ent.MetarConnection) graphql.Marshaler {
-	return ec._MetarConnection(ctx, sel, &v)
-}
-
-func (ec *executionContext) marshalNMetarConnection2ᚖmetarᚗggᚋentᚐMetarConnection(ctx context.Context, sel ast.SelectionSet, v *ent.MetarConnection) graphql.Marshaler {
-	if v == nil {
-		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
-			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
-		}
-		return graphql.Null
-	}
-	return ec._MetarConnection(ctx, sel, v)
 }
 
 func (ec *executionContext) marshalNMetarEdge2ᚕᚖmetarᚗggᚋentᚐMetarEdgeᚄ(ctx context.Context, sel ast.SelectionSet, v []*ent.MetarEdge) graphql.Marshaler {

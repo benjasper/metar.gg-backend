@@ -21,6 +21,8 @@ import (
 	"metar.gg/ent/metar"
 	"metar.gg/ent/runway"
 	"metar.gg/ent/skycondition"
+	"metar.gg/ent/station"
+	"metar.gg/ent/taf"
 )
 
 // Noder wraps the basic Node method.
@@ -54,8 +56,8 @@ func (a *Airport) Node(ctx context.Context) (node *Node, err error) {
 	node = &Node{
 		ID:     a.ID,
 		Type:   "Airport",
-		Fields: make([]*Field, 19),
-		Edges:  make([]*Edge, 1),
+		Fields: make([]*Field, 18),
+		Edges:  make([]*Edge, 2),
 	}
 	var buf []byte
 	if buf, err = json.Marshal(a.LastUpdated); err != nil {
@@ -138,18 +140,10 @@ func (a *Airport) Node(ctx context.Context) (node *Node, err error) {
 		Name:  "region",
 		Value: string(buf),
 	}
-	if buf, err = json.Marshal(a.HasWeather); err != nil {
-		return nil, err
-	}
-	node.Fields[10] = &Field{
-		Type:  "bool",
-		Name:  "has_weather",
-		Value: string(buf),
-	}
 	if buf, err = json.Marshal(a.Municipality); err != nil {
 		return nil, err
 	}
-	node.Fields[11] = &Field{
+	node.Fields[10] = &Field{
 		Type:  "string",
 		Name:  "municipality",
 		Value: string(buf),
@@ -157,7 +151,7 @@ func (a *Airport) Node(ctx context.Context) (node *Node, err error) {
 	if buf, err = json.Marshal(a.ScheduledService); err != nil {
 		return nil, err
 	}
-	node.Fields[12] = &Field{
+	node.Fields[11] = &Field{
 		Type:  "bool",
 		Name:  "scheduled_service",
 		Value: string(buf),
@@ -165,7 +159,7 @@ func (a *Airport) Node(ctx context.Context) (node *Node, err error) {
 	if buf, err = json.Marshal(a.GpsCode); err != nil {
 		return nil, err
 	}
-	node.Fields[13] = &Field{
+	node.Fields[12] = &Field{
 		Type:  "string",
 		Name:  "gps_code",
 		Value: string(buf),
@@ -173,7 +167,7 @@ func (a *Airport) Node(ctx context.Context) (node *Node, err error) {
 	if buf, err = json.Marshal(a.IataCode); err != nil {
 		return nil, err
 	}
-	node.Fields[14] = &Field{
+	node.Fields[13] = &Field{
 		Type:  "string",
 		Name:  "iata_code",
 		Value: string(buf),
@@ -181,7 +175,7 @@ func (a *Airport) Node(ctx context.Context) (node *Node, err error) {
 	if buf, err = json.Marshal(a.LocalCode); err != nil {
 		return nil, err
 	}
-	node.Fields[15] = &Field{
+	node.Fields[14] = &Field{
 		Type:  "string",
 		Name:  "local_code",
 		Value: string(buf),
@@ -189,7 +183,7 @@ func (a *Airport) Node(ctx context.Context) (node *Node, err error) {
 	if buf, err = json.Marshal(a.Website); err != nil {
 		return nil, err
 	}
-	node.Fields[16] = &Field{
+	node.Fields[15] = &Field{
 		Type:  "string",
 		Name:  "website",
 		Value: string(buf),
@@ -197,7 +191,7 @@ func (a *Airport) Node(ctx context.Context) (node *Node, err error) {
 	if buf, err = json.Marshal(a.Wikipedia); err != nil {
 		return nil, err
 	}
-	node.Fields[17] = &Field{
+	node.Fields[16] = &Field{
 		Type:  "string",
 		Name:  "wikipedia",
 		Value: string(buf),
@@ -205,18 +199,28 @@ func (a *Airport) Node(ctx context.Context) (node *Node, err error) {
 	if buf, err = json.Marshal(a.Keywords); err != nil {
 		return nil, err
 	}
-	node.Fields[18] = &Field{
+	node.Fields[17] = &Field{
 		Type:  "[]string",
 		Name:  "keywords",
 		Value: string(buf),
 	}
 	node.Edges[0] = &Edge{
+		Type: "Station",
+		Name: "station",
+	}
+	err = a.QueryStation().
+		Select(station.FieldID).
+		Scan(ctx, &node.Edges[0].IDs)
+	if err != nil {
+		return nil, err
+	}
+	node.Edges[1] = &Edge{
 		Type: "Frequency",
 		Name: "frequencies",
 	}
 	err = a.QueryFrequencies().
 		Select(frequency.FieldID).
-		Scan(ctx, &node.Edges[0].IDs)
+		Scan(ctx, &node.Edges[1].IDs)
 	if err != nil {
 		return nil, err
 	}
@@ -280,22 +284,14 @@ func (m *Metar) Node(ctx context.Context) (node *Node, err error) {
 	node = &Node{
 		ID:     m.ID,
 		Type:   "Metar",
-		Fields: make([]*Field, 35),
+		Fields: make([]*Field, 34),
 		Edges:  make([]*Edge, 2),
 	}
 	var buf []byte
-	if buf, err = json.Marshal(m.StationID); err != nil {
-		return nil, err
-	}
-	node.Fields[0] = &Field{
-		Type:  "string",
-		Name:  "station_id",
-		Value: string(buf),
-	}
 	if buf, err = json.Marshal(m.RawText); err != nil {
 		return nil, err
 	}
-	node.Fields[1] = &Field{
+	node.Fields[0] = &Field{
 		Type:  "string",
 		Name:  "raw_text",
 		Value: string(buf),
@@ -303,7 +299,7 @@ func (m *Metar) Node(ctx context.Context) (node *Node, err error) {
 	if buf, err = json.Marshal(m.ObservationTime); err != nil {
 		return nil, err
 	}
-	node.Fields[2] = &Field{
+	node.Fields[1] = &Field{
 		Type:  "time.Time",
 		Name:  "observation_time",
 		Value: string(buf),
@@ -311,7 +307,7 @@ func (m *Metar) Node(ctx context.Context) (node *Node, err error) {
 	if buf, err = json.Marshal(m.Latitude); err != nil {
 		return nil, err
 	}
-	node.Fields[3] = &Field{
+	node.Fields[2] = &Field{
 		Type:  "float64",
 		Name:  "latitude",
 		Value: string(buf),
@@ -319,7 +315,7 @@ func (m *Metar) Node(ctx context.Context) (node *Node, err error) {
 	if buf, err = json.Marshal(m.Longitude); err != nil {
 		return nil, err
 	}
-	node.Fields[4] = &Field{
+	node.Fields[3] = &Field{
 		Type:  "float64",
 		Name:  "longitude",
 		Value: string(buf),
@@ -327,7 +323,7 @@ func (m *Metar) Node(ctx context.Context) (node *Node, err error) {
 	if buf, err = json.Marshal(m.Elevation); err != nil {
 		return nil, err
 	}
-	node.Fields[5] = &Field{
+	node.Fields[4] = &Field{
 		Type:  "float64",
 		Name:  "elevation",
 		Value: string(buf),
@@ -335,7 +331,7 @@ func (m *Metar) Node(ctx context.Context) (node *Node, err error) {
 	if buf, err = json.Marshal(m.Temperature); err != nil {
 		return nil, err
 	}
-	node.Fields[6] = &Field{
+	node.Fields[5] = &Field{
 		Type:  "float64",
 		Name:  "temperature",
 		Value: string(buf),
@@ -343,7 +339,7 @@ func (m *Metar) Node(ctx context.Context) (node *Node, err error) {
 	if buf, err = json.Marshal(m.Dewpoint); err != nil {
 		return nil, err
 	}
-	node.Fields[7] = &Field{
+	node.Fields[6] = &Field{
 		Type:  "float64",
 		Name:  "dewpoint",
 		Value: string(buf),
@@ -351,7 +347,7 @@ func (m *Metar) Node(ctx context.Context) (node *Node, err error) {
 	if buf, err = json.Marshal(m.WindSpeed); err != nil {
 		return nil, err
 	}
-	node.Fields[8] = &Field{
+	node.Fields[7] = &Field{
 		Type:  "int",
 		Name:  "wind_speed",
 		Value: string(buf),
@@ -359,7 +355,7 @@ func (m *Metar) Node(ctx context.Context) (node *Node, err error) {
 	if buf, err = json.Marshal(m.WindGust); err != nil {
 		return nil, err
 	}
-	node.Fields[9] = &Field{
+	node.Fields[8] = &Field{
 		Type:  "int",
 		Name:  "wind_gust",
 		Value: string(buf),
@@ -367,7 +363,7 @@ func (m *Metar) Node(ctx context.Context) (node *Node, err error) {
 	if buf, err = json.Marshal(m.WindDirection); err != nil {
 		return nil, err
 	}
-	node.Fields[10] = &Field{
+	node.Fields[9] = &Field{
 		Type:  "int",
 		Name:  "wind_direction",
 		Value: string(buf),
@@ -375,7 +371,7 @@ func (m *Metar) Node(ctx context.Context) (node *Node, err error) {
 	if buf, err = json.Marshal(m.Visibility); err != nil {
 		return nil, err
 	}
-	node.Fields[11] = &Field{
+	node.Fields[10] = &Field{
 		Type:  "float64",
 		Name:  "visibility",
 		Value: string(buf),
@@ -383,7 +379,7 @@ func (m *Metar) Node(ctx context.Context) (node *Node, err error) {
 	if buf, err = json.Marshal(m.Altimeter); err != nil {
 		return nil, err
 	}
-	node.Fields[12] = &Field{
+	node.Fields[11] = &Field{
 		Type:  "float64",
 		Name:  "altimeter",
 		Value: string(buf),
@@ -391,7 +387,7 @@ func (m *Metar) Node(ctx context.Context) (node *Node, err error) {
 	if buf, err = json.Marshal(m.PresentWeather); err != nil {
 		return nil, err
 	}
-	node.Fields[13] = &Field{
+	node.Fields[12] = &Field{
 		Type:  "string",
 		Name:  "present_weather",
 		Value: string(buf),
@@ -399,7 +395,7 @@ func (m *Metar) Node(ctx context.Context) (node *Node, err error) {
 	if buf, err = json.Marshal(m.FlightCategory); err != nil {
 		return nil, err
 	}
-	node.Fields[14] = &Field{
+	node.Fields[13] = &Field{
 		Type:  "metar.FlightCategory",
 		Name:  "flight_category",
 		Value: string(buf),
@@ -407,7 +403,7 @@ func (m *Metar) Node(ctx context.Context) (node *Node, err error) {
 	if buf, err = json.Marshal(m.QualityControlCorrected); err != nil {
 		return nil, err
 	}
-	node.Fields[15] = &Field{
+	node.Fields[14] = &Field{
 		Type:  "bool",
 		Name:  "quality_control_corrected",
 		Value: string(buf),
@@ -415,7 +411,7 @@ func (m *Metar) Node(ctx context.Context) (node *Node, err error) {
 	if buf, err = json.Marshal(m.QualityControlAutoStation); err != nil {
 		return nil, err
 	}
-	node.Fields[16] = &Field{
+	node.Fields[15] = &Field{
 		Type:  "bool",
 		Name:  "quality_control_auto_station",
 		Value: string(buf),
@@ -423,7 +419,7 @@ func (m *Metar) Node(ctx context.Context) (node *Node, err error) {
 	if buf, err = json.Marshal(m.QualityControlMaintenanceIndicatorOn); err != nil {
 		return nil, err
 	}
-	node.Fields[17] = &Field{
+	node.Fields[16] = &Field{
 		Type:  "bool",
 		Name:  "quality_control_maintenance_indicator_on",
 		Value: string(buf),
@@ -431,7 +427,7 @@ func (m *Metar) Node(ctx context.Context) (node *Node, err error) {
 	if buf, err = json.Marshal(m.QualityControlNoSignal); err != nil {
 		return nil, err
 	}
-	node.Fields[18] = &Field{
+	node.Fields[17] = &Field{
 		Type:  "bool",
 		Name:  "quality_control_no_signal",
 		Value: string(buf),
@@ -439,7 +435,7 @@ func (m *Metar) Node(ctx context.Context) (node *Node, err error) {
 	if buf, err = json.Marshal(m.QualityControlLightningSensorOff); err != nil {
 		return nil, err
 	}
-	node.Fields[19] = &Field{
+	node.Fields[18] = &Field{
 		Type:  "bool",
 		Name:  "quality_control_lightning_sensor_off",
 		Value: string(buf),
@@ -447,7 +443,7 @@ func (m *Metar) Node(ctx context.Context) (node *Node, err error) {
 	if buf, err = json.Marshal(m.QualityControlFreezingRainSensorOff); err != nil {
 		return nil, err
 	}
-	node.Fields[20] = &Field{
+	node.Fields[19] = &Field{
 		Type:  "bool",
 		Name:  "quality_control_freezing_rain_sensor_off",
 		Value: string(buf),
@@ -455,7 +451,7 @@ func (m *Metar) Node(ctx context.Context) (node *Node, err error) {
 	if buf, err = json.Marshal(m.QualityControlPresentWeatherSensorOff); err != nil {
 		return nil, err
 	}
-	node.Fields[21] = &Field{
+	node.Fields[20] = &Field{
 		Type:  "bool",
 		Name:  "quality_control_present_weather_sensor_off",
 		Value: string(buf),
@@ -463,7 +459,7 @@ func (m *Metar) Node(ctx context.Context) (node *Node, err error) {
 	if buf, err = json.Marshal(m.SeaLevelPressure); err != nil {
 		return nil, err
 	}
-	node.Fields[22] = &Field{
+	node.Fields[21] = &Field{
 		Type:  "float64",
 		Name:  "sea_level_pressure",
 		Value: string(buf),
@@ -471,7 +467,7 @@ func (m *Metar) Node(ctx context.Context) (node *Node, err error) {
 	if buf, err = json.Marshal(m.PressureTendency); err != nil {
 		return nil, err
 	}
-	node.Fields[23] = &Field{
+	node.Fields[22] = &Field{
 		Type:  "float64",
 		Name:  "pressure_tendency",
 		Value: string(buf),
@@ -479,7 +475,7 @@ func (m *Metar) Node(ctx context.Context) (node *Node, err error) {
 	if buf, err = json.Marshal(m.MaxTemp6); err != nil {
 		return nil, err
 	}
-	node.Fields[24] = &Field{
+	node.Fields[23] = &Field{
 		Type:  "float64",
 		Name:  "max_temp_6",
 		Value: string(buf),
@@ -487,7 +483,7 @@ func (m *Metar) Node(ctx context.Context) (node *Node, err error) {
 	if buf, err = json.Marshal(m.MinTemp6); err != nil {
 		return nil, err
 	}
-	node.Fields[25] = &Field{
+	node.Fields[24] = &Field{
 		Type:  "float64",
 		Name:  "min_temp_6",
 		Value: string(buf),
@@ -495,7 +491,7 @@ func (m *Metar) Node(ctx context.Context) (node *Node, err error) {
 	if buf, err = json.Marshal(m.MaxTemp24); err != nil {
 		return nil, err
 	}
-	node.Fields[26] = &Field{
+	node.Fields[25] = &Field{
 		Type:  "float64",
 		Name:  "max_temp_24",
 		Value: string(buf),
@@ -503,7 +499,7 @@ func (m *Metar) Node(ctx context.Context) (node *Node, err error) {
 	if buf, err = json.Marshal(m.MinTemp24); err != nil {
 		return nil, err
 	}
-	node.Fields[27] = &Field{
+	node.Fields[26] = &Field{
 		Type:  "float64",
 		Name:  "min_temp_24",
 		Value: string(buf),
@@ -511,7 +507,7 @@ func (m *Metar) Node(ctx context.Context) (node *Node, err error) {
 	if buf, err = json.Marshal(m.Precipitation); err != nil {
 		return nil, err
 	}
-	node.Fields[28] = &Field{
+	node.Fields[27] = &Field{
 		Type:  "float64",
 		Name:  "precipitation",
 		Value: string(buf),
@@ -519,7 +515,7 @@ func (m *Metar) Node(ctx context.Context) (node *Node, err error) {
 	if buf, err = json.Marshal(m.Precipitation3); err != nil {
 		return nil, err
 	}
-	node.Fields[29] = &Field{
+	node.Fields[28] = &Field{
 		Type:  "float64",
 		Name:  "precipitation_3",
 		Value: string(buf),
@@ -527,7 +523,7 @@ func (m *Metar) Node(ctx context.Context) (node *Node, err error) {
 	if buf, err = json.Marshal(m.Precipitation6); err != nil {
 		return nil, err
 	}
-	node.Fields[30] = &Field{
+	node.Fields[29] = &Field{
 		Type:  "float64",
 		Name:  "precipitation_6",
 		Value: string(buf),
@@ -535,7 +531,7 @@ func (m *Metar) Node(ctx context.Context) (node *Node, err error) {
 	if buf, err = json.Marshal(m.Precipitation24); err != nil {
 		return nil, err
 	}
-	node.Fields[31] = &Field{
+	node.Fields[30] = &Field{
 		Type:  "float64",
 		Name:  "precipitation_24",
 		Value: string(buf),
@@ -543,7 +539,7 @@ func (m *Metar) Node(ctx context.Context) (node *Node, err error) {
 	if buf, err = json.Marshal(m.SnowDepth); err != nil {
 		return nil, err
 	}
-	node.Fields[32] = &Field{
+	node.Fields[31] = &Field{
 		Type:  "float64",
 		Name:  "snow_depth",
 		Value: string(buf),
@@ -551,7 +547,7 @@ func (m *Metar) Node(ctx context.Context) (node *Node, err error) {
 	if buf, err = json.Marshal(m.VertVis); err != nil {
 		return nil, err
 	}
-	node.Fields[33] = &Field{
+	node.Fields[32] = &Field{
 		Type:  "float64",
 		Name:  "vert_vis",
 		Value: string(buf),
@@ -559,17 +555,17 @@ func (m *Metar) Node(ctx context.Context) (node *Node, err error) {
 	if buf, err = json.Marshal(m.MetarType); err != nil {
 		return nil, err
 	}
-	node.Fields[34] = &Field{
+	node.Fields[33] = &Field{
 		Type:  "metar.MetarType",
 		Name:  "metar_type",
 		Value: string(buf),
 	}
 	node.Edges[0] = &Edge{
-		Type: "Airport",
-		Name: "airport",
+		Type: "Station",
+		Name: "station",
 	}
-	err = m.QueryAirport().
-		Select(airport.FieldID).
+	err = m.QueryStation().
+		Select(station.FieldID).
 		Scan(ctx, &node.Edges[0].IDs)
 	if err != nil {
 		return nil, err
@@ -789,6 +785,382 @@ func (sc *SkyCondition) Node(ctx context.Context) (node *Node, err error) {
 	return node, nil
 }
 
+func (s *Station) Node(ctx context.Context) (node *Node, err error) {
+	node = &Node{
+		ID:     s.ID,
+		Type:   "Station",
+		Fields: make([]*Field, 4),
+		Edges:  make([]*Edge, 3),
+	}
+	var buf []byte
+	if buf, err = json.Marshal(s.StationID); err != nil {
+		return nil, err
+	}
+	node.Fields[0] = &Field{
+		Type:  "string",
+		Name:  "station_id",
+		Value: string(buf),
+	}
+	if buf, err = json.Marshal(s.Latitude); err != nil {
+		return nil, err
+	}
+	node.Fields[1] = &Field{
+		Type:  "float64",
+		Name:  "latitude",
+		Value: string(buf),
+	}
+	if buf, err = json.Marshal(s.Longitude); err != nil {
+		return nil, err
+	}
+	node.Fields[2] = &Field{
+		Type:  "float64",
+		Name:  "longitude",
+		Value: string(buf),
+	}
+	if buf, err = json.Marshal(s.Elevation); err != nil {
+		return nil, err
+	}
+	node.Fields[3] = &Field{
+		Type:  "float64",
+		Name:  "elevation",
+		Value: string(buf),
+	}
+	node.Edges[0] = &Edge{
+		Type: "Airport",
+		Name: "airport",
+	}
+	err = s.QueryAirport().
+		Select(airport.FieldID).
+		Scan(ctx, &node.Edges[0].IDs)
+	if err != nil {
+		return nil, err
+	}
+	node.Edges[1] = &Edge{
+		Type: "Metar",
+		Name: "metars",
+	}
+	err = s.QueryMetars().
+		Select(metar.FieldID).
+		Scan(ctx, &node.Edges[1].IDs)
+	if err != nil {
+		return nil, err
+	}
+	node.Edges[2] = &Edge{
+		Type: "Taf",
+		Name: "tafs",
+	}
+	err = s.QueryTafs().
+		Select(taf.FieldID).
+		Scan(ctx, &node.Edges[2].IDs)
+	if err != nil {
+		return nil, err
+	}
+	return node, nil
+}
+
+func (t *Taf) Node(ctx context.Context) (node *Node, err error) {
+	node = &Node{
+		ID:     t.ID,
+		Type:   "Taf",
+		Fields: make([]*Field, 34),
+		Edges:  make([]*Edge, 2),
+	}
+	var buf []byte
+	if buf, err = json.Marshal(t.RawText); err != nil {
+		return nil, err
+	}
+	node.Fields[0] = &Field{
+		Type:  "string",
+		Name:  "raw_text",
+		Value: string(buf),
+	}
+	if buf, err = json.Marshal(t.IssueTime); err != nil {
+		return nil, err
+	}
+	node.Fields[1] = &Field{
+		Type:  "time.Time",
+		Name:  "issue_time",
+		Value: string(buf),
+	}
+	if buf, err = json.Marshal(t.BulletinTime); err != nil {
+		return nil, err
+	}
+	node.Fields[2] = &Field{
+		Type:  "time.Time",
+		Name:  "bulletin_time",
+		Value: string(buf),
+	}
+	if buf, err = json.Marshal(t.ValidFromTime); err != nil {
+		return nil, err
+	}
+	node.Fields[3] = &Field{
+		Type:  "time.Time",
+		Name:  "valid_from_time",
+		Value: string(buf),
+	}
+	if buf, err = json.Marshal(t.ValidToTime); err != nil {
+		return nil, err
+	}
+	node.Fields[4] = &Field{
+		Type:  "time.Time",
+		Name:  "valid_to_time",
+		Value: string(buf),
+	}
+	if buf, err = json.Marshal(t.Remarks); err != nil {
+		return nil, err
+	}
+	node.Fields[5] = &Field{
+		Type:  "string",
+		Name:  "remarks",
+		Value: string(buf),
+	}
+	if buf, err = json.Marshal(t.Temperature); err != nil {
+		return nil, err
+	}
+	node.Fields[6] = &Field{
+		Type:  "float64",
+		Name:  "temperature",
+		Value: string(buf),
+	}
+	if buf, err = json.Marshal(t.Dewpoint); err != nil {
+		return nil, err
+	}
+	node.Fields[7] = &Field{
+		Type:  "float64",
+		Name:  "dewpoint",
+		Value: string(buf),
+	}
+	if buf, err = json.Marshal(t.WindSpeed); err != nil {
+		return nil, err
+	}
+	node.Fields[8] = &Field{
+		Type:  "int",
+		Name:  "wind_speed",
+		Value: string(buf),
+	}
+	if buf, err = json.Marshal(t.WindGust); err != nil {
+		return nil, err
+	}
+	node.Fields[9] = &Field{
+		Type:  "int",
+		Name:  "wind_gust",
+		Value: string(buf),
+	}
+	if buf, err = json.Marshal(t.WindDirection); err != nil {
+		return nil, err
+	}
+	node.Fields[10] = &Field{
+		Type:  "int",
+		Name:  "wind_direction",
+		Value: string(buf),
+	}
+	if buf, err = json.Marshal(t.Visibility); err != nil {
+		return nil, err
+	}
+	node.Fields[11] = &Field{
+		Type:  "float64",
+		Name:  "visibility",
+		Value: string(buf),
+	}
+	if buf, err = json.Marshal(t.Altimeter); err != nil {
+		return nil, err
+	}
+	node.Fields[12] = &Field{
+		Type:  "float64",
+		Name:  "altimeter",
+		Value: string(buf),
+	}
+	if buf, err = json.Marshal(t.FlightCategory); err != nil {
+		return nil, err
+	}
+	node.Fields[13] = &Field{
+		Type:  "taf.FlightCategory",
+		Name:  "flight_category",
+		Value: string(buf),
+	}
+	if buf, err = json.Marshal(t.QualityControlCorrected); err != nil {
+		return nil, err
+	}
+	node.Fields[14] = &Field{
+		Type:  "bool",
+		Name:  "quality_control_corrected",
+		Value: string(buf),
+	}
+	if buf, err = json.Marshal(t.QualityControlAutoStation); err != nil {
+		return nil, err
+	}
+	node.Fields[15] = &Field{
+		Type:  "bool",
+		Name:  "quality_control_auto_station",
+		Value: string(buf),
+	}
+	if buf, err = json.Marshal(t.QualityControlMaintenanceIndicatorOn); err != nil {
+		return nil, err
+	}
+	node.Fields[16] = &Field{
+		Type:  "bool",
+		Name:  "quality_control_maintenance_indicator_on",
+		Value: string(buf),
+	}
+	if buf, err = json.Marshal(t.QualityControlNoSignal); err != nil {
+		return nil, err
+	}
+	node.Fields[17] = &Field{
+		Type:  "bool",
+		Name:  "quality_control_no_signal",
+		Value: string(buf),
+	}
+	if buf, err = json.Marshal(t.QualityControlLightningSensorOff); err != nil {
+		return nil, err
+	}
+	node.Fields[18] = &Field{
+		Type:  "bool",
+		Name:  "quality_control_lightning_sensor_off",
+		Value: string(buf),
+	}
+	if buf, err = json.Marshal(t.QualityControlFreezingRainSensorOff); err != nil {
+		return nil, err
+	}
+	node.Fields[19] = &Field{
+		Type:  "bool",
+		Name:  "quality_control_freezing_rain_sensor_off",
+		Value: string(buf),
+	}
+	if buf, err = json.Marshal(t.QualityControlPresentWeatherSensorOff); err != nil {
+		return nil, err
+	}
+	node.Fields[20] = &Field{
+		Type:  "bool",
+		Name:  "quality_control_present_weather_sensor_off",
+		Value: string(buf),
+	}
+	if buf, err = json.Marshal(t.SeaLevelPressure); err != nil {
+		return nil, err
+	}
+	node.Fields[21] = &Field{
+		Type:  "float64",
+		Name:  "sea_level_pressure",
+		Value: string(buf),
+	}
+	if buf, err = json.Marshal(t.PressureTendency); err != nil {
+		return nil, err
+	}
+	node.Fields[22] = &Field{
+		Type:  "float64",
+		Name:  "pressure_tendency",
+		Value: string(buf),
+	}
+	if buf, err = json.Marshal(t.MaxTemp6); err != nil {
+		return nil, err
+	}
+	node.Fields[23] = &Field{
+		Type:  "float64",
+		Name:  "max_temp_6",
+		Value: string(buf),
+	}
+	if buf, err = json.Marshal(t.MinTemp6); err != nil {
+		return nil, err
+	}
+	node.Fields[24] = &Field{
+		Type:  "float64",
+		Name:  "min_temp_6",
+		Value: string(buf),
+	}
+	if buf, err = json.Marshal(t.MaxTemp24); err != nil {
+		return nil, err
+	}
+	node.Fields[25] = &Field{
+		Type:  "float64",
+		Name:  "max_temp_24",
+		Value: string(buf),
+	}
+	if buf, err = json.Marshal(t.MinTemp24); err != nil {
+		return nil, err
+	}
+	node.Fields[26] = &Field{
+		Type:  "float64",
+		Name:  "min_temp_24",
+		Value: string(buf),
+	}
+	if buf, err = json.Marshal(t.Precipitation); err != nil {
+		return nil, err
+	}
+	node.Fields[27] = &Field{
+		Type:  "float64",
+		Name:  "precipitation",
+		Value: string(buf),
+	}
+	if buf, err = json.Marshal(t.Precipitation3); err != nil {
+		return nil, err
+	}
+	node.Fields[28] = &Field{
+		Type:  "float64",
+		Name:  "precipitation_3",
+		Value: string(buf),
+	}
+	if buf, err = json.Marshal(t.Precipitation6); err != nil {
+		return nil, err
+	}
+	node.Fields[29] = &Field{
+		Type:  "float64",
+		Name:  "precipitation_6",
+		Value: string(buf),
+	}
+	if buf, err = json.Marshal(t.Precipitation24); err != nil {
+		return nil, err
+	}
+	node.Fields[30] = &Field{
+		Type:  "float64",
+		Name:  "precipitation_24",
+		Value: string(buf),
+	}
+	if buf, err = json.Marshal(t.SnowDepth); err != nil {
+		return nil, err
+	}
+	node.Fields[31] = &Field{
+		Type:  "float64",
+		Name:  "snow_depth",
+		Value: string(buf),
+	}
+	if buf, err = json.Marshal(t.VertVis); err != nil {
+		return nil, err
+	}
+	node.Fields[32] = &Field{
+		Type:  "float64",
+		Name:  "vert_vis",
+		Value: string(buf),
+	}
+	if buf, err = json.Marshal(t.MetarType); err != nil {
+		return nil, err
+	}
+	node.Fields[33] = &Field{
+		Type:  "taf.MetarType",
+		Name:  "metar_type",
+		Value: string(buf),
+	}
+	node.Edges[0] = &Edge{
+		Type: "Station",
+		Name: "station",
+	}
+	err = t.QueryStation().
+		Select(station.FieldID).
+		Scan(ctx, &node.Edges[0].IDs)
+	if err != nil {
+		return nil, err
+	}
+	node.Edges[1] = &Edge{
+		Type: "SkyCondition",
+		Name: "sky_conditions",
+	}
+	err = t.QuerySkyConditions().
+		Select(skycondition.FieldID).
+		Scan(ctx, &node.Edges[1].IDs)
+	if err != nil {
+		return nil, err
+	}
+	return node, nil
+}
+
 func (c *Client) Node(ctx context.Context, id int) (*Node, error) {
 	n, err := c.Noder(ctx, id)
 	if err != nil {
@@ -907,6 +1279,30 @@ func (c *Client) noder(ctx context.Context, table string, id int) (Noder, error)
 		query := c.SkyCondition.Query().
 			Where(skycondition.ID(id))
 		query, err := query.CollectFields(ctx, "SkyCondition")
+		if err != nil {
+			return nil, err
+		}
+		n, err := query.Only(ctx)
+		if err != nil {
+			return nil, err
+		}
+		return n, nil
+	case station.Table:
+		query := c.Station.Query().
+			Where(station.ID(id))
+		query, err := query.CollectFields(ctx, "Station")
+		if err != nil {
+			return nil, err
+		}
+		n, err := query.Only(ctx)
+		if err != nil {
+			return nil, err
+		}
+		return n, nil
+	case taf.Table:
+		query := c.Taf.Query().
+			Where(taf.ID(id))
+		query, err := query.CollectFields(ctx, "Taf")
 		if err != nil {
 			return nil, err
 		}
@@ -1056,6 +1452,38 @@ func (c *Client) noders(ctx context.Context, table string, ids []int) ([]Noder, 
 		query := c.SkyCondition.Query().
 			Where(skycondition.IDIn(ids...))
 		query, err := query.CollectFields(ctx, "SkyCondition")
+		if err != nil {
+			return nil, err
+		}
+		nodes, err := query.All(ctx)
+		if err != nil {
+			return nil, err
+		}
+		for _, node := range nodes {
+			for _, noder := range idmap[node.ID] {
+				*noder = node
+			}
+		}
+	case station.Table:
+		query := c.Station.Query().
+			Where(station.IDIn(ids...))
+		query, err := query.CollectFields(ctx, "Station")
+		if err != nil {
+			return nil, err
+		}
+		nodes, err := query.All(ctx)
+		if err != nil {
+			return nil, err
+		}
+		for _, node := range nodes {
+			for _, noder := range idmap[node.ID] {
+				*noder = node
+			}
+		}
+	case taf.Table:
+		query := c.Taf.Query().
+			Where(taf.IDIn(ids...))
+		query, err := query.CollectFields(ctx, "Taf")
 		if err != nil {
 			return nil, err
 		}

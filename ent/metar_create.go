@@ -11,9 +11,9 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
-	"metar.gg/ent/airport"
 	"metar.gg/ent/metar"
 	"metar.gg/ent/skycondition"
+	"metar.gg/ent/station"
 )
 
 // MetarCreate is the builder for creating a Metar entity.
@@ -22,12 +22,6 @@ type MetarCreate struct {
 	mutation *MetarMutation
 	hooks    []Hook
 	conflict []sql.ConflictOption
-}
-
-// SetStationID sets the "station_id" field.
-func (mc *MetarCreate) SetStationID(s string) *MetarCreate {
-	mc.mutation.SetStationID(s)
-	return mc
 }
 
 // SetRawText sets the "raw_text" field.
@@ -390,23 +384,15 @@ func (mc *MetarCreate) SetID(i int) *MetarCreate {
 	return mc
 }
 
-// SetAirportID sets the "airport" edge to the Airport entity by ID.
-func (mc *MetarCreate) SetAirportID(id int) *MetarCreate {
-	mc.mutation.SetAirportID(id)
+// SetStationID sets the "station" edge to the Station entity by ID.
+func (mc *MetarCreate) SetStationID(id int) *MetarCreate {
+	mc.mutation.SetStationID(id)
 	return mc
 }
 
-// SetNillableAirportID sets the "airport" edge to the Airport entity by ID if the given value is not nil.
-func (mc *MetarCreate) SetNillableAirportID(id *int) *MetarCreate {
-	if id != nil {
-		mc = mc.SetAirportID(*id)
-	}
-	return mc
-}
-
-// SetAirport sets the "airport" edge to the Airport entity.
-func (mc *MetarCreate) SetAirport(a *Airport) *MetarCreate {
-	return mc.SetAirportID(a.ID)
+// SetStation sets the "station" edge to the Station entity.
+func (mc *MetarCreate) SetStation(s *Station) *MetarCreate {
+	return mc.SetStationID(s.ID)
 }
 
 // AddSkyConditionIDs adds the "sky_conditions" edge to the SkyCondition entity by IDs.
@@ -500,9 +486,6 @@ func (mc *MetarCreate) ExecX(ctx context.Context) {
 
 // check runs all checks and user-defined validators on the builder.
 func (mc *MetarCreate) check() error {
-	if _, ok := mc.mutation.StationID(); !ok {
-		return &ValidationError{Name: "station_id", err: errors.New(`ent: missing required field "Metar.station_id"`)}
-	}
 	if _, ok := mc.mutation.RawText(); !ok {
 		return &ValidationError{Name: "raw_text", err: errors.New(`ent: missing required field "Metar.raw_text"`)}
 	}
@@ -564,6 +547,9 @@ func (mc *MetarCreate) check() error {
 	if _, ok := mc.mutation.Hash(); !ok {
 		return &ValidationError{Name: "hash", err: errors.New(`ent: missing required field "Metar.hash"`)}
 	}
+	if _, ok := mc.mutation.StationID(); !ok {
+		return &ValidationError{Name: "station", err: errors.New(`ent: missing required edge "Metar.station"`)}
+	}
 	return nil
 }
 
@@ -597,14 +583,6 @@ func (mc *MetarCreate) createSpec() (*Metar, *sqlgraph.CreateSpec) {
 	if id, ok := mc.mutation.ID(); ok {
 		_node.ID = id
 		_spec.ID.Value = id
-	}
-	if value, ok := mc.mutation.StationID(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: metar.FieldStationID,
-		})
-		_node.StationID = value
 	}
 	if value, ok := mc.mutation.RawText(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
@@ -886,24 +864,24 @@ func (mc *MetarCreate) createSpec() (*Metar, *sqlgraph.CreateSpec) {
 		})
 		_node.Hash = value
 	}
-	if nodes := mc.mutation.AirportIDs(); len(nodes) > 0 {
+	if nodes := mc.mutation.StationIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
-			Table:   metar.AirportTable,
-			Columns: []string{metar.AirportColumn},
+			Table:   metar.StationTable,
+			Columns: []string{metar.StationColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeInt,
-					Column: airport.FieldID,
+					Column: station.FieldID,
 				},
 			},
 		}
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
-		_node.airport_metars = &nodes[0]
+		_node.station_metars = &nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	if nodes := mc.mutation.SkyConditionsIDs(); len(nodes) > 0 {
@@ -932,7 +910,7 @@ func (mc *MetarCreate) createSpec() (*Metar, *sqlgraph.CreateSpec) {
 // of the `INSERT` statement. For example:
 //
 //	client.Metar.Create().
-//		SetStationID(v).
+//		SetRawText(v).
 //		OnConflict(
 //			// Update the row with the new values
 //			// the was proposed for insertion.
@@ -941,7 +919,7 @@ func (mc *MetarCreate) createSpec() (*Metar, *sqlgraph.CreateSpec) {
 //		// Override some of the fields with custom
 //		// update values.
 //		Update(func(u *ent.MetarUpsert) {
-//			SetStationID(v+v).
+//			SetRawText(v+v).
 //		}).
 //		Exec(ctx)
 func (mc *MetarCreate) OnConflict(opts ...sql.ConflictOption) *MetarUpsertOne {
@@ -1653,9 +1631,6 @@ func (u *MetarUpsertOne) UpdateNewValues() *MetarUpsertOne {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(s *sql.UpdateSet) {
 		if _, exists := u.create.mutation.ID(); exists {
 			s.SetIgnore(metar.FieldID)
-		}
-		if _, exists := u.create.mutation.StationID(); exists {
-			s.SetIgnore(metar.FieldStationID)
 		}
 	}))
 	return u
@@ -2588,7 +2563,7 @@ func (mcb *MetarCreateBulk) ExecX(ctx context.Context) {
 //		// Override some of the fields with custom
 //		// update values.
 //		Update(func(u *ent.MetarUpsert) {
-//			SetStationID(v+v).
+//			SetRawText(v+v).
 //		}).
 //		Exec(ctx)
 func (mcb *MetarCreateBulk) OnConflict(opts ...sql.ConflictOption) *MetarUpsertBulk {
@@ -2634,9 +2609,6 @@ func (u *MetarUpsertBulk) UpdateNewValues() *MetarUpsertBulk {
 		for _, b := range u.create.builders {
 			if _, exists := b.mutation.ID(); exists {
 				s.SetIgnore(metar.FieldID)
-			}
-			if _, exists := b.mutation.StationID(); exists {
-				s.SetIgnore(metar.FieldStationID)
 			}
 		}
 	}))

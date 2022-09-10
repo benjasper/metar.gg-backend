@@ -13,9 +13,9 @@ import (
 	"entgo.io/ent/schema/field"
 	"metar.gg/ent/airport"
 	"metar.gg/ent/frequency"
-	"metar.gg/ent/metar"
 	"metar.gg/ent/predicate"
 	"metar.gg/ent/runway"
+	"metar.gg/ent/station"
 )
 
 // AirportUpdate is the builder for updating Airport entities.
@@ -152,20 +152,6 @@ func (au *AirportUpdate) SetCountry(s string) *AirportUpdate {
 // SetRegion sets the "region" field.
 func (au *AirportUpdate) SetRegion(s string) *AirportUpdate {
 	au.mutation.SetRegion(s)
-	return au
-}
-
-// SetHasWeather sets the "has_weather" field.
-func (au *AirportUpdate) SetHasWeather(b bool) *AirportUpdate {
-	au.mutation.SetHasWeather(b)
-	return au
-}
-
-// SetNillableHasWeather sets the "has_weather" field if the given value is not nil.
-func (au *AirportUpdate) SetNillableHasWeather(b *bool) *AirportUpdate {
-	if b != nil {
-		au.SetHasWeather(*b)
-	}
 	return au
 }
 
@@ -316,6 +302,25 @@ func (au *AirportUpdate) AddRunways(r ...*Runway) *AirportUpdate {
 	return au.AddRunwayIDs(ids...)
 }
 
+// SetStationID sets the "station" edge to the Station entity by ID.
+func (au *AirportUpdate) SetStationID(id int) *AirportUpdate {
+	au.mutation.SetStationID(id)
+	return au
+}
+
+// SetNillableStationID sets the "station" edge to the Station entity by ID if the given value is not nil.
+func (au *AirportUpdate) SetNillableStationID(id *int) *AirportUpdate {
+	if id != nil {
+		au = au.SetStationID(*id)
+	}
+	return au
+}
+
+// SetStation sets the "station" edge to the Station entity.
+func (au *AirportUpdate) SetStation(s *Station) *AirportUpdate {
+	return au.SetStationID(s.ID)
+}
+
 // AddFrequencyIDs adds the "frequencies" edge to the Frequency entity by IDs.
 func (au *AirportUpdate) AddFrequencyIDs(ids ...int) *AirportUpdate {
 	au.mutation.AddFrequencyIDs(ids...)
@@ -329,21 +334,6 @@ func (au *AirportUpdate) AddFrequencies(f ...*Frequency) *AirportUpdate {
 		ids[i] = f[i].ID
 	}
 	return au.AddFrequencyIDs(ids...)
-}
-
-// AddMetarIDs adds the "metars" edge to the Metar entity by IDs.
-func (au *AirportUpdate) AddMetarIDs(ids ...int) *AirportUpdate {
-	au.mutation.AddMetarIDs(ids...)
-	return au
-}
-
-// AddMetars adds the "metars" edges to the Metar entity.
-func (au *AirportUpdate) AddMetars(m ...*Metar) *AirportUpdate {
-	ids := make([]int, len(m))
-	for i := range m {
-		ids[i] = m[i].ID
-	}
-	return au.AddMetarIDs(ids...)
 }
 
 // Mutation returns the AirportMutation object of the builder.
@@ -372,6 +362,12 @@ func (au *AirportUpdate) RemoveRunways(r ...*Runway) *AirportUpdate {
 	return au.RemoveRunwayIDs(ids...)
 }
 
+// ClearStation clears the "station" edge to the Station entity.
+func (au *AirportUpdate) ClearStation() *AirportUpdate {
+	au.mutation.ClearStation()
+	return au
+}
+
 // ClearFrequencies clears all "frequencies" edges to the Frequency entity.
 func (au *AirportUpdate) ClearFrequencies() *AirportUpdate {
 	au.mutation.ClearFrequencies()
@@ -391,27 +387,6 @@ func (au *AirportUpdate) RemoveFrequencies(f ...*Frequency) *AirportUpdate {
 		ids[i] = f[i].ID
 	}
 	return au.RemoveFrequencyIDs(ids...)
-}
-
-// ClearMetars clears all "metars" edges to the Metar entity.
-func (au *AirportUpdate) ClearMetars() *AirportUpdate {
-	au.mutation.ClearMetars()
-	return au
-}
-
-// RemoveMetarIDs removes the "metars" edge to Metar entities by IDs.
-func (au *AirportUpdate) RemoveMetarIDs(ids ...int) *AirportUpdate {
-	au.mutation.RemoveMetarIDs(ids...)
-	return au
-}
-
-// RemoveMetars removes "metars" edges to Metar entities.
-func (au *AirportUpdate) RemoveMetars(m ...*Metar) *AirportUpdate {
-	ids := make([]int, len(m))
-	for i := range m {
-		ids[i] = m[i].ID
-	}
-	return au.RemoveMetarIDs(ids...)
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -624,13 +599,6 @@ func (au *AirportUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Column: airport.FieldRegion,
 		})
 	}
-	if value, ok := au.mutation.HasWeather(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeBool,
-			Value:  value,
-			Column: airport.FieldHasWeather,
-		})
-	}
 	if value, ok := au.mutation.Municipality(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
@@ -777,6 +745,41 @@ func (au *AirportUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
+	if au.mutation.StationCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2O,
+			Inverse: false,
+			Table:   airport.StationTable,
+			Columns: []string{airport.StationColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: station.FieldID,
+				},
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := au.mutation.StationIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2O,
+			Inverse: false,
+			Table:   airport.StationTable,
+			Columns: []string{airport.StationColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: station.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
 	if au.mutation.FrequenciesCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
@@ -823,60 +826,6 @@ func (au *AirportUpdate) sqlSave(ctx context.Context) (n int, err error) {
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeInt,
 					Column: frequency.FieldID,
-				},
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Add = append(_spec.Edges.Add, edge)
-	}
-	if au.mutation.MetarsCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   airport.MetarsTable,
-			Columns: []string{airport.MetarsColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: metar.FieldID,
-				},
-			},
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := au.mutation.RemovedMetarsIDs(); len(nodes) > 0 && !au.mutation.MetarsCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   airport.MetarsTable,
-			Columns: []string{airport.MetarsColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: metar.FieldID,
-				},
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := au.mutation.MetarsIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   airport.MetarsTable,
-			Columns: []string{airport.MetarsColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: metar.FieldID,
 				},
 			},
 		}
@@ -1029,20 +978,6 @@ func (auo *AirportUpdateOne) SetRegion(s string) *AirportUpdateOne {
 	return auo
 }
 
-// SetHasWeather sets the "has_weather" field.
-func (auo *AirportUpdateOne) SetHasWeather(b bool) *AirportUpdateOne {
-	auo.mutation.SetHasWeather(b)
-	return auo
-}
-
-// SetNillableHasWeather sets the "has_weather" field if the given value is not nil.
-func (auo *AirportUpdateOne) SetNillableHasWeather(b *bool) *AirportUpdateOne {
-	if b != nil {
-		auo.SetHasWeather(*b)
-	}
-	return auo
-}
-
 // SetMunicipality sets the "municipality" field.
 func (auo *AirportUpdateOne) SetMunicipality(s string) *AirportUpdateOne {
 	auo.mutation.SetMunicipality(s)
@@ -1190,6 +1125,25 @@ func (auo *AirportUpdateOne) AddRunways(r ...*Runway) *AirportUpdateOne {
 	return auo.AddRunwayIDs(ids...)
 }
 
+// SetStationID sets the "station" edge to the Station entity by ID.
+func (auo *AirportUpdateOne) SetStationID(id int) *AirportUpdateOne {
+	auo.mutation.SetStationID(id)
+	return auo
+}
+
+// SetNillableStationID sets the "station" edge to the Station entity by ID if the given value is not nil.
+func (auo *AirportUpdateOne) SetNillableStationID(id *int) *AirportUpdateOne {
+	if id != nil {
+		auo = auo.SetStationID(*id)
+	}
+	return auo
+}
+
+// SetStation sets the "station" edge to the Station entity.
+func (auo *AirportUpdateOne) SetStation(s *Station) *AirportUpdateOne {
+	return auo.SetStationID(s.ID)
+}
+
 // AddFrequencyIDs adds the "frequencies" edge to the Frequency entity by IDs.
 func (auo *AirportUpdateOne) AddFrequencyIDs(ids ...int) *AirportUpdateOne {
 	auo.mutation.AddFrequencyIDs(ids...)
@@ -1203,21 +1157,6 @@ func (auo *AirportUpdateOne) AddFrequencies(f ...*Frequency) *AirportUpdateOne {
 		ids[i] = f[i].ID
 	}
 	return auo.AddFrequencyIDs(ids...)
-}
-
-// AddMetarIDs adds the "metars" edge to the Metar entity by IDs.
-func (auo *AirportUpdateOne) AddMetarIDs(ids ...int) *AirportUpdateOne {
-	auo.mutation.AddMetarIDs(ids...)
-	return auo
-}
-
-// AddMetars adds the "metars" edges to the Metar entity.
-func (auo *AirportUpdateOne) AddMetars(m ...*Metar) *AirportUpdateOne {
-	ids := make([]int, len(m))
-	for i := range m {
-		ids[i] = m[i].ID
-	}
-	return auo.AddMetarIDs(ids...)
 }
 
 // Mutation returns the AirportMutation object of the builder.
@@ -1246,6 +1185,12 @@ func (auo *AirportUpdateOne) RemoveRunways(r ...*Runway) *AirportUpdateOne {
 	return auo.RemoveRunwayIDs(ids...)
 }
 
+// ClearStation clears the "station" edge to the Station entity.
+func (auo *AirportUpdateOne) ClearStation() *AirportUpdateOne {
+	auo.mutation.ClearStation()
+	return auo
+}
+
 // ClearFrequencies clears all "frequencies" edges to the Frequency entity.
 func (auo *AirportUpdateOne) ClearFrequencies() *AirportUpdateOne {
 	auo.mutation.ClearFrequencies()
@@ -1265,27 +1210,6 @@ func (auo *AirportUpdateOne) RemoveFrequencies(f ...*Frequency) *AirportUpdateOn
 		ids[i] = f[i].ID
 	}
 	return auo.RemoveFrequencyIDs(ids...)
-}
-
-// ClearMetars clears all "metars" edges to the Metar entity.
-func (auo *AirportUpdateOne) ClearMetars() *AirportUpdateOne {
-	auo.mutation.ClearMetars()
-	return auo
-}
-
-// RemoveMetarIDs removes the "metars" edge to Metar entities by IDs.
-func (auo *AirportUpdateOne) RemoveMetarIDs(ids ...int) *AirportUpdateOne {
-	auo.mutation.RemoveMetarIDs(ids...)
-	return auo
-}
-
-// RemoveMetars removes "metars" edges to Metar entities.
-func (auo *AirportUpdateOne) RemoveMetars(m ...*Metar) *AirportUpdateOne {
-	ids := make([]int, len(m))
-	for i := range m {
-		ids[i] = m[i].ID
-	}
-	return auo.RemoveMetarIDs(ids...)
 }
 
 // Select allows selecting one or more fields (columns) of the returned entity.
@@ -1528,13 +1452,6 @@ func (auo *AirportUpdateOne) sqlSave(ctx context.Context) (_node *Airport, err e
 			Column: airport.FieldRegion,
 		})
 	}
-	if value, ok := auo.mutation.HasWeather(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeBool,
-			Value:  value,
-			Column: airport.FieldHasWeather,
-		})
-	}
 	if value, ok := auo.mutation.Municipality(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
@@ -1681,6 +1598,41 @@ func (auo *AirportUpdateOne) sqlSave(ctx context.Context) (_node *Airport, err e
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
+	if auo.mutation.StationCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2O,
+			Inverse: false,
+			Table:   airport.StationTable,
+			Columns: []string{airport.StationColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: station.FieldID,
+				},
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := auo.mutation.StationIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2O,
+			Inverse: false,
+			Table:   airport.StationTable,
+			Columns: []string{airport.StationColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: station.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
 	if auo.mutation.FrequenciesCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
@@ -1727,60 +1679,6 @@ func (auo *AirportUpdateOne) sqlSave(ctx context.Context) (_node *Airport, err e
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeInt,
 					Column: frequency.FieldID,
-				},
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Add = append(_spec.Edges.Add, edge)
-	}
-	if auo.mutation.MetarsCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   airport.MetarsTable,
-			Columns: []string{airport.MetarsColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: metar.FieldID,
-				},
-			},
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := auo.mutation.RemovedMetarsIDs(); len(nodes) > 0 && !auo.mutation.MetarsCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   airport.MetarsTable,
-			Columns: []string{airport.MetarsColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: metar.FieldID,
-				},
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := auo.mutation.MetarsIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   airport.MetarsTable,
-			Columns: []string{airport.MetarsColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: metar.FieldID,
 				},
 			},
 		}

@@ -13,8 +13,8 @@ import (
 	"entgo.io/ent/schema/field"
 	"metar.gg/ent/airport"
 	"metar.gg/ent/frequency"
-	"metar.gg/ent/metar"
 	"metar.gg/ent/runway"
+	"metar.gg/ent/station"
 )
 
 // AirportCreate is the builder for creating a Airport entity.
@@ -118,20 +118,6 @@ func (ac *AirportCreate) SetCountry(s string) *AirportCreate {
 // SetRegion sets the "region" field.
 func (ac *AirportCreate) SetRegion(s string) *AirportCreate {
 	ac.mutation.SetRegion(s)
-	return ac
-}
-
-// SetHasWeather sets the "has_weather" field.
-func (ac *AirportCreate) SetHasWeather(b bool) *AirportCreate {
-	ac.mutation.SetHasWeather(b)
-	return ac
-}
-
-// SetNillableHasWeather sets the "has_weather" field if the given value is not nil.
-func (ac *AirportCreate) SetNillableHasWeather(b *bool) *AirportCreate {
-	if b != nil {
-		ac.SetHasWeather(*b)
-	}
 	return ac
 }
 
@@ -252,6 +238,25 @@ func (ac *AirportCreate) AddRunways(r ...*Runway) *AirportCreate {
 	return ac.AddRunwayIDs(ids...)
 }
 
+// SetStationID sets the "station" edge to the Station entity by ID.
+func (ac *AirportCreate) SetStationID(id int) *AirportCreate {
+	ac.mutation.SetStationID(id)
+	return ac
+}
+
+// SetNillableStationID sets the "station" edge to the Station entity by ID if the given value is not nil.
+func (ac *AirportCreate) SetNillableStationID(id *int) *AirportCreate {
+	if id != nil {
+		ac = ac.SetStationID(*id)
+	}
+	return ac
+}
+
+// SetStation sets the "station" edge to the Station entity.
+func (ac *AirportCreate) SetStation(s *Station) *AirportCreate {
+	return ac.SetStationID(s.ID)
+}
+
 // AddFrequencyIDs adds the "frequencies" edge to the Frequency entity by IDs.
 func (ac *AirportCreate) AddFrequencyIDs(ids ...int) *AirportCreate {
 	ac.mutation.AddFrequencyIDs(ids...)
@@ -265,21 +270,6 @@ func (ac *AirportCreate) AddFrequencies(f ...*Frequency) *AirportCreate {
 		ids[i] = f[i].ID
 	}
 	return ac.AddFrequencyIDs(ids...)
-}
-
-// AddMetarIDs adds the "metars" edge to the Metar entity by IDs.
-func (ac *AirportCreate) AddMetarIDs(ids ...int) *AirportCreate {
-	ac.mutation.AddMetarIDs(ids...)
-	return ac
-}
-
-// AddMetars adds the "metars" edges to the Metar entity.
-func (ac *AirportCreate) AddMetars(m ...*Metar) *AirportCreate {
-	ids := make([]int, len(m))
-	for i := range m {
-		ids[i] = m[i].ID
-	}
-	return ac.AddMetarIDs(ids...)
 }
 
 // Mutation returns the AirportMutation object of the builder.
@@ -367,10 +357,6 @@ func (ac *AirportCreate) defaults() {
 		v := airport.DefaultLastUpdated()
 		ac.mutation.SetLastUpdated(v)
 	}
-	if _, ok := ac.mutation.HasWeather(); !ok {
-		v := airport.DefaultHasWeather
-		ac.mutation.SetHasWeather(v)
-	}
 }
 
 // check runs all checks and user-defined validators on the builder.
@@ -417,9 +403,6 @@ func (ac *AirportCreate) check() error {
 	}
 	if _, ok := ac.mutation.Region(); !ok {
 		return &ValidationError{Name: "region", err: errors.New(`ent: missing required field "Airport.region"`)}
-	}
-	if _, ok := ac.mutation.HasWeather(); !ok {
-		return &ValidationError{Name: "has_weather", err: errors.New(`ent: missing required field "Airport.has_weather"`)}
 	}
 	if _, ok := ac.mutation.ScheduledService(); !ok {
 		return &ValidationError{Name: "scheduled_service", err: errors.New(`ent: missing required field "Airport.scheduled_service"`)}
@@ -557,14 +540,6 @@ func (ac *AirportCreate) createSpec() (*Airport, *sqlgraph.CreateSpec) {
 		})
 		_node.Region = value
 	}
-	if value, ok := ac.mutation.HasWeather(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeBool,
-			Value:  value,
-			Column: airport.FieldHasWeather,
-		})
-		_node.HasWeather = value
-	}
 	if value, ok := ac.mutation.Municipality(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
@@ -648,6 +623,25 @@ func (ac *AirportCreate) createSpec() (*Airport, *sqlgraph.CreateSpec) {
 		}
 		_spec.Edges = append(_spec.Edges, edge)
 	}
+	if nodes := ac.mutation.StationIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2O,
+			Inverse: false,
+			Table:   airport.StationTable,
+			Columns: []string{airport.StationColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: station.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
 	if nodes := ac.mutation.FrequenciesIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
@@ -659,25 +653,6 @@ func (ac *AirportCreate) createSpec() (*Airport, *sqlgraph.CreateSpec) {
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeInt,
 					Column: frequency.FieldID,
-				},
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges = append(_spec.Edges, edge)
-	}
-	if nodes := ac.mutation.MetarsIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   airport.MetarsTable,
-			Columns: []string{airport.MetarsColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: metar.FieldID,
 				},
 			},
 		}
@@ -903,18 +878,6 @@ func (u *AirportUpsert) SetRegion(v string) *AirportUpsert {
 // UpdateRegion sets the "region" field to the value that was provided on create.
 func (u *AirportUpsert) UpdateRegion() *AirportUpsert {
 	u.SetExcluded(airport.FieldRegion)
-	return u
-}
-
-// SetHasWeather sets the "has_weather" field.
-func (u *AirportUpsert) SetHasWeather(v bool) *AirportUpsert {
-	u.Set(airport.FieldHasWeather, v)
-	return u
-}
-
-// UpdateHasWeather sets the "has_weather" field to the value that was provided on create.
-func (u *AirportUpsert) UpdateHasWeather() *AirportUpsert {
-	u.SetExcluded(airport.FieldHasWeather)
 	return u
 }
 
@@ -1291,20 +1254,6 @@ func (u *AirportUpsertOne) SetRegion(v string) *AirportUpsertOne {
 func (u *AirportUpsertOne) UpdateRegion() *AirportUpsertOne {
 	return u.Update(func(s *AirportUpsert) {
 		s.UpdateRegion()
-	})
-}
-
-// SetHasWeather sets the "has_weather" field.
-func (u *AirportUpsertOne) SetHasWeather(v bool) *AirportUpsertOne {
-	return u.Update(func(s *AirportUpsert) {
-		s.SetHasWeather(v)
-	})
-}
-
-// UpdateHasWeather sets the "has_weather" field to the value that was provided on create.
-func (u *AirportUpsertOne) UpdateHasWeather() *AirportUpsertOne {
-	return u.Update(func(s *AirportUpsert) {
-		s.UpdateHasWeather()
 	})
 }
 
@@ -1865,20 +1814,6 @@ func (u *AirportUpsertBulk) SetRegion(v string) *AirportUpsertBulk {
 func (u *AirportUpsertBulk) UpdateRegion() *AirportUpsertBulk {
 	return u.Update(func(s *AirportUpsert) {
 		s.UpdateRegion()
-	})
-}
-
-// SetHasWeather sets the "has_weather" field.
-func (u *AirportUpsertBulk) SetHasWeather(v bool) *AirportUpsertBulk {
-	return u.Update(func(s *AirportUpsert) {
-		s.SetHasWeather(v)
-	})
-}
-
-// UpdateHasWeather sets the "has_weather" field to the value that was provided on create.
-func (u *AirportUpsertBulk) UpdateHasWeather() *AirportUpsertBulk {
-	return u.Update(func(s *AirportUpsert) {
-		s.UpdateHasWeather()
 	})
 }
 

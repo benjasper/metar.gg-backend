@@ -151,13 +151,6 @@ func Region(v string) predicate.Airport {
 	})
 }
 
-// HasWeather applies equality check predicate on the "has_weather" field. It's identical to HasWeatherEQ.
-func HasWeather(v bool) predicate.Airport {
-	return predicate.Airport(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldHasWeather), v))
-	})
-}
-
 // Municipality applies equality check predicate on the "municipality" field. It's identical to MunicipalityEQ.
 func Municipality(v string) predicate.Airport {
 	return predicate.Airport(func(s *sql.Selector) {
@@ -1058,20 +1051,6 @@ func RegionContainsFold(v string) predicate.Airport {
 	})
 }
 
-// HasWeatherEQ applies the EQ predicate on the "has_weather" field.
-func HasWeatherEQ(v bool) predicate.Airport {
-	return predicate.Airport(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldHasWeather), v))
-	})
-}
-
-// HasWeatherNEQ applies the NEQ predicate on the "has_weather" field.
-func HasWeatherNEQ(v bool) predicate.Airport {
-	return predicate.Airport(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldHasWeather), v))
-	})
-}
-
 // MunicipalityEQ applies the EQ predicate on the "municipality" field.
 func MunicipalityEQ(v string) predicate.Airport {
 	return predicate.Airport(func(s *sql.Selector) {
@@ -1792,6 +1771,34 @@ func HasRunwaysWith(preds ...predicate.Runway) predicate.Airport {
 	})
 }
 
+// HasStation applies the HasEdge predicate on the "station" edge.
+func HasStation() predicate.Airport {
+	return predicate.Airport(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.To(StationTable, FieldID),
+			sqlgraph.Edge(sqlgraph.O2O, false, StationTable, StationColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasStationWith applies the HasEdge predicate on the "station" edge with a given conditions (other predicates).
+func HasStationWith(preds ...predicate.Station) predicate.Airport {
+	return predicate.Airport(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.To(StationInverseTable, FieldID),
+			sqlgraph.Edge(sqlgraph.O2O, false, StationTable, StationColumn),
+		)
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
 // HasFrequencies applies the HasEdge predicate on the "frequencies" edge.
 func HasFrequencies() predicate.Airport {
 	return predicate.Airport(func(s *sql.Selector) {
@@ -1811,34 +1818,6 @@ func HasFrequenciesWith(preds ...predicate.Frequency) predicate.Airport {
 			sqlgraph.From(Table, FieldID),
 			sqlgraph.To(FrequenciesInverseTable, FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, false, FrequenciesTable, FrequenciesColumn),
-		)
-		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
-			for _, p := range preds {
-				p(s)
-			}
-		})
-	})
-}
-
-// HasMetars applies the HasEdge predicate on the "metars" edge.
-func HasMetars() predicate.Airport {
-	return predicate.Airport(func(s *sql.Selector) {
-		step := sqlgraph.NewStep(
-			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(MetarsTable, FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, MetarsTable, MetarsColumn),
-		)
-		sqlgraph.HasNeighbors(s, step)
-	})
-}
-
-// HasMetarsWith applies the HasEdge predicate on the "metars" edge with a given conditions (other predicates).
-func HasMetarsWith(preds ...predicate.Metar) predicate.Airport {
-	return predicate.Airport(func(s *sql.Selector) {
-		step := sqlgraph.NewStep(
-			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(MetarsInverseTable, FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, MetarsTable, MetarsColumn),
 		)
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {

@@ -62,10 +62,9 @@ type MetarWithDistance {
 extend type Airport {
     """Returns all Runways for this Airport. They can be filtered with the closed parameter."""
     runways(closed: Boolean): [Runway!]! @goField(forceResolver: true)
+}
 
-    """Returns last METARs reported by this airport."""
-    metars(after: Cursor, first: Int, before: Cursor, last: Int): MetarConnection! @goField(forceResolver: true)
-
+extend type Station {
     """Returns the closest METAR to the airport, within the given radius (in km). It's also the latest METAR for each station."""
     metarsVicinity(first: Int = 1, radius: Float = 50.0): [MetarWithDistance!]! @goField(forceResolver: true)
 }

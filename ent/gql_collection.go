@@ -25,6 +25,16 @@ func (a *AirportQuery) collectField(ctx context.Context, op *graphql.OperationCo
 	path = append([]string(nil), path...)
 	for _, field := range graphql.CollectFields(op, field.Selections, satisfies) {
 		switch field.Name {
+		case "station":
+			var (
+				alias = field.Alias
+				path  = append(path, alias)
+				query = &StationQuery{config: a.config}
+			)
+			if err := query.collectField(ctx, op, field, path, satisfies...); err != nil {
+				return err
+			}
+			a.withStation = query
 		case "frequencies":
 			var (
 				alias = field.Alias
@@ -141,16 +151,16 @@ func (m *MetarQuery) collectField(ctx context.Context, op *graphql.OperationCont
 	path = append([]string(nil), path...)
 	for _, field := range graphql.CollectFields(op, field.Selections, satisfies) {
 		switch field.Name {
-		case "airport":
+		case "station":
 			var (
 				alias = field.Alias
 				path  = append(path, alias)
-				query = &AirportQuery{config: m.config}
+				query = &StationQuery{config: m.config}
 			)
 			if err := query.collectField(ctx, op, field, path, satisfies...); err != nil {
 				return err
 			}
-			m.withAirport = query
+			m.withStation = query
 		case "skyConditions", "sky_conditions":
 			var (
 				alias = field.Alias
@@ -304,6 +314,178 @@ func newSkyConditionPaginateArgs(rv map[string]interface{}) *skyconditionPaginat
 	}
 	if v := rv[beforeField]; v != nil {
 		args.before = v.(*Cursor)
+	}
+	return args
+}
+
+// CollectFields tells the query-builder to eagerly load connected nodes by resolver context.
+func (s *StationQuery) CollectFields(ctx context.Context, satisfies ...string) (*StationQuery, error) {
+	fc := graphql.GetFieldContext(ctx)
+	if fc == nil {
+		return s, nil
+	}
+	if err := s.collectField(ctx, graphql.GetOperationContext(ctx), fc.Field, nil, satisfies...); err != nil {
+		return nil, err
+	}
+	return s, nil
+}
+
+func (s *StationQuery) collectField(ctx context.Context, op *graphql.OperationContext, field graphql.CollectedField, path []string, satisfies ...string) error {
+	path = append([]string(nil), path...)
+	for _, field := range graphql.CollectFields(op, field.Selections, satisfies) {
+		switch field.Name {
+		case "airport":
+			var (
+				alias = field.Alias
+				path  = append(path, alias)
+				query = &AirportQuery{config: s.config}
+			)
+			if err := query.collectField(ctx, op, field, path, satisfies...); err != nil {
+				return err
+			}
+			s.withAirport = query
+		case "metars":
+			var (
+				alias = field.Alias
+				path  = append(path, alias)
+				query = &MetarQuery{config: s.config}
+			)
+			if err := query.collectField(ctx, op, field, path, satisfies...); err != nil {
+				return err
+			}
+			s.WithNamedMetars(alias, func(wq *MetarQuery) {
+				*wq = *query
+			})
+		case "tafs":
+			var (
+				alias = field.Alias
+				path  = append(path, alias)
+				query = &TafQuery{config: s.config}
+			)
+			if err := query.collectField(ctx, op, field, path, satisfies...); err != nil {
+				return err
+			}
+			s.WithNamedTafs(alias, func(wq *TafQuery) {
+				*wq = *query
+			})
+		}
+	}
+	return nil
+}
+
+type stationPaginateArgs struct {
+	first, last   *int
+	after, before *Cursor
+	opts          []StationPaginateOption
+}
+
+func newStationPaginateArgs(rv map[string]interface{}) *stationPaginateArgs {
+	args := &stationPaginateArgs{}
+	if rv == nil {
+		return args
+	}
+	if v := rv[firstField]; v != nil {
+		args.first = v.(*int)
+	}
+	if v := rv[lastField]; v != nil {
+		args.last = v.(*int)
+	}
+	if v := rv[afterField]; v != nil {
+		args.after = v.(*Cursor)
+	}
+	if v := rv[beforeField]; v != nil {
+		args.before = v.(*Cursor)
+	}
+	return args
+}
+
+// CollectFields tells the query-builder to eagerly load connected nodes by resolver context.
+func (t *TafQuery) CollectFields(ctx context.Context, satisfies ...string) (*TafQuery, error) {
+	fc := graphql.GetFieldContext(ctx)
+	if fc == nil {
+		return t, nil
+	}
+	if err := t.collectField(ctx, graphql.GetOperationContext(ctx), fc.Field, nil, satisfies...); err != nil {
+		return nil, err
+	}
+	return t, nil
+}
+
+func (t *TafQuery) collectField(ctx context.Context, op *graphql.OperationContext, field graphql.CollectedField, path []string, satisfies ...string) error {
+	path = append([]string(nil), path...)
+	for _, field := range graphql.CollectFields(op, field.Selections, satisfies) {
+		switch field.Name {
+		case "station":
+			var (
+				alias = field.Alias
+				path  = append(path, alias)
+				query = &StationQuery{config: t.config}
+			)
+			if err := query.collectField(ctx, op, field, path, satisfies...); err != nil {
+				return err
+			}
+			t.withStation = query
+		case "skyConditions", "sky_conditions":
+			var (
+				alias = field.Alias
+				path  = append(path, alias)
+				query = &SkyConditionQuery{config: t.config}
+			)
+			if err := query.collectField(ctx, op, field, path, satisfies...); err != nil {
+				return err
+			}
+			t.WithNamedSkyConditions(alias, func(wq *SkyConditionQuery) {
+				*wq = *query
+			})
+		}
+	}
+	return nil
+}
+
+type tafPaginateArgs struct {
+	first, last   *int
+	after, before *Cursor
+	opts          []TafPaginateOption
+}
+
+func newTafPaginateArgs(rv map[string]interface{}) *tafPaginateArgs {
+	args := &tafPaginateArgs{}
+	if rv == nil {
+		return args
+	}
+	if v := rv[firstField]; v != nil {
+		args.first = v.(*int)
+	}
+	if v := rv[lastField]; v != nil {
+		args.last = v.(*int)
+	}
+	if v := rv[afterField]; v != nil {
+		args.after = v.(*Cursor)
+	}
+	if v := rv[beforeField]; v != nil {
+		args.before = v.(*Cursor)
+	}
+	if v, ok := rv[orderByField]; ok {
+		switch v := v.(type) {
+		case map[string]interface{}:
+			var (
+				err1, err2 error
+				order      = &TafOrder{Field: &TafOrderField{}}
+			)
+			if d, ok := v[directionField]; ok {
+				err1 = order.Direction.UnmarshalGQL(d)
+			}
+			if f, ok := v[fieldField]; ok {
+				err2 = order.Field.UnmarshalGQL(f)
+			}
+			if err1 == nil && err2 == nil {
+				args.opts = append(args.opts, WithTafOrder(order))
+			}
+		case *TafOrder:
+			if v != nil {
+				args.opts = append(args.opts, WithTafOrder(v))
+			}
+		}
 	}
 	return args
 }

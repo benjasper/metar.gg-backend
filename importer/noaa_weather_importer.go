@@ -5,15 +5,18 @@ import (
 	"encoding/xml"
 	"fmt"
 	"github.com/cnf/structhash"
+	"github.com/segmentio/fasthash/fnv1a"
 	"golang.org/x/sync/errgroup"
 	"metar.gg/ent"
 	"metar.gg/ent/airport"
 	"metar.gg/ent/metar"
 	"metar.gg/ent/skycondition"
+	"metar.gg/ent/station"
 	"metar.gg/environment"
 	"metar.gg/logging"
 	"metar.gg/utils"
 	"os"
+	"strconv"
 	"time"
 )
 
@@ -69,21 +72,21 @@ func (x *XmlMetar) Hash() string {
 	return fmt.Sprintf("%x", structhash.Md5(x, 1))
 }
 
-type NoaaMetarImporter struct {
+type NoaaWeatherImporter struct {
 	db     *ent.Client
 	logger *logging.Logger
 	stats  *ImportStatistics
 }
 
-func NewNoaaMetarImporter(db *ent.Client, logger *logging.Logger) *NoaaMetarImporter {
-	return &NoaaMetarImporter{
+func NewNoaaMetarImporter(db *ent.Client, logger *logging.Logger) *NoaaWeatherImporter {
+	return &NoaaWeatherImporter{
 		db:     db,
 		logger: logger,
 		stats:  NewImportStatistics("METAR", logger),
 	}
 }
 
-func (i *NoaaMetarImporter) ImportMetars(url string, ctx context.Context) error {
+func (i *NoaaWeatherImporter) ImportMetars(url string, ctx context.Context) error {
 	i.stats.Start()
 
 	filepath := "metars.xml"
@@ -101,10 +104,9 @@ func (i *NoaaMetarImporter) ImportMetars(url string, ctx context.Context) error 
 		_ = f.Close()
 	}(f)
 
-	maxGoroutines := environment.Global.MaxConcurrentImports
-	guard := make(chan struct{}, maxGoroutines)
+	wg, ctx := errgroup.WithContext(ctx)
 
-	wg := errgroup.Group{}
+	wg.SetLimit(environment.Global.MaxConcurrentImports)
 
 	// Parse xml file
 	decoder := xml.NewDecoder(f)
@@ -121,17 +123,15 @@ func (i *NoaaMetarImporter) ImportMetars(url string, ctx context.Context) error 
 		case xml.StartElement:
 			switch se.Name.Local {
 			case "METAR":
-				var metar XmlMetar
-				err = decoder.DecodeElement(&metar, &se)
+				var xmlMetar XmlMetar
+				err = decoder.DecodeElement(&xmlMetar, &se)
 				if err != nil {
 					return err
 				}
 
-				guard <- struct{}{} // would block if guard channel is already filled
 				i.stats.AddTotal()
 				wg.Go(func() error {
-					defer func() { <-guard }()
-					return i.importMetar(&metar, ctx)
+					return i.importMetar(&xmlMetar, ctx)
 				})
 			}
 		}
@@ -153,11 +153,10 @@ func (i *NoaaMetarImporter) ImportMetars(url string, ctx context.Context) error 
 	return nil
 }
 
-func (i *NoaaMetarImporter) importMetar(x *XmlMetar, ctx context.Context) error {
-	a, _ := i.db.Airport.Query().Where(airport.Identifier(x.StationId)).Only(ctx)
-	if x.StationId == "" {
-		i.logger.Error(fmt.Sprintf("Could not find airport with identifier %s and metar %s", x.StationId, x.RawText))
-		return nil
+func (i *NoaaWeatherImporter) importMetar(x *XmlMetar, ctx context.Context) error {
+	s, err := i.getStation(ctx, x.StationId, utils.Nillable(x.Latitude), utils.Nillable(x.Longitude), utils.Nillable(x.Elevation))
+	if err != nil {
+		return err
 	}
 
 	select {
@@ -169,7 +168,7 @@ func (i *NoaaMetarImporter) importMetar(x *XmlMetar, ctx context.Context) error 
 	hash := x.Hash()
 
 	// Check if m already exists
-	_, err := i.db.Metar.Query().Where(metar.Hash(hash)).First(ctx)
+	_, err = i.db.Metar.Query().Where(metar.Hash(hash)).First(ctx)
 	if err == nil {
 		// Metar already exists
 		return nil
@@ -203,7 +202,7 @@ func (i *NoaaMetarImporter) importMetar(x *XmlMetar, ctx context.Context) error 
 	}
 
 	t := transaction.Metar.Create().
-		SetStationID(x.StationId).
+		SetStation(s).
 		SetRawText(x.RawText).
 		SetObservationTime(x.ObservationTime).
 		SetNillableLatitude(x.Latitude).
@@ -239,10 +238,6 @@ func (i *NoaaMetarImporter) importMetar(x *XmlMetar, ctx context.Context) error 
 		SetMetarType(metarType).
 		SetNillableElevation(x.Elevation).
 		SetHash(hash)
-
-	if a != nil {
-		t.SetAirportID(a.ID)
-	}
 
 	m, err := t.Save(ctx)
 	if err != nil {
@@ -291,13 +286,6 @@ func (i *NoaaMetarImporter) importMetar(x *XmlMetar, ctx context.Context) error 
 		}
 	}
 
-	if a != nil && a.HasWeather == false {
-		err = transaction.Airport.Update().Where(airport.ID(a.ID)).SetHasWeather(true).Exec(ctx)
-		if err != nil {
-			return err
-		}
-	}
-
 	err = transaction.Commit()
 	if err != nil {
 		return err
@@ -306,4 +294,52 @@ func (i *NoaaMetarImporter) importMetar(x *XmlMetar, ctx context.Context) error 
 	i.stats.AddUpdated()
 
 	return err
+}
+
+func (i *NoaaWeatherImporter) getStation(ctx context.Context, stationID string, latitude float64, longitude float64, elevation float64) (*ent.Station, error) {
+	// Check if we have an airport with this station ID
+	a, _ := i.db.Airport.Query().Where(airport.Identifier(stationID)).Only(ctx)
+
+	line := fmt.Sprintf("%s%f%f%f", stationID, latitude, longitude, elevation)
+
+	if a != nil {
+		line += fmt.Sprintf("%d", a.ID)
+	}
+
+	hash := strconv.FormatUint(fnv1a.HashString64(line), 10)
+
+	// Check if we already have this s
+	s, _ := i.db.Station.Query().Where(station.StationID(stationID)).Only(ctx)
+	if s != nil {
+		if s.Hash == hash {
+			return s, nil
+		}
+
+		// Update the station
+		update := s.Update().SetHash(hash).SetLatitude(latitude).SetLongitude(longitude).SetElevation(elevation)
+		if a != nil {
+			update.SetAirport(a)
+		}
+
+		err := update.Exec(ctx)
+		if err != nil {
+			return nil, err
+		}
+
+		return s, nil
+	}
+
+	var err error
+
+	stationCreation := i.db.Station.Create().SetHash(hash).SetLatitude(latitude).SetLongitude(longitude).SetElevation(elevation).SetStationID(stationID)
+	if a != nil {
+		stationCreation.SetAirport(a)
+	}
+
+	s, err = stationCreation.Save(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	return s, nil
 }

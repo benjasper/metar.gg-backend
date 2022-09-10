@@ -28,10 +28,6 @@ func init() {
 	airportDescLastUpdated := airportMixinFields0[3].Descriptor()
 	// airport.DefaultLastUpdated holds the default value on creation for the last_updated field.
 	airport.DefaultLastUpdated = airportDescLastUpdated.Default.(func() time.Time)
-	// airportDescHasWeather is the schema descriptor for has_weather field.
-	airportDescHasWeather := airportFields[9].Descriptor()
-	// airport.DefaultHasWeather holds the default value on creation for the has_weather field.
-	airport.DefaultHasWeather = airportDescHasWeather.Default.(bool)
 	frequencyMixin := schema.Frequency{}.Mixin()
 	frequencyMixinFields0 := frequencyMixin[0].Fields()
 	_ = frequencyMixinFields0

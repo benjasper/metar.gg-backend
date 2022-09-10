@@ -29,6 +29,8 @@ type hooks struct {
 	Metar        []ent.Hook
 	Runway       []ent.Hook
 	SkyCondition []ent.Hook
+	Station      []ent.Hook
+	Taf          []ent.Hook
 }
 
 // Options applies the options on the config object.

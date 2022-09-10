@@ -8,25 +8,27 @@ import (
 	"time"
 
 	"entgo.io/ent/dialect/sql"
-	"metar.gg/ent/metar"
 	"metar.gg/ent/station"
+	"metar.gg/ent/taf"
 )
 
-// Metar is the model entity for the Metar schema.
-type Metar struct {
+// Taf is the model entity for the Taf schema.
+type Taf struct {
 	config `json:"-"`
 	// ID of the ent.
 	ID int `json:"id,omitempty"`
-	// The raw METAR text.
+	// The raw TAF text.
 	RawText string `json:"raw_text,omitempty"`
-	// The time the METAR was observed.
-	ObservationTime time.Time `json:"observation_time,omitempty"`
-	// The latitude in decimal degrees of the station.
-	Latitude *float64 `json:"latitude,omitempty"`
-	// The longitude in decimal degrees of the station.
-	Longitude *float64 `json:"longitude,omitempty"`
-	// The elevation in meters of the station.
-	Elevation *float64 `json:"elevation,omitempty"`
+	// The time the TAF was issued.
+	IssueTime time.Time `json:"issue_time,omitempty"`
+	// TAF bulletin time.
+	BulletinTime time.Time `json:"bulletin_time,omitempty"`
+	// The start time of the TAF validity period.
+	ValidFromTime time.Time `json:"valid_from_time,omitempty"`
+	// The end time of the TAF validity period.
+	ValidToTime time.Time `json:"valid_to_time,omitempty"`
+	// Remarks.
+	Remarks string `json:"remarks,omitempty"`
 	// The temperature in Celsius.
 	Temperature float64 `json:"temperature,omitempty"`
 	// The dewpoint in Celsius.
@@ -41,10 +43,8 @@ type Metar struct {
 	Visibility float64 `json:"visibility,omitempty"`
 	// The altimeter setting in inches of mercury.
 	Altimeter float64 `json:"altimeter,omitempty"`
-	// The present weather string.
-	PresentWeather *string `json:"present_weather,omitempty"`
 	// FlightCategory holds the value of the "flight_category" field.
-	FlightCategory *metar.FlightCategory `json:"flight_category,omitempty"`
+	FlightCategory *taf.FlightCategory `json:"flight_category,omitempty"`
 	// Quality control corrected.
 	QualityControlCorrected *bool `json:"quality_control_corrected,omitempty"`
 	// Whether it's an automated station, of one of the following types A01|A01A|A02|A02A|AOA|AWOS.
@@ -83,19 +83,19 @@ type Metar struct {
 	SnowDepth *float64 `json:"snow_depth,omitempty"`
 	// The vertical visibility in feet.
 	VertVis *float64 `json:"vert_vis,omitempty"`
-	// The type of METAR.
-	MetarType metar.MetarType `json:"metar_type,omitempty"`
+	// The type of TAF.
+	MetarType taf.MetarType `json:"metar_type,omitempty"`
 	// Hash holds the value of the "hash" field.
 	Hash string `json:"hash,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
-	// The values are being populated by the MetarQuery when eager-loading is set.
-	Edges          MetarEdges `json:"edges"`
-	station_metars *int
+	// The values are being populated by the TafQuery when eager-loading is set.
+	Edges        TafEdges `json:"edges"`
+	station_tafs *int
 }
 
-// MetarEdges holds the relations/edges for other nodes in the graph.
-type MetarEdges struct {
-	// The station that provided the METAR.
+// TafEdges holds the relations/edges for other nodes in the graph.
+type TafEdges struct {
+	// The station that issued this taf.
 	Station *Station `json:"station,omitempty"`
 	// The sky conditions.
 	SkyConditions []*SkyCondition `json:"sky_conditions,omitempty"`
@@ -110,7 +110,7 @@ type MetarEdges struct {
 
 // StationOrErr returns the Station value or an error if the edge
 // was not loaded in eager-loading, or loaded but was not found.
-func (e MetarEdges) StationOrErr() (*Station, error) {
+func (e TafEdges) StationOrErr() (*Station, error) {
 	if e.loadedTypes[0] {
 		if e.Station == nil {
 			// Edge was loaded but was not found.
@@ -123,7 +123,7 @@ func (e MetarEdges) StationOrErr() (*Station, error) {
 
 // SkyConditionsOrErr returns the SkyConditions value or an error if the edge
 // was not loaded in eager-loading.
-func (e MetarEdges) SkyConditionsOrErr() ([]*SkyCondition, error) {
+func (e TafEdges) SkyConditionsOrErr() ([]*SkyCondition, error) {
 	if e.loadedTypes[1] {
 		return e.SkyConditions, nil
 	}
@@ -131,489 +131,477 @@ func (e MetarEdges) SkyConditionsOrErr() ([]*SkyCondition, error) {
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
-func (*Metar) scanValues(columns []string) ([]any, error) {
+func (*Taf) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case metar.FieldQualityControlCorrected, metar.FieldQualityControlAutoStation, metar.FieldQualityControlMaintenanceIndicatorOn, metar.FieldQualityControlNoSignal, metar.FieldQualityControlLightningSensorOff, metar.FieldQualityControlFreezingRainSensorOff, metar.FieldQualityControlPresentWeatherSensorOff:
+		case taf.FieldQualityControlCorrected, taf.FieldQualityControlAutoStation, taf.FieldQualityControlMaintenanceIndicatorOn, taf.FieldQualityControlNoSignal, taf.FieldQualityControlLightningSensorOff, taf.FieldQualityControlFreezingRainSensorOff, taf.FieldQualityControlPresentWeatherSensorOff:
 			values[i] = new(sql.NullBool)
-		case metar.FieldLatitude, metar.FieldLongitude, metar.FieldElevation, metar.FieldTemperature, metar.FieldDewpoint, metar.FieldVisibility, metar.FieldAltimeter, metar.FieldSeaLevelPressure, metar.FieldPressureTendency, metar.FieldMaxTemp6, metar.FieldMinTemp6, metar.FieldMaxTemp24, metar.FieldMinTemp24, metar.FieldPrecipitation, metar.FieldPrecipitation3, metar.FieldPrecipitation6, metar.FieldPrecipitation24, metar.FieldSnowDepth, metar.FieldVertVis:
+		case taf.FieldTemperature, taf.FieldDewpoint, taf.FieldVisibility, taf.FieldAltimeter, taf.FieldSeaLevelPressure, taf.FieldPressureTendency, taf.FieldMaxTemp6, taf.FieldMinTemp6, taf.FieldMaxTemp24, taf.FieldMinTemp24, taf.FieldPrecipitation, taf.FieldPrecipitation3, taf.FieldPrecipitation6, taf.FieldPrecipitation24, taf.FieldSnowDepth, taf.FieldVertVis:
 			values[i] = new(sql.NullFloat64)
-		case metar.FieldID, metar.FieldWindSpeed, metar.FieldWindGust, metar.FieldWindDirection:
+		case taf.FieldID, taf.FieldWindSpeed, taf.FieldWindGust, taf.FieldWindDirection:
 			values[i] = new(sql.NullInt64)
-		case metar.FieldRawText, metar.FieldPresentWeather, metar.FieldFlightCategory, metar.FieldMetarType, metar.FieldHash:
+		case taf.FieldRawText, taf.FieldRemarks, taf.FieldFlightCategory, taf.FieldMetarType, taf.FieldHash:
 			values[i] = new(sql.NullString)
-		case metar.FieldObservationTime:
+		case taf.FieldIssueTime, taf.FieldBulletinTime, taf.FieldValidFromTime, taf.FieldValidToTime:
 			values[i] = new(sql.NullTime)
-		case metar.ForeignKeys[0]: // station_metars
+		case taf.ForeignKeys[0]: // station_tafs
 			values[i] = new(sql.NullInt64)
 		default:
-			return nil, fmt.Errorf("unexpected column %q for type Metar", columns[i])
+			return nil, fmt.Errorf("unexpected column %q for type Taf", columns[i])
 		}
 	}
 	return values, nil
 }
 
 // assignValues assigns the values that were returned from sql.Rows (after scanning)
-// to the Metar fields.
-func (m *Metar) assignValues(columns []string, values []any) error {
+// to the Taf fields.
+func (t *Taf) assignValues(columns []string, values []any) error {
 	if m, n := len(values), len(columns); m < n {
 		return fmt.Errorf("mismatch number of scan values: %d != %d", m, n)
 	}
 	for i := range columns {
 		switch columns[i] {
-		case metar.FieldID:
+		case taf.FieldID:
 			value, ok := values[i].(*sql.NullInt64)
 			if !ok {
 				return fmt.Errorf("unexpected type %T for field id", value)
 			}
-			m.ID = int(value.Int64)
-		case metar.FieldRawText:
+			t.ID = int(value.Int64)
+		case taf.FieldRawText:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field raw_text", values[i])
 			} else if value.Valid {
-				m.RawText = value.String
+				t.RawText = value.String
 			}
-		case metar.FieldObservationTime:
+		case taf.FieldIssueTime:
 			if value, ok := values[i].(*sql.NullTime); !ok {
-				return fmt.Errorf("unexpected type %T for field observation_time", values[i])
+				return fmt.Errorf("unexpected type %T for field issue_time", values[i])
 			} else if value.Valid {
-				m.ObservationTime = value.Time
+				t.IssueTime = value.Time
 			}
-		case metar.FieldLatitude:
-			if value, ok := values[i].(*sql.NullFloat64); !ok {
-				return fmt.Errorf("unexpected type %T for field latitude", values[i])
+		case taf.FieldBulletinTime:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field bulletin_time", values[i])
 			} else if value.Valid {
-				m.Latitude = new(float64)
-				*m.Latitude = value.Float64
+				t.BulletinTime = value.Time
 			}
-		case metar.FieldLongitude:
-			if value, ok := values[i].(*sql.NullFloat64); !ok {
-				return fmt.Errorf("unexpected type %T for field longitude", values[i])
+		case taf.FieldValidFromTime:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field valid_from_time", values[i])
 			} else if value.Valid {
-				m.Longitude = new(float64)
-				*m.Longitude = value.Float64
+				t.ValidFromTime = value.Time
 			}
-		case metar.FieldElevation:
-			if value, ok := values[i].(*sql.NullFloat64); !ok {
-				return fmt.Errorf("unexpected type %T for field elevation", values[i])
+		case taf.FieldValidToTime:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field valid_to_time", values[i])
 			} else if value.Valid {
-				m.Elevation = new(float64)
-				*m.Elevation = value.Float64
+				t.ValidToTime = value.Time
 			}
-		case metar.FieldTemperature:
+		case taf.FieldRemarks:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field remarks", values[i])
+			} else if value.Valid {
+				t.Remarks = value.String
+			}
+		case taf.FieldTemperature:
 			if value, ok := values[i].(*sql.NullFloat64); !ok {
 				return fmt.Errorf("unexpected type %T for field temperature", values[i])
 			} else if value.Valid {
-				m.Temperature = value.Float64
+				t.Temperature = value.Float64
 			}
-		case metar.FieldDewpoint:
+		case taf.FieldDewpoint:
 			if value, ok := values[i].(*sql.NullFloat64); !ok {
 				return fmt.Errorf("unexpected type %T for field dewpoint", values[i])
 			} else if value.Valid {
-				m.Dewpoint = value.Float64
+				t.Dewpoint = value.Float64
 			}
-		case metar.FieldWindSpeed:
+		case taf.FieldWindSpeed:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for field wind_speed", values[i])
 			} else if value.Valid {
-				m.WindSpeed = int(value.Int64)
+				t.WindSpeed = int(value.Int64)
 			}
-		case metar.FieldWindGust:
+		case taf.FieldWindGust:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for field wind_gust", values[i])
 			} else if value.Valid {
-				m.WindGust = int(value.Int64)
+				t.WindGust = int(value.Int64)
 			}
-		case metar.FieldWindDirection:
+		case taf.FieldWindDirection:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for field wind_direction", values[i])
 			} else if value.Valid {
-				m.WindDirection = int(value.Int64)
+				t.WindDirection = int(value.Int64)
 			}
-		case metar.FieldVisibility:
+		case taf.FieldVisibility:
 			if value, ok := values[i].(*sql.NullFloat64); !ok {
 				return fmt.Errorf("unexpected type %T for field visibility", values[i])
 			} else if value.Valid {
-				m.Visibility = value.Float64
+				t.Visibility = value.Float64
 			}
-		case metar.FieldAltimeter:
+		case taf.FieldAltimeter:
 			if value, ok := values[i].(*sql.NullFloat64); !ok {
 				return fmt.Errorf("unexpected type %T for field altimeter", values[i])
 			} else if value.Valid {
-				m.Altimeter = value.Float64
+				t.Altimeter = value.Float64
 			}
-		case metar.FieldPresentWeather:
-			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field present_weather", values[i])
-			} else if value.Valid {
-				m.PresentWeather = new(string)
-				*m.PresentWeather = value.String
-			}
-		case metar.FieldFlightCategory:
+		case taf.FieldFlightCategory:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field flight_category", values[i])
 			} else if value.Valid {
-				m.FlightCategory = new(metar.FlightCategory)
-				*m.FlightCategory = metar.FlightCategory(value.String)
+				t.FlightCategory = new(taf.FlightCategory)
+				*t.FlightCategory = taf.FlightCategory(value.String)
 			}
-		case metar.FieldQualityControlCorrected:
+		case taf.FieldQualityControlCorrected:
 			if value, ok := values[i].(*sql.NullBool); !ok {
 				return fmt.Errorf("unexpected type %T for field quality_control_corrected", values[i])
 			} else if value.Valid {
-				m.QualityControlCorrected = new(bool)
-				*m.QualityControlCorrected = value.Bool
+				t.QualityControlCorrected = new(bool)
+				*t.QualityControlCorrected = value.Bool
 			}
-		case metar.FieldQualityControlAutoStation:
+		case taf.FieldQualityControlAutoStation:
 			if value, ok := values[i].(*sql.NullBool); !ok {
 				return fmt.Errorf("unexpected type %T for field quality_control_auto_station", values[i])
 			} else if value.Valid {
-				m.QualityControlAutoStation = value.Bool
+				t.QualityControlAutoStation = value.Bool
 			}
-		case metar.FieldQualityControlMaintenanceIndicatorOn:
+		case taf.FieldQualityControlMaintenanceIndicatorOn:
 			if value, ok := values[i].(*sql.NullBool); !ok {
 				return fmt.Errorf("unexpected type %T for field quality_control_maintenance_indicator_on", values[i])
 			} else if value.Valid {
-				m.QualityControlMaintenanceIndicatorOn = value.Bool
+				t.QualityControlMaintenanceIndicatorOn = value.Bool
 			}
-		case metar.FieldQualityControlNoSignal:
+		case taf.FieldQualityControlNoSignal:
 			if value, ok := values[i].(*sql.NullBool); !ok {
 				return fmt.Errorf("unexpected type %T for field quality_control_no_signal", values[i])
 			} else if value.Valid {
-				m.QualityControlNoSignal = value.Bool
+				t.QualityControlNoSignal = value.Bool
 			}
-		case metar.FieldQualityControlLightningSensorOff:
+		case taf.FieldQualityControlLightningSensorOff:
 			if value, ok := values[i].(*sql.NullBool); !ok {
 				return fmt.Errorf("unexpected type %T for field quality_control_lightning_sensor_off", values[i])
 			} else if value.Valid {
-				m.QualityControlLightningSensorOff = value.Bool
+				t.QualityControlLightningSensorOff = value.Bool
 			}
-		case metar.FieldQualityControlFreezingRainSensorOff:
+		case taf.FieldQualityControlFreezingRainSensorOff:
 			if value, ok := values[i].(*sql.NullBool); !ok {
 				return fmt.Errorf("unexpected type %T for field quality_control_freezing_rain_sensor_off", values[i])
 			} else if value.Valid {
-				m.QualityControlFreezingRainSensorOff = value.Bool
+				t.QualityControlFreezingRainSensorOff = value.Bool
 			}
-		case metar.FieldQualityControlPresentWeatherSensorOff:
+		case taf.FieldQualityControlPresentWeatherSensorOff:
 			if value, ok := values[i].(*sql.NullBool); !ok {
 				return fmt.Errorf("unexpected type %T for field quality_control_present_weather_sensor_off", values[i])
 			} else if value.Valid {
-				m.QualityControlPresentWeatherSensorOff = value.Bool
+				t.QualityControlPresentWeatherSensorOff = value.Bool
 			}
-		case metar.FieldSeaLevelPressure:
+		case taf.FieldSeaLevelPressure:
 			if value, ok := values[i].(*sql.NullFloat64); !ok {
 				return fmt.Errorf("unexpected type %T for field sea_level_pressure", values[i])
 			} else if value.Valid {
-				m.SeaLevelPressure = new(float64)
-				*m.SeaLevelPressure = value.Float64
+				t.SeaLevelPressure = new(float64)
+				*t.SeaLevelPressure = value.Float64
 			}
-		case metar.FieldPressureTendency:
+		case taf.FieldPressureTendency:
 			if value, ok := values[i].(*sql.NullFloat64); !ok {
 				return fmt.Errorf("unexpected type %T for field pressure_tendency", values[i])
 			} else if value.Valid {
-				m.PressureTendency = new(float64)
-				*m.PressureTendency = value.Float64
+				t.PressureTendency = new(float64)
+				*t.PressureTendency = value.Float64
 			}
-		case metar.FieldMaxTemp6:
+		case taf.FieldMaxTemp6:
 			if value, ok := values[i].(*sql.NullFloat64); !ok {
 				return fmt.Errorf("unexpected type %T for field max_temp_6", values[i])
 			} else if value.Valid {
-				m.MaxTemp6 = new(float64)
-				*m.MaxTemp6 = value.Float64
+				t.MaxTemp6 = new(float64)
+				*t.MaxTemp6 = value.Float64
 			}
-		case metar.FieldMinTemp6:
+		case taf.FieldMinTemp6:
 			if value, ok := values[i].(*sql.NullFloat64); !ok {
 				return fmt.Errorf("unexpected type %T for field min_temp_6", values[i])
 			} else if value.Valid {
-				m.MinTemp6 = new(float64)
-				*m.MinTemp6 = value.Float64
+				t.MinTemp6 = new(float64)
+				*t.MinTemp6 = value.Float64
 			}
-		case metar.FieldMaxTemp24:
+		case taf.FieldMaxTemp24:
 			if value, ok := values[i].(*sql.NullFloat64); !ok {
 				return fmt.Errorf("unexpected type %T for field max_temp_24", values[i])
 			} else if value.Valid {
-				m.MaxTemp24 = new(float64)
-				*m.MaxTemp24 = value.Float64
+				t.MaxTemp24 = new(float64)
+				*t.MaxTemp24 = value.Float64
 			}
-		case metar.FieldMinTemp24:
+		case taf.FieldMinTemp24:
 			if value, ok := values[i].(*sql.NullFloat64); !ok {
 				return fmt.Errorf("unexpected type %T for field min_temp_24", values[i])
 			} else if value.Valid {
-				m.MinTemp24 = new(float64)
-				*m.MinTemp24 = value.Float64
+				t.MinTemp24 = new(float64)
+				*t.MinTemp24 = value.Float64
 			}
-		case metar.FieldPrecipitation:
+		case taf.FieldPrecipitation:
 			if value, ok := values[i].(*sql.NullFloat64); !ok {
 				return fmt.Errorf("unexpected type %T for field precipitation", values[i])
 			} else if value.Valid {
-				m.Precipitation = new(float64)
-				*m.Precipitation = value.Float64
+				t.Precipitation = new(float64)
+				*t.Precipitation = value.Float64
 			}
-		case metar.FieldPrecipitation3:
+		case taf.FieldPrecipitation3:
 			if value, ok := values[i].(*sql.NullFloat64); !ok {
 				return fmt.Errorf("unexpected type %T for field precipitation_3", values[i])
 			} else if value.Valid {
-				m.Precipitation3 = new(float64)
-				*m.Precipitation3 = value.Float64
+				t.Precipitation3 = new(float64)
+				*t.Precipitation3 = value.Float64
 			}
-		case metar.FieldPrecipitation6:
+		case taf.FieldPrecipitation6:
 			if value, ok := values[i].(*sql.NullFloat64); !ok {
 				return fmt.Errorf("unexpected type %T for field precipitation_6", values[i])
 			} else if value.Valid {
-				m.Precipitation6 = new(float64)
-				*m.Precipitation6 = value.Float64
+				t.Precipitation6 = new(float64)
+				*t.Precipitation6 = value.Float64
 			}
-		case metar.FieldPrecipitation24:
+		case taf.FieldPrecipitation24:
 			if value, ok := values[i].(*sql.NullFloat64); !ok {
 				return fmt.Errorf("unexpected type %T for field precipitation_24", values[i])
 			} else if value.Valid {
-				m.Precipitation24 = new(float64)
-				*m.Precipitation24 = value.Float64
+				t.Precipitation24 = new(float64)
+				*t.Precipitation24 = value.Float64
 			}
-		case metar.FieldSnowDepth:
+		case taf.FieldSnowDepth:
 			if value, ok := values[i].(*sql.NullFloat64); !ok {
 				return fmt.Errorf("unexpected type %T for field snow_depth", values[i])
 			} else if value.Valid {
-				m.SnowDepth = new(float64)
-				*m.SnowDepth = value.Float64
+				t.SnowDepth = new(float64)
+				*t.SnowDepth = value.Float64
 			}
-		case metar.FieldVertVis:
+		case taf.FieldVertVis:
 			if value, ok := values[i].(*sql.NullFloat64); !ok {
 				return fmt.Errorf("unexpected type %T for field vert_vis", values[i])
 			} else if value.Valid {
-				m.VertVis = new(float64)
-				*m.VertVis = value.Float64
+				t.VertVis = new(float64)
+				*t.VertVis = value.Float64
 			}
-		case metar.FieldMetarType:
+		case taf.FieldMetarType:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field metar_type", values[i])
 			} else if value.Valid {
-				m.MetarType = metar.MetarType(value.String)
+				t.MetarType = taf.MetarType(value.String)
 			}
-		case metar.FieldHash:
+		case taf.FieldHash:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field hash", values[i])
 			} else if value.Valid {
-				m.Hash = value.String
+				t.Hash = value.String
 			}
-		case metar.ForeignKeys[0]:
+		case taf.ForeignKeys[0]:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for edge-field station_metars", value)
+				return fmt.Errorf("unexpected type %T for edge-field station_tafs", value)
 			} else if value.Valid {
-				m.station_metars = new(int)
-				*m.station_metars = int(value.Int64)
+				t.station_tafs = new(int)
+				*t.station_tafs = int(value.Int64)
 			}
 		}
 	}
 	return nil
 }
 
-// QueryStation queries the "station" edge of the Metar entity.
-func (m *Metar) QueryStation() *StationQuery {
-	return (&MetarClient{config: m.config}).QueryStation(m)
+// QueryStation queries the "station" edge of the Taf entity.
+func (t *Taf) QueryStation() *StationQuery {
+	return (&TafClient{config: t.config}).QueryStation(t)
 }
 
-// QuerySkyConditions queries the "sky_conditions" edge of the Metar entity.
-func (m *Metar) QuerySkyConditions() *SkyConditionQuery {
-	return (&MetarClient{config: m.config}).QuerySkyConditions(m)
+// QuerySkyConditions queries the "sky_conditions" edge of the Taf entity.
+func (t *Taf) QuerySkyConditions() *SkyConditionQuery {
+	return (&TafClient{config: t.config}).QuerySkyConditions(t)
 }
 
-// Update returns a builder for updating this Metar.
-// Note that you need to call Metar.Unwrap() before calling this method if this Metar
+// Update returns a builder for updating this Taf.
+// Note that you need to call Taf.Unwrap() before calling this method if this Taf
 // was returned from a transaction, and the transaction was committed or rolled back.
-func (m *Metar) Update() *MetarUpdateOne {
-	return (&MetarClient{config: m.config}).UpdateOne(m)
+func (t *Taf) Update() *TafUpdateOne {
+	return (&TafClient{config: t.config}).UpdateOne(t)
 }
 
-// Unwrap unwraps the Metar entity that was returned from a transaction after it was closed,
+// Unwrap unwraps the Taf entity that was returned from a transaction after it was closed,
 // so that all future queries will be executed through the driver which created the transaction.
-func (m *Metar) Unwrap() *Metar {
-	_tx, ok := m.config.driver.(*txDriver)
+func (t *Taf) Unwrap() *Taf {
+	_tx, ok := t.config.driver.(*txDriver)
 	if !ok {
-		panic("ent: Metar is not a transactional entity")
+		panic("ent: Taf is not a transactional entity")
 	}
-	m.config.driver = _tx.drv
-	return m
+	t.config.driver = _tx.drv
+	return t
 }
 
 // String implements the fmt.Stringer.
-func (m *Metar) String() string {
+func (t *Taf) String() string {
 	var builder strings.Builder
-	builder.WriteString("Metar(")
-	builder.WriteString(fmt.Sprintf("id=%v, ", m.ID))
+	builder.WriteString("Taf(")
+	builder.WriteString(fmt.Sprintf("id=%v, ", t.ID))
 	builder.WriteString("raw_text=")
-	builder.WriteString(m.RawText)
+	builder.WriteString(t.RawText)
 	builder.WriteString(", ")
-	builder.WriteString("observation_time=")
-	builder.WriteString(m.ObservationTime.Format(time.ANSIC))
+	builder.WriteString("issue_time=")
+	builder.WriteString(t.IssueTime.Format(time.ANSIC))
 	builder.WriteString(", ")
-	if v := m.Latitude; v != nil {
-		builder.WriteString("latitude=")
-		builder.WriteString(fmt.Sprintf("%v", *v))
-	}
+	builder.WriteString("bulletin_time=")
+	builder.WriteString(t.BulletinTime.Format(time.ANSIC))
 	builder.WriteString(", ")
-	if v := m.Longitude; v != nil {
-		builder.WriteString("longitude=")
-		builder.WriteString(fmt.Sprintf("%v", *v))
-	}
+	builder.WriteString("valid_from_time=")
+	builder.WriteString(t.ValidFromTime.Format(time.ANSIC))
 	builder.WriteString(", ")
-	if v := m.Elevation; v != nil {
-		builder.WriteString("elevation=")
-		builder.WriteString(fmt.Sprintf("%v", *v))
-	}
+	builder.WriteString("valid_to_time=")
+	builder.WriteString(t.ValidToTime.Format(time.ANSIC))
+	builder.WriteString(", ")
+	builder.WriteString("remarks=")
+	builder.WriteString(t.Remarks)
 	builder.WriteString(", ")
 	builder.WriteString("temperature=")
-	builder.WriteString(fmt.Sprintf("%v", m.Temperature))
+	builder.WriteString(fmt.Sprintf("%v", t.Temperature))
 	builder.WriteString(", ")
 	builder.WriteString("dewpoint=")
-	builder.WriteString(fmt.Sprintf("%v", m.Dewpoint))
+	builder.WriteString(fmt.Sprintf("%v", t.Dewpoint))
 	builder.WriteString(", ")
 	builder.WriteString("wind_speed=")
-	builder.WriteString(fmt.Sprintf("%v", m.WindSpeed))
+	builder.WriteString(fmt.Sprintf("%v", t.WindSpeed))
 	builder.WriteString(", ")
 	builder.WriteString("wind_gust=")
-	builder.WriteString(fmt.Sprintf("%v", m.WindGust))
+	builder.WriteString(fmt.Sprintf("%v", t.WindGust))
 	builder.WriteString(", ")
 	builder.WriteString("wind_direction=")
-	builder.WriteString(fmt.Sprintf("%v", m.WindDirection))
+	builder.WriteString(fmt.Sprintf("%v", t.WindDirection))
 	builder.WriteString(", ")
 	builder.WriteString("visibility=")
-	builder.WriteString(fmt.Sprintf("%v", m.Visibility))
+	builder.WriteString(fmt.Sprintf("%v", t.Visibility))
 	builder.WriteString(", ")
 	builder.WriteString("altimeter=")
-	builder.WriteString(fmt.Sprintf("%v", m.Altimeter))
+	builder.WriteString(fmt.Sprintf("%v", t.Altimeter))
 	builder.WriteString(", ")
-	if v := m.PresentWeather; v != nil {
-		builder.WriteString("present_weather=")
-		builder.WriteString(*v)
-	}
-	builder.WriteString(", ")
-	if v := m.FlightCategory; v != nil {
+	if v := t.FlightCategory; v != nil {
 		builder.WriteString("flight_category=")
 		builder.WriteString(fmt.Sprintf("%v", *v))
 	}
 	builder.WriteString(", ")
-	if v := m.QualityControlCorrected; v != nil {
+	if v := t.QualityControlCorrected; v != nil {
 		builder.WriteString("quality_control_corrected=")
 		builder.WriteString(fmt.Sprintf("%v", *v))
 	}
 	builder.WriteString(", ")
 	builder.WriteString("quality_control_auto_station=")
-	builder.WriteString(fmt.Sprintf("%v", m.QualityControlAutoStation))
+	builder.WriteString(fmt.Sprintf("%v", t.QualityControlAutoStation))
 	builder.WriteString(", ")
 	builder.WriteString("quality_control_maintenance_indicator_on=")
-	builder.WriteString(fmt.Sprintf("%v", m.QualityControlMaintenanceIndicatorOn))
+	builder.WriteString(fmt.Sprintf("%v", t.QualityControlMaintenanceIndicatorOn))
 	builder.WriteString(", ")
 	builder.WriteString("quality_control_no_signal=")
-	builder.WriteString(fmt.Sprintf("%v", m.QualityControlNoSignal))
+	builder.WriteString(fmt.Sprintf("%v", t.QualityControlNoSignal))
 	builder.WriteString(", ")
 	builder.WriteString("quality_control_lightning_sensor_off=")
-	builder.WriteString(fmt.Sprintf("%v", m.QualityControlLightningSensorOff))
+	builder.WriteString(fmt.Sprintf("%v", t.QualityControlLightningSensorOff))
 	builder.WriteString(", ")
 	builder.WriteString("quality_control_freezing_rain_sensor_off=")
-	builder.WriteString(fmt.Sprintf("%v", m.QualityControlFreezingRainSensorOff))
+	builder.WriteString(fmt.Sprintf("%v", t.QualityControlFreezingRainSensorOff))
 	builder.WriteString(", ")
 	builder.WriteString("quality_control_present_weather_sensor_off=")
-	builder.WriteString(fmt.Sprintf("%v", m.QualityControlPresentWeatherSensorOff))
+	builder.WriteString(fmt.Sprintf("%v", t.QualityControlPresentWeatherSensorOff))
 	builder.WriteString(", ")
-	if v := m.SeaLevelPressure; v != nil {
+	if v := t.SeaLevelPressure; v != nil {
 		builder.WriteString("sea_level_pressure=")
 		builder.WriteString(fmt.Sprintf("%v", *v))
 	}
 	builder.WriteString(", ")
-	if v := m.PressureTendency; v != nil {
+	if v := t.PressureTendency; v != nil {
 		builder.WriteString("pressure_tendency=")
 		builder.WriteString(fmt.Sprintf("%v", *v))
 	}
 	builder.WriteString(", ")
-	if v := m.MaxTemp6; v != nil {
+	if v := t.MaxTemp6; v != nil {
 		builder.WriteString("max_temp_6=")
 		builder.WriteString(fmt.Sprintf("%v", *v))
 	}
 	builder.WriteString(", ")
-	if v := m.MinTemp6; v != nil {
+	if v := t.MinTemp6; v != nil {
 		builder.WriteString("min_temp_6=")
 		builder.WriteString(fmt.Sprintf("%v", *v))
 	}
 	builder.WriteString(", ")
-	if v := m.MaxTemp24; v != nil {
+	if v := t.MaxTemp24; v != nil {
 		builder.WriteString("max_temp_24=")
 		builder.WriteString(fmt.Sprintf("%v", *v))
 	}
 	builder.WriteString(", ")
-	if v := m.MinTemp24; v != nil {
+	if v := t.MinTemp24; v != nil {
 		builder.WriteString("min_temp_24=")
 		builder.WriteString(fmt.Sprintf("%v", *v))
 	}
 	builder.WriteString(", ")
-	if v := m.Precipitation; v != nil {
+	if v := t.Precipitation; v != nil {
 		builder.WriteString("precipitation=")
 		builder.WriteString(fmt.Sprintf("%v", *v))
 	}
 	builder.WriteString(", ")
-	if v := m.Precipitation3; v != nil {
+	if v := t.Precipitation3; v != nil {
 		builder.WriteString("precipitation_3=")
 		builder.WriteString(fmt.Sprintf("%v", *v))
 	}
 	builder.WriteString(", ")
-	if v := m.Precipitation6; v != nil {
+	if v := t.Precipitation6; v != nil {
 		builder.WriteString("precipitation_6=")
 		builder.WriteString(fmt.Sprintf("%v", *v))
 	}
 	builder.WriteString(", ")
-	if v := m.Precipitation24; v != nil {
+	if v := t.Precipitation24; v != nil {
 		builder.WriteString("precipitation_24=")
 		builder.WriteString(fmt.Sprintf("%v", *v))
 	}
 	builder.WriteString(", ")
-	if v := m.SnowDepth; v != nil {
+	if v := t.SnowDepth; v != nil {
 		builder.WriteString("snow_depth=")
 		builder.WriteString(fmt.Sprintf("%v", *v))
 	}
 	builder.WriteString(", ")
-	if v := m.VertVis; v != nil {
+	if v := t.VertVis; v != nil {
 		builder.WriteString("vert_vis=")
 		builder.WriteString(fmt.Sprintf("%v", *v))
 	}
 	builder.WriteString(", ")
 	builder.WriteString("metar_type=")
-	builder.WriteString(fmt.Sprintf("%v", m.MetarType))
+	builder.WriteString(fmt.Sprintf("%v", t.MetarType))
 	builder.WriteString(", ")
 	builder.WriteString("hash=")
-	builder.WriteString(m.Hash)
+	builder.WriteString(t.Hash)
 	builder.WriteByte(')')
 	return builder.String()
 }
 
 // NamedSkyConditions returns the SkyConditions named value or an error if the edge was not
 // loaded in eager-loading with this name.
-func (m *Metar) NamedSkyConditions(name string) ([]*SkyCondition, error) {
-	if m.Edges.namedSkyConditions == nil {
+func (t *Taf) NamedSkyConditions(name string) ([]*SkyCondition, error) {
+	if t.Edges.namedSkyConditions == nil {
 		return nil, &NotLoadedError{edge: name}
 	}
-	nodes, ok := m.Edges.namedSkyConditions[name]
+	nodes, ok := t.Edges.namedSkyConditions[name]
 	if !ok {
 		return nil, &NotLoadedError{edge: name}
 	}
 	return nodes, nil
 }
 
-func (m *Metar) appendNamedSkyConditions(name string, edges ...*SkyCondition) {
-	if m.Edges.namedSkyConditions == nil {
-		m.Edges.namedSkyConditions = make(map[string][]*SkyCondition)
+func (t *Taf) appendNamedSkyConditions(name string, edges ...*SkyCondition) {
+	if t.Edges.namedSkyConditions == nil {
+		t.Edges.namedSkyConditions = make(map[string][]*SkyCondition)
 	}
 	if len(edges) == 0 {
-		m.Edges.namedSkyConditions[name] = []*SkyCondition{}
+		t.Edges.namedSkyConditions[name] = []*SkyCondition{}
 	} else {
-		m.Edges.namedSkyConditions[name] = append(m.Edges.namedSkyConditions[name], edges...)
+		t.Edges.namedSkyConditions[name] = append(t.Edges.namedSkyConditions[name], edges...)
 	}
 }
 
-// Metars is a parsable slice of Metar.
-type Metars []*Metar
+// Tafs is a parsable slice of Taf.
+type Tafs []*Taf
 
-func (m Metars) config(cfg config) {
-	for _i := range m {
-		m[_i].config = cfg
+func (t Tafs) config(cfg config) {
+	for _i := range t {
+		t[_i].config = cfg
 	}
 }

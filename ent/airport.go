@@ -10,6 +10,7 @@ import (
 
 	"entgo.io/ent/dialect/sql"
 	"metar.gg/ent/airport"
+	"metar.gg/ent/station"
 )
 
 // Airport is the model entity for the Airport schema.
@@ -41,8 +42,6 @@ type Airport struct {
 	Country string `json:"country,omitempty"`
 	// Region holds the value of the "region" field.
 	Region string `json:"region,omitempty"`
-	// Whether the airport has weather reporting and a metar by the airport is available.
-	HasWeather bool `json:"has_weather,omitempty"`
 	// The primary municipality that the airport serves (when available). Note that this is not necessarily the municipality where the airport is physically located.
 	Municipality *string `json:"municipality,omitempty"`
 	// Whether the airport has scheduled airline service.
@@ -68,19 +67,18 @@ type Airport struct {
 type AirportEdges struct {
 	// Runways at the airport.
 	Runways []*Runway `json:"runways,omitempty"`
+	// Weather station at the airport.
+	Station *Station `json:"station,omitempty"`
 	// Frequencies at the airport.
 	Frequencies []*Frequency `json:"frequencies,omitempty"`
-	// METARs at the airport.
-	Metars []*Metar `json:"metars,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
 	loadedTypes [3]bool
 	// totalCount holds the count of the edges above.
-	totalCount [1]map[string]int
+	totalCount [2]map[string]int
 
 	namedRunways     map[string][]*Runway
 	namedFrequencies map[string][]*Frequency
-	namedMetars      map[string][]*Metar
 }
 
 // RunwaysOrErr returns the Runways value or an error if the edge
@@ -92,22 +90,26 @@ func (e AirportEdges) RunwaysOrErr() ([]*Runway, error) {
 	return nil, &NotLoadedError{edge: "runways"}
 }
 
+// StationOrErr returns the Station value or an error if the edge
+// was not loaded in eager-loading, or loaded but was not found.
+func (e AirportEdges) StationOrErr() (*Station, error) {
+	if e.loadedTypes[1] {
+		if e.Station == nil {
+			// Edge was loaded but was not found.
+			return nil, &NotFoundError{label: station.Label}
+		}
+		return e.Station, nil
+	}
+	return nil, &NotLoadedError{edge: "station"}
+}
+
 // FrequenciesOrErr returns the Frequencies value or an error if the edge
 // was not loaded in eager-loading.
 func (e AirportEdges) FrequenciesOrErr() ([]*Frequency, error) {
-	if e.loadedTypes[1] {
+	if e.loadedTypes[2] {
 		return e.Frequencies, nil
 	}
 	return nil, &NotLoadedError{edge: "frequencies"}
-}
-
-// MetarsOrErr returns the Metars value or an error if the edge
-// was not loaded in eager-loading.
-func (e AirportEdges) MetarsOrErr() ([]*Metar, error) {
-	if e.loadedTypes[2] {
-		return e.Metars, nil
-	}
-	return nil, &NotLoadedError{edge: "metars"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -117,7 +119,7 @@ func (*Airport) scanValues(columns []string) ([]any, error) {
 		switch columns[i] {
 		case airport.FieldKeywords:
 			values[i] = new([]byte)
-		case airport.FieldImportFlag, airport.FieldHasWeather, airport.FieldScheduledService:
+		case airport.FieldImportFlag, airport.FieldScheduledService:
 			values[i] = new(sql.NullBool)
 		case airport.FieldLatitude, airport.FieldLongitude:
 			values[i] = new(sql.NullFloat64)
@@ -221,12 +223,6 @@ func (a *Airport) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				a.Region = value.String
 			}
-		case airport.FieldHasWeather:
-			if value, ok := values[i].(*sql.NullBool); !ok {
-				return fmt.Errorf("unexpected type %T for field has_weather", values[i])
-			} else if value.Valid {
-				a.HasWeather = value.Bool
-			}
 		case airport.FieldMunicipality:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field municipality", values[i])
@@ -293,14 +289,14 @@ func (a *Airport) QueryRunways() *RunwayQuery {
 	return (&AirportClient{config: a.config}).QueryRunways(a)
 }
 
+// QueryStation queries the "station" edge of the Airport entity.
+func (a *Airport) QueryStation() *StationQuery {
+	return (&AirportClient{config: a.config}).QueryStation(a)
+}
+
 // QueryFrequencies queries the "frequencies" edge of the Airport entity.
 func (a *Airport) QueryFrequencies() *FrequencyQuery {
 	return (&AirportClient{config: a.config}).QueryFrequencies(a)
-}
-
-// QueryMetars queries the "metars" edge of the Airport entity.
-func (a *Airport) QueryMetars() *MetarQuery {
-	return (&AirportClient{config: a.config}).QueryMetars(a)
 }
 
 // Update returns a builder for updating this Airport.
@@ -363,9 +359,6 @@ func (a *Airport) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("region=")
 	builder.WriteString(a.Region)
-	builder.WriteString(", ")
-	builder.WriteString("has_weather=")
-	builder.WriteString(fmt.Sprintf("%v", a.HasWeather))
 	builder.WriteString(", ")
 	if v := a.Municipality; v != nil {
 		builder.WriteString("municipality=")
@@ -451,30 +444,6 @@ func (a *Airport) appendNamedFrequencies(name string, edges ...*Frequency) {
 		a.Edges.namedFrequencies[name] = []*Frequency{}
 	} else {
 		a.Edges.namedFrequencies[name] = append(a.Edges.namedFrequencies[name], edges...)
-	}
-}
-
-// NamedMetars returns the Metars named value or an error if the edge was not
-// loaded in eager-loading with this name.
-func (a *Airport) NamedMetars(name string) ([]*Metar, error) {
-	if a.Edges.namedMetars == nil {
-		return nil, &NotLoadedError{edge: name}
-	}
-	nodes, ok := a.Edges.namedMetars[name]
-	if !ok {
-		return nil, &NotLoadedError{edge: name}
-	}
-	return nodes, nil
-}
-
-func (a *Airport) appendNamedMetars(name string, edges ...*Metar) {
-	if a.Edges.namedMetars == nil {
-		a.Edges.namedMetars = make(map[string][]*Metar)
-	}
-	if len(edges) == 0 {
-		a.Edges.namedMetars[name] = []*Metar{}
-	} else {
-		a.Edges.namedMetars[name] = append(a.Edges.namedMetars[name], edges...)
 	}
 }
 

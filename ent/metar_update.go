@@ -11,10 +11,10 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
-	"metar.gg/ent/airport"
 	"metar.gg/ent/metar"
 	"metar.gg/ent/predicate"
 	"metar.gg/ent/skycondition"
+	"metar.gg/ent/station"
 )
 
 // MetarUpdate is the builder for updating Metar entities.
@@ -647,23 +647,15 @@ func (mu *MetarUpdate) SetHash(s string) *MetarUpdate {
 	return mu
 }
 
-// SetAirportID sets the "airport" edge to the Airport entity by ID.
-func (mu *MetarUpdate) SetAirportID(id int) *MetarUpdate {
-	mu.mutation.SetAirportID(id)
+// SetStationID sets the "station" edge to the Station entity by ID.
+func (mu *MetarUpdate) SetStationID(id int) *MetarUpdate {
+	mu.mutation.SetStationID(id)
 	return mu
 }
 
-// SetNillableAirportID sets the "airport" edge to the Airport entity by ID if the given value is not nil.
-func (mu *MetarUpdate) SetNillableAirportID(id *int) *MetarUpdate {
-	if id != nil {
-		mu = mu.SetAirportID(*id)
-	}
-	return mu
-}
-
-// SetAirport sets the "airport" edge to the Airport entity.
-func (mu *MetarUpdate) SetAirport(a *Airport) *MetarUpdate {
-	return mu.SetAirportID(a.ID)
+// SetStation sets the "station" edge to the Station entity.
+func (mu *MetarUpdate) SetStation(s *Station) *MetarUpdate {
+	return mu.SetStationID(s.ID)
 }
 
 // AddSkyConditionIDs adds the "sky_conditions" edge to the SkyCondition entity by IDs.
@@ -686,9 +678,9 @@ func (mu *MetarUpdate) Mutation() *MetarMutation {
 	return mu.mutation
 }
 
-// ClearAirport clears the "airport" edge to the Airport entity.
-func (mu *MetarUpdate) ClearAirport() *MetarUpdate {
-	mu.mutation.ClearAirport()
+// ClearStation clears the "station" edge to the Station entity.
+func (mu *MetarUpdate) ClearStation() *MetarUpdate {
+	mu.mutation.ClearStation()
 	return mu
 }
 
@@ -784,6 +776,9 @@ func (mu *MetarUpdate) check() error {
 		if err := metar.MetarTypeValidator(v); err != nil {
 			return &ValidationError{Name: "metar_type", err: fmt.Errorf(`ent: validator failed for field "Metar.metar_type": %w`, err)}
 		}
+	}
+	if _, ok := mu.mutation.StationID(); mu.mutation.StationCleared() && !ok {
+		return errors.New(`ent: clearing a required unique edge "Metar.station"`)
 	}
 	return nil
 }
@@ -1319,33 +1314,33 @@ func (mu *MetarUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Column: metar.FieldHash,
 		})
 	}
-	if mu.mutation.AirportCleared() {
+	if mu.mutation.StationCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
-			Table:   metar.AirportTable,
-			Columns: []string{metar.AirportColumn},
+			Table:   metar.StationTable,
+			Columns: []string{metar.StationColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeInt,
-					Column: airport.FieldID,
+					Column: station.FieldID,
 				},
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := mu.mutation.AirportIDs(); len(nodes) > 0 {
+	if nodes := mu.mutation.StationIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
-			Table:   metar.AirportTable,
-			Columns: []string{metar.AirportColumn},
+			Table:   metar.StationTable,
+			Columns: []string{metar.StationColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeInt,
-					Column: airport.FieldID,
+					Column: station.FieldID,
 				},
 			},
 		}
@@ -2045,23 +2040,15 @@ func (muo *MetarUpdateOne) SetHash(s string) *MetarUpdateOne {
 	return muo
 }
 
-// SetAirportID sets the "airport" edge to the Airport entity by ID.
-func (muo *MetarUpdateOne) SetAirportID(id int) *MetarUpdateOne {
-	muo.mutation.SetAirportID(id)
+// SetStationID sets the "station" edge to the Station entity by ID.
+func (muo *MetarUpdateOne) SetStationID(id int) *MetarUpdateOne {
+	muo.mutation.SetStationID(id)
 	return muo
 }
 
-// SetNillableAirportID sets the "airport" edge to the Airport entity by ID if the given value is not nil.
-func (muo *MetarUpdateOne) SetNillableAirportID(id *int) *MetarUpdateOne {
-	if id != nil {
-		muo = muo.SetAirportID(*id)
-	}
-	return muo
-}
-
-// SetAirport sets the "airport" edge to the Airport entity.
-func (muo *MetarUpdateOne) SetAirport(a *Airport) *MetarUpdateOne {
-	return muo.SetAirportID(a.ID)
+// SetStation sets the "station" edge to the Station entity.
+func (muo *MetarUpdateOne) SetStation(s *Station) *MetarUpdateOne {
+	return muo.SetStationID(s.ID)
 }
 
 // AddSkyConditionIDs adds the "sky_conditions" edge to the SkyCondition entity by IDs.
@@ -2084,9 +2071,9 @@ func (muo *MetarUpdateOne) Mutation() *MetarMutation {
 	return muo.mutation
 }
 
-// ClearAirport clears the "airport" edge to the Airport entity.
-func (muo *MetarUpdateOne) ClearAirport() *MetarUpdateOne {
-	muo.mutation.ClearAirport()
+// ClearStation clears the "station" edge to the Station entity.
+func (muo *MetarUpdateOne) ClearStation() *MetarUpdateOne {
+	muo.mutation.ClearStation()
 	return muo
 }
 
@@ -2195,6 +2182,9 @@ func (muo *MetarUpdateOne) check() error {
 		if err := metar.MetarTypeValidator(v); err != nil {
 			return &ValidationError{Name: "metar_type", err: fmt.Errorf(`ent: validator failed for field "Metar.metar_type": %w`, err)}
 		}
+	}
+	if _, ok := muo.mutation.StationID(); muo.mutation.StationCleared() && !ok {
+		return errors.New(`ent: clearing a required unique edge "Metar.station"`)
 	}
 	return nil
 }
@@ -2747,33 +2737,33 @@ func (muo *MetarUpdateOne) sqlSave(ctx context.Context) (_node *Metar, err error
 			Column: metar.FieldHash,
 		})
 	}
-	if muo.mutation.AirportCleared() {
+	if muo.mutation.StationCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
-			Table:   metar.AirportTable,
-			Columns: []string{metar.AirportColumn},
+			Table:   metar.StationTable,
+			Columns: []string{metar.StationColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeInt,
-					Column: airport.FieldID,
+					Column: station.FieldID,
 				},
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := muo.mutation.AirportIDs(); len(nodes) > 0 {
+	if nodes := muo.mutation.StationIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
-			Table:   metar.AirportTable,
-			Columns: []string{metar.AirportColumn},
+			Table:   metar.StationTable,
+			Columns: []string{metar.StationColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeInt,
-					Column: airport.FieldID,
+					Column: station.FieldID,
 				},
 			},
 		}

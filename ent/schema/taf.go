@@ -9,20 +9,22 @@ import (
 	"entgo.io/ent/schema/index"
 )
 
-// Metar holds the schema definition for the Metar entity.
-type Metar struct {
+// Taf holds the schema definition for the Metar entity.
+type Taf struct {
 	ent.Schema
 }
 
 // Fields of the Metar.
-func (Metar) Fields() []ent.Field {
+func (Taf) Fields() []ent.Field {
 	return []ent.Field{
 		field.Int("id").Annotations(entgql.Skip()),
-		field.String("raw_text").Comment("The raw METAR text."),
-		field.Time("observation_time").Comment("The time the METAR was observed."),
-		field.Float("latitude").Optional().Nillable().Comment("The latitude in decimal degrees of the station."),
-		field.Float("longitude").Optional().Nillable().Comment("The longitude in decimal degrees of the station."),
-		field.Float("elevation").Optional().Nillable().Comment("The elevation in meters of the station."),
+		field.String("raw_text").Comment("The raw TAF text."),
+		field.Time("issue_time").Comment("The time the TAF was issued."),
+		field.Time("bulletin_time").Comment("TAF bulletin time."),
+		field.Time("valid_from_time").Comment("The start time of the TAF validity period.").Annotations(entgql.OrderField("valid_from_time")),
+		field.Time("valid_to_time").Comment("The end time of the TAF validity period."),
+		field.String("remarks").Comment("Remarks."),
+
 		field.Float("temperature").Comment("The temperature in Celsius."),
 		field.Float("dewpoint").Comment("The dewpoint in Celsius."),
 		field.Int("wind_speed").Comment("The wind speed in knots, or 0 if calm."),
@@ -30,7 +32,6 @@ func (Metar) Fields() []ent.Field {
 		field.Int("wind_direction").Comment("The wind direction in degrees, or 0 if calm."),
 		field.Float("visibility").Comment("The visibility in statute miles."),
 		field.Float("altimeter").Comment("The altimeter setting in inches of mercury."),
-		field.String("present_weather").Optional().Nillable().Comment("The present weather string."),
 		field.Enum("flight_category").Optional().Nillable().Values("VFR", "MVFR", "IFR", "LIFR"),
 		field.Bool("quality_control_corrected").Optional().Nillable().Comment("Quality control corrected."),
 		field.Bool("quality_control_auto_station").Comment("Whether it's an automated station, of one of the following types A01|A01A|A02|A02A|AOA|AWOS."),
@@ -51,15 +52,15 @@ func (Metar) Fields() []ent.Field {
 		field.Float("precipitation_24").Optional().Nillable().Comment("The precipitation in inches from the past 24 hours. 0.0005 in = trace precipitation"),
 		field.Float("snow_depth").Optional().Nillable().Comment("The snow depth in inches."),
 		field.Float("vert_vis").Optional().Nillable().Comment("The vertical visibility in feet."),
-		field.Enum("metar_type").Values("METAR", "SPECI").Comment("The type of METAR."),
+		field.Enum("metar_type").Values("TAF", "SPECI").Comment("The type of TAF."),
 		field.String("hash").Annotations(entgql.Skip()),
 	}
 }
 
 // Edges of the Metar.
-func (Metar) Edges() []ent.Edge {
+func (Taf) Edges() []ent.Edge {
 	return []ent.Edge{
-		edge.From("station", Station.Type).Ref("metars").Unique().Required().Comment("The station that provided the METAR."),
+		edge.From("station", Station.Type).Ref("tafs").Unique().Required().Comment("The station that issued this taf."),
 		edge.To("sky_conditions", SkyCondition.Type).Comment("The sky conditions.").Annotations(entsql.Annotation{
 			OnDelete: entsql.Cascade,
 		}),
@@ -67,13 +68,13 @@ func (Metar) Edges() []ent.Edge {
 }
 
 // Indexes of the Metar.
-func (Metar) Indexes() []ent.Index {
+func (Taf) Indexes() []ent.Index {
 	return []ent.Index{
-		index.Fields("observation_time"),
+		index.Fields("issue_time"),
 	}
 }
 
 // Mixin of the Metar.
-func (Metar) Mixin() []ent.Mixin {
+func (Taf) Mixin() []ent.Mixin {
 	return nil
 }

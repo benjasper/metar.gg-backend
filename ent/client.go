@@ -15,6 +15,8 @@ import (
 	"metar.gg/ent/metar"
 	"metar.gg/ent/runway"
 	"metar.gg/ent/skycondition"
+	"metar.gg/ent/station"
+	"metar.gg/ent/taf"
 
 	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/sql"
@@ -36,6 +38,10 @@ type Client struct {
 	Runway *RunwayClient
 	// SkyCondition is the client for interacting with the SkyCondition builders.
 	SkyCondition *SkyConditionClient
+	// Station is the client for interacting with the Station builders.
+	Station *StationClient
+	// Taf is the client for interacting with the Taf builders.
+	Taf *TafClient
 	// additional fields for node api
 	tables tables
 }
@@ -56,6 +62,8 @@ func (c *Client) init() {
 	c.Metar = NewMetarClient(c.config)
 	c.Runway = NewRunwayClient(c.config)
 	c.SkyCondition = NewSkyConditionClient(c.config)
+	c.Station = NewStationClient(c.config)
+	c.Taf = NewTafClient(c.config)
 }
 
 // Open opens a database/sql.DB specified by the driver name and
@@ -94,6 +102,8 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 		Metar:        NewMetarClient(cfg),
 		Runway:       NewRunwayClient(cfg),
 		SkyCondition: NewSkyConditionClient(cfg),
+		Station:      NewStationClient(cfg),
+		Taf:          NewTafClient(cfg),
 	}, nil
 }
 
@@ -118,6 +128,8 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 		Metar:        NewMetarClient(cfg),
 		Runway:       NewRunwayClient(cfg),
 		SkyCondition: NewSkyConditionClient(cfg),
+		Station:      NewStationClient(cfg),
+		Taf:          NewTafClient(cfg),
 	}, nil
 }
 
@@ -151,6 +163,8 @@ func (c *Client) Use(hooks ...Hook) {
 	c.Metar.Use(hooks...)
 	c.Runway.Use(hooks...)
 	c.SkyCondition.Use(hooks...)
+	c.Station.Use(hooks...)
+	c.Taf.Use(hooks...)
 }
 
 // AirportClient is a client for the Airport schema.
@@ -254,6 +268,22 @@ func (c *AirportClient) QueryRunways(a *Airport) *RunwayQuery {
 	return query
 }
 
+// QueryStation queries the station edge of a Airport.
+func (c *AirportClient) QueryStation(a *Airport) *StationQuery {
+	query := &StationQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := a.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(airport.Table, airport.FieldID, id),
+			sqlgraph.To(station.Table, station.FieldID),
+			sqlgraph.Edge(sqlgraph.O2O, false, airport.StationTable, airport.StationColumn),
+		)
+		fromV = sqlgraph.Neighbors(a.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // QueryFrequencies queries the frequencies edge of a Airport.
 func (c *AirportClient) QueryFrequencies(a *Airport) *FrequencyQuery {
 	query := &FrequencyQuery{config: c.config}
@@ -263,22 +293,6 @@ func (c *AirportClient) QueryFrequencies(a *Airport) *FrequencyQuery {
 			sqlgraph.From(airport.Table, airport.FieldID, id),
 			sqlgraph.To(frequency.Table, frequency.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, false, airport.FrequenciesTable, airport.FrequenciesColumn),
-		)
-		fromV = sqlgraph.Neighbors(a.driver.Dialect(), step)
-		return fromV, nil
-	}
-	return query
-}
-
-// QueryMetars queries the metars edge of a Airport.
-func (c *AirportClient) QueryMetars(a *Airport) *MetarQuery {
-	query := &MetarQuery{config: c.config}
-	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
-		id := a.ID
-		step := sqlgraph.NewStep(
-			sqlgraph.From(airport.Table, airport.FieldID, id),
-			sqlgraph.To(metar.Table, metar.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, airport.MetarsTable, airport.MetarsColumn),
 		)
 		fromV = sqlgraph.Neighbors(a.driver.Dialect(), step)
 		return fromV, nil
@@ -482,15 +496,15 @@ func (c *MetarClient) GetX(ctx context.Context, id int) *Metar {
 	return obj
 }
 
-// QueryAirport queries the airport edge of a Metar.
-func (c *MetarClient) QueryAirport(m *Metar) *AirportQuery {
-	query := &AirportQuery{config: c.config}
+// QueryStation queries the station edge of a Metar.
+func (c *MetarClient) QueryStation(m *Metar) *StationQuery {
+	query := &StationQuery{config: c.config}
 	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
 		id := m.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(metar.Table, metar.FieldID, id),
-			sqlgraph.To(airport.Table, airport.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, metar.AirportTable, metar.AirportColumn),
+			sqlgraph.To(station.Table, station.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, metar.StationTable, metar.StationColumn),
 		)
 		fromV = sqlgraph.Neighbors(m.driver.Dialect(), step)
 		return fromV, nil
@@ -729,4 +743,264 @@ func (c *SkyConditionClient) QueryMetar(sc *SkyCondition) *MetarQuery {
 // Hooks returns the client hooks.
 func (c *SkyConditionClient) Hooks() []Hook {
 	return c.hooks.SkyCondition
+}
+
+// StationClient is a client for the Station schema.
+type StationClient struct {
+	config
+}
+
+// NewStationClient returns a client for the Station from the given config.
+func NewStationClient(c config) *StationClient {
+	return &StationClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `station.Hooks(f(g(h())))`.
+func (c *StationClient) Use(hooks ...Hook) {
+	c.hooks.Station = append(c.hooks.Station, hooks...)
+}
+
+// Create returns a builder for creating a Station entity.
+func (c *StationClient) Create() *StationCreate {
+	mutation := newStationMutation(c.config, OpCreate)
+	return &StationCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of Station entities.
+func (c *StationClient) CreateBulk(builders ...*StationCreate) *StationCreateBulk {
+	return &StationCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for Station.
+func (c *StationClient) Update() *StationUpdate {
+	mutation := newStationMutation(c.config, OpUpdate)
+	return &StationUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *StationClient) UpdateOne(s *Station) *StationUpdateOne {
+	mutation := newStationMutation(c.config, OpUpdateOne, withStation(s))
+	return &StationUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *StationClient) UpdateOneID(id int) *StationUpdateOne {
+	mutation := newStationMutation(c.config, OpUpdateOne, withStationID(id))
+	return &StationUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for Station.
+func (c *StationClient) Delete() *StationDelete {
+	mutation := newStationMutation(c.config, OpDelete)
+	return &StationDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *StationClient) DeleteOne(s *Station) *StationDeleteOne {
+	return c.DeleteOneID(s.ID)
+}
+
+// DeleteOne returns a builder for deleting the given entity by its id.
+func (c *StationClient) DeleteOneID(id int) *StationDeleteOne {
+	builder := c.Delete().Where(station.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &StationDeleteOne{builder}
+}
+
+// Query returns a query builder for Station.
+func (c *StationClient) Query() *StationQuery {
+	return &StationQuery{
+		config: c.config,
+	}
+}
+
+// Get returns a Station entity by its id.
+func (c *StationClient) Get(ctx context.Context, id int) (*Station, error) {
+	return c.Query().Where(station.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *StationClient) GetX(ctx context.Context, id int) *Station {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryAirport queries the airport edge of a Station.
+func (c *StationClient) QueryAirport(s *Station) *AirportQuery {
+	query := &AirportQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := s.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(station.Table, station.FieldID, id),
+			sqlgraph.To(airport.Table, airport.FieldID),
+			sqlgraph.Edge(sqlgraph.O2O, true, station.AirportTable, station.AirportColumn),
+		)
+		fromV = sqlgraph.Neighbors(s.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryMetars queries the metars edge of a Station.
+func (c *StationClient) QueryMetars(s *Station) *MetarQuery {
+	query := &MetarQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := s.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(station.Table, station.FieldID, id),
+			sqlgraph.To(metar.Table, metar.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, station.MetarsTable, station.MetarsColumn),
+		)
+		fromV = sqlgraph.Neighbors(s.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryTafs queries the tafs edge of a Station.
+func (c *StationClient) QueryTafs(s *Station) *TafQuery {
+	query := &TafQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := s.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(station.Table, station.FieldID, id),
+			sqlgraph.To(taf.Table, taf.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, station.TafsTable, station.TafsColumn),
+		)
+		fromV = sqlgraph.Neighbors(s.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *StationClient) Hooks() []Hook {
+	return c.hooks.Station
+}
+
+// TafClient is a client for the Taf schema.
+type TafClient struct {
+	config
+}
+
+// NewTafClient returns a client for the Taf from the given config.
+func NewTafClient(c config) *TafClient {
+	return &TafClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `taf.Hooks(f(g(h())))`.
+func (c *TafClient) Use(hooks ...Hook) {
+	c.hooks.Taf = append(c.hooks.Taf, hooks...)
+}
+
+// Create returns a builder for creating a Taf entity.
+func (c *TafClient) Create() *TafCreate {
+	mutation := newTafMutation(c.config, OpCreate)
+	return &TafCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of Taf entities.
+func (c *TafClient) CreateBulk(builders ...*TafCreate) *TafCreateBulk {
+	return &TafCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for Taf.
+func (c *TafClient) Update() *TafUpdate {
+	mutation := newTafMutation(c.config, OpUpdate)
+	return &TafUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *TafClient) UpdateOne(t *Taf) *TafUpdateOne {
+	mutation := newTafMutation(c.config, OpUpdateOne, withTaf(t))
+	return &TafUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *TafClient) UpdateOneID(id int) *TafUpdateOne {
+	mutation := newTafMutation(c.config, OpUpdateOne, withTafID(id))
+	return &TafUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for Taf.
+func (c *TafClient) Delete() *TafDelete {
+	mutation := newTafMutation(c.config, OpDelete)
+	return &TafDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *TafClient) DeleteOne(t *Taf) *TafDeleteOne {
+	return c.DeleteOneID(t.ID)
+}
+
+// DeleteOne returns a builder for deleting the given entity by its id.
+func (c *TafClient) DeleteOneID(id int) *TafDeleteOne {
+	builder := c.Delete().Where(taf.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &TafDeleteOne{builder}
+}
+
+// Query returns a query builder for Taf.
+func (c *TafClient) Query() *TafQuery {
+	return &TafQuery{
+		config: c.config,
+	}
+}
+
+// Get returns a Taf entity by its id.
+func (c *TafClient) Get(ctx context.Context, id int) (*Taf, error) {
+	return c.Query().Where(taf.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *TafClient) GetX(ctx context.Context, id int) *Taf {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryStation queries the station edge of a Taf.
+func (c *TafClient) QueryStation(t *Taf) *StationQuery {
+	query := &StationQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := t.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(taf.Table, taf.FieldID, id),
+			sqlgraph.To(station.Table, station.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, taf.StationTable, taf.StationColumn),
+		)
+		fromV = sqlgraph.Neighbors(t.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QuerySkyConditions queries the sky_conditions edge of a Taf.
+func (c *TafClient) QuerySkyConditions(t *Taf) *SkyConditionQuery {
+	query := &SkyConditionQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := t.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(taf.Table, taf.FieldID, id),
+			sqlgraph.To(skycondition.Table, skycondition.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, taf.SkyConditionsTable, taf.SkyConditionsColumn),
+		)
+		fromV = sqlgraph.Neighbors(t.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *TafClient) Hooks() []Hook {
+	return c.hooks.Taf
 }

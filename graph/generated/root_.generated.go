@@ -34,6 +34,7 @@ type ResolverRoot interface {
 	AirportConnection() AirportConnectionResolver
 	MetarConnection() MetarConnectionResolver
 	Query() QueryResolver
+	Station() StationResolver
 }
 
 type DirectiveRoot struct {
@@ -46,7 +47,6 @@ type ComplexityRoot struct {
 		Elevation        func(childComplexity int) int
 		Frequencies      func(childComplexity int) int
 		GpsCode          func(childComplexity int) int
-		HasWeather       func(childComplexity int) int
 		ID               func(childComplexity int) int
 		IataCode         func(childComplexity int) int
 		Identifier       func(childComplexity int) int
@@ -55,13 +55,12 @@ type ComplexityRoot struct {
 		Latitude         func(childComplexity int) int
 		LocalCode        func(childComplexity int) int
 		Longitude        func(childComplexity int) int
-		Metars           func(childComplexity int, after *ent.Cursor, first *int, before *ent.Cursor, last *int) int
-		MetarsVicinity   func(childComplexity int, first *int, radius *float64) int
 		Municipality     func(childComplexity int) int
 		Name             func(childComplexity int) int
 		Region           func(childComplexity int) int
 		Runways          func(childComplexity int, closed *bool) int
 		ScheduledService func(childComplexity int) int
+		Station          func(childComplexity int) int
 		Type             func(childComplexity int) int
 		Website          func(childComplexity int) int
 		Wikipedia        func(childComplexity int) int
@@ -89,7 +88,6 @@ type ComplexityRoot struct {
 	}
 
 	Metar struct {
-		Airport                               func(childComplexity int) int
 		Altimeter                             func(childComplexity int) int
 		Dewpoint                              func(childComplexity int) int
 		Elevation                             func(childComplexity int) int
@@ -119,7 +117,7 @@ type ComplexityRoot struct {
 		SeaLevelPressure                      func(childComplexity int) int
 		SkyConditions                         func(childComplexity int) int
 		SnowDepth                             func(childComplexity int) int
-		StationID                             func(childComplexity int) int
+		Station                               func(childComplexity int) int
 		Temperature                           func(childComplexity int) int
 		VertVis                               func(childComplexity int) int
 		Visibility                            func(childComplexity int) int
@@ -184,6 +182,56 @@ type ComplexityRoot struct {
 		Metar     func(childComplexity int) int
 		SkyCover  func(childComplexity int) int
 	}
+
+	Station struct {
+		Airport        func(childComplexity int) int
+		Elevation      func(childComplexity int) int
+		Latitude       func(childComplexity int) int
+		Longitude      func(childComplexity int) int
+		Metars         func(childComplexity int) int
+		MetarsVicinity func(childComplexity int, first *int, radius *float64) int
+		StationID      func(childComplexity int) int
+		Tafs           func(childComplexity int) int
+	}
+
+	Taf struct {
+		Altimeter                             func(childComplexity int) int
+		BulletinTime                          func(childComplexity int) int
+		Dewpoint                              func(childComplexity int) int
+		FlightCategory                        func(childComplexity int) int
+		IssueTime                             func(childComplexity int) int
+		MaxTemp24                             func(childComplexity int) int
+		MaxTemp6                              func(childComplexity int) int
+		MetarType                             func(childComplexity int) int
+		MinTemp24                             func(childComplexity int) int
+		MinTemp6                              func(childComplexity int) int
+		Precipitation                         func(childComplexity int) int
+		Precipitation24                       func(childComplexity int) int
+		Precipitation3                        func(childComplexity int) int
+		Precipitation6                        func(childComplexity int) int
+		PressureTendency                      func(childComplexity int) int
+		QualityControlAutoStation             func(childComplexity int) int
+		QualityControlCorrected               func(childComplexity int) int
+		QualityControlFreezingRainSensorOff   func(childComplexity int) int
+		QualityControlLightningSensorOff      func(childComplexity int) int
+		QualityControlMaintenanceIndicatorOn  func(childComplexity int) int
+		QualityControlNoSignal                func(childComplexity int) int
+		QualityControlPresentWeatherSensorOff func(childComplexity int) int
+		RawText                               func(childComplexity int) int
+		Remarks                               func(childComplexity int) int
+		SeaLevelPressure                      func(childComplexity int) int
+		SkyConditions                         func(childComplexity int) int
+		SnowDepth                             func(childComplexity int) int
+		Station                               func(childComplexity int) int
+		Temperature                           func(childComplexity int) int
+		ValidFromTime                         func(childComplexity int) int
+		ValidToTime                           func(childComplexity int) int
+		VertVis                               func(childComplexity int) int
+		Visibility                            func(childComplexity int) int
+		WindDirection                         func(childComplexity int) int
+		WindGust                              func(childComplexity int) int
+		WindSpeed                             func(childComplexity int) int
+	}
 }
 
 type executableSchema struct {
@@ -235,13 +283,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Airport.GpsCode(childComplexity), true
-
-	case "Airport.hasWeather":
-		if e.complexity.Airport.HasWeather == nil {
-			break
-		}
-
-		return e.complexity.Airport.HasWeather(childComplexity), true
 
 	case "Airport.id":
 		if e.complexity.Airport.ID == nil {
@@ -299,30 +340,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Airport.Longitude(childComplexity), true
 
-	case "Airport.metars":
-		if e.complexity.Airport.Metars == nil {
-			break
-		}
-
-		args, err := ec.field_Airport_metars_args(context.TODO(), rawArgs)
-		if err != nil {
-			return 0, false
-		}
-
-		return e.complexity.Airport.Metars(childComplexity, args["after"].(*ent.Cursor), args["first"].(*int), args["before"].(*ent.Cursor), args["last"].(*int)), true
-
-	case "Airport.metarsVicinity":
-		if e.complexity.Airport.MetarsVicinity == nil {
-			break
-		}
-
-		args, err := ec.field_Airport_metarsVicinity_args(context.TODO(), rawArgs)
-		if err != nil {
-			return 0, false
-		}
-
-		return e.complexity.Airport.MetarsVicinity(childComplexity, args["first"].(*int), args["radius"].(*float64)), true
-
 	case "Airport.municipality":
 		if e.complexity.Airport.Municipality == nil {
 			break
@@ -362,6 +379,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Airport.ScheduledService(childComplexity), true
+
+	case "Airport.station":
+		if e.complexity.Airport.Station == nil {
+			break
+		}
+
+		return e.complexity.Airport.Station(childComplexity), true
 
 	case "Airport.type":
 		if e.complexity.Airport.Type == nil {
@@ -467,13 +491,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Frequency.Type(childComplexity), true
-
-	case "Metar.airport":
-		if e.complexity.Metar.Airport == nil {
-			break
-		}
-
-		return e.complexity.Metar.Airport(childComplexity), true
 
 	case "Metar.altimeter":
 		if e.complexity.Metar.Altimeter == nil {
@@ -678,12 +695,12 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Metar.SnowDepth(childComplexity), true
 
-	case "Metar.stationID":
-		if e.complexity.Metar.StationID == nil {
+	case "Metar.station":
+		if e.complexity.Metar.Station == nil {
 			break
 		}
 
-		return e.complexity.Metar.StationID(childComplexity), true
+		return e.complexity.Metar.Station(childComplexity), true
 
 	case "Metar.temperature":
 		if e.complexity.Metar.Temperature == nil {
@@ -984,6 +1001,319 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.SkyCondition.SkyCover(childComplexity), true
 
+	case "Station.airport":
+		if e.complexity.Station.Airport == nil {
+			break
+		}
+
+		return e.complexity.Station.Airport(childComplexity), true
+
+	case "Station.elevation":
+		if e.complexity.Station.Elevation == nil {
+			break
+		}
+
+		return e.complexity.Station.Elevation(childComplexity), true
+
+	case "Station.latitude":
+		if e.complexity.Station.Latitude == nil {
+			break
+		}
+
+		return e.complexity.Station.Latitude(childComplexity), true
+
+	case "Station.longitude":
+		if e.complexity.Station.Longitude == nil {
+			break
+		}
+
+		return e.complexity.Station.Longitude(childComplexity), true
+
+	case "Station.metars":
+		if e.complexity.Station.Metars == nil {
+			break
+		}
+
+		return e.complexity.Station.Metars(childComplexity), true
+
+	case "Station.metarsVicinity":
+		if e.complexity.Station.MetarsVicinity == nil {
+			break
+		}
+
+		args, err := ec.field_Station_metarsVicinity_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Station.MetarsVicinity(childComplexity, args["first"].(*int), args["radius"].(*float64)), true
+
+	case "Station.stationID":
+		if e.complexity.Station.StationID == nil {
+			break
+		}
+
+		return e.complexity.Station.StationID(childComplexity), true
+
+	case "Station.tafs":
+		if e.complexity.Station.Tafs == nil {
+			break
+		}
+
+		return e.complexity.Station.Tafs(childComplexity), true
+
+	case "Taf.altimeter":
+		if e.complexity.Taf.Altimeter == nil {
+			break
+		}
+
+		return e.complexity.Taf.Altimeter(childComplexity), true
+
+	case "Taf.bulletinTime":
+		if e.complexity.Taf.BulletinTime == nil {
+			break
+		}
+
+		return e.complexity.Taf.BulletinTime(childComplexity), true
+
+	case "Taf.dewpoint":
+		if e.complexity.Taf.Dewpoint == nil {
+			break
+		}
+
+		return e.complexity.Taf.Dewpoint(childComplexity), true
+
+	case "Taf.flightCategory":
+		if e.complexity.Taf.FlightCategory == nil {
+			break
+		}
+
+		return e.complexity.Taf.FlightCategory(childComplexity), true
+
+	case "Taf.issueTime":
+		if e.complexity.Taf.IssueTime == nil {
+			break
+		}
+
+		return e.complexity.Taf.IssueTime(childComplexity), true
+
+	case "Taf.maxTemp24":
+		if e.complexity.Taf.MaxTemp24 == nil {
+			break
+		}
+
+		return e.complexity.Taf.MaxTemp24(childComplexity), true
+
+	case "Taf.maxTemp6":
+		if e.complexity.Taf.MaxTemp6 == nil {
+			break
+		}
+
+		return e.complexity.Taf.MaxTemp6(childComplexity), true
+
+	case "Taf.metarType":
+		if e.complexity.Taf.MetarType == nil {
+			break
+		}
+
+		return e.complexity.Taf.MetarType(childComplexity), true
+
+	case "Taf.minTemp24":
+		if e.complexity.Taf.MinTemp24 == nil {
+			break
+		}
+
+		return e.complexity.Taf.MinTemp24(childComplexity), true
+
+	case "Taf.minTemp6":
+		if e.complexity.Taf.MinTemp6 == nil {
+			break
+		}
+
+		return e.complexity.Taf.MinTemp6(childComplexity), true
+
+	case "Taf.precipitation":
+		if e.complexity.Taf.Precipitation == nil {
+			break
+		}
+
+		return e.complexity.Taf.Precipitation(childComplexity), true
+
+	case "Taf.precipitation24":
+		if e.complexity.Taf.Precipitation24 == nil {
+			break
+		}
+
+		return e.complexity.Taf.Precipitation24(childComplexity), true
+
+	case "Taf.precipitation3":
+		if e.complexity.Taf.Precipitation3 == nil {
+			break
+		}
+
+		return e.complexity.Taf.Precipitation3(childComplexity), true
+
+	case "Taf.precipitation6":
+		if e.complexity.Taf.Precipitation6 == nil {
+			break
+		}
+
+		return e.complexity.Taf.Precipitation6(childComplexity), true
+
+	case "Taf.pressureTendency":
+		if e.complexity.Taf.PressureTendency == nil {
+			break
+		}
+
+		return e.complexity.Taf.PressureTendency(childComplexity), true
+
+	case "Taf.qualityControlAutoStation":
+		if e.complexity.Taf.QualityControlAutoStation == nil {
+			break
+		}
+
+		return e.complexity.Taf.QualityControlAutoStation(childComplexity), true
+
+	case "Taf.qualityControlCorrected":
+		if e.complexity.Taf.QualityControlCorrected == nil {
+			break
+		}
+
+		return e.complexity.Taf.QualityControlCorrected(childComplexity), true
+
+	case "Taf.qualityControlFreezingRainSensorOff":
+		if e.complexity.Taf.QualityControlFreezingRainSensorOff == nil {
+			break
+		}
+
+		return e.complexity.Taf.QualityControlFreezingRainSensorOff(childComplexity), true
+
+	case "Taf.qualityControlLightningSensorOff":
+		if e.complexity.Taf.QualityControlLightningSensorOff == nil {
+			break
+		}
+
+		return e.complexity.Taf.QualityControlLightningSensorOff(childComplexity), true
+
+	case "Taf.qualityControlMaintenanceIndicatorOn":
+		if e.complexity.Taf.QualityControlMaintenanceIndicatorOn == nil {
+			break
+		}
+
+		return e.complexity.Taf.QualityControlMaintenanceIndicatorOn(childComplexity), true
+
+	case "Taf.qualityControlNoSignal":
+		if e.complexity.Taf.QualityControlNoSignal == nil {
+			break
+		}
+
+		return e.complexity.Taf.QualityControlNoSignal(childComplexity), true
+
+	case "Taf.qualityControlPresentWeatherSensorOff":
+		if e.complexity.Taf.QualityControlPresentWeatherSensorOff == nil {
+			break
+		}
+
+		return e.complexity.Taf.QualityControlPresentWeatherSensorOff(childComplexity), true
+
+	case "Taf.rawText":
+		if e.complexity.Taf.RawText == nil {
+			break
+		}
+
+		return e.complexity.Taf.RawText(childComplexity), true
+
+	case "Taf.remarks":
+		if e.complexity.Taf.Remarks == nil {
+			break
+		}
+
+		return e.complexity.Taf.Remarks(childComplexity), true
+
+	case "Taf.seaLevelPressure":
+		if e.complexity.Taf.SeaLevelPressure == nil {
+			break
+		}
+
+		return e.complexity.Taf.SeaLevelPressure(childComplexity), true
+
+	case "Taf.skyConditions":
+		if e.complexity.Taf.SkyConditions == nil {
+			break
+		}
+
+		return e.complexity.Taf.SkyConditions(childComplexity), true
+
+	case "Taf.snowDepth":
+		if e.complexity.Taf.SnowDepth == nil {
+			break
+		}
+
+		return e.complexity.Taf.SnowDepth(childComplexity), true
+
+	case "Taf.station":
+		if e.complexity.Taf.Station == nil {
+			break
+		}
+
+		return e.complexity.Taf.Station(childComplexity), true
+
+	case "Taf.temperature":
+		if e.complexity.Taf.Temperature == nil {
+			break
+		}
+
+		return e.complexity.Taf.Temperature(childComplexity), true
+
+	case "Taf.validFromTime":
+		if e.complexity.Taf.ValidFromTime == nil {
+			break
+		}
+
+		return e.complexity.Taf.ValidFromTime(childComplexity), true
+
+	case "Taf.validToTime":
+		if e.complexity.Taf.ValidToTime == nil {
+			break
+		}
+
+		return e.complexity.Taf.ValidToTime(childComplexity), true
+
+	case "Taf.vertVis":
+		if e.complexity.Taf.VertVis == nil {
+			break
+		}
+
+		return e.complexity.Taf.VertVis(childComplexity), true
+
+	case "Taf.visibility":
+		if e.complexity.Taf.Visibility == nil {
+			break
+		}
+
+		return e.complexity.Taf.Visibility(childComplexity), true
+
+	case "Taf.windDirection":
+		if e.complexity.Taf.WindDirection == nil {
+			break
+		}
+
+		return e.complexity.Taf.WindDirection(childComplexity), true
+
+	case "Taf.windGust":
+		if e.complexity.Taf.WindGust == nil {
+			break
+		}
+
+		return e.complexity.Taf.WindGust(childComplexity), true
+
+	case "Taf.windSpeed":
+		if e.complexity.Taf.WindSpeed == nil {
+			break
+		}
+
+		return e.complexity.Taf.WindSpeed(childComplexity), true
+
 	}
 	return 0, false
 }
@@ -991,7 +1321,9 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 	rc := graphql.GetOperationContext(ctx)
 	ec := executionContext{rc, e}
-	inputUnmarshalMap := graphql.BuildUnmarshalerMap()
+	inputUnmarshalMap := graphql.BuildUnmarshalerMap(
+		ec.unmarshalInputTafOrder,
+	)
 	first := true
 
 	switch rc.Operation.Operation {
@@ -1057,8 +1389,6 @@ type Airport {
   continent: AirportContinent!
   country: String!
   region: String!
-  """Whether the airport has weather reporting and a metar by the airport is available."""
-  hasWeather: Boolean!
   """The primary municipality that the airport serves (when available). Note that this is not necessarily the municipality where the airport is physically located."""
   municipality: String
   """Whether the airport has scheduled airline service."""
@@ -1075,6 +1405,7 @@ type Airport {
   wikipedia: String
   """Extra keywords/phrases to assist with search. May include former names for the airport, alternate codes, names in other languages, nearby tourist destinations, etc."""
   keywords: [String!]!
+  station: Station
   frequencies: [Frequency!]
 }
 """AirportContinent is enum for the field continent"""
@@ -1108,8 +1439,6 @@ type Frequency {
   airport: Airport
 }
 type Metar {
-  """The ICAO identifier of the station that provided the METAR or identifier of the weather station."""
-  stationID: String!
   """The raw METAR text."""
   rawText: String!
   """The time the METAR was observed."""
@@ -1177,7 +1506,7 @@ type Metar {
   vertVis: Float
   """The type of METAR."""
   metarType: MetarMetarType!
-  airport: Airport
+  station: Station!
   skyConditions: [SkyCondition!]
 }
 """MetarFlightCategory is enum for the field flight_category"""
@@ -1255,6 +1584,113 @@ enum SkyConditionSkyCover @goModel(model: "metar.gg/ent/skycondition.SkyCover") 
   OVX
   CAVOK
 }
+type Station {
+  """The ICAO identifier of the station that provided the weather data or identifier of the weather station."""
+  stationID: String!
+  """The latitude in decimal degrees of the station."""
+  latitude: Float
+  """The longitude in decimal degrees of the station."""
+  longitude: Float
+  """The elevation in meters of the station."""
+  elevation: Float
+  airport: Airport
+  metars: [Metar!]
+  tafs: [Taf!]
+}
+type Taf {
+  """The raw TAF text."""
+  rawText: String!
+  """The time the TAF was issued."""
+  issueTime: Time!
+  """TAF bulletin time."""
+  bulletinTime: Time!
+  """The start time of the TAF validity period."""
+  validFromTime: Time!
+  """The end time of the TAF validity period."""
+  validToTime: Time!
+  """Remarks."""
+  remarks: String!
+  """The temperature in Celsius."""
+  temperature: Float!
+  """The dewpoint in Celsius."""
+  dewpoint: Float!
+  """The wind speed in knots, or 0 if calm."""
+  windSpeed: Int!
+  """The wind gust in knots."""
+  windGust: Int!
+  """The wind direction in degrees, or 0 if calm."""
+  windDirection: Int!
+  """The visibility in statute miles."""
+  visibility: Float!
+  """The altimeter setting in inches of mercury."""
+  altimeter: Float!
+  flightCategory: TafFlightCategory
+  """Quality control corrected."""
+  qualityControlCorrected: Boolean
+  """Whether it's an automated station, of one of the following types A01|A01A|A02|A02A|AOA|AWOS."""
+  qualityControlAutoStation: Boolean!
+  """Maintenance check indicator - maintenance is needed."""
+  qualityControlMaintenanceIndicatorOn: Boolean!
+  """No signal."""
+  qualityControlNoSignal: Boolean!
+  """Whether Lightning sensor is off."""
+  qualityControlLightningSensorOff: Boolean!
+  """Whether Freezing rain sensor is off."""
+  qualityControlFreezingRainSensorOff: Boolean!
+  """Whether Present weather sensor is off."""
+  qualityControlPresentWeatherSensorOff: Boolean!
+  """The sea level pressure in hectopascal.s"""
+  seaLevelPressure: Float
+  """The pressur_6e tendency in hectopascals."""
+  pressureTendency: Float
+  """The maximum air temperature in Celsius from the past 6 hours."""
+  maxTemp6: Float
+  """The minimum air temperature in Celsius from the past 6 hours."""
+  minTemp6: Float
+  """The maximum air temperature in Celsius from the past 24 hours."""
+  maxTemp24: Float
+  """The minimum air temperature in Celsius from the past 24 hours."""
+  minTemp24: Float
+  """The precipitation in inches from since the last observation. 0.0005 in = trace precipitation"""
+  precipitation: Float
+  """The precipitation in inches from the past 3 hours. 0.0005 in = trace precipitation"""
+  precipitation3: Float
+  """The precipitation in inches from the past 6 hours. 0.0005 in = trace precipitation"""
+  precipitation6: Float
+  """The precipitation in inches from the past 24 hours. 0.0005 in = trace precipitation"""
+  precipitation24: Float
+  """The snow depth in inches."""
+  snowDepth: Float
+  """The vertical visibility in feet."""
+  vertVis: Float
+  """The type of TAF."""
+  metarType: TafMetarType!
+  station: Station!
+  skyConditions: [SkyCondition!]
+}
+"""TafFlightCategory is enum for the field flight_category"""
+enum TafFlightCategory @goModel(model: "metar.gg/ent/taf.FlightCategory") {
+  VFR
+  MVFR
+  IFR
+  LIFR
+}
+"""TafMetarType is enum for the field metar_type"""
+enum TafMetarType @goModel(model: "metar.gg/ent/taf.MetarType") {
+  TAF
+  SPECI
+}
+"""Ordering options for Taf connections"""
+input TafOrder {
+  """The ordering direction."""
+  direction: OrderDirection! = ASC
+  """The field by which to order Tafs."""
+  field: TafOrderField!
+}
+"""Properties by which Taf connections can be ordered."""
+enum TafOrderField {
+  valid_from_time
+}
 `, BuiltIn: false},
 	{Name: "../../metar.graphql", Input: `scalar Cursor
 scalar Time
@@ -1320,10 +1756,9 @@ type MetarWithDistance {
 extend type Airport {
     """Returns all Runways for this Airport. They can be filtered with the closed parameter."""
     runways(closed: Boolean): [Runway!]! @goField(forceResolver: true)
+}
 
-    """Returns last METARs reported by this airport."""
-    metars(after: Cursor, first: Int, before: Cursor, last: Int): MetarConnection! @goField(forceResolver: true)
-
+extend type Station {
     """Returns the closest METAR to the airport, within the given radius (in km). It's also the latest METAR for each station."""
     metarsVicinity(first: Int = 1, radius: Float = 50.0): [MetarWithDistance!]! @goField(forceResolver: true)
 }`, BuiltIn: false},

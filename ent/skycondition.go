@@ -24,6 +24,7 @@ type SkyCondition struct {
 	// The values are being populated by the SkyConditionQuery when eager-loading is set.
 	Edges                SkyConditionEdges `json:"edges"`
 	metar_sky_conditions *int
+	taf_sky_conditions   *int
 }
 
 // SkyConditionEdges holds the relations/edges for other nodes in the graph.
@@ -60,6 +61,8 @@ func (*SkyCondition) scanValues(columns []string) ([]any, error) {
 		case skycondition.FieldSkyCover:
 			values[i] = new(sql.NullString)
 		case skycondition.ForeignKeys[0]: // metar_sky_conditions
+			values[i] = new(sql.NullInt64)
+		case skycondition.ForeignKeys[1]: // taf_sky_conditions
 			values[i] = new(sql.NullInt64)
 		default:
 			return nil, fmt.Errorf("unexpected column %q for type SkyCondition", columns[i])
@@ -101,6 +104,13 @@ func (sc *SkyCondition) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				sc.metar_sky_conditions = new(int)
 				*sc.metar_sky_conditions = int(value.Int64)
+			}
+		case skycondition.ForeignKeys[1]:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for edge-field taf_sky_conditions", value)
+			} else if value.Valid {
+				sc.taf_sky_conditions = new(int)
+				*sc.taf_sky_conditions = int(value.Int64)
 			}
 		}
 	}

@@ -41,6 +41,7 @@ var Columns = []string{
 // table and are not defined as standalone fields in the schema.
 var ForeignKeys = []string{
 	"metar_sky_conditions",
+	"taf_sky_conditions",
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).

@@ -11,10 +11,10 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
-	"metar.gg/ent/airport"
 	"metar.gg/ent/metar"
 	"metar.gg/ent/predicate"
 	"metar.gg/ent/skycondition"
+	"metar.gg/ent/station"
 )
 
 // MetarQuery is the builder for querying Metar entities.
@@ -26,7 +26,7 @@ type MetarQuery struct {
 	order                  []OrderFunc
 	fields                 []string
 	predicates             []predicate.Metar
-	withAirport            *AirportQuery
+	withStation            *StationQuery
 	withSkyConditions      *SkyConditionQuery
 	withFKs                bool
 	loadTotal              []func(context.Context, []*Metar) error
@@ -68,9 +68,9 @@ func (mq *MetarQuery) Order(o ...OrderFunc) *MetarQuery {
 	return mq
 }
 
-// QueryAirport chains the current query on the "airport" edge.
-func (mq *MetarQuery) QueryAirport() *AirportQuery {
-	query := &AirportQuery{config: mq.config}
+// QueryStation chains the current query on the "station" edge.
+func (mq *MetarQuery) QueryStation() *StationQuery {
+	query := &StationQuery{config: mq.config}
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := mq.prepareQuery(ctx); err != nil {
 			return nil, err
@@ -81,8 +81,8 @@ func (mq *MetarQuery) QueryAirport() *AirportQuery {
 		}
 		step := sqlgraph.NewStep(
 			sqlgraph.From(metar.Table, metar.FieldID, selector),
-			sqlgraph.To(airport.Table, airport.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, metar.AirportTable, metar.AirportColumn),
+			sqlgraph.To(station.Table, station.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, metar.StationTable, metar.StationColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(mq.driver.Dialect(), step)
 		return fromU, nil
@@ -293,7 +293,7 @@ func (mq *MetarQuery) Clone() *MetarQuery {
 		offset:            mq.offset,
 		order:             append([]OrderFunc{}, mq.order...),
 		predicates:        append([]predicate.Metar{}, mq.predicates...),
-		withAirport:       mq.withAirport.Clone(),
+		withStation:       mq.withStation.Clone(),
 		withSkyConditions: mq.withSkyConditions.Clone(),
 		// clone intermediate query.
 		sql:    mq.sql.Clone(),
@@ -302,14 +302,14 @@ func (mq *MetarQuery) Clone() *MetarQuery {
 	}
 }
 
-// WithAirport tells the query-builder to eager-load the nodes that are connected to
-// the "airport" edge. The optional arguments are used to configure the query builder of the edge.
-func (mq *MetarQuery) WithAirport(opts ...func(*AirportQuery)) *MetarQuery {
-	query := &AirportQuery{config: mq.config}
+// WithStation tells the query-builder to eager-load the nodes that are connected to
+// the "station" edge. The optional arguments are used to configure the query builder of the edge.
+func (mq *MetarQuery) WithStation(opts ...func(*StationQuery)) *MetarQuery {
+	query := &StationQuery{config: mq.config}
 	for _, opt := range opts {
 		opt(query)
 	}
-	mq.withAirport = query
+	mq.withStation = query
 	return mq
 }
 
@@ -330,12 +330,12 @@ func (mq *MetarQuery) WithSkyConditions(opts ...func(*SkyConditionQuery)) *Metar
 // Example:
 //
 //	var v []struct {
-//		StationID string `json:"station_id,omitempty"`
+//		RawText string `json:"raw_text,omitempty"`
 //		Count int `json:"count,omitempty"`
 //	}
 //
 //	client.Metar.Query().
-//		GroupBy(metar.FieldStationID).
+//		GroupBy(metar.FieldRawText).
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
 func (mq *MetarQuery) GroupBy(field string, fields ...string) *MetarGroupBy {
@@ -358,11 +358,11 @@ func (mq *MetarQuery) GroupBy(field string, fields ...string) *MetarGroupBy {
 // Example:
 //
 //	var v []struct {
-//		StationID string `json:"station_id,omitempty"`
+//		RawText string `json:"raw_text,omitempty"`
 //	}
 //
 //	client.Metar.Query().
-//		Select(metar.FieldStationID).
+//		Select(metar.FieldRawText).
 //		Scan(ctx, &v)
 func (mq *MetarQuery) Select(fields ...string) *MetarSelect {
 	mq.fields = append(mq.fields, fields...)
@@ -394,11 +394,11 @@ func (mq *MetarQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Metar,
 		withFKs     = mq.withFKs
 		_spec       = mq.querySpec()
 		loadedTypes = [2]bool{
-			mq.withAirport != nil,
+			mq.withStation != nil,
 			mq.withSkyConditions != nil,
 		}
 	)
-	if mq.withAirport != nil {
+	if mq.withStation != nil {
 		withFKs = true
 	}
 	if withFKs {
@@ -425,9 +425,9 @@ func (mq *MetarQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Metar,
 	if len(nodes) == 0 {
 		return nodes, nil
 	}
-	if query := mq.withAirport; query != nil {
-		if err := mq.loadAirport(ctx, query, nodes, nil,
-			func(n *Metar, e *Airport) { n.Edges.Airport = e }); err != nil {
+	if query := mq.withStation; query != nil {
+		if err := mq.loadStation(ctx, query, nodes, nil,
+			func(n *Metar, e *Station) { n.Edges.Station = e }); err != nil {
 			return nil, err
 		}
 	}
@@ -453,20 +453,20 @@ func (mq *MetarQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Metar,
 	return nodes, nil
 }
 
-func (mq *MetarQuery) loadAirport(ctx context.Context, query *AirportQuery, nodes []*Metar, init func(*Metar), assign func(*Metar, *Airport)) error {
+func (mq *MetarQuery) loadStation(ctx context.Context, query *StationQuery, nodes []*Metar, init func(*Metar), assign func(*Metar, *Station)) error {
 	ids := make([]int, 0, len(nodes))
 	nodeids := make(map[int][]*Metar)
 	for i := range nodes {
-		if nodes[i].airport_metars == nil {
+		if nodes[i].station_metars == nil {
 			continue
 		}
-		fk := *nodes[i].airport_metars
+		fk := *nodes[i].station_metars
 		if _, ok := nodeids[fk]; !ok {
 			ids = append(ids, fk)
 		}
 		nodeids[fk] = append(nodeids[fk], nodes[i])
 	}
-	query.Where(airport.IDIn(ids...))
+	query.Where(station.IDIn(ids...))
 	neighbors, err := query.All(ctx)
 	if err != nil {
 		return err
@@ -474,7 +474,7 @@ func (mq *MetarQuery) loadAirport(ctx context.Context, query *AirportQuery, node
 	for _, n := range neighbors {
 		nodes, ok := nodeids[n.ID]
 		if !ok {
-			return fmt.Errorf(`unexpected foreign-key "airport_metars" returned %v`, n.ID)
+			return fmt.Errorf(`unexpected foreign-key "station_metars" returned %v`, n.ID)
 		}
 		for i := range nodes {
 			assign(nodes[i], n)
