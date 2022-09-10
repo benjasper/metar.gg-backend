@@ -3,6 +3,7 @@ package server
 import (
 	"context"
 	"github.com/99designs/gqlgen/graphql/handler"
+	"github.com/99designs/gqlgen/graphql/handler/extension"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"metar.gg/ent"
@@ -30,6 +31,7 @@ func (s *Server) Run(db *ent.Client, logger *logging.Logger) error {
 	port := environment.Global.Port
 
 	srv := handler.NewDefaultServer(graph.NewSchema(db))
+	srv.Use(extension.FixedComplexityLimit(80))
 
 	r := gin.New()
 
