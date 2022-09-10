@@ -100,7 +100,7 @@ func (i *NoaaMetarImporter) ImportMetars(url string, ctx context.Context) error 
 		_ = f.Close()
 	}(f)
 
-	maxGoroutines := 10
+	maxGoroutines := 4
 	guard := make(chan struct{}, maxGoroutines)
 
 	wg := errgroup.Group{}
