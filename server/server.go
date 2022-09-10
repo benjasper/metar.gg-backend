@@ -2,6 +2,7 @@ package server
 
 import (
 	"context"
+	"fmt"
 	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/99designs/gqlgen/graphql/handler/extension"
 	"github.com/gin-contrib/cors"
@@ -84,20 +85,17 @@ func RunAirportImport(ctx context.Context, db *ent.Client, logger *logging.Logge
 
 	err := imp.ImportAirports(ctx, "https://raw.githubusercontent.com/davidmegginson/ourairports-data/main/airports.csv")
 	if err != nil {
-		logger.Fatal(err)
-		return
+		logger.Error(fmt.Sprintf("[IMPORT] Failed to import airports: %s", err))
 	}
 
 	err = imp.ImportRunways(ctx, "https://raw.githubusercontent.com/davidmegginson/ourairports-data/main/runways.csv")
 	if err != nil {
-		logger.Fatal(err)
-		return
+		logger.Error(fmt.Sprintf("[IMPORT] Failed to import runways: %s", err))
 	}
 
 	err = imp.ImportFrequencies(ctx, "https://raw.githubusercontent.com/davidmegginson/ourairports-data/main/airport-frequencies.csv")
 	if err != nil {
-		logger.Fatal(err)
-		return
+		logger.Error(fmt.Sprintf("[IMPORT] Failed to import frequencies: %s", err))
 	}
 }
 
@@ -105,15 +103,13 @@ func RunWeatherImport(ctx context.Context, db *ent.Client, logger *logging.Logge
 	metarImporter := importer.NewNoaaWeatherImporter(db, logger)
 	err := metarImporter.ImportMetars("https://www.aviationweather.gov/adds/dataserver_current/current/metars.cache.xml", ctx)
 	if err != nil {
-		logger.Fatal(err)
-		return
+		logger.Error(fmt.Sprintf("[IMPORT] Failed to import METARs: %s", err))
 	}
 
 	tafImporter := importer.NewNoaaWeatherImporter(db, logger)
 	err = tafImporter.ImportTafs("https://www.aviationweather.gov/adds/dataserver_current/current/tafs.cache.xml", ctx)
 	if err != nil {
-		logger.Fatal(err)
-		return
+		logger.Error(fmt.Sprintf("[IMPORT] Failed to import TAFs: %s", err))
 	}
 }
 
