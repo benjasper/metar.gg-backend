@@ -36,48 +36,6 @@ func (mc *MetarCreate) SetObservationTime(t time.Time) *MetarCreate {
 	return mc
 }
 
-// SetLatitude sets the "latitude" field.
-func (mc *MetarCreate) SetLatitude(f float64) *MetarCreate {
-	mc.mutation.SetLatitude(f)
-	return mc
-}
-
-// SetNillableLatitude sets the "latitude" field if the given value is not nil.
-func (mc *MetarCreate) SetNillableLatitude(f *float64) *MetarCreate {
-	if f != nil {
-		mc.SetLatitude(*f)
-	}
-	return mc
-}
-
-// SetLongitude sets the "longitude" field.
-func (mc *MetarCreate) SetLongitude(f float64) *MetarCreate {
-	mc.mutation.SetLongitude(f)
-	return mc
-}
-
-// SetNillableLongitude sets the "longitude" field if the given value is not nil.
-func (mc *MetarCreate) SetNillableLongitude(f *float64) *MetarCreate {
-	if f != nil {
-		mc.SetLongitude(*f)
-	}
-	return mc
-}
-
-// SetElevation sets the "elevation" field.
-func (mc *MetarCreate) SetElevation(f float64) *MetarCreate {
-	mc.mutation.SetElevation(f)
-	return mc
-}
-
-// SetNillableElevation sets the "elevation" field if the given value is not nil.
-func (mc *MetarCreate) SetNillableElevation(f *float64) *MetarCreate {
-	if f != nil {
-		mc.SetElevation(*f)
-	}
-	return mc
-}
-
 // SetTemperature sets the "temperature" field.
 func (mc *MetarCreate) SetTemperature(f float64) *MetarCreate {
 	mc.mutation.SetTemperature(f)
@@ -600,30 +558,6 @@ func (mc *MetarCreate) createSpec() (*Metar, *sqlgraph.CreateSpec) {
 		})
 		_node.ObservationTime = value
 	}
-	if value, ok := mc.mutation.Latitude(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeFloat64,
-			Value:  value,
-			Column: metar.FieldLatitude,
-		})
-		_node.Latitude = &value
-	}
-	if value, ok := mc.mutation.Longitude(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeFloat64,
-			Value:  value,
-			Column: metar.FieldLongitude,
-		})
-		_node.Longitude = &value
-	}
-	if value, ok := mc.mutation.Elevation(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeFloat64,
-			Value:  value,
-			Column: metar.FieldElevation,
-		})
-		_node.Elevation = &value
-	}
 	if value, ok := mc.mutation.Temperature(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
 			Type:   field.TypeFloat64,
@@ -976,78 +910,6 @@ func (u *MetarUpsert) SetObservationTime(v time.Time) *MetarUpsert {
 // UpdateObservationTime sets the "observation_time" field to the value that was provided on create.
 func (u *MetarUpsert) UpdateObservationTime() *MetarUpsert {
 	u.SetExcluded(metar.FieldObservationTime)
-	return u
-}
-
-// SetLatitude sets the "latitude" field.
-func (u *MetarUpsert) SetLatitude(v float64) *MetarUpsert {
-	u.Set(metar.FieldLatitude, v)
-	return u
-}
-
-// UpdateLatitude sets the "latitude" field to the value that was provided on create.
-func (u *MetarUpsert) UpdateLatitude() *MetarUpsert {
-	u.SetExcluded(metar.FieldLatitude)
-	return u
-}
-
-// AddLatitude adds v to the "latitude" field.
-func (u *MetarUpsert) AddLatitude(v float64) *MetarUpsert {
-	u.Add(metar.FieldLatitude, v)
-	return u
-}
-
-// ClearLatitude clears the value of the "latitude" field.
-func (u *MetarUpsert) ClearLatitude() *MetarUpsert {
-	u.SetNull(metar.FieldLatitude)
-	return u
-}
-
-// SetLongitude sets the "longitude" field.
-func (u *MetarUpsert) SetLongitude(v float64) *MetarUpsert {
-	u.Set(metar.FieldLongitude, v)
-	return u
-}
-
-// UpdateLongitude sets the "longitude" field to the value that was provided on create.
-func (u *MetarUpsert) UpdateLongitude() *MetarUpsert {
-	u.SetExcluded(metar.FieldLongitude)
-	return u
-}
-
-// AddLongitude adds v to the "longitude" field.
-func (u *MetarUpsert) AddLongitude(v float64) *MetarUpsert {
-	u.Add(metar.FieldLongitude, v)
-	return u
-}
-
-// ClearLongitude clears the value of the "longitude" field.
-func (u *MetarUpsert) ClearLongitude() *MetarUpsert {
-	u.SetNull(metar.FieldLongitude)
-	return u
-}
-
-// SetElevation sets the "elevation" field.
-func (u *MetarUpsert) SetElevation(v float64) *MetarUpsert {
-	u.Set(metar.FieldElevation, v)
-	return u
-}
-
-// UpdateElevation sets the "elevation" field to the value that was provided on create.
-func (u *MetarUpsert) UpdateElevation() *MetarUpsert {
-	u.SetExcluded(metar.FieldElevation)
-	return u
-}
-
-// AddElevation adds v to the "elevation" field.
-func (u *MetarUpsert) AddElevation(v float64) *MetarUpsert {
-	u.Add(metar.FieldElevation, v)
-	return u
-}
-
-// ClearElevation clears the value of the "elevation" field.
-func (u *MetarUpsert) ClearElevation() *MetarUpsert {
-	u.SetNull(metar.FieldElevation)
 	return u
 }
 
@@ -1688,90 +1550,6 @@ func (u *MetarUpsertOne) SetObservationTime(v time.Time) *MetarUpsertOne {
 func (u *MetarUpsertOne) UpdateObservationTime() *MetarUpsertOne {
 	return u.Update(func(s *MetarUpsert) {
 		s.UpdateObservationTime()
-	})
-}
-
-// SetLatitude sets the "latitude" field.
-func (u *MetarUpsertOne) SetLatitude(v float64) *MetarUpsertOne {
-	return u.Update(func(s *MetarUpsert) {
-		s.SetLatitude(v)
-	})
-}
-
-// AddLatitude adds v to the "latitude" field.
-func (u *MetarUpsertOne) AddLatitude(v float64) *MetarUpsertOne {
-	return u.Update(func(s *MetarUpsert) {
-		s.AddLatitude(v)
-	})
-}
-
-// UpdateLatitude sets the "latitude" field to the value that was provided on create.
-func (u *MetarUpsertOne) UpdateLatitude() *MetarUpsertOne {
-	return u.Update(func(s *MetarUpsert) {
-		s.UpdateLatitude()
-	})
-}
-
-// ClearLatitude clears the value of the "latitude" field.
-func (u *MetarUpsertOne) ClearLatitude() *MetarUpsertOne {
-	return u.Update(func(s *MetarUpsert) {
-		s.ClearLatitude()
-	})
-}
-
-// SetLongitude sets the "longitude" field.
-func (u *MetarUpsertOne) SetLongitude(v float64) *MetarUpsertOne {
-	return u.Update(func(s *MetarUpsert) {
-		s.SetLongitude(v)
-	})
-}
-
-// AddLongitude adds v to the "longitude" field.
-func (u *MetarUpsertOne) AddLongitude(v float64) *MetarUpsertOne {
-	return u.Update(func(s *MetarUpsert) {
-		s.AddLongitude(v)
-	})
-}
-
-// UpdateLongitude sets the "longitude" field to the value that was provided on create.
-func (u *MetarUpsertOne) UpdateLongitude() *MetarUpsertOne {
-	return u.Update(func(s *MetarUpsert) {
-		s.UpdateLongitude()
-	})
-}
-
-// ClearLongitude clears the value of the "longitude" field.
-func (u *MetarUpsertOne) ClearLongitude() *MetarUpsertOne {
-	return u.Update(func(s *MetarUpsert) {
-		s.ClearLongitude()
-	})
-}
-
-// SetElevation sets the "elevation" field.
-func (u *MetarUpsertOne) SetElevation(v float64) *MetarUpsertOne {
-	return u.Update(func(s *MetarUpsert) {
-		s.SetElevation(v)
-	})
-}
-
-// AddElevation adds v to the "elevation" field.
-func (u *MetarUpsertOne) AddElevation(v float64) *MetarUpsertOne {
-	return u.Update(func(s *MetarUpsert) {
-		s.AddElevation(v)
-	})
-}
-
-// UpdateElevation sets the "elevation" field to the value that was provided on create.
-func (u *MetarUpsertOne) UpdateElevation() *MetarUpsertOne {
-	return u.Update(func(s *MetarUpsert) {
-		s.UpdateElevation()
-	})
-}
-
-// ClearElevation clears the value of the "elevation" field.
-func (u *MetarUpsertOne) ClearElevation() *MetarUpsertOne {
-	return u.Update(func(s *MetarUpsert) {
-		s.ClearElevation()
 	})
 }
 
@@ -2667,90 +2445,6 @@ func (u *MetarUpsertBulk) SetObservationTime(v time.Time) *MetarUpsertBulk {
 func (u *MetarUpsertBulk) UpdateObservationTime() *MetarUpsertBulk {
 	return u.Update(func(s *MetarUpsert) {
 		s.UpdateObservationTime()
-	})
-}
-
-// SetLatitude sets the "latitude" field.
-func (u *MetarUpsertBulk) SetLatitude(v float64) *MetarUpsertBulk {
-	return u.Update(func(s *MetarUpsert) {
-		s.SetLatitude(v)
-	})
-}
-
-// AddLatitude adds v to the "latitude" field.
-func (u *MetarUpsertBulk) AddLatitude(v float64) *MetarUpsertBulk {
-	return u.Update(func(s *MetarUpsert) {
-		s.AddLatitude(v)
-	})
-}
-
-// UpdateLatitude sets the "latitude" field to the value that was provided on create.
-func (u *MetarUpsertBulk) UpdateLatitude() *MetarUpsertBulk {
-	return u.Update(func(s *MetarUpsert) {
-		s.UpdateLatitude()
-	})
-}
-
-// ClearLatitude clears the value of the "latitude" field.
-func (u *MetarUpsertBulk) ClearLatitude() *MetarUpsertBulk {
-	return u.Update(func(s *MetarUpsert) {
-		s.ClearLatitude()
-	})
-}
-
-// SetLongitude sets the "longitude" field.
-func (u *MetarUpsertBulk) SetLongitude(v float64) *MetarUpsertBulk {
-	return u.Update(func(s *MetarUpsert) {
-		s.SetLongitude(v)
-	})
-}
-
-// AddLongitude adds v to the "longitude" field.
-func (u *MetarUpsertBulk) AddLongitude(v float64) *MetarUpsertBulk {
-	return u.Update(func(s *MetarUpsert) {
-		s.AddLongitude(v)
-	})
-}
-
-// UpdateLongitude sets the "longitude" field to the value that was provided on create.
-func (u *MetarUpsertBulk) UpdateLongitude() *MetarUpsertBulk {
-	return u.Update(func(s *MetarUpsert) {
-		s.UpdateLongitude()
-	})
-}
-
-// ClearLongitude clears the value of the "longitude" field.
-func (u *MetarUpsertBulk) ClearLongitude() *MetarUpsertBulk {
-	return u.Update(func(s *MetarUpsert) {
-		s.ClearLongitude()
-	})
-}
-
-// SetElevation sets the "elevation" field.
-func (u *MetarUpsertBulk) SetElevation(v float64) *MetarUpsertBulk {
-	return u.Update(func(s *MetarUpsert) {
-		s.SetElevation(v)
-	})
-}
-
-// AddElevation adds v to the "elevation" field.
-func (u *MetarUpsertBulk) AddElevation(v float64) *MetarUpsertBulk {
-	return u.Update(func(s *MetarUpsert) {
-		s.AddElevation(v)
-	})
-}
-
-// UpdateElevation sets the "elevation" field to the value that was provided on create.
-func (u *MetarUpsertBulk) UpdateElevation() *MetarUpsertBulk {
-	return u.Update(func(s *MetarUpsert) {
-		s.UpdateElevation()
-	})
-}
-
-// ClearElevation clears the value of the "elevation" field.
-func (u *MetarUpsertBulk) ClearElevation() *MetarUpsertBulk {
-	return u.Update(func(s *MetarUpsert) {
-		s.ClearElevation()
 	})
 }
 

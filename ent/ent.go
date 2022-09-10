@@ -11,12 +11,16 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"metar.gg/ent/airport"
+	"metar.gg/ent/forecast"
 	"metar.gg/ent/frequency"
+	"metar.gg/ent/icingcondition"
 	"metar.gg/ent/metar"
 	"metar.gg/ent/runway"
 	"metar.gg/ent/skycondition"
 	"metar.gg/ent/station"
 	"metar.gg/ent/taf"
+	"metar.gg/ent/temperaturedata"
+	"metar.gg/ent/turbulencecondition"
 )
 
 // ent aliases to avoid import conflicts in user's code.
@@ -37,13 +41,17 @@ type OrderFunc func(*sql.Selector)
 // columnChecker returns a function indicates if the column exists in the given column.
 func columnChecker(table string) func(string) error {
 	checks := map[string]func(string) bool{
-		airport.Table:      airport.ValidColumn,
-		frequency.Table:    frequency.ValidColumn,
-		metar.Table:        metar.ValidColumn,
-		runway.Table:       runway.ValidColumn,
-		skycondition.Table: skycondition.ValidColumn,
-		station.Table:      station.ValidColumn,
-		taf.Table:          taf.ValidColumn,
+		airport.Table:             airport.ValidColumn,
+		forecast.Table:            forecast.ValidColumn,
+		frequency.Table:           frequency.ValidColumn,
+		icingcondition.Table:      icingcondition.ValidColumn,
+		metar.Table:               metar.ValidColumn,
+		runway.Table:              runway.ValidColumn,
+		skycondition.Table:        skycondition.ValidColumn,
+		station.Table:             station.ValidColumn,
+		taf.Table:                 taf.ValidColumn,
+		temperaturedata.Table:     temperaturedata.ValidColumn,
+		turbulencecondition.Table: turbulencecondition.ValidColumn,
 	}
 	check, ok := checks[table]
 	if !ok {

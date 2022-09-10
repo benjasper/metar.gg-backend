@@ -22,6 +22,19 @@ func (f AirportFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, err
 	return f(ctx, mv)
 }
 
+// The ForecastFunc type is an adapter to allow the use of ordinary
+// function as Forecast mutator.
+type ForecastFunc func(context.Context, *ent.ForecastMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f ForecastFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	mv, ok := m.(*ent.ForecastMutation)
+	if !ok {
+		return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.ForecastMutation", m)
+	}
+	return f(ctx, mv)
+}
+
 // The FrequencyFunc type is an adapter to allow the use of ordinary
 // function as Frequency mutator.
 type FrequencyFunc func(context.Context, *ent.FrequencyMutation) (ent.Value, error)
@@ -31,6 +44,19 @@ func (f FrequencyFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, e
 	mv, ok := m.(*ent.FrequencyMutation)
 	if !ok {
 		return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.FrequencyMutation", m)
+	}
+	return f(ctx, mv)
+}
+
+// The IcingConditionFunc type is an adapter to allow the use of ordinary
+// function as IcingCondition mutator.
+type IcingConditionFunc func(context.Context, *ent.IcingConditionMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f IcingConditionFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	mv, ok := m.(*ent.IcingConditionMutation)
+	if !ok {
+		return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.IcingConditionMutation", m)
 	}
 	return f(ctx, mv)
 }
@@ -96,6 +122,32 @@ func (f TafFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) 
 	mv, ok := m.(*ent.TafMutation)
 	if !ok {
 		return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.TafMutation", m)
+	}
+	return f(ctx, mv)
+}
+
+// The TemperatureDataFunc type is an adapter to allow the use of ordinary
+// function as TemperatureData mutator.
+type TemperatureDataFunc func(context.Context, *ent.TemperatureDataMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f TemperatureDataFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	mv, ok := m.(*ent.TemperatureDataMutation)
+	if !ok {
+		return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.TemperatureDataMutation", m)
+	}
+	return f(ctx, mv)
+}
+
+// The TurbulenceConditionFunc type is an adapter to allow the use of ordinary
+// function as TurbulenceCondition mutator.
+type TurbulenceConditionFunc func(context.Context, *ent.TurbulenceConditionMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f TurbulenceConditionFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	mv, ok := m.(*ent.TurbulenceConditionMutation)
+	if !ok {
+		return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.TurbulenceConditionMutation", m)
 	}
 	return f(ctx, mv)
 }

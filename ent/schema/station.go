@@ -30,8 +30,8 @@ func (Station) Fields() []ent.Field {
 func (Station) Edges() []ent.Edge {
 	return []ent.Edge{
 		edge.From("airport", Airport.Type).Ref("station").Unique().Comment("The airport that hosts this station. This can also be empty if the metar is from a weather station outside an airport."),
-		edge.To("metars", Metar.Type).Comment("The metars that were reported by this station."),
-		edge.To("tafs", Taf.Type).Comment("The tafs that were reported by this station."),
+		edge.To("metars", Metar.Type).Annotations(entgql.Skip()).Comment("The metars that were reported by this station."),
+		edge.To("tafs", Taf.Type).Annotations(entgql.Skip()).Comment("The tafs that were reported by this station."),
 	}
 }
 

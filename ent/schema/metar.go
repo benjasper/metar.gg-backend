@@ -18,11 +18,8 @@ type Metar struct {
 func (Metar) Fields() []ent.Field {
 	return []ent.Field{
 		field.Int("id").Annotations(entgql.Skip()),
-		field.String("raw_text").Comment("The raw METAR text."),
+		field.Text("raw_text").Comment("The raw METAR text."),
 		field.Time("observation_time").Comment("The time the METAR was observed."),
-		field.Float("latitude").Optional().Nillable().Comment("The latitude in decimal degrees of the station."),
-		field.Float("longitude").Optional().Nillable().Comment("The longitude in decimal degrees of the station."),
-		field.Float("elevation").Optional().Nillable().Comment("The elevation in meters of the station."),
 		field.Float("temperature").Comment("The temperature in Celsius."),
 		field.Float("dewpoint").Comment("The dewpoint in Celsius."),
 		field.Int("wind_speed").Comment("The wind speed in knots, or 0 if calm."),

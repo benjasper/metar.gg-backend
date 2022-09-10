@@ -7,7 +7,6 @@ import (
 	"strings"
 
 	"entgo.io/ent/dialect/sql"
-	"metar.gg/ent/metar"
 	"metar.gg/ent/skycondition"
 )
 
@@ -20,35 +19,11 @@ type SkyCondition struct {
 	SkyCover skycondition.SkyCover `json:"sky_cover,omitempty"`
 	// Cloud base in feet.
 	CloudBase *int `json:"cloud_base,omitempty"`
-	// Edges holds the relations/edges for other nodes in the graph.
-	// The values are being populated by the SkyConditionQuery when eager-loading is set.
-	Edges                SkyConditionEdges `json:"edges"`
-	metar_sky_conditions *int
-	taf_sky_conditions   *int
-}
-
-// SkyConditionEdges holds the relations/edges for other nodes in the graph.
-type SkyConditionEdges struct {
-	// Metar holds the value of the metar edge.
-	Metar *Metar `json:"metar,omitempty"`
-	// loadedTypes holds the information for reporting if a
-	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [1]bool
-	// totalCount holds the count of the edges above.
-	totalCount [1]map[string]int
-}
-
-// MetarOrErr returns the Metar value or an error if the edge
-// was not loaded in eager-loading, or loaded but was not found.
-func (e SkyConditionEdges) MetarOrErr() (*Metar, error) {
-	if e.loadedTypes[0] {
-		if e.Metar == nil {
-			// Edge was loaded but was not found.
-			return nil, &NotFoundError{label: metar.Label}
-		}
-		return e.Metar, nil
-	}
-	return nil, &NotLoadedError{edge: "metar"}
+	// Cloud type. Only present in TAFs.
+	CloudType               *skycondition.CloudType `json:"cloud_type,omitempty"`
+	forecast_sky_conditions *int
+	metar_sky_conditions    *int
+	taf_sky_conditions      *int
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -58,11 +33,13 @@ func (*SkyCondition) scanValues(columns []string) ([]any, error) {
 		switch columns[i] {
 		case skycondition.FieldID, skycondition.FieldCloudBase:
 			values[i] = new(sql.NullInt64)
-		case skycondition.FieldSkyCover:
+		case skycondition.FieldSkyCover, skycondition.FieldCloudType:
 			values[i] = new(sql.NullString)
-		case skycondition.ForeignKeys[0]: // metar_sky_conditions
+		case skycondition.ForeignKeys[0]: // forecast_sky_conditions
 			values[i] = new(sql.NullInt64)
-		case skycondition.ForeignKeys[1]: // taf_sky_conditions
+		case skycondition.ForeignKeys[1]: // metar_sky_conditions
+			values[i] = new(sql.NullInt64)
+		case skycondition.ForeignKeys[2]: // taf_sky_conditions
 			values[i] = new(sql.NullInt64)
 		default:
 			return nil, fmt.Errorf("unexpected column %q for type SkyCondition", columns[i])
@@ -98,14 +75,28 @@ func (sc *SkyCondition) assignValues(columns []string, values []any) error {
 				sc.CloudBase = new(int)
 				*sc.CloudBase = int(value.Int64)
 			}
+		case skycondition.FieldCloudType:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field cloud_type", values[i])
+			} else if value.Valid {
+				sc.CloudType = new(skycondition.CloudType)
+				*sc.CloudType = skycondition.CloudType(value.String)
+			}
 		case skycondition.ForeignKeys[0]:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for edge-field forecast_sky_conditions", value)
+			} else if value.Valid {
+				sc.forecast_sky_conditions = new(int)
+				*sc.forecast_sky_conditions = int(value.Int64)
+			}
+		case skycondition.ForeignKeys[1]:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for edge-field metar_sky_conditions", value)
 			} else if value.Valid {
 				sc.metar_sky_conditions = new(int)
 				*sc.metar_sky_conditions = int(value.Int64)
 			}
-		case skycondition.ForeignKeys[1]:
+		case skycondition.ForeignKeys[2]:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for edge-field taf_sky_conditions", value)
 			} else if value.Valid {
@@ -115,11 +106,6 @@ func (sc *SkyCondition) assignValues(columns []string, values []any) error {
 		}
 	}
 	return nil
-}
-
-// QueryMetar queries the "metar" edge of the SkyCondition entity.
-func (sc *SkyCondition) QueryMetar() *MetarQuery {
-	return (&SkyConditionClient{config: sc.config}).QueryMetar(sc)
 }
 
 // Update returns a builder for updating this SkyCondition.
@@ -150,6 +136,11 @@ func (sc *SkyCondition) String() string {
 	builder.WriteString(", ")
 	if v := sc.CloudBase; v != nil {
 		builder.WriteString("cloud_base=")
+		builder.WriteString(fmt.Sprintf("%v", *v))
+	}
+	builder.WriteString(", ")
+	if v := sc.CloudType; v != nil {
+		builder.WriteString("cloud_type=")
 		builder.WriteString(fmt.Sprintf("%v", *v))
 	}
 	builder.WriteByte(')')

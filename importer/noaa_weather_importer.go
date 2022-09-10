@@ -4,14 +4,15 @@ import (
 	"context"
 	"encoding/xml"
 	"fmt"
-	"github.com/cnf/structhash"
 	"github.com/segmentio/fasthash/fnv1a"
 	"golang.org/x/sync/errgroup"
 	"metar.gg/ent"
 	"metar.gg/ent/airport"
+	"metar.gg/ent/forecast"
 	"metar.gg/ent/metar"
 	"metar.gg/ent/skycondition"
 	"metar.gg/ent/station"
+	"metar.gg/ent/taf"
 	"metar.gg/environment"
 	"metar.gg/logging"
 	"metar.gg/utils"
@@ -20,73 +21,22 @@ import (
 	"time"
 )
 
-type XmlQualityControlFlags struct {
-	Auto                    bool `xml:"auto"`
-	Corrected               bool `xml:"corrected"`
-	MaintenanceIndicatorOn  bool `xml:"maintenance_indicator"`
-	NoSignal                bool `xml:"no_signal"`
-	LightningSensorOff      bool `xml:"lightning_sensor_off"`
-	FreezingRainSensorOff   bool `xml:"freezing_rain_sensor_off"`
-	PresentWeatherSensorOff bool `xml:"present_weather_sensor_off"`
-}
-
-type XmlSkyCondition struct {
-	Coverage string `xml:"sky_cover,attr"`
-	Altitude *int   `xml:"cloud_base_ft_agl,attr"`
-}
-
-type XmlMetar struct {
-	RawText                   string                 `xml:"raw_text"`
-	StationId                 string                 `xml:"station_id"`
-	ObservationTime           time.Time              `xml:"observation_time"`
-	Latitude                  *float64               `xml:"latitude"`
-	Longitude                 *float64               `xml:"longitude"`
-	TempC                     *float64               `xml:"temp_c"`
-	DewpointC                 *float64               `xml:"dewpoint_c"`
-	WindDirDegrees            *int                   `xml:"wind_dir_degrees"`
-	WindSpeedKt               *int                   `xml:"wind_speed_kt"`
-	WindGustKt                *int                   `xml:"wind_gust_kt"`
-	VisibilityStatuteMi       *float64               `xml:"visibility_statute_mi"`
-	AltimeterInHg             *float64               `xml:"altim_in_hg"`
-	SeaLevelPressureMb        *float64               `xml:"sea_level_pressure_mb"`
-	QualityControlFlags       XmlQualityControlFlags `xml:"quality_control_flags"`
-	WxString                  *string                `xml:"wx_string"`
-	SkyCondition              []XmlSkyCondition      `xml:"sky_condition"`
-	FlightCategory            string                 `xml:"flight_category"`
-	ThreeHrPressureTendencyMb *float64               `xml:"three_hr_pressure_tendency_mb"`
-	MaxTempC                  *float64               `xml:"maxT_c"`
-	MinTempC                  *float64               `xml:"minT_c"`
-	MaxTemp24HrC              *float64               `xml:"maxT24hr_c"`
-	MinTemp24HrC              *float64               `xml:"minT24hr_c"`
-	PrecipIn                  *float64               `xml:"precip_in"`
-	Precip3HrIn               *float64               `xml:"precip_3hr_in"`
-	Precip6HrIn               *float64               `xml:"precip_6hr_in"`
-	Precip24HrIn              *float64               `xml:"precip24hr_in"`
-	SnowIn                    *float64               `xml:"snow_in"`
-	VertVisFt                 *float64               `xml:"vert_vis_ft"`
-	MetarType                 string                 `xml:"metar_type"`
-	Elevation                 *float64               `xml:"elevation_m"`
-}
-
-func (x *XmlMetar) Hash() string {
-	return fmt.Sprintf("%x", structhash.Md5(x, 1))
-}
-
 type NoaaWeatherImporter struct {
 	db     *ent.Client
 	logger *logging.Logger
 	stats  *ImportStatistics
 }
 
-func NewNoaaMetarImporter(db *ent.Client, logger *logging.Logger) *NoaaWeatherImporter {
+func NewNoaaWeatherImporter(db *ent.Client, logger *logging.Logger) *NoaaWeatherImporter {
 	return &NoaaWeatherImporter{
 		db:     db,
 		logger: logger,
-		stats:  NewImportStatistics("METAR", logger),
 	}
 }
 
 func (i *NoaaWeatherImporter) ImportMetars(url string, ctx context.Context) error {
+	i.stats = NewImportStatistics("METAR", i.logger)
+
 	i.stats.Start()
 
 	filepath := "metars.xml"
@@ -139,7 +89,76 @@ func (i *NoaaWeatherImporter) ImportMetars(url string, ctx context.Context) erro
 
 	err = wg.Wait()
 	if err != nil {
+		i.logger.Error(fmt.Sprintf("[IMPORT] Failed to import METARs: %s", err))
+	}
+
+	// Delete file
+	err = os.Remove(filepath)
+	if err != nil {
 		return err
+	}
+
+	i.stats.End()
+
+	return nil
+}
+
+func (i *NoaaWeatherImporter) ImportTafs(url string, ctx context.Context) error {
+	i.stats = NewImportStatistics("TAF", i.logger)
+
+	i.stats.Start()
+
+	filepath := "taf.xml"
+	err := utils.DownloadFile(url, filepath)
+	if err != nil {
+		return err
+	}
+
+	// Read xml file and parse it
+	f, err := os.Open(filepath)
+	if err != nil {
+		return err
+	}
+	defer func(f *os.File) {
+		_ = f.Close()
+	}(f)
+
+	wg, ctx := errgroup.WithContext(ctx)
+
+	wg.SetLimit(environment.Global.MaxConcurrentImports)
+
+	// Parse xml file
+	decoder := xml.NewDecoder(f)
+	for {
+		token, err := decoder.Token()
+		if err != nil {
+			break
+		}
+
+		switch se := token.(type) {
+
+		// We have the start of an element.
+		// However, we have the complete token in t
+		case xml.StartElement:
+			switch se.Name.Local {
+			case "TAF":
+				var xmlTaf XmlTaf
+				err = decoder.DecodeElement(&xmlTaf, &se)
+				if err != nil {
+					return err
+				}
+
+				i.stats.AddTotal()
+				wg.Go(func() error {
+					return i.importTaf(&xmlTaf, ctx)
+				})
+			}
+		}
+	}
+
+	err = wg.Wait()
+	if err != nil {
+		i.logger.Error(fmt.Sprintf("[IMPORT] Failed to import TAFs: %s", err))
 	}
 
 	// Delete file
@@ -205,8 +224,6 @@ func (i *NoaaWeatherImporter) importMetar(x *XmlMetar, ctx context.Context) erro
 		SetStation(s).
 		SetRawText(x.RawText).
 		SetObservationTime(x.ObservationTime).
-		SetNillableLatitude(x.Latitude).
-		SetNillableLongitude(x.Longitude).
 		SetTemperature(utils.Nillable(x.TempC)).
 		SetDewpoint(utils.Nillable(x.DewpointC)).
 		SetWindDirection(utils.Nillable(x.WindDirDegrees)).
@@ -236,54 +253,28 @@ func (i *NoaaWeatherImporter) importMetar(x *XmlMetar, ctx context.Context) erro
 		SetNillableSnowDepth(x.SnowIn).
 		SetNillableVertVis(x.VertVisFt).
 		SetMetarType(metarType).
-		SetNillableElevation(x.Elevation).
 		SetHash(hash)
 
-	m, err := t.Save(ctx)
-	if err != nil {
-		return err
-	}
-
 	for _, condition := range x.SkyCondition {
-		skyCover := skycondition.SkyCoverSkyClear
-
-		switch condition.Coverage {
-		case "SKC":
-			skyCover = skycondition.SkyCoverSkyClear
-			break
-		case "CLR":
-			skyCover = skycondition.SkyCoverClear
-			break
-		case "FEW":
-			skyCover = skycondition.SkyCoverFew
-			break
-		case "SCT":
-			skyCover = skycondition.SkyCoverScattered
-			break
-		case "BKN":
-			skyCover = skycondition.SkyCoverBroken
-			break
-		case "OVC":
-			skyCover = skycondition.SkyCoverOvercast
-			break
-		case "OVX":
-			skyCover = skycondition.SkyCoverVerticalVisibility
-			break
-		case "CAVOK":
-			skyCover = skycondition.SkyCoverCeilingAndVisibilityOK
-			break
-		default:
-			return fmt.Errorf("unknown sky cover %s", condition.Coverage)
-		}
-
-		err = transaction.SkyCondition.Create().
-			SetMetar(m).
-			SetSkyCover(skyCover).
-			SetNillableCloudBase(condition.Altitude).
-			Exec(ctx)
+		skyCover, err := getSkyCoverFromString(condition.Coverage)
 		if err != nil {
 			return err
 		}
+
+		sky, err := transaction.SkyCondition.Create().
+			SetSkyCover(skyCover).
+			SetNillableCloudBase(condition.Altitude).
+			Save(ctx)
+		if err != nil {
+			return err
+		}
+
+		t.AddSkyConditions(sky)
+	}
+
+	err = t.Exec(ctx)
+	if err != nil {
+		return err
 	}
 
 	err = transaction.Commit()
@@ -294,6 +285,215 @@ func (i *NoaaWeatherImporter) importMetar(x *XmlMetar, ctx context.Context) erro
 	i.stats.AddUpdated()
 
 	return err
+}
+
+func (i *NoaaWeatherImporter) importTaf(x *XmlTaf, ctx context.Context) error {
+	s, err := i.getStation(ctx, x.StationId, utils.Nillable(x.Latitude), utils.Nillable(x.Longitude), utils.Nillable(x.Elevation))
+	if err != nil {
+		return err
+	}
+
+	select {
+	case <-ctx.Done():
+		return ctx.Err()
+	default:
+	}
+
+	hash := x.Hash()
+
+	// Check if t already exists
+	_, err = i.db.Taf.Query().Where(taf.Hash(hash)).First(ctx)
+	if err == nil {
+		// Metar already exists
+		return nil
+	}
+
+	transaction, err := i.db.Tx(ctx)
+	if err != nil {
+		return err
+	}
+
+	tx := transaction.Taf.Create().
+		SetStation(s).
+		SetRawText(x.RawText).
+		SetIssueTime(x.IssueTime).
+		SetBulletinTime(x.BulletinTime).
+		SetValidFromTime(x.ValidTimeFrom).
+		SetValidToTime(x.ValidTimeTo).
+		SetRemarks(x.Remarks).
+		SetHash(hash)
+
+	for _, xmlForecast := range x.Forecasts {
+
+		fc := transaction.Forecast.Create().
+			SetFromTime(xmlForecast.TimeFrom).
+			SetToTime(xmlForecast.TimeTo).
+			SetNillableChangeTime(xmlForecast.TimeBecoming).
+			SetNillableChangeProbability(xmlForecast.Probability).
+			SetNillableWindDirection(xmlForecast.WindDir).
+			SetNillableWindSpeed(xmlForecast.WindSpeed).
+			SetNillableWindGust(xmlForecast.WindGust).
+			SetNillableWindShearHeight(xmlForecast.WindShear).
+			SetNillableWindShearDirection(xmlForecast.WindShearDir).
+			SetNillableWindShearSpeed(xmlForecast.WindShearSpd).
+			SetNillableVisibilityHorizontal(xmlForecast.Visibility).
+			SetNillableAltimeter(xmlForecast.Altimeter).
+			SetNillableVisibilityVertical(xmlForecast.VertVis).
+			SetWeather(xmlForecast.Weather).
+			SetNotDecoded(xmlForecast.NotDecoded)
+
+		// Forecast change indicator to enum
+		if xmlForecast.Change != nil {
+			switch *xmlForecast.Change {
+			case "TEMPO":
+				fc.SetChangeIndicator(forecast.ChangeIndicatorTEMPO)
+				break
+			case "BECMG":
+				fc.SetChangeIndicator(forecast.ChangeIndicatorBECMG)
+				break
+			case "FM":
+				fc.SetChangeIndicator(forecast.ChangeIndicatorFM)
+				break
+			case "PROB":
+				fc.SetChangeIndicator(forecast.ChangeIndicatorPROB)
+				break
+			default:
+				i.logger.Error(fmt.Sprintf("unknown forecast change indicator %s", xmlForecast.Change))
+				break
+			}
+		}
+
+		for _, condition := range xmlForecast.SkyCondition {
+			skyCover, err := getSkyCoverFromString(condition.Coverage)
+			if err != nil {
+				return err
+			}
+
+			skyC, err := transaction.SkyCondition.Create().
+				SetSkyCover(skyCover).
+				SetNillableCloudBase(condition.Altitude).
+				Save(ctx)
+			if err != nil {
+				return err
+			}
+
+			fc.AddSkyConditions(skyC)
+		}
+
+		for _, xmlTurbulence := range xmlForecast.TurbulenceCondition {
+			if xmlTurbulence.Intensity == "" && xmlTurbulence.MinAlt == 0 && xmlTurbulence.MaxAlt == 0 {
+				continue
+			}
+
+			turb, err := transaction.TurbulenceCondition.Create().
+				SetIntensity(xmlTurbulence.Intensity).
+				SetMinAltitude(xmlTurbulence.MinAlt).
+				SetMaxAltitude(xmlTurbulence.MaxAlt).
+				Save(ctx)
+
+			if err != nil {
+				return err
+			}
+
+			fc.AddTurbulenceConditions(turb)
+		}
+
+		for _, xmlIcing := range xmlForecast.IcingCondition {
+			if xmlIcing.Intensity == "" && xmlIcing.MinAlt == 0 && xmlIcing.MaxAlt == 0 {
+				continue
+			}
+
+			icing, err := transaction.IcingCondition.Create().
+				SetIntensity(xmlIcing.Intensity).
+				SetMinAltitude(xmlIcing.MinAlt).
+				SetMaxAltitude(xmlIcing.MaxAlt).
+				Save(ctx)
+
+			if err != nil {
+				return err
+			}
+
+			fc.AddIcingConditions(icing)
+		}
+
+		for _, xmlTemperature := range xmlForecast.Temperature {
+			if xmlTemperature.SurfaceTempC == 0 && (xmlTemperature.ValidTime == time.Time{}) && xmlTemperature.MinTempC == nil && xmlTemperature.MaxTempC == nil {
+				continue
+			}
+
+			temperature, err := transaction.TemperatureData.Create().
+				SetTemperature(xmlTemperature.SurfaceTempC).
+				SetNillableMinTemperature(xmlTemperature.MinTempC).
+				SetNillableMaxTemperature(xmlTemperature.MaxTempC).
+				SetValidTime(xmlTemperature.ValidTime).
+				Save(ctx)
+
+			if err != nil {
+				return err
+			}
+
+			fc.AddTemperatureData(temperature)
+		}
+
+		f, err := fc.Save(ctx)
+		if err != nil {
+			return err
+		}
+
+		tx.AddForecast(f)
+	}
+
+	err = tx.Exec(ctx)
+	if err != nil {
+		return err
+	}
+
+	err = transaction.Commit()
+	if err != nil {
+		return err
+	}
+
+	i.stats.AddUpdated()
+
+	return err
+}
+
+func getSkyCoverFromString(input string) (skycondition.SkyCover, error) {
+	var skyCover skycondition.SkyCover = ""
+
+	switch input {
+	case "SCT":
+		skyCover = skycondition.SkyCoverScattered
+		break
+	case "CAVOK":
+		skyCover = skycondition.SkyCoverCeilingAndVisibilityOK
+		break
+	case "NSC":
+		skyCover = skycondition.SkyCoverNoSignificantClouds
+		break
+	case "SKC":
+		skyCover = skycondition.SkyCoverSkyClear
+		break
+	case "CLR":
+		skyCover = skycondition.SkyCoverClear
+		break
+	case "BKN":
+		skyCover = skycondition.SkyCoverBroken
+		break
+	case "FEW":
+		skyCover = skycondition.SkyCoverFew
+		break
+	case "OVC":
+		skyCover = skycondition.SkyCoverOvercast
+		break
+	case "OVX":
+		skyCover = skycondition.SkyCoverVerticalVisibility
+		break
+	default:
+		return "", fmt.Errorf("unknown sky cover %s", input)
+	}
+
+	return skyCover, nil
 }
 
 func (i *NoaaWeatherImporter) getStation(ctx context.Context, stationID string, latitude float64, longitude float64, elevation float64) (*ent.Station, error) {

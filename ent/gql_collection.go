@@ -79,6 +79,101 @@ func newAirportPaginateArgs(rv map[string]interface{}) *airportPaginateArgs {
 }
 
 // CollectFields tells the query-builder to eagerly load connected nodes by resolver context.
+func (f *ForecastQuery) CollectFields(ctx context.Context, satisfies ...string) (*ForecastQuery, error) {
+	fc := graphql.GetFieldContext(ctx)
+	if fc == nil {
+		return f, nil
+	}
+	if err := f.collectField(ctx, graphql.GetOperationContext(ctx), fc.Field, nil, satisfies...); err != nil {
+		return nil, err
+	}
+	return f, nil
+}
+
+func (f *ForecastQuery) collectField(ctx context.Context, op *graphql.OperationContext, field graphql.CollectedField, path []string, satisfies ...string) error {
+	path = append([]string(nil), path...)
+	for _, field := range graphql.CollectFields(op, field.Selections, satisfies) {
+		switch field.Name {
+		case "skyConditions", "sky_conditions":
+			var (
+				alias = field.Alias
+				path  = append(path, alias)
+				query = &SkyConditionQuery{config: f.config}
+			)
+			if err := query.collectField(ctx, op, field, path, satisfies...); err != nil {
+				return err
+			}
+			f.WithNamedSkyConditions(alias, func(wq *SkyConditionQuery) {
+				*wq = *query
+			})
+		case "turbulenceConditions", "turbulence_conditions":
+			var (
+				alias = field.Alias
+				path  = append(path, alias)
+				query = &TurbulenceConditionQuery{config: f.config}
+			)
+			if err := query.collectField(ctx, op, field, path, satisfies...); err != nil {
+				return err
+			}
+			f.WithNamedTurbulenceConditions(alias, func(wq *TurbulenceConditionQuery) {
+				*wq = *query
+			})
+		case "icingConditions", "icing_conditions":
+			var (
+				alias = field.Alias
+				path  = append(path, alias)
+				query = &IcingConditionQuery{config: f.config}
+			)
+			if err := query.collectField(ctx, op, field, path, satisfies...); err != nil {
+				return err
+			}
+			f.WithNamedIcingConditions(alias, func(wq *IcingConditionQuery) {
+				*wq = *query
+			})
+		case "temperatureData", "temperature_data":
+			var (
+				alias = field.Alias
+				path  = append(path, alias)
+				query = &TemperatureDataQuery{config: f.config}
+			)
+			if err := query.collectField(ctx, op, field, path, satisfies...); err != nil {
+				return err
+			}
+			f.WithNamedTemperatureData(alias, func(wq *TemperatureDataQuery) {
+				*wq = *query
+			})
+		}
+	}
+	return nil
+}
+
+type forecastPaginateArgs struct {
+	first, last   *int
+	after, before *Cursor
+	opts          []ForecastPaginateOption
+}
+
+func newForecastPaginateArgs(rv map[string]interface{}) *forecastPaginateArgs {
+	args := &forecastPaginateArgs{}
+	if rv == nil {
+		return args
+	}
+	if v := rv[firstField]; v != nil {
+		args.first = v.(*int)
+	}
+	if v := rv[lastField]; v != nil {
+		args.last = v.(*int)
+	}
+	if v := rv[afterField]; v != nil {
+		args.after = v.(*Cursor)
+	}
+	if v := rv[beforeField]; v != nil {
+		args.before = v.(*Cursor)
+	}
+	return args
+}
+
+// CollectFields tells the query-builder to eagerly load connected nodes by resolver context.
 func (f *FrequencyQuery) CollectFields(ctx context.Context, satisfies ...string) (*FrequencyQuery, error) {
 	fc := graphql.GetFieldContext(ctx)
 	if fc == nil {
@@ -117,6 +212,49 @@ type frequencyPaginateArgs struct {
 
 func newFrequencyPaginateArgs(rv map[string]interface{}) *frequencyPaginateArgs {
 	args := &frequencyPaginateArgs{}
+	if rv == nil {
+		return args
+	}
+	if v := rv[firstField]; v != nil {
+		args.first = v.(*int)
+	}
+	if v := rv[lastField]; v != nil {
+		args.last = v.(*int)
+	}
+	if v := rv[afterField]; v != nil {
+		args.after = v.(*Cursor)
+	}
+	if v := rv[beforeField]; v != nil {
+		args.before = v.(*Cursor)
+	}
+	return args
+}
+
+// CollectFields tells the query-builder to eagerly load connected nodes by resolver context.
+func (ic *IcingConditionQuery) CollectFields(ctx context.Context, satisfies ...string) (*IcingConditionQuery, error) {
+	fc := graphql.GetFieldContext(ctx)
+	if fc == nil {
+		return ic, nil
+	}
+	if err := ic.collectField(ctx, graphql.GetOperationContext(ctx), fc.Field, nil, satisfies...); err != nil {
+		return nil, err
+	}
+	return ic, nil
+}
+
+func (ic *IcingConditionQuery) collectField(ctx context.Context, op *graphql.OperationContext, field graphql.CollectedField, path []string, satisfies ...string) error {
+	path = append([]string(nil), path...)
+	return nil
+}
+
+type icingconditionPaginateArgs struct {
+	first, last   *int
+	after, before *Cursor
+	opts          []IcingConditionPaginateOption
+}
+
+func newIcingConditionPaginateArgs(rv map[string]interface{}) *icingconditionPaginateArgs {
+	args := &icingconditionPaginateArgs{}
 	if rv == nil {
 		return args
 	}
@@ -275,20 +413,6 @@ func (sc *SkyConditionQuery) CollectFields(ctx context.Context, satisfies ...str
 
 func (sc *SkyConditionQuery) collectField(ctx context.Context, op *graphql.OperationContext, field graphql.CollectedField, path []string, satisfies ...string) error {
 	path = append([]string(nil), path...)
-	for _, field := range graphql.CollectFields(op, field.Selections, satisfies) {
-		switch field.Name {
-		case "metar":
-			var (
-				alias = field.Alias
-				path  = append(path, alias)
-				query = &MetarQuery{config: sc.config}
-			)
-			if err := query.collectField(ctx, op, field, path, satisfies...); err != nil {
-				return err
-			}
-			sc.withMetar = query
-		}
-	}
 	return nil
 }
 
@@ -344,30 +468,6 @@ func (s *StationQuery) collectField(ctx context.Context, op *graphql.OperationCo
 				return err
 			}
 			s.withAirport = query
-		case "metars":
-			var (
-				alias = field.Alias
-				path  = append(path, alias)
-				query = &MetarQuery{config: s.config}
-			)
-			if err := query.collectField(ctx, op, field, path, satisfies...); err != nil {
-				return err
-			}
-			s.WithNamedMetars(alias, func(wq *MetarQuery) {
-				*wq = *query
-			})
-		case "tafs":
-			var (
-				alias = field.Alias
-				path  = append(path, alias)
-				query = &TafQuery{config: s.config}
-			)
-			if err := query.collectField(ctx, op, field, path, satisfies...); err != nil {
-				return err
-			}
-			s.WithNamedTafs(alias, func(wq *TafQuery) {
-				*wq = *query
-			})
 		}
 	}
 	return nil
@@ -437,6 +537,18 @@ func (t *TafQuery) collectField(ctx context.Context, op *graphql.OperationContex
 			t.WithNamedSkyConditions(alias, func(wq *SkyConditionQuery) {
 				*wq = *query
 			})
+		case "forecast":
+			var (
+				alias = field.Alias
+				path  = append(path, alias)
+				query = &ForecastQuery{config: t.config}
+			)
+			if err := query.collectField(ctx, op, field, path, satisfies...); err != nil {
+				return err
+			}
+			t.WithNamedForecast(alias, func(wq *ForecastQuery) {
+				*wq = *query
+			})
 		}
 	}
 	return nil
@@ -486,6 +598,92 @@ func newTafPaginateArgs(rv map[string]interface{}) *tafPaginateArgs {
 				args.opts = append(args.opts, WithTafOrder(v))
 			}
 		}
+	}
+	return args
+}
+
+// CollectFields tells the query-builder to eagerly load connected nodes by resolver context.
+func (td *TemperatureDataQuery) CollectFields(ctx context.Context, satisfies ...string) (*TemperatureDataQuery, error) {
+	fc := graphql.GetFieldContext(ctx)
+	if fc == nil {
+		return td, nil
+	}
+	if err := td.collectField(ctx, graphql.GetOperationContext(ctx), fc.Field, nil, satisfies...); err != nil {
+		return nil, err
+	}
+	return td, nil
+}
+
+func (td *TemperatureDataQuery) collectField(ctx context.Context, op *graphql.OperationContext, field graphql.CollectedField, path []string, satisfies ...string) error {
+	path = append([]string(nil), path...)
+	return nil
+}
+
+type temperaturedataPaginateArgs struct {
+	first, last   *int
+	after, before *Cursor
+	opts          []TemperatureDataPaginateOption
+}
+
+func newTemperatureDataPaginateArgs(rv map[string]interface{}) *temperaturedataPaginateArgs {
+	args := &temperaturedataPaginateArgs{}
+	if rv == nil {
+		return args
+	}
+	if v := rv[firstField]; v != nil {
+		args.first = v.(*int)
+	}
+	if v := rv[lastField]; v != nil {
+		args.last = v.(*int)
+	}
+	if v := rv[afterField]; v != nil {
+		args.after = v.(*Cursor)
+	}
+	if v := rv[beforeField]; v != nil {
+		args.before = v.(*Cursor)
+	}
+	return args
+}
+
+// CollectFields tells the query-builder to eagerly load connected nodes by resolver context.
+func (tc *TurbulenceConditionQuery) CollectFields(ctx context.Context, satisfies ...string) (*TurbulenceConditionQuery, error) {
+	fc := graphql.GetFieldContext(ctx)
+	if fc == nil {
+		return tc, nil
+	}
+	if err := tc.collectField(ctx, graphql.GetOperationContext(ctx), fc.Field, nil, satisfies...); err != nil {
+		return nil, err
+	}
+	return tc, nil
+}
+
+func (tc *TurbulenceConditionQuery) collectField(ctx context.Context, op *graphql.OperationContext, field graphql.CollectedField, path []string, satisfies ...string) error {
+	path = append([]string(nil), path...)
+	return nil
+}
+
+type turbulenceconditionPaginateArgs struct {
+	first, last   *int
+	after, before *Cursor
+	opts          []TurbulenceConditionPaginateOption
+}
+
+func newTurbulenceConditionPaginateArgs(rv map[string]interface{}) *turbulenceconditionPaginateArgs {
+	args := &turbulenceconditionPaginateArgs{}
+	if rv == nil {
+		return args
+	}
+	if v := rv[firstField]; v != nil {
+		args.first = v.(*int)
+	}
+	if v := rv[lastField]; v != nil {
+		args.last = v.(*int)
+	}
+	if v := rv[afterField]; v != nil {
+		args.after = v.(*Cursor)
+	}
+	if v := rv[beforeField]; v != nil {
+		args.before = v.(*Cursor)
 	}
 	return args
 }

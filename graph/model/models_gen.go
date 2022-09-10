@@ -6,9 +6,9 @@ import (
 	"metar.gg/ent"
 )
 
-type MetarWithDistance struct {
+type StationWithDistance struct {
 	// The distance in meters from the given location to the airport
-	Distance *float64 `json:"distance"`
+	Distance float64 `json:"distance"`
 	// The METAR for the station
-	Metar *ent.Metar `json:"metar"`
+	Station *ent.Station `json:"station"`
 }

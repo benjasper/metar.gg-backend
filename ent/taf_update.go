@@ -11,6 +11,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"metar.gg/ent/forecast"
 	"metar.gg/ent/predicate"
 	"metar.gg/ent/skycondition"
 	"metar.gg/ent/station"
@@ -67,503 +68,6 @@ func (tu *TafUpdate) SetRemarks(s string) *TafUpdate {
 	return tu
 }
 
-// SetTemperature sets the "temperature" field.
-func (tu *TafUpdate) SetTemperature(f float64) *TafUpdate {
-	tu.mutation.ResetTemperature()
-	tu.mutation.SetTemperature(f)
-	return tu
-}
-
-// AddTemperature adds f to the "temperature" field.
-func (tu *TafUpdate) AddTemperature(f float64) *TafUpdate {
-	tu.mutation.AddTemperature(f)
-	return tu
-}
-
-// SetDewpoint sets the "dewpoint" field.
-func (tu *TafUpdate) SetDewpoint(f float64) *TafUpdate {
-	tu.mutation.ResetDewpoint()
-	tu.mutation.SetDewpoint(f)
-	return tu
-}
-
-// AddDewpoint adds f to the "dewpoint" field.
-func (tu *TafUpdate) AddDewpoint(f float64) *TafUpdate {
-	tu.mutation.AddDewpoint(f)
-	return tu
-}
-
-// SetWindSpeed sets the "wind_speed" field.
-func (tu *TafUpdate) SetWindSpeed(i int) *TafUpdate {
-	tu.mutation.ResetWindSpeed()
-	tu.mutation.SetWindSpeed(i)
-	return tu
-}
-
-// AddWindSpeed adds i to the "wind_speed" field.
-func (tu *TafUpdate) AddWindSpeed(i int) *TafUpdate {
-	tu.mutation.AddWindSpeed(i)
-	return tu
-}
-
-// SetWindGust sets the "wind_gust" field.
-func (tu *TafUpdate) SetWindGust(i int) *TafUpdate {
-	tu.mutation.ResetWindGust()
-	tu.mutation.SetWindGust(i)
-	return tu
-}
-
-// AddWindGust adds i to the "wind_gust" field.
-func (tu *TafUpdate) AddWindGust(i int) *TafUpdate {
-	tu.mutation.AddWindGust(i)
-	return tu
-}
-
-// SetWindDirection sets the "wind_direction" field.
-func (tu *TafUpdate) SetWindDirection(i int) *TafUpdate {
-	tu.mutation.ResetWindDirection()
-	tu.mutation.SetWindDirection(i)
-	return tu
-}
-
-// AddWindDirection adds i to the "wind_direction" field.
-func (tu *TafUpdate) AddWindDirection(i int) *TafUpdate {
-	tu.mutation.AddWindDirection(i)
-	return tu
-}
-
-// SetVisibility sets the "visibility" field.
-func (tu *TafUpdate) SetVisibility(f float64) *TafUpdate {
-	tu.mutation.ResetVisibility()
-	tu.mutation.SetVisibility(f)
-	return tu
-}
-
-// AddVisibility adds f to the "visibility" field.
-func (tu *TafUpdate) AddVisibility(f float64) *TafUpdate {
-	tu.mutation.AddVisibility(f)
-	return tu
-}
-
-// SetAltimeter sets the "altimeter" field.
-func (tu *TafUpdate) SetAltimeter(f float64) *TafUpdate {
-	tu.mutation.ResetAltimeter()
-	tu.mutation.SetAltimeter(f)
-	return tu
-}
-
-// AddAltimeter adds f to the "altimeter" field.
-func (tu *TafUpdate) AddAltimeter(f float64) *TafUpdate {
-	tu.mutation.AddAltimeter(f)
-	return tu
-}
-
-// SetFlightCategory sets the "flight_category" field.
-func (tu *TafUpdate) SetFlightCategory(tc taf.FlightCategory) *TafUpdate {
-	tu.mutation.SetFlightCategory(tc)
-	return tu
-}
-
-// SetNillableFlightCategory sets the "flight_category" field if the given value is not nil.
-func (tu *TafUpdate) SetNillableFlightCategory(tc *taf.FlightCategory) *TafUpdate {
-	if tc != nil {
-		tu.SetFlightCategory(*tc)
-	}
-	return tu
-}
-
-// ClearFlightCategory clears the value of the "flight_category" field.
-func (tu *TafUpdate) ClearFlightCategory() *TafUpdate {
-	tu.mutation.ClearFlightCategory()
-	return tu
-}
-
-// SetQualityControlCorrected sets the "quality_control_corrected" field.
-func (tu *TafUpdate) SetQualityControlCorrected(b bool) *TafUpdate {
-	tu.mutation.SetQualityControlCorrected(b)
-	return tu
-}
-
-// SetNillableQualityControlCorrected sets the "quality_control_corrected" field if the given value is not nil.
-func (tu *TafUpdate) SetNillableQualityControlCorrected(b *bool) *TafUpdate {
-	if b != nil {
-		tu.SetQualityControlCorrected(*b)
-	}
-	return tu
-}
-
-// ClearQualityControlCorrected clears the value of the "quality_control_corrected" field.
-func (tu *TafUpdate) ClearQualityControlCorrected() *TafUpdate {
-	tu.mutation.ClearQualityControlCorrected()
-	return tu
-}
-
-// SetQualityControlAutoStation sets the "quality_control_auto_station" field.
-func (tu *TafUpdate) SetQualityControlAutoStation(b bool) *TafUpdate {
-	tu.mutation.SetQualityControlAutoStation(b)
-	return tu
-}
-
-// SetQualityControlMaintenanceIndicatorOn sets the "quality_control_maintenance_indicator_on" field.
-func (tu *TafUpdate) SetQualityControlMaintenanceIndicatorOn(b bool) *TafUpdate {
-	tu.mutation.SetQualityControlMaintenanceIndicatorOn(b)
-	return tu
-}
-
-// SetQualityControlNoSignal sets the "quality_control_no_signal" field.
-func (tu *TafUpdate) SetQualityControlNoSignal(b bool) *TafUpdate {
-	tu.mutation.SetQualityControlNoSignal(b)
-	return tu
-}
-
-// SetQualityControlLightningSensorOff sets the "quality_control_lightning_sensor_off" field.
-func (tu *TafUpdate) SetQualityControlLightningSensorOff(b bool) *TafUpdate {
-	tu.mutation.SetQualityControlLightningSensorOff(b)
-	return tu
-}
-
-// SetQualityControlFreezingRainSensorOff sets the "quality_control_freezing_rain_sensor_off" field.
-func (tu *TafUpdate) SetQualityControlFreezingRainSensorOff(b bool) *TafUpdate {
-	tu.mutation.SetQualityControlFreezingRainSensorOff(b)
-	return tu
-}
-
-// SetQualityControlPresentWeatherSensorOff sets the "quality_control_present_weather_sensor_off" field.
-func (tu *TafUpdate) SetQualityControlPresentWeatherSensorOff(b bool) *TafUpdate {
-	tu.mutation.SetQualityControlPresentWeatherSensorOff(b)
-	return tu
-}
-
-// SetSeaLevelPressure sets the "sea_level_pressure" field.
-func (tu *TafUpdate) SetSeaLevelPressure(f float64) *TafUpdate {
-	tu.mutation.ResetSeaLevelPressure()
-	tu.mutation.SetSeaLevelPressure(f)
-	return tu
-}
-
-// SetNillableSeaLevelPressure sets the "sea_level_pressure" field if the given value is not nil.
-func (tu *TafUpdate) SetNillableSeaLevelPressure(f *float64) *TafUpdate {
-	if f != nil {
-		tu.SetSeaLevelPressure(*f)
-	}
-	return tu
-}
-
-// AddSeaLevelPressure adds f to the "sea_level_pressure" field.
-func (tu *TafUpdate) AddSeaLevelPressure(f float64) *TafUpdate {
-	tu.mutation.AddSeaLevelPressure(f)
-	return tu
-}
-
-// ClearSeaLevelPressure clears the value of the "sea_level_pressure" field.
-func (tu *TafUpdate) ClearSeaLevelPressure() *TafUpdate {
-	tu.mutation.ClearSeaLevelPressure()
-	return tu
-}
-
-// SetPressureTendency sets the "pressure_tendency" field.
-func (tu *TafUpdate) SetPressureTendency(f float64) *TafUpdate {
-	tu.mutation.ResetPressureTendency()
-	tu.mutation.SetPressureTendency(f)
-	return tu
-}
-
-// SetNillablePressureTendency sets the "pressure_tendency" field if the given value is not nil.
-func (tu *TafUpdate) SetNillablePressureTendency(f *float64) *TafUpdate {
-	if f != nil {
-		tu.SetPressureTendency(*f)
-	}
-	return tu
-}
-
-// AddPressureTendency adds f to the "pressure_tendency" field.
-func (tu *TafUpdate) AddPressureTendency(f float64) *TafUpdate {
-	tu.mutation.AddPressureTendency(f)
-	return tu
-}
-
-// ClearPressureTendency clears the value of the "pressure_tendency" field.
-func (tu *TafUpdate) ClearPressureTendency() *TafUpdate {
-	tu.mutation.ClearPressureTendency()
-	return tu
-}
-
-// SetMaxTemp6 sets the "max_temp_6" field.
-func (tu *TafUpdate) SetMaxTemp6(f float64) *TafUpdate {
-	tu.mutation.ResetMaxTemp6()
-	tu.mutation.SetMaxTemp6(f)
-	return tu
-}
-
-// SetNillableMaxTemp6 sets the "max_temp_6" field if the given value is not nil.
-func (tu *TafUpdate) SetNillableMaxTemp6(f *float64) *TafUpdate {
-	if f != nil {
-		tu.SetMaxTemp6(*f)
-	}
-	return tu
-}
-
-// AddMaxTemp6 adds f to the "max_temp_6" field.
-func (tu *TafUpdate) AddMaxTemp6(f float64) *TafUpdate {
-	tu.mutation.AddMaxTemp6(f)
-	return tu
-}
-
-// ClearMaxTemp6 clears the value of the "max_temp_6" field.
-func (tu *TafUpdate) ClearMaxTemp6() *TafUpdate {
-	tu.mutation.ClearMaxTemp6()
-	return tu
-}
-
-// SetMinTemp6 sets the "min_temp_6" field.
-func (tu *TafUpdate) SetMinTemp6(f float64) *TafUpdate {
-	tu.mutation.ResetMinTemp6()
-	tu.mutation.SetMinTemp6(f)
-	return tu
-}
-
-// SetNillableMinTemp6 sets the "min_temp_6" field if the given value is not nil.
-func (tu *TafUpdate) SetNillableMinTemp6(f *float64) *TafUpdate {
-	if f != nil {
-		tu.SetMinTemp6(*f)
-	}
-	return tu
-}
-
-// AddMinTemp6 adds f to the "min_temp_6" field.
-func (tu *TafUpdate) AddMinTemp6(f float64) *TafUpdate {
-	tu.mutation.AddMinTemp6(f)
-	return tu
-}
-
-// ClearMinTemp6 clears the value of the "min_temp_6" field.
-func (tu *TafUpdate) ClearMinTemp6() *TafUpdate {
-	tu.mutation.ClearMinTemp6()
-	return tu
-}
-
-// SetMaxTemp24 sets the "max_temp_24" field.
-func (tu *TafUpdate) SetMaxTemp24(f float64) *TafUpdate {
-	tu.mutation.ResetMaxTemp24()
-	tu.mutation.SetMaxTemp24(f)
-	return tu
-}
-
-// SetNillableMaxTemp24 sets the "max_temp_24" field if the given value is not nil.
-func (tu *TafUpdate) SetNillableMaxTemp24(f *float64) *TafUpdate {
-	if f != nil {
-		tu.SetMaxTemp24(*f)
-	}
-	return tu
-}
-
-// AddMaxTemp24 adds f to the "max_temp_24" field.
-func (tu *TafUpdate) AddMaxTemp24(f float64) *TafUpdate {
-	tu.mutation.AddMaxTemp24(f)
-	return tu
-}
-
-// ClearMaxTemp24 clears the value of the "max_temp_24" field.
-func (tu *TafUpdate) ClearMaxTemp24() *TafUpdate {
-	tu.mutation.ClearMaxTemp24()
-	return tu
-}
-
-// SetMinTemp24 sets the "min_temp_24" field.
-func (tu *TafUpdate) SetMinTemp24(f float64) *TafUpdate {
-	tu.mutation.ResetMinTemp24()
-	tu.mutation.SetMinTemp24(f)
-	return tu
-}
-
-// SetNillableMinTemp24 sets the "min_temp_24" field if the given value is not nil.
-func (tu *TafUpdate) SetNillableMinTemp24(f *float64) *TafUpdate {
-	if f != nil {
-		tu.SetMinTemp24(*f)
-	}
-	return tu
-}
-
-// AddMinTemp24 adds f to the "min_temp_24" field.
-func (tu *TafUpdate) AddMinTemp24(f float64) *TafUpdate {
-	tu.mutation.AddMinTemp24(f)
-	return tu
-}
-
-// ClearMinTemp24 clears the value of the "min_temp_24" field.
-func (tu *TafUpdate) ClearMinTemp24() *TafUpdate {
-	tu.mutation.ClearMinTemp24()
-	return tu
-}
-
-// SetPrecipitation sets the "precipitation" field.
-func (tu *TafUpdate) SetPrecipitation(f float64) *TafUpdate {
-	tu.mutation.ResetPrecipitation()
-	tu.mutation.SetPrecipitation(f)
-	return tu
-}
-
-// SetNillablePrecipitation sets the "precipitation" field if the given value is not nil.
-func (tu *TafUpdate) SetNillablePrecipitation(f *float64) *TafUpdate {
-	if f != nil {
-		tu.SetPrecipitation(*f)
-	}
-	return tu
-}
-
-// AddPrecipitation adds f to the "precipitation" field.
-func (tu *TafUpdate) AddPrecipitation(f float64) *TafUpdate {
-	tu.mutation.AddPrecipitation(f)
-	return tu
-}
-
-// ClearPrecipitation clears the value of the "precipitation" field.
-func (tu *TafUpdate) ClearPrecipitation() *TafUpdate {
-	tu.mutation.ClearPrecipitation()
-	return tu
-}
-
-// SetPrecipitation3 sets the "precipitation_3" field.
-func (tu *TafUpdate) SetPrecipitation3(f float64) *TafUpdate {
-	tu.mutation.ResetPrecipitation3()
-	tu.mutation.SetPrecipitation3(f)
-	return tu
-}
-
-// SetNillablePrecipitation3 sets the "precipitation_3" field if the given value is not nil.
-func (tu *TafUpdate) SetNillablePrecipitation3(f *float64) *TafUpdate {
-	if f != nil {
-		tu.SetPrecipitation3(*f)
-	}
-	return tu
-}
-
-// AddPrecipitation3 adds f to the "precipitation_3" field.
-func (tu *TafUpdate) AddPrecipitation3(f float64) *TafUpdate {
-	tu.mutation.AddPrecipitation3(f)
-	return tu
-}
-
-// ClearPrecipitation3 clears the value of the "precipitation_3" field.
-func (tu *TafUpdate) ClearPrecipitation3() *TafUpdate {
-	tu.mutation.ClearPrecipitation3()
-	return tu
-}
-
-// SetPrecipitation6 sets the "precipitation_6" field.
-func (tu *TafUpdate) SetPrecipitation6(f float64) *TafUpdate {
-	tu.mutation.ResetPrecipitation6()
-	tu.mutation.SetPrecipitation6(f)
-	return tu
-}
-
-// SetNillablePrecipitation6 sets the "precipitation_6" field if the given value is not nil.
-func (tu *TafUpdate) SetNillablePrecipitation6(f *float64) *TafUpdate {
-	if f != nil {
-		tu.SetPrecipitation6(*f)
-	}
-	return tu
-}
-
-// AddPrecipitation6 adds f to the "precipitation_6" field.
-func (tu *TafUpdate) AddPrecipitation6(f float64) *TafUpdate {
-	tu.mutation.AddPrecipitation6(f)
-	return tu
-}
-
-// ClearPrecipitation6 clears the value of the "precipitation_6" field.
-func (tu *TafUpdate) ClearPrecipitation6() *TafUpdate {
-	tu.mutation.ClearPrecipitation6()
-	return tu
-}
-
-// SetPrecipitation24 sets the "precipitation_24" field.
-func (tu *TafUpdate) SetPrecipitation24(f float64) *TafUpdate {
-	tu.mutation.ResetPrecipitation24()
-	tu.mutation.SetPrecipitation24(f)
-	return tu
-}
-
-// SetNillablePrecipitation24 sets the "precipitation_24" field if the given value is not nil.
-func (tu *TafUpdate) SetNillablePrecipitation24(f *float64) *TafUpdate {
-	if f != nil {
-		tu.SetPrecipitation24(*f)
-	}
-	return tu
-}
-
-// AddPrecipitation24 adds f to the "precipitation_24" field.
-func (tu *TafUpdate) AddPrecipitation24(f float64) *TafUpdate {
-	tu.mutation.AddPrecipitation24(f)
-	return tu
-}
-
-// ClearPrecipitation24 clears the value of the "precipitation_24" field.
-func (tu *TafUpdate) ClearPrecipitation24() *TafUpdate {
-	tu.mutation.ClearPrecipitation24()
-	return tu
-}
-
-// SetSnowDepth sets the "snow_depth" field.
-func (tu *TafUpdate) SetSnowDepth(f float64) *TafUpdate {
-	tu.mutation.ResetSnowDepth()
-	tu.mutation.SetSnowDepth(f)
-	return tu
-}
-
-// SetNillableSnowDepth sets the "snow_depth" field if the given value is not nil.
-func (tu *TafUpdate) SetNillableSnowDepth(f *float64) *TafUpdate {
-	if f != nil {
-		tu.SetSnowDepth(*f)
-	}
-	return tu
-}
-
-// AddSnowDepth adds f to the "snow_depth" field.
-func (tu *TafUpdate) AddSnowDepth(f float64) *TafUpdate {
-	tu.mutation.AddSnowDepth(f)
-	return tu
-}
-
-// ClearSnowDepth clears the value of the "snow_depth" field.
-func (tu *TafUpdate) ClearSnowDepth() *TafUpdate {
-	tu.mutation.ClearSnowDepth()
-	return tu
-}
-
-// SetVertVis sets the "vert_vis" field.
-func (tu *TafUpdate) SetVertVis(f float64) *TafUpdate {
-	tu.mutation.ResetVertVis()
-	tu.mutation.SetVertVis(f)
-	return tu
-}
-
-// SetNillableVertVis sets the "vert_vis" field if the given value is not nil.
-func (tu *TafUpdate) SetNillableVertVis(f *float64) *TafUpdate {
-	if f != nil {
-		tu.SetVertVis(*f)
-	}
-	return tu
-}
-
-// AddVertVis adds f to the "vert_vis" field.
-func (tu *TafUpdate) AddVertVis(f float64) *TafUpdate {
-	tu.mutation.AddVertVis(f)
-	return tu
-}
-
-// ClearVertVis clears the value of the "vert_vis" field.
-func (tu *TafUpdate) ClearVertVis() *TafUpdate {
-	tu.mutation.ClearVertVis()
-	return tu
-}
-
-// SetMetarType sets the "metar_type" field.
-func (tu *TafUpdate) SetMetarType(tt taf.MetarType) *TafUpdate {
-	tu.mutation.SetMetarType(tt)
-	return tu
-}
-
 // SetHash sets the "hash" field.
 func (tu *TafUpdate) SetHash(s string) *TafUpdate {
 	tu.mutation.SetHash(s)
@@ -596,6 +100,21 @@ func (tu *TafUpdate) AddSkyConditions(s ...*SkyCondition) *TafUpdate {
 	return tu.AddSkyConditionIDs(ids...)
 }
 
+// AddForecastIDs adds the "forecast" edge to the Forecast entity by IDs.
+func (tu *TafUpdate) AddForecastIDs(ids ...int) *TafUpdate {
+	tu.mutation.AddForecastIDs(ids...)
+	return tu
+}
+
+// AddForecast adds the "forecast" edges to the Forecast entity.
+func (tu *TafUpdate) AddForecast(f ...*Forecast) *TafUpdate {
+	ids := make([]int, len(f))
+	for i := range f {
+		ids[i] = f[i].ID
+	}
+	return tu.AddForecastIDs(ids...)
+}
+
 // Mutation returns the TafMutation object of the builder.
 func (tu *TafUpdate) Mutation() *TafMutation {
 	return tu.mutation
@@ -626,6 +145,27 @@ func (tu *TafUpdate) RemoveSkyConditions(s ...*SkyCondition) *TafUpdate {
 		ids[i] = s[i].ID
 	}
 	return tu.RemoveSkyConditionIDs(ids...)
+}
+
+// ClearForecast clears all "forecast" edges to the Forecast entity.
+func (tu *TafUpdate) ClearForecast() *TafUpdate {
+	tu.mutation.ClearForecast()
+	return tu
+}
+
+// RemoveForecastIDs removes the "forecast" edge to Forecast entities by IDs.
+func (tu *TafUpdate) RemoveForecastIDs(ids ...int) *TafUpdate {
+	tu.mutation.RemoveForecastIDs(ids...)
+	return tu
+}
+
+// RemoveForecast removes "forecast" edges to Forecast entities.
+func (tu *TafUpdate) RemoveForecast(f ...*Forecast) *TafUpdate {
+	ids := make([]int, len(f))
+	for i := range f {
+		ids[i] = f[i].ID
+	}
+	return tu.RemoveForecastIDs(ids...)
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -690,16 +230,6 @@ func (tu *TafUpdate) ExecX(ctx context.Context) {
 
 // check runs all checks and user-defined validators on the builder.
 func (tu *TafUpdate) check() error {
-	if v, ok := tu.mutation.FlightCategory(); ok {
-		if err := taf.FlightCategoryValidator(v); err != nil {
-			return &ValidationError{Name: "flight_category", err: fmt.Errorf(`ent: validator failed for field "Taf.flight_category": %w`, err)}
-		}
-	}
-	if v, ok := tu.mutation.MetarType(); ok {
-		if err := taf.MetarTypeValidator(v); err != nil {
-			return &ValidationError{Name: "metar_type", err: fmt.Errorf(`ent: validator failed for field "Taf.metar_type": %w`, err)}
-		}
-	}
 	if _, ok := tu.mutation.StationID(); tu.mutation.StationCleared() && !ok {
 		return errors.New(`ent: clearing a required unique edge "Taf.station"`)
 	}
@@ -770,419 +300,6 @@ func (tu *TafUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Type:   field.TypeString,
 			Value:  value,
 			Column: taf.FieldRemarks,
-		})
-	}
-	if value, ok := tu.mutation.Temperature(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeFloat64,
-			Value:  value,
-			Column: taf.FieldTemperature,
-		})
-	}
-	if value, ok := tu.mutation.AddedTemperature(); ok {
-		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
-			Type:   field.TypeFloat64,
-			Value:  value,
-			Column: taf.FieldTemperature,
-		})
-	}
-	if value, ok := tu.mutation.Dewpoint(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeFloat64,
-			Value:  value,
-			Column: taf.FieldDewpoint,
-		})
-	}
-	if value, ok := tu.mutation.AddedDewpoint(); ok {
-		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
-			Type:   field.TypeFloat64,
-			Value:  value,
-			Column: taf.FieldDewpoint,
-		})
-	}
-	if value, ok := tu.mutation.WindSpeed(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Value:  value,
-			Column: taf.FieldWindSpeed,
-		})
-	}
-	if value, ok := tu.mutation.AddedWindSpeed(); ok {
-		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Value:  value,
-			Column: taf.FieldWindSpeed,
-		})
-	}
-	if value, ok := tu.mutation.WindGust(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Value:  value,
-			Column: taf.FieldWindGust,
-		})
-	}
-	if value, ok := tu.mutation.AddedWindGust(); ok {
-		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Value:  value,
-			Column: taf.FieldWindGust,
-		})
-	}
-	if value, ok := tu.mutation.WindDirection(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Value:  value,
-			Column: taf.FieldWindDirection,
-		})
-	}
-	if value, ok := tu.mutation.AddedWindDirection(); ok {
-		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Value:  value,
-			Column: taf.FieldWindDirection,
-		})
-	}
-	if value, ok := tu.mutation.Visibility(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeFloat64,
-			Value:  value,
-			Column: taf.FieldVisibility,
-		})
-	}
-	if value, ok := tu.mutation.AddedVisibility(); ok {
-		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
-			Type:   field.TypeFloat64,
-			Value:  value,
-			Column: taf.FieldVisibility,
-		})
-	}
-	if value, ok := tu.mutation.Altimeter(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeFloat64,
-			Value:  value,
-			Column: taf.FieldAltimeter,
-		})
-	}
-	if value, ok := tu.mutation.AddedAltimeter(); ok {
-		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
-			Type:   field.TypeFloat64,
-			Value:  value,
-			Column: taf.FieldAltimeter,
-		})
-	}
-	if value, ok := tu.mutation.FlightCategory(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeEnum,
-			Value:  value,
-			Column: taf.FieldFlightCategory,
-		})
-	}
-	if tu.mutation.FlightCategoryCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeEnum,
-			Column: taf.FieldFlightCategory,
-		})
-	}
-	if value, ok := tu.mutation.QualityControlCorrected(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeBool,
-			Value:  value,
-			Column: taf.FieldQualityControlCorrected,
-		})
-	}
-	if tu.mutation.QualityControlCorrectedCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeBool,
-			Column: taf.FieldQualityControlCorrected,
-		})
-	}
-	if value, ok := tu.mutation.QualityControlAutoStation(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeBool,
-			Value:  value,
-			Column: taf.FieldQualityControlAutoStation,
-		})
-	}
-	if value, ok := tu.mutation.QualityControlMaintenanceIndicatorOn(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeBool,
-			Value:  value,
-			Column: taf.FieldQualityControlMaintenanceIndicatorOn,
-		})
-	}
-	if value, ok := tu.mutation.QualityControlNoSignal(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeBool,
-			Value:  value,
-			Column: taf.FieldQualityControlNoSignal,
-		})
-	}
-	if value, ok := tu.mutation.QualityControlLightningSensorOff(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeBool,
-			Value:  value,
-			Column: taf.FieldQualityControlLightningSensorOff,
-		})
-	}
-	if value, ok := tu.mutation.QualityControlFreezingRainSensorOff(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeBool,
-			Value:  value,
-			Column: taf.FieldQualityControlFreezingRainSensorOff,
-		})
-	}
-	if value, ok := tu.mutation.QualityControlPresentWeatherSensorOff(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeBool,
-			Value:  value,
-			Column: taf.FieldQualityControlPresentWeatherSensorOff,
-		})
-	}
-	if value, ok := tu.mutation.SeaLevelPressure(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeFloat64,
-			Value:  value,
-			Column: taf.FieldSeaLevelPressure,
-		})
-	}
-	if value, ok := tu.mutation.AddedSeaLevelPressure(); ok {
-		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
-			Type:   field.TypeFloat64,
-			Value:  value,
-			Column: taf.FieldSeaLevelPressure,
-		})
-	}
-	if tu.mutation.SeaLevelPressureCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeFloat64,
-			Column: taf.FieldSeaLevelPressure,
-		})
-	}
-	if value, ok := tu.mutation.PressureTendency(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeFloat64,
-			Value:  value,
-			Column: taf.FieldPressureTendency,
-		})
-	}
-	if value, ok := tu.mutation.AddedPressureTendency(); ok {
-		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
-			Type:   field.TypeFloat64,
-			Value:  value,
-			Column: taf.FieldPressureTendency,
-		})
-	}
-	if tu.mutation.PressureTendencyCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeFloat64,
-			Column: taf.FieldPressureTendency,
-		})
-	}
-	if value, ok := tu.mutation.MaxTemp6(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeFloat64,
-			Value:  value,
-			Column: taf.FieldMaxTemp6,
-		})
-	}
-	if value, ok := tu.mutation.AddedMaxTemp6(); ok {
-		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
-			Type:   field.TypeFloat64,
-			Value:  value,
-			Column: taf.FieldMaxTemp6,
-		})
-	}
-	if tu.mutation.MaxTemp6Cleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeFloat64,
-			Column: taf.FieldMaxTemp6,
-		})
-	}
-	if value, ok := tu.mutation.MinTemp6(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeFloat64,
-			Value:  value,
-			Column: taf.FieldMinTemp6,
-		})
-	}
-	if value, ok := tu.mutation.AddedMinTemp6(); ok {
-		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
-			Type:   field.TypeFloat64,
-			Value:  value,
-			Column: taf.FieldMinTemp6,
-		})
-	}
-	if tu.mutation.MinTemp6Cleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeFloat64,
-			Column: taf.FieldMinTemp6,
-		})
-	}
-	if value, ok := tu.mutation.MaxTemp24(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeFloat64,
-			Value:  value,
-			Column: taf.FieldMaxTemp24,
-		})
-	}
-	if value, ok := tu.mutation.AddedMaxTemp24(); ok {
-		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
-			Type:   field.TypeFloat64,
-			Value:  value,
-			Column: taf.FieldMaxTemp24,
-		})
-	}
-	if tu.mutation.MaxTemp24Cleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeFloat64,
-			Column: taf.FieldMaxTemp24,
-		})
-	}
-	if value, ok := tu.mutation.MinTemp24(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeFloat64,
-			Value:  value,
-			Column: taf.FieldMinTemp24,
-		})
-	}
-	if value, ok := tu.mutation.AddedMinTemp24(); ok {
-		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
-			Type:   field.TypeFloat64,
-			Value:  value,
-			Column: taf.FieldMinTemp24,
-		})
-	}
-	if tu.mutation.MinTemp24Cleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeFloat64,
-			Column: taf.FieldMinTemp24,
-		})
-	}
-	if value, ok := tu.mutation.Precipitation(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeFloat64,
-			Value:  value,
-			Column: taf.FieldPrecipitation,
-		})
-	}
-	if value, ok := tu.mutation.AddedPrecipitation(); ok {
-		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
-			Type:   field.TypeFloat64,
-			Value:  value,
-			Column: taf.FieldPrecipitation,
-		})
-	}
-	if tu.mutation.PrecipitationCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeFloat64,
-			Column: taf.FieldPrecipitation,
-		})
-	}
-	if value, ok := tu.mutation.Precipitation3(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeFloat64,
-			Value:  value,
-			Column: taf.FieldPrecipitation3,
-		})
-	}
-	if value, ok := tu.mutation.AddedPrecipitation3(); ok {
-		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
-			Type:   field.TypeFloat64,
-			Value:  value,
-			Column: taf.FieldPrecipitation3,
-		})
-	}
-	if tu.mutation.Precipitation3Cleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeFloat64,
-			Column: taf.FieldPrecipitation3,
-		})
-	}
-	if value, ok := tu.mutation.Precipitation6(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeFloat64,
-			Value:  value,
-			Column: taf.FieldPrecipitation6,
-		})
-	}
-	if value, ok := tu.mutation.AddedPrecipitation6(); ok {
-		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
-			Type:   field.TypeFloat64,
-			Value:  value,
-			Column: taf.FieldPrecipitation6,
-		})
-	}
-	if tu.mutation.Precipitation6Cleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeFloat64,
-			Column: taf.FieldPrecipitation6,
-		})
-	}
-	if value, ok := tu.mutation.Precipitation24(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeFloat64,
-			Value:  value,
-			Column: taf.FieldPrecipitation24,
-		})
-	}
-	if value, ok := tu.mutation.AddedPrecipitation24(); ok {
-		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
-			Type:   field.TypeFloat64,
-			Value:  value,
-			Column: taf.FieldPrecipitation24,
-		})
-	}
-	if tu.mutation.Precipitation24Cleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeFloat64,
-			Column: taf.FieldPrecipitation24,
-		})
-	}
-	if value, ok := tu.mutation.SnowDepth(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeFloat64,
-			Value:  value,
-			Column: taf.FieldSnowDepth,
-		})
-	}
-	if value, ok := tu.mutation.AddedSnowDepth(); ok {
-		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
-			Type:   field.TypeFloat64,
-			Value:  value,
-			Column: taf.FieldSnowDepth,
-		})
-	}
-	if tu.mutation.SnowDepthCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeFloat64,
-			Column: taf.FieldSnowDepth,
-		})
-	}
-	if value, ok := tu.mutation.VertVis(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeFloat64,
-			Value:  value,
-			Column: taf.FieldVertVis,
-		})
-	}
-	if value, ok := tu.mutation.AddedVertVis(); ok {
-		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
-			Type:   field.TypeFloat64,
-			Value:  value,
-			Column: taf.FieldVertVis,
-		})
-	}
-	if tu.mutation.VertVisCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeFloat64,
-			Column: taf.FieldVertVis,
-		})
-	}
-	if value, ok := tu.mutation.MetarType(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeEnum,
-			Value:  value,
-			Column: taf.FieldMetarType,
 		})
 	}
 	if value, ok := tu.mutation.Hash(); ok {
@@ -1281,6 +398,60 @@ func (tu *TafUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
+	if tu.mutation.ForecastCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   taf.ForecastTable,
+			Columns: []string{taf.ForecastColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: forecast.FieldID,
+				},
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := tu.mutation.RemovedForecastIDs(); len(nodes) > 0 && !tu.mutation.ForecastCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   taf.ForecastTable,
+			Columns: []string{taf.ForecastColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: forecast.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := tu.mutation.ForecastIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   taf.ForecastTable,
+			Columns: []string{taf.ForecastColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: forecast.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
 	_spec.Modifiers = tu.modifiers
 	if n, err = sqlgraph.UpdateNodes(ctx, tu.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
@@ -1338,503 +509,6 @@ func (tuo *TafUpdateOne) SetRemarks(s string) *TafUpdateOne {
 	return tuo
 }
 
-// SetTemperature sets the "temperature" field.
-func (tuo *TafUpdateOne) SetTemperature(f float64) *TafUpdateOne {
-	tuo.mutation.ResetTemperature()
-	tuo.mutation.SetTemperature(f)
-	return tuo
-}
-
-// AddTemperature adds f to the "temperature" field.
-func (tuo *TafUpdateOne) AddTemperature(f float64) *TafUpdateOne {
-	tuo.mutation.AddTemperature(f)
-	return tuo
-}
-
-// SetDewpoint sets the "dewpoint" field.
-func (tuo *TafUpdateOne) SetDewpoint(f float64) *TafUpdateOne {
-	tuo.mutation.ResetDewpoint()
-	tuo.mutation.SetDewpoint(f)
-	return tuo
-}
-
-// AddDewpoint adds f to the "dewpoint" field.
-func (tuo *TafUpdateOne) AddDewpoint(f float64) *TafUpdateOne {
-	tuo.mutation.AddDewpoint(f)
-	return tuo
-}
-
-// SetWindSpeed sets the "wind_speed" field.
-func (tuo *TafUpdateOne) SetWindSpeed(i int) *TafUpdateOne {
-	tuo.mutation.ResetWindSpeed()
-	tuo.mutation.SetWindSpeed(i)
-	return tuo
-}
-
-// AddWindSpeed adds i to the "wind_speed" field.
-func (tuo *TafUpdateOne) AddWindSpeed(i int) *TafUpdateOne {
-	tuo.mutation.AddWindSpeed(i)
-	return tuo
-}
-
-// SetWindGust sets the "wind_gust" field.
-func (tuo *TafUpdateOne) SetWindGust(i int) *TafUpdateOne {
-	tuo.mutation.ResetWindGust()
-	tuo.mutation.SetWindGust(i)
-	return tuo
-}
-
-// AddWindGust adds i to the "wind_gust" field.
-func (tuo *TafUpdateOne) AddWindGust(i int) *TafUpdateOne {
-	tuo.mutation.AddWindGust(i)
-	return tuo
-}
-
-// SetWindDirection sets the "wind_direction" field.
-func (tuo *TafUpdateOne) SetWindDirection(i int) *TafUpdateOne {
-	tuo.mutation.ResetWindDirection()
-	tuo.mutation.SetWindDirection(i)
-	return tuo
-}
-
-// AddWindDirection adds i to the "wind_direction" field.
-func (tuo *TafUpdateOne) AddWindDirection(i int) *TafUpdateOne {
-	tuo.mutation.AddWindDirection(i)
-	return tuo
-}
-
-// SetVisibility sets the "visibility" field.
-func (tuo *TafUpdateOne) SetVisibility(f float64) *TafUpdateOne {
-	tuo.mutation.ResetVisibility()
-	tuo.mutation.SetVisibility(f)
-	return tuo
-}
-
-// AddVisibility adds f to the "visibility" field.
-func (tuo *TafUpdateOne) AddVisibility(f float64) *TafUpdateOne {
-	tuo.mutation.AddVisibility(f)
-	return tuo
-}
-
-// SetAltimeter sets the "altimeter" field.
-func (tuo *TafUpdateOne) SetAltimeter(f float64) *TafUpdateOne {
-	tuo.mutation.ResetAltimeter()
-	tuo.mutation.SetAltimeter(f)
-	return tuo
-}
-
-// AddAltimeter adds f to the "altimeter" field.
-func (tuo *TafUpdateOne) AddAltimeter(f float64) *TafUpdateOne {
-	tuo.mutation.AddAltimeter(f)
-	return tuo
-}
-
-// SetFlightCategory sets the "flight_category" field.
-func (tuo *TafUpdateOne) SetFlightCategory(tc taf.FlightCategory) *TafUpdateOne {
-	tuo.mutation.SetFlightCategory(tc)
-	return tuo
-}
-
-// SetNillableFlightCategory sets the "flight_category" field if the given value is not nil.
-func (tuo *TafUpdateOne) SetNillableFlightCategory(tc *taf.FlightCategory) *TafUpdateOne {
-	if tc != nil {
-		tuo.SetFlightCategory(*tc)
-	}
-	return tuo
-}
-
-// ClearFlightCategory clears the value of the "flight_category" field.
-func (tuo *TafUpdateOne) ClearFlightCategory() *TafUpdateOne {
-	tuo.mutation.ClearFlightCategory()
-	return tuo
-}
-
-// SetQualityControlCorrected sets the "quality_control_corrected" field.
-func (tuo *TafUpdateOne) SetQualityControlCorrected(b bool) *TafUpdateOne {
-	tuo.mutation.SetQualityControlCorrected(b)
-	return tuo
-}
-
-// SetNillableQualityControlCorrected sets the "quality_control_corrected" field if the given value is not nil.
-func (tuo *TafUpdateOne) SetNillableQualityControlCorrected(b *bool) *TafUpdateOne {
-	if b != nil {
-		tuo.SetQualityControlCorrected(*b)
-	}
-	return tuo
-}
-
-// ClearQualityControlCorrected clears the value of the "quality_control_corrected" field.
-func (tuo *TafUpdateOne) ClearQualityControlCorrected() *TafUpdateOne {
-	tuo.mutation.ClearQualityControlCorrected()
-	return tuo
-}
-
-// SetQualityControlAutoStation sets the "quality_control_auto_station" field.
-func (tuo *TafUpdateOne) SetQualityControlAutoStation(b bool) *TafUpdateOne {
-	tuo.mutation.SetQualityControlAutoStation(b)
-	return tuo
-}
-
-// SetQualityControlMaintenanceIndicatorOn sets the "quality_control_maintenance_indicator_on" field.
-func (tuo *TafUpdateOne) SetQualityControlMaintenanceIndicatorOn(b bool) *TafUpdateOne {
-	tuo.mutation.SetQualityControlMaintenanceIndicatorOn(b)
-	return tuo
-}
-
-// SetQualityControlNoSignal sets the "quality_control_no_signal" field.
-func (tuo *TafUpdateOne) SetQualityControlNoSignal(b bool) *TafUpdateOne {
-	tuo.mutation.SetQualityControlNoSignal(b)
-	return tuo
-}
-
-// SetQualityControlLightningSensorOff sets the "quality_control_lightning_sensor_off" field.
-func (tuo *TafUpdateOne) SetQualityControlLightningSensorOff(b bool) *TafUpdateOne {
-	tuo.mutation.SetQualityControlLightningSensorOff(b)
-	return tuo
-}
-
-// SetQualityControlFreezingRainSensorOff sets the "quality_control_freezing_rain_sensor_off" field.
-func (tuo *TafUpdateOne) SetQualityControlFreezingRainSensorOff(b bool) *TafUpdateOne {
-	tuo.mutation.SetQualityControlFreezingRainSensorOff(b)
-	return tuo
-}
-
-// SetQualityControlPresentWeatherSensorOff sets the "quality_control_present_weather_sensor_off" field.
-func (tuo *TafUpdateOne) SetQualityControlPresentWeatherSensorOff(b bool) *TafUpdateOne {
-	tuo.mutation.SetQualityControlPresentWeatherSensorOff(b)
-	return tuo
-}
-
-// SetSeaLevelPressure sets the "sea_level_pressure" field.
-func (tuo *TafUpdateOne) SetSeaLevelPressure(f float64) *TafUpdateOne {
-	tuo.mutation.ResetSeaLevelPressure()
-	tuo.mutation.SetSeaLevelPressure(f)
-	return tuo
-}
-
-// SetNillableSeaLevelPressure sets the "sea_level_pressure" field if the given value is not nil.
-func (tuo *TafUpdateOne) SetNillableSeaLevelPressure(f *float64) *TafUpdateOne {
-	if f != nil {
-		tuo.SetSeaLevelPressure(*f)
-	}
-	return tuo
-}
-
-// AddSeaLevelPressure adds f to the "sea_level_pressure" field.
-func (tuo *TafUpdateOne) AddSeaLevelPressure(f float64) *TafUpdateOne {
-	tuo.mutation.AddSeaLevelPressure(f)
-	return tuo
-}
-
-// ClearSeaLevelPressure clears the value of the "sea_level_pressure" field.
-func (tuo *TafUpdateOne) ClearSeaLevelPressure() *TafUpdateOne {
-	tuo.mutation.ClearSeaLevelPressure()
-	return tuo
-}
-
-// SetPressureTendency sets the "pressure_tendency" field.
-func (tuo *TafUpdateOne) SetPressureTendency(f float64) *TafUpdateOne {
-	tuo.mutation.ResetPressureTendency()
-	tuo.mutation.SetPressureTendency(f)
-	return tuo
-}
-
-// SetNillablePressureTendency sets the "pressure_tendency" field if the given value is not nil.
-func (tuo *TafUpdateOne) SetNillablePressureTendency(f *float64) *TafUpdateOne {
-	if f != nil {
-		tuo.SetPressureTendency(*f)
-	}
-	return tuo
-}
-
-// AddPressureTendency adds f to the "pressure_tendency" field.
-func (tuo *TafUpdateOne) AddPressureTendency(f float64) *TafUpdateOne {
-	tuo.mutation.AddPressureTendency(f)
-	return tuo
-}
-
-// ClearPressureTendency clears the value of the "pressure_tendency" field.
-func (tuo *TafUpdateOne) ClearPressureTendency() *TafUpdateOne {
-	tuo.mutation.ClearPressureTendency()
-	return tuo
-}
-
-// SetMaxTemp6 sets the "max_temp_6" field.
-func (tuo *TafUpdateOne) SetMaxTemp6(f float64) *TafUpdateOne {
-	tuo.mutation.ResetMaxTemp6()
-	tuo.mutation.SetMaxTemp6(f)
-	return tuo
-}
-
-// SetNillableMaxTemp6 sets the "max_temp_6" field if the given value is not nil.
-func (tuo *TafUpdateOne) SetNillableMaxTemp6(f *float64) *TafUpdateOne {
-	if f != nil {
-		tuo.SetMaxTemp6(*f)
-	}
-	return tuo
-}
-
-// AddMaxTemp6 adds f to the "max_temp_6" field.
-func (tuo *TafUpdateOne) AddMaxTemp6(f float64) *TafUpdateOne {
-	tuo.mutation.AddMaxTemp6(f)
-	return tuo
-}
-
-// ClearMaxTemp6 clears the value of the "max_temp_6" field.
-func (tuo *TafUpdateOne) ClearMaxTemp6() *TafUpdateOne {
-	tuo.mutation.ClearMaxTemp6()
-	return tuo
-}
-
-// SetMinTemp6 sets the "min_temp_6" field.
-func (tuo *TafUpdateOne) SetMinTemp6(f float64) *TafUpdateOne {
-	tuo.mutation.ResetMinTemp6()
-	tuo.mutation.SetMinTemp6(f)
-	return tuo
-}
-
-// SetNillableMinTemp6 sets the "min_temp_6" field if the given value is not nil.
-func (tuo *TafUpdateOne) SetNillableMinTemp6(f *float64) *TafUpdateOne {
-	if f != nil {
-		tuo.SetMinTemp6(*f)
-	}
-	return tuo
-}
-
-// AddMinTemp6 adds f to the "min_temp_6" field.
-func (tuo *TafUpdateOne) AddMinTemp6(f float64) *TafUpdateOne {
-	tuo.mutation.AddMinTemp6(f)
-	return tuo
-}
-
-// ClearMinTemp6 clears the value of the "min_temp_6" field.
-func (tuo *TafUpdateOne) ClearMinTemp6() *TafUpdateOne {
-	tuo.mutation.ClearMinTemp6()
-	return tuo
-}
-
-// SetMaxTemp24 sets the "max_temp_24" field.
-func (tuo *TafUpdateOne) SetMaxTemp24(f float64) *TafUpdateOne {
-	tuo.mutation.ResetMaxTemp24()
-	tuo.mutation.SetMaxTemp24(f)
-	return tuo
-}
-
-// SetNillableMaxTemp24 sets the "max_temp_24" field if the given value is not nil.
-func (tuo *TafUpdateOne) SetNillableMaxTemp24(f *float64) *TafUpdateOne {
-	if f != nil {
-		tuo.SetMaxTemp24(*f)
-	}
-	return tuo
-}
-
-// AddMaxTemp24 adds f to the "max_temp_24" field.
-func (tuo *TafUpdateOne) AddMaxTemp24(f float64) *TafUpdateOne {
-	tuo.mutation.AddMaxTemp24(f)
-	return tuo
-}
-
-// ClearMaxTemp24 clears the value of the "max_temp_24" field.
-func (tuo *TafUpdateOne) ClearMaxTemp24() *TafUpdateOne {
-	tuo.mutation.ClearMaxTemp24()
-	return tuo
-}
-
-// SetMinTemp24 sets the "min_temp_24" field.
-func (tuo *TafUpdateOne) SetMinTemp24(f float64) *TafUpdateOne {
-	tuo.mutation.ResetMinTemp24()
-	tuo.mutation.SetMinTemp24(f)
-	return tuo
-}
-
-// SetNillableMinTemp24 sets the "min_temp_24" field if the given value is not nil.
-func (tuo *TafUpdateOne) SetNillableMinTemp24(f *float64) *TafUpdateOne {
-	if f != nil {
-		tuo.SetMinTemp24(*f)
-	}
-	return tuo
-}
-
-// AddMinTemp24 adds f to the "min_temp_24" field.
-func (tuo *TafUpdateOne) AddMinTemp24(f float64) *TafUpdateOne {
-	tuo.mutation.AddMinTemp24(f)
-	return tuo
-}
-
-// ClearMinTemp24 clears the value of the "min_temp_24" field.
-func (tuo *TafUpdateOne) ClearMinTemp24() *TafUpdateOne {
-	tuo.mutation.ClearMinTemp24()
-	return tuo
-}
-
-// SetPrecipitation sets the "precipitation" field.
-func (tuo *TafUpdateOne) SetPrecipitation(f float64) *TafUpdateOne {
-	tuo.mutation.ResetPrecipitation()
-	tuo.mutation.SetPrecipitation(f)
-	return tuo
-}
-
-// SetNillablePrecipitation sets the "precipitation" field if the given value is not nil.
-func (tuo *TafUpdateOne) SetNillablePrecipitation(f *float64) *TafUpdateOne {
-	if f != nil {
-		tuo.SetPrecipitation(*f)
-	}
-	return tuo
-}
-
-// AddPrecipitation adds f to the "precipitation" field.
-func (tuo *TafUpdateOne) AddPrecipitation(f float64) *TafUpdateOne {
-	tuo.mutation.AddPrecipitation(f)
-	return tuo
-}
-
-// ClearPrecipitation clears the value of the "precipitation" field.
-func (tuo *TafUpdateOne) ClearPrecipitation() *TafUpdateOne {
-	tuo.mutation.ClearPrecipitation()
-	return tuo
-}
-
-// SetPrecipitation3 sets the "precipitation_3" field.
-func (tuo *TafUpdateOne) SetPrecipitation3(f float64) *TafUpdateOne {
-	tuo.mutation.ResetPrecipitation3()
-	tuo.mutation.SetPrecipitation3(f)
-	return tuo
-}
-
-// SetNillablePrecipitation3 sets the "precipitation_3" field if the given value is not nil.
-func (tuo *TafUpdateOne) SetNillablePrecipitation3(f *float64) *TafUpdateOne {
-	if f != nil {
-		tuo.SetPrecipitation3(*f)
-	}
-	return tuo
-}
-
-// AddPrecipitation3 adds f to the "precipitation_3" field.
-func (tuo *TafUpdateOne) AddPrecipitation3(f float64) *TafUpdateOne {
-	tuo.mutation.AddPrecipitation3(f)
-	return tuo
-}
-
-// ClearPrecipitation3 clears the value of the "precipitation_3" field.
-func (tuo *TafUpdateOne) ClearPrecipitation3() *TafUpdateOne {
-	tuo.mutation.ClearPrecipitation3()
-	return tuo
-}
-
-// SetPrecipitation6 sets the "precipitation_6" field.
-func (tuo *TafUpdateOne) SetPrecipitation6(f float64) *TafUpdateOne {
-	tuo.mutation.ResetPrecipitation6()
-	tuo.mutation.SetPrecipitation6(f)
-	return tuo
-}
-
-// SetNillablePrecipitation6 sets the "precipitation_6" field if the given value is not nil.
-func (tuo *TafUpdateOne) SetNillablePrecipitation6(f *float64) *TafUpdateOne {
-	if f != nil {
-		tuo.SetPrecipitation6(*f)
-	}
-	return tuo
-}
-
-// AddPrecipitation6 adds f to the "precipitation_6" field.
-func (tuo *TafUpdateOne) AddPrecipitation6(f float64) *TafUpdateOne {
-	tuo.mutation.AddPrecipitation6(f)
-	return tuo
-}
-
-// ClearPrecipitation6 clears the value of the "precipitation_6" field.
-func (tuo *TafUpdateOne) ClearPrecipitation6() *TafUpdateOne {
-	tuo.mutation.ClearPrecipitation6()
-	return tuo
-}
-
-// SetPrecipitation24 sets the "precipitation_24" field.
-func (tuo *TafUpdateOne) SetPrecipitation24(f float64) *TafUpdateOne {
-	tuo.mutation.ResetPrecipitation24()
-	tuo.mutation.SetPrecipitation24(f)
-	return tuo
-}
-
-// SetNillablePrecipitation24 sets the "precipitation_24" field if the given value is not nil.
-func (tuo *TafUpdateOne) SetNillablePrecipitation24(f *float64) *TafUpdateOne {
-	if f != nil {
-		tuo.SetPrecipitation24(*f)
-	}
-	return tuo
-}
-
-// AddPrecipitation24 adds f to the "precipitation_24" field.
-func (tuo *TafUpdateOne) AddPrecipitation24(f float64) *TafUpdateOne {
-	tuo.mutation.AddPrecipitation24(f)
-	return tuo
-}
-
-// ClearPrecipitation24 clears the value of the "precipitation_24" field.
-func (tuo *TafUpdateOne) ClearPrecipitation24() *TafUpdateOne {
-	tuo.mutation.ClearPrecipitation24()
-	return tuo
-}
-
-// SetSnowDepth sets the "snow_depth" field.
-func (tuo *TafUpdateOne) SetSnowDepth(f float64) *TafUpdateOne {
-	tuo.mutation.ResetSnowDepth()
-	tuo.mutation.SetSnowDepth(f)
-	return tuo
-}
-
-// SetNillableSnowDepth sets the "snow_depth" field if the given value is not nil.
-func (tuo *TafUpdateOne) SetNillableSnowDepth(f *float64) *TafUpdateOne {
-	if f != nil {
-		tuo.SetSnowDepth(*f)
-	}
-	return tuo
-}
-
-// AddSnowDepth adds f to the "snow_depth" field.
-func (tuo *TafUpdateOne) AddSnowDepth(f float64) *TafUpdateOne {
-	tuo.mutation.AddSnowDepth(f)
-	return tuo
-}
-
-// ClearSnowDepth clears the value of the "snow_depth" field.
-func (tuo *TafUpdateOne) ClearSnowDepth() *TafUpdateOne {
-	tuo.mutation.ClearSnowDepth()
-	return tuo
-}
-
-// SetVertVis sets the "vert_vis" field.
-func (tuo *TafUpdateOne) SetVertVis(f float64) *TafUpdateOne {
-	tuo.mutation.ResetVertVis()
-	tuo.mutation.SetVertVis(f)
-	return tuo
-}
-
-// SetNillableVertVis sets the "vert_vis" field if the given value is not nil.
-func (tuo *TafUpdateOne) SetNillableVertVis(f *float64) *TafUpdateOne {
-	if f != nil {
-		tuo.SetVertVis(*f)
-	}
-	return tuo
-}
-
-// AddVertVis adds f to the "vert_vis" field.
-func (tuo *TafUpdateOne) AddVertVis(f float64) *TafUpdateOne {
-	tuo.mutation.AddVertVis(f)
-	return tuo
-}
-
-// ClearVertVis clears the value of the "vert_vis" field.
-func (tuo *TafUpdateOne) ClearVertVis() *TafUpdateOne {
-	tuo.mutation.ClearVertVis()
-	return tuo
-}
-
-// SetMetarType sets the "metar_type" field.
-func (tuo *TafUpdateOne) SetMetarType(tt taf.MetarType) *TafUpdateOne {
-	tuo.mutation.SetMetarType(tt)
-	return tuo
-}
-
 // SetHash sets the "hash" field.
 func (tuo *TafUpdateOne) SetHash(s string) *TafUpdateOne {
 	tuo.mutation.SetHash(s)
@@ -1867,6 +541,21 @@ func (tuo *TafUpdateOne) AddSkyConditions(s ...*SkyCondition) *TafUpdateOne {
 	return tuo.AddSkyConditionIDs(ids...)
 }
 
+// AddForecastIDs adds the "forecast" edge to the Forecast entity by IDs.
+func (tuo *TafUpdateOne) AddForecastIDs(ids ...int) *TafUpdateOne {
+	tuo.mutation.AddForecastIDs(ids...)
+	return tuo
+}
+
+// AddForecast adds the "forecast" edges to the Forecast entity.
+func (tuo *TafUpdateOne) AddForecast(f ...*Forecast) *TafUpdateOne {
+	ids := make([]int, len(f))
+	for i := range f {
+		ids[i] = f[i].ID
+	}
+	return tuo.AddForecastIDs(ids...)
+}
+
 // Mutation returns the TafMutation object of the builder.
 func (tuo *TafUpdateOne) Mutation() *TafMutation {
 	return tuo.mutation
@@ -1897,6 +586,27 @@ func (tuo *TafUpdateOne) RemoveSkyConditions(s ...*SkyCondition) *TafUpdateOne {
 		ids[i] = s[i].ID
 	}
 	return tuo.RemoveSkyConditionIDs(ids...)
+}
+
+// ClearForecast clears all "forecast" edges to the Forecast entity.
+func (tuo *TafUpdateOne) ClearForecast() *TafUpdateOne {
+	tuo.mutation.ClearForecast()
+	return tuo
+}
+
+// RemoveForecastIDs removes the "forecast" edge to Forecast entities by IDs.
+func (tuo *TafUpdateOne) RemoveForecastIDs(ids ...int) *TafUpdateOne {
+	tuo.mutation.RemoveForecastIDs(ids...)
+	return tuo
+}
+
+// RemoveForecast removes "forecast" edges to Forecast entities.
+func (tuo *TafUpdateOne) RemoveForecast(f ...*Forecast) *TafUpdateOne {
+	ids := make([]int, len(f))
+	for i := range f {
+		ids[i] = f[i].ID
+	}
+	return tuo.RemoveForecastIDs(ids...)
 }
 
 // Select allows selecting one or more fields (columns) of the returned entity.
@@ -1974,16 +684,6 @@ func (tuo *TafUpdateOne) ExecX(ctx context.Context) {
 
 // check runs all checks and user-defined validators on the builder.
 func (tuo *TafUpdateOne) check() error {
-	if v, ok := tuo.mutation.FlightCategory(); ok {
-		if err := taf.FlightCategoryValidator(v); err != nil {
-			return &ValidationError{Name: "flight_category", err: fmt.Errorf(`ent: validator failed for field "Taf.flight_category": %w`, err)}
-		}
-	}
-	if v, ok := tuo.mutation.MetarType(); ok {
-		if err := taf.MetarTypeValidator(v); err != nil {
-			return &ValidationError{Name: "metar_type", err: fmt.Errorf(`ent: validator failed for field "Taf.metar_type": %w`, err)}
-		}
-	}
 	if _, ok := tuo.mutation.StationID(); tuo.mutation.StationCleared() && !ok {
 		return errors.New(`ent: clearing a required unique edge "Taf.station"`)
 	}
@@ -2071,419 +771,6 @@ func (tuo *TafUpdateOne) sqlSave(ctx context.Context) (_node *Taf, err error) {
 			Type:   field.TypeString,
 			Value:  value,
 			Column: taf.FieldRemarks,
-		})
-	}
-	if value, ok := tuo.mutation.Temperature(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeFloat64,
-			Value:  value,
-			Column: taf.FieldTemperature,
-		})
-	}
-	if value, ok := tuo.mutation.AddedTemperature(); ok {
-		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
-			Type:   field.TypeFloat64,
-			Value:  value,
-			Column: taf.FieldTemperature,
-		})
-	}
-	if value, ok := tuo.mutation.Dewpoint(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeFloat64,
-			Value:  value,
-			Column: taf.FieldDewpoint,
-		})
-	}
-	if value, ok := tuo.mutation.AddedDewpoint(); ok {
-		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
-			Type:   field.TypeFloat64,
-			Value:  value,
-			Column: taf.FieldDewpoint,
-		})
-	}
-	if value, ok := tuo.mutation.WindSpeed(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Value:  value,
-			Column: taf.FieldWindSpeed,
-		})
-	}
-	if value, ok := tuo.mutation.AddedWindSpeed(); ok {
-		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Value:  value,
-			Column: taf.FieldWindSpeed,
-		})
-	}
-	if value, ok := tuo.mutation.WindGust(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Value:  value,
-			Column: taf.FieldWindGust,
-		})
-	}
-	if value, ok := tuo.mutation.AddedWindGust(); ok {
-		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Value:  value,
-			Column: taf.FieldWindGust,
-		})
-	}
-	if value, ok := tuo.mutation.WindDirection(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Value:  value,
-			Column: taf.FieldWindDirection,
-		})
-	}
-	if value, ok := tuo.mutation.AddedWindDirection(); ok {
-		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Value:  value,
-			Column: taf.FieldWindDirection,
-		})
-	}
-	if value, ok := tuo.mutation.Visibility(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeFloat64,
-			Value:  value,
-			Column: taf.FieldVisibility,
-		})
-	}
-	if value, ok := tuo.mutation.AddedVisibility(); ok {
-		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
-			Type:   field.TypeFloat64,
-			Value:  value,
-			Column: taf.FieldVisibility,
-		})
-	}
-	if value, ok := tuo.mutation.Altimeter(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeFloat64,
-			Value:  value,
-			Column: taf.FieldAltimeter,
-		})
-	}
-	if value, ok := tuo.mutation.AddedAltimeter(); ok {
-		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
-			Type:   field.TypeFloat64,
-			Value:  value,
-			Column: taf.FieldAltimeter,
-		})
-	}
-	if value, ok := tuo.mutation.FlightCategory(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeEnum,
-			Value:  value,
-			Column: taf.FieldFlightCategory,
-		})
-	}
-	if tuo.mutation.FlightCategoryCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeEnum,
-			Column: taf.FieldFlightCategory,
-		})
-	}
-	if value, ok := tuo.mutation.QualityControlCorrected(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeBool,
-			Value:  value,
-			Column: taf.FieldQualityControlCorrected,
-		})
-	}
-	if tuo.mutation.QualityControlCorrectedCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeBool,
-			Column: taf.FieldQualityControlCorrected,
-		})
-	}
-	if value, ok := tuo.mutation.QualityControlAutoStation(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeBool,
-			Value:  value,
-			Column: taf.FieldQualityControlAutoStation,
-		})
-	}
-	if value, ok := tuo.mutation.QualityControlMaintenanceIndicatorOn(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeBool,
-			Value:  value,
-			Column: taf.FieldQualityControlMaintenanceIndicatorOn,
-		})
-	}
-	if value, ok := tuo.mutation.QualityControlNoSignal(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeBool,
-			Value:  value,
-			Column: taf.FieldQualityControlNoSignal,
-		})
-	}
-	if value, ok := tuo.mutation.QualityControlLightningSensorOff(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeBool,
-			Value:  value,
-			Column: taf.FieldQualityControlLightningSensorOff,
-		})
-	}
-	if value, ok := tuo.mutation.QualityControlFreezingRainSensorOff(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeBool,
-			Value:  value,
-			Column: taf.FieldQualityControlFreezingRainSensorOff,
-		})
-	}
-	if value, ok := tuo.mutation.QualityControlPresentWeatherSensorOff(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeBool,
-			Value:  value,
-			Column: taf.FieldQualityControlPresentWeatherSensorOff,
-		})
-	}
-	if value, ok := tuo.mutation.SeaLevelPressure(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeFloat64,
-			Value:  value,
-			Column: taf.FieldSeaLevelPressure,
-		})
-	}
-	if value, ok := tuo.mutation.AddedSeaLevelPressure(); ok {
-		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
-			Type:   field.TypeFloat64,
-			Value:  value,
-			Column: taf.FieldSeaLevelPressure,
-		})
-	}
-	if tuo.mutation.SeaLevelPressureCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeFloat64,
-			Column: taf.FieldSeaLevelPressure,
-		})
-	}
-	if value, ok := tuo.mutation.PressureTendency(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeFloat64,
-			Value:  value,
-			Column: taf.FieldPressureTendency,
-		})
-	}
-	if value, ok := tuo.mutation.AddedPressureTendency(); ok {
-		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
-			Type:   field.TypeFloat64,
-			Value:  value,
-			Column: taf.FieldPressureTendency,
-		})
-	}
-	if tuo.mutation.PressureTendencyCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeFloat64,
-			Column: taf.FieldPressureTendency,
-		})
-	}
-	if value, ok := tuo.mutation.MaxTemp6(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeFloat64,
-			Value:  value,
-			Column: taf.FieldMaxTemp6,
-		})
-	}
-	if value, ok := tuo.mutation.AddedMaxTemp6(); ok {
-		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
-			Type:   field.TypeFloat64,
-			Value:  value,
-			Column: taf.FieldMaxTemp6,
-		})
-	}
-	if tuo.mutation.MaxTemp6Cleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeFloat64,
-			Column: taf.FieldMaxTemp6,
-		})
-	}
-	if value, ok := tuo.mutation.MinTemp6(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeFloat64,
-			Value:  value,
-			Column: taf.FieldMinTemp6,
-		})
-	}
-	if value, ok := tuo.mutation.AddedMinTemp6(); ok {
-		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
-			Type:   field.TypeFloat64,
-			Value:  value,
-			Column: taf.FieldMinTemp6,
-		})
-	}
-	if tuo.mutation.MinTemp6Cleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeFloat64,
-			Column: taf.FieldMinTemp6,
-		})
-	}
-	if value, ok := tuo.mutation.MaxTemp24(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeFloat64,
-			Value:  value,
-			Column: taf.FieldMaxTemp24,
-		})
-	}
-	if value, ok := tuo.mutation.AddedMaxTemp24(); ok {
-		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
-			Type:   field.TypeFloat64,
-			Value:  value,
-			Column: taf.FieldMaxTemp24,
-		})
-	}
-	if tuo.mutation.MaxTemp24Cleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeFloat64,
-			Column: taf.FieldMaxTemp24,
-		})
-	}
-	if value, ok := tuo.mutation.MinTemp24(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeFloat64,
-			Value:  value,
-			Column: taf.FieldMinTemp24,
-		})
-	}
-	if value, ok := tuo.mutation.AddedMinTemp24(); ok {
-		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
-			Type:   field.TypeFloat64,
-			Value:  value,
-			Column: taf.FieldMinTemp24,
-		})
-	}
-	if tuo.mutation.MinTemp24Cleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeFloat64,
-			Column: taf.FieldMinTemp24,
-		})
-	}
-	if value, ok := tuo.mutation.Precipitation(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeFloat64,
-			Value:  value,
-			Column: taf.FieldPrecipitation,
-		})
-	}
-	if value, ok := tuo.mutation.AddedPrecipitation(); ok {
-		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
-			Type:   field.TypeFloat64,
-			Value:  value,
-			Column: taf.FieldPrecipitation,
-		})
-	}
-	if tuo.mutation.PrecipitationCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeFloat64,
-			Column: taf.FieldPrecipitation,
-		})
-	}
-	if value, ok := tuo.mutation.Precipitation3(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeFloat64,
-			Value:  value,
-			Column: taf.FieldPrecipitation3,
-		})
-	}
-	if value, ok := tuo.mutation.AddedPrecipitation3(); ok {
-		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
-			Type:   field.TypeFloat64,
-			Value:  value,
-			Column: taf.FieldPrecipitation3,
-		})
-	}
-	if tuo.mutation.Precipitation3Cleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeFloat64,
-			Column: taf.FieldPrecipitation3,
-		})
-	}
-	if value, ok := tuo.mutation.Precipitation6(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeFloat64,
-			Value:  value,
-			Column: taf.FieldPrecipitation6,
-		})
-	}
-	if value, ok := tuo.mutation.AddedPrecipitation6(); ok {
-		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
-			Type:   field.TypeFloat64,
-			Value:  value,
-			Column: taf.FieldPrecipitation6,
-		})
-	}
-	if tuo.mutation.Precipitation6Cleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeFloat64,
-			Column: taf.FieldPrecipitation6,
-		})
-	}
-	if value, ok := tuo.mutation.Precipitation24(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeFloat64,
-			Value:  value,
-			Column: taf.FieldPrecipitation24,
-		})
-	}
-	if value, ok := tuo.mutation.AddedPrecipitation24(); ok {
-		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
-			Type:   field.TypeFloat64,
-			Value:  value,
-			Column: taf.FieldPrecipitation24,
-		})
-	}
-	if tuo.mutation.Precipitation24Cleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeFloat64,
-			Column: taf.FieldPrecipitation24,
-		})
-	}
-	if value, ok := tuo.mutation.SnowDepth(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeFloat64,
-			Value:  value,
-			Column: taf.FieldSnowDepth,
-		})
-	}
-	if value, ok := tuo.mutation.AddedSnowDepth(); ok {
-		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
-			Type:   field.TypeFloat64,
-			Value:  value,
-			Column: taf.FieldSnowDepth,
-		})
-	}
-	if tuo.mutation.SnowDepthCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeFloat64,
-			Column: taf.FieldSnowDepth,
-		})
-	}
-	if value, ok := tuo.mutation.VertVis(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeFloat64,
-			Value:  value,
-			Column: taf.FieldVertVis,
-		})
-	}
-	if value, ok := tuo.mutation.AddedVertVis(); ok {
-		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
-			Type:   field.TypeFloat64,
-			Value:  value,
-			Column: taf.FieldVertVis,
-		})
-	}
-	if tuo.mutation.VertVisCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeFloat64,
-			Column: taf.FieldVertVis,
-		})
-	}
-	if value, ok := tuo.mutation.MetarType(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeEnum,
-			Value:  value,
-			Column: taf.FieldMetarType,
 		})
 	}
 	if value, ok := tuo.mutation.Hash(); ok {
@@ -2574,6 +861,60 @@ func (tuo *TafUpdateOne) sqlSave(ctx context.Context) (_node *Taf, err error) {
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeInt,
 					Column: skycondition.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if tuo.mutation.ForecastCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   taf.ForecastTable,
+			Columns: []string{taf.ForecastColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: forecast.FieldID,
+				},
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := tuo.mutation.RemovedForecastIDs(); len(nodes) > 0 && !tuo.mutation.ForecastCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   taf.ForecastTable,
+			Columns: []string{taf.ForecastColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: forecast.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := tuo.mutation.ForecastIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   taf.ForecastTable,
+			Columns: []string{taf.ForecastColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: forecast.FieldID,
 				},
 			},
 		}

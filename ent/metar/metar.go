@@ -17,12 +17,6 @@ const (
 	FieldRawText = "raw_text"
 	// FieldObservationTime holds the string denoting the observation_time field in the database.
 	FieldObservationTime = "observation_time"
-	// FieldLatitude holds the string denoting the latitude field in the database.
-	FieldLatitude = "latitude"
-	// FieldLongitude holds the string denoting the longitude field in the database.
-	FieldLongitude = "longitude"
-	// FieldElevation holds the string denoting the elevation field in the database.
-	FieldElevation = "elevation"
 	// FieldTemperature holds the string denoting the temperature field in the database.
 	FieldTemperature = "temperature"
 	// FieldDewpoint holds the string denoting the dewpoint field in the database.
@@ -110,9 +104,6 @@ var Columns = []string{
 	FieldID,
 	FieldRawText,
 	FieldObservationTime,
-	FieldLatitude,
-	FieldLongitude,
-	FieldElevation,
 	FieldTemperature,
 	FieldDewpoint,
 	FieldWindSpeed,

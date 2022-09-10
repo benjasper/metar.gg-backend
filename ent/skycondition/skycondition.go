@@ -17,17 +17,10 @@ const (
 	FieldSkyCover = "sky_cover"
 	// FieldCloudBase holds the string denoting the cloud_base field in the database.
 	FieldCloudBase = "cloud_base"
-	// EdgeMetar holds the string denoting the metar edge name in mutations.
-	EdgeMetar = "metar"
+	// FieldCloudType holds the string denoting the cloud_type field in the database.
+	FieldCloudType = "cloud_type"
 	// Table holds the table name of the skycondition in the database.
 	Table = "sky_conditions"
-	// MetarTable is the table that holds the metar relation/edge.
-	MetarTable = "sky_conditions"
-	// MetarInverseTable is the table name for the Metar entity.
-	// It exists in this package in order to avoid circular dependency with the "metar" package.
-	MetarInverseTable = "metars"
-	// MetarColumn is the table column denoting the metar relation/edge.
-	MetarColumn = "metar_sky_conditions"
 )
 
 // Columns holds all SQL columns for skycondition fields.
@@ -35,11 +28,13 @@ var Columns = []string{
 	FieldID,
 	FieldSkyCover,
 	FieldCloudBase,
+	FieldCloudType,
 }
 
 // ForeignKeys holds the SQL foreign-keys that are owned by the "sky_conditions"
 // table and are not defined as standalone fields in the schema.
 var ForeignKeys = []string{
+	"forecast_sky_conditions",
 	"metar_sky_conditions",
 	"taf_sky_conditions",
 }
@@ -68,8 +63,10 @@ const (
 	SkyCoverFew                    SkyCover = "FEW"
 	SkyCoverScattered              SkyCover = "SCT"
 	SkyCoverClear                  SkyCover = "CLR"
+	SkyCoverNoSignificantClouds    SkyCover = "NSC"
 	SkyCoverBroken                 SkyCover = "BKN"
 	SkyCoverOvercast               SkyCover = "OVC"
+	SkyCoverOvercastX              SkyCover = "OVCX"
 	SkyCoverVerticalVisibility     SkyCover = "OVX"
 	SkyCoverCeilingAndVisibilityOK SkyCover = "CAVOK"
 )
@@ -81,10 +78,34 @@ func (sc SkyCover) String() string {
 // SkyCoverValidator is a validator for the "sky_cover" field enum values. It is called by the builders before save.
 func SkyCoverValidator(sc SkyCover) error {
 	switch sc {
-	case SkyCoverSkyClear, SkyCoverFew, SkyCoverScattered, SkyCoverClear, SkyCoverBroken, SkyCoverOvercast, SkyCoverVerticalVisibility, SkyCoverCeilingAndVisibilityOK:
+	case SkyCoverSkyClear, SkyCoverFew, SkyCoverScattered, SkyCoverClear, SkyCoverNoSignificantClouds, SkyCoverBroken, SkyCoverOvercast, SkyCoverOvercastX, SkyCoverVerticalVisibility, SkyCoverCeilingAndVisibilityOK:
 		return nil
 	default:
 		return fmt.Errorf("skycondition: invalid enum value for sky_cover field: %q", sc)
+	}
+}
+
+// CloudType defines the type for the "cloud_type" enum field.
+type CloudType string
+
+// CloudType values.
+const (
+	CloudTypeCumulonimbus    CloudType = "CB"
+	CloudTypeCumulus         CloudType = "CU"
+	CloudTypeToweringCumulus CloudType = "TCU"
+)
+
+func (ct CloudType) String() string {
+	return string(ct)
+}
+
+// CloudTypeValidator is a validator for the "cloud_type" field enum values. It is called by the builders before save.
+func CloudTypeValidator(ct CloudType) error {
+	switch ct {
+	case CloudTypeCumulonimbus, CloudTypeCumulus, CloudTypeToweringCumulus:
+		return nil
+	default:
+		return fmt.Errorf("skycondition: invalid enum value for cloud_type field: %q", ct)
 	}
 }
 
@@ -102,6 +123,24 @@ func (e *SkyCover) UnmarshalGQL(val interface{}) error {
 	*e = SkyCover(str)
 	if err := SkyCoverValidator(*e); err != nil {
 		return fmt.Errorf("%s is not a valid SkyCover", str)
+	}
+	return nil
+}
+
+// MarshalGQL implements graphql.Marshaler interface.
+func (e CloudType) MarshalGQL(w io.Writer) {
+	io.WriteString(w, strconv.Quote(e.String()))
+}
+
+// UnmarshalGQL implements graphql.Unmarshaler interface.
+func (e *CloudType) UnmarshalGQL(val interface{}) error {
+	str, ok := val.(string)
+	if !ok {
+		return fmt.Errorf("enum %T must be a string", val)
+	}
+	*e = CloudType(str)
+	if err := CloudTypeValidator(*e); err != nil {
+		return fmt.Errorf("%s is not a valid CloudType", str)
 	}
 	return nil
 }

@@ -102,8 +102,15 @@ func RunAirportImport(ctx context.Context, db *ent.Client, logger *logging.Logge
 }
 
 func RunWeatherImport(ctx context.Context, db *ent.Client, logger *logging.Logger) {
-	metarImporter := importer.NewNoaaMetarImporter(db, logger)
+	metarImporter := importer.NewNoaaWeatherImporter(db, logger)
 	err := metarImporter.ImportMetars("https://www.aviationweather.gov/adds/dataserver_current/current/metars.cache.xml", ctx)
+	if err != nil {
+		logger.Fatal(err)
+		return
+	}
+
+	tafImporter := importer.NewNoaaWeatherImporter(db, logger)
+	err = tafImporter.ImportTafs("https://www.aviationweather.gov/adds/dataserver_current/current/tafs.cache.xml", ctx)
 	if err != nil {
 		logger.Fatal(err)
 		return

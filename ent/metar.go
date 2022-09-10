@@ -21,12 +21,6 @@ type Metar struct {
 	RawText string `json:"raw_text,omitempty"`
 	// The time the METAR was observed.
 	ObservationTime time.Time `json:"observation_time,omitempty"`
-	// The latitude in decimal degrees of the station.
-	Latitude *float64 `json:"latitude,omitempty"`
-	// The longitude in decimal degrees of the station.
-	Longitude *float64 `json:"longitude,omitempty"`
-	// The elevation in meters of the station.
-	Elevation *float64 `json:"elevation,omitempty"`
 	// The temperature in Celsius.
 	Temperature float64 `json:"temperature,omitempty"`
 	// The dewpoint in Celsius.
@@ -137,7 +131,7 @@ func (*Metar) scanValues(columns []string) ([]any, error) {
 		switch columns[i] {
 		case metar.FieldQualityControlCorrected, metar.FieldQualityControlAutoStation, metar.FieldQualityControlMaintenanceIndicatorOn, metar.FieldQualityControlNoSignal, metar.FieldQualityControlLightningSensorOff, metar.FieldQualityControlFreezingRainSensorOff, metar.FieldQualityControlPresentWeatherSensorOff:
 			values[i] = new(sql.NullBool)
-		case metar.FieldLatitude, metar.FieldLongitude, metar.FieldElevation, metar.FieldTemperature, metar.FieldDewpoint, metar.FieldVisibility, metar.FieldAltimeter, metar.FieldSeaLevelPressure, metar.FieldPressureTendency, metar.FieldMaxTemp6, metar.FieldMinTemp6, metar.FieldMaxTemp24, metar.FieldMinTemp24, metar.FieldPrecipitation, metar.FieldPrecipitation3, metar.FieldPrecipitation6, metar.FieldPrecipitation24, metar.FieldSnowDepth, metar.FieldVertVis:
+		case metar.FieldTemperature, metar.FieldDewpoint, metar.FieldVisibility, metar.FieldAltimeter, metar.FieldSeaLevelPressure, metar.FieldPressureTendency, metar.FieldMaxTemp6, metar.FieldMinTemp6, metar.FieldMaxTemp24, metar.FieldMinTemp24, metar.FieldPrecipitation, metar.FieldPrecipitation3, metar.FieldPrecipitation6, metar.FieldPrecipitation24, metar.FieldSnowDepth, metar.FieldVertVis:
 			values[i] = new(sql.NullFloat64)
 		case metar.FieldID, metar.FieldWindSpeed, metar.FieldWindGust, metar.FieldWindDirection:
 			values[i] = new(sql.NullInt64)
@@ -179,27 +173,6 @@ func (m *Metar) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field observation_time", values[i])
 			} else if value.Valid {
 				m.ObservationTime = value.Time
-			}
-		case metar.FieldLatitude:
-			if value, ok := values[i].(*sql.NullFloat64); !ok {
-				return fmt.Errorf("unexpected type %T for field latitude", values[i])
-			} else if value.Valid {
-				m.Latitude = new(float64)
-				*m.Latitude = value.Float64
-			}
-		case metar.FieldLongitude:
-			if value, ok := values[i].(*sql.NullFloat64); !ok {
-				return fmt.Errorf("unexpected type %T for field longitude", values[i])
-			} else if value.Valid {
-				m.Longitude = new(float64)
-				*m.Longitude = value.Float64
-			}
-		case metar.FieldElevation:
-			if value, ok := values[i].(*sql.NullFloat64); !ok {
-				return fmt.Errorf("unexpected type %T for field elevation", values[i])
-			} else if value.Valid {
-				m.Elevation = new(float64)
-				*m.Elevation = value.Float64
 			}
 		case metar.FieldTemperature:
 			if value, ok := values[i].(*sql.NullFloat64); !ok {
@@ -446,21 +419,6 @@ func (m *Metar) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("observation_time=")
 	builder.WriteString(m.ObservationTime.Format(time.ANSIC))
-	builder.WriteString(", ")
-	if v := m.Latitude; v != nil {
-		builder.WriteString("latitude=")
-		builder.WriteString(fmt.Sprintf("%v", *v))
-	}
-	builder.WriteString(", ")
-	if v := m.Longitude; v != nil {
-		builder.WriteString("longitude=")
-		builder.WriteString(fmt.Sprintf("%v", *v))
-	}
-	builder.WriteString(", ")
-	if v := m.Elevation; v != nil {
-		builder.WriteString("elevation=")
-		builder.WriteString(fmt.Sprintf("%v", *v))
-	}
 	builder.WriteString(", ")
 	builder.WriteString("temperature=")
 	builder.WriteString(fmt.Sprintf("%v", m.Temperature))

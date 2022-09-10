@@ -57,6 +57,52 @@ enum AirportType @goModel(model: "metar.gg/ent/airport.Type") {
   heliport
   seaplane_base
 }
+type Forecast {
+  id: ID!
+  """The start time of the forecast period."""
+  fromTime: Time!
+  """The end time of the forecast period."""
+  toTime: Time!
+  """The change indicator."""
+  changeIndicator: ForecastChangeIndicator
+  """The time of the change."""
+  changeTime: Time
+  """The probability of the change."""
+  changeProbability: Int
+  """The wind direction in degrees."""
+  windDirection: Int
+  """The wind speed in knots."""
+  windSpeed: Int
+  """The wind gust in knots."""
+  windGust: Int
+  """The height of the wind shear in feet above ground level."""
+  windShearHeight: Int
+  """The wind shear direction in degrees."""
+  windShearDirection: Int
+  """The wind shear speed in knots."""
+  windShearSpeed: Int
+  """The visibility in statute miles."""
+  visibilityHorizontal: Float
+  """The vertical visibility in feet."""
+  visibilityVertical: Int
+  """The altimeter in inches of mercury."""
+  altimeter: Float
+  """The weather string."""
+  weather: String
+  """The not decoded string."""
+  notDecoded: String
+  skyConditions: [SkyCondition!]
+  turbulenceConditions: [TurbulenceCondition!]
+  icingConditions: [IcingCondition!]
+  temperatureData: [TemperatureData!]
+}
+"""ForecastChangeIndicator is enum for the field change_indicator"""
+enum ForecastChangeIndicator @goModel(model: "metar.gg/ent/forecast.ChangeIndicator") {
+  BECMG
+  FM
+  TEMPO
+  PROB
+}
 type Frequency {
   id: ID!
   lastUpdated: Time!
@@ -68,17 +114,20 @@ type Frequency {
   frequency: Float!
   airport: Airport
 }
+type IcingCondition {
+  id: ID!
+  """The intensity of the icing."""
+  intensity: String!
+  """The minimum altitude in feet that the icing is present."""
+  minAltitude: Int
+  """The maximum altitude in feet that the icing is present."""
+  maxAltitude: Int
+}
 type Metar {
   """The raw METAR text."""
   rawText: String!
   """The time the METAR was observed."""
   observationTime: Time!
-  """The latitude in decimal degrees of the station."""
-  latitude: Float
-  """The longitude in decimal degrees of the station."""
-  longitude: Float
-  """The elevation in meters of the station."""
-  elevation: Float
   """The temperature in Celsius."""
   temperature: Float!
   """The dewpoint in Celsius."""
@@ -201,7 +250,14 @@ type SkyCondition {
   skyCover: SkyConditionSkyCover!
   """Cloud base in feet."""
   cloudBase: Int
-  metar: Metar!
+  """Cloud type. Only present in TAFs."""
+  cloudType: SkyConditionCloudType
+}
+"""SkyConditionCloudType is enum for the field cloud_type"""
+enum SkyConditionCloudType @goModel(model: "metar.gg/ent/skycondition.CloudType") {
+  CB
+  CU
+  TCU
 }
 """SkyConditionSkyCover is enum for the field sky_cover"""
 enum SkyConditionSkyCover @goModel(model: "metar.gg/ent/skycondition.SkyCover") {
@@ -209,8 +265,10 @@ enum SkyConditionSkyCover @goModel(model: "metar.gg/ent/skycondition.SkyCover") 
   FEW
   SCT
   CLR
+  NSC
   BKN
   OVC
+  OVCX
   OVX
   CAVOK
 }
@@ -224,8 +282,6 @@ type Station {
   """The elevation in meters of the station."""
   elevation: Float
   airport: Airport
-  metars: [Metar!]
-  tafs: [Taf!]
 }
 type Taf {
   """The raw TAF text."""
@@ -240,75 +296,9 @@ type Taf {
   validToTime: Time!
   """Remarks."""
   remarks: String!
-  """The temperature in Celsius."""
-  temperature: Float!
-  """The dewpoint in Celsius."""
-  dewpoint: Float!
-  """The wind speed in knots, or 0 if calm."""
-  windSpeed: Int!
-  """The wind gust in knots."""
-  windGust: Int!
-  """The wind direction in degrees, or 0 if calm."""
-  windDirection: Int!
-  """The visibility in statute miles."""
-  visibility: Float!
-  """The altimeter setting in inches of mercury."""
-  altimeter: Float!
-  flightCategory: TafFlightCategory
-  """Quality control corrected."""
-  qualityControlCorrected: Boolean
-  """Whether it's an automated station, of one of the following types A01|A01A|A02|A02A|AOA|AWOS."""
-  qualityControlAutoStation: Boolean!
-  """Maintenance check indicator - maintenance is needed."""
-  qualityControlMaintenanceIndicatorOn: Boolean!
-  """No signal."""
-  qualityControlNoSignal: Boolean!
-  """Whether Lightning sensor is off."""
-  qualityControlLightningSensorOff: Boolean!
-  """Whether Freezing rain sensor is off."""
-  qualityControlFreezingRainSensorOff: Boolean!
-  """Whether Present weather sensor is off."""
-  qualityControlPresentWeatherSensorOff: Boolean!
-  """The sea level pressure in hectopascal.s"""
-  seaLevelPressure: Float
-  """The pressur_6e tendency in hectopascals."""
-  pressureTendency: Float
-  """The maximum air temperature in Celsius from the past 6 hours."""
-  maxTemp6: Float
-  """The minimum air temperature in Celsius from the past 6 hours."""
-  minTemp6: Float
-  """The maximum air temperature in Celsius from the past 24 hours."""
-  maxTemp24: Float
-  """The minimum air temperature in Celsius from the past 24 hours."""
-  minTemp24: Float
-  """The precipitation in inches from since the last observation. 0.0005 in = trace precipitation"""
-  precipitation: Float
-  """The precipitation in inches from the past 3 hours. 0.0005 in = trace precipitation"""
-  precipitation3: Float
-  """The precipitation in inches from the past 6 hours. 0.0005 in = trace precipitation"""
-  precipitation6: Float
-  """The precipitation in inches from the past 24 hours. 0.0005 in = trace precipitation"""
-  precipitation24: Float
-  """The snow depth in inches."""
-  snowDepth: Float
-  """The vertical visibility in feet."""
-  vertVis: Float
-  """The type of TAF."""
-  metarType: TafMetarType!
   station: Station!
   skyConditions: [SkyCondition!]
-}
-"""TafFlightCategory is enum for the field flight_category"""
-enum TafFlightCategory @goModel(model: "metar.gg/ent/taf.FlightCategory") {
-  VFR
-  MVFR
-  IFR
-  LIFR
-}
-"""TafMetarType is enum for the field metar_type"""
-enum TafMetarType @goModel(model: "metar.gg/ent/taf.MetarType") {
-  TAF
-  SPECI
+  forecast: [Forecast!]
 }
 """Ordering options for Taf connections"""
 input TafOrder {
@@ -320,4 +310,24 @@ input TafOrder {
 """Properties by which Taf connections can be ordered."""
 enum TafOrderField {
   valid_from_time
+}
+type TemperatureData {
+  id: ID!
+  """The time the temperature data is valid."""
+  validTime: Time!
+  """The surface temperature in degrees Celsius."""
+  temperature: Float!
+  """The minimum temperature in degrees Celsius."""
+  minTemperature: Float
+  """The maximum temperature in degrees Celsius."""
+  maxTemperature: Float
+}
+type TurbulenceCondition {
+  id: ID!
+  """The intensity of the turbulence."""
+  intensity: String!
+  """The minimum altitude in feet that the turbulence is present."""
+  minAltitude: Int!
+  """The maximum altitude in feet that the turbulence is present."""
+  maxAltitude: Int!
 }

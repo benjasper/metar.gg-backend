@@ -10,13 +10,17 @@ import (
 	"time"
 
 	"metar.gg/ent/airport"
+	"metar.gg/ent/forecast"
 	"metar.gg/ent/frequency"
+	"metar.gg/ent/icingcondition"
 	"metar.gg/ent/metar"
 	"metar.gg/ent/predicate"
 	"metar.gg/ent/runway"
 	"metar.gg/ent/skycondition"
 	"metar.gg/ent/station"
 	"metar.gg/ent/taf"
+	"metar.gg/ent/temperaturedata"
+	"metar.gg/ent/turbulencecondition"
 
 	"entgo.io/ent"
 )
@@ -30,13 +34,17 @@ const (
 	OpUpdateOne = ent.OpUpdateOne
 
 	// Node types.
-	TypeAirport      = "Airport"
-	TypeFrequency    = "Frequency"
-	TypeMetar        = "Metar"
-	TypeRunway       = "Runway"
-	TypeSkyCondition = "SkyCondition"
-	TypeStation      = "Station"
-	TypeTaf          = "Taf"
+	TypeAirport             = "Airport"
+	TypeForecast            = "Forecast"
+	TypeFrequency           = "Frequency"
+	TypeIcingCondition      = "IcingCondition"
+	TypeMetar               = "Metar"
+	TypeRunway              = "Runway"
+	TypeSkyCondition        = "SkyCondition"
+	TypeStation             = "Station"
+	TypeTaf                 = "Taf"
+	TypeTemperatureData     = "TemperatureData"
+	TypeTurbulenceCondition = "TurbulenceCondition"
 )
 
 // AirportMutation represents an operation that mutates the Airport nodes in the graph.
@@ -1856,6 +1864,2081 @@ func (m *AirportMutation) ResetEdge(name string) error {
 	return fmt.Errorf("unknown Airport edge %s", name)
 }
 
+// ForecastMutation represents an operation that mutates the Forecast nodes in the graph.
+type ForecastMutation struct {
+	config
+	op                           Op
+	typ                          string
+	id                           *int
+	from_time                    *time.Time
+	to_time                      *time.Time
+	change_indicator             *forecast.ChangeIndicator
+	change_time                  *time.Time
+	change_probability           *int
+	addchange_probability        *int
+	wind_direction               *int
+	addwind_direction            *int
+	wind_speed                   *int
+	addwind_speed                *int
+	wind_gust                    *int
+	addwind_gust                 *int
+	wind_shear_height            *int
+	addwind_shear_height         *int
+	wind_shear_direction         *int
+	addwind_shear_direction      *int
+	wind_shear_speed             *int
+	addwind_shear_speed          *int
+	visibility_horizontal        *float64
+	addvisibility_horizontal     *float64
+	visibility_vertical          *int
+	addvisibility_vertical       *int
+	altimeter                    *float64
+	addaltimeter                 *float64
+	weather                      *string
+	not_decoded                  *string
+	clearedFields                map[string]struct{}
+	sky_conditions               map[int]struct{}
+	removedsky_conditions        map[int]struct{}
+	clearedsky_conditions        bool
+	turbulence_conditions        map[int]struct{}
+	removedturbulence_conditions map[int]struct{}
+	clearedturbulence_conditions bool
+	icing_conditions             map[int]struct{}
+	removedicing_conditions      map[int]struct{}
+	clearedicing_conditions      bool
+	temperature_data             map[int]struct{}
+	removedtemperature_data      map[int]struct{}
+	clearedtemperature_data      bool
+	done                         bool
+	oldValue                     func(context.Context) (*Forecast, error)
+	predicates                   []predicate.Forecast
+}
+
+var _ ent.Mutation = (*ForecastMutation)(nil)
+
+// forecastOption allows management of the mutation configuration using functional options.
+type forecastOption func(*ForecastMutation)
+
+// newForecastMutation creates new mutation for the Forecast entity.
+func newForecastMutation(c config, op Op, opts ...forecastOption) *ForecastMutation {
+	m := &ForecastMutation{
+		config:        c,
+		op:            op,
+		typ:           TypeForecast,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withForecastID sets the ID field of the mutation.
+func withForecastID(id int) forecastOption {
+	return func(m *ForecastMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *Forecast
+		)
+		m.oldValue = func(ctx context.Context) (*Forecast, error) {
+			once.Do(func() {
+				if m.done {
+					err = errors.New("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().Forecast.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withForecast sets the old Forecast of the mutation.
+func withForecast(node *Forecast) forecastOption {
+	return func(m *ForecastMutation) {
+		m.oldValue = func(context.Context) (*Forecast, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m ForecastMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m ForecastMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, errors.New("ent: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *ForecastMutation) ID() (id int, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *ForecastMutation) IDs(ctx context.Context) ([]int, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []int{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().Forecast.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
+}
+
+// SetFromTime sets the "from_time" field.
+func (m *ForecastMutation) SetFromTime(t time.Time) {
+	m.from_time = &t
+}
+
+// FromTime returns the value of the "from_time" field in the mutation.
+func (m *ForecastMutation) FromTime() (r time.Time, exists bool) {
+	v := m.from_time
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldFromTime returns the old "from_time" field's value of the Forecast entity.
+// If the Forecast object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ForecastMutation) OldFromTime(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldFromTime is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldFromTime requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldFromTime: %w", err)
+	}
+	return oldValue.FromTime, nil
+}
+
+// ResetFromTime resets all changes to the "from_time" field.
+func (m *ForecastMutation) ResetFromTime() {
+	m.from_time = nil
+}
+
+// SetToTime sets the "to_time" field.
+func (m *ForecastMutation) SetToTime(t time.Time) {
+	m.to_time = &t
+}
+
+// ToTime returns the value of the "to_time" field in the mutation.
+func (m *ForecastMutation) ToTime() (r time.Time, exists bool) {
+	v := m.to_time
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldToTime returns the old "to_time" field's value of the Forecast entity.
+// If the Forecast object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ForecastMutation) OldToTime(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldToTime is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldToTime requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldToTime: %w", err)
+	}
+	return oldValue.ToTime, nil
+}
+
+// ResetToTime resets all changes to the "to_time" field.
+func (m *ForecastMutation) ResetToTime() {
+	m.to_time = nil
+}
+
+// SetChangeIndicator sets the "change_indicator" field.
+func (m *ForecastMutation) SetChangeIndicator(fi forecast.ChangeIndicator) {
+	m.change_indicator = &fi
+}
+
+// ChangeIndicator returns the value of the "change_indicator" field in the mutation.
+func (m *ForecastMutation) ChangeIndicator() (r forecast.ChangeIndicator, exists bool) {
+	v := m.change_indicator
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldChangeIndicator returns the old "change_indicator" field's value of the Forecast entity.
+// If the Forecast object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ForecastMutation) OldChangeIndicator(ctx context.Context) (v *forecast.ChangeIndicator, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldChangeIndicator is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldChangeIndicator requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldChangeIndicator: %w", err)
+	}
+	return oldValue.ChangeIndicator, nil
+}
+
+// ClearChangeIndicator clears the value of the "change_indicator" field.
+func (m *ForecastMutation) ClearChangeIndicator() {
+	m.change_indicator = nil
+	m.clearedFields[forecast.FieldChangeIndicator] = struct{}{}
+}
+
+// ChangeIndicatorCleared returns if the "change_indicator" field was cleared in this mutation.
+func (m *ForecastMutation) ChangeIndicatorCleared() bool {
+	_, ok := m.clearedFields[forecast.FieldChangeIndicator]
+	return ok
+}
+
+// ResetChangeIndicator resets all changes to the "change_indicator" field.
+func (m *ForecastMutation) ResetChangeIndicator() {
+	m.change_indicator = nil
+	delete(m.clearedFields, forecast.FieldChangeIndicator)
+}
+
+// SetChangeTime sets the "change_time" field.
+func (m *ForecastMutation) SetChangeTime(t time.Time) {
+	m.change_time = &t
+}
+
+// ChangeTime returns the value of the "change_time" field in the mutation.
+func (m *ForecastMutation) ChangeTime() (r time.Time, exists bool) {
+	v := m.change_time
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldChangeTime returns the old "change_time" field's value of the Forecast entity.
+// If the Forecast object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ForecastMutation) OldChangeTime(ctx context.Context) (v *time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldChangeTime is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldChangeTime requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldChangeTime: %w", err)
+	}
+	return oldValue.ChangeTime, nil
+}
+
+// ClearChangeTime clears the value of the "change_time" field.
+func (m *ForecastMutation) ClearChangeTime() {
+	m.change_time = nil
+	m.clearedFields[forecast.FieldChangeTime] = struct{}{}
+}
+
+// ChangeTimeCleared returns if the "change_time" field was cleared in this mutation.
+func (m *ForecastMutation) ChangeTimeCleared() bool {
+	_, ok := m.clearedFields[forecast.FieldChangeTime]
+	return ok
+}
+
+// ResetChangeTime resets all changes to the "change_time" field.
+func (m *ForecastMutation) ResetChangeTime() {
+	m.change_time = nil
+	delete(m.clearedFields, forecast.FieldChangeTime)
+}
+
+// SetChangeProbability sets the "change_probability" field.
+func (m *ForecastMutation) SetChangeProbability(i int) {
+	m.change_probability = &i
+	m.addchange_probability = nil
+}
+
+// ChangeProbability returns the value of the "change_probability" field in the mutation.
+func (m *ForecastMutation) ChangeProbability() (r int, exists bool) {
+	v := m.change_probability
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldChangeProbability returns the old "change_probability" field's value of the Forecast entity.
+// If the Forecast object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ForecastMutation) OldChangeProbability(ctx context.Context) (v *int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldChangeProbability is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldChangeProbability requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldChangeProbability: %w", err)
+	}
+	return oldValue.ChangeProbability, nil
+}
+
+// AddChangeProbability adds i to the "change_probability" field.
+func (m *ForecastMutation) AddChangeProbability(i int) {
+	if m.addchange_probability != nil {
+		*m.addchange_probability += i
+	} else {
+		m.addchange_probability = &i
+	}
+}
+
+// AddedChangeProbability returns the value that was added to the "change_probability" field in this mutation.
+func (m *ForecastMutation) AddedChangeProbability() (r int, exists bool) {
+	v := m.addchange_probability
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ClearChangeProbability clears the value of the "change_probability" field.
+func (m *ForecastMutation) ClearChangeProbability() {
+	m.change_probability = nil
+	m.addchange_probability = nil
+	m.clearedFields[forecast.FieldChangeProbability] = struct{}{}
+}
+
+// ChangeProbabilityCleared returns if the "change_probability" field was cleared in this mutation.
+func (m *ForecastMutation) ChangeProbabilityCleared() bool {
+	_, ok := m.clearedFields[forecast.FieldChangeProbability]
+	return ok
+}
+
+// ResetChangeProbability resets all changes to the "change_probability" field.
+func (m *ForecastMutation) ResetChangeProbability() {
+	m.change_probability = nil
+	m.addchange_probability = nil
+	delete(m.clearedFields, forecast.FieldChangeProbability)
+}
+
+// SetWindDirection sets the "wind_direction" field.
+func (m *ForecastMutation) SetWindDirection(i int) {
+	m.wind_direction = &i
+	m.addwind_direction = nil
+}
+
+// WindDirection returns the value of the "wind_direction" field in the mutation.
+func (m *ForecastMutation) WindDirection() (r int, exists bool) {
+	v := m.wind_direction
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldWindDirection returns the old "wind_direction" field's value of the Forecast entity.
+// If the Forecast object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ForecastMutation) OldWindDirection(ctx context.Context) (v *int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldWindDirection is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldWindDirection requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldWindDirection: %w", err)
+	}
+	return oldValue.WindDirection, nil
+}
+
+// AddWindDirection adds i to the "wind_direction" field.
+func (m *ForecastMutation) AddWindDirection(i int) {
+	if m.addwind_direction != nil {
+		*m.addwind_direction += i
+	} else {
+		m.addwind_direction = &i
+	}
+}
+
+// AddedWindDirection returns the value that was added to the "wind_direction" field in this mutation.
+func (m *ForecastMutation) AddedWindDirection() (r int, exists bool) {
+	v := m.addwind_direction
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ClearWindDirection clears the value of the "wind_direction" field.
+func (m *ForecastMutation) ClearWindDirection() {
+	m.wind_direction = nil
+	m.addwind_direction = nil
+	m.clearedFields[forecast.FieldWindDirection] = struct{}{}
+}
+
+// WindDirectionCleared returns if the "wind_direction" field was cleared in this mutation.
+func (m *ForecastMutation) WindDirectionCleared() bool {
+	_, ok := m.clearedFields[forecast.FieldWindDirection]
+	return ok
+}
+
+// ResetWindDirection resets all changes to the "wind_direction" field.
+func (m *ForecastMutation) ResetWindDirection() {
+	m.wind_direction = nil
+	m.addwind_direction = nil
+	delete(m.clearedFields, forecast.FieldWindDirection)
+}
+
+// SetWindSpeed sets the "wind_speed" field.
+func (m *ForecastMutation) SetWindSpeed(i int) {
+	m.wind_speed = &i
+	m.addwind_speed = nil
+}
+
+// WindSpeed returns the value of the "wind_speed" field in the mutation.
+func (m *ForecastMutation) WindSpeed() (r int, exists bool) {
+	v := m.wind_speed
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldWindSpeed returns the old "wind_speed" field's value of the Forecast entity.
+// If the Forecast object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ForecastMutation) OldWindSpeed(ctx context.Context) (v *int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldWindSpeed is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldWindSpeed requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldWindSpeed: %w", err)
+	}
+	return oldValue.WindSpeed, nil
+}
+
+// AddWindSpeed adds i to the "wind_speed" field.
+func (m *ForecastMutation) AddWindSpeed(i int) {
+	if m.addwind_speed != nil {
+		*m.addwind_speed += i
+	} else {
+		m.addwind_speed = &i
+	}
+}
+
+// AddedWindSpeed returns the value that was added to the "wind_speed" field in this mutation.
+func (m *ForecastMutation) AddedWindSpeed() (r int, exists bool) {
+	v := m.addwind_speed
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ClearWindSpeed clears the value of the "wind_speed" field.
+func (m *ForecastMutation) ClearWindSpeed() {
+	m.wind_speed = nil
+	m.addwind_speed = nil
+	m.clearedFields[forecast.FieldWindSpeed] = struct{}{}
+}
+
+// WindSpeedCleared returns if the "wind_speed" field was cleared in this mutation.
+func (m *ForecastMutation) WindSpeedCleared() bool {
+	_, ok := m.clearedFields[forecast.FieldWindSpeed]
+	return ok
+}
+
+// ResetWindSpeed resets all changes to the "wind_speed" field.
+func (m *ForecastMutation) ResetWindSpeed() {
+	m.wind_speed = nil
+	m.addwind_speed = nil
+	delete(m.clearedFields, forecast.FieldWindSpeed)
+}
+
+// SetWindGust sets the "wind_gust" field.
+func (m *ForecastMutation) SetWindGust(i int) {
+	m.wind_gust = &i
+	m.addwind_gust = nil
+}
+
+// WindGust returns the value of the "wind_gust" field in the mutation.
+func (m *ForecastMutation) WindGust() (r int, exists bool) {
+	v := m.wind_gust
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldWindGust returns the old "wind_gust" field's value of the Forecast entity.
+// If the Forecast object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ForecastMutation) OldWindGust(ctx context.Context) (v *int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldWindGust is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldWindGust requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldWindGust: %w", err)
+	}
+	return oldValue.WindGust, nil
+}
+
+// AddWindGust adds i to the "wind_gust" field.
+func (m *ForecastMutation) AddWindGust(i int) {
+	if m.addwind_gust != nil {
+		*m.addwind_gust += i
+	} else {
+		m.addwind_gust = &i
+	}
+}
+
+// AddedWindGust returns the value that was added to the "wind_gust" field in this mutation.
+func (m *ForecastMutation) AddedWindGust() (r int, exists bool) {
+	v := m.addwind_gust
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ClearWindGust clears the value of the "wind_gust" field.
+func (m *ForecastMutation) ClearWindGust() {
+	m.wind_gust = nil
+	m.addwind_gust = nil
+	m.clearedFields[forecast.FieldWindGust] = struct{}{}
+}
+
+// WindGustCleared returns if the "wind_gust" field was cleared in this mutation.
+func (m *ForecastMutation) WindGustCleared() bool {
+	_, ok := m.clearedFields[forecast.FieldWindGust]
+	return ok
+}
+
+// ResetWindGust resets all changes to the "wind_gust" field.
+func (m *ForecastMutation) ResetWindGust() {
+	m.wind_gust = nil
+	m.addwind_gust = nil
+	delete(m.clearedFields, forecast.FieldWindGust)
+}
+
+// SetWindShearHeight sets the "wind_shear_height" field.
+func (m *ForecastMutation) SetWindShearHeight(i int) {
+	m.wind_shear_height = &i
+	m.addwind_shear_height = nil
+}
+
+// WindShearHeight returns the value of the "wind_shear_height" field in the mutation.
+func (m *ForecastMutation) WindShearHeight() (r int, exists bool) {
+	v := m.wind_shear_height
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldWindShearHeight returns the old "wind_shear_height" field's value of the Forecast entity.
+// If the Forecast object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ForecastMutation) OldWindShearHeight(ctx context.Context) (v *int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldWindShearHeight is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldWindShearHeight requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldWindShearHeight: %w", err)
+	}
+	return oldValue.WindShearHeight, nil
+}
+
+// AddWindShearHeight adds i to the "wind_shear_height" field.
+func (m *ForecastMutation) AddWindShearHeight(i int) {
+	if m.addwind_shear_height != nil {
+		*m.addwind_shear_height += i
+	} else {
+		m.addwind_shear_height = &i
+	}
+}
+
+// AddedWindShearHeight returns the value that was added to the "wind_shear_height" field in this mutation.
+func (m *ForecastMutation) AddedWindShearHeight() (r int, exists bool) {
+	v := m.addwind_shear_height
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ClearWindShearHeight clears the value of the "wind_shear_height" field.
+func (m *ForecastMutation) ClearWindShearHeight() {
+	m.wind_shear_height = nil
+	m.addwind_shear_height = nil
+	m.clearedFields[forecast.FieldWindShearHeight] = struct{}{}
+}
+
+// WindShearHeightCleared returns if the "wind_shear_height" field was cleared in this mutation.
+func (m *ForecastMutation) WindShearHeightCleared() bool {
+	_, ok := m.clearedFields[forecast.FieldWindShearHeight]
+	return ok
+}
+
+// ResetWindShearHeight resets all changes to the "wind_shear_height" field.
+func (m *ForecastMutation) ResetWindShearHeight() {
+	m.wind_shear_height = nil
+	m.addwind_shear_height = nil
+	delete(m.clearedFields, forecast.FieldWindShearHeight)
+}
+
+// SetWindShearDirection sets the "wind_shear_direction" field.
+func (m *ForecastMutation) SetWindShearDirection(i int) {
+	m.wind_shear_direction = &i
+	m.addwind_shear_direction = nil
+}
+
+// WindShearDirection returns the value of the "wind_shear_direction" field in the mutation.
+func (m *ForecastMutation) WindShearDirection() (r int, exists bool) {
+	v := m.wind_shear_direction
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldWindShearDirection returns the old "wind_shear_direction" field's value of the Forecast entity.
+// If the Forecast object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ForecastMutation) OldWindShearDirection(ctx context.Context) (v *int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldWindShearDirection is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldWindShearDirection requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldWindShearDirection: %w", err)
+	}
+	return oldValue.WindShearDirection, nil
+}
+
+// AddWindShearDirection adds i to the "wind_shear_direction" field.
+func (m *ForecastMutation) AddWindShearDirection(i int) {
+	if m.addwind_shear_direction != nil {
+		*m.addwind_shear_direction += i
+	} else {
+		m.addwind_shear_direction = &i
+	}
+}
+
+// AddedWindShearDirection returns the value that was added to the "wind_shear_direction" field in this mutation.
+func (m *ForecastMutation) AddedWindShearDirection() (r int, exists bool) {
+	v := m.addwind_shear_direction
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ClearWindShearDirection clears the value of the "wind_shear_direction" field.
+func (m *ForecastMutation) ClearWindShearDirection() {
+	m.wind_shear_direction = nil
+	m.addwind_shear_direction = nil
+	m.clearedFields[forecast.FieldWindShearDirection] = struct{}{}
+}
+
+// WindShearDirectionCleared returns if the "wind_shear_direction" field was cleared in this mutation.
+func (m *ForecastMutation) WindShearDirectionCleared() bool {
+	_, ok := m.clearedFields[forecast.FieldWindShearDirection]
+	return ok
+}
+
+// ResetWindShearDirection resets all changes to the "wind_shear_direction" field.
+func (m *ForecastMutation) ResetWindShearDirection() {
+	m.wind_shear_direction = nil
+	m.addwind_shear_direction = nil
+	delete(m.clearedFields, forecast.FieldWindShearDirection)
+}
+
+// SetWindShearSpeed sets the "wind_shear_speed" field.
+func (m *ForecastMutation) SetWindShearSpeed(i int) {
+	m.wind_shear_speed = &i
+	m.addwind_shear_speed = nil
+}
+
+// WindShearSpeed returns the value of the "wind_shear_speed" field in the mutation.
+func (m *ForecastMutation) WindShearSpeed() (r int, exists bool) {
+	v := m.wind_shear_speed
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldWindShearSpeed returns the old "wind_shear_speed" field's value of the Forecast entity.
+// If the Forecast object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ForecastMutation) OldWindShearSpeed(ctx context.Context) (v *int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldWindShearSpeed is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldWindShearSpeed requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldWindShearSpeed: %w", err)
+	}
+	return oldValue.WindShearSpeed, nil
+}
+
+// AddWindShearSpeed adds i to the "wind_shear_speed" field.
+func (m *ForecastMutation) AddWindShearSpeed(i int) {
+	if m.addwind_shear_speed != nil {
+		*m.addwind_shear_speed += i
+	} else {
+		m.addwind_shear_speed = &i
+	}
+}
+
+// AddedWindShearSpeed returns the value that was added to the "wind_shear_speed" field in this mutation.
+func (m *ForecastMutation) AddedWindShearSpeed() (r int, exists bool) {
+	v := m.addwind_shear_speed
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ClearWindShearSpeed clears the value of the "wind_shear_speed" field.
+func (m *ForecastMutation) ClearWindShearSpeed() {
+	m.wind_shear_speed = nil
+	m.addwind_shear_speed = nil
+	m.clearedFields[forecast.FieldWindShearSpeed] = struct{}{}
+}
+
+// WindShearSpeedCleared returns if the "wind_shear_speed" field was cleared in this mutation.
+func (m *ForecastMutation) WindShearSpeedCleared() bool {
+	_, ok := m.clearedFields[forecast.FieldWindShearSpeed]
+	return ok
+}
+
+// ResetWindShearSpeed resets all changes to the "wind_shear_speed" field.
+func (m *ForecastMutation) ResetWindShearSpeed() {
+	m.wind_shear_speed = nil
+	m.addwind_shear_speed = nil
+	delete(m.clearedFields, forecast.FieldWindShearSpeed)
+}
+
+// SetVisibilityHorizontal sets the "visibility_horizontal" field.
+func (m *ForecastMutation) SetVisibilityHorizontal(f float64) {
+	m.visibility_horizontal = &f
+	m.addvisibility_horizontal = nil
+}
+
+// VisibilityHorizontal returns the value of the "visibility_horizontal" field in the mutation.
+func (m *ForecastMutation) VisibilityHorizontal() (r float64, exists bool) {
+	v := m.visibility_horizontal
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldVisibilityHorizontal returns the old "visibility_horizontal" field's value of the Forecast entity.
+// If the Forecast object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ForecastMutation) OldVisibilityHorizontal(ctx context.Context) (v *float64, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldVisibilityHorizontal is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldVisibilityHorizontal requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldVisibilityHorizontal: %w", err)
+	}
+	return oldValue.VisibilityHorizontal, nil
+}
+
+// AddVisibilityHorizontal adds f to the "visibility_horizontal" field.
+func (m *ForecastMutation) AddVisibilityHorizontal(f float64) {
+	if m.addvisibility_horizontal != nil {
+		*m.addvisibility_horizontal += f
+	} else {
+		m.addvisibility_horizontal = &f
+	}
+}
+
+// AddedVisibilityHorizontal returns the value that was added to the "visibility_horizontal" field in this mutation.
+func (m *ForecastMutation) AddedVisibilityHorizontal() (r float64, exists bool) {
+	v := m.addvisibility_horizontal
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ClearVisibilityHorizontal clears the value of the "visibility_horizontal" field.
+func (m *ForecastMutation) ClearVisibilityHorizontal() {
+	m.visibility_horizontal = nil
+	m.addvisibility_horizontal = nil
+	m.clearedFields[forecast.FieldVisibilityHorizontal] = struct{}{}
+}
+
+// VisibilityHorizontalCleared returns if the "visibility_horizontal" field was cleared in this mutation.
+func (m *ForecastMutation) VisibilityHorizontalCleared() bool {
+	_, ok := m.clearedFields[forecast.FieldVisibilityHorizontal]
+	return ok
+}
+
+// ResetVisibilityHorizontal resets all changes to the "visibility_horizontal" field.
+func (m *ForecastMutation) ResetVisibilityHorizontal() {
+	m.visibility_horizontal = nil
+	m.addvisibility_horizontal = nil
+	delete(m.clearedFields, forecast.FieldVisibilityHorizontal)
+}
+
+// SetVisibilityVertical sets the "visibility_vertical" field.
+func (m *ForecastMutation) SetVisibilityVertical(i int) {
+	m.visibility_vertical = &i
+	m.addvisibility_vertical = nil
+}
+
+// VisibilityVertical returns the value of the "visibility_vertical" field in the mutation.
+func (m *ForecastMutation) VisibilityVertical() (r int, exists bool) {
+	v := m.visibility_vertical
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldVisibilityVertical returns the old "visibility_vertical" field's value of the Forecast entity.
+// If the Forecast object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ForecastMutation) OldVisibilityVertical(ctx context.Context) (v *int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldVisibilityVertical is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldVisibilityVertical requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldVisibilityVertical: %w", err)
+	}
+	return oldValue.VisibilityVertical, nil
+}
+
+// AddVisibilityVertical adds i to the "visibility_vertical" field.
+func (m *ForecastMutation) AddVisibilityVertical(i int) {
+	if m.addvisibility_vertical != nil {
+		*m.addvisibility_vertical += i
+	} else {
+		m.addvisibility_vertical = &i
+	}
+}
+
+// AddedVisibilityVertical returns the value that was added to the "visibility_vertical" field in this mutation.
+func (m *ForecastMutation) AddedVisibilityVertical() (r int, exists bool) {
+	v := m.addvisibility_vertical
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ClearVisibilityVertical clears the value of the "visibility_vertical" field.
+func (m *ForecastMutation) ClearVisibilityVertical() {
+	m.visibility_vertical = nil
+	m.addvisibility_vertical = nil
+	m.clearedFields[forecast.FieldVisibilityVertical] = struct{}{}
+}
+
+// VisibilityVerticalCleared returns if the "visibility_vertical" field was cleared in this mutation.
+func (m *ForecastMutation) VisibilityVerticalCleared() bool {
+	_, ok := m.clearedFields[forecast.FieldVisibilityVertical]
+	return ok
+}
+
+// ResetVisibilityVertical resets all changes to the "visibility_vertical" field.
+func (m *ForecastMutation) ResetVisibilityVertical() {
+	m.visibility_vertical = nil
+	m.addvisibility_vertical = nil
+	delete(m.clearedFields, forecast.FieldVisibilityVertical)
+}
+
+// SetAltimeter sets the "altimeter" field.
+func (m *ForecastMutation) SetAltimeter(f float64) {
+	m.altimeter = &f
+	m.addaltimeter = nil
+}
+
+// Altimeter returns the value of the "altimeter" field in the mutation.
+func (m *ForecastMutation) Altimeter() (r float64, exists bool) {
+	v := m.altimeter
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldAltimeter returns the old "altimeter" field's value of the Forecast entity.
+// If the Forecast object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ForecastMutation) OldAltimeter(ctx context.Context) (v *float64, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldAltimeter is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldAltimeter requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldAltimeter: %w", err)
+	}
+	return oldValue.Altimeter, nil
+}
+
+// AddAltimeter adds f to the "altimeter" field.
+func (m *ForecastMutation) AddAltimeter(f float64) {
+	if m.addaltimeter != nil {
+		*m.addaltimeter += f
+	} else {
+		m.addaltimeter = &f
+	}
+}
+
+// AddedAltimeter returns the value that was added to the "altimeter" field in this mutation.
+func (m *ForecastMutation) AddedAltimeter() (r float64, exists bool) {
+	v := m.addaltimeter
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ClearAltimeter clears the value of the "altimeter" field.
+func (m *ForecastMutation) ClearAltimeter() {
+	m.altimeter = nil
+	m.addaltimeter = nil
+	m.clearedFields[forecast.FieldAltimeter] = struct{}{}
+}
+
+// AltimeterCleared returns if the "altimeter" field was cleared in this mutation.
+func (m *ForecastMutation) AltimeterCleared() bool {
+	_, ok := m.clearedFields[forecast.FieldAltimeter]
+	return ok
+}
+
+// ResetAltimeter resets all changes to the "altimeter" field.
+func (m *ForecastMutation) ResetAltimeter() {
+	m.altimeter = nil
+	m.addaltimeter = nil
+	delete(m.clearedFields, forecast.FieldAltimeter)
+}
+
+// SetWeather sets the "weather" field.
+func (m *ForecastMutation) SetWeather(s string) {
+	m.weather = &s
+}
+
+// Weather returns the value of the "weather" field in the mutation.
+func (m *ForecastMutation) Weather() (r string, exists bool) {
+	v := m.weather
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldWeather returns the old "weather" field's value of the Forecast entity.
+// If the Forecast object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ForecastMutation) OldWeather(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldWeather is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldWeather requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldWeather: %w", err)
+	}
+	return oldValue.Weather, nil
+}
+
+// ClearWeather clears the value of the "weather" field.
+func (m *ForecastMutation) ClearWeather() {
+	m.weather = nil
+	m.clearedFields[forecast.FieldWeather] = struct{}{}
+}
+
+// WeatherCleared returns if the "weather" field was cleared in this mutation.
+func (m *ForecastMutation) WeatherCleared() bool {
+	_, ok := m.clearedFields[forecast.FieldWeather]
+	return ok
+}
+
+// ResetWeather resets all changes to the "weather" field.
+func (m *ForecastMutation) ResetWeather() {
+	m.weather = nil
+	delete(m.clearedFields, forecast.FieldWeather)
+}
+
+// SetNotDecoded sets the "not_decoded" field.
+func (m *ForecastMutation) SetNotDecoded(s string) {
+	m.not_decoded = &s
+}
+
+// NotDecoded returns the value of the "not_decoded" field in the mutation.
+func (m *ForecastMutation) NotDecoded() (r string, exists bool) {
+	v := m.not_decoded
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldNotDecoded returns the old "not_decoded" field's value of the Forecast entity.
+// If the Forecast object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ForecastMutation) OldNotDecoded(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldNotDecoded is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldNotDecoded requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldNotDecoded: %w", err)
+	}
+	return oldValue.NotDecoded, nil
+}
+
+// ClearNotDecoded clears the value of the "not_decoded" field.
+func (m *ForecastMutation) ClearNotDecoded() {
+	m.not_decoded = nil
+	m.clearedFields[forecast.FieldNotDecoded] = struct{}{}
+}
+
+// NotDecodedCleared returns if the "not_decoded" field was cleared in this mutation.
+func (m *ForecastMutation) NotDecodedCleared() bool {
+	_, ok := m.clearedFields[forecast.FieldNotDecoded]
+	return ok
+}
+
+// ResetNotDecoded resets all changes to the "not_decoded" field.
+func (m *ForecastMutation) ResetNotDecoded() {
+	m.not_decoded = nil
+	delete(m.clearedFields, forecast.FieldNotDecoded)
+}
+
+// AddSkyConditionIDs adds the "sky_conditions" edge to the SkyCondition entity by ids.
+func (m *ForecastMutation) AddSkyConditionIDs(ids ...int) {
+	if m.sky_conditions == nil {
+		m.sky_conditions = make(map[int]struct{})
+	}
+	for i := range ids {
+		m.sky_conditions[ids[i]] = struct{}{}
+	}
+}
+
+// ClearSkyConditions clears the "sky_conditions" edge to the SkyCondition entity.
+func (m *ForecastMutation) ClearSkyConditions() {
+	m.clearedsky_conditions = true
+}
+
+// SkyConditionsCleared reports if the "sky_conditions" edge to the SkyCondition entity was cleared.
+func (m *ForecastMutation) SkyConditionsCleared() bool {
+	return m.clearedsky_conditions
+}
+
+// RemoveSkyConditionIDs removes the "sky_conditions" edge to the SkyCondition entity by IDs.
+func (m *ForecastMutation) RemoveSkyConditionIDs(ids ...int) {
+	if m.removedsky_conditions == nil {
+		m.removedsky_conditions = make(map[int]struct{})
+	}
+	for i := range ids {
+		delete(m.sky_conditions, ids[i])
+		m.removedsky_conditions[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedSkyConditions returns the removed IDs of the "sky_conditions" edge to the SkyCondition entity.
+func (m *ForecastMutation) RemovedSkyConditionsIDs() (ids []int) {
+	for id := range m.removedsky_conditions {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// SkyConditionsIDs returns the "sky_conditions" edge IDs in the mutation.
+func (m *ForecastMutation) SkyConditionsIDs() (ids []int) {
+	for id := range m.sky_conditions {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetSkyConditions resets all changes to the "sky_conditions" edge.
+func (m *ForecastMutation) ResetSkyConditions() {
+	m.sky_conditions = nil
+	m.clearedsky_conditions = false
+	m.removedsky_conditions = nil
+}
+
+// AddTurbulenceConditionIDs adds the "turbulence_conditions" edge to the TurbulenceCondition entity by ids.
+func (m *ForecastMutation) AddTurbulenceConditionIDs(ids ...int) {
+	if m.turbulence_conditions == nil {
+		m.turbulence_conditions = make(map[int]struct{})
+	}
+	for i := range ids {
+		m.turbulence_conditions[ids[i]] = struct{}{}
+	}
+}
+
+// ClearTurbulenceConditions clears the "turbulence_conditions" edge to the TurbulenceCondition entity.
+func (m *ForecastMutation) ClearTurbulenceConditions() {
+	m.clearedturbulence_conditions = true
+}
+
+// TurbulenceConditionsCleared reports if the "turbulence_conditions" edge to the TurbulenceCondition entity was cleared.
+func (m *ForecastMutation) TurbulenceConditionsCleared() bool {
+	return m.clearedturbulence_conditions
+}
+
+// RemoveTurbulenceConditionIDs removes the "turbulence_conditions" edge to the TurbulenceCondition entity by IDs.
+func (m *ForecastMutation) RemoveTurbulenceConditionIDs(ids ...int) {
+	if m.removedturbulence_conditions == nil {
+		m.removedturbulence_conditions = make(map[int]struct{})
+	}
+	for i := range ids {
+		delete(m.turbulence_conditions, ids[i])
+		m.removedturbulence_conditions[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedTurbulenceConditions returns the removed IDs of the "turbulence_conditions" edge to the TurbulenceCondition entity.
+func (m *ForecastMutation) RemovedTurbulenceConditionsIDs() (ids []int) {
+	for id := range m.removedturbulence_conditions {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// TurbulenceConditionsIDs returns the "turbulence_conditions" edge IDs in the mutation.
+func (m *ForecastMutation) TurbulenceConditionsIDs() (ids []int) {
+	for id := range m.turbulence_conditions {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetTurbulenceConditions resets all changes to the "turbulence_conditions" edge.
+func (m *ForecastMutation) ResetTurbulenceConditions() {
+	m.turbulence_conditions = nil
+	m.clearedturbulence_conditions = false
+	m.removedturbulence_conditions = nil
+}
+
+// AddIcingConditionIDs adds the "icing_conditions" edge to the IcingCondition entity by ids.
+func (m *ForecastMutation) AddIcingConditionIDs(ids ...int) {
+	if m.icing_conditions == nil {
+		m.icing_conditions = make(map[int]struct{})
+	}
+	for i := range ids {
+		m.icing_conditions[ids[i]] = struct{}{}
+	}
+}
+
+// ClearIcingConditions clears the "icing_conditions" edge to the IcingCondition entity.
+func (m *ForecastMutation) ClearIcingConditions() {
+	m.clearedicing_conditions = true
+}
+
+// IcingConditionsCleared reports if the "icing_conditions" edge to the IcingCondition entity was cleared.
+func (m *ForecastMutation) IcingConditionsCleared() bool {
+	return m.clearedicing_conditions
+}
+
+// RemoveIcingConditionIDs removes the "icing_conditions" edge to the IcingCondition entity by IDs.
+func (m *ForecastMutation) RemoveIcingConditionIDs(ids ...int) {
+	if m.removedicing_conditions == nil {
+		m.removedicing_conditions = make(map[int]struct{})
+	}
+	for i := range ids {
+		delete(m.icing_conditions, ids[i])
+		m.removedicing_conditions[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedIcingConditions returns the removed IDs of the "icing_conditions" edge to the IcingCondition entity.
+func (m *ForecastMutation) RemovedIcingConditionsIDs() (ids []int) {
+	for id := range m.removedicing_conditions {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// IcingConditionsIDs returns the "icing_conditions" edge IDs in the mutation.
+func (m *ForecastMutation) IcingConditionsIDs() (ids []int) {
+	for id := range m.icing_conditions {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetIcingConditions resets all changes to the "icing_conditions" edge.
+func (m *ForecastMutation) ResetIcingConditions() {
+	m.icing_conditions = nil
+	m.clearedicing_conditions = false
+	m.removedicing_conditions = nil
+}
+
+// AddTemperatureDatumIDs adds the "temperature_data" edge to the TemperatureData entity by ids.
+func (m *ForecastMutation) AddTemperatureDatumIDs(ids ...int) {
+	if m.temperature_data == nil {
+		m.temperature_data = make(map[int]struct{})
+	}
+	for i := range ids {
+		m.temperature_data[ids[i]] = struct{}{}
+	}
+}
+
+// ClearTemperatureData clears the "temperature_data" edge to the TemperatureData entity.
+func (m *ForecastMutation) ClearTemperatureData() {
+	m.clearedtemperature_data = true
+}
+
+// TemperatureDataCleared reports if the "temperature_data" edge to the TemperatureData entity was cleared.
+func (m *ForecastMutation) TemperatureDataCleared() bool {
+	return m.clearedtemperature_data
+}
+
+// RemoveTemperatureDatumIDs removes the "temperature_data" edge to the TemperatureData entity by IDs.
+func (m *ForecastMutation) RemoveTemperatureDatumIDs(ids ...int) {
+	if m.removedtemperature_data == nil {
+		m.removedtemperature_data = make(map[int]struct{})
+	}
+	for i := range ids {
+		delete(m.temperature_data, ids[i])
+		m.removedtemperature_data[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedTemperatureData returns the removed IDs of the "temperature_data" edge to the TemperatureData entity.
+func (m *ForecastMutation) RemovedTemperatureDataIDs() (ids []int) {
+	for id := range m.removedtemperature_data {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// TemperatureDataIDs returns the "temperature_data" edge IDs in the mutation.
+func (m *ForecastMutation) TemperatureDataIDs() (ids []int) {
+	for id := range m.temperature_data {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetTemperatureData resets all changes to the "temperature_data" edge.
+func (m *ForecastMutation) ResetTemperatureData() {
+	m.temperature_data = nil
+	m.clearedtemperature_data = false
+	m.removedtemperature_data = nil
+}
+
+// Where appends a list predicates to the ForecastMutation builder.
+func (m *ForecastMutation) Where(ps ...predicate.Forecast) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// Op returns the operation name.
+func (m *ForecastMutation) Op() Op {
+	return m.op
+}
+
+// Type returns the node type of this mutation (Forecast).
+func (m *ForecastMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *ForecastMutation) Fields() []string {
+	fields := make([]string, 0, 16)
+	if m.from_time != nil {
+		fields = append(fields, forecast.FieldFromTime)
+	}
+	if m.to_time != nil {
+		fields = append(fields, forecast.FieldToTime)
+	}
+	if m.change_indicator != nil {
+		fields = append(fields, forecast.FieldChangeIndicator)
+	}
+	if m.change_time != nil {
+		fields = append(fields, forecast.FieldChangeTime)
+	}
+	if m.change_probability != nil {
+		fields = append(fields, forecast.FieldChangeProbability)
+	}
+	if m.wind_direction != nil {
+		fields = append(fields, forecast.FieldWindDirection)
+	}
+	if m.wind_speed != nil {
+		fields = append(fields, forecast.FieldWindSpeed)
+	}
+	if m.wind_gust != nil {
+		fields = append(fields, forecast.FieldWindGust)
+	}
+	if m.wind_shear_height != nil {
+		fields = append(fields, forecast.FieldWindShearHeight)
+	}
+	if m.wind_shear_direction != nil {
+		fields = append(fields, forecast.FieldWindShearDirection)
+	}
+	if m.wind_shear_speed != nil {
+		fields = append(fields, forecast.FieldWindShearSpeed)
+	}
+	if m.visibility_horizontal != nil {
+		fields = append(fields, forecast.FieldVisibilityHorizontal)
+	}
+	if m.visibility_vertical != nil {
+		fields = append(fields, forecast.FieldVisibilityVertical)
+	}
+	if m.altimeter != nil {
+		fields = append(fields, forecast.FieldAltimeter)
+	}
+	if m.weather != nil {
+		fields = append(fields, forecast.FieldWeather)
+	}
+	if m.not_decoded != nil {
+		fields = append(fields, forecast.FieldNotDecoded)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *ForecastMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case forecast.FieldFromTime:
+		return m.FromTime()
+	case forecast.FieldToTime:
+		return m.ToTime()
+	case forecast.FieldChangeIndicator:
+		return m.ChangeIndicator()
+	case forecast.FieldChangeTime:
+		return m.ChangeTime()
+	case forecast.FieldChangeProbability:
+		return m.ChangeProbability()
+	case forecast.FieldWindDirection:
+		return m.WindDirection()
+	case forecast.FieldWindSpeed:
+		return m.WindSpeed()
+	case forecast.FieldWindGust:
+		return m.WindGust()
+	case forecast.FieldWindShearHeight:
+		return m.WindShearHeight()
+	case forecast.FieldWindShearDirection:
+		return m.WindShearDirection()
+	case forecast.FieldWindShearSpeed:
+		return m.WindShearSpeed()
+	case forecast.FieldVisibilityHorizontal:
+		return m.VisibilityHorizontal()
+	case forecast.FieldVisibilityVertical:
+		return m.VisibilityVertical()
+	case forecast.FieldAltimeter:
+		return m.Altimeter()
+	case forecast.FieldWeather:
+		return m.Weather()
+	case forecast.FieldNotDecoded:
+		return m.NotDecoded()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *ForecastMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case forecast.FieldFromTime:
+		return m.OldFromTime(ctx)
+	case forecast.FieldToTime:
+		return m.OldToTime(ctx)
+	case forecast.FieldChangeIndicator:
+		return m.OldChangeIndicator(ctx)
+	case forecast.FieldChangeTime:
+		return m.OldChangeTime(ctx)
+	case forecast.FieldChangeProbability:
+		return m.OldChangeProbability(ctx)
+	case forecast.FieldWindDirection:
+		return m.OldWindDirection(ctx)
+	case forecast.FieldWindSpeed:
+		return m.OldWindSpeed(ctx)
+	case forecast.FieldWindGust:
+		return m.OldWindGust(ctx)
+	case forecast.FieldWindShearHeight:
+		return m.OldWindShearHeight(ctx)
+	case forecast.FieldWindShearDirection:
+		return m.OldWindShearDirection(ctx)
+	case forecast.FieldWindShearSpeed:
+		return m.OldWindShearSpeed(ctx)
+	case forecast.FieldVisibilityHorizontal:
+		return m.OldVisibilityHorizontal(ctx)
+	case forecast.FieldVisibilityVertical:
+		return m.OldVisibilityVertical(ctx)
+	case forecast.FieldAltimeter:
+		return m.OldAltimeter(ctx)
+	case forecast.FieldWeather:
+		return m.OldWeather(ctx)
+	case forecast.FieldNotDecoded:
+		return m.OldNotDecoded(ctx)
+	}
+	return nil, fmt.Errorf("unknown Forecast field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *ForecastMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case forecast.FieldFromTime:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetFromTime(v)
+		return nil
+	case forecast.FieldToTime:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetToTime(v)
+		return nil
+	case forecast.FieldChangeIndicator:
+		v, ok := value.(forecast.ChangeIndicator)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetChangeIndicator(v)
+		return nil
+	case forecast.FieldChangeTime:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetChangeTime(v)
+		return nil
+	case forecast.FieldChangeProbability:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetChangeProbability(v)
+		return nil
+	case forecast.FieldWindDirection:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetWindDirection(v)
+		return nil
+	case forecast.FieldWindSpeed:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetWindSpeed(v)
+		return nil
+	case forecast.FieldWindGust:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetWindGust(v)
+		return nil
+	case forecast.FieldWindShearHeight:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetWindShearHeight(v)
+		return nil
+	case forecast.FieldWindShearDirection:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetWindShearDirection(v)
+		return nil
+	case forecast.FieldWindShearSpeed:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetWindShearSpeed(v)
+		return nil
+	case forecast.FieldVisibilityHorizontal:
+		v, ok := value.(float64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetVisibilityHorizontal(v)
+		return nil
+	case forecast.FieldVisibilityVertical:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetVisibilityVertical(v)
+		return nil
+	case forecast.FieldAltimeter:
+		v, ok := value.(float64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetAltimeter(v)
+		return nil
+	case forecast.FieldWeather:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetWeather(v)
+		return nil
+	case forecast.FieldNotDecoded:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetNotDecoded(v)
+		return nil
+	}
+	return fmt.Errorf("unknown Forecast field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *ForecastMutation) AddedFields() []string {
+	var fields []string
+	if m.addchange_probability != nil {
+		fields = append(fields, forecast.FieldChangeProbability)
+	}
+	if m.addwind_direction != nil {
+		fields = append(fields, forecast.FieldWindDirection)
+	}
+	if m.addwind_speed != nil {
+		fields = append(fields, forecast.FieldWindSpeed)
+	}
+	if m.addwind_gust != nil {
+		fields = append(fields, forecast.FieldWindGust)
+	}
+	if m.addwind_shear_height != nil {
+		fields = append(fields, forecast.FieldWindShearHeight)
+	}
+	if m.addwind_shear_direction != nil {
+		fields = append(fields, forecast.FieldWindShearDirection)
+	}
+	if m.addwind_shear_speed != nil {
+		fields = append(fields, forecast.FieldWindShearSpeed)
+	}
+	if m.addvisibility_horizontal != nil {
+		fields = append(fields, forecast.FieldVisibilityHorizontal)
+	}
+	if m.addvisibility_vertical != nil {
+		fields = append(fields, forecast.FieldVisibilityVertical)
+	}
+	if m.addaltimeter != nil {
+		fields = append(fields, forecast.FieldAltimeter)
+	}
+	return fields
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *ForecastMutation) AddedField(name string) (ent.Value, bool) {
+	switch name {
+	case forecast.FieldChangeProbability:
+		return m.AddedChangeProbability()
+	case forecast.FieldWindDirection:
+		return m.AddedWindDirection()
+	case forecast.FieldWindSpeed:
+		return m.AddedWindSpeed()
+	case forecast.FieldWindGust:
+		return m.AddedWindGust()
+	case forecast.FieldWindShearHeight:
+		return m.AddedWindShearHeight()
+	case forecast.FieldWindShearDirection:
+		return m.AddedWindShearDirection()
+	case forecast.FieldWindShearSpeed:
+		return m.AddedWindShearSpeed()
+	case forecast.FieldVisibilityHorizontal:
+		return m.AddedVisibilityHorizontal()
+	case forecast.FieldVisibilityVertical:
+		return m.AddedVisibilityVertical()
+	case forecast.FieldAltimeter:
+		return m.AddedAltimeter()
+	}
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *ForecastMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	case forecast.FieldChangeProbability:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddChangeProbability(v)
+		return nil
+	case forecast.FieldWindDirection:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddWindDirection(v)
+		return nil
+	case forecast.FieldWindSpeed:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddWindSpeed(v)
+		return nil
+	case forecast.FieldWindGust:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddWindGust(v)
+		return nil
+	case forecast.FieldWindShearHeight:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddWindShearHeight(v)
+		return nil
+	case forecast.FieldWindShearDirection:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddWindShearDirection(v)
+		return nil
+	case forecast.FieldWindShearSpeed:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddWindShearSpeed(v)
+		return nil
+	case forecast.FieldVisibilityHorizontal:
+		v, ok := value.(float64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddVisibilityHorizontal(v)
+		return nil
+	case forecast.FieldVisibilityVertical:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddVisibilityVertical(v)
+		return nil
+	case forecast.FieldAltimeter:
+		v, ok := value.(float64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddAltimeter(v)
+		return nil
+	}
+	return fmt.Errorf("unknown Forecast numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *ForecastMutation) ClearedFields() []string {
+	var fields []string
+	if m.FieldCleared(forecast.FieldChangeIndicator) {
+		fields = append(fields, forecast.FieldChangeIndicator)
+	}
+	if m.FieldCleared(forecast.FieldChangeTime) {
+		fields = append(fields, forecast.FieldChangeTime)
+	}
+	if m.FieldCleared(forecast.FieldChangeProbability) {
+		fields = append(fields, forecast.FieldChangeProbability)
+	}
+	if m.FieldCleared(forecast.FieldWindDirection) {
+		fields = append(fields, forecast.FieldWindDirection)
+	}
+	if m.FieldCleared(forecast.FieldWindSpeed) {
+		fields = append(fields, forecast.FieldWindSpeed)
+	}
+	if m.FieldCleared(forecast.FieldWindGust) {
+		fields = append(fields, forecast.FieldWindGust)
+	}
+	if m.FieldCleared(forecast.FieldWindShearHeight) {
+		fields = append(fields, forecast.FieldWindShearHeight)
+	}
+	if m.FieldCleared(forecast.FieldWindShearDirection) {
+		fields = append(fields, forecast.FieldWindShearDirection)
+	}
+	if m.FieldCleared(forecast.FieldWindShearSpeed) {
+		fields = append(fields, forecast.FieldWindShearSpeed)
+	}
+	if m.FieldCleared(forecast.FieldVisibilityHorizontal) {
+		fields = append(fields, forecast.FieldVisibilityHorizontal)
+	}
+	if m.FieldCleared(forecast.FieldVisibilityVertical) {
+		fields = append(fields, forecast.FieldVisibilityVertical)
+	}
+	if m.FieldCleared(forecast.FieldAltimeter) {
+		fields = append(fields, forecast.FieldAltimeter)
+	}
+	if m.FieldCleared(forecast.FieldWeather) {
+		fields = append(fields, forecast.FieldWeather)
+	}
+	if m.FieldCleared(forecast.FieldNotDecoded) {
+		fields = append(fields, forecast.FieldNotDecoded)
+	}
+	return fields
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *ForecastMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *ForecastMutation) ClearField(name string) error {
+	switch name {
+	case forecast.FieldChangeIndicator:
+		m.ClearChangeIndicator()
+		return nil
+	case forecast.FieldChangeTime:
+		m.ClearChangeTime()
+		return nil
+	case forecast.FieldChangeProbability:
+		m.ClearChangeProbability()
+		return nil
+	case forecast.FieldWindDirection:
+		m.ClearWindDirection()
+		return nil
+	case forecast.FieldWindSpeed:
+		m.ClearWindSpeed()
+		return nil
+	case forecast.FieldWindGust:
+		m.ClearWindGust()
+		return nil
+	case forecast.FieldWindShearHeight:
+		m.ClearWindShearHeight()
+		return nil
+	case forecast.FieldWindShearDirection:
+		m.ClearWindShearDirection()
+		return nil
+	case forecast.FieldWindShearSpeed:
+		m.ClearWindShearSpeed()
+		return nil
+	case forecast.FieldVisibilityHorizontal:
+		m.ClearVisibilityHorizontal()
+		return nil
+	case forecast.FieldVisibilityVertical:
+		m.ClearVisibilityVertical()
+		return nil
+	case forecast.FieldAltimeter:
+		m.ClearAltimeter()
+		return nil
+	case forecast.FieldWeather:
+		m.ClearWeather()
+		return nil
+	case forecast.FieldNotDecoded:
+		m.ClearNotDecoded()
+		return nil
+	}
+	return fmt.Errorf("unknown Forecast nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *ForecastMutation) ResetField(name string) error {
+	switch name {
+	case forecast.FieldFromTime:
+		m.ResetFromTime()
+		return nil
+	case forecast.FieldToTime:
+		m.ResetToTime()
+		return nil
+	case forecast.FieldChangeIndicator:
+		m.ResetChangeIndicator()
+		return nil
+	case forecast.FieldChangeTime:
+		m.ResetChangeTime()
+		return nil
+	case forecast.FieldChangeProbability:
+		m.ResetChangeProbability()
+		return nil
+	case forecast.FieldWindDirection:
+		m.ResetWindDirection()
+		return nil
+	case forecast.FieldWindSpeed:
+		m.ResetWindSpeed()
+		return nil
+	case forecast.FieldWindGust:
+		m.ResetWindGust()
+		return nil
+	case forecast.FieldWindShearHeight:
+		m.ResetWindShearHeight()
+		return nil
+	case forecast.FieldWindShearDirection:
+		m.ResetWindShearDirection()
+		return nil
+	case forecast.FieldWindShearSpeed:
+		m.ResetWindShearSpeed()
+		return nil
+	case forecast.FieldVisibilityHorizontal:
+		m.ResetVisibilityHorizontal()
+		return nil
+	case forecast.FieldVisibilityVertical:
+		m.ResetVisibilityVertical()
+		return nil
+	case forecast.FieldAltimeter:
+		m.ResetAltimeter()
+		return nil
+	case forecast.FieldWeather:
+		m.ResetWeather()
+		return nil
+	case forecast.FieldNotDecoded:
+		m.ResetNotDecoded()
+		return nil
+	}
+	return fmt.Errorf("unknown Forecast field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *ForecastMutation) AddedEdges() []string {
+	edges := make([]string, 0, 4)
+	if m.sky_conditions != nil {
+		edges = append(edges, forecast.EdgeSkyConditions)
+	}
+	if m.turbulence_conditions != nil {
+		edges = append(edges, forecast.EdgeTurbulenceConditions)
+	}
+	if m.icing_conditions != nil {
+		edges = append(edges, forecast.EdgeIcingConditions)
+	}
+	if m.temperature_data != nil {
+		edges = append(edges, forecast.EdgeTemperatureData)
+	}
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *ForecastMutation) AddedIDs(name string) []ent.Value {
+	switch name {
+	case forecast.EdgeSkyConditions:
+		ids := make([]ent.Value, 0, len(m.sky_conditions))
+		for id := range m.sky_conditions {
+			ids = append(ids, id)
+		}
+		return ids
+	case forecast.EdgeTurbulenceConditions:
+		ids := make([]ent.Value, 0, len(m.turbulence_conditions))
+		for id := range m.turbulence_conditions {
+			ids = append(ids, id)
+		}
+		return ids
+	case forecast.EdgeIcingConditions:
+		ids := make([]ent.Value, 0, len(m.icing_conditions))
+		for id := range m.icing_conditions {
+			ids = append(ids, id)
+		}
+		return ids
+	case forecast.EdgeTemperatureData:
+		ids := make([]ent.Value, 0, len(m.temperature_data))
+		for id := range m.temperature_data {
+			ids = append(ids, id)
+		}
+		return ids
+	}
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *ForecastMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 4)
+	if m.removedsky_conditions != nil {
+		edges = append(edges, forecast.EdgeSkyConditions)
+	}
+	if m.removedturbulence_conditions != nil {
+		edges = append(edges, forecast.EdgeTurbulenceConditions)
+	}
+	if m.removedicing_conditions != nil {
+		edges = append(edges, forecast.EdgeIcingConditions)
+	}
+	if m.removedtemperature_data != nil {
+		edges = append(edges, forecast.EdgeTemperatureData)
+	}
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *ForecastMutation) RemovedIDs(name string) []ent.Value {
+	switch name {
+	case forecast.EdgeSkyConditions:
+		ids := make([]ent.Value, 0, len(m.removedsky_conditions))
+		for id := range m.removedsky_conditions {
+			ids = append(ids, id)
+		}
+		return ids
+	case forecast.EdgeTurbulenceConditions:
+		ids := make([]ent.Value, 0, len(m.removedturbulence_conditions))
+		for id := range m.removedturbulence_conditions {
+			ids = append(ids, id)
+		}
+		return ids
+	case forecast.EdgeIcingConditions:
+		ids := make([]ent.Value, 0, len(m.removedicing_conditions))
+		for id := range m.removedicing_conditions {
+			ids = append(ids, id)
+		}
+		return ids
+	case forecast.EdgeTemperatureData:
+		ids := make([]ent.Value, 0, len(m.removedtemperature_data))
+		for id := range m.removedtemperature_data {
+			ids = append(ids, id)
+		}
+		return ids
+	}
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *ForecastMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 4)
+	if m.clearedsky_conditions {
+		edges = append(edges, forecast.EdgeSkyConditions)
+	}
+	if m.clearedturbulence_conditions {
+		edges = append(edges, forecast.EdgeTurbulenceConditions)
+	}
+	if m.clearedicing_conditions {
+		edges = append(edges, forecast.EdgeIcingConditions)
+	}
+	if m.clearedtemperature_data {
+		edges = append(edges, forecast.EdgeTemperatureData)
+	}
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *ForecastMutation) EdgeCleared(name string) bool {
+	switch name {
+	case forecast.EdgeSkyConditions:
+		return m.clearedsky_conditions
+	case forecast.EdgeTurbulenceConditions:
+		return m.clearedturbulence_conditions
+	case forecast.EdgeIcingConditions:
+		return m.clearedicing_conditions
+	case forecast.EdgeTemperatureData:
+		return m.clearedtemperature_data
+	}
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *ForecastMutation) ClearEdge(name string) error {
+	switch name {
+	}
+	return fmt.Errorf("unknown Forecast unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *ForecastMutation) ResetEdge(name string) error {
+	switch name {
+	case forecast.EdgeSkyConditions:
+		m.ResetSkyConditions()
+		return nil
+	case forecast.EdgeTurbulenceConditions:
+		m.ResetTurbulenceConditions()
+		return nil
+	case forecast.EdgeIcingConditions:
+		m.ResetIcingConditions()
+		return nil
+	case forecast.EdgeTemperatureData:
+		m.ResetTemperatureData()
+		return nil
+	}
+	return fmt.Errorf("unknown Forecast edge %s", name)
+}
+
 // FrequencyMutation represents an operation that mutates the Frequency nodes in the graph.
 type FrequencyMutation struct {
 	config
@@ -2546,6 +4629,537 @@ func (m *FrequencyMutation) ResetEdge(name string) error {
 	return fmt.Errorf("unknown Frequency edge %s", name)
 }
 
+// IcingConditionMutation represents an operation that mutates the IcingCondition nodes in the graph.
+type IcingConditionMutation struct {
+	config
+	op              Op
+	typ             string
+	id              *int
+	intensity       *string
+	min_altitude    *int
+	addmin_altitude *int
+	max_altitude    *int
+	addmax_altitude *int
+	clearedFields   map[string]struct{}
+	done            bool
+	oldValue        func(context.Context) (*IcingCondition, error)
+	predicates      []predicate.IcingCondition
+}
+
+var _ ent.Mutation = (*IcingConditionMutation)(nil)
+
+// icingconditionOption allows management of the mutation configuration using functional options.
+type icingconditionOption func(*IcingConditionMutation)
+
+// newIcingConditionMutation creates new mutation for the IcingCondition entity.
+func newIcingConditionMutation(c config, op Op, opts ...icingconditionOption) *IcingConditionMutation {
+	m := &IcingConditionMutation{
+		config:        c,
+		op:            op,
+		typ:           TypeIcingCondition,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withIcingConditionID sets the ID field of the mutation.
+func withIcingConditionID(id int) icingconditionOption {
+	return func(m *IcingConditionMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *IcingCondition
+		)
+		m.oldValue = func(ctx context.Context) (*IcingCondition, error) {
+			once.Do(func() {
+				if m.done {
+					err = errors.New("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().IcingCondition.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withIcingCondition sets the old IcingCondition of the mutation.
+func withIcingCondition(node *IcingCondition) icingconditionOption {
+	return func(m *IcingConditionMutation) {
+		m.oldValue = func(context.Context) (*IcingCondition, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m IcingConditionMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m IcingConditionMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, errors.New("ent: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *IcingConditionMutation) ID() (id int, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *IcingConditionMutation) IDs(ctx context.Context) ([]int, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []int{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().IcingCondition.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
+}
+
+// SetIntensity sets the "intensity" field.
+func (m *IcingConditionMutation) SetIntensity(s string) {
+	m.intensity = &s
+}
+
+// Intensity returns the value of the "intensity" field in the mutation.
+func (m *IcingConditionMutation) Intensity() (r string, exists bool) {
+	v := m.intensity
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldIntensity returns the old "intensity" field's value of the IcingCondition entity.
+// If the IcingCondition object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *IcingConditionMutation) OldIntensity(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldIntensity is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldIntensity requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldIntensity: %w", err)
+	}
+	return oldValue.Intensity, nil
+}
+
+// ResetIntensity resets all changes to the "intensity" field.
+func (m *IcingConditionMutation) ResetIntensity() {
+	m.intensity = nil
+}
+
+// SetMinAltitude sets the "min_altitude" field.
+func (m *IcingConditionMutation) SetMinAltitude(i int) {
+	m.min_altitude = &i
+	m.addmin_altitude = nil
+}
+
+// MinAltitude returns the value of the "min_altitude" field in the mutation.
+func (m *IcingConditionMutation) MinAltitude() (r int, exists bool) {
+	v := m.min_altitude
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldMinAltitude returns the old "min_altitude" field's value of the IcingCondition entity.
+// If the IcingCondition object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *IcingConditionMutation) OldMinAltitude(ctx context.Context) (v *int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldMinAltitude is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldMinAltitude requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldMinAltitude: %w", err)
+	}
+	return oldValue.MinAltitude, nil
+}
+
+// AddMinAltitude adds i to the "min_altitude" field.
+func (m *IcingConditionMutation) AddMinAltitude(i int) {
+	if m.addmin_altitude != nil {
+		*m.addmin_altitude += i
+	} else {
+		m.addmin_altitude = &i
+	}
+}
+
+// AddedMinAltitude returns the value that was added to the "min_altitude" field in this mutation.
+func (m *IcingConditionMutation) AddedMinAltitude() (r int, exists bool) {
+	v := m.addmin_altitude
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ClearMinAltitude clears the value of the "min_altitude" field.
+func (m *IcingConditionMutation) ClearMinAltitude() {
+	m.min_altitude = nil
+	m.addmin_altitude = nil
+	m.clearedFields[icingcondition.FieldMinAltitude] = struct{}{}
+}
+
+// MinAltitudeCleared returns if the "min_altitude" field was cleared in this mutation.
+func (m *IcingConditionMutation) MinAltitudeCleared() bool {
+	_, ok := m.clearedFields[icingcondition.FieldMinAltitude]
+	return ok
+}
+
+// ResetMinAltitude resets all changes to the "min_altitude" field.
+func (m *IcingConditionMutation) ResetMinAltitude() {
+	m.min_altitude = nil
+	m.addmin_altitude = nil
+	delete(m.clearedFields, icingcondition.FieldMinAltitude)
+}
+
+// SetMaxAltitude sets the "max_altitude" field.
+func (m *IcingConditionMutation) SetMaxAltitude(i int) {
+	m.max_altitude = &i
+	m.addmax_altitude = nil
+}
+
+// MaxAltitude returns the value of the "max_altitude" field in the mutation.
+func (m *IcingConditionMutation) MaxAltitude() (r int, exists bool) {
+	v := m.max_altitude
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldMaxAltitude returns the old "max_altitude" field's value of the IcingCondition entity.
+// If the IcingCondition object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *IcingConditionMutation) OldMaxAltitude(ctx context.Context) (v *int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldMaxAltitude is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldMaxAltitude requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldMaxAltitude: %w", err)
+	}
+	return oldValue.MaxAltitude, nil
+}
+
+// AddMaxAltitude adds i to the "max_altitude" field.
+func (m *IcingConditionMutation) AddMaxAltitude(i int) {
+	if m.addmax_altitude != nil {
+		*m.addmax_altitude += i
+	} else {
+		m.addmax_altitude = &i
+	}
+}
+
+// AddedMaxAltitude returns the value that was added to the "max_altitude" field in this mutation.
+func (m *IcingConditionMutation) AddedMaxAltitude() (r int, exists bool) {
+	v := m.addmax_altitude
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ClearMaxAltitude clears the value of the "max_altitude" field.
+func (m *IcingConditionMutation) ClearMaxAltitude() {
+	m.max_altitude = nil
+	m.addmax_altitude = nil
+	m.clearedFields[icingcondition.FieldMaxAltitude] = struct{}{}
+}
+
+// MaxAltitudeCleared returns if the "max_altitude" field was cleared in this mutation.
+func (m *IcingConditionMutation) MaxAltitudeCleared() bool {
+	_, ok := m.clearedFields[icingcondition.FieldMaxAltitude]
+	return ok
+}
+
+// ResetMaxAltitude resets all changes to the "max_altitude" field.
+func (m *IcingConditionMutation) ResetMaxAltitude() {
+	m.max_altitude = nil
+	m.addmax_altitude = nil
+	delete(m.clearedFields, icingcondition.FieldMaxAltitude)
+}
+
+// Where appends a list predicates to the IcingConditionMutation builder.
+func (m *IcingConditionMutation) Where(ps ...predicate.IcingCondition) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// Op returns the operation name.
+func (m *IcingConditionMutation) Op() Op {
+	return m.op
+}
+
+// Type returns the node type of this mutation (IcingCondition).
+func (m *IcingConditionMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *IcingConditionMutation) Fields() []string {
+	fields := make([]string, 0, 3)
+	if m.intensity != nil {
+		fields = append(fields, icingcondition.FieldIntensity)
+	}
+	if m.min_altitude != nil {
+		fields = append(fields, icingcondition.FieldMinAltitude)
+	}
+	if m.max_altitude != nil {
+		fields = append(fields, icingcondition.FieldMaxAltitude)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *IcingConditionMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case icingcondition.FieldIntensity:
+		return m.Intensity()
+	case icingcondition.FieldMinAltitude:
+		return m.MinAltitude()
+	case icingcondition.FieldMaxAltitude:
+		return m.MaxAltitude()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *IcingConditionMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case icingcondition.FieldIntensity:
+		return m.OldIntensity(ctx)
+	case icingcondition.FieldMinAltitude:
+		return m.OldMinAltitude(ctx)
+	case icingcondition.FieldMaxAltitude:
+		return m.OldMaxAltitude(ctx)
+	}
+	return nil, fmt.Errorf("unknown IcingCondition field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *IcingConditionMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case icingcondition.FieldIntensity:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetIntensity(v)
+		return nil
+	case icingcondition.FieldMinAltitude:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetMinAltitude(v)
+		return nil
+	case icingcondition.FieldMaxAltitude:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetMaxAltitude(v)
+		return nil
+	}
+	return fmt.Errorf("unknown IcingCondition field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *IcingConditionMutation) AddedFields() []string {
+	var fields []string
+	if m.addmin_altitude != nil {
+		fields = append(fields, icingcondition.FieldMinAltitude)
+	}
+	if m.addmax_altitude != nil {
+		fields = append(fields, icingcondition.FieldMaxAltitude)
+	}
+	return fields
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *IcingConditionMutation) AddedField(name string) (ent.Value, bool) {
+	switch name {
+	case icingcondition.FieldMinAltitude:
+		return m.AddedMinAltitude()
+	case icingcondition.FieldMaxAltitude:
+		return m.AddedMaxAltitude()
+	}
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *IcingConditionMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	case icingcondition.FieldMinAltitude:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddMinAltitude(v)
+		return nil
+	case icingcondition.FieldMaxAltitude:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddMaxAltitude(v)
+		return nil
+	}
+	return fmt.Errorf("unknown IcingCondition numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *IcingConditionMutation) ClearedFields() []string {
+	var fields []string
+	if m.FieldCleared(icingcondition.FieldMinAltitude) {
+		fields = append(fields, icingcondition.FieldMinAltitude)
+	}
+	if m.FieldCleared(icingcondition.FieldMaxAltitude) {
+		fields = append(fields, icingcondition.FieldMaxAltitude)
+	}
+	return fields
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *IcingConditionMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *IcingConditionMutation) ClearField(name string) error {
+	switch name {
+	case icingcondition.FieldMinAltitude:
+		m.ClearMinAltitude()
+		return nil
+	case icingcondition.FieldMaxAltitude:
+		m.ClearMaxAltitude()
+		return nil
+	}
+	return fmt.Errorf("unknown IcingCondition nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *IcingConditionMutation) ResetField(name string) error {
+	switch name {
+	case icingcondition.FieldIntensity:
+		m.ResetIntensity()
+		return nil
+	case icingcondition.FieldMinAltitude:
+		m.ResetMinAltitude()
+		return nil
+	case icingcondition.FieldMaxAltitude:
+		m.ResetMaxAltitude()
+		return nil
+	}
+	return fmt.Errorf("unknown IcingCondition field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *IcingConditionMutation) AddedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *IcingConditionMutation) AddedIDs(name string) []ent.Value {
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *IcingConditionMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *IcingConditionMutation) RemovedIDs(name string) []ent.Value {
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *IcingConditionMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *IcingConditionMutation) EdgeCleared(name string) bool {
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *IcingConditionMutation) ClearEdge(name string) error {
+	return fmt.Errorf("unknown IcingCondition unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *IcingConditionMutation) ResetEdge(name string) error {
+	return fmt.Errorf("unknown IcingCondition edge %s", name)
+}
+
 // MetarMutation represents an operation that mutates the Metar nodes in the graph.
 type MetarMutation struct {
 	config
@@ -2554,12 +5168,6 @@ type MetarMutation struct {
 	id                                         *int
 	raw_text                                   *string
 	observation_time                           *time.Time
-	latitude                                   *float64
-	addlatitude                                *float64
-	longitude                                  *float64
-	addlongitude                               *float64
-	elevation                                  *float64
-	addelevation                               *float64
 	temperature                                *float64
 	addtemperature                             *float64
 	dewpoint                                   *float64
@@ -2794,216 +5402,6 @@ func (m *MetarMutation) OldObservationTime(ctx context.Context) (v time.Time, er
 // ResetObservationTime resets all changes to the "observation_time" field.
 func (m *MetarMutation) ResetObservationTime() {
 	m.observation_time = nil
-}
-
-// SetLatitude sets the "latitude" field.
-func (m *MetarMutation) SetLatitude(f float64) {
-	m.latitude = &f
-	m.addlatitude = nil
-}
-
-// Latitude returns the value of the "latitude" field in the mutation.
-func (m *MetarMutation) Latitude() (r float64, exists bool) {
-	v := m.latitude
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldLatitude returns the old "latitude" field's value of the Metar entity.
-// If the Metar object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *MetarMutation) OldLatitude(ctx context.Context) (v *float64, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldLatitude is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldLatitude requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldLatitude: %w", err)
-	}
-	return oldValue.Latitude, nil
-}
-
-// AddLatitude adds f to the "latitude" field.
-func (m *MetarMutation) AddLatitude(f float64) {
-	if m.addlatitude != nil {
-		*m.addlatitude += f
-	} else {
-		m.addlatitude = &f
-	}
-}
-
-// AddedLatitude returns the value that was added to the "latitude" field in this mutation.
-func (m *MetarMutation) AddedLatitude() (r float64, exists bool) {
-	v := m.addlatitude
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// ClearLatitude clears the value of the "latitude" field.
-func (m *MetarMutation) ClearLatitude() {
-	m.latitude = nil
-	m.addlatitude = nil
-	m.clearedFields[metar.FieldLatitude] = struct{}{}
-}
-
-// LatitudeCleared returns if the "latitude" field was cleared in this mutation.
-func (m *MetarMutation) LatitudeCleared() bool {
-	_, ok := m.clearedFields[metar.FieldLatitude]
-	return ok
-}
-
-// ResetLatitude resets all changes to the "latitude" field.
-func (m *MetarMutation) ResetLatitude() {
-	m.latitude = nil
-	m.addlatitude = nil
-	delete(m.clearedFields, metar.FieldLatitude)
-}
-
-// SetLongitude sets the "longitude" field.
-func (m *MetarMutation) SetLongitude(f float64) {
-	m.longitude = &f
-	m.addlongitude = nil
-}
-
-// Longitude returns the value of the "longitude" field in the mutation.
-func (m *MetarMutation) Longitude() (r float64, exists bool) {
-	v := m.longitude
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldLongitude returns the old "longitude" field's value of the Metar entity.
-// If the Metar object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *MetarMutation) OldLongitude(ctx context.Context) (v *float64, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldLongitude is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldLongitude requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldLongitude: %w", err)
-	}
-	return oldValue.Longitude, nil
-}
-
-// AddLongitude adds f to the "longitude" field.
-func (m *MetarMutation) AddLongitude(f float64) {
-	if m.addlongitude != nil {
-		*m.addlongitude += f
-	} else {
-		m.addlongitude = &f
-	}
-}
-
-// AddedLongitude returns the value that was added to the "longitude" field in this mutation.
-func (m *MetarMutation) AddedLongitude() (r float64, exists bool) {
-	v := m.addlongitude
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// ClearLongitude clears the value of the "longitude" field.
-func (m *MetarMutation) ClearLongitude() {
-	m.longitude = nil
-	m.addlongitude = nil
-	m.clearedFields[metar.FieldLongitude] = struct{}{}
-}
-
-// LongitudeCleared returns if the "longitude" field was cleared in this mutation.
-func (m *MetarMutation) LongitudeCleared() bool {
-	_, ok := m.clearedFields[metar.FieldLongitude]
-	return ok
-}
-
-// ResetLongitude resets all changes to the "longitude" field.
-func (m *MetarMutation) ResetLongitude() {
-	m.longitude = nil
-	m.addlongitude = nil
-	delete(m.clearedFields, metar.FieldLongitude)
-}
-
-// SetElevation sets the "elevation" field.
-func (m *MetarMutation) SetElevation(f float64) {
-	m.elevation = &f
-	m.addelevation = nil
-}
-
-// Elevation returns the value of the "elevation" field in the mutation.
-func (m *MetarMutation) Elevation() (r float64, exists bool) {
-	v := m.elevation
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldElevation returns the old "elevation" field's value of the Metar entity.
-// If the Metar object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *MetarMutation) OldElevation(ctx context.Context) (v *float64, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldElevation is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldElevation requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldElevation: %w", err)
-	}
-	return oldValue.Elevation, nil
-}
-
-// AddElevation adds f to the "elevation" field.
-func (m *MetarMutation) AddElevation(f float64) {
-	if m.addelevation != nil {
-		*m.addelevation += f
-	} else {
-		m.addelevation = &f
-	}
-}
-
-// AddedElevation returns the value that was added to the "elevation" field in this mutation.
-func (m *MetarMutation) AddedElevation() (r float64, exists bool) {
-	v := m.addelevation
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// ClearElevation clears the value of the "elevation" field.
-func (m *MetarMutation) ClearElevation() {
-	m.elevation = nil
-	m.addelevation = nil
-	m.clearedFields[metar.FieldElevation] = struct{}{}
-}
-
-// ElevationCleared returns if the "elevation" field was cleared in this mutation.
-func (m *MetarMutation) ElevationCleared() bool {
-	_, ok := m.clearedFields[metar.FieldElevation]
-	return ok
-}
-
-// ResetElevation resets all changes to the "elevation" field.
-func (m *MetarMutation) ResetElevation() {
-	m.elevation = nil
-	m.addelevation = nil
-	delete(m.clearedFields, metar.FieldElevation)
 }
 
 // SetTemperature sets the "temperature" field.
@@ -4785,21 +7183,12 @@ func (m *MetarMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *MetarMutation) Fields() []string {
-	fields := make([]string, 0, 35)
+	fields := make([]string, 0, 32)
 	if m.raw_text != nil {
 		fields = append(fields, metar.FieldRawText)
 	}
 	if m.observation_time != nil {
 		fields = append(fields, metar.FieldObservationTime)
-	}
-	if m.latitude != nil {
-		fields = append(fields, metar.FieldLatitude)
-	}
-	if m.longitude != nil {
-		fields = append(fields, metar.FieldLongitude)
-	}
-	if m.elevation != nil {
-		fields = append(fields, metar.FieldElevation)
 	}
 	if m.temperature != nil {
 		fields = append(fields, metar.FieldTemperature)
@@ -4903,12 +7292,6 @@ func (m *MetarMutation) Field(name string) (ent.Value, bool) {
 		return m.RawText()
 	case metar.FieldObservationTime:
 		return m.ObservationTime()
-	case metar.FieldLatitude:
-		return m.Latitude()
-	case metar.FieldLongitude:
-		return m.Longitude()
-	case metar.FieldElevation:
-		return m.Elevation()
 	case metar.FieldTemperature:
 		return m.Temperature()
 	case metar.FieldDewpoint:
@@ -4982,12 +7365,6 @@ func (m *MetarMutation) OldField(ctx context.Context, name string) (ent.Value, e
 		return m.OldRawText(ctx)
 	case metar.FieldObservationTime:
 		return m.OldObservationTime(ctx)
-	case metar.FieldLatitude:
-		return m.OldLatitude(ctx)
-	case metar.FieldLongitude:
-		return m.OldLongitude(ctx)
-	case metar.FieldElevation:
-		return m.OldElevation(ctx)
 	case metar.FieldTemperature:
 		return m.OldTemperature(ctx)
 	case metar.FieldDewpoint:
@@ -5070,27 +7447,6 @@ func (m *MetarMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetObservationTime(v)
-		return nil
-	case metar.FieldLatitude:
-		v, ok := value.(float64)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetLatitude(v)
-		return nil
-	case metar.FieldLongitude:
-		v, ok := value.(float64)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetLongitude(v)
-		return nil
-	case metar.FieldElevation:
-		v, ok := value.(float64)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetElevation(v)
 		return nil
 	case metar.FieldTemperature:
 		v, ok := value.(float64)
@@ -5310,15 +7666,6 @@ func (m *MetarMutation) SetField(name string, value ent.Value) error {
 // this mutation.
 func (m *MetarMutation) AddedFields() []string {
 	var fields []string
-	if m.addlatitude != nil {
-		fields = append(fields, metar.FieldLatitude)
-	}
-	if m.addlongitude != nil {
-		fields = append(fields, metar.FieldLongitude)
-	}
-	if m.addelevation != nil {
-		fields = append(fields, metar.FieldElevation)
-	}
 	if m.addtemperature != nil {
 		fields = append(fields, metar.FieldTemperature)
 	}
@@ -5384,12 +7731,6 @@ func (m *MetarMutation) AddedFields() []string {
 // was not set, or was not defined in the schema.
 func (m *MetarMutation) AddedField(name string) (ent.Value, bool) {
 	switch name {
-	case metar.FieldLatitude:
-		return m.AddedLatitude()
-	case metar.FieldLongitude:
-		return m.AddedLongitude()
-	case metar.FieldElevation:
-		return m.AddedElevation()
 	case metar.FieldTemperature:
 		return m.AddedTemperature()
 	case metar.FieldDewpoint:
@@ -5437,27 +7778,6 @@ func (m *MetarMutation) AddedField(name string) (ent.Value, bool) {
 // type.
 func (m *MetarMutation) AddField(name string, value ent.Value) error {
 	switch name {
-	case metar.FieldLatitude:
-		v, ok := value.(float64)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.AddLatitude(v)
-		return nil
-	case metar.FieldLongitude:
-		v, ok := value.(float64)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.AddLongitude(v)
-		return nil
-	case metar.FieldElevation:
-		v, ok := value.(float64)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.AddElevation(v)
-		return nil
 	case metar.FieldTemperature:
 		v, ok := value.(float64)
 		if !ok {
@@ -5599,15 +7919,6 @@ func (m *MetarMutation) AddField(name string, value ent.Value) error {
 // mutation.
 func (m *MetarMutation) ClearedFields() []string {
 	var fields []string
-	if m.FieldCleared(metar.FieldLatitude) {
-		fields = append(fields, metar.FieldLatitude)
-	}
-	if m.FieldCleared(metar.FieldLongitude) {
-		fields = append(fields, metar.FieldLongitude)
-	}
-	if m.FieldCleared(metar.FieldElevation) {
-		fields = append(fields, metar.FieldElevation)
-	}
 	if m.FieldCleared(metar.FieldPresentWeather) {
 		fields = append(fields, metar.FieldPresentWeather)
 	}
@@ -5667,15 +7978,6 @@ func (m *MetarMutation) FieldCleared(name string) bool {
 // error if the field is not defined in the schema.
 func (m *MetarMutation) ClearField(name string) error {
 	switch name {
-	case metar.FieldLatitude:
-		m.ClearLatitude()
-		return nil
-	case metar.FieldLongitude:
-		m.ClearLongitude()
-		return nil
-	case metar.FieldElevation:
-		m.ClearElevation()
-		return nil
 	case metar.FieldPresentWeather:
 		m.ClearPresentWeather()
 		return nil
@@ -5734,15 +8036,6 @@ func (m *MetarMutation) ResetField(name string) error {
 		return nil
 	case metar.FieldObservationTime:
 		m.ResetObservationTime()
-		return nil
-	case metar.FieldLatitude:
-		m.ResetLatitude()
-		return nil
-	case metar.FieldLongitude:
-		m.ResetLongitude()
-		return nil
-	case metar.FieldElevation:
-		m.ResetElevation()
 		return nil
 	case metar.FieldTemperature:
 		m.ResetTemperature()
@@ -7980,9 +10273,8 @@ type SkyConditionMutation struct {
 	sky_cover     *skycondition.SkyCover
 	cloud_base    *int
 	addcloud_base *int
+	cloud_type    *skycondition.CloudType
 	clearedFields map[string]struct{}
-	metar         *int
-	clearedmetar  bool
 	done          bool
 	oldValue      func(context.Context) (*SkyCondition, error)
 	predicates    []predicate.SkyCondition
@@ -8198,43 +10490,53 @@ func (m *SkyConditionMutation) ResetCloudBase() {
 	delete(m.clearedFields, skycondition.FieldCloudBase)
 }
 
-// SetMetarID sets the "metar" edge to the Metar entity by id.
-func (m *SkyConditionMutation) SetMetarID(id int) {
-	m.metar = &id
+// SetCloudType sets the "cloud_type" field.
+func (m *SkyConditionMutation) SetCloudType(st skycondition.CloudType) {
+	m.cloud_type = &st
 }
 
-// ClearMetar clears the "metar" edge to the Metar entity.
-func (m *SkyConditionMutation) ClearMetar() {
-	m.clearedmetar = true
-}
-
-// MetarCleared reports if the "metar" edge to the Metar entity was cleared.
-func (m *SkyConditionMutation) MetarCleared() bool {
-	return m.clearedmetar
-}
-
-// MetarID returns the "metar" edge ID in the mutation.
-func (m *SkyConditionMutation) MetarID() (id int, exists bool) {
-	if m.metar != nil {
-		return *m.metar, true
+// CloudType returns the value of the "cloud_type" field in the mutation.
+func (m *SkyConditionMutation) CloudType() (r skycondition.CloudType, exists bool) {
+	v := m.cloud_type
+	if v == nil {
+		return
 	}
-	return
+	return *v, true
 }
 
-// MetarIDs returns the "metar" edge IDs in the mutation.
-// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
-// MetarID instead. It exists only for internal usage by the builders.
-func (m *SkyConditionMutation) MetarIDs() (ids []int) {
-	if id := m.metar; id != nil {
-		ids = append(ids, *id)
+// OldCloudType returns the old "cloud_type" field's value of the SkyCondition entity.
+// If the SkyCondition object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *SkyConditionMutation) OldCloudType(ctx context.Context) (v *skycondition.CloudType, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCloudType is only allowed on UpdateOne operations")
 	}
-	return
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCloudType requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCloudType: %w", err)
+	}
+	return oldValue.CloudType, nil
 }
 
-// ResetMetar resets all changes to the "metar" edge.
-func (m *SkyConditionMutation) ResetMetar() {
-	m.metar = nil
-	m.clearedmetar = false
+// ClearCloudType clears the value of the "cloud_type" field.
+func (m *SkyConditionMutation) ClearCloudType() {
+	m.cloud_type = nil
+	m.clearedFields[skycondition.FieldCloudType] = struct{}{}
+}
+
+// CloudTypeCleared returns if the "cloud_type" field was cleared in this mutation.
+func (m *SkyConditionMutation) CloudTypeCleared() bool {
+	_, ok := m.clearedFields[skycondition.FieldCloudType]
+	return ok
+}
+
+// ResetCloudType resets all changes to the "cloud_type" field.
+func (m *SkyConditionMutation) ResetCloudType() {
+	m.cloud_type = nil
+	delete(m.clearedFields, skycondition.FieldCloudType)
 }
 
 // Where appends a list predicates to the SkyConditionMutation builder.
@@ -8256,12 +10558,15 @@ func (m *SkyConditionMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *SkyConditionMutation) Fields() []string {
-	fields := make([]string, 0, 2)
+	fields := make([]string, 0, 3)
 	if m.sky_cover != nil {
 		fields = append(fields, skycondition.FieldSkyCover)
 	}
 	if m.cloud_base != nil {
 		fields = append(fields, skycondition.FieldCloudBase)
+	}
+	if m.cloud_type != nil {
+		fields = append(fields, skycondition.FieldCloudType)
 	}
 	return fields
 }
@@ -8275,6 +10580,8 @@ func (m *SkyConditionMutation) Field(name string) (ent.Value, bool) {
 		return m.SkyCover()
 	case skycondition.FieldCloudBase:
 		return m.CloudBase()
+	case skycondition.FieldCloudType:
+		return m.CloudType()
 	}
 	return nil, false
 }
@@ -8288,6 +10595,8 @@ func (m *SkyConditionMutation) OldField(ctx context.Context, name string) (ent.V
 		return m.OldSkyCover(ctx)
 	case skycondition.FieldCloudBase:
 		return m.OldCloudBase(ctx)
+	case skycondition.FieldCloudType:
+		return m.OldCloudType(ctx)
 	}
 	return nil, fmt.Errorf("unknown SkyCondition field %s", name)
 }
@@ -8310,6 +10619,13 @@ func (m *SkyConditionMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetCloudBase(v)
+		return nil
+	case skycondition.FieldCloudType:
+		v, ok := value.(skycondition.CloudType)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCloudType(v)
 		return nil
 	}
 	return fmt.Errorf("unknown SkyCondition field %s", name)
@@ -8359,6 +10675,9 @@ func (m *SkyConditionMutation) ClearedFields() []string {
 	if m.FieldCleared(skycondition.FieldCloudBase) {
 		fields = append(fields, skycondition.FieldCloudBase)
 	}
+	if m.FieldCleared(skycondition.FieldCloudType) {
+		fields = append(fields, skycondition.FieldCloudType)
+	}
 	return fields
 }
 
@@ -8376,6 +10695,9 @@ func (m *SkyConditionMutation) ClearField(name string) error {
 	case skycondition.FieldCloudBase:
 		m.ClearCloudBase()
 		return nil
+	case skycondition.FieldCloudType:
+		m.ClearCloudType()
+		return nil
 	}
 	return fmt.Errorf("unknown SkyCondition nullable field %s", name)
 }
@@ -8390,34 +10712,28 @@ func (m *SkyConditionMutation) ResetField(name string) error {
 	case skycondition.FieldCloudBase:
 		m.ResetCloudBase()
 		return nil
+	case skycondition.FieldCloudType:
+		m.ResetCloudType()
+		return nil
 	}
 	return fmt.Errorf("unknown SkyCondition field %s", name)
 }
 
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *SkyConditionMutation) AddedEdges() []string {
-	edges := make([]string, 0, 1)
-	if m.metar != nil {
-		edges = append(edges, skycondition.EdgeMetar)
-	}
+	edges := make([]string, 0, 0)
 	return edges
 }
 
 // AddedIDs returns all IDs (to other nodes) that were added for the given edge
 // name in this mutation.
 func (m *SkyConditionMutation) AddedIDs(name string) []ent.Value {
-	switch name {
-	case skycondition.EdgeMetar:
-		if id := m.metar; id != nil {
-			return []ent.Value{*id}
-		}
-	}
 	return nil
 }
 
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *SkyConditionMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 1)
+	edges := make([]string, 0, 0)
 	return edges
 }
 
@@ -8429,42 +10745,25 @@ func (m *SkyConditionMutation) RemovedIDs(name string) []ent.Value {
 
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *SkyConditionMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 1)
-	if m.clearedmetar {
-		edges = append(edges, skycondition.EdgeMetar)
-	}
+	edges := make([]string, 0, 0)
 	return edges
 }
 
 // EdgeCleared returns a boolean which indicates if the edge with the given name
 // was cleared in this mutation.
 func (m *SkyConditionMutation) EdgeCleared(name string) bool {
-	switch name {
-	case skycondition.EdgeMetar:
-		return m.clearedmetar
-	}
 	return false
 }
 
 // ClearEdge clears the value of the edge with the given name. It returns an error
 // if that edge is not defined in the schema.
 func (m *SkyConditionMutation) ClearEdge(name string) error {
-	switch name {
-	case skycondition.EdgeMetar:
-		m.ClearMetar()
-		return nil
-	}
 	return fmt.Errorf("unknown SkyCondition unique edge %s", name)
 }
 
 // ResetEdge resets all changes to the edge with the given name in this mutation.
 // It returns an error if the edge is not defined in the schema.
 func (m *SkyConditionMutation) ResetEdge(name string) error {
-	switch name {
-	case skycondition.EdgeMetar:
-		m.ResetMetar()
-		return nil
-	}
 	return fmt.Errorf("unknown SkyCondition edge %s", name)
 }
 
@@ -9404,72 +11703,28 @@ func (m *StationMutation) ResetEdge(name string) error {
 // TafMutation represents an operation that mutates the Taf nodes in the graph.
 type TafMutation struct {
 	config
-	op                                         Op
-	typ                                        string
-	id                                         *int
-	raw_text                                   *string
-	issue_time                                 *time.Time
-	bulletin_time                              *time.Time
-	valid_from_time                            *time.Time
-	valid_to_time                              *time.Time
-	remarks                                    *string
-	temperature                                *float64
-	addtemperature                             *float64
-	dewpoint                                   *float64
-	adddewpoint                                *float64
-	wind_speed                                 *int
-	addwind_speed                              *int
-	wind_gust                                  *int
-	addwind_gust                               *int
-	wind_direction                             *int
-	addwind_direction                          *int
-	visibility                                 *float64
-	addvisibility                              *float64
-	altimeter                                  *float64
-	addaltimeter                               *float64
-	flight_category                            *taf.FlightCategory
-	quality_control_corrected                  *bool
-	quality_control_auto_station               *bool
-	quality_control_maintenance_indicator_on   *bool
-	quality_control_no_signal                  *bool
-	quality_control_lightning_sensor_off       *bool
-	quality_control_freezing_rain_sensor_off   *bool
-	quality_control_present_weather_sensor_off *bool
-	sea_level_pressure                         *float64
-	addsea_level_pressure                      *float64
-	pressure_tendency                          *float64
-	addpressure_tendency                       *float64
-	max_temp_6                                 *float64
-	addmax_temp_6                              *float64
-	min_temp_6                                 *float64
-	addmin_temp_6                              *float64
-	max_temp_24                                *float64
-	addmax_temp_24                             *float64
-	min_temp_24                                *float64
-	addmin_temp_24                             *float64
-	precipitation                              *float64
-	addprecipitation                           *float64
-	precipitation_3                            *float64
-	addprecipitation_3                         *float64
-	precipitation_6                            *float64
-	addprecipitation_6                         *float64
-	precipitation_24                           *float64
-	addprecipitation_24                        *float64
-	snow_depth                                 *float64
-	addsnow_depth                              *float64
-	vert_vis                                   *float64
-	addvert_vis                                *float64
-	metar_type                                 *taf.MetarType
-	hash                                       *string
-	clearedFields                              map[string]struct{}
-	station                                    *int
-	clearedstation                             bool
-	sky_conditions                             map[int]struct{}
-	removedsky_conditions                      map[int]struct{}
-	clearedsky_conditions                      bool
-	done                                       bool
-	oldValue                                   func(context.Context) (*Taf, error)
-	predicates                                 []predicate.Taf
+	op                    Op
+	typ                   string
+	id                    *int
+	raw_text              *string
+	issue_time            *time.Time
+	bulletin_time         *time.Time
+	valid_from_time       *time.Time
+	valid_to_time         *time.Time
+	remarks               *string
+	hash                  *string
+	clearedFields         map[string]struct{}
+	station               *int
+	clearedstation        bool
+	sky_conditions        map[int]struct{}
+	removedsky_conditions map[int]struct{}
+	clearedsky_conditions bool
+	forecast              map[int]struct{}
+	removedforecast       map[int]struct{}
+	clearedforecast       bool
+	done                  bool
+	oldValue              func(context.Context) (*Taf, error)
+	predicates            []predicate.Taf
 }
 
 var _ ent.Mutation = (*TafMutation)(nil)
@@ -9792,1588 +12047,6 @@ func (m *TafMutation) ResetRemarks() {
 	m.remarks = nil
 }
 
-// SetTemperature sets the "temperature" field.
-func (m *TafMutation) SetTemperature(f float64) {
-	m.temperature = &f
-	m.addtemperature = nil
-}
-
-// Temperature returns the value of the "temperature" field in the mutation.
-func (m *TafMutation) Temperature() (r float64, exists bool) {
-	v := m.temperature
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldTemperature returns the old "temperature" field's value of the Taf entity.
-// If the Taf object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *TafMutation) OldTemperature(ctx context.Context) (v float64, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldTemperature is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldTemperature requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldTemperature: %w", err)
-	}
-	return oldValue.Temperature, nil
-}
-
-// AddTemperature adds f to the "temperature" field.
-func (m *TafMutation) AddTemperature(f float64) {
-	if m.addtemperature != nil {
-		*m.addtemperature += f
-	} else {
-		m.addtemperature = &f
-	}
-}
-
-// AddedTemperature returns the value that was added to the "temperature" field in this mutation.
-func (m *TafMutation) AddedTemperature() (r float64, exists bool) {
-	v := m.addtemperature
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// ResetTemperature resets all changes to the "temperature" field.
-func (m *TafMutation) ResetTemperature() {
-	m.temperature = nil
-	m.addtemperature = nil
-}
-
-// SetDewpoint sets the "dewpoint" field.
-func (m *TafMutation) SetDewpoint(f float64) {
-	m.dewpoint = &f
-	m.adddewpoint = nil
-}
-
-// Dewpoint returns the value of the "dewpoint" field in the mutation.
-func (m *TafMutation) Dewpoint() (r float64, exists bool) {
-	v := m.dewpoint
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldDewpoint returns the old "dewpoint" field's value of the Taf entity.
-// If the Taf object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *TafMutation) OldDewpoint(ctx context.Context) (v float64, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldDewpoint is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldDewpoint requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldDewpoint: %w", err)
-	}
-	return oldValue.Dewpoint, nil
-}
-
-// AddDewpoint adds f to the "dewpoint" field.
-func (m *TafMutation) AddDewpoint(f float64) {
-	if m.adddewpoint != nil {
-		*m.adddewpoint += f
-	} else {
-		m.adddewpoint = &f
-	}
-}
-
-// AddedDewpoint returns the value that was added to the "dewpoint" field in this mutation.
-func (m *TafMutation) AddedDewpoint() (r float64, exists bool) {
-	v := m.adddewpoint
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// ResetDewpoint resets all changes to the "dewpoint" field.
-func (m *TafMutation) ResetDewpoint() {
-	m.dewpoint = nil
-	m.adddewpoint = nil
-}
-
-// SetWindSpeed sets the "wind_speed" field.
-func (m *TafMutation) SetWindSpeed(i int) {
-	m.wind_speed = &i
-	m.addwind_speed = nil
-}
-
-// WindSpeed returns the value of the "wind_speed" field in the mutation.
-func (m *TafMutation) WindSpeed() (r int, exists bool) {
-	v := m.wind_speed
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldWindSpeed returns the old "wind_speed" field's value of the Taf entity.
-// If the Taf object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *TafMutation) OldWindSpeed(ctx context.Context) (v int, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldWindSpeed is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldWindSpeed requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldWindSpeed: %w", err)
-	}
-	return oldValue.WindSpeed, nil
-}
-
-// AddWindSpeed adds i to the "wind_speed" field.
-func (m *TafMutation) AddWindSpeed(i int) {
-	if m.addwind_speed != nil {
-		*m.addwind_speed += i
-	} else {
-		m.addwind_speed = &i
-	}
-}
-
-// AddedWindSpeed returns the value that was added to the "wind_speed" field in this mutation.
-func (m *TafMutation) AddedWindSpeed() (r int, exists bool) {
-	v := m.addwind_speed
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// ResetWindSpeed resets all changes to the "wind_speed" field.
-func (m *TafMutation) ResetWindSpeed() {
-	m.wind_speed = nil
-	m.addwind_speed = nil
-}
-
-// SetWindGust sets the "wind_gust" field.
-func (m *TafMutation) SetWindGust(i int) {
-	m.wind_gust = &i
-	m.addwind_gust = nil
-}
-
-// WindGust returns the value of the "wind_gust" field in the mutation.
-func (m *TafMutation) WindGust() (r int, exists bool) {
-	v := m.wind_gust
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldWindGust returns the old "wind_gust" field's value of the Taf entity.
-// If the Taf object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *TafMutation) OldWindGust(ctx context.Context) (v int, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldWindGust is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldWindGust requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldWindGust: %w", err)
-	}
-	return oldValue.WindGust, nil
-}
-
-// AddWindGust adds i to the "wind_gust" field.
-func (m *TafMutation) AddWindGust(i int) {
-	if m.addwind_gust != nil {
-		*m.addwind_gust += i
-	} else {
-		m.addwind_gust = &i
-	}
-}
-
-// AddedWindGust returns the value that was added to the "wind_gust" field in this mutation.
-func (m *TafMutation) AddedWindGust() (r int, exists bool) {
-	v := m.addwind_gust
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// ResetWindGust resets all changes to the "wind_gust" field.
-func (m *TafMutation) ResetWindGust() {
-	m.wind_gust = nil
-	m.addwind_gust = nil
-}
-
-// SetWindDirection sets the "wind_direction" field.
-func (m *TafMutation) SetWindDirection(i int) {
-	m.wind_direction = &i
-	m.addwind_direction = nil
-}
-
-// WindDirection returns the value of the "wind_direction" field in the mutation.
-func (m *TafMutation) WindDirection() (r int, exists bool) {
-	v := m.wind_direction
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldWindDirection returns the old "wind_direction" field's value of the Taf entity.
-// If the Taf object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *TafMutation) OldWindDirection(ctx context.Context) (v int, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldWindDirection is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldWindDirection requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldWindDirection: %w", err)
-	}
-	return oldValue.WindDirection, nil
-}
-
-// AddWindDirection adds i to the "wind_direction" field.
-func (m *TafMutation) AddWindDirection(i int) {
-	if m.addwind_direction != nil {
-		*m.addwind_direction += i
-	} else {
-		m.addwind_direction = &i
-	}
-}
-
-// AddedWindDirection returns the value that was added to the "wind_direction" field in this mutation.
-func (m *TafMutation) AddedWindDirection() (r int, exists bool) {
-	v := m.addwind_direction
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// ResetWindDirection resets all changes to the "wind_direction" field.
-func (m *TafMutation) ResetWindDirection() {
-	m.wind_direction = nil
-	m.addwind_direction = nil
-}
-
-// SetVisibility sets the "visibility" field.
-func (m *TafMutation) SetVisibility(f float64) {
-	m.visibility = &f
-	m.addvisibility = nil
-}
-
-// Visibility returns the value of the "visibility" field in the mutation.
-func (m *TafMutation) Visibility() (r float64, exists bool) {
-	v := m.visibility
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldVisibility returns the old "visibility" field's value of the Taf entity.
-// If the Taf object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *TafMutation) OldVisibility(ctx context.Context) (v float64, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldVisibility is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldVisibility requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldVisibility: %w", err)
-	}
-	return oldValue.Visibility, nil
-}
-
-// AddVisibility adds f to the "visibility" field.
-func (m *TafMutation) AddVisibility(f float64) {
-	if m.addvisibility != nil {
-		*m.addvisibility += f
-	} else {
-		m.addvisibility = &f
-	}
-}
-
-// AddedVisibility returns the value that was added to the "visibility" field in this mutation.
-func (m *TafMutation) AddedVisibility() (r float64, exists bool) {
-	v := m.addvisibility
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// ResetVisibility resets all changes to the "visibility" field.
-func (m *TafMutation) ResetVisibility() {
-	m.visibility = nil
-	m.addvisibility = nil
-}
-
-// SetAltimeter sets the "altimeter" field.
-func (m *TafMutation) SetAltimeter(f float64) {
-	m.altimeter = &f
-	m.addaltimeter = nil
-}
-
-// Altimeter returns the value of the "altimeter" field in the mutation.
-func (m *TafMutation) Altimeter() (r float64, exists bool) {
-	v := m.altimeter
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldAltimeter returns the old "altimeter" field's value of the Taf entity.
-// If the Taf object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *TafMutation) OldAltimeter(ctx context.Context) (v float64, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldAltimeter is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldAltimeter requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldAltimeter: %w", err)
-	}
-	return oldValue.Altimeter, nil
-}
-
-// AddAltimeter adds f to the "altimeter" field.
-func (m *TafMutation) AddAltimeter(f float64) {
-	if m.addaltimeter != nil {
-		*m.addaltimeter += f
-	} else {
-		m.addaltimeter = &f
-	}
-}
-
-// AddedAltimeter returns the value that was added to the "altimeter" field in this mutation.
-func (m *TafMutation) AddedAltimeter() (r float64, exists bool) {
-	v := m.addaltimeter
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// ResetAltimeter resets all changes to the "altimeter" field.
-func (m *TafMutation) ResetAltimeter() {
-	m.altimeter = nil
-	m.addaltimeter = nil
-}
-
-// SetFlightCategory sets the "flight_category" field.
-func (m *TafMutation) SetFlightCategory(tc taf.FlightCategory) {
-	m.flight_category = &tc
-}
-
-// FlightCategory returns the value of the "flight_category" field in the mutation.
-func (m *TafMutation) FlightCategory() (r taf.FlightCategory, exists bool) {
-	v := m.flight_category
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldFlightCategory returns the old "flight_category" field's value of the Taf entity.
-// If the Taf object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *TafMutation) OldFlightCategory(ctx context.Context) (v *taf.FlightCategory, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldFlightCategory is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldFlightCategory requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldFlightCategory: %w", err)
-	}
-	return oldValue.FlightCategory, nil
-}
-
-// ClearFlightCategory clears the value of the "flight_category" field.
-func (m *TafMutation) ClearFlightCategory() {
-	m.flight_category = nil
-	m.clearedFields[taf.FieldFlightCategory] = struct{}{}
-}
-
-// FlightCategoryCleared returns if the "flight_category" field was cleared in this mutation.
-func (m *TafMutation) FlightCategoryCleared() bool {
-	_, ok := m.clearedFields[taf.FieldFlightCategory]
-	return ok
-}
-
-// ResetFlightCategory resets all changes to the "flight_category" field.
-func (m *TafMutation) ResetFlightCategory() {
-	m.flight_category = nil
-	delete(m.clearedFields, taf.FieldFlightCategory)
-}
-
-// SetQualityControlCorrected sets the "quality_control_corrected" field.
-func (m *TafMutation) SetQualityControlCorrected(b bool) {
-	m.quality_control_corrected = &b
-}
-
-// QualityControlCorrected returns the value of the "quality_control_corrected" field in the mutation.
-func (m *TafMutation) QualityControlCorrected() (r bool, exists bool) {
-	v := m.quality_control_corrected
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldQualityControlCorrected returns the old "quality_control_corrected" field's value of the Taf entity.
-// If the Taf object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *TafMutation) OldQualityControlCorrected(ctx context.Context) (v *bool, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldQualityControlCorrected is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldQualityControlCorrected requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldQualityControlCorrected: %w", err)
-	}
-	return oldValue.QualityControlCorrected, nil
-}
-
-// ClearQualityControlCorrected clears the value of the "quality_control_corrected" field.
-func (m *TafMutation) ClearQualityControlCorrected() {
-	m.quality_control_corrected = nil
-	m.clearedFields[taf.FieldQualityControlCorrected] = struct{}{}
-}
-
-// QualityControlCorrectedCleared returns if the "quality_control_corrected" field was cleared in this mutation.
-func (m *TafMutation) QualityControlCorrectedCleared() bool {
-	_, ok := m.clearedFields[taf.FieldQualityControlCorrected]
-	return ok
-}
-
-// ResetQualityControlCorrected resets all changes to the "quality_control_corrected" field.
-func (m *TafMutation) ResetQualityControlCorrected() {
-	m.quality_control_corrected = nil
-	delete(m.clearedFields, taf.FieldQualityControlCorrected)
-}
-
-// SetQualityControlAutoStation sets the "quality_control_auto_station" field.
-func (m *TafMutation) SetQualityControlAutoStation(b bool) {
-	m.quality_control_auto_station = &b
-}
-
-// QualityControlAutoStation returns the value of the "quality_control_auto_station" field in the mutation.
-func (m *TafMutation) QualityControlAutoStation() (r bool, exists bool) {
-	v := m.quality_control_auto_station
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldQualityControlAutoStation returns the old "quality_control_auto_station" field's value of the Taf entity.
-// If the Taf object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *TafMutation) OldQualityControlAutoStation(ctx context.Context) (v bool, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldQualityControlAutoStation is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldQualityControlAutoStation requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldQualityControlAutoStation: %w", err)
-	}
-	return oldValue.QualityControlAutoStation, nil
-}
-
-// ResetQualityControlAutoStation resets all changes to the "quality_control_auto_station" field.
-func (m *TafMutation) ResetQualityControlAutoStation() {
-	m.quality_control_auto_station = nil
-}
-
-// SetQualityControlMaintenanceIndicatorOn sets the "quality_control_maintenance_indicator_on" field.
-func (m *TafMutation) SetQualityControlMaintenanceIndicatorOn(b bool) {
-	m.quality_control_maintenance_indicator_on = &b
-}
-
-// QualityControlMaintenanceIndicatorOn returns the value of the "quality_control_maintenance_indicator_on" field in the mutation.
-func (m *TafMutation) QualityControlMaintenanceIndicatorOn() (r bool, exists bool) {
-	v := m.quality_control_maintenance_indicator_on
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldQualityControlMaintenanceIndicatorOn returns the old "quality_control_maintenance_indicator_on" field's value of the Taf entity.
-// If the Taf object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *TafMutation) OldQualityControlMaintenanceIndicatorOn(ctx context.Context) (v bool, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldQualityControlMaintenanceIndicatorOn is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldQualityControlMaintenanceIndicatorOn requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldQualityControlMaintenanceIndicatorOn: %w", err)
-	}
-	return oldValue.QualityControlMaintenanceIndicatorOn, nil
-}
-
-// ResetQualityControlMaintenanceIndicatorOn resets all changes to the "quality_control_maintenance_indicator_on" field.
-func (m *TafMutation) ResetQualityControlMaintenanceIndicatorOn() {
-	m.quality_control_maintenance_indicator_on = nil
-}
-
-// SetQualityControlNoSignal sets the "quality_control_no_signal" field.
-func (m *TafMutation) SetQualityControlNoSignal(b bool) {
-	m.quality_control_no_signal = &b
-}
-
-// QualityControlNoSignal returns the value of the "quality_control_no_signal" field in the mutation.
-func (m *TafMutation) QualityControlNoSignal() (r bool, exists bool) {
-	v := m.quality_control_no_signal
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldQualityControlNoSignal returns the old "quality_control_no_signal" field's value of the Taf entity.
-// If the Taf object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *TafMutation) OldQualityControlNoSignal(ctx context.Context) (v bool, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldQualityControlNoSignal is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldQualityControlNoSignal requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldQualityControlNoSignal: %w", err)
-	}
-	return oldValue.QualityControlNoSignal, nil
-}
-
-// ResetQualityControlNoSignal resets all changes to the "quality_control_no_signal" field.
-func (m *TafMutation) ResetQualityControlNoSignal() {
-	m.quality_control_no_signal = nil
-}
-
-// SetQualityControlLightningSensorOff sets the "quality_control_lightning_sensor_off" field.
-func (m *TafMutation) SetQualityControlLightningSensorOff(b bool) {
-	m.quality_control_lightning_sensor_off = &b
-}
-
-// QualityControlLightningSensorOff returns the value of the "quality_control_lightning_sensor_off" field in the mutation.
-func (m *TafMutation) QualityControlLightningSensorOff() (r bool, exists bool) {
-	v := m.quality_control_lightning_sensor_off
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldQualityControlLightningSensorOff returns the old "quality_control_lightning_sensor_off" field's value of the Taf entity.
-// If the Taf object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *TafMutation) OldQualityControlLightningSensorOff(ctx context.Context) (v bool, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldQualityControlLightningSensorOff is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldQualityControlLightningSensorOff requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldQualityControlLightningSensorOff: %w", err)
-	}
-	return oldValue.QualityControlLightningSensorOff, nil
-}
-
-// ResetQualityControlLightningSensorOff resets all changes to the "quality_control_lightning_sensor_off" field.
-func (m *TafMutation) ResetQualityControlLightningSensorOff() {
-	m.quality_control_lightning_sensor_off = nil
-}
-
-// SetQualityControlFreezingRainSensorOff sets the "quality_control_freezing_rain_sensor_off" field.
-func (m *TafMutation) SetQualityControlFreezingRainSensorOff(b bool) {
-	m.quality_control_freezing_rain_sensor_off = &b
-}
-
-// QualityControlFreezingRainSensorOff returns the value of the "quality_control_freezing_rain_sensor_off" field in the mutation.
-func (m *TafMutation) QualityControlFreezingRainSensorOff() (r bool, exists bool) {
-	v := m.quality_control_freezing_rain_sensor_off
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldQualityControlFreezingRainSensorOff returns the old "quality_control_freezing_rain_sensor_off" field's value of the Taf entity.
-// If the Taf object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *TafMutation) OldQualityControlFreezingRainSensorOff(ctx context.Context) (v bool, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldQualityControlFreezingRainSensorOff is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldQualityControlFreezingRainSensorOff requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldQualityControlFreezingRainSensorOff: %w", err)
-	}
-	return oldValue.QualityControlFreezingRainSensorOff, nil
-}
-
-// ResetQualityControlFreezingRainSensorOff resets all changes to the "quality_control_freezing_rain_sensor_off" field.
-func (m *TafMutation) ResetQualityControlFreezingRainSensorOff() {
-	m.quality_control_freezing_rain_sensor_off = nil
-}
-
-// SetQualityControlPresentWeatherSensorOff sets the "quality_control_present_weather_sensor_off" field.
-func (m *TafMutation) SetQualityControlPresentWeatherSensorOff(b bool) {
-	m.quality_control_present_weather_sensor_off = &b
-}
-
-// QualityControlPresentWeatherSensorOff returns the value of the "quality_control_present_weather_sensor_off" field in the mutation.
-func (m *TafMutation) QualityControlPresentWeatherSensorOff() (r bool, exists bool) {
-	v := m.quality_control_present_weather_sensor_off
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldQualityControlPresentWeatherSensorOff returns the old "quality_control_present_weather_sensor_off" field's value of the Taf entity.
-// If the Taf object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *TafMutation) OldQualityControlPresentWeatherSensorOff(ctx context.Context) (v bool, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldQualityControlPresentWeatherSensorOff is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldQualityControlPresentWeatherSensorOff requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldQualityControlPresentWeatherSensorOff: %w", err)
-	}
-	return oldValue.QualityControlPresentWeatherSensorOff, nil
-}
-
-// ResetQualityControlPresentWeatherSensorOff resets all changes to the "quality_control_present_weather_sensor_off" field.
-func (m *TafMutation) ResetQualityControlPresentWeatherSensorOff() {
-	m.quality_control_present_weather_sensor_off = nil
-}
-
-// SetSeaLevelPressure sets the "sea_level_pressure" field.
-func (m *TafMutation) SetSeaLevelPressure(f float64) {
-	m.sea_level_pressure = &f
-	m.addsea_level_pressure = nil
-}
-
-// SeaLevelPressure returns the value of the "sea_level_pressure" field in the mutation.
-func (m *TafMutation) SeaLevelPressure() (r float64, exists bool) {
-	v := m.sea_level_pressure
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldSeaLevelPressure returns the old "sea_level_pressure" field's value of the Taf entity.
-// If the Taf object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *TafMutation) OldSeaLevelPressure(ctx context.Context) (v *float64, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldSeaLevelPressure is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldSeaLevelPressure requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldSeaLevelPressure: %w", err)
-	}
-	return oldValue.SeaLevelPressure, nil
-}
-
-// AddSeaLevelPressure adds f to the "sea_level_pressure" field.
-func (m *TafMutation) AddSeaLevelPressure(f float64) {
-	if m.addsea_level_pressure != nil {
-		*m.addsea_level_pressure += f
-	} else {
-		m.addsea_level_pressure = &f
-	}
-}
-
-// AddedSeaLevelPressure returns the value that was added to the "sea_level_pressure" field in this mutation.
-func (m *TafMutation) AddedSeaLevelPressure() (r float64, exists bool) {
-	v := m.addsea_level_pressure
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// ClearSeaLevelPressure clears the value of the "sea_level_pressure" field.
-func (m *TafMutation) ClearSeaLevelPressure() {
-	m.sea_level_pressure = nil
-	m.addsea_level_pressure = nil
-	m.clearedFields[taf.FieldSeaLevelPressure] = struct{}{}
-}
-
-// SeaLevelPressureCleared returns if the "sea_level_pressure" field was cleared in this mutation.
-func (m *TafMutation) SeaLevelPressureCleared() bool {
-	_, ok := m.clearedFields[taf.FieldSeaLevelPressure]
-	return ok
-}
-
-// ResetSeaLevelPressure resets all changes to the "sea_level_pressure" field.
-func (m *TafMutation) ResetSeaLevelPressure() {
-	m.sea_level_pressure = nil
-	m.addsea_level_pressure = nil
-	delete(m.clearedFields, taf.FieldSeaLevelPressure)
-}
-
-// SetPressureTendency sets the "pressure_tendency" field.
-func (m *TafMutation) SetPressureTendency(f float64) {
-	m.pressure_tendency = &f
-	m.addpressure_tendency = nil
-}
-
-// PressureTendency returns the value of the "pressure_tendency" field in the mutation.
-func (m *TafMutation) PressureTendency() (r float64, exists bool) {
-	v := m.pressure_tendency
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldPressureTendency returns the old "pressure_tendency" field's value of the Taf entity.
-// If the Taf object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *TafMutation) OldPressureTendency(ctx context.Context) (v *float64, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldPressureTendency is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldPressureTendency requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldPressureTendency: %w", err)
-	}
-	return oldValue.PressureTendency, nil
-}
-
-// AddPressureTendency adds f to the "pressure_tendency" field.
-func (m *TafMutation) AddPressureTendency(f float64) {
-	if m.addpressure_tendency != nil {
-		*m.addpressure_tendency += f
-	} else {
-		m.addpressure_tendency = &f
-	}
-}
-
-// AddedPressureTendency returns the value that was added to the "pressure_tendency" field in this mutation.
-func (m *TafMutation) AddedPressureTendency() (r float64, exists bool) {
-	v := m.addpressure_tendency
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// ClearPressureTendency clears the value of the "pressure_tendency" field.
-func (m *TafMutation) ClearPressureTendency() {
-	m.pressure_tendency = nil
-	m.addpressure_tendency = nil
-	m.clearedFields[taf.FieldPressureTendency] = struct{}{}
-}
-
-// PressureTendencyCleared returns if the "pressure_tendency" field was cleared in this mutation.
-func (m *TafMutation) PressureTendencyCleared() bool {
-	_, ok := m.clearedFields[taf.FieldPressureTendency]
-	return ok
-}
-
-// ResetPressureTendency resets all changes to the "pressure_tendency" field.
-func (m *TafMutation) ResetPressureTendency() {
-	m.pressure_tendency = nil
-	m.addpressure_tendency = nil
-	delete(m.clearedFields, taf.FieldPressureTendency)
-}
-
-// SetMaxTemp6 sets the "max_temp_6" field.
-func (m *TafMutation) SetMaxTemp6(f float64) {
-	m.max_temp_6 = &f
-	m.addmax_temp_6 = nil
-}
-
-// MaxTemp6 returns the value of the "max_temp_6" field in the mutation.
-func (m *TafMutation) MaxTemp6() (r float64, exists bool) {
-	v := m.max_temp_6
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldMaxTemp6 returns the old "max_temp_6" field's value of the Taf entity.
-// If the Taf object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *TafMutation) OldMaxTemp6(ctx context.Context) (v *float64, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldMaxTemp6 is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldMaxTemp6 requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldMaxTemp6: %w", err)
-	}
-	return oldValue.MaxTemp6, nil
-}
-
-// AddMaxTemp6 adds f to the "max_temp_6" field.
-func (m *TafMutation) AddMaxTemp6(f float64) {
-	if m.addmax_temp_6 != nil {
-		*m.addmax_temp_6 += f
-	} else {
-		m.addmax_temp_6 = &f
-	}
-}
-
-// AddedMaxTemp6 returns the value that was added to the "max_temp_6" field in this mutation.
-func (m *TafMutation) AddedMaxTemp6() (r float64, exists bool) {
-	v := m.addmax_temp_6
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// ClearMaxTemp6 clears the value of the "max_temp_6" field.
-func (m *TafMutation) ClearMaxTemp6() {
-	m.max_temp_6 = nil
-	m.addmax_temp_6 = nil
-	m.clearedFields[taf.FieldMaxTemp6] = struct{}{}
-}
-
-// MaxTemp6Cleared returns if the "max_temp_6" field was cleared in this mutation.
-func (m *TafMutation) MaxTemp6Cleared() bool {
-	_, ok := m.clearedFields[taf.FieldMaxTemp6]
-	return ok
-}
-
-// ResetMaxTemp6 resets all changes to the "max_temp_6" field.
-func (m *TafMutation) ResetMaxTemp6() {
-	m.max_temp_6 = nil
-	m.addmax_temp_6 = nil
-	delete(m.clearedFields, taf.FieldMaxTemp6)
-}
-
-// SetMinTemp6 sets the "min_temp_6" field.
-func (m *TafMutation) SetMinTemp6(f float64) {
-	m.min_temp_6 = &f
-	m.addmin_temp_6 = nil
-}
-
-// MinTemp6 returns the value of the "min_temp_6" field in the mutation.
-func (m *TafMutation) MinTemp6() (r float64, exists bool) {
-	v := m.min_temp_6
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldMinTemp6 returns the old "min_temp_6" field's value of the Taf entity.
-// If the Taf object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *TafMutation) OldMinTemp6(ctx context.Context) (v *float64, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldMinTemp6 is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldMinTemp6 requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldMinTemp6: %w", err)
-	}
-	return oldValue.MinTemp6, nil
-}
-
-// AddMinTemp6 adds f to the "min_temp_6" field.
-func (m *TafMutation) AddMinTemp6(f float64) {
-	if m.addmin_temp_6 != nil {
-		*m.addmin_temp_6 += f
-	} else {
-		m.addmin_temp_6 = &f
-	}
-}
-
-// AddedMinTemp6 returns the value that was added to the "min_temp_6" field in this mutation.
-func (m *TafMutation) AddedMinTemp6() (r float64, exists bool) {
-	v := m.addmin_temp_6
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// ClearMinTemp6 clears the value of the "min_temp_6" field.
-func (m *TafMutation) ClearMinTemp6() {
-	m.min_temp_6 = nil
-	m.addmin_temp_6 = nil
-	m.clearedFields[taf.FieldMinTemp6] = struct{}{}
-}
-
-// MinTemp6Cleared returns if the "min_temp_6" field was cleared in this mutation.
-func (m *TafMutation) MinTemp6Cleared() bool {
-	_, ok := m.clearedFields[taf.FieldMinTemp6]
-	return ok
-}
-
-// ResetMinTemp6 resets all changes to the "min_temp_6" field.
-func (m *TafMutation) ResetMinTemp6() {
-	m.min_temp_6 = nil
-	m.addmin_temp_6 = nil
-	delete(m.clearedFields, taf.FieldMinTemp6)
-}
-
-// SetMaxTemp24 sets the "max_temp_24" field.
-func (m *TafMutation) SetMaxTemp24(f float64) {
-	m.max_temp_24 = &f
-	m.addmax_temp_24 = nil
-}
-
-// MaxTemp24 returns the value of the "max_temp_24" field in the mutation.
-func (m *TafMutation) MaxTemp24() (r float64, exists bool) {
-	v := m.max_temp_24
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldMaxTemp24 returns the old "max_temp_24" field's value of the Taf entity.
-// If the Taf object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *TafMutation) OldMaxTemp24(ctx context.Context) (v *float64, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldMaxTemp24 is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldMaxTemp24 requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldMaxTemp24: %w", err)
-	}
-	return oldValue.MaxTemp24, nil
-}
-
-// AddMaxTemp24 adds f to the "max_temp_24" field.
-func (m *TafMutation) AddMaxTemp24(f float64) {
-	if m.addmax_temp_24 != nil {
-		*m.addmax_temp_24 += f
-	} else {
-		m.addmax_temp_24 = &f
-	}
-}
-
-// AddedMaxTemp24 returns the value that was added to the "max_temp_24" field in this mutation.
-func (m *TafMutation) AddedMaxTemp24() (r float64, exists bool) {
-	v := m.addmax_temp_24
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// ClearMaxTemp24 clears the value of the "max_temp_24" field.
-func (m *TafMutation) ClearMaxTemp24() {
-	m.max_temp_24 = nil
-	m.addmax_temp_24 = nil
-	m.clearedFields[taf.FieldMaxTemp24] = struct{}{}
-}
-
-// MaxTemp24Cleared returns if the "max_temp_24" field was cleared in this mutation.
-func (m *TafMutation) MaxTemp24Cleared() bool {
-	_, ok := m.clearedFields[taf.FieldMaxTemp24]
-	return ok
-}
-
-// ResetMaxTemp24 resets all changes to the "max_temp_24" field.
-func (m *TafMutation) ResetMaxTemp24() {
-	m.max_temp_24 = nil
-	m.addmax_temp_24 = nil
-	delete(m.clearedFields, taf.FieldMaxTemp24)
-}
-
-// SetMinTemp24 sets the "min_temp_24" field.
-func (m *TafMutation) SetMinTemp24(f float64) {
-	m.min_temp_24 = &f
-	m.addmin_temp_24 = nil
-}
-
-// MinTemp24 returns the value of the "min_temp_24" field in the mutation.
-func (m *TafMutation) MinTemp24() (r float64, exists bool) {
-	v := m.min_temp_24
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldMinTemp24 returns the old "min_temp_24" field's value of the Taf entity.
-// If the Taf object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *TafMutation) OldMinTemp24(ctx context.Context) (v *float64, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldMinTemp24 is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldMinTemp24 requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldMinTemp24: %w", err)
-	}
-	return oldValue.MinTemp24, nil
-}
-
-// AddMinTemp24 adds f to the "min_temp_24" field.
-func (m *TafMutation) AddMinTemp24(f float64) {
-	if m.addmin_temp_24 != nil {
-		*m.addmin_temp_24 += f
-	} else {
-		m.addmin_temp_24 = &f
-	}
-}
-
-// AddedMinTemp24 returns the value that was added to the "min_temp_24" field in this mutation.
-func (m *TafMutation) AddedMinTemp24() (r float64, exists bool) {
-	v := m.addmin_temp_24
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// ClearMinTemp24 clears the value of the "min_temp_24" field.
-func (m *TafMutation) ClearMinTemp24() {
-	m.min_temp_24 = nil
-	m.addmin_temp_24 = nil
-	m.clearedFields[taf.FieldMinTemp24] = struct{}{}
-}
-
-// MinTemp24Cleared returns if the "min_temp_24" field was cleared in this mutation.
-func (m *TafMutation) MinTemp24Cleared() bool {
-	_, ok := m.clearedFields[taf.FieldMinTemp24]
-	return ok
-}
-
-// ResetMinTemp24 resets all changes to the "min_temp_24" field.
-func (m *TafMutation) ResetMinTemp24() {
-	m.min_temp_24 = nil
-	m.addmin_temp_24 = nil
-	delete(m.clearedFields, taf.FieldMinTemp24)
-}
-
-// SetPrecipitation sets the "precipitation" field.
-func (m *TafMutation) SetPrecipitation(f float64) {
-	m.precipitation = &f
-	m.addprecipitation = nil
-}
-
-// Precipitation returns the value of the "precipitation" field in the mutation.
-func (m *TafMutation) Precipitation() (r float64, exists bool) {
-	v := m.precipitation
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldPrecipitation returns the old "precipitation" field's value of the Taf entity.
-// If the Taf object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *TafMutation) OldPrecipitation(ctx context.Context) (v *float64, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldPrecipitation is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldPrecipitation requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldPrecipitation: %w", err)
-	}
-	return oldValue.Precipitation, nil
-}
-
-// AddPrecipitation adds f to the "precipitation" field.
-func (m *TafMutation) AddPrecipitation(f float64) {
-	if m.addprecipitation != nil {
-		*m.addprecipitation += f
-	} else {
-		m.addprecipitation = &f
-	}
-}
-
-// AddedPrecipitation returns the value that was added to the "precipitation" field in this mutation.
-func (m *TafMutation) AddedPrecipitation() (r float64, exists bool) {
-	v := m.addprecipitation
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// ClearPrecipitation clears the value of the "precipitation" field.
-func (m *TafMutation) ClearPrecipitation() {
-	m.precipitation = nil
-	m.addprecipitation = nil
-	m.clearedFields[taf.FieldPrecipitation] = struct{}{}
-}
-
-// PrecipitationCleared returns if the "precipitation" field was cleared in this mutation.
-func (m *TafMutation) PrecipitationCleared() bool {
-	_, ok := m.clearedFields[taf.FieldPrecipitation]
-	return ok
-}
-
-// ResetPrecipitation resets all changes to the "precipitation" field.
-func (m *TafMutation) ResetPrecipitation() {
-	m.precipitation = nil
-	m.addprecipitation = nil
-	delete(m.clearedFields, taf.FieldPrecipitation)
-}
-
-// SetPrecipitation3 sets the "precipitation_3" field.
-func (m *TafMutation) SetPrecipitation3(f float64) {
-	m.precipitation_3 = &f
-	m.addprecipitation_3 = nil
-}
-
-// Precipitation3 returns the value of the "precipitation_3" field in the mutation.
-func (m *TafMutation) Precipitation3() (r float64, exists bool) {
-	v := m.precipitation_3
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldPrecipitation3 returns the old "precipitation_3" field's value of the Taf entity.
-// If the Taf object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *TafMutation) OldPrecipitation3(ctx context.Context) (v *float64, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldPrecipitation3 is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldPrecipitation3 requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldPrecipitation3: %w", err)
-	}
-	return oldValue.Precipitation3, nil
-}
-
-// AddPrecipitation3 adds f to the "precipitation_3" field.
-func (m *TafMutation) AddPrecipitation3(f float64) {
-	if m.addprecipitation_3 != nil {
-		*m.addprecipitation_3 += f
-	} else {
-		m.addprecipitation_3 = &f
-	}
-}
-
-// AddedPrecipitation3 returns the value that was added to the "precipitation_3" field in this mutation.
-func (m *TafMutation) AddedPrecipitation3() (r float64, exists bool) {
-	v := m.addprecipitation_3
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// ClearPrecipitation3 clears the value of the "precipitation_3" field.
-func (m *TafMutation) ClearPrecipitation3() {
-	m.precipitation_3 = nil
-	m.addprecipitation_3 = nil
-	m.clearedFields[taf.FieldPrecipitation3] = struct{}{}
-}
-
-// Precipitation3Cleared returns if the "precipitation_3" field was cleared in this mutation.
-func (m *TafMutation) Precipitation3Cleared() bool {
-	_, ok := m.clearedFields[taf.FieldPrecipitation3]
-	return ok
-}
-
-// ResetPrecipitation3 resets all changes to the "precipitation_3" field.
-func (m *TafMutation) ResetPrecipitation3() {
-	m.precipitation_3 = nil
-	m.addprecipitation_3 = nil
-	delete(m.clearedFields, taf.FieldPrecipitation3)
-}
-
-// SetPrecipitation6 sets the "precipitation_6" field.
-func (m *TafMutation) SetPrecipitation6(f float64) {
-	m.precipitation_6 = &f
-	m.addprecipitation_6 = nil
-}
-
-// Precipitation6 returns the value of the "precipitation_6" field in the mutation.
-func (m *TafMutation) Precipitation6() (r float64, exists bool) {
-	v := m.precipitation_6
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldPrecipitation6 returns the old "precipitation_6" field's value of the Taf entity.
-// If the Taf object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *TafMutation) OldPrecipitation6(ctx context.Context) (v *float64, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldPrecipitation6 is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldPrecipitation6 requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldPrecipitation6: %w", err)
-	}
-	return oldValue.Precipitation6, nil
-}
-
-// AddPrecipitation6 adds f to the "precipitation_6" field.
-func (m *TafMutation) AddPrecipitation6(f float64) {
-	if m.addprecipitation_6 != nil {
-		*m.addprecipitation_6 += f
-	} else {
-		m.addprecipitation_6 = &f
-	}
-}
-
-// AddedPrecipitation6 returns the value that was added to the "precipitation_6" field in this mutation.
-func (m *TafMutation) AddedPrecipitation6() (r float64, exists bool) {
-	v := m.addprecipitation_6
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// ClearPrecipitation6 clears the value of the "precipitation_6" field.
-func (m *TafMutation) ClearPrecipitation6() {
-	m.precipitation_6 = nil
-	m.addprecipitation_6 = nil
-	m.clearedFields[taf.FieldPrecipitation6] = struct{}{}
-}
-
-// Precipitation6Cleared returns if the "precipitation_6" field was cleared in this mutation.
-func (m *TafMutation) Precipitation6Cleared() bool {
-	_, ok := m.clearedFields[taf.FieldPrecipitation6]
-	return ok
-}
-
-// ResetPrecipitation6 resets all changes to the "precipitation_6" field.
-func (m *TafMutation) ResetPrecipitation6() {
-	m.precipitation_6 = nil
-	m.addprecipitation_6 = nil
-	delete(m.clearedFields, taf.FieldPrecipitation6)
-}
-
-// SetPrecipitation24 sets the "precipitation_24" field.
-func (m *TafMutation) SetPrecipitation24(f float64) {
-	m.precipitation_24 = &f
-	m.addprecipitation_24 = nil
-}
-
-// Precipitation24 returns the value of the "precipitation_24" field in the mutation.
-func (m *TafMutation) Precipitation24() (r float64, exists bool) {
-	v := m.precipitation_24
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldPrecipitation24 returns the old "precipitation_24" field's value of the Taf entity.
-// If the Taf object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *TafMutation) OldPrecipitation24(ctx context.Context) (v *float64, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldPrecipitation24 is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldPrecipitation24 requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldPrecipitation24: %w", err)
-	}
-	return oldValue.Precipitation24, nil
-}
-
-// AddPrecipitation24 adds f to the "precipitation_24" field.
-func (m *TafMutation) AddPrecipitation24(f float64) {
-	if m.addprecipitation_24 != nil {
-		*m.addprecipitation_24 += f
-	} else {
-		m.addprecipitation_24 = &f
-	}
-}
-
-// AddedPrecipitation24 returns the value that was added to the "precipitation_24" field in this mutation.
-func (m *TafMutation) AddedPrecipitation24() (r float64, exists bool) {
-	v := m.addprecipitation_24
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// ClearPrecipitation24 clears the value of the "precipitation_24" field.
-func (m *TafMutation) ClearPrecipitation24() {
-	m.precipitation_24 = nil
-	m.addprecipitation_24 = nil
-	m.clearedFields[taf.FieldPrecipitation24] = struct{}{}
-}
-
-// Precipitation24Cleared returns if the "precipitation_24" field was cleared in this mutation.
-func (m *TafMutation) Precipitation24Cleared() bool {
-	_, ok := m.clearedFields[taf.FieldPrecipitation24]
-	return ok
-}
-
-// ResetPrecipitation24 resets all changes to the "precipitation_24" field.
-func (m *TafMutation) ResetPrecipitation24() {
-	m.precipitation_24 = nil
-	m.addprecipitation_24 = nil
-	delete(m.clearedFields, taf.FieldPrecipitation24)
-}
-
-// SetSnowDepth sets the "snow_depth" field.
-func (m *TafMutation) SetSnowDepth(f float64) {
-	m.snow_depth = &f
-	m.addsnow_depth = nil
-}
-
-// SnowDepth returns the value of the "snow_depth" field in the mutation.
-func (m *TafMutation) SnowDepth() (r float64, exists bool) {
-	v := m.snow_depth
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldSnowDepth returns the old "snow_depth" field's value of the Taf entity.
-// If the Taf object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *TafMutation) OldSnowDepth(ctx context.Context) (v *float64, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldSnowDepth is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldSnowDepth requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldSnowDepth: %w", err)
-	}
-	return oldValue.SnowDepth, nil
-}
-
-// AddSnowDepth adds f to the "snow_depth" field.
-func (m *TafMutation) AddSnowDepth(f float64) {
-	if m.addsnow_depth != nil {
-		*m.addsnow_depth += f
-	} else {
-		m.addsnow_depth = &f
-	}
-}
-
-// AddedSnowDepth returns the value that was added to the "snow_depth" field in this mutation.
-func (m *TafMutation) AddedSnowDepth() (r float64, exists bool) {
-	v := m.addsnow_depth
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// ClearSnowDepth clears the value of the "snow_depth" field.
-func (m *TafMutation) ClearSnowDepth() {
-	m.snow_depth = nil
-	m.addsnow_depth = nil
-	m.clearedFields[taf.FieldSnowDepth] = struct{}{}
-}
-
-// SnowDepthCleared returns if the "snow_depth" field was cleared in this mutation.
-func (m *TafMutation) SnowDepthCleared() bool {
-	_, ok := m.clearedFields[taf.FieldSnowDepth]
-	return ok
-}
-
-// ResetSnowDepth resets all changes to the "snow_depth" field.
-func (m *TafMutation) ResetSnowDepth() {
-	m.snow_depth = nil
-	m.addsnow_depth = nil
-	delete(m.clearedFields, taf.FieldSnowDepth)
-}
-
-// SetVertVis sets the "vert_vis" field.
-func (m *TafMutation) SetVertVis(f float64) {
-	m.vert_vis = &f
-	m.addvert_vis = nil
-}
-
-// VertVis returns the value of the "vert_vis" field in the mutation.
-func (m *TafMutation) VertVis() (r float64, exists bool) {
-	v := m.vert_vis
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldVertVis returns the old "vert_vis" field's value of the Taf entity.
-// If the Taf object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *TafMutation) OldVertVis(ctx context.Context) (v *float64, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldVertVis is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldVertVis requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldVertVis: %w", err)
-	}
-	return oldValue.VertVis, nil
-}
-
-// AddVertVis adds f to the "vert_vis" field.
-func (m *TafMutation) AddVertVis(f float64) {
-	if m.addvert_vis != nil {
-		*m.addvert_vis += f
-	} else {
-		m.addvert_vis = &f
-	}
-}
-
-// AddedVertVis returns the value that was added to the "vert_vis" field in this mutation.
-func (m *TafMutation) AddedVertVis() (r float64, exists bool) {
-	v := m.addvert_vis
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// ClearVertVis clears the value of the "vert_vis" field.
-func (m *TafMutation) ClearVertVis() {
-	m.vert_vis = nil
-	m.addvert_vis = nil
-	m.clearedFields[taf.FieldVertVis] = struct{}{}
-}
-
-// VertVisCleared returns if the "vert_vis" field was cleared in this mutation.
-func (m *TafMutation) VertVisCleared() bool {
-	_, ok := m.clearedFields[taf.FieldVertVis]
-	return ok
-}
-
-// ResetVertVis resets all changes to the "vert_vis" field.
-func (m *TafMutation) ResetVertVis() {
-	m.vert_vis = nil
-	m.addvert_vis = nil
-	delete(m.clearedFields, taf.FieldVertVis)
-}
-
-// SetMetarType sets the "metar_type" field.
-func (m *TafMutation) SetMetarType(tt taf.MetarType) {
-	m.metar_type = &tt
-}
-
-// MetarType returns the value of the "metar_type" field in the mutation.
-func (m *TafMutation) MetarType() (r taf.MetarType, exists bool) {
-	v := m.metar_type
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldMetarType returns the old "metar_type" field's value of the Taf entity.
-// If the Taf object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *TafMutation) OldMetarType(ctx context.Context) (v taf.MetarType, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldMetarType is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldMetarType requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldMetarType: %w", err)
-	}
-	return oldValue.MetarType, nil
-}
-
-// ResetMetarType resets all changes to the "metar_type" field.
-func (m *TafMutation) ResetMetarType() {
-	m.metar_type = nil
-}
-
 // SetHash sets the "hash" field.
 func (m *TafMutation) SetHash(s string) {
 	m.hash = &s
@@ -11503,6 +12176,60 @@ func (m *TafMutation) ResetSkyConditions() {
 	m.removedsky_conditions = nil
 }
 
+// AddForecastIDs adds the "forecast" edge to the Forecast entity by ids.
+func (m *TafMutation) AddForecastIDs(ids ...int) {
+	if m.forecast == nil {
+		m.forecast = make(map[int]struct{})
+	}
+	for i := range ids {
+		m.forecast[ids[i]] = struct{}{}
+	}
+}
+
+// ClearForecast clears the "forecast" edge to the Forecast entity.
+func (m *TafMutation) ClearForecast() {
+	m.clearedforecast = true
+}
+
+// ForecastCleared reports if the "forecast" edge to the Forecast entity was cleared.
+func (m *TafMutation) ForecastCleared() bool {
+	return m.clearedforecast
+}
+
+// RemoveForecastIDs removes the "forecast" edge to the Forecast entity by IDs.
+func (m *TafMutation) RemoveForecastIDs(ids ...int) {
+	if m.removedforecast == nil {
+		m.removedforecast = make(map[int]struct{})
+	}
+	for i := range ids {
+		delete(m.forecast, ids[i])
+		m.removedforecast[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedForecast returns the removed IDs of the "forecast" edge to the Forecast entity.
+func (m *TafMutation) RemovedForecastIDs() (ids []int) {
+	for id := range m.removedforecast {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ForecastIDs returns the "forecast" edge IDs in the mutation.
+func (m *TafMutation) ForecastIDs() (ids []int) {
+	for id := range m.forecast {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetForecast resets all changes to the "forecast" edge.
+func (m *TafMutation) ResetForecast() {
+	m.forecast = nil
+	m.clearedforecast = false
+	m.removedforecast = nil
+}
+
 // Where appends a list predicates to the TafMutation builder.
 func (m *TafMutation) Where(ps ...predicate.Taf) {
 	m.predicates = append(m.predicates, ps...)
@@ -11522,7 +12249,7 @@ func (m *TafMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *TafMutation) Fields() []string {
-	fields := make([]string, 0, 35)
+	fields := make([]string, 0, 7)
 	if m.raw_text != nil {
 		fields = append(fields, taf.FieldRawText)
 	}
@@ -11540,90 +12267,6 @@ func (m *TafMutation) Fields() []string {
 	}
 	if m.remarks != nil {
 		fields = append(fields, taf.FieldRemarks)
-	}
-	if m.temperature != nil {
-		fields = append(fields, taf.FieldTemperature)
-	}
-	if m.dewpoint != nil {
-		fields = append(fields, taf.FieldDewpoint)
-	}
-	if m.wind_speed != nil {
-		fields = append(fields, taf.FieldWindSpeed)
-	}
-	if m.wind_gust != nil {
-		fields = append(fields, taf.FieldWindGust)
-	}
-	if m.wind_direction != nil {
-		fields = append(fields, taf.FieldWindDirection)
-	}
-	if m.visibility != nil {
-		fields = append(fields, taf.FieldVisibility)
-	}
-	if m.altimeter != nil {
-		fields = append(fields, taf.FieldAltimeter)
-	}
-	if m.flight_category != nil {
-		fields = append(fields, taf.FieldFlightCategory)
-	}
-	if m.quality_control_corrected != nil {
-		fields = append(fields, taf.FieldQualityControlCorrected)
-	}
-	if m.quality_control_auto_station != nil {
-		fields = append(fields, taf.FieldQualityControlAutoStation)
-	}
-	if m.quality_control_maintenance_indicator_on != nil {
-		fields = append(fields, taf.FieldQualityControlMaintenanceIndicatorOn)
-	}
-	if m.quality_control_no_signal != nil {
-		fields = append(fields, taf.FieldQualityControlNoSignal)
-	}
-	if m.quality_control_lightning_sensor_off != nil {
-		fields = append(fields, taf.FieldQualityControlLightningSensorOff)
-	}
-	if m.quality_control_freezing_rain_sensor_off != nil {
-		fields = append(fields, taf.FieldQualityControlFreezingRainSensorOff)
-	}
-	if m.quality_control_present_weather_sensor_off != nil {
-		fields = append(fields, taf.FieldQualityControlPresentWeatherSensorOff)
-	}
-	if m.sea_level_pressure != nil {
-		fields = append(fields, taf.FieldSeaLevelPressure)
-	}
-	if m.pressure_tendency != nil {
-		fields = append(fields, taf.FieldPressureTendency)
-	}
-	if m.max_temp_6 != nil {
-		fields = append(fields, taf.FieldMaxTemp6)
-	}
-	if m.min_temp_6 != nil {
-		fields = append(fields, taf.FieldMinTemp6)
-	}
-	if m.max_temp_24 != nil {
-		fields = append(fields, taf.FieldMaxTemp24)
-	}
-	if m.min_temp_24 != nil {
-		fields = append(fields, taf.FieldMinTemp24)
-	}
-	if m.precipitation != nil {
-		fields = append(fields, taf.FieldPrecipitation)
-	}
-	if m.precipitation_3 != nil {
-		fields = append(fields, taf.FieldPrecipitation3)
-	}
-	if m.precipitation_6 != nil {
-		fields = append(fields, taf.FieldPrecipitation6)
-	}
-	if m.precipitation_24 != nil {
-		fields = append(fields, taf.FieldPrecipitation24)
-	}
-	if m.snow_depth != nil {
-		fields = append(fields, taf.FieldSnowDepth)
-	}
-	if m.vert_vis != nil {
-		fields = append(fields, taf.FieldVertVis)
-	}
-	if m.metar_type != nil {
-		fields = append(fields, taf.FieldMetarType)
 	}
 	if m.hash != nil {
 		fields = append(fields, taf.FieldHash)
@@ -11648,62 +12291,6 @@ func (m *TafMutation) Field(name string) (ent.Value, bool) {
 		return m.ValidToTime()
 	case taf.FieldRemarks:
 		return m.Remarks()
-	case taf.FieldTemperature:
-		return m.Temperature()
-	case taf.FieldDewpoint:
-		return m.Dewpoint()
-	case taf.FieldWindSpeed:
-		return m.WindSpeed()
-	case taf.FieldWindGust:
-		return m.WindGust()
-	case taf.FieldWindDirection:
-		return m.WindDirection()
-	case taf.FieldVisibility:
-		return m.Visibility()
-	case taf.FieldAltimeter:
-		return m.Altimeter()
-	case taf.FieldFlightCategory:
-		return m.FlightCategory()
-	case taf.FieldQualityControlCorrected:
-		return m.QualityControlCorrected()
-	case taf.FieldQualityControlAutoStation:
-		return m.QualityControlAutoStation()
-	case taf.FieldQualityControlMaintenanceIndicatorOn:
-		return m.QualityControlMaintenanceIndicatorOn()
-	case taf.FieldQualityControlNoSignal:
-		return m.QualityControlNoSignal()
-	case taf.FieldQualityControlLightningSensorOff:
-		return m.QualityControlLightningSensorOff()
-	case taf.FieldQualityControlFreezingRainSensorOff:
-		return m.QualityControlFreezingRainSensorOff()
-	case taf.FieldQualityControlPresentWeatherSensorOff:
-		return m.QualityControlPresentWeatherSensorOff()
-	case taf.FieldSeaLevelPressure:
-		return m.SeaLevelPressure()
-	case taf.FieldPressureTendency:
-		return m.PressureTendency()
-	case taf.FieldMaxTemp6:
-		return m.MaxTemp6()
-	case taf.FieldMinTemp6:
-		return m.MinTemp6()
-	case taf.FieldMaxTemp24:
-		return m.MaxTemp24()
-	case taf.FieldMinTemp24:
-		return m.MinTemp24()
-	case taf.FieldPrecipitation:
-		return m.Precipitation()
-	case taf.FieldPrecipitation3:
-		return m.Precipitation3()
-	case taf.FieldPrecipitation6:
-		return m.Precipitation6()
-	case taf.FieldPrecipitation24:
-		return m.Precipitation24()
-	case taf.FieldSnowDepth:
-		return m.SnowDepth()
-	case taf.FieldVertVis:
-		return m.VertVis()
-	case taf.FieldMetarType:
-		return m.MetarType()
 	case taf.FieldHash:
 		return m.Hash()
 	}
@@ -11727,62 +12314,6 @@ func (m *TafMutation) OldField(ctx context.Context, name string) (ent.Value, err
 		return m.OldValidToTime(ctx)
 	case taf.FieldRemarks:
 		return m.OldRemarks(ctx)
-	case taf.FieldTemperature:
-		return m.OldTemperature(ctx)
-	case taf.FieldDewpoint:
-		return m.OldDewpoint(ctx)
-	case taf.FieldWindSpeed:
-		return m.OldWindSpeed(ctx)
-	case taf.FieldWindGust:
-		return m.OldWindGust(ctx)
-	case taf.FieldWindDirection:
-		return m.OldWindDirection(ctx)
-	case taf.FieldVisibility:
-		return m.OldVisibility(ctx)
-	case taf.FieldAltimeter:
-		return m.OldAltimeter(ctx)
-	case taf.FieldFlightCategory:
-		return m.OldFlightCategory(ctx)
-	case taf.FieldQualityControlCorrected:
-		return m.OldQualityControlCorrected(ctx)
-	case taf.FieldQualityControlAutoStation:
-		return m.OldQualityControlAutoStation(ctx)
-	case taf.FieldQualityControlMaintenanceIndicatorOn:
-		return m.OldQualityControlMaintenanceIndicatorOn(ctx)
-	case taf.FieldQualityControlNoSignal:
-		return m.OldQualityControlNoSignal(ctx)
-	case taf.FieldQualityControlLightningSensorOff:
-		return m.OldQualityControlLightningSensorOff(ctx)
-	case taf.FieldQualityControlFreezingRainSensorOff:
-		return m.OldQualityControlFreezingRainSensorOff(ctx)
-	case taf.FieldQualityControlPresentWeatherSensorOff:
-		return m.OldQualityControlPresentWeatherSensorOff(ctx)
-	case taf.FieldSeaLevelPressure:
-		return m.OldSeaLevelPressure(ctx)
-	case taf.FieldPressureTendency:
-		return m.OldPressureTendency(ctx)
-	case taf.FieldMaxTemp6:
-		return m.OldMaxTemp6(ctx)
-	case taf.FieldMinTemp6:
-		return m.OldMinTemp6(ctx)
-	case taf.FieldMaxTemp24:
-		return m.OldMaxTemp24(ctx)
-	case taf.FieldMinTemp24:
-		return m.OldMinTemp24(ctx)
-	case taf.FieldPrecipitation:
-		return m.OldPrecipitation(ctx)
-	case taf.FieldPrecipitation3:
-		return m.OldPrecipitation3(ctx)
-	case taf.FieldPrecipitation6:
-		return m.OldPrecipitation6(ctx)
-	case taf.FieldPrecipitation24:
-		return m.OldPrecipitation24(ctx)
-	case taf.FieldSnowDepth:
-		return m.OldSnowDepth(ctx)
-	case taf.FieldVertVis:
-		return m.OldVertVis(ctx)
-	case taf.FieldMetarType:
-		return m.OldMetarType(ctx)
 	case taf.FieldHash:
 		return m.OldHash(ctx)
 	}
@@ -11836,202 +12367,6 @@ func (m *TafMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetRemarks(v)
 		return nil
-	case taf.FieldTemperature:
-		v, ok := value.(float64)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetTemperature(v)
-		return nil
-	case taf.FieldDewpoint:
-		v, ok := value.(float64)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetDewpoint(v)
-		return nil
-	case taf.FieldWindSpeed:
-		v, ok := value.(int)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetWindSpeed(v)
-		return nil
-	case taf.FieldWindGust:
-		v, ok := value.(int)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetWindGust(v)
-		return nil
-	case taf.FieldWindDirection:
-		v, ok := value.(int)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetWindDirection(v)
-		return nil
-	case taf.FieldVisibility:
-		v, ok := value.(float64)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetVisibility(v)
-		return nil
-	case taf.FieldAltimeter:
-		v, ok := value.(float64)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetAltimeter(v)
-		return nil
-	case taf.FieldFlightCategory:
-		v, ok := value.(taf.FlightCategory)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetFlightCategory(v)
-		return nil
-	case taf.FieldQualityControlCorrected:
-		v, ok := value.(bool)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetQualityControlCorrected(v)
-		return nil
-	case taf.FieldQualityControlAutoStation:
-		v, ok := value.(bool)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetQualityControlAutoStation(v)
-		return nil
-	case taf.FieldQualityControlMaintenanceIndicatorOn:
-		v, ok := value.(bool)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetQualityControlMaintenanceIndicatorOn(v)
-		return nil
-	case taf.FieldQualityControlNoSignal:
-		v, ok := value.(bool)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetQualityControlNoSignal(v)
-		return nil
-	case taf.FieldQualityControlLightningSensorOff:
-		v, ok := value.(bool)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetQualityControlLightningSensorOff(v)
-		return nil
-	case taf.FieldQualityControlFreezingRainSensorOff:
-		v, ok := value.(bool)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetQualityControlFreezingRainSensorOff(v)
-		return nil
-	case taf.FieldQualityControlPresentWeatherSensorOff:
-		v, ok := value.(bool)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetQualityControlPresentWeatherSensorOff(v)
-		return nil
-	case taf.FieldSeaLevelPressure:
-		v, ok := value.(float64)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetSeaLevelPressure(v)
-		return nil
-	case taf.FieldPressureTendency:
-		v, ok := value.(float64)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetPressureTendency(v)
-		return nil
-	case taf.FieldMaxTemp6:
-		v, ok := value.(float64)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetMaxTemp6(v)
-		return nil
-	case taf.FieldMinTemp6:
-		v, ok := value.(float64)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetMinTemp6(v)
-		return nil
-	case taf.FieldMaxTemp24:
-		v, ok := value.(float64)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetMaxTemp24(v)
-		return nil
-	case taf.FieldMinTemp24:
-		v, ok := value.(float64)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetMinTemp24(v)
-		return nil
-	case taf.FieldPrecipitation:
-		v, ok := value.(float64)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetPrecipitation(v)
-		return nil
-	case taf.FieldPrecipitation3:
-		v, ok := value.(float64)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetPrecipitation3(v)
-		return nil
-	case taf.FieldPrecipitation6:
-		v, ok := value.(float64)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetPrecipitation6(v)
-		return nil
-	case taf.FieldPrecipitation24:
-		v, ok := value.(float64)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetPrecipitation24(v)
-		return nil
-	case taf.FieldSnowDepth:
-		v, ok := value.(float64)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetSnowDepth(v)
-		return nil
-	case taf.FieldVertVis:
-		v, ok := value.(float64)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetVertVis(v)
-		return nil
-	case taf.FieldMetarType:
-		v, ok := value.(taf.MetarType)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetMetarType(v)
-		return nil
 	case taf.FieldHash:
 		v, ok := value.(string)
 		if !ok {
@@ -12046,111 +12381,13 @@ func (m *TafMutation) SetField(name string, value ent.Value) error {
 // AddedFields returns all numeric fields that were incremented/decremented during
 // this mutation.
 func (m *TafMutation) AddedFields() []string {
-	var fields []string
-	if m.addtemperature != nil {
-		fields = append(fields, taf.FieldTemperature)
-	}
-	if m.adddewpoint != nil {
-		fields = append(fields, taf.FieldDewpoint)
-	}
-	if m.addwind_speed != nil {
-		fields = append(fields, taf.FieldWindSpeed)
-	}
-	if m.addwind_gust != nil {
-		fields = append(fields, taf.FieldWindGust)
-	}
-	if m.addwind_direction != nil {
-		fields = append(fields, taf.FieldWindDirection)
-	}
-	if m.addvisibility != nil {
-		fields = append(fields, taf.FieldVisibility)
-	}
-	if m.addaltimeter != nil {
-		fields = append(fields, taf.FieldAltimeter)
-	}
-	if m.addsea_level_pressure != nil {
-		fields = append(fields, taf.FieldSeaLevelPressure)
-	}
-	if m.addpressure_tendency != nil {
-		fields = append(fields, taf.FieldPressureTendency)
-	}
-	if m.addmax_temp_6 != nil {
-		fields = append(fields, taf.FieldMaxTemp6)
-	}
-	if m.addmin_temp_6 != nil {
-		fields = append(fields, taf.FieldMinTemp6)
-	}
-	if m.addmax_temp_24 != nil {
-		fields = append(fields, taf.FieldMaxTemp24)
-	}
-	if m.addmin_temp_24 != nil {
-		fields = append(fields, taf.FieldMinTemp24)
-	}
-	if m.addprecipitation != nil {
-		fields = append(fields, taf.FieldPrecipitation)
-	}
-	if m.addprecipitation_3 != nil {
-		fields = append(fields, taf.FieldPrecipitation3)
-	}
-	if m.addprecipitation_6 != nil {
-		fields = append(fields, taf.FieldPrecipitation6)
-	}
-	if m.addprecipitation_24 != nil {
-		fields = append(fields, taf.FieldPrecipitation24)
-	}
-	if m.addsnow_depth != nil {
-		fields = append(fields, taf.FieldSnowDepth)
-	}
-	if m.addvert_vis != nil {
-		fields = append(fields, taf.FieldVertVis)
-	}
-	return fields
+	return nil
 }
 
 // AddedField returns the numeric value that was incremented/decremented on a field
 // with the given name. The second boolean return value indicates that this field
 // was not set, or was not defined in the schema.
 func (m *TafMutation) AddedField(name string) (ent.Value, bool) {
-	switch name {
-	case taf.FieldTemperature:
-		return m.AddedTemperature()
-	case taf.FieldDewpoint:
-		return m.AddedDewpoint()
-	case taf.FieldWindSpeed:
-		return m.AddedWindSpeed()
-	case taf.FieldWindGust:
-		return m.AddedWindGust()
-	case taf.FieldWindDirection:
-		return m.AddedWindDirection()
-	case taf.FieldVisibility:
-		return m.AddedVisibility()
-	case taf.FieldAltimeter:
-		return m.AddedAltimeter()
-	case taf.FieldSeaLevelPressure:
-		return m.AddedSeaLevelPressure()
-	case taf.FieldPressureTendency:
-		return m.AddedPressureTendency()
-	case taf.FieldMaxTemp6:
-		return m.AddedMaxTemp6()
-	case taf.FieldMinTemp6:
-		return m.AddedMinTemp6()
-	case taf.FieldMaxTemp24:
-		return m.AddedMaxTemp24()
-	case taf.FieldMinTemp24:
-		return m.AddedMinTemp24()
-	case taf.FieldPrecipitation:
-		return m.AddedPrecipitation()
-	case taf.FieldPrecipitation3:
-		return m.AddedPrecipitation3()
-	case taf.FieldPrecipitation6:
-		return m.AddedPrecipitation6()
-	case taf.FieldPrecipitation24:
-		return m.AddedPrecipitation24()
-	case taf.FieldSnowDepth:
-		return m.AddedSnowDepth()
-	case taf.FieldVertVis:
-		return m.AddedVertVis()
-	}
 	return nil, false
 }
 
@@ -12159,139 +12396,6 @@ func (m *TafMutation) AddedField(name string) (ent.Value, bool) {
 // type.
 func (m *TafMutation) AddField(name string, value ent.Value) error {
 	switch name {
-	case taf.FieldTemperature:
-		v, ok := value.(float64)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.AddTemperature(v)
-		return nil
-	case taf.FieldDewpoint:
-		v, ok := value.(float64)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.AddDewpoint(v)
-		return nil
-	case taf.FieldWindSpeed:
-		v, ok := value.(int)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.AddWindSpeed(v)
-		return nil
-	case taf.FieldWindGust:
-		v, ok := value.(int)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.AddWindGust(v)
-		return nil
-	case taf.FieldWindDirection:
-		v, ok := value.(int)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.AddWindDirection(v)
-		return nil
-	case taf.FieldVisibility:
-		v, ok := value.(float64)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.AddVisibility(v)
-		return nil
-	case taf.FieldAltimeter:
-		v, ok := value.(float64)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.AddAltimeter(v)
-		return nil
-	case taf.FieldSeaLevelPressure:
-		v, ok := value.(float64)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.AddSeaLevelPressure(v)
-		return nil
-	case taf.FieldPressureTendency:
-		v, ok := value.(float64)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.AddPressureTendency(v)
-		return nil
-	case taf.FieldMaxTemp6:
-		v, ok := value.(float64)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.AddMaxTemp6(v)
-		return nil
-	case taf.FieldMinTemp6:
-		v, ok := value.(float64)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.AddMinTemp6(v)
-		return nil
-	case taf.FieldMaxTemp24:
-		v, ok := value.(float64)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.AddMaxTemp24(v)
-		return nil
-	case taf.FieldMinTemp24:
-		v, ok := value.(float64)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.AddMinTemp24(v)
-		return nil
-	case taf.FieldPrecipitation:
-		v, ok := value.(float64)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.AddPrecipitation(v)
-		return nil
-	case taf.FieldPrecipitation3:
-		v, ok := value.(float64)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.AddPrecipitation3(v)
-		return nil
-	case taf.FieldPrecipitation6:
-		v, ok := value.(float64)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.AddPrecipitation6(v)
-		return nil
-	case taf.FieldPrecipitation24:
-		v, ok := value.(float64)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.AddPrecipitation24(v)
-		return nil
-	case taf.FieldSnowDepth:
-		v, ok := value.(float64)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.AddSnowDepth(v)
-		return nil
-	case taf.FieldVertVis:
-		v, ok := value.(float64)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.AddVertVis(v)
-		return nil
 	}
 	return fmt.Errorf("unknown Taf numeric field %s", name)
 }
@@ -12299,50 +12403,7 @@ func (m *TafMutation) AddField(name string, value ent.Value) error {
 // ClearedFields returns all nullable fields that were cleared during this
 // mutation.
 func (m *TafMutation) ClearedFields() []string {
-	var fields []string
-	if m.FieldCleared(taf.FieldFlightCategory) {
-		fields = append(fields, taf.FieldFlightCategory)
-	}
-	if m.FieldCleared(taf.FieldQualityControlCorrected) {
-		fields = append(fields, taf.FieldQualityControlCorrected)
-	}
-	if m.FieldCleared(taf.FieldSeaLevelPressure) {
-		fields = append(fields, taf.FieldSeaLevelPressure)
-	}
-	if m.FieldCleared(taf.FieldPressureTendency) {
-		fields = append(fields, taf.FieldPressureTendency)
-	}
-	if m.FieldCleared(taf.FieldMaxTemp6) {
-		fields = append(fields, taf.FieldMaxTemp6)
-	}
-	if m.FieldCleared(taf.FieldMinTemp6) {
-		fields = append(fields, taf.FieldMinTemp6)
-	}
-	if m.FieldCleared(taf.FieldMaxTemp24) {
-		fields = append(fields, taf.FieldMaxTemp24)
-	}
-	if m.FieldCleared(taf.FieldMinTemp24) {
-		fields = append(fields, taf.FieldMinTemp24)
-	}
-	if m.FieldCleared(taf.FieldPrecipitation) {
-		fields = append(fields, taf.FieldPrecipitation)
-	}
-	if m.FieldCleared(taf.FieldPrecipitation3) {
-		fields = append(fields, taf.FieldPrecipitation3)
-	}
-	if m.FieldCleared(taf.FieldPrecipitation6) {
-		fields = append(fields, taf.FieldPrecipitation6)
-	}
-	if m.FieldCleared(taf.FieldPrecipitation24) {
-		fields = append(fields, taf.FieldPrecipitation24)
-	}
-	if m.FieldCleared(taf.FieldSnowDepth) {
-		fields = append(fields, taf.FieldSnowDepth)
-	}
-	if m.FieldCleared(taf.FieldVertVis) {
-		fields = append(fields, taf.FieldVertVis)
-	}
-	return fields
+	return nil
 }
 
 // FieldCleared returns a boolean indicating if a field with the given name was
@@ -12355,50 +12416,6 @@ func (m *TafMutation) FieldCleared(name string) bool {
 // ClearField clears the value of the field with the given name. It returns an
 // error if the field is not defined in the schema.
 func (m *TafMutation) ClearField(name string) error {
-	switch name {
-	case taf.FieldFlightCategory:
-		m.ClearFlightCategory()
-		return nil
-	case taf.FieldQualityControlCorrected:
-		m.ClearQualityControlCorrected()
-		return nil
-	case taf.FieldSeaLevelPressure:
-		m.ClearSeaLevelPressure()
-		return nil
-	case taf.FieldPressureTendency:
-		m.ClearPressureTendency()
-		return nil
-	case taf.FieldMaxTemp6:
-		m.ClearMaxTemp6()
-		return nil
-	case taf.FieldMinTemp6:
-		m.ClearMinTemp6()
-		return nil
-	case taf.FieldMaxTemp24:
-		m.ClearMaxTemp24()
-		return nil
-	case taf.FieldMinTemp24:
-		m.ClearMinTemp24()
-		return nil
-	case taf.FieldPrecipitation:
-		m.ClearPrecipitation()
-		return nil
-	case taf.FieldPrecipitation3:
-		m.ClearPrecipitation3()
-		return nil
-	case taf.FieldPrecipitation6:
-		m.ClearPrecipitation6()
-		return nil
-	case taf.FieldPrecipitation24:
-		m.ClearPrecipitation24()
-		return nil
-	case taf.FieldSnowDepth:
-		m.ClearSnowDepth()
-		return nil
-	case taf.FieldVertVis:
-		m.ClearVertVis()
-		return nil
-	}
 	return fmt.Errorf("unknown Taf nullable field %s", name)
 }
 
@@ -12424,90 +12441,6 @@ func (m *TafMutation) ResetField(name string) error {
 	case taf.FieldRemarks:
 		m.ResetRemarks()
 		return nil
-	case taf.FieldTemperature:
-		m.ResetTemperature()
-		return nil
-	case taf.FieldDewpoint:
-		m.ResetDewpoint()
-		return nil
-	case taf.FieldWindSpeed:
-		m.ResetWindSpeed()
-		return nil
-	case taf.FieldWindGust:
-		m.ResetWindGust()
-		return nil
-	case taf.FieldWindDirection:
-		m.ResetWindDirection()
-		return nil
-	case taf.FieldVisibility:
-		m.ResetVisibility()
-		return nil
-	case taf.FieldAltimeter:
-		m.ResetAltimeter()
-		return nil
-	case taf.FieldFlightCategory:
-		m.ResetFlightCategory()
-		return nil
-	case taf.FieldQualityControlCorrected:
-		m.ResetQualityControlCorrected()
-		return nil
-	case taf.FieldQualityControlAutoStation:
-		m.ResetQualityControlAutoStation()
-		return nil
-	case taf.FieldQualityControlMaintenanceIndicatorOn:
-		m.ResetQualityControlMaintenanceIndicatorOn()
-		return nil
-	case taf.FieldQualityControlNoSignal:
-		m.ResetQualityControlNoSignal()
-		return nil
-	case taf.FieldQualityControlLightningSensorOff:
-		m.ResetQualityControlLightningSensorOff()
-		return nil
-	case taf.FieldQualityControlFreezingRainSensorOff:
-		m.ResetQualityControlFreezingRainSensorOff()
-		return nil
-	case taf.FieldQualityControlPresentWeatherSensorOff:
-		m.ResetQualityControlPresentWeatherSensorOff()
-		return nil
-	case taf.FieldSeaLevelPressure:
-		m.ResetSeaLevelPressure()
-		return nil
-	case taf.FieldPressureTendency:
-		m.ResetPressureTendency()
-		return nil
-	case taf.FieldMaxTemp6:
-		m.ResetMaxTemp6()
-		return nil
-	case taf.FieldMinTemp6:
-		m.ResetMinTemp6()
-		return nil
-	case taf.FieldMaxTemp24:
-		m.ResetMaxTemp24()
-		return nil
-	case taf.FieldMinTemp24:
-		m.ResetMinTemp24()
-		return nil
-	case taf.FieldPrecipitation:
-		m.ResetPrecipitation()
-		return nil
-	case taf.FieldPrecipitation3:
-		m.ResetPrecipitation3()
-		return nil
-	case taf.FieldPrecipitation6:
-		m.ResetPrecipitation6()
-		return nil
-	case taf.FieldPrecipitation24:
-		m.ResetPrecipitation24()
-		return nil
-	case taf.FieldSnowDepth:
-		m.ResetSnowDepth()
-		return nil
-	case taf.FieldVertVis:
-		m.ResetVertVis()
-		return nil
-	case taf.FieldMetarType:
-		m.ResetMetarType()
-		return nil
 	case taf.FieldHash:
 		m.ResetHash()
 		return nil
@@ -12517,12 +12450,15 @@ func (m *TafMutation) ResetField(name string) error {
 
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *TafMutation) AddedEdges() []string {
-	edges := make([]string, 0, 2)
+	edges := make([]string, 0, 3)
 	if m.station != nil {
 		edges = append(edges, taf.EdgeStation)
 	}
 	if m.sky_conditions != nil {
 		edges = append(edges, taf.EdgeSkyConditions)
+	}
+	if m.forecast != nil {
+		edges = append(edges, taf.EdgeForecast)
 	}
 	return edges
 }
@@ -12541,15 +12477,24 @@ func (m *TafMutation) AddedIDs(name string) []ent.Value {
 			ids = append(ids, id)
 		}
 		return ids
+	case taf.EdgeForecast:
+		ids := make([]ent.Value, 0, len(m.forecast))
+		for id := range m.forecast {
+			ids = append(ids, id)
+		}
+		return ids
 	}
 	return nil
 }
 
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *TafMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 2)
+	edges := make([]string, 0, 3)
 	if m.removedsky_conditions != nil {
 		edges = append(edges, taf.EdgeSkyConditions)
+	}
+	if m.removedforecast != nil {
+		edges = append(edges, taf.EdgeForecast)
 	}
 	return edges
 }
@@ -12564,18 +12509,27 @@ func (m *TafMutation) RemovedIDs(name string) []ent.Value {
 			ids = append(ids, id)
 		}
 		return ids
+	case taf.EdgeForecast:
+		ids := make([]ent.Value, 0, len(m.removedforecast))
+		for id := range m.removedforecast {
+			ids = append(ids, id)
+		}
+		return ids
 	}
 	return nil
 }
 
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *TafMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 2)
+	edges := make([]string, 0, 3)
 	if m.clearedstation {
 		edges = append(edges, taf.EdgeStation)
 	}
 	if m.clearedsky_conditions {
 		edges = append(edges, taf.EdgeSkyConditions)
+	}
+	if m.clearedforecast {
+		edges = append(edges, taf.EdgeForecast)
 	}
 	return edges
 }
@@ -12588,6 +12542,8 @@ func (m *TafMutation) EdgeCleared(name string) bool {
 		return m.clearedstation
 	case taf.EdgeSkyConditions:
 		return m.clearedsky_conditions
+	case taf.EdgeForecast:
+		return m.clearedforecast
 	}
 	return false
 }
@@ -12613,6 +12569,1115 @@ func (m *TafMutation) ResetEdge(name string) error {
 	case taf.EdgeSkyConditions:
 		m.ResetSkyConditions()
 		return nil
+	case taf.EdgeForecast:
+		m.ResetForecast()
+		return nil
 	}
 	return fmt.Errorf("unknown Taf edge %s", name)
+}
+
+// TemperatureDataMutation represents an operation that mutates the TemperatureData nodes in the graph.
+type TemperatureDataMutation struct {
+	config
+	op                 Op
+	typ                string
+	id                 *int
+	valid_time         *time.Time
+	temperature        *float64
+	addtemperature     *float64
+	min_temperature    *float64
+	addmin_temperature *float64
+	max_temperature    *float64
+	addmax_temperature *float64
+	clearedFields      map[string]struct{}
+	done               bool
+	oldValue           func(context.Context) (*TemperatureData, error)
+	predicates         []predicate.TemperatureData
+}
+
+var _ ent.Mutation = (*TemperatureDataMutation)(nil)
+
+// temperaturedataOption allows management of the mutation configuration using functional options.
+type temperaturedataOption func(*TemperatureDataMutation)
+
+// newTemperatureDataMutation creates new mutation for the TemperatureData entity.
+func newTemperatureDataMutation(c config, op Op, opts ...temperaturedataOption) *TemperatureDataMutation {
+	m := &TemperatureDataMutation{
+		config:        c,
+		op:            op,
+		typ:           TypeTemperatureData,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withTemperatureDataID sets the ID field of the mutation.
+func withTemperatureDataID(id int) temperaturedataOption {
+	return func(m *TemperatureDataMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *TemperatureData
+		)
+		m.oldValue = func(ctx context.Context) (*TemperatureData, error) {
+			once.Do(func() {
+				if m.done {
+					err = errors.New("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().TemperatureData.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withTemperatureData sets the old TemperatureData of the mutation.
+func withTemperatureData(node *TemperatureData) temperaturedataOption {
+	return func(m *TemperatureDataMutation) {
+		m.oldValue = func(context.Context) (*TemperatureData, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m TemperatureDataMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m TemperatureDataMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, errors.New("ent: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *TemperatureDataMutation) ID() (id int, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *TemperatureDataMutation) IDs(ctx context.Context) ([]int, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []int{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().TemperatureData.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
+}
+
+// SetValidTime sets the "valid_time" field.
+func (m *TemperatureDataMutation) SetValidTime(t time.Time) {
+	m.valid_time = &t
+}
+
+// ValidTime returns the value of the "valid_time" field in the mutation.
+func (m *TemperatureDataMutation) ValidTime() (r time.Time, exists bool) {
+	v := m.valid_time
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldValidTime returns the old "valid_time" field's value of the TemperatureData entity.
+// If the TemperatureData object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *TemperatureDataMutation) OldValidTime(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldValidTime is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldValidTime requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldValidTime: %w", err)
+	}
+	return oldValue.ValidTime, nil
+}
+
+// ResetValidTime resets all changes to the "valid_time" field.
+func (m *TemperatureDataMutation) ResetValidTime() {
+	m.valid_time = nil
+}
+
+// SetTemperature sets the "temperature" field.
+func (m *TemperatureDataMutation) SetTemperature(f float64) {
+	m.temperature = &f
+	m.addtemperature = nil
+}
+
+// Temperature returns the value of the "temperature" field in the mutation.
+func (m *TemperatureDataMutation) Temperature() (r float64, exists bool) {
+	v := m.temperature
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldTemperature returns the old "temperature" field's value of the TemperatureData entity.
+// If the TemperatureData object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *TemperatureDataMutation) OldTemperature(ctx context.Context) (v float64, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldTemperature is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldTemperature requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldTemperature: %w", err)
+	}
+	return oldValue.Temperature, nil
+}
+
+// AddTemperature adds f to the "temperature" field.
+func (m *TemperatureDataMutation) AddTemperature(f float64) {
+	if m.addtemperature != nil {
+		*m.addtemperature += f
+	} else {
+		m.addtemperature = &f
+	}
+}
+
+// AddedTemperature returns the value that was added to the "temperature" field in this mutation.
+func (m *TemperatureDataMutation) AddedTemperature() (r float64, exists bool) {
+	v := m.addtemperature
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetTemperature resets all changes to the "temperature" field.
+func (m *TemperatureDataMutation) ResetTemperature() {
+	m.temperature = nil
+	m.addtemperature = nil
+}
+
+// SetMinTemperature sets the "min_temperature" field.
+func (m *TemperatureDataMutation) SetMinTemperature(f float64) {
+	m.min_temperature = &f
+	m.addmin_temperature = nil
+}
+
+// MinTemperature returns the value of the "min_temperature" field in the mutation.
+func (m *TemperatureDataMutation) MinTemperature() (r float64, exists bool) {
+	v := m.min_temperature
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldMinTemperature returns the old "min_temperature" field's value of the TemperatureData entity.
+// If the TemperatureData object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *TemperatureDataMutation) OldMinTemperature(ctx context.Context) (v *float64, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldMinTemperature is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldMinTemperature requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldMinTemperature: %w", err)
+	}
+	return oldValue.MinTemperature, nil
+}
+
+// AddMinTemperature adds f to the "min_temperature" field.
+func (m *TemperatureDataMutation) AddMinTemperature(f float64) {
+	if m.addmin_temperature != nil {
+		*m.addmin_temperature += f
+	} else {
+		m.addmin_temperature = &f
+	}
+}
+
+// AddedMinTemperature returns the value that was added to the "min_temperature" field in this mutation.
+func (m *TemperatureDataMutation) AddedMinTemperature() (r float64, exists bool) {
+	v := m.addmin_temperature
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ClearMinTemperature clears the value of the "min_temperature" field.
+func (m *TemperatureDataMutation) ClearMinTemperature() {
+	m.min_temperature = nil
+	m.addmin_temperature = nil
+	m.clearedFields[temperaturedata.FieldMinTemperature] = struct{}{}
+}
+
+// MinTemperatureCleared returns if the "min_temperature" field was cleared in this mutation.
+func (m *TemperatureDataMutation) MinTemperatureCleared() bool {
+	_, ok := m.clearedFields[temperaturedata.FieldMinTemperature]
+	return ok
+}
+
+// ResetMinTemperature resets all changes to the "min_temperature" field.
+func (m *TemperatureDataMutation) ResetMinTemperature() {
+	m.min_temperature = nil
+	m.addmin_temperature = nil
+	delete(m.clearedFields, temperaturedata.FieldMinTemperature)
+}
+
+// SetMaxTemperature sets the "max_temperature" field.
+func (m *TemperatureDataMutation) SetMaxTemperature(f float64) {
+	m.max_temperature = &f
+	m.addmax_temperature = nil
+}
+
+// MaxTemperature returns the value of the "max_temperature" field in the mutation.
+func (m *TemperatureDataMutation) MaxTemperature() (r float64, exists bool) {
+	v := m.max_temperature
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldMaxTemperature returns the old "max_temperature" field's value of the TemperatureData entity.
+// If the TemperatureData object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *TemperatureDataMutation) OldMaxTemperature(ctx context.Context) (v *float64, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldMaxTemperature is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldMaxTemperature requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldMaxTemperature: %w", err)
+	}
+	return oldValue.MaxTemperature, nil
+}
+
+// AddMaxTemperature adds f to the "max_temperature" field.
+func (m *TemperatureDataMutation) AddMaxTemperature(f float64) {
+	if m.addmax_temperature != nil {
+		*m.addmax_temperature += f
+	} else {
+		m.addmax_temperature = &f
+	}
+}
+
+// AddedMaxTemperature returns the value that was added to the "max_temperature" field in this mutation.
+func (m *TemperatureDataMutation) AddedMaxTemperature() (r float64, exists bool) {
+	v := m.addmax_temperature
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ClearMaxTemperature clears the value of the "max_temperature" field.
+func (m *TemperatureDataMutation) ClearMaxTemperature() {
+	m.max_temperature = nil
+	m.addmax_temperature = nil
+	m.clearedFields[temperaturedata.FieldMaxTemperature] = struct{}{}
+}
+
+// MaxTemperatureCleared returns if the "max_temperature" field was cleared in this mutation.
+func (m *TemperatureDataMutation) MaxTemperatureCleared() bool {
+	_, ok := m.clearedFields[temperaturedata.FieldMaxTemperature]
+	return ok
+}
+
+// ResetMaxTemperature resets all changes to the "max_temperature" field.
+func (m *TemperatureDataMutation) ResetMaxTemperature() {
+	m.max_temperature = nil
+	m.addmax_temperature = nil
+	delete(m.clearedFields, temperaturedata.FieldMaxTemperature)
+}
+
+// Where appends a list predicates to the TemperatureDataMutation builder.
+func (m *TemperatureDataMutation) Where(ps ...predicate.TemperatureData) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// Op returns the operation name.
+func (m *TemperatureDataMutation) Op() Op {
+	return m.op
+}
+
+// Type returns the node type of this mutation (TemperatureData).
+func (m *TemperatureDataMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *TemperatureDataMutation) Fields() []string {
+	fields := make([]string, 0, 4)
+	if m.valid_time != nil {
+		fields = append(fields, temperaturedata.FieldValidTime)
+	}
+	if m.temperature != nil {
+		fields = append(fields, temperaturedata.FieldTemperature)
+	}
+	if m.min_temperature != nil {
+		fields = append(fields, temperaturedata.FieldMinTemperature)
+	}
+	if m.max_temperature != nil {
+		fields = append(fields, temperaturedata.FieldMaxTemperature)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *TemperatureDataMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case temperaturedata.FieldValidTime:
+		return m.ValidTime()
+	case temperaturedata.FieldTemperature:
+		return m.Temperature()
+	case temperaturedata.FieldMinTemperature:
+		return m.MinTemperature()
+	case temperaturedata.FieldMaxTemperature:
+		return m.MaxTemperature()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *TemperatureDataMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case temperaturedata.FieldValidTime:
+		return m.OldValidTime(ctx)
+	case temperaturedata.FieldTemperature:
+		return m.OldTemperature(ctx)
+	case temperaturedata.FieldMinTemperature:
+		return m.OldMinTemperature(ctx)
+	case temperaturedata.FieldMaxTemperature:
+		return m.OldMaxTemperature(ctx)
+	}
+	return nil, fmt.Errorf("unknown TemperatureData field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *TemperatureDataMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case temperaturedata.FieldValidTime:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetValidTime(v)
+		return nil
+	case temperaturedata.FieldTemperature:
+		v, ok := value.(float64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetTemperature(v)
+		return nil
+	case temperaturedata.FieldMinTemperature:
+		v, ok := value.(float64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetMinTemperature(v)
+		return nil
+	case temperaturedata.FieldMaxTemperature:
+		v, ok := value.(float64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetMaxTemperature(v)
+		return nil
+	}
+	return fmt.Errorf("unknown TemperatureData field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *TemperatureDataMutation) AddedFields() []string {
+	var fields []string
+	if m.addtemperature != nil {
+		fields = append(fields, temperaturedata.FieldTemperature)
+	}
+	if m.addmin_temperature != nil {
+		fields = append(fields, temperaturedata.FieldMinTemperature)
+	}
+	if m.addmax_temperature != nil {
+		fields = append(fields, temperaturedata.FieldMaxTemperature)
+	}
+	return fields
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *TemperatureDataMutation) AddedField(name string) (ent.Value, bool) {
+	switch name {
+	case temperaturedata.FieldTemperature:
+		return m.AddedTemperature()
+	case temperaturedata.FieldMinTemperature:
+		return m.AddedMinTemperature()
+	case temperaturedata.FieldMaxTemperature:
+		return m.AddedMaxTemperature()
+	}
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *TemperatureDataMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	case temperaturedata.FieldTemperature:
+		v, ok := value.(float64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddTemperature(v)
+		return nil
+	case temperaturedata.FieldMinTemperature:
+		v, ok := value.(float64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddMinTemperature(v)
+		return nil
+	case temperaturedata.FieldMaxTemperature:
+		v, ok := value.(float64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddMaxTemperature(v)
+		return nil
+	}
+	return fmt.Errorf("unknown TemperatureData numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *TemperatureDataMutation) ClearedFields() []string {
+	var fields []string
+	if m.FieldCleared(temperaturedata.FieldMinTemperature) {
+		fields = append(fields, temperaturedata.FieldMinTemperature)
+	}
+	if m.FieldCleared(temperaturedata.FieldMaxTemperature) {
+		fields = append(fields, temperaturedata.FieldMaxTemperature)
+	}
+	return fields
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *TemperatureDataMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *TemperatureDataMutation) ClearField(name string) error {
+	switch name {
+	case temperaturedata.FieldMinTemperature:
+		m.ClearMinTemperature()
+		return nil
+	case temperaturedata.FieldMaxTemperature:
+		m.ClearMaxTemperature()
+		return nil
+	}
+	return fmt.Errorf("unknown TemperatureData nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *TemperatureDataMutation) ResetField(name string) error {
+	switch name {
+	case temperaturedata.FieldValidTime:
+		m.ResetValidTime()
+		return nil
+	case temperaturedata.FieldTemperature:
+		m.ResetTemperature()
+		return nil
+	case temperaturedata.FieldMinTemperature:
+		m.ResetMinTemperature()
+		return nil
+	case temperaturedata.FieldMaxTemperature:
+		m.ResetMaxTemperature()
+		return nil
+	}
+	return fmt.Errorf("unknown TemperatureData field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *TemperatureDataMutation) AddedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *TemperatureDataMutation) AddedIDs(name string) []ent.Value {
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *TemperatureDataMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *TemperatureDataMutation) RemovedIDs(name string) []ent.Value {
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *TemperatureDataMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *TemperatureDataMutation) EdgeCleared(name string) bool {
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *TemperatureDataMutation) ClearEdge(name string) error {
+	return fmt.Errorf("unknown TemperatureData unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *TemperatureDataMutation) ResetEdge(name string) error {
+	return fmt.Errorf("unknown TemperatureData edge %s", name)
+}
+
+// TurbulenceConditionMutation represents an operation that mutates the TurbulenceCondition nodes in the graph.
+type TurbulenceConditionMutation struct {
+	config
+	op              Op
+	typ             string
+	id              *int
+	intensity       *string
+	min_altitude    *int
+	addmin_altitude *int
+	max_altitude    *int
+	addmax_altitude *int
+	clearedFields   map[string]struct{}
+	done            bool
+	oldValue        func(context.Context) (*TurbulenceCondition, error)
+	predicates      []predicate.TurbulenceCondition
+}
+
+var _ ent.Mutation = (*TurbulenceConditionMutation)(nil)
+
+// turbulenceconditionOption allows management of the mutation configuration using functional options.
+type turbulenceconditionOption func(*TurbulenceConditionMutation)
+
+// newTurbulenceConditionMutation creates new mutation for the TurbulenceCondition entity.
+func newTurbulenceConditionMutation(c config, op Op, opts ...turbulenceconditionOption) *TurbulenceConditionMutation {
+	m := &TurbulenceConditionMutation{
+		config:        c,
+		op:            op,
+		typ:           TypeTurbulenceCondition,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withTurbulenceConditionID sets the ID field of the mutation.
+func withTurbulenceConditionID(id int) turbulenceconditionOption {
+	return func(m *TurbulenceConditionMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *TurbulenceCondition
+		)
+		m.oldValue = func(ctx context.Context) (*TurbulenceCondition, error) {
+			once.Do(func() {
+				if m.done {
+					err = errors.New("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().TurbulenceCondition.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withTurbulenceCondition sets the old TurbulenceCondition of the mutation.
+func withTurbulenceCondition(node *TurbulenceCondition) turbulenceconditionOption {
+	return func(m *TurbulenceConditionMutation) {
+		m.oldValue = func(context.Context) (*TurbulenceCondition, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m TurbulenceConditionMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m TurbulenceConditionMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, errors.New("ent: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *TurbulenceConditionMutation) ID() (id int, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *TurbulenceConditionMutation) IDs(ctx context.Context) ([]int, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []int{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().TurbulenceCondition.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
+}
+
+// SetIntensity sets the "intensity" field.
+func (m *TurbulenceConditionMutation) SetIntensity(s string) {
+	m.intensity = &s
+}
+
+// Intensity returns the value of the "intensity" field in the mutation.
+func (m *TurbulenceConditionMutation) Intensity() (r string, exists bool) {
+	v := m.intensity
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldIntensity returns the old "intensity" field's value of the TurbulenceCondition entity.
+// If the TurbulenceCondition object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *TurbulenceConditionMutation) OldIntensity(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldIntensity is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldIntensity requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldIntensity: %w", err)
+	}
+	return oldValue.Intensity, nil
+}
+
+// ResetIntensity resets all changes to the "intensity" field.
+func (m *TurbulenceConditionMutation) ResetIntensity() {
+	m.intensity = nil
+}
+
+// SetMinAltitude sets the "min_altitude" field.
+func (m *TurbulenceConditionMutation) SetMinAltitude(i int) {
+	m.min_altitude = &i
+	m.addmin_altitude = nil
+}
+
+// MinAltitude returns the value of the "min_altitude" field in the mutation.
+func (m *TurbulenceConditionMutation) MinAltitude() (r int, exists bool) {
+	v := m.min_altitude
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldMinAltitude returns the old "min_altitude" field's value of the TurbulenceCondition entity.
+// If the TurbulenceCondition object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *TurbulenceConditionMutation) OldMinAltitude(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldMinAltitude is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldMinAltitude requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldMinAltitude: %w", err)
+	}
+	return oldValue.MinAltitude, nil
+}
+
+// AddMinAltitude adds i to the "min_altitude" field.
+func (m *TurbulenceConditionMutation) AddMinAltitude(i int) {
+	if m.addmin_altitude != nil {
+		*m.addmin_altitude += i
+	} else {
+		m.addmin_altitude = &i
+	}
+}
+
+// AddedMinAltitude returns the value that was added to the "min_altitude" field in this mutation.
+func (m *TurbulenceConditionMutation) AddedMinAltitude() (r int, exists bool) {
+	v := m.addmin_altitude
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetMinAltitude resets all changes to the "min_altitude" field.
+func (m *TurbulenceConditionMutation) ResetMinAltitude() {
+	m.min_altitude = nil
+	m.addmin_altitude = nil
+}
+
+// SetMaxAltitude sets the "max_altitude" field.
+func (m *TurbulenceConditionMutation) SetMaxAltitude(i int) {
+	m.max_altitude = &i
+	m.addmax_altitude = nil
+}
+
+// MaxAltitude returns the value of the "max_altitude" field in the mutation.
+func (m *TurbulenceConditionMutation) MaxAltitude() (r int, exists bool) {
+	v := m.max_altitude
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldMaxAltitude returns the old "max_altitude" field's value of the TurbulenceCondition entity.
+// If the TurbulenceCondition object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *TurbulenceConditionMutation) OldMaxAltitude(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldMaxAltitude is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldMaxAltitude requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldMaxAltitude: %w", err)
+	}
+	return oldValue.MaxAltitude, nil
+}
+
+// AddMaxAltitude adds i to the "max_altitude" field.
+func (m *TurbulenceConditionMutation) AddMaxAltitude(i int) {
+	if m.addmax_altitude != nil {
+		*m.addmax_altitude += i
+	} else {
+		m.addmax_altitude = &i
+	}
+}
+
+// AddedMaxAltitude returns the value that was added to the "max_altitude" field in this mutation.
+func (m *TurbulenceConditionMutation) AddedMaxAltitude() (r int, exists bool) {
+	v := m.addmax_altitude
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetMaxAltitude resets all changes to the "max_altitude" field.
+func (m *TurbulenceConditionMutation) ResetMaxAltitude() {
+	m.max_altitude = nil
+	m.addmax_altitude = nil
+}
+
+// Where appends a list predicates to the TurbulenceConditionMutation builder.
+func (m *TurbulenceConditionMutation) Where(ps ...predicate.TurbulenceCondition) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// Op returns the operation name.
+func (m *TurbulenceConditionMutation) Op() Op {
+	return m.op
+}
+
+// Type returns the node type of this mutation (TurbulenceCondition).
+func (m *TurbulenceConditionMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *TurbulenceConditionMutation) Fields() []string {
+	fields := make([]string, 0, 3)
+	if m.intensity != nil {
+		fields = append(fields, turbulencecondition.FieldIntensity)
+	}
+	if m.min_altitude != nil {
+		fields = append(fields, turbulencecondition.FieldMinAltitude)
+	}
+	if m.max_altitude != nil {
+		fields = append(fields, turbulencecondition.FieldMaxAltitude)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *TurbulenceConditionMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case turbulencecondition.FieldIntensity:
+		return m.Intensity()
+	case turbulencecondition.FieldMinAltitude:
+		return m.MinAltitude()
+	case turbulencecondition.FieldMaxAltitude:
+		return m.MaxAltitude()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *TurbulenceConditionMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case turbulencecondition.FieldIntensity:
+		return m.OldIntensity(ctx)
+	case turbulencecondition.FieldMinAltitude:
+		return m.OldMinAltitude(ctx)
+	case turbulencecondition.FieldMaxAltitude:
+		return m.OldMaxAltitude(ctx)
+	}
+	return nil, fmt.Errorf("unknown TurbulenceCondition field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *TurbulenceConditionMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case turbulencecondition.FieldIntensity:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetIntensity(v)
+		return nil
+	case turbulencecondition.FieldMinAltitude:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetMinAltitude(v)
+		return nil
+	case turbulencecondition.FieldMaxAltitude:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetMaxAltitude(v)
+		return nil
+	}
+	return fmt.Errorf("unknown TurbulenceCondition field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *TurbulenceConditionMutation) AddedFields() []string {
+	var fields []string
+	if m.addmin_altitude != nil {
+		fields = append(fields, turbulencecondition.FieldMinAltitude)
+	}
+	if m.addmax_altitude != nil {
+		fields = append(fields, turbulencecondition.FieldMaxAltitude)
+	}
+	return fields
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *TurbulenceConditionMutation) AddedField(name string) (ent.Value, bool) {
+	switch name {
+	case turbulencecondition.FieldMinAltitude:
+		return m.AddedMinAltitude()
+	case turbulencecondition.FieldMaxAltitude:
+		return m.AddedMaxAltitude()
+	}
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *TurbulenceConditionMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	case turbulencecondition.FieldMinAltitude:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddMinAltitude(v)
+		return nil
+	case turbulencecondition.FieldMaxAltitude:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddMaxAltitude(v)
+		return nil
+	}
+	return fmt.Errorf("unknown TurbulenceCondition numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *TurbulenceConditionMutation) ClearedFields() []string {
+	return nil
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *TurbulenceConditionMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *TurbulenceConditionMutation) ClearField(name string) error {
+	return fmt.Errorf("unknown TurbulenceCondition nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *TurbulenceConditionMutation) ResetField(name string) error {
+	switch name {
+	case turbulencecondition.FieldIntensity:
+		m.ResetIntensity()
+		return nil
+	case turbulencecondition.FieldMinAltitude:
+		m.ResetMinAltitude()
+		return nil
+	case turbulencecondition.FieldMaxAltitude:
+		m.ResetMaxAltitude()
+		return nil
+	}
+	return fmt.Errorf("unknown TurbulenceCondition field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *TurbulenceConditionMutation) AddedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *TurbulenceConditionMutation) AddedIDs(name string) []ent.Value {
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *TurbulenceConditionMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *TurbulenceConditionMutation) RemovedIDs(name string) []ent.Value {
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *TurbulenceConditionMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *TurbulenceConditionMutation) EdgeCleared(name string) bool {
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *TurbulenceConditionMutation) ClearEdge(name string) error {
+	return fmt.Errorf("unknown TurbulenceCondition unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *TurbulenceConditionMutation) ResetEdge(name string) error {
+	return fmt.Errorf("unknown TurbulenceCondition edge %s", name)
 }

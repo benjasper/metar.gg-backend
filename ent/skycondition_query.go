@@ -10,7 +10,6 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
-	"metar.gg/ent/metar"
 	"metar.gg/ent/predicate"
 	"metar.gg/ent/skycondition"
 )
@@ -24,7 +23,6 @@ type SkyConditionQuery struct {
 	order      []OrderFunc
 	fields     []string
 	predicates []predicate.SkyCondition
-	withMetar  *MetarQuery
 	withFKs    bool
 	loadTotal  []func(context.Context, []*SkyCondition) error
 	modifiers  []func(*sql.Selector)
@@ -62,28 +60,6 @@ func (scq *SkyConditionQuery) Unique(unique bool) *SkyConditionQuery {
 func (scq *SkyConditionQuery) Order(o ...OrderFunc) *SkyConditionQuery {
 	scq.order = append(scq.order, o...)
 	return scq
-}
-
-// QueryMetar chains the current query on the "metar" edge.
-func (scq *SkyConditionQuery) QueryMetar() *MetarQuery {
-	query := &MetarQuery{config: scq.config}
-	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
-		if err := scq.prepareQuery(ctx); err != nil {
-			return nil, err
-		}
-		selector := scq.sqlQuery(ctx)
-		if err := selector.Err(); err != nil {
-			return nil, err
-		}
-		step := sqlgraph.NewStep(
-			sqlgraph.From(skycondition.Table, skycondition.FieldID, selector),
-			sqlgraph.To(metar.Table, metar.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, skycondition.MetarTable, skycondition.MetarColumn),
-		)
-		fromU = sqlgraph.SetNeighbors(scq.driver.Dialect(), step)
-		return fromU, nil
-	}
-	return query
 }
 
 // First returns the first SkyCondition entity from the query.
@@ -267,23 +243,11 @@ func (scq *SkyConditionQuery) Clone() *SkyConditionQuery {
 		offset:     scq.offset,
 		order:      append([]OrderFunc{}, scq.order...),
 		predicates: append([]predicate.SkyCondition{}, scq.predicates...),
-		withMetar:  scq.withMetar.Clone(),
 		// clone intermediate query.
 		sql:    scq.sql.Clone(),
 		path:   scq.path,
 		unique: scq.unique,
 	}
-}
-
-// WithMetar tells the query-builder to eager-load the nodes that are connected to
-// the "metar" edge. The optional arguments are used to configure the query builder of the edge.
-func (scq *SkyConditionQuery) WithMetar(opts ...func(*MetarQuery)) *SkyConditionQuery {
-	query := &MetarQuery{config: scq.config}
-	for _, opt := range opts {
-		opt(query)
-	}
-	scq.withMetar = query
-	return scq
 }
 
 // GroupBy is used to group vertices by one or more fields/columns.
@@ -352,16 +316,10 @@ func (scq *SkyConditionQuery) prepareQuery(ctx context.Context) error {
 
 func (scq *SkyConditionQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*SkyCondition, error) {
 	var (
-		nodes       = []*SkyCondition{}
-		withFKs     = scq.withFKs
-		_spec       = scq.querySpec()
-		loadedTypes = [1]bool{
-			scq.withMetar != nil,
-		}
+		nodes   = []*SkyCondition{}
+		withFKs = scq.withFKs
+		_spec   = scq.querySpec()
 	)
-	if scq.withMetar != nil {
-		withFKs = true
-	}
 	if withFKs {
 		_spec.Node.Columns = append(_spec.Node.Columns, skycondition.ForeignKeys...)
 	}
@@ -371,7 +329,6 @@ func (scq *SkyConditionQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([
 	_spec.Assign = func(columns []string, values []any) error {
 		node := &SkyCondition{config: scq.config}
 		nodes = append(nodes, node)
-		node.Edges.loadedTypes = loadedTypes
 		return node.assignValues(columns, values)
 	}
 	if len(scq.modifiers) > 0 {
@@ -386,48 +343,12 @@ func (scq *SkyConditionQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([
 	if len(nodes) == 0 {
 		return nodes, nil
 	}
-	if query := scq.withMetar; query != nil {
-		if err := scq.loadMetar(ctx, query, nodes, nil,
-			func(n *SkyCondition, e *Metar) { n.Edges.Metar = e }); err != nil {
-			return nil, err
-		}
-	}
 	for i := range scq.loadTotal {
 		if err := scq.loadTotal[i](ctx, nodes); err != nil {
 			return nil, err
 		}
 	}
 	return nodes, nil
-}
-
-func (scq *SkyConditionQuery) loadMetar(ctx context.Context, query *MetarQuery, nodes []*SkyCondition, init func(*SkyCondition), assign func(*SkyCondition, *Metar)) error {
-	ids := make([]int, 0, len(nodes))
-	nodeids := make(map[int][]*SkyCondition)
-	for i := range nodes {
-		if nodes[i].metar_sky_conditions == nil {
-			continue
-		}
-		fk := *nodes[i].metar_sky_conditions
-		if _, ok := nodeids[fk]; !ok {
-			ids = append(ids, fk)
-		}
-		nodeids[fk] = append(nodeids[fk], nodes[i])
-	}
-	query.Where(metar.IDIn(ids...))
-	neighbors, err := query.All(ctx)
-	if err != nil {
-		return err
-	}
-	for _, n := range neighbors {
-		nodes, ok := nodeids[n.ID]
-		if !ok {
-			return fmt.Errorf(`unexpected foreign-key "metar_sky_conditions" returned %v`, n.ID)
-		}
-		for i := range nodes {
-			assign(nodes[i], n)
-		}
-	}
-	return nil
 }
 
 func (scq *SkyConditionQuery) sqlCount(ctx context.Context) (int, error) {

@@ -4,7 +4,6 @@ package skycondition
 
 import (
 	"entgo.io/ent/dialect/sql"
-	"entgo.io/ent/dialect/sql/sqlgraph"
 	"metar.gg/ent/predicate"
 )
 
@@ -200,31 +199,53 @@ func CloudBaseNotNil() predicate.SkyCondition {
 	})
 }
 
-// HasMetar applies the HasEdge predicate on the "metar" edge.
-func HasMetar() predicate.SkyCondition {
+// CloudTypeEQ applies the EQ predicate on the "cloud_type" field.
+func CloudTypeEQ(v CloudType) predicate.SkyCondition {
 	return predicate.SkyCondition(func(s *sql.Selector) {
-		step := sqlgraph.NewStep(
-			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(MetarTable, FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, MetarTable, MetarColumn),
-		)
-		sqlgraph.HasNeighbors(s, step)
+		s.Where(sql.EQ(s.C(FieldCloudType), v))
 	})
 }
 
-// HasMetarWith applies the HasEdge predicate on the "metar" edge with a given conditions (other predicates).
-func HasMetarWith(preds ...predicate.Metar) predicate.SkyCondition {
+// CloudTypeNEQ applies the NEQ predicate on the "cloud_type" field.
+func CloudTypeNEQ(v CloudType) predicate.SkyCondition {
 	return predicate.SkyCondition(func(s *sql.Selector) {
-		step := sqlgraph.NewStep(
-			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(MetarInverseTable, FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, MetarTable, MetarColumn),
-		)
-		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
-			for _, p := range preds {
-				p(s)
-			}
-		})
+		s.Where(sql.NEQ(s.C(FieldCloudType), v))
+	})
+}
+
+// CloudTypeIn applies the In predicate on the "cloud_type" field.
+func CloudTypeIn(vs ...CloudType) predicate.SkyCondition {
+	v := make([]any, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.SkyCondition(func(s *sql.Selector) {
+		s.Where(sql.In(s.C(FieldCloudType), v...))
+	})
+}
+
+// CloudTypeNotIn applies the NotIn predicate on the "cloud_type" field.
+func CloudTypeNotIn(vs ...CloudType) predicate.SkyCondition {
+	v := make([]any, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.SkyCondition(func(s *sql.Selector) {
+		s.Where(sql.NotIn(s.C(FieldCloudType), v...))
+	})
+}
+
+// CloudTypeIsNil applies the IsNil predicate on the "cloud_type" field.
+func CloudTypeIsNil() predicate.SkyCondition {
+	return predicate.SkyCondition(func(s *sql.Selector) {
+		s.Where(sql.IsNull(s.C(FieldCloudType)))
+	})
+}
+
+// CloudTypeNotNil applies the NotNil predicate on the "cloud_type" field.
+func CloudTypeNotNil() predicate.SkyCondition {
+	return predicate.SkyCondition(func(s *sql.Selector) {
+		s.Where(sql.NotNull(s.C(FieldCloudType)))
 	})
 }
 

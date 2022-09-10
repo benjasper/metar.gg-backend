@@ -50,6 +50,41 @@ var (
 			},
 		},
 	}
+	// ForecastsColumns holds the columns for the "forecasts" table.
+	ForecastsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "from_time", Type: field.TypeTime},
+		{Name: "to_time", Type: field.TypeTime},
+		{Name: "change_indicator", Type: field.TypeEnum, Nullable: true, Enums: []string{"BECMG", "FM", "TEMPO", "PROB"}},
+		{Name: "change_time", Type: field.TypeTime, Nullable: true},
+		{Name: "change_probability", Type: field.TypeInt, Nullable: true},
+		{Name: "wind_direction", Type: field.TypeInt, Nullable: true},
+		{Name: "wind_speed", Type: field.TypeInt, Nullable: true},
+		{Name: "wind_gust", Type: field.TypeInt, Nullable: true},
+		{Name: "wind_shear_height", Type: field.TypeInt, Nullable: true},
+		{Name: "wind_shear_direction", Type: field.TypeInt, Nullable: true},
+		{Name: "wind_shear_speed", Type: field.TypeInt, Nullable: true},
+		{Name: "visibility_horizontal", Type: field.TypeFloat64, Nullable: true},
+		{Name: "visibility_vertical", Type: field.TypeInt, Nullable: true},
+		{Name: "altimeter", Type: field.TypeFloat64, Nullable: true},
+		{Name: "weather", Type: field.TypeString, Nullable: true},
+		{Name: "not_decoded", Type: field.TypeString, Nullable: true},
+		{Name: "taf_forecast", Type: field.TypeInt, Nullable: true},
+	}
+	// ForecastsTable holds the schema information for the "forecasts" table.
+	ForecastsTable = &schema.Table{
+		Name:       "forecasts",
+		Columns:    ForecastsColumns,
+		PrimaryKey: []*schema.Column{ForecastsColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "forecasts_tafs_forecast",
+				Columns:    []*schema.Column{ForecastsColumns[17]},
+				RefColumns: []*schema.Column{TafsColumns[0]},
+				OnDelete:   schema.SetNull,
+			},
+		},
+	}
 	// FrequenciesColumns holds the columns for the "frequencies" table.
 	FrequenciesColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
@@ -82,14 +117,33 @@ var (
 			},
 		},
 	}
+	// IcingConditionsColumns holds the columns for the "icing_conditions" table.
+	IcingConditionsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "intensity", Type: field.TypeString},
+		{Name: "min_altitude", Type: field.TypeInt, Nullable: true},
+		{Name: "max_altitude", Type: field.TypeInt, Nullable: true},
+		{Name: "forecast_icing_conditions", Type: field.TypeInt, Nullable: true},
+	}
+	// IcingConditionsTable holds the schema information for the "icing_conditions" table.
+	IcingConditionsTable = &schema.Table{
+		Name:       "icing_conditions",
+		Columns:    IcingConditionsColumns,
+		PrimaryKey: []*schema.Column{IcingConditionsColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "icing_conditions_forecasts_icing_conditions",
+				Columns:    []*schema.Column{IcingConditionsColumns[4]},
+				RefColumns: []*schema.Column{ForecastsColumns[0]},
+				OnDelete:   schema.SetNull,
+			},
+		},
+	}
 	// MetarsColumns holds the columns for the "metars" table.
 	MetarsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
-		{Name: "raw_text", Type: field.TypeString},
+		{Name: "raw_text", Type: field.TypeString, Size: 2147483647},
 		{Name: "observation_time", Type: field.TypeTime},
-		{Name: "latitude", Type: field.TypeFloat64, Nullable: true},
-		{Name: "longitude", Type: field.TypeFloat64, Nullable: true},
-		{Name: "elevation", Type: field.TypeFloat64, Nullable: true},
 		{Name: "temperature", Type: field.TypeFloat64},
 		{Name: "dewpoint", Type: field.TypeFloat64},
 		{Name: "wind_speed", Type: field.TypeInt},
@@ -130,7 +184,7 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "metars_stations_metars",
-				Columns:    []*schema.Column{MetarsColumns[36]},
+				Columns:    []*schema.Column{MetarsColumns[33]},
 				RefColumns: []*schema.Column{StationsColumns[0]},
 				OnDelete:   schema.NoAction,
 			},
@@ -192,9 +246,11 @@ var (
 	// SkyConditionsColumns holds the columns for the "sky_conditions" table.
 	SkyConditionsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
-		{Name: "sky_cover", Type: field.TypeEnum, Enums: []string{"SKC", "FEW", "SCT", "CLR", "BKN", "OVC", "OVX", "CAVOK"}},
+		{Name: "sky_cover", Type: field.TypeEnum, Enums: []string{"SKC", "FEW", "SCT", "CLR", "NSC", "BKN", "OVC", "OVCX", "OVX", "CAVOK"}},
 		{Name: "cloud_base", Type: field.TypeInt, Nullable: true},
-		{Name: "metar_sky_conditions", Type: field.TypeInt},
+		{Name: "cloud_type", Type: field.TypeEnum, Nullable: true, Enums: []string{"CB", "CU", "TCU"}},
+		{Name: "forecast_sky_conditions", Type: field.TypeInt, Nullable: true},
+		{Name: "metar_sky_conditions", Type: field.TypeInt, Nullable: true},
 		{Name: "taf_sky_conditions", Type: field.TypeInt, Nullable: true},
 	}
 	// SkyConditionsTable holds the schema information for the "sky_conditions" table.
@@ -204,14 +260,20 @@ var (
 		PrimaryKey: []*schema.Column{SkyConditionsColumns[0]},
 		ForeignKeys: []*schema.ForeignKey{
 			{
+				Symbol:     "sky_conditions_forecasts_sky_conditions",
+				Columns:    []*schema.Column{SkyConditionsColumns[4]},
+				RefColumns: []*schema.Column{ForecastsColumns[0]},
+				OnDelete:   schema.SetNull,
+			},
+			{
 				Symbol:     "sky_conditions_metars_sky_conditions",
-				Columns:    []*schema.Column{SkyConditionsColumns[3]},
+				Columns:    []*schema.Column{SkyConditionsColumns[5]},
 				RefColumns: []*schema.Column{MetarsColumns[0]},
 				OnDelete:   schema.Cascade,
 			},
 			{
 				Symbol:     "sky_conditions_tafs_sky_conditions",
-				Columns:    []*schema.Column{SkyConditionsColumns[4]},
+				Columns:    []*schema.Column{SkyConditionsColumns[6]},
 				RefColumns: []*schema.Column{TafsColumns[0]},
 				OnDelete:   schema.Cascade,
 			},
@@ -261,40 +323,12 @@ var (
 	// TafsColumns holds the columns for the "tafs" table.
 	TafsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
-		{Name: "raw_text", Type: field.TypeString},
+		{Name: "raw_text", Type: field.TypeString, Size: 2147483647},
 		{Name: "issue_time", Type: field.TypeTime},
 		{Name: "bulletin_time", Type: field.TypeTime},
 		{Name: "valid_from_time", Type: field.TypeTime},
 		{Name: "valid_to_time", Type: field.TypeTime},
 		{Name: "remarks", Type: field.TypeString},
-		{Name: "temperature", Type: field.TypeFloat64},
-		{Name: "dewpoint", Type: field.TypeFloat64},
-		{Name: "wind_speed", Type: field.TypeInt},
-		{Name: "wind_gust", Type: field.TypeInt},
-		{Name: "wind_direction", Type: field.TypeInt},
-		{Name: "visibility", Type: field.TypeFloat64},
-		{Name: "altimeter", Type: field.TypeFloat64},
-		{Name: "flight_category", Type: field.TypeEnum, Nullable: true, Enums: []string{"VFR", "MVFR", "IFR", "LIFR"}},
-		{Name: "quality_control_corrected", Type: field.TypeBool, Nullable: true},
-		{Name: "quality_control_auto_station", Type: field.TypeBool},
-		{Name: "quality_control_maintenance_indicator_on", Type: field.TypeBool},
-		{Name: "quality_control_no_signal", Type: field.TypeBool},
-		{Name: "quality_control_lightning_sensor_off", Type: field.TypeBool},
-		{Name: "quality_control_freezing_rain_sensor_off", Type: field.TypeBool},
-		{Name: "quality_control_present_weather_sensor_off", Type: field.TypeBool},
-		{Name: "sea_level_pressure", Type: field.TypeFloat64, Nullable: true},
-		{Name: "pressure_tendency", Type: field.TypeFloat64, Nullable: true},
-		{Name: "max_temp_6", Type: field.TypeFloat64, Nullable: true},
-		{Name: "min_temp_6", Type: field.TypeFloat64, Nullable: true},
-		{Name: "max_temp_24", Type: field.TypeFloat64, Nullable: true},
-		{Name: "min_temp_24", Type: field.TypeFloat64, Nullable: true},
-		{Name: "precipitation", Type: field.TypeFloat64, Nullable: true},
-		{Name: "precipitation_3", Type: field.TypeFloat64, Nullable: true},
-		{Name: "precipitation_6", Type: field.TypeFloat64, Nullable: true},
-		{Name: "precipitation_24", Type: field.TypeFloat64, Nullable: true},
-		{Name: "snow_depth", Type: field.TypeFloat64, Nullable: true},
-		{Name: "vert_vis", Type: field.TypeFloat64, Nullable: true},
-		{Name: "metar_type", Type: field.TypeEnum, Enums: []string{"TAF", "SPECI"}},
 		{Name: "hash", Type: field.TypeString},
 		{Name: "station_tafs", Type: field.TypeInt},
 	}
@@ -306,7 +340,7 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "tafs_stations_tafs",
-				Columns:    []*schema.Column{TafsColumns[36]},
+				Columns:    []*schema.Column{TafsColumns[8]},
 				RefColumns: []*schema.Column{StationsColumns[0]},
 				OnDelete:   schema.NoAction,
 			},
@@ -319,24 +353,78 @@ var (
 			},
 		},
 	}
+	// TemperatureDataColumns holds the columns for the "temperature_data" table.
+	TemperatureDataColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "valid_time", Type: field.TypeTime},
+		{Name: "temperature", Type: field.TypeFloat64},
+		{Name: "min_temperature", Type: field.TypeFloat64, Nullable: true},
+		{Name: "max_temperature", Type: field.TypeFloat64, Nullable: true},
+		{Name: "forecast_temperature_data", Type: field.TypeInt, Nullable: true},
+	}
+	// TemperatureDataTable holds the schema information for the "temperature_data" table.
+	TemperatureDataTable = &schema.Table{
+		Name:       "temperature_data",
+		Columns:    TemperatureDataColumns,
+		PrimaryKey: []*schema.Column{TemperatureDataColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "temperature_data_forecasts_temperature_data",
+				Columns:    []*schema.Column{TemperatureDataColumns[5]},
+				RefColumns: []*schema.Column{ForecastsColumns[0]},
+				OnDelete:   schema.SetNull,
+			},
+		},
+	}
+	// TurbulenceConditionsColumns holds the columns for the "turbulence_conditions" table.
+	TurbulenceConditionsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "intensity", Type: field.TypeString},
+		{Name: "min_altitude", Type: field.TypeInt},
+		{Name: "max_altitude", Type: field.TypeInt},
+		{Name: "forecast_turbulence_conditions", Type: field.TypeInt, Nullable: true},
+	}
+	// TurbulenceConditionsTable holds the schema information for the "turbulence_conditions" table.
+	TurbulenceConditionsTable = &schema.Table{
+		Name:       "turbulence_conditions",
+		Columns:    TurbulenceConditionsColumns,
+		PrimaryKey: []*schema.Column{TurbulenceConditionsColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "turbulence_conditions_forecasts_turbulence_conditions",
+				Columns:    []*schema.Column{TurbulenceConditionsColumns[4]},
+				RefColumns: []*schema.Column{ForecastsColumns[0]},
+				OnDelete:   schema.SetNull,
+			},
+		},
+	}
 	// Tables holds all the tables in the schema.
 	Tables = []*schema.Table{
 		AirportsTable,
+		ForecastsTable,
 		FrequenciesTable,
+		IcingConditionsTable,
 		MetarsTable,
 		RunwaysTable,
 		SkyConditionsTable,
 		StationsTable,
 		TafsTable,
+		TemperatureDataTable,
+		TurbulenceConditionsTable,
 	}
 )
 
 func init() {
+	ForecastsTable.ForeignKeys[0].RefTable = TafsTable
 	FrequenciesTable.ForeignKeys[0].RefTable = AirportsTable
+	IcingConditionsTable.ForeignKeys[0].RefTable = ForecastsTable
 	MetarsTable.ForeignKeys[0].RefTable = StationsTable
 	RunwaysTable.ForeignKeys[0].RefTable = AirportsTable
-	SkyConditionsTable.ForeignKeys[0].RefTable = MetarsTable
-	SkyConditionsTable.ForeignKeys[1].RefTable = TafsTable
+	SkyConditionsTable.ForeignKeys[0].RefTable = ForecastsTable
+	SkyConditionsTable.ForeignKeys[1].RefTable = MetarsTable
+	SkyConditionsTable.ForeignKeys[2].RefTable = TafsTable
 	StationsTable.ForeignKeys[0].RefTable = AirportsTable
 	TafsTable.ForeignKeys[0].RefTable = StationsTable
+	TemperatureDataTable.ForeignKeys[0].RefTable = ForecastsTable
+	TurbulenceConditionsTable.ForeignKeys[0].RefTable = ForecastsTable
 }

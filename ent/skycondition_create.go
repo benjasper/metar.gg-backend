@@ -10,7 +10,6 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
-	"metar.gg/ent/metar"
 	"metar.gg/ent/skycondition"
 )
 
@@ -42,21 +41,24 @@ func (scc *SkyConditionCreate) SetNillableCloudBase(i *int) *SkyConditionCreate 
 	return scc
 }
 
+// SetCloudType sets the "cloud_type" field.
+func (scc *SkyConditionCreate) SetCloudType(st skycondition.CloudType) *SkyConditionCreate {
+	scc.mutation.SetCloudType(st)
+	return scc
+}
+
+// SetNillableCloudType sets the "cloud_type" field if the given value is not nil.
+func (scc *SkyConditionCreate) SetNillableCloudType(st *skycondition.CloudType) *SkyConditionCreate {
+	if st != nil {
+		scc.SetCloudType(*st)
+	}
+	return scc
+}
+
 // SetID sets the "id" field.
 func (scc *SkyConditionCreate) SetID(i int) *SkyConditionCreate {
 	scc.mutation.SetID(i)
 	return scc
-}
-
-// SetMetarID sets the "metar" edge to the Metar entity by ID.
-func (scc *SkyConditionCreate) SetMetarID(id int) *SkyConditionCreate {
-	scc.mutation.SetMetarID(id)
-	return scc
-}
-
-// SetMetar sets the "metar" edge to the Metar entity.
-func (scc *SkyConditionCreate) SetMetar(m *Metar) *SkyConditionCreate {
-	return scc.SetMetarID(m.ID)
 }
 
 // Mutation returns the SkyConditionMutation object of the builder.
@@ -143,8 +145,10 @@ func (scc *SkyConditionCreate) check() error {
 			return &ValidationError{Name: "sky_cover", err: fmt.Errorf(`ent: validator failed for field "SkyCondition.sky_cover": %w`, err)}
 		}
 	}
-	if _, ok := scc.mutation.MetarID(); !ok {
-		return &ValidationError{Name: "metar", err: errors.New(`ent: missing required edge "SkyCondition.metar"`)}
+	if v, ok := scc.mutation.CloudType(); ok {
+		if err := skycondition.CloudTypeValidator(v); err != nil {
+			return &ValidationError{Name: "cloud_type", err: fmt.Errorf(`ent: validator failed for field "SkyCondition.cloud_type": %w`, err)}
+		}
 	}
 	return nil
 }
@@ -196,25 +200,13 @@ func (scc *SkyConditionCreate) createSpec() (*SkyCondition, *sqlgraph.CreateSpec
 		})
 		_node.CloudBase = &value
 	}
-	if nodes := scc.mutation.MetarIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: true,
-			Table:   skycondition.MetarTable,
-			Columns: []string{skycondition.MetarColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: metar.FieldID,
-				},
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_node.metar_sky_conditions = &nodes[0]
-		_spec.Edges = append(_spec.Edges, edge)
+	if value, ok := scc.mutation.CloudType(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeEnum,
+			Value:  value,
+			Column: skycondition.FieldCloudType,
+		})
+		_node.CloudType = &value
 	}
 	return _node, _spec
 }
@@ -301,6 +293,24 @@ func (u *SkyConditionUpsert) AddCloudBase(v int) *SkyConditionUpsert {
 // ClearCloudBase clears the value of the "cloud_base" field.
 func (u *SkyConditionUpsert) ClearCloudBase() *SkyConditionUpsert {
 	u.SetNull(skycondition.FieldCloudBase)
+	return u
+}
+
+// SetCloudType sets the "cloud_type" field.
+func (u *SkyConditionUpsert) SetCloudType(v skycondition.CloudType) *SkyConditionUpsert {
+	u.Set(skycondition.FieldCloudType, v)
+	return u
+}
+
+// UpdateCloudType sets the "cloud_type" field to the value that was provided on create.
+func (u *SkyConditionUpsert) UpdateCloudType() *SkyConditionUpsert {
+	u.SetExcluded(skycondition.FieldCloudType)
+	return u
+}
+
+// ClearCloudType clears the value of the "cloud_type" field.
+func (u *SkyConditionUpsert) ClearCloudType() *SkyConditionUpsert {
+	u.SetNull(skycondition.FieldCloudType)
 	return u
 }
 
@@ -391,6 +401,27 @@ func (u *SkyConditionUpsertOne) UpdateCloudBase() *SkyConditionUpsertOne {
 func (u *SkyConditionUpsertOne) ClearCloudBase() *SkyConditionUpsertOne {
 	return u.Update(func(s *SkyConditionUpsert) {
 		s.ClearCloudBase()
+	})
+}
+
+// SetCloudType sets the "cloud_type" field.
+func (u *SkyConditionUpsertOne) SetCloudType(v skycondition.CloudType) *SkyConditionUpsertOne {
+	return u.Update(func(s *SkyConditionUpsert) {
+		s.SetCloudType(v)
+	})
+}
+
+// UpdateCloudType sets the "cloud_type" field to the value that was provided on create.
+func (u *SkyConditionUpsertOne) UpdateCloudType() *SkyConditionUpsertOne {
+	return u.Update(func(s *SkyConditionUpsert) {
+		s.UpdateCloudType()
+	})
+}
+
+// ClearCloudType clears the value of the "cloud_type" field.
+func (u *SkyConditionUpsertOne) ClearCloudType() *SkyConditionUpsertOne {
+	return u.Update(func(s *SkyConditionUpsert) {
+		s.ClearCloudType()
 	})
 }
 
@@ -642,6 +673,27 @@ func (u *SkyConditionUpsertBulk) UpdateCloudBase() *SkyConditionUpsertBulk {
 func (u *SkyConditionUpsertBulk) ClearCloudBase() *SkyConditionUpsertBulk {
 	return u.Update(func(s *SkyConditionUpsert) {
 		s.ClearCloudBase()
+	})
+}
+
+// SetCloudType sets the "cloud_type" field.
+func (u *SkyConditionUpsertBulk) SetCloudType(v skycondition.CloudType) *SkyConditionUpsertBulk {
+	return u.Update(func(s *SkyConditionUpsert) {
+		s.SetCloudType(v)
+	})
+}
+
+// UpdateCloudType sets the "cloud_type" field to the value that was provided on create.
+func (u *SkyConditionUpsertBulk) UpdateCloudType() *SkyConditionUpsertBulk {
+	return u.Update(func(s *SkyConditionUpsert) {
+		s.UpdateCloudType()
+	})
+}
+
+// ClearCloudType clears the value of the "cloud_type" field.
+func (u *SkyConditionUpsertBulk) ClearCloudType() *SkyConditionUpsertBulk {
+	return u.Update(func(s *SkyConditionUpsert) {
+		s.ClearCloudType()
 	})
 }
 

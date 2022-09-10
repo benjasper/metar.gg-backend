@@ -16,9 +16,6 @@ type AirportConnection {
     totalCount: Int!
     pageInfo: PageInfo!
     edges: [AirportEdge!]!
-
-    """A structured list of the edges without a cursor. Use this to quickly explore the API."""
-    nodes: [Airport!]!
 }
 
 type AirportEdge {
@@ -30,13 +27,21 @@ type MetarConnection {
     totalCount: Int!
     pageInfo: PageInfo!
     edges: [MetarEdge!]!
-
-    """A structured list of the edges without a cursor. Use this to quickly explore the API."""
-    nodes: [Metar!]!
 }
 
 type MetarEdge {
     node: Metar!
+    cursor: Cursor!
+}
+
+type TafConnection {
+    totalCount: Int!
+    pageInfo: PageInfo!
+    edges: [TafEdge!]!
+}
+
+type TafEdge {
+    node: Taf!
     cursor: Cursor!
 }
 
@@ -51,20 +56,23 @@ type Query {
     ): AirportConnection!
 }
 
-type MetarWithDistance {
+type StationWithDistance {
     """The distance in meters from the given location to the airport"""
-    distance: Float
+    distance: Float!
 
     """The METAR for the station"""
-    metar: Metar
+    station: Station!
 }
 
 extend type Airport {
     """Returns all Runways for this Airport. They can be filtered with the closed parameter."""
     runways(closed: Boolean): [Runway!]! @goField(forceResolver: true)
+
+    """Returns the closest weather stations to the airport, within the given radius (in km)."""
+    stationsVicinity(first: Int = 1, radius: Float = 50.0): [StationWithDistance!]! @goField(forceResolver: true)
 }
 
 extend type Station {
-    """Returns the closest METAR to the airport, within the given radius (in km). It's also the latest METAR for each station."""
-    metarsVicinity(first: Int = 1, radius: Float = 50.0): [MetarWithDistance!]! @goField(forceResolver: true)
+    metars(after: Cursor, first: Int, before: Cursor, last: Int): MetarConnection!
+    tafs(after: Cursor, first: Int, before: Cursor, last: Int): TafConnection!
 }

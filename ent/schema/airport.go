@@ -40,7 +40,7 @@ func (Airport) Fields() []ent.Field {
 func (Airport) Edges() []ent.Edge {
 	return []ent.Edge{
 		edge.To("runways", Runway.Type).Comment("Runways at the airport.").Annotations(entgql.Skip()),
-		edge.To("station", Station.Type).Unique().Comment("Weather station at the airport.").Annotations(),
+		edge.To("station", Station.Type).Unique().Comment("Weather station at the airport."),
 		edge.To("frequencies", Frequency.Type).Comment("Frequencies at the airport."),
 	}
 }

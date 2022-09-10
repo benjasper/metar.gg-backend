@@ -11,12 +11,16 @@ import (
 	"metar.gg/ent/migrate"
 
 	"metar.gg/ent/airport"
+	"metar.gg/ent/forecast"
 	"metar.gg/ent/frequency"
+	"metar.gg/ent/icingcondition"
 	"metar.gg/ent/metar"
 	"metar.gg/ent/runway"
 	"metar.gg/ent/skycondition"
 	"metar.gg/ent/station"
 	"metar.gg/ent/taf"
+	"metar.gg/ent/temperaturedata"
+	"metar.gg/ent/turbulencecondition"
 
 	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/sql"
@@ -30,8 +34,12 @@ type Client struct {
 	Schema *migrate.Schema
 	// Airport is the client for interacting with the Airport builders.
 	Airport *AirportClient
+	// Forecast is the client for interacting with the Forecast builders.
+	Forecast *ForecastClient
 	// Frequency is the client for interacting with the Frequency builders.
 	Frequency *FrequencyClient
+	// IcingCondition is the client for interacting with the IcingCondition builders.
+	IcingCondition *IcingConditionClient
 	// Metar is the client for interacting with the Metar builders.
 	Metar *MetarClient
 	// Runway is the client for interacting with the Runway builders.
@@ -42,6 +50,10 @@ type Client struct {
 	Station *StationClient
 	// Taf is the client for interacting with the Taf builders.
 	Taf *TafClient
+	// TemperatureData is the client for interacting with the TemperatureData builders.
+	TemperatureData *TemperatureDataClient
+	// TurbulenceCondition is the client for interacting with the TurbulenceCondition builders.
+	TurbulenceCondition *TurbulenceConditionClient
 	// additional fields for node api
 	tables tables
 }
@@ -58,12 +70,16 @@ func NewClient(opts ...Option) *Client {
 func (c *Client) init() {
 	c.Schema = migrate.NewSchema(c.driver)
 	c.Airport = NewAirportClient(c.config)
+	c.Forecast = NewForecastClient(c.config)
 	c.Frequency = NewFrequencyClient(c.config)
+	c.IcingCondition = NewIcingConditionClient(c.config)
 	c.Metar = NewMetarClient(c.config)
 	c.Runway = NewRunwayClient(c.config)
 	c.SkyCondition = NewSkyConditionClient(c.config)
 	c.Station = NewStationClient(c.config)
 	c.Taf = NewTafClient(c.config)
+	c.TemperatureData = NewTemperatureDataClient(c.config)
+	c.TurbulenceCondition = NewTurbulenceConditionClient(c.config)
 }
 
 // Open opens a database/sql.DB specified by the driver name and
@@ -95,15 +111,19 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 	cfg := c.config
 	cfg.driver = tx
 	return &Tx{
-		ctx:          ctx,
-		config:       cfg,
-		Airport:      NewAirportClient(cfg),
-		Frequency:    NewFrequencyClient(cfg),
-		Metar:        NewMetarClient(cfg),
-		Runway:       NewRunwayClient(cfg),
-		SkyCondition: NewSkyConditionClient(cfg),
-		Station:      NewStationClient(cfg),
-		Taf:          NewTafClient(cfg),
+		ctx:                 ctx,
+		config:              cfg,
+		Airport:             NewAirportClient(cfg),
+		Forecast:            NewForecastClient(cfg),
+		Frequency:           NewFrequencyClient(cfg),
+		IcingCondition:      NewIcingConditionClient(cfg),
+		Metar:               NewMetarClient(cfg),
+		Runway:              NewRunwayClient(cfg),
+		SkyCondition:        NewSkyConditionClient(cfg),
+		Station:             NewStationClient(cfg),
+		Taf:                 NewTafClient(cfg),
+		TemperatureData:     NewTemperatureDataClient(cfg),
+		TurbulenceCondition: NewTurbulenceConditionClient(cfg),
 	}, nil
 }
 
@@ -121,15 +141,19 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 	cfg := c.config
 	cfg.driver = &txDriver{tx: tx, drv: c.driver}
 	return &Tx{
-		ctx:          ctx,
-		config:       cfg,
-		Airport:      NewAirportClient(cfg),
-		Frequency:    NewFrequencyClient(cfg),
-		Metar:        NewMetarClient(cfg),
-		Runway:       NewRunwayClient(cfg),
-		SkyCondition: NewSkyConditionClient(cfg),
-		Station:      NewStationClient(cfg),
-		Taf:          NewTafClient(cfg),
+		ctx:                 ctx,
+		config:              cfg,
+		Airport:             NewAirportClient(cfg),
+		Forecast:            NewForecastClient(cfg),
+		Frequency:           NewFrequencyClient(cfg),
+		IcingCondition:      NewIcingConditionClient(cfg),
+		Metar:               NewMetarClient(cfg),
+		Runway:              NewRunwayClient(cfg),
+		SkyCondition:        NewSkyConditionClient(cfg),
+		Station:             NewStationClient(cfg),
+		Taf:                 NewTafClient(cfg),
+		TemperatureData:     NewTemperatureDataClient(cfg),
+		TurbulenceCondition: NewTurbulenceConditionClient(cfg),
 	}, nil
 }
 
@@ -159,12 +183,16 @@ func (c *Client) Close() error {
 // In order to add hooks to a specific client, call: `client.Node.Use(...)`.
 func (c *Client) Use(hooks ...Hook) {
 	c.Airport.Use(hooks...)
+	c.Forecast.Use(hooks...)
 	c.Frequency.Use(hooks...)
+	c.IcingCondition.Use(hooks...)
 	c.Metar.Use(hooks...)
 	c.Runway.Use(hooks...)
 	c.SkyCondition.Use(hooks...)
 	c.Station.Use(hooks...)
 	c.Taf.Use(hooks...)
+	c.TemperatureData.Use(hooks...)
+	c.TurbulenceCondition.Use(hooks...)
 }
 
 // AirportClient is a client for the Airport schema.
@@ -305,6 +333,160 @@ func (c *AirportClient) Hooks() []Hook {
 	return c.hooks.Airport
 }
 
+// ForecastClient is a client for the Forecast schema.
+type ForecastClient struct {
+	config
+}
+
+// NewForecastClient returns a client for the Forecast from the given config.
+func NewForecastClient(c config) *ForecastClient {
+	return &ForecastClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `forecast.Hooks(f(g(h())))`.
+func (c *ForecastClient) Use(hooks ...Hook) {
+	c.hooks.Forecast = append(c.hooks.Forecast, hooks...)
+}
+
+// Create returns a builder for creating a Forecast entity.
+func (c *ForecastClient) Create() *ForecastCreate {
+	mutation := newForecastMutation(c.config, OpCreate)
+	return &ForecastCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of Forecast entities.
+func (c *ForecastClient) CreateBulk(builders ...*ForecastCreate) *ForecastCreateBulk {
+	return &ForecastCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for Forecast.
+func (c *ForecastClient) Update() *ForecastUpdate {
+	mutation := newForecastMutation(c.config, OpUpdate)
+	return &ForecastUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *ForecastClient) UpdateOne(f *Forecast) *ForecastUpdateOne {
+	mutation := newForecastMutation(c.config, OpUpdateOne, withForecast(f))
+	return &ForecastUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *ForecastClient) UpdateOneID(id int) *ForecastUpdateOne {
+	mutation := newForecastMutation(c.config, OpUpdateOne, withForecastID(id))
+	return &ForecastUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for Forecast.
+func (c *ForecastClient) Delete() *ForecastDelete {
+	mutation := newForecastMutation(c.config, OpDelete)
+	return &ForecastDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *ForecastClient) DeleteOne(f *Forecast) *ForecastDeleteOne {
+	return c.DeleteOneID(f.ID)
+}
+
+// DeleteOne returns a builder for deleting the given entity by its id.
+func (c *ForecastClient) DeleteOneID(id int) *ForecastDeleteOne {
+	builder := c.Delete().Where(forecast.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &ForecastDeleteOne{builder}
+}
+
+// Query returns a query builder for Forecast.
+func (c *ForecastClient) Query() *ForecastQuery {
+	return &ForecastQuery{
+		config: c.config,
+	}
+}
+
+// Get returns a Forecast entity by its id.
+func (c *ForecastClient) Get(ctx context.Context, id int) (*Forecast, error) {
+	return c.Query().Where(forecast.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *ForecastClient) GetX(ctx context.Context, id int) *Forecast {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QuerySkyConditions queries the sky_conditions edge of a Forecast.
+func (c *ForecastClient) QuerySkyConditions(f *Forecast) *SkyConditionQuery {
+	query := &SkyConditionQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := f.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(forecast.Table, forecast.FieldID, id),
+			sqlgraph.To(skycondition.Table, skycondition.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, forecast.SkyConditionsTable, forecast.SkyConditionsColumn),
+		)
+		fromV = sqlgraph.Neighbors(f.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryTurbulenceConditions queries the turbulence_conditions edge of a Forecast.
+func (c *ForecastClient) QueryTurbulenceConditions(f *Forecast) *TurbulenceConditionQuery {
+	query := &TurbulenceConditionQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := f.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(forecast.Table, forecast.FieldID, id),
+			sqlgraph.To(turbulencecondition.Table, turbulencecondition.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, forecast.TurbulenceConditionsTable, forecast.TurbulenceConditionsColumn),
+		)
+		fromV = sqlgraph.Neighbors(f.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryIcingConditions queries the icing_conditions edge of a Forecast.
+func (c *ForecastClient) QueryIcingConditions(f *Forecast) *IcingConditionQuery {
+	query := &IcingConditionQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := f.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(forecast.Table, forecast.FieldID, id),
+			sqlgraph.To(icingcondition.Table, icingcondition.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, forecast.IcingConditionsTable, forecast.IcingConditionsColumn),
+		)
+		fromV = sqlgraph.Neighbors(f.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryTemperatureData queries the temperature_data edge of a Forecast.
+func (c *ForecastClient) QueryTemperatureData(f *Forecast) *TemperatureDataQuery {
+	query := &TemperatureDataQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := f.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(forecast.Table, forecast.FieldID, id),
+			sqlgraph.To(temperaturedata.Table, temperaturedata.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, forecast.TemperatureDataTable, forecast.TemperatureDataColumn),
+		)
+		fromV = sqlgraph.Neighbors(f.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *ForecastClient) Hooks() []Hook {
+	return c.hooks.Forecast
+}
+
 // FrequencyClient is a client for the Frequency schema.
 type FrequencyClient struct {
 	config
@@ -409,6 +591,96 @@ func (c *FrequencyClient) QueryAirport(f *Frequency) *AirportQuery {
 // Hooks returns the client hooks.
 func (c *FrequencyClient) Hooks() []Hook {
 	return c.hooks.Frequency
+}
+
+// IcingConditionClient is a client for the IcingCondition schema.
+type IcingConditionClient struct {
+	config
+}
+
+// NewIcingConditionClient returns a client for the IcingCondition from the given config.
+func NewIcingConditionClient(c config) *IcingConditionClient {
+	return &IcingConditionClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `icingcondition.Hooks(f(g(h())))`.
+func (c *IcingConditionClient) Use(hooks ...Hook) {
+	c.hooks.IcingCondition = append(c.hooks.IcingCondition, hooks...)
+}
+
+// Create returns a builder for creating a IcingCondition entity.
+func (c *IcingConditionClient) Create() *IcingConditionCreate {
+	mutation := newIcingConditionMutation(c.config, OpCreate)
+	return &IcingConditionCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of IcingCondition entities.
+func (c *IcingConditionClient) CreateBulk(builders ...*IcingConditionCreate) *IcingConditionCreateBulk {
+	return &IcingConditionCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for IcingCondition.
+func (c *IcingConditionClient) Update() *IcingConditionUpdate {
+	mutation := newIcingConditionMutation(c.config, OpUpdate)
+	return &IcingConditionUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *IcingConditionClient) UpdateOne(ic *IcingCondition) *IcingConditionUpdateOne {
+	mutation := newIcingConditionMutation(c.config, OpUpdateOne, withIcingCondition(ic))
+	return &IcingConditionUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *IcingConditionClient) UpdateOneID(id int) *IcingConditionUpdateOne {
+	mutation := newIcingConditionMutation(c.config, OpUpdateOne, withIcingConditionID(id))
+	return &IcingConditionUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for IcingCondition.
+func (c *IcingConditionClient) Delete() *IcingConditionDelete {
+	mutation := newIcingConditionMutation(c.config, OpDelete)
+	return &IcingConditionDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *IcingConditionClient) DeleteOne(ic *IcingCondition) *IcingConditionDeleteOne {
+	return c.DeleteOneID(ic.ID)
+}
+
+// DeleteOne returns a builder for deleting the given entity by its id.
+func (c *IcingConditionClient) DeleteOneID(id int) *IcingConditionDeleteOne {
+	builder := c.Delete().Where(icingcondition.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &IcingConditionDeleteOne{builder}
+}
+
+// Query returns a query builder for IcingCondition.
+func (c *IcingConditionClient) Query() *IcingConditionQuery {
+	return &IcingConditionQuery{
+		config: c.config,
+	}
+}
+
+// Get returns a IcingCondition entity by its id.
+func (c *IcingConditionClient) Get(ctx context.Context, id int) (*IcingCondition, error) {
+	return c.Query().Where(icingcondition.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *IcingConditionClient) GetX(ctx context.Context, id int) *IcingCondition {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// Hooks returns the client hooks.
+func (c *IcingConditionClient) Hooks() []Hook {
+	return c.hooks.IcingCondition
 }
 
 // MetarClient is a client for the Metar schema.
@@ -724,22 +996,6 @@ func (c *SkyConditionClient) GetX(ctx context.Context, id int) *SkyCondition {
 	return obj
 }
 
-// QueryMetar queries the metar edge of a SkyCondition.
-func (c *SkyConditionClient) QueryMetar(sc *SkyCondition) *MetarQuery {
-	query := &MetarQuery{config: c.config}
-	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
-		id := sc.ID
-		step := sqlgraph.NewStep(
-			sqlgraph.From(skycondition.Table, skycondition.FieldID, id),
-			sqlgraph.To(metar.Table, metar.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, skycondition.MetarTable, skycondition.MetarColumn),
-		)
-		fromV = sqlgraph.Neighbors(sc.driver.Dialect(), step)
-		return fromV, nil
-	}
-	return query
-}
-
 // Hooks returns the client hooks.
 func (c *SkyConditionClient) Hooks() []Hook {
 	return c.hooks.SkyCondition
@@ -1000,7 +1256,203 @@ func (c *TafClient) QuerySkyConditions(t *Taf) *SkyConditionQuery {
 	return query
 }
 
+// QueryForecast queries the forecast edge of a Taf.
+func (c *TafClient) QueryForecast(t *Taf) *ForecastQuery {
+	query := &ForecastQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := t.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(taf.Table, taf.FieldID, id),
+			sqlgraph.To(forecast.Table, forecast.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, taf.ForecastTable, taf.ForecastColumn),
+		)
+		fromV = sqlgraph.Neighbors(t.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // Hooks returns the client hooks.
 func (c *TafClient) Hooks() []Hook {
 	return c.hooks.Taf
+}
+
+// TemperatureDataClient is a client for the TemperatureData schema.
+type TemperatureDataClient struct {
+	config
+}
+
+// NewTemperatureDataClient returns a client for the TemperatureData from the given config.
+func NewTemperatureDataClient(c config) *TemperatureDataClient {
+	return &TemperatureDataClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `temperaturedata.Hooks(f(g(h())))`.
+func (c *TemperatureDataClient) Use(hooks ...Hook) {
+	c.hooks.TemperatureData = append(c.hooks.TemperatureData, hooks...)
+}
+
+// Create returns a builder for creating a TemperatureData entity.
+func (c *TemperatureDataClient) Create() *TemperatureDataCreate {
+	mutation := newTemperatureDataMutation(c.config, OpCreate)
+	return &TemperatureDataCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of TemperatureData entities.
+func (c *TemperatureDataClient) CreateBulk(builders ...*TemperatureDataCreate) *TemperatureDataCreateBulk {
+	return &TemperatureDataCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for TemperatureData.
+func (c *TemperatureDataClient) Update() *TemperatureDataUpdate {
+	mutation := newTemperatureDataMutation(c.config, OpUpdate)
+	return &TemperatureDataUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *TemperatureDataClient) UpdateOne(td *TemperatureData) *TemperatureDataUpdateOne {
+	mutation := newTemperatureDataMutation(c.config, OpUpdateOne, withTemperatureData(td))
+	return &TemperatureDataUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *TemperatureDataClient) UpdateOneID(id int) *TemperatureDataUpdateOne {
+	mutation := newTemperatureDataMutation(c.config, OpUpdateOne, withTemperatureDataID(id))
+	return &TemperatureDataUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for TemperatureData.
+func (c *TemperatureDataClient) Delete() *TemperatureDataDelete {
+	mutation := newTemperatureDataMutation(c.config, OpDelete)
+	return &TemperatureDataDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *TemperatureDataClient) DeleteOne(td *TemperatureData) *TemperatureDataDeleteOne {
+	return c.DeleteOneID(td.ID)
+}
+
+// DeleteOne returns a builder for deleting the given entity by its id.
+func (c *TemperatureDataClient) DeleteOneID(id int) *TemperatureDataDeleteOne {
+	builder := c.Delete().Where(temperaturedata.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &TemperatureDataDeleteOne{builder}
+}
+
+// Query returns a query builder for TemperatureData.
+func (c *TemperatureDataClient) Query() *TemperatureDataQuery {
+	return &TemperatureDataQuery{
+		config: c.config,
+	}
+}
+
+// Get returns a TemperatureData entity by its id.
+func (c *TemperatureDataClient) Get(ctx context.Context, id int) (*TemperatureData, error) {
+	return c.Query().Where(temperaturedata.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *TemperatureDataClient) GetX(ctx context.Context, id int) *TemperatureData {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// Hooks returns the client hooks.
+func (c *TemperatureDataClient) Hooks() []Hook {
+	return c.hooks.TemperatureData
+}
+
+// TurbulenceConditionClient is a client for the TurbulenceCondition schema.
+type TurbulenceConditionClient struct {
+	config
+}
+
+// NewTurbulenceConditionClient returns a client for the TurbulenceCondition from the given config.
+func NewTurbulenceConditionClient(c config) *TurbulenceConditionClient {
+	return &TurbulenceConditionClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `turbulencecondition.Hooks(f(g(h())))`.
+func (c *TurbulenceConditionClient) Use(hooks ...Hook) {
+	c.hooks.TurbulenceCondition = append(c.hooks.TurbulenceCondition, hooks...)
+}
+
+// Create returns a builder for creating a TurbulenceCondition entity.
+func (c *TurbulenceConditionClient) Create() *TurbulenceConditionCreate {
+	mutation := newTurbulenceConditionMutation(c.config, OpCreate)
+	return &TurbulenceConditionCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of TurbulenceCondition entities.
+func (c *TurbulenceConditionClient) CreateBulk(builders ...*TurbulenceConditionCreate) *TurbulenceConditionCreateBulk {
+	return &TurbulenceConditionCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for TurbulenceCondition.
+func (c *TurbulenceConditionClient) Update() *TurbulenceConditionUpdate {
+	mutation := newTurbulenceConditionMutation(c.config, OpUpdate)
+	return &TurbulenceConditionUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *TurbulenceConditionClient) UpdateOne(tc *TurbulenceCondition) *TurbulenceConditionUpdateOne {
+	mutation := newTurbulenceConditionMutation(c.config, OpUpdateOne, withTurbulenceCondition(tc))
+	return &TurbulenceConditionUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *TurbulenceConditionClient) UpdateOneID(id int) *TurbulenceConditionUpdateOne {
+	mutation := newTurbulenceConditionMutation(c.config, OpUpdateOne, withTurbulenceConditionID(id))
+	return &TurbulenceConditionUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for TurbulenceCondition.
+func (c *TurbulenceConditionClient) Delete() *TurbulenceConditionDelete {
+	mutation := newTurbulenceConditionMutation(c.config, OpDelete)
+	return &TurbulenceConditionDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *TurbulenceConditionClient) DeleteOne(tc *TurbulenceCondition) *TurbulenceConditionDeleteOne {
+	return c.DeleteOneID(tc.ID)
+}
+
+// DeleteOne returns a builder for deleting the given entity by its id.
+func (c *TurbulenceConditionClient) DeleteOneID(id int) *TurbulenceConditionDeleteOne {
+	builder := c.Delete().Where(turbulencecondition.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &TurbulenceConditionDeleteOne{builder}
+}
+
+// Query returns a query builder for TurbulenceCondition.
+func (c *TurbulenceConditionClient) Query() *TurbulenceConditionQuery {
+	return &TurbulenceConditionQuery{
+		config: c.config,
+	}
+}
+
+// Get returns a TurbulenceCondition entity by its id.
+func (c *TurbulenceConditionClient) Get(ctx context.Context, id int) (*TurbulenceCondition, error) {
+	return c.Query().Where(turbulencecondition.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *TurbulenceConditionClient) GetX(ctx context.Context, id int) *TurbulenceCondition {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// Hooks returns the client hooks.
+func (c *TurbulenceConditionClient) Hooks() []Hook {
+	return c.hooks.TurbulenceCondition
 }

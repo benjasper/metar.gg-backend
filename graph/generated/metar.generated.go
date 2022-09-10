@@ -20,12 +20,6 @@ import (
 
 // region    ************************** generated!.gotpl **************************
 
-type AirportConnectionResolver interface {
-	Nodes(ctx context.Context, obj *ent.AirportConnection) ([]*ent.Airport, error)
-}
-type MetarConnectionResolver interface {
-	Nodes(ctx context.Context, obj *ent.MetarConnection) ([]*ent.Metar, error)
-}
 type QueryResolver interface {
 	GetAirports(ctx context.Context, after *ent.Cursor, first *int, before *ent.Cursor, last *int, identifier *string, hasWeather *bool) (*ent.AirportConnection, error)
 }
@@ -265,96 +259,6 @@ func (ec *executionContext) fieldContext_AirportConnection_edges(ctx context.Con
 	return fc, nil
 }
 
-func (ec *executionContext) _AirportConnection_nodes(ctx context.Context, field graphql.CollectedField, obj *ent.AirportConnection) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_AirportConnection_nodes(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.AirportConnection().Nodes(rctx, obj)
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.([]*ent.Airport)
-	fc.Result = res
-	return ec.marshalNAirport2ᚕᚖmetarᚗggᚋentᚐAirportᚄ(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_AirportConnection_nodes(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "AirportConnection",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "id":
-				return ec.fieldContext_Airport_id(ctx, field)
-			case "lastUpdated":
-				return ec.fieldContext_Airport_lastUpdated(ctx, field)
-			case "identifier":
-				return ec.fieldContext_Airport_identifier(ctx, field)
-			case "type":
-				return ec.fieldContext_Airport_type(ctx, field)
-			case "name":
-				return ec.fieldContext_Airport_name(ctx, field)
-			case "latitude":
-				return ec.fieldContext_Airport_latitude(ctx, field)
-			case "longitude":
-				return ec.fieldContext_Airport_longitude(ctx, field)
-			case "elevation":
-				return ec.fieldContext_Airport_elevation(ctx, field)
-			case "continent":
-				return ec.fieldContext_Airport_continent(ctx, field)
-			case "country":
-				return ec.fieldContext_Airport_country(ctx, field)
-			case "region":
-				return ec.fieldContext_Airport_region(ctx, field)
-			case "municipality":
-				return ec.fieldContext_Airport_municipality(ctx, field)
-			case "scheduledService":
-				return ec.fieldContext_Airport_scheduledService(ctx, field)
-			case "gpsCode":
-				return ec.fieldContext_Airport_gpsCode(ctx, field)
-			case "iataCode":
-				return ec.fieldContext_Airport_iataCode(ctx, field)
-			case "localCode":
-				return ec.fieldContext_Airport_localCode(ctx, field)
-			case "website":
-				return ec.fieldContext_Airport_website(ctx, field)
-			case "wikipedia":
-				return ec.fieldContext_Airport_wikipedia(ctx, field)
-			case "keywords":
-				return ec.fieldContext_Airport_keywords(ctx, field)
-			case "station":
-				return ec.fieldContext_Airport_station(ctx, field)
-			case "frequencies":
-				return ec.fieldContext_Airport_frequencies(ctx, field)
-			case "runways":
-				return ec.fieldContext_Airport_runways(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type Airport", field.Name)
-		},
-	}
-	return fc, nil
-}
-
 func (ec *executionContext) _AirportEdge_node(ctx context.Context, field graphql.CollectedField, obj *ent.AirportEdge) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_AirportEdge_node(ctx, field)
 	if err != nil {
@@ -438,6 +342,8 @@ func (ec *executionContext) fieldContext_AirportEdge_node(ctx context.Context, f
 				return ec.fieldContext_Airport_frequencies(ctx, field)
 			case "runways":
 				return ec.fieldContext_Airport_runways(ctx, field)
+			case "stationsVicinity":
+				return ec.fieldContext_Airport_stationsVicinity(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Airport", field.Name)
 		},
@@ -637,124 +543,6 @@ func (ec *executionContext) fieldContext_MetarConnection_edges(ctx context.Conte
 	return fc, nil
 }
 
-func (ec *executionContext) _MetarConnection_nodes(ctx context.Context, field graphql.CollectedField, obj *ent.MetarConnection) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_MetarConnection_nodes(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.MetarConnection().Nodes(rctx, obj)
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.([]*ent.Metar)
-	fc.Result = res
-	return ec.marshalNMetar2ᚕᚖmetarᚗggᚋentᚐMetarᚄ(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_MetarConnection_nodes(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "MetarConnection",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "rawText":
-				return ec.fieldContext_Metar_rawText(ctx, field)
-			case "observationTime":
-				return ec.fieldContext_Metar_observationTime(ctx, field)
-			case "latitude":
-				return ec.fieldContext_Metar_latitude(ctx, field)
-			case "longitude":
-				return ec.fieldContext_Metar_longitude(ctx, field)
-			case "elevation":
-				return ec.fieldContext_Metar_elevation(ctx, field)
-			case "temperature":
-				return ec.fieldContext_Metar_temperature(ctx, field)
-			case "dewpoint":
-				return ec.fieldContext_Metar_dewpoint(ctx, field)
-			case "windSpeed":
-				return ec.fieldContext_Metar_windSpeed(ctx, field)
-			case "windGust":
-				return ec.fieldContext_Metar_windGust(ctx, field)
-			case "windDirection":
-				return ec.fieldContext_Metar_windDirection(ctx, field)
-			case "visibility":
-				return ec.fieldContext_Metar_visibility(ctx, field)
-			case "altimeter":
-				return ec.fieldContext_Metar_altimeter(ctx, field)
-			case "presentWeather":
-				return ec.fieldContext_Metar_presentWeather(ctx, field)
-			case "flightCategory":
-				return ec.fieldContext_Metar_flightCategory(ctx, field)
-			case "qualityControlCorrected":
-				return ec.fieldContext_Metar_qualityControlCorrected(ctx, field)
-			case "qualityControlAutoStation":
-				return ec.fieldContext_Metar_qualityControlAutoStation(ctx, field)
-			case "qualityControlMaintenanceIndicatorOn":
-				return ec.fieldContext_Metar_qualityControlMaintenanceIndicatorOn(ctx, field)
-			case "qualityControlNoSignal":
-				return ec.fieldContext_Metar_qualityControlNoSignal(ctx, field)
-			case "qualityControlLightningSensorOff":
-				return ec.fieldContext_Metar_qualityControlLightningSensorOff(ctx, field)
-			case "qualityControlFreezingRainSensorOff":
-				return ec.fieldContext_Metar_qualityControlFreezingRainSensorOff(ctx, field)
-			case "qualityControlPresentWeatherSensorOff":
-				return ec.fieldContext_Metar_qualityControlPresentWeatherSensorOff(ctx, field)
-			case "seaLevelPressure":
-				return ec.fieldContext_Metar_seaLevelPressure(ctx, field)
-			case "pressureTendency":
-				return ec.fieldContext_Metar_pressureTendency(ctx, field)
-			case "maxTemp6":
-				return ec.fieldContext_Metar_maxTemp6(ctx, field)
-			case "minTemp6":
-				return ec.fieldContext_Metar_minTemp6(ctx, field)
-			case "maxTemp24":
-				return ec.fieldContext_Metar_maxTemp24(ctx, field)
-			case "minTemp24":
-				return ec.fieldContext_Metar_minTemp24(ctx, field)
-			case "precipitation":
-				return ec.fieldContext_Metar_precipitation(ctx, field)
-			case "precipitation3":
-				return ec.fieldContext_Metar_precipitation3(ctx, field)
-			case "precipitation6":
-				return ec.fieldContext_Metar_precipitation6(ctx, field)
-			case "precipitation24":
-				return ec.fieldContext_Metar_precipitation24(ctx, field)
-			case "snowDepth":
-				return ec.fieldContext_Metar_snowDepth(ctx, field)
-			case "vertVis":
-				return ec.fieldContext_Metar_vertVis(ctx, field)
-			case "metarType":
-				return ec.fieldContext_Metar_metarType(ctx, field)
-			case "station":
-				return ec.fieldContext_Metar_station(ctx, field)
-			case "skyConditions":
-				return ec.fieldContext_Metar_skyConditions(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type Metar", field.Name)
-		},
-	}
-	return fc, nil
-}
-
 func (ec *executionContext) _MetarEdge_node(ctx context.Context, field graphql.CollectedField, obj *ent.MetarEdge) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_MetarEdge_node(ctx, field)
 	if err != nil {
@@ -798,12 +586,6 @@ func (ec *executionContext) fieldContext_MetarEdge_node(ctx context.Context, fie
 				return ec.fieldContext_Metar_rawText(ctx, field)
 			case "observationTime":
 				return ec.fieldContext_Metar_observationTime(ctx, field)
-			case "latitude":
-				return ec.fieldContext_Metar_latitude(ctx, field)
-			case "longitude":
-				return ec.fieldContext_Metar_longitude(ctx, field)
-			case "elevation":
-				return ec.fieldContext_Metar_elevation(ctx, field)
 			case "temperature":
 				return ec.fieldContext_Metar_temperature(ctx, field)
 			case "dewpoint":
@@ -912,162 +694,6 @@ func (ec *executionContext) fieldContext_MetarEdge_cursor(ctx context.Context, f
 		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			return nil, errors.New("field of type Cursor does not have child fields")
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _MetarWithDistance_distance(ctx context.Context, field graphql.CollectedField, obj *model.MetarWithDistance) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_MetarWithDistance_distance(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Distance, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		return graphql.Null
-	}
-	res := resTmp.(*float64)
-	fc.Result = res
-	return ec.marshalOFloat2ᚖfloat64(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_MetarWithDistance_distance(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "MetarWithDistance",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type Float does not have child fields")
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _MetarWithDistance_metar(ctx context.Context, field graphql.CollectedField, obj *model.MetarWithDistance) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_MetarWithDistance_metar(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Metar, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		return graphql.Null
-	}
-	res := resTmp.(*ent.Metar)
-	fc.Result = res
-	return ec.marshalOMetar2ᚖmetarᚗggᚋentᚐMetar(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_MetarWithDistance_metar(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "MetarWithDistance",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "rawText":
-				return ec.fieldContext_Metar_rawText(ctx, field)
-			case "observationTime":
-				return ec.fieldContext_Metar_observationTime(ctx, field)
-			case "latitude":
-				return ec.fieldContext_Metar_latitude(ctx, field)
-			case "longitude":
-				return ec.fieldContext_Metar_longitude(ctx, field)
-			case "elevation":
-				return ec.fieldContext_Metar_elevation(ctx, field)
-			case "temperature":
-				return ec.fieldContext_Metar_temperature(ctx, field)
-			case "dewpoint":
-				return ec.fieldContext_Metar_dewpoint(ctx, field)
-			case "windSpeed":
-				return ec.fieldContext_Metar_windSpeed(ctx, field)
-			case "windGust":
-				return ec.fieldContext_Metar_windGust(ctx, field)
-			case "windDirection":
-				return ec.fieldContext_Metar_windDirection(ctx, field)
-			case "visibility":
-				return ec.fieldContext_Metar_visibility(ctx, field)
-			case "altimeter":
-				return ec.fieldContext_Metar_altimeter(ctx, field)
-			case "presentWeather":
-				return ec.fieldContext_Metar_presentWeather(ctx, field)
-			case "flightCategory":
-				return ec.fieldContext_Metar_flightCategory(ctx, field)
-			case "qualityControlCorrected":
-				return ec.fieldContext_Metar_qualityControlCorrected(ctx, field)
-			case "qualityControlAutoStation":
-				return ec.fieldContext_Metar_qualityControlAutoStation(ctx, field)
-			case "qualityControlMaintenanceIndicatorOn":
-				return ec.fieldContext_Metar_qualityControlMaintenanceIndicatorOn(ctx, field)
-			case "qualityControlNoSignal":
-				return ec.fieldContext_Metar_qualityControlNoSignal(ctx, field)
-			case "qualityControlLightningSensorOff":
-				return ec.fieldContext_Metar_qualityControlLightningSensorOff(ctx, field)
-			case "qualityControlFreezingRainSensorOff":
-				return ec.fieldContext_Metar_qualityControlFreezingRainSensorOff(ctx, field)
-			case "qualityControlPresentWeatherSensorOff":
-				return ec.fieldContext_Metar_qualityControlPresentWeatherSensorOff(ctx, field)
-			case "seaLevelPressure":
-				return ec.fieldContext_Metar_seaLevelPressure(ctx, field)
-			case "pressureTendency":
-				return ec.fieldContext_Metar_pressureTendency(ctx, field)
-			case "maxTemp6":
-				return ec.fieldContext_Metar_maxTemp6(ctx, field)
-			case "minTemp6":
-				return ec.fieldContext_Metar_minTemp6(ctx, field)
-			case "maxTemp24":
-				return ec.fieldContext_Metar_maxTemp24(ctx, field)
-			case "minTemp24":
-				return ec.fieldContext_Metar_minTemp24(ctx, field)
-			case "precipitation":
-				return ec.fieldContext_Metar_precipitation(ctx, field)
-			case "precipitation3":
-				return ec.fieldContext_Metar_precipitation3(ctx, field)
-			case "precipitation6":
-				return ec.fieldContext_Metar_precipitation6(ctx, field)
-			case "precipitation24":
-				return ec.fieldContext_Metar_precipitation24(ctx, field)
-			case "snowDepth":
-				return ec.fieldContext_Metar_snowDepth(ctx, field)
-			case "vertVis":
-				return ec.fieldContext_Metar_vertVis(ctx, field)
-			case "metarType":
-				return ec.fieldContext_Metar_metarType(ctx, field)
-			case "station":
-				return ec.fieldContext_Metar_station(ctx, field)
-			case "skyConditions":
-				return ec.fieldContext_Metar_skyConditions(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type Metar", field.Name)
 		},
 	}
 	return fc, nil
@@ -1288,8 +914,6 @@ func (ec *executionContext) fieldContext_Query_getAirports(ctx context.Context, 
 				return ec.fieldContext_AirportConnection_pageInfo(ctx, field)
 			case "edges":
 				return ec.fieldContext_AirportConnection_edges(ctx, field)
-			case "nodes":
-				return ec.fieldContext_AirportConnection_nodes(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type AirportConnection", field.Name)
 		},
@@ -1437,6 +1061,366 @@ func (ec *executionContext) fieldContext_Query___schema(ctx context.Context, fie
 	return fc, nil
 }
 
+func (ec *executionContext) _StationWithDistance_distance(ctx context.Context, field graphql.CollectedField, obj *model.StationWithDistance) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_StationWithDistance_distance(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Distance, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(float64)
+	fc.Result = res
+	return ec.marshalNFloat2float64(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_StationWithDistance_distance(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "StationWithDistance",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Float does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _StationWithDistance_station(ctx context.Context, field graphql.CollectedField, obj *model.StationWithDistance) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_StationWithDistance_station(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Station, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*ent.Station)
+	fc.Result = res
+	return ec.marshalNStation2ᚖmetarᚗggᚋentᚐStation(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_StationWithDistance_station(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "StationWithDistance",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "stationID":
+				return ec.fieldContext_Station_stationID(ctx, field)
+			case "latitude":
+				return ec.fieldContext_Station_latitude(ctx, field)
+			case "longitude":
+				return ec.fieldContext_Station_longitude(ctx, field)
+			case "elevation":
+				return ec.fieldContext_Station_elevation(ctx, field)
+			case "airport":
+				return ec.fieldContext_Station_airport(ctx, field)
+			case "metars":
+				return ec.fieldContext_Station_metars(ctx, field)
+			case "tafs":
+				return ec.fieldContext_Station_tafs(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type Station", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _TafConnection_totalCount(ctx context.Context, field graphql.CollectedField, obj *ent.TafConnection) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_TafConnection_totalCount(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.TotalCount, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int)
+	fc.Result = res
+	return ec.marshalNInt2int(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_TafConnection_totalCount(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "TafConnection",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Int does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _TafConnection_pageInfo(ctx context.Context, field graphql.CollectedField, obj *ent.TafConnection) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_TafConnection_pageInfo(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.PageInfo, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(ent.PageInfo)
+	fc.Result = res
+	return ec.marshalNPageInfo2metarᚗggᚋentᚐPageInfo(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_TafConnection_pageInfo(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "TafConnection",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "hasNextPage":
+				return ec.fieldContext_PageInfo_hasNextPage(ctx, field)
+			case "hasPreviousPage":
+				return ec.fieldContext_PageInfo_hasPreviousPage(ctx, field)
+			case "startCursor":
+				return ec.fieldContext_PageInfo_startCursor(ctx, field)
+			case "endCursor":
+				return ec.fieldContext_PageInfo_endCursor(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type PageInfo", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _TafConnection_edges(ctx context.Context, field graphql.CollectedField, obj *ent.TafConnection) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_TafConnection_edges(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Edges, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]*ent.TafEdge)
+	fc.Result = res
+	return ec.marshalNTafEdge2ᚕᚖmetarᚗggᚋentᚐTafEdgeᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_TafConnection_edges(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "TafConnection",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "node":
+				return ec.fieldContext_TafEdge_node(ctx, field)
+			case "cursor":
+				return ec.fieldContext_TafEdge_cursor(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type TafEdge", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _TafEdge_node(ctx context.Context, field graphql.CollectedField, obj *ent.TafEdge) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_TafEdge_node(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Node, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*ent.Taf)
+	fc.Result = res
+	return ec.marshalNTaf2ᚖmetarᚗggᚋentᚐTaf(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_TafEdge_node(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "TafEdge",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "rawText":
+				return ec.fieldContext_Taf_rawText(ctx, field)
+			case "issueTime":
+				return ec.fieldContext_Taf_issueTime(ctx, field)
+			case "bulletinTime":
+				return ec.fieldContext_Taf_bulletinTime(ctx, field)
+			case "validFromTime":
+				return ec.fieldContext_Taf_validFromTime(ctx, field)
+			case "validToTime":
+				return ec.fieldContext_Taf_validToTime(ctx, field)
+			case "remarks":
+				return ec.fieldContext_Taf_remarks(ctx, field)
+			case "station":
+				return ec.fieldContext_Taf_station(ctx, field)
+			case "skyConditions":
+				return ec.fieldContext_Taf_skyConditions(ctx, field)
+			case "forecast":
+				return ec.fieldContext_Taf_forecast(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type Taf", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _TafEdge_cursor(ctx context.Context, field graphql.CollectedField, obj *ent.TafEdge) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_TafEdge_cursor(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Cursor, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(ent.Cursor)
+	fc.Result = res
+	return ec.marshalNCursor2metarᚗggᚋentᚐCursor(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_TafEdge_cursor(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "TafEdge",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Cursor does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
 // endregion **************************** field.gotpl *****************************
 
 // region    **************************** input.gotpl *****************************
@@ -1464,42 +1448,22 @@ func (ec *executionContext) _AirportConnection(ctx context.Context, sel ast.Sele
 			out.Values[i] = ec._AirportConnection_totalCount(ctx, field, obj)
 
 			if out.Values[i] == graphql.Null {
-				atomic.AddUint32(&invalids, 1)
+				invalids++
 			}
 		case "pageInfo":
 
 			out.Values[i] = ec._AirportConnection_pageInfo(ctx, field, obj)
 
 			if out.Values[i] == graphql.Null {
-				atomic.AddUint32(&invalids, 1)
+				invalids++
 			}
 		case "edges":
 
 			out.Values[i] = ec._AirportConnection_edges(ctx, field, obj)
 
 			if out.Values[i] == graphql.Null {
-				atomic.AddUint32(&invalids, 1)
+				invalids++
 			}
-		case "nodes":
-			field := field
-
-			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
-				defer func() {
-					if r := recover(); r != nil {
-						ec.Error(ctx, ec.Recover(ctx, r))
-					}
-				}()
-				res = ec._AirportConnection_nodes(ctx, field, obj)
-				if res == graphql.Null {
-					atomic.AddUint32(&invalids, 1)
-				}
-				return res
-			}
-
-			out.Concurrently(i, func() graphql.Marshaler {
-				return innerFunc(ctx)
-
-			})
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -1561,42 +1525,22 @@ func (ec *executionContext) _MetarConnection(ctx context.Context, sel ast.Select
 			out.Values[i] = ec._MetarConnection_totalCount(ctx, field, obj)
 
 			if out.Values[i] == graphql.Null {
-				atomic.AddUint32(&invalids, 1)
+				invalids++
 			}
 		case "pageInfo":
 
 			out.Values[i] = ec._MetarConnection_pageInfo(ctx, field, obj)
 
 			if out.Values[i] == graphql.Null {
-				atomic.AddUint32(&invalids, 1)
+				invalids++
 			}
 		case "edges":
 
 			out.Values[i] = ec._MetarConnection_edges(ctx, field, obj)
 
 			if out.Values[i] == graphql.Null {
-				atomic.AddUint32(&invalids, 1)
+				invalids++
 			}
-		case "nodes":
-			field := field
-
-			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
-				defer func() {
-					if r := recover(); r != nil {
-						ec.Error(ctx, ec.Recover(ctx, r))
-					}
-				}()
-				res = ec._MetarConnection_nodes(ctx, field, obj)
-				if res == graphql.Null {
-					atomic.AddUint32(&invalids, 1)
-				}
-				return res
-			}
-
-			out.Concurrently(i, func() graphql.Marshaler {
-				return innerFunc(ctx)
-
-			})
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -1632,35 +1576,6 @@ func (ec *executionContext) _MetarEdge(ctx context.Context, sel ast.SelectionSet
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
-		default:
-			panic("unknown field " + strconv.Quote(field.Name))
-		}
-	}
-	out.Dispatch()
-	if invalids > 0 {
-		return graphql.Null
-	}
-	return out
-}
-
-var metarWithDistanceImplementors = []string{"MetarWithDistance"}
-
-func (ec *executionContext) _MetarWithDistance(ctx context.Context, sel ast.SelectionSet, obj *model.MetarWithDistance) graphql.Marshaler {
-	fields := graphql.CollectFields(ec.OperationContext, sel, metarWithDistanceImplementors)
-	out := graphql.NewFieldSet(fields)
-	var invalids uint32
-	for i, field := range fields {
-		switch field.Name {
-		case "__typename":
-			out.Values[i] = graphql.MarshalString("MetarWithDistance")
-		case "distance":
-
-			out.Values[i] = ec._MetarWithDistance_distance(ctx, field, obj)
-
-		case "metar":
-
-			out.Values[i] = ec._MetarWithDistance_metar(ctx, field, obj)
-
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -1780,6 +1695,118 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 	return out
 }
 
+var stationWithDistanceImplementors = []string{"StationWithDistance"}
+
+func (ec *executionContext) _StationWithDistance(ctx context.Context, sel ast.SelectionSet, obj *model.StationWithDistance) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, stationWithDistanceImplementors)
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("StationWithDistance")
+		case "distance":
+
+			out.Values[i] = ec._StationWithDistance_distance(ctx, field, obj)
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "station":
+
+			out.Values[i] = ec._StationWithDistance_station(ctx, field, obj)
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
+var tafConnectionImplementors = []string{"TafConnection"}
+
+func (ec *executionContext) _TafConnection(ctx context.Context, sel ast.SelectionSet, obj *ent.TafConnection) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, tafConnectionImplementors)
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("TafConnection")
+		case "totalCount":
+
+			out.Values[i] = ec._TafConnection_totalCount(ctx, field, obj)
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "pageInfo":
+
+			out.Values[i] = ec._TafConnection_pageInfo(ctx, field, obj)
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "edges":
+
+			out.Values[i] = ec._TafConnection_edges(ctx, field, obj)
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
+var tafEdgeImplementors = []string{"TafEdge"}
+
+func (ec *executionContext) _TafEdge(ctx context.Context, sel ast.SelectionSet, obj *ent.TafEdge) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, tafEdgeImplementors)
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("TafEdge")
+		case "node":
+
+			out.Values[i] = ec._TafEdge_node(ctx, field, obj)
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "cursor":
+
+			out.Values[i] = ec._TafEdge_cursor(ctx, field, obj)
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
 // endregion **************************** object.gotpl ****************************
 
 // region    ***************************** type.gotpl *****************************
@@ -1862,6 +1889,20 @@ func (ec *executionContext) marshalNCursor2metarᚗggᚋentᚐCursor(ctx context
 	return v
 }
 
+func (ec *executionContext) marshalNMetarConnection2metarᚗggᚋentᚐMetarConnection(ctx context.Context, sel ast.SelectionSet, v ent.MetarConnection) graphql.Marshaler {
+	return ec._MetarConnection(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNMetarConnection2ᚖmetarᚗggᚋentᚐMetarConnection(ctx context.Context, sel ast.SelectionSet, v *ent.MetarConnection) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+		}
+		return graphql.Null
+	}
+	return ec._MetarConnection(ctx, sel, v)
+}
+
 func (ec *executionContext) marshalNMetarEdge2ᚕᚖmetarᚗggᚋentᚐMetarEdgeᚄ(ctx context.Context, sel ast.SelectionSet, v []*ent.MetarEdge) graphql.Marshaler {
 	ret := make(graphql.Array, len(v))
 	var wg sync.WaitGroup
@@ -1916,7 +1957,11 @@ func (ec *executionContext) marshalNMetarEdge2ᚖmetarᚗggᚋentᚐMetarEdge(ct
 	return ec._MetarEdge(ctx, sel, v)
 }
 
-func (ec *executionContext) marshalNMetarWithDistance2ᚕᚖmetarᚗggᚋgraphᚋmodelᚐMetarWithDistanceᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.MetarWithDistance) graphql.Marshaler {
+func (ec *executionContext) marshalNPageInfo2metarᚗggᚋentᚐPageInfo(ctx context.Context, sel ast.SelectionSet, v ent.PageInfo) graphql.Marshaler {
+	return ec._PageInfo(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNStationWithDistance2ᚕᚖmetarᚗggᚋgraphᚋmodelᚐStationWithDistanceᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.StationWithDistance) graphql.Marshaler {
 	ret := make(graphql.Array, len(v))
 	var wg sync.WaitGroup
 	isLen1 := len(v) == 1
@@ -1940,7 +1985,7 @@ func (ec *executionContext) marshalNMetarWithDistance2ᚕᚖmetarᚗggᚋgraph�
 			if !isLen1 {
 				defer wg.Done()
 			}
-			ret[i] = ec.marshalNMetarWithDistance2ᚖmetarᚗggᚋgraphᚋmodelᚐMetarWithDistance(ctx, sel, v[i])
+			ret[i] = ec.marshalNStationWithDistance2ᚖmetarᚗggᚋgraphᚋmodelᚐStationWithDistance(ctx, sel, v[i])
 		}
 		if isLen1 {
 			f(i)
@@ -1960,18 +2005,82 @@ func (ec *executionContext) marshalNMetarWithDistance2ᚕᚖmetarᚗggᚋgraph�
 	return ret
 }
 
-func (ec *executionContext) marshalNMetarWithDistance2ᚖmetarᚗggᚋgraphᚋmodelᚐMetarWithDistance(ctx context.Context, sel ast.SelectionSet, v *model.MetarWithDistance) graphql.Marshaler {
+func (ec *executionContext) marshalNStationWithDistance2ᚖmetarᚗggᚋgraphᚋmodelᚐStationWithDistance(ctx context.Context, sel ast.SelectionSet, v *model.StationWithDistance) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
 		}
 		return graphql.Null
 	}
-	return ec._MetarWithDistance(ctx, sel, v)
+	return ec._StationWithDistance(ctx, sel, v)
 }
 
-func (ec *executionContext) marshalNPageInfo2metarᚗggᚋentᚐPageInfo(ctx context.Context, sel ast.SelectionSet, v ent.PageInfo) graphql.Marshaler {
-	return ec._PageInfo(ctx, sel, &v)
+func (ec *executionContext) marshalNTafConnection2metarᚗggᚋentᚐTafConnection(ctx context.Context, sel ast.SelectionSet, v ent.TafConnection) graphql.Marshaler {
+	return ec._TafConnection(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNTafConnection2ᚖmetarᚗggᚋentᚐTafConnection(ctx context.Context, sel ast.SelectionSet, v *ent.TafConnection) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+		}
+		return graphql.Null
+	}
+	return ec._TafConnection(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalNTafEdge2ᚕᚖmetarᚗggᚋentᚐTafEdgeᚄ(ctx context.Context, sel ast.SelectionSet, v []*ent.TafEdge) graphql.Marshaler {
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		fc := &graphql.FieldContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithFieldContext(ctx, fc)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalNTafEdge2ᚖmetarᚗggᚋentᚐTafEdge(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+
+	for _, e := range ret {
+		if e == graphql.Null {
+			return graphql.Null
+		}
+	}
+
+	return ret
+}
+
+func (ec *executionContext) marshalNTafEdge2ᚖmetarᚗggᚋentᚐTafEdge(ctx context.Context, sel ast.SelectionSet, v *ent.TafEdge) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+		}
+		return graphql.Null
+	}
+	return ec._TafEdge(ctx, sel, v)
 }
 
 func (ec *executionContext) unmarshalNTime2timeᚐTime(ctx context.Context, v interface{}) (time.Time, error) {
@@ -2003,6 +2112,22 @@ func (ec *executionContext) marshalOCursor2ᚖmetarᚗggᚋentᚐCursor(ctx cont
 		return graphql.Null
 	}
 	return v
+}
+
+func (ec *executionContext) unmarshalOTime2ᚖtimeᚐTime(ctx context.Context, v interface{}) (*time.Time, error) {
+	if v == nil {
+		return nil, nil
+	}
+	res, err := graphql.UnmarshalTime(v)
+	return &res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalOTime2ᚖtimeᚐTime(ctx context.Context, sel ast.SelectionSet, v *time.Time) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	res := graphql.MarshalTime(*v)
+	return res
 }
 
 // endregion ***************************** type.gotpl *****************************

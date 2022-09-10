@@ -24,6 +24,38 @@ func (a *Airport) Frequencies(ctx context.Context) ([]*Frequency, error) {
 	return result, err
 }
 
+func (f *Forecast) SkyConditions(ctx context.Context) ([]*SkyCondition, error) {
+	result, err := f.NamedSkyConditions(graphql.GetFieldContext(ctx).Field.Alias)
+	if IsNotLoaded(err) {
+		result, err = f.QuerySkyConditions().All(ctx)
+	}
+	return result, err
+}
+
+func (f *Forecast) TurbulenceConditions(ctx context.Context) ([]*TurbulenceCondition, error) {
+	result, err := f.NamedTurbulenceConditions(graphql.GetFieldContext(ctx).Field.Alias)
+	if IsNotLoaded(err) {
+		result, err = f.QueryTurbulenceConditions().All(ctx)
+	}
+	return result, err
+}
+
+func (f *Forecast) IcingConditions(ctx context.Context) ([]*IcingCondition, error) {
+	result, err := f.NamedIcingConditions(graphql.GetFieldContext(ctx).Field.Alias)
+	if IsNotLoaded(err) {
+		result, err = f.QueryIcingConditions().All(ctx)
+	}
+	return result, err
+}
+
+func (f *Forecast) TemperatureData(ctx context.Context) ([]*TemperatureData, error) {
+	result, err := f.NamedTemperatureData(graphql.GetFieldContext(ctx).Field.Alias)
+	if IsNotLoaded(err) {
+		result, err = f.QueryTemperatureData().All(ctx)
+	}
+	return result, err
+}
+
 func (f *Frequency) Airport(ctx context.Context) (*Airport, error) {
 	result, err := f.Edges.AirportOrErr()
 	if IsNotLoaded(err) {
@@ -56,36 +88,12 @@ func (r *Runway) Airport(ctx context.Context) (*Airport, error) {
 	return result, MaskNotFound(err)
 }
 
-func (sc *SkyCondition) Metar(ctx context.Context) (*Metar, error) {
-	result, err := sc.Edges.MetarOrErr()
-	if IsNotLoaded(err) {
-		result, err = sc.QueryMetar().Only(ctx)
-	}
-	return result, err
-}
-
 func (s *Station) Airport(ctx context.Context) (*Airport, error) {
 	result, err := s.Edges.AirportOrErr()
 	if IsNotLoaded(err) {
 		result, err = s.QueryAirport().Only(ctx)
 	}
 	return result, MaskNotFound(err)
-}
-
-func (s *Station) Metars(ctx context.Context) ([]*Metar, error) {
-	result, err := s.NamedMetars(graphql.GetFieldContext(ctx).Field.Alias)
-	if IsNotLoaded(err) {
-		result, err = s.QueryMetars().All(ctx)
-	}
-	return result, err
-}
-
-func (s *Station) Tafs(ctx context.Context) ([]*Taf, error) {
-	result, err := s.NamedTafs(graphql.GetFieldContext(ctx).Field.Alias)
-	if IsNotLoaded(err) {
-		result, err = s.QueryTafs().All(ctx)
-	}
-	return result, err
 }
 
 func (t *Taf) Station(ctx context.Context) (*Station, error) {
@@ -100,6 +108,14 @@ func (t *Taf) SkyConditions(ctx context.Context) ([]*SkyCondition, error) {
 	result, err := t.NamedSkyConditions(graphql.GetFieldContext(ctx).Field.Alias)
 	if IsNotLoaded(err) {
 		result, err = t.QuerySkyConditions().All(ctx)
+	}
+	return result, err
+}
+
+func (t *Taf) Forecast(ctx context.Context) ([]*Forecast, error) {
+	result, err := t.NamedForecast(graphql.GetFieldContext(ctx).Field.Alias)
+	if IsNotLoaded(err) {
+		result, err = t.QueryForecast().All(ctx)
 	}
 	return result, err
 }
