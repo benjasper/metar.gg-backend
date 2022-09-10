@@ -1310,7 +1310,10 @@ type Query {
 }
 
 type MetarWithDistance {
+    """The distance in meters from the given location to the airport"""
     distance: Float
+
+    """The METAR for the station"""
     metar: Metar
 }
 
@@ -1321,7 +1324,7 @@ extend type Airport {
     """Returns last METARs reported by this airport."""
     metars(after: Cursor, first: Int, before: Cursor, last: Int): MetarConnection! @goField(forceResolver: true)
 
-    """Returns the closest METAR to the airport, within the given radius (in km)."""
+    """Returns the closest METAR to the airport, within the given radius (in km). It's also the latest METAR for each station."""
     metarsVicinity(first: Int = 1, radius: Float = 50.0): [MetarWithDistance!]! @goField(forceResolver: true)
 }`, BuiltIn: false},
 }

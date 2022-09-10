@@ -3,6 +3,7 @@ package schema
 import (
 	"entgo.io/contrib/entgql"
 	"entgo.io/ent"
+	"entgo.io/ent/dialect/entsql"
 	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
 	"entgo.io/ent/schema/index"
@@ -60,7 +61,9 @@ func (Metar) Fields() []ent.Field {
 func (Metar) Edges() []ent.Edge {
 	return []ent.Edge{
 		edge.From("airport", Airport.Type).Ref("metars").Unique().Comment("The airport that reported this metar. This can also be empty if the metar is from a weather station."),
-		edge.To("sky_conditions", SkyCondition.Type).Comment("The sky conditions."),
+		edge.To("sky_conditions", SkyCondition.Type).Comment("The sky conditions.").Annotations(entsql.Annotation{
+			OnDelete: entsql.Cascade,
+		}),
 	}
 }
 

@@ -7,6 +7,8 @@ import (
 )
 
 type MetarWithDistance struct {
-	Distance *float64   `json:"distance"`
-	Metar    *ent.Metar `json:"metar"`
+	// The distance in meters from the given location to the airport
+	Distance *float64 `json:"distance"`
+	// The METAR for the station
+	Metar *ent.Metar `json:"metar"`
 }

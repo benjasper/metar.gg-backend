@@ -10,6 +10,7 @@ import (
 	"metar.gg/ent/airport"
 	"metar.gg/ent/frequency"
 	"metar.gg/ent/runway"
+	"metar.gg/environment"
 	"metar.gg/logging"
 	"metar.gg/utils"
 	"os"
@@ -88,7 +89,7 @@ func (i *Importer) importModelType(ctx context.Context, url string, importFuncti
 
 	csvReader := csv.NewReader(f)
 
-	maxGoroutines := 10
+	maxGoroutines := environment.Global.MaxConcurrentImports
 	guard := make(chan struct{}, maxGoroutines)
 
 	wg := errgroup.Group{}

@@ -223,7 +223,7 @@ var (
 				Symbol:     "sky_conditions_metars_sky_conditions",
 				Columns:    []*schema.Column{SkyConditionsColumns[3]},
 				RefColumns: []*schema.Column{MetarsColumns[0]},
-				OnDelete:   schema.NoAction,
+				OnDelete:   schema.Cascade,
 			},
 		},
 	}

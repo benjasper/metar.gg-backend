@@ -10,6 +10,7 @@ import (
 	"metar.gg/ent/airport"
 	"metar.gg/ent/metar"
 	"metar.gg/ent/skycondition"
+	"metar.gg/environment"
 	"metar.gg/logging"
 	"metar.gg/utils"
 	"os"
@@ -100,7 +101,7 @@ func (i *NoaaMetarImporter) ImportMetars(url string, ctx context.Context) error 
 		_ = f.Close()
 	}(f)
 
-	maxGoroutines := 4
+	maxGoroutines := environment.Global.MaxConcurrentImports
 	guard := make(chan struct{}, maxGoroutines)
 
 	wg := errgroup.Group{}
