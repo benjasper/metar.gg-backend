@@ -36,7 +36,11 @@ func (Taf) Edges() []ent.Edge {
 		edge.To("sky_conditions", SkyCondition.Type).Comment("The sky conditions.").Annotations(entsql.Annotation{
 			OnDelete: entsql.Cascade,
 		}),
-		edge.To("forecast", Forecast.Type).Comment("The forecasts"),
+		edge.To("forecast", Forecast.Type).Comment("The forecasts").Annotations(
+			entsql.Annotation{
+				OnDelete: entsql.Cascade,
+			},
+		),
 	}
 }
 
