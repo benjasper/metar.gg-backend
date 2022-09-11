@@ -41,6 +41,7 @@ func (Station) Indexes() []ent.Index {
 		index.Fields("station_id").Unique(),
 		index.Fields("latitude"),
 		index.Fields("longitude"),
+		index.Fields("hash"),
 	}
 }
 
