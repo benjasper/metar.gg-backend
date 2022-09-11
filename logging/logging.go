@@ -2,18 +2,18 @@ package logging
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"github.com/axiomhq/axiom-go/axiom"
 	"log"
-	"os"
+	"metar.gg/environment"
+	"sync"
 	"time"
 )
 
-const logFile = "./tmp/logs.log"
-
 type Logger struct {
-	logger *log.Logger
+	axiomClient *axiom.Client
+	storeMutex  sync.Mutex
+	eventStore  []axiom.Event
 }
 
 type Message struct {
@@ -27,29 +27,19 @@ func (m *Message) String() string {
 }
 
 func NewLogger() *Logger {
-	// If the tmp directory does not exist, create it
-	if _, err := os.Stat("./tmp"); os.IsNotExist(err) {
-		err = os.Mkdir("./tmp", 0755)
-		if err != nil {
-			log.Fatal(err)
-		}
-	}
-
-	file, err := os.OpenFile(logFile, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0666)
+	client, err := axiom.NewClient()
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	logger := log.New(file, "", 0)
-
 	loggerObject := &Logger{
-		logger: logger,
+		axiomClient: client,
 	}
 
 	// Trigger upload every minute
 	go func() {
 		for {
-			time.Sleep(1 * time.Minute)
+			time.Sleep(30 * time.Second)
 			loggerObject.uploadLog()
 		}
 	}()
@@ -65,7 +55,7 @@ func (l *Logger) Debug(input string) {
 	}
 
 	message := fmt.Sprintf("[DEBUG] %s\n", input)
-	l.messageToJson(&m)
+	go l.messageToAxiomEvent(&m)
 
 	log.Print(message)
 }
@@ -78,7 +68,7 @@ func (l *Logger) Info(input string) {
 	}
 
 	message := fmt.Sprintf("[INFO] %s\n", input)
-	l.messageToJson(&m)
+	go l.messageToAxiomEvent(&m)
 
 	log.Print(message)
 }
@@ -91,7 +81,7 @@ func (l *Logger) Warn(input string) {
 	}
 
 	message := fmt.Sprintf("[WARN] %s\n", input)
-	l.messageToJson(&m)
+	go l.messageToAxiomEvent(&m)
 
 	log.Print(message)
 }
@@ -104,7 +94,7 @@ func (l *Logger) Error(input string) {
 	}
 
 	message := fmt.Sprintf("[ERROR] %s\n", input)
-	l.messageToJson(&m)
+	go l.messageToAxiomEvent(&m)
 
 	log.Print(message)
 }
@@ -117,105 +107,54 @@ func (l *Logger) Fatal(input error) {
 	}
 
 	message := fmt.Sprintf("[FATAL] %s\n", input)
-	l.messageToJson(&m)
+	go l.messageToAxiomEvent(&m)
 
 	log.Fatal(message)
 }
 
-func (l *Logger) messageToJson(message *Message) {
+func (l *Logger) messageToAxiomEvent(message *Message) {
 	// Marshal to JSON string
-	jsonMessage, err := json.Marshal(message)
-	if err != nil {
-		return
+	event := axiom.Event{
+		"type":    message.Type,
+		"message": message.Message,
+		"time":    message.Time,
 	}
 
-	// Write to file
-	l.logger.Println(string(jsonMessage))
+	// Append to the message store
+	l.storeMutex.Lock()
+	l.eventStore = append(l.eventStore, event)
+
+	// If the store is too big, upload it
+	if len(l.eventStore) >= 999 {
+		l.uploadLog()
+	}
+
+	l.storeMutex.Unlock()
 }
 
 func (l *Logger) uploadLog() {
-	f, err := os.Open(logFile)
-	if err != nil {
-		l.Fatal(err)
-	}
+	l.storeMutex.Lock()
+	defer l.storeMutex.Unlock()
 
-	// If file is empty, return
-	fileInfo, err := f.Stat()
-	if err != nil {
+	storeSize := len(l.eventStore)
+
+	if storeSize == 0 || environment.Global.AxiomDataset == "" {
 		return
 	}
 
-	if fileInfo.Size() == 0 {
-		return
-	}
+	log.Printf("Uploading %d log events to Axiom\n", storeSize)
 
-	dataset := os.Getenv("AXIOM_DATASET")
-	if dataset == "" {
-		return
-	}
-
-	log.Println("Uploading log file to Axiom")
-
-	// Rename the file to prevent loss of data
-	renamedFile := fmt.Sprintf("./tmp/logs-%s.log", time.Now().Format("2006-01-02"))
-
-	err = os.Rename(logFile, renamedFile)
-	if err != nil {
-		log.Fatal(err)
-		return
-	}
-
-	file, err := os.OpenFile(logFile, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0666)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	l.logger.SetOutput(file)
-
-	// Upload the file to a remote server
-	l.uploadLogToAxiom(renamedFile, dataset)
-}
-
-func (l *Logger) uploadLogToAxiom(file string, dataset string) {
-	// Upload the file to Axiom
-
-	// 1. Open the file to ingest.
-	f, err := os.Open(file)
-	if err != nil {
-		l.Fatal(err)
-	}
-	defer func(f *os.File) {
-		_ = f.Close()
-	}(f)
-
-	// 2. Wrap it in a gzip enabled reader.
-	r, err := axiom.GzipEncoder(f)
+	// Ingest ⚡
+	res, err := l.axiomClient.Datasets.IngestEvents(context.Background(), environment.Global.AxiomDataset, axiom.IngestOptions{}, l.eventStore...)
 	if err != nil {
 		l.Fatal(err)
 	}
 
-	// 3. Initialize the Axiom API client.
-	client, err := axiom.NewClient()
-	if err != nil {
-		l.Fatal(err)
-	}
-
-	// 4. Ingest ⚡
-	// Note the JSON content type and Gzip content encoding being set because
-	// the client does not auto sense them.
-	res, err := client.Datasets.Ingest(context.Background(), dataset, r, axiom.NDJSON, axiom.Gzip, axiom.IngestOptions{})
-	if err != nil {
-		l.Fatal(err)
-	}
-
-	// 5. Make sure everything went smoothly.
+	// Make sure everything went smoothly.
 	for _, fail := range res.Failures {
 		l.Error(fail.Error)
 	}
 
-	// 6. Remove the file
-	err = os.Remove(file)
-	if err != nil {
-		l.Fatal(err)
-	}
+	// Clear the store
+	l.eventStore = []axiom.Event{}
 }

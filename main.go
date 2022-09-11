@@ -12,9 +12,9 @@ import (
 )
 
 func main() {
-	logger := logging.NewLogger()
+	environment.Initialize()
 
-	environment.Initialize(logger)
+	logger := logging.NewLogger()
 
 	logger.Info("Starting up...")
 
