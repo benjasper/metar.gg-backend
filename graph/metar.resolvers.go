@@ -5,14 +5,14 @@ package graph
 
 import (
 	"context"
-	"entgo.io/ent/dialect/sql"
 	"fmt"
-	"metar.gg/ent/station"
 
+	"entgo.io/ent/dialect/sql"
 	"metar.gg/ent"
 	"metar.gg/ent/airport"
 	"metar.gg/ent/predicate"
 	"metar.gg/ent/runway"
+	"metar.gg/ent/station"
 	"metar.gg/graph/generated"
 	"metar.gg/graph/model"
 )

@@ -195,6 +195,11 @@ var (
 				Unique:  false,
 				Columns: []*schema.Column{MetarsColumns[2]},
 			},
+			{
+				Name:    "metar_hash",
+				Unique:  false,
+				Columns: []*schema.Column{MetarsColumns[32]},
+			},
 		},
 	}
 	// RunwaysColumns holds the columns for the "runways" table.
@@ -317,6 +322,11 @@ var (
 				Name:    "station_longitude",
 				Unique:  false,
 				Columns: []*schema.Column{StationsColumns[3]},
+			},
+			{
+				Name:    "station_hash",
+				Unique:  false,
+				Columns: []*schema.Column{StationsColumns[5]},
 			},
 		},
 	}
