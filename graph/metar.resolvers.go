@@ -6,6 +6,8 @@ package graph
 import (
 	"context"
 	"fmt"
+	"metar.gg/ent/metar"
+	"metar.gg/ent/taf"
 
 	"entgo.io/ent/dialect/sql"
 	"metar.gg/ent"
@@ -112,7 +114,7 @@ func (r *queryResolver) GetAirports(ctx context.Context, after *ent.Cursor, firs
 func (r *stationResolver) Metars(ctx context.Context, obj *ent.Station, after *ent.Cursor, first *int, before *ent.Cursor, last *int) (*ent.MetarConnection, error) {
 	first, last = BoundsForPagination(first, last)
 
-	connection, err := obj.QueryMetars().Paginate(ctx, after, first, before, last)
+	connection, err := obj.QueryMetars().Order(ent.Desc(metar.FieldObservationTime)).Paginate(ctx, after, first, before, last)
 	if err != nil {
 		return nil, err
 	}
@@ -124,7 +126,7 @@ func (r *stationResolver) Metars(ctx context.Context, obj *ent.Station, after *e
 func (r *stationResolver) Tafs(ctx context.Context, obj *ent.Station, after *ent.Cursor, first *int, before *ent.Cursor, last *int) (*ent.TafConnection, error) {
 	first, last = BoundsForPagination(first, last)
 
-	connection, err := obj.QueryTafs().Paginate(ctx, after, first, before, last)
+	connection, err := obj.QueryTafs().Order(ent.Desc(taf.FieldIssueTime)).Paginate(ctx, after, first, before, last)
 	if err != nil {
 		return nil, err
 	}
