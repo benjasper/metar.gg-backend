@@ -3,6 +3,7 @@ package schema
 import (
 	"entgo.io/contrib/entgql"
 	"entgo.io/ent"
+	"entgo.io/ent/dialect/entsql"
 	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
 	"entgo.io/ent/schema/index"
@@ -40,9 +41,14 @@ func (Airport) Fields() []ent.Field {
 // Edges of the Airport.
 func (Airport) Edges() []ent.Edge {
 	return []ent.Edge{
-		edge.To("runways", Runway.Type).Comment("Runways at the airport.").Annotations(entgql.Skip()),
+		edge.To("runways", Runway.Type).Comment("Runways at the airport.").Annotations(entgql.Skip(), entsql.Annotation{
+			OnDelete: entsql.Cascade,
+		}),
+		edge.To("frequencies", Frequency.Type).Comment("Frequencies at the airport.").Annotations(
+			entsql.Annotation{
+				OnDelete: entsql.Cascade,
+			}),
 		edge.To("station", WeatherStation.Type).Unique().Comment("Weather station at the airport."),
-		edge.To("frequencies", Frequency.Type).Comment("Frequencies at the airport."),
 	}
 }
 
