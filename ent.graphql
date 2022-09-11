@@ -2,7 +2,12 @@ directive @goField(forceResolver: Boolean, name: String) on FIELD_DEFINITION | I
 directive @goModel(model: String, models: [String!]) on OBJECT | INPUT_OBJECT | SCALAR | ENUM | INTERFACE | UNION
 type Airport {
   id: ID!
+  importID: Int!
   lastUpdated: Time!
+  """The four-letter ICAO code of the airport."""
+  icaoCode: String
+  """The three-letter IATA code for the airport."""
+  iataCode: String
   """This will be the ICAO code if available. Otherwise, it will be a local airport code (if no conflict), or if nothing else is available, an internally-generated code starting with the ISO2 country code, followed by a dash and a four-digit number."""
   identifier: String!
   """Type of airport."""
@@ -25,8 +30,6 @@ type Airport {
   scheduledService: Boolean!
   """The code that an aviation GPS database (such as Jeppesen's or Garmin's) would normally use for the airport. This will always be the ICAO code if one exists. Note that, unlike the ident column, this is not guaranteed to be globally unique."""
   gpsCode: String
-  """The three-letter IATA code for the airport."""
-  iataCode: String
   """The local country code for the airport, if different from the gps_code and iata_code fields (used mainly for US airports)."""
   localCode: String
   """The URL of the airport's website."""
@@ -35,7 +38,7 @@ type Airport {
   wikipedia: String
   """Extra keywords/phrases to assist with search. May include former names for the airport, alternate codes, names in other languages, nearby tourist destinations, etc."""
   keywords: [String!]!
-  station: Station
+  station: WeatherStation
   frequencies: [Frequency!]
 }
 """AirportContinent is enum for the field continent"""
@@ -105,6 +108,7 @@ enum ForecastChangeIndicator @goModel(model: "metar.gg/ent/forecast.ChangeIndica
 }
 type Frequency {
   id: ID!
+  importID: Int!
   lastUpdated: Time!
   """A code for the frequency type. Some common values are "TWR" (tower), "ATF" or "CTAF" (common traffic frequency), "GND" (ground control), "RMP" (ramp control), "ATIS" (automated weather), "RCO" (remote radio outlet), "ARR" (arrivals), "DEP" (departures), "UNICOM" (monitored ground station), and "RDO" (a flight-service station)."""
   type: String!
@@ -124,6 +128,7 @@ type IcingCondition {
   maxAltitude: Int
 }
 type Metar {
+  id: ID!
   """The raw METAR text."""
   rawText: String!
   """The time the METAR was observed."""
@@ -185,7 +190,7 @@ type Metar {
   vertVis: Float
   """The type of METAR."""
   metarType: MetarMetarType!
-  station: Station!
+  station: WeatherStation!
   skyConditions: [SkyCondition!]
 }
 """MetarFlightCategory is enum for the field flight_category"""
@@ -209,6 +214,7 @@ enum OrderDirection {
 }
 type Runway {
   id: ID!
+  importID: Int!
   lastUpdated: Time!
   """Length of the runway in feet."""
   length: Int!
@@ -247,6 +253,7 @@ type Runway {
   airport: Airport
 }
 type SkyCondition {
+  id: ID!
   skyCover: SkyConditionSkyCover!
   """Cloud base in feet."""
   cloudBase: Int
@@ -272,18 +279,8 @@ enum SkyConditionSkyCover @goModel(model: "metar.gg/ent/skycondition.SkyCover") 
   OVX
   CAVOK
 }
-type Station {
-  """The ICAO identifier of the station that provided the weather data or identifier of the weather station."""
-  stationID: String!
-  """The latitude in decimal degrees of the station."""
-  latitude: Float
-  """The longitude in decimal degrees of the station."""
-  longitude: Float
-  """The elevation in meters of the station."""
-  elevation: Float
-  airport: Airport
-}
 type Taf {
+  id: ID!
   """The raw TAF text."""
   rawText: String!
   """The time the TAF was issued."""
@@ -296,7 +293,7 @@ type Taf {
   validToTime: Time!
   """Remarks."""
   remarks: String!
-  station: Station!
+  station: WeatherStation!
   skyConditions: [SkyCondition!]
   forecast: [Forecast!]
 }
@@ -330,4 +327,16 @@ type TurbulenceCondition {
   minAltitude: Int!
   """The maximum altitude in feet that the turbulence is present."""
   maxAltitude: Int!
+}
+type WeatherStation {
+  id: ID!
+  """The ICAO identifier of the station that provided the weather data or identifier of the weather station."""
+  stationID: String!
+  """The latitude in decimal degrees of the station."""
+  latitude: Float
+  """The longitude in decimal degrees of the station."""
+  longitude: Float
+  """The elevation in meters of the station."""
+  elevation: Float
+  airport: Airport
 }

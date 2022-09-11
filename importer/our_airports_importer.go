@@ -14,6 +14,7 @@ import (
 	"metar.gg/logging"
 	"metar.gg/utils"
 	"os"
+	"regexp"
 	"strconv"
 	"strings"
 	"time"
@@ -147,7 +148,7 @@ func (i *Importer) importAirportLine(ctx context.Context, data []string) error {
 
 	found, err := i.db.Airport.Update().Where(
 		airport.Hash(hash),
-		airport.ID(int(ourAirportID)),
+		airport.ImportID(int(ourAirportID)),
 	).
 		SetImportFlag(true).
 		Save(ctx)
@@ -221,10 +222,10 @@ func (i *Importer) importAirportLine(ctx context.Context, data []string) error {
 		break
 	}
 
-	err = i.db.Airport.Create().
+	createAirport := i.db.Airport.Create().
 		SetImportFlag(true).
 		SetHash(hash).
-		SetID(int(ourAirportID)).
+		SetImportID(int(ourAirportID)).
 		SetIdentifier(data[1]).
 		SetType(airportType).
 		SetName(data[3]).
@@ -242,10 +243,16 @@ func (i *Importer) importAirportLine(ctx context.Context, data []string) error {
 		SetNillableWebsite(utils.NillableString(data[15])).
 		SetNillableWikipedia(utils.NillableString(data[16])).
 		SetKeywords(keywords).
-		SetLastUpdated(time.Now()).
-		OnConflict().
-		UpdateNewValues().
-		Exec(ctx)
+		SetLastUpdated(time.Now())
+
+	// Check if identifier is all letters and only 4 characters long.
+	potentialIcao := strings.Trim(data[1], " ")
+	if len(potentialIcao) == 4 && regexp.MustCompile(`^[a-zA-Z]+$`).MatchString(potentialIcao) {
+		createAirport.SetIcaoCode(strings.ToUpper(potentialIcao))
+	}
+
+	err = createAirport.OnConflict().
+		UpdateNewValues().Exec(ctx)
 	if err != nil {
 		return err
 	}
@@ -287,7 +294,7 @@ func (i *Importer) importRunwayLine(ctx context.Context, data []string) error {
 
 	found, err := i.db.Runway.Update().Where(
 		runway.Hash(hash),
-		runway.ID(int(runwayID)),
+		runway.ImportID(int(runwayID)),
 	).
 		SetImportFlag(true).
 		Save(ctx)
@@ -299,11 +306,15 @@ func (i *Importer) importRunwayLine(ctx context.Context, data []string) error {
 		return nil
 	}
 
-	// Upsert airport, because we know it doesn't exist yet, or it changed
-	airportID, err := strconv.ParseInt(data[1], 10, 64)
+	// Find the airport
+	a, err := i.db.Airport.Query().Where(
+		airport.Identifier(data[2]),
+	).First(ctx)
 	if err != nil {
 		return err
 	}
+
+	// Upsert airport, because we know it doesn't exist yet, or it changed
 
 	length, _ := strconv.ParseInt(data[3], 10, 64)
 	width, _ := strconv.ParseInt(data[4], 10, 64)
@@ -325,8 +336,8 @@ func (i *Importer) importRunwayLine(ctx context.Context, data []string) error {
 	err = i.db.Runway.Create().
 		SetImportFlag(true).
 		SetHash(hash).
-		SetID(int(runwayID)).
-		SetAirportID(int(airportID)).
+		SetImportID(int(runwayID)).
+		SetAirport(a).
 		SetLength(int(length)).
 		SetWidth(int(width)).
 		SetNillableSurface(utils.NillableString(data[5])).
@@ -386,7 +397,7 @@ func (i *Importer) importFrequencyLine(ctx context.Context, data []string) error
 
 	found, err := i.db.Frequency.Update().Where(
 		frequency.Hash(hash),
-		frequency.ID(int(frequencyID)),
+		frequency.ImportID(int(frequencyID)),
 	).
 		SetImportFlag(true).
 		Save(ctx)
@@ -399,7 +410,9 @@ func (i *Importer) importFrequencyLine(ctx context.Context, data []string) error
 	}
 
 	// Upsert airport, because we know it doesn't exist yet, or it changed
-	airportID, err := strconv.ParseInt(data[1], 10, 64)
+	a, err := i.db.Airport.Query().Where(
+		airport.Identifier(data[2]),
+	).First(ctx)
 	if err != nil {
 		return err
 	}
@@ -409,8 +422,8 @@ func (i *Importer) importFrequencyLine(ctx context.Context, data []string) error
 	err = i.db.Frequency.Create().
 		SetImportFlag(true).
 		SetHash(hash).
-		SetID(int(frequencyID)).
-		SetAirportID(int(airportID)).
+		SetImportID(int(frequencyID)).
+		SetAirport(a).
 		SetType(data[3]).
 		SetDescription(data[4]).
 		SetFrequency(f).

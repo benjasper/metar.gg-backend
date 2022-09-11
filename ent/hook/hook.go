@@ -100,19 +100,6 @@ func (f SkyConditionFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value
 	return f(ctx, mv)
 }
 
-// The StationFunc type is an adapter to allow the use of ordinary
-// function as Station mutator.
-type StationFunc func(context.Context, *ent.StationMutation) (ent.Value, error)
-
-// Mutate calls f(ctx, m).
-func (f StationFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
-	mv, ok := m.(*ent.StationMutation)
-	if !ok {
-		return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.StationMutation", m)
-	}
-	return f(ctx, mv)
-}
-
 // The TafFunc type is an adapter to allow the use of ordinary
 // function as Taf mutator.
 type TafFunc func(context.Context, *ent.TafMutation) (ent.Value, error)
@@ -148,6 +135,19 @@ func (f TurbulenceConditionFunc) Mutate(ctx context.Context, m ent.Mutation) (en
 	mv, ok := m.(*ent.TurbulenceConditionMutation)
 	if !ok {
 		return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.TurbulenceConditionMutation", m)
+	}
+	return f(ctx, mv)
+}
+
+// The WeatherStationFunc type is an adapter to allow the use of ordinary
+// function as WeatherStation mutator.
+type WeatherStationFunc func(context.Context, *ent.WeatherStationMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f WeatherStationFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	mv, ok := m.(*ent.WeatherStationMutation)
+	if !ok {
+		return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.WeatherStationMutation", m)
 	}
 	return f(ctx, mv)
 }

@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"entgo.io/ent/dialect/sql"
+	"github.com/google/uuid"
 	"metar.gg/ent/icingcondition"
 )
 
@@ -14,14 +15,14 @@ import (
 type IcingCondition struct {
 	config `json:"-"`
 	// ID of the ent.
-	ID int `json:"id,omitempty"`
+	ID uuid.UUID `json:"id,omitempty"`
 	// The intensity of the icing.
 	Intensity string `json:"intensity,omitempty"`
 	// The minimum altitude in feet that the icing is present.
 	MinAltitude *int `json:"min_altitude,omitempty"`
 	// The maximum altitude in feet that the icing is present.
 	MaxAltitude               *int `json:"max_altitude,omitempty"`
-	forecast_icing_conditions *int
+	forecast_icing_conditions *uuid.UUID
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -29,12 +30,14 @@ func (*IcingCondition) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case icingcondition.FieldID, icingcondition.FieldMinAltitude, icingcondition.FieldMaxAltitude:
+		case icingcondition.FieldMinAltitude, icingcondition.FieldMaxAltitude:
 			values[i] = new(sql.NullInt64)
 		case icingcondition.FieldIntensity:
 			values[i] = new(sql.NullString)
+		case icingcondition.FieldID:
+			values[i] = new(uuid.UUID)
 		case icingcondition.ForeignKeys[0]: // forecast_icing_conditions
-			values[i] = new(sql.NullInt64)
+			values[i] = &sql.NullScanner{S: new(uuid.UUID)}
 		default:
 			return nil, fmt.Errorf("unexpected column %q for type IcingCondition", columns[i])
 		}
@@ -51,11 +54,11 @@ func (ic *IcingCondition) assignValues(columns []string, values []any) error {
 	for i := range columns {
 		switch columns[i] {
 		case icingcondition.FieldID:
-			value, ok := values[i].(*sql.NullInt64)
-			if !ok {
-				return fmt.Errorf("unexpected type %T for field id", value)
+			if value, ok := values[i].(*uuid.UUID); !ok {
+				return fmt.Errorf("unexpected type %T for field id", values[i])
+			} else if value != nil {
+				ic.ID = *value
 			}
-			ic.ID = int(value.Int64)
 		case icingcondition.FieldIntensity:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field intensity", values[i])
@@ -77,11 +80,11 @@ func (ic *IcingCondition) assignValues(columns []string, values []any) error {
 				*ic.MaxAltitude = int(value.Int64)
 			}
 		case icingcondition.ForeignKeys[0]:
-			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for edge-field forecast_icing_conditions", value)
+			if value, ok := values[i].(*sql.NullScanner); !ok {
+				return fmt.Errorf("unexpected type %T for field forecast_icing_conditions", values[i])
 			} else if value.Valid {
-				ic.forecast_icing_conditions = new(int)
-				*ic.forecast_icing_conditions = int(value.Int64)
+				ic.forecast_icing_conditions = new(uuid.UUID)
+				*ic.forecast_icing_conditions = *value.S.(*uuid.UUID)
 			}
 		}
 	}

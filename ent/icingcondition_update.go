@@ -159,7 +159,7 @@ func (icu *IcingConditionUpdate) sqlSave(ctx context.Context) (n int, err error)
 			Table:   icingcondition.Table,
 			Columns: icingcondition.Columns,
 			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt,
+				Type:   field.TypeUUID,
 				Column: icingcondition.FieldID,
 			},
 		},
@@ -383,7 +383,7 @@ func (icuo *IcingConditionUpdateOne) sqlSave(ctx context.Context) (_node *IcingC
 			Table:   icingcondition.Table,
 			Columns: icingcondition.Columns,
 			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt,
+				Type:   field.TypeUUID,
 				Column: icingcondition.FieldID,
 			},
 		},

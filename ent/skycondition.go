@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"entgo.io/ent/dialect/sql"
+	"github.com/google/uuid"
 	"metar.gg/ent/skycondition"
 )
 
@@ -14,16 +15,16 @@ import (
 type SkyCondition struct {
 	config `json:"-"`
 	// ID of the ent.
-	ID int `json:"id,omitempty"`
+	ID uuid.UUID `json:"id,omitempty"`
 	// SkyCover holds the value of the "sky_cover" field.
 	SkyCover skycondition.SkyCover `json:"sky_cover,omitempty"`
 	// Cloud base in feet.
 	CloudBase *int `json:"cloud_base,omitempty"`
 	// Cloud type. Only present in TAFs.
 	CloudType               *skycondition.CloudType `json:"cloud_type,omitempty"`
-	forecast_sky_conditions *int
-	metar_sky_conditions    *int
-	taf_sky_conditions      *int
+	forecast_sky_conditions *uuid.UUID
+	metar_sky_conditions    *uuid.UUID
+	taf_sky_conditions      *uuid.UUID
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -31,16 +32,18 @@ func (*SkyCondition) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case skycondition.FieldID, skycondition.FieldCloudBase:
+		case skycondition.FieldCloudBase:
 			values[i] = new(sql.NullInt64)
 		case skycondition.FieldSkyCover, skycondition.FieldCloudType:
 			values[i] = new(sql.NullString)
+		case skycondition.FieldID:
+			values[i] = new(uuid.UUID)
 		case skycondition.ForeignKeys[0]: // forecast_sky_conditions
-			values[i] = new(sql.NullInt64)
+			values[i] = &sql.NullScanner{S: new(uuid.UUID)}
 		case skycondition.ForeignKeys[1]: // metar_sky_conditions
-			values[i] = new(sql.NullInt64)
+			values[i] = &sql.NullScanner{S: new(uuid.UUID)}
 		case skycondition.ForeignKeys[2]: // taf_sky_conditions
-			values[i] = new(sql.NullInt64)
+			values[i] = &sql.NullScanner{S: new(uuid.UUID)}
 		default:
 			return nil, fmt.Errorf("unexpected column %q for type SkyCondition", columns[i])
 		}
@@ -57,11 +60,11 @@ func (sc *SkyCondition) assignValues(columns []string, values []any) error {
 	for i := range columns {
 		switch columns[i] {
 		case skycondition.FieldID:
-			value, ok := values[i].(*sql.NullInt64)
-			if !ok {
-				return fmt.Errorf("unexpected type %T for field id", value)
+			if value, ok := values[i].(*uuid.UUID); !ok {
+				return fmt.Errorf("unexpected type %T for field id", values[i])
+			} else if value != nil {
+				sc.ID = *value
 			}
-			sc.ID = int(value.Int64)
 		case skycondition.FieldSkyCover:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field sky_cover", values[i])
@@ -83,25 +86,25 @@ func (sc *SkyCondition) assignValues(columns []string, values []any) error {
 				*sc.CloudType = skycondition.CloudType(value.String)
 			}
 		case skycondition.ForeignKeys[0]:
-			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for edge-field forecast_sky_conditions", value)
+			if value, ok := values[i].(*sql.NullScanner); !ok {
+				return fmt.Errorf("unexpected type %T for field forecast_sky_conditions", values[i])
 			} else if value.Valid {
-				sc.forecast_sky_conditions = new(int)
-				*sc.forecast_sky_conditions = int(value.Int64)
+				sc.forecast_sky_conditions = new(uuid.UUID)
+				*sc.forecast_sky_conditions = *value.S.(*uuid.UUID)
 			}
 		case skycondition.ForeignKeys[1]:
-			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for edge-field metar_sky_conditions", value)
+			if value, ok := values[i].(*sql.NullScanner); !ok {
+				return fmt.Errorf("unexpected type %T for field metar_sky_conditions", values[i])
 			} else if value.Valid {
-				sc.metar_sky_conditions = new(int)
-				*sc.metar_sky_conditions = int(value.Int64)
+				sc.metar_sky_conditions = new(uuid.UUID)
+				*sc.metar_sky_conditions = *value.S.(*uuid.UUID)
 			}
 		case skycondition.ForeignKeys[2]:
-			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for edge-field taf_sky_conditions", value)
+			if value, ok := values[i].(*sql.NullScanner); !ok {
+				return fmt.Errorf("unexpected type %T for field taf_sky_conditions", values[i])
 			} else if value.Valid {
-				sc.taf_sky_conditions = new(int)
-				*sc.taf_sky_conditions = int(value.Int64)
+				sc.taf_sky_conditions = new(uuid.UUID)
+				*sc.taf_sky_conditions = *value.S.(*uuid.UUID)
 			}
 		}
 	}

@@ -11,6 +11,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/google/uuid"
 	"metar.gg/ent/forecast"
 	"metar.gg/ent/icingcondition"
 	"metar.gg/ent/predicate"
@@ -396,14 +397,14 @@ func (fu *ForecastUpdate) ClearNotDecoded() *ForecastUpdate {
 }
 
 // AddSkyConditionIDs adds the "sky_conditions" edge to the SkyCondition entity by IDs.
-func (fu *ForecastUpdate) AddSkyConditionIDs(ids ...int) *ForecastUpdate {
+func (fu *ForecastUpdate) AddSkyConditionIDs(ids ...uuid.UUID) *ForecastUpdate {
 	fu.mutation.AddSkyConditionIDs(ids...)
 	return fu
 }
 
 // AddSkyConditions adds the "sky_conditions" edges to the SkyCondition entity.
 func (fu *ForecastUpdate) AddSkyConditions(s ...*SkyCondition) *ForecastUpdate {
-	ids := make([]int, len(s))
+	ids := make([]uuid.UUID, len(s))
 	for i := range s {
 		ids[i] = s[i].ID
 	}
@@ -411,14 +412,14 @@ func (fu *ForecastUpdate) AddSkyConditions(s ...*SkyCondition) *ForecastUpdate {
 }
 
 // AddTurbulenceConditionIDs adds the "turbulence_conditions" edge to the TurbulenceCondition entity by IDs.
-func (fu *ForecastUpdate) AddTurbulenceConditionIDs(ids ...int) *ForecastUpdate {
+func (fu *ForecastUpdate) AddTurbulenceConditionIDs(ids ...uuid.UUID) *ForecastUpdate {
 	fu.mutation.AddTurbulenceConditionIDs(ids...)
 	return fu
 }
 
 // AddTurbulenceConditions adds the "turbulence_conditions" edges to the TurbulenceCondition entity.
 func (fu *ForecastUpdate) AddTurbulenceConditions(t ...*TurbulenceCondition) *ForecastUpdate {
-	ids := make([]int, len(t))
+	ids := make([]uuid.UUID, len(t))
 	for i := range t {
 		ids[i] = t[i].ID
 	}
@@ -426,14 +427,14 @@ func (fu *ForecastUpdate) AddTurbulenceConditions(t ...*TurbulenceCondition) *Fo
 }
 
 // AddIcingConditionIDs adds the "icing_conditions" edge to the IcingCondition entity by IDs.
-func (fu *ForecastUpdate) AddIcingConditionIDs(ids ...int) *ForecastUpdate {
+func (fu *ForecastUpdate) AddIcingConditionIDs(ids ...uuid.UUID) *ForecastUpdate {
 	fu.mutation.AddIcingConditionIDs(ids...)
 	return fu
 }
 
 // AddIcingConditions adds the "icing_conditions" edges to the IcingCondition entity.
 func (fu *ForecastUpdate) AddIcingConditions(i ...*IcingCondition) *ForecastUpdate {
-	ids := make([]int, len(i))
+	ids := make([]uuid.UUID, len(i))
 	for j := range i {
 		ids[j] = i[j].ID
 	}
@@ -441,14 +442,14 @@ func (fu *ForecastUpdate) AddIcingConditions(i ...*IcingCondition) *ForecastUpda
 }
 
 // AddTemperatureDatumIDs adds the "temperature_data" edge to the TemperatureData entity by IDs.
-func (fu *ForecastUpdate) AddTemperatureDatumIDs(ids ...int) *ForecastUpdate {
+func (fu *ForecastUpdate) AddTemperatureDatumIDs(ids ...uuid.UUID) *ForecastUpdate {
 	fu.mutation.AddTemperatureDatumIDs(ids...)
 	return fu
 }
 
 // AddTemperatureData adds the "temperature_data" edges to the TemperatureData entity.
 func (fu *ForecastUpdate) AddTemperatureData(t ...*TemperatureData) *ForecastUpdate {
-	ids := make([]int, len(t))
+	ids := make([]uuid.UUID, len(t))
 	for i := range t {
 		ids[i] = t[i].ID
 	}
@@ -467,14 +468,14 @@ func (fu *ForecastUpdate) ClearSkyConditions() *ForecastUpdate {
 }
 
 // RemoveSkyConditionIDs removes the "sky_conditions" edge to SkyCondition entities by IDs.
-func (fu *ForecastUpdate) RemoveSkyConditionIDs(ids ...int) *ForecastUpdate {
+func (fu *ForecastUpdate) RemoveSkyConditionIDs(ids ...uuid.UUID) *ForecastUpdate {
 	fu.mutation.RemoveSkyConditionIDs(ids...)
 	return fu
 }
 
 // RemoveSkyConditions removes "sky_conditions" edges to SkyCondition entities.
 func (fu *ForecastUpdate) RemoveSkyConditions(s ...*SkyCondition) *ForecastUpdate {
-	ids := make([]int, len(s))
+	ids := make([]uuid.UUID, len(s))
 	for i := range s {
 		ids[i] = s[i].ID
 	}
@@ -488,14 +489,14 @@ func (fu *ForecastUpdate) ClearTurbulenceConditions() *ForecastUpdate {
 }
 
 // RemoveTurbulenceConditionIDs removes the "turbulence_conditions" edge to TurbulenceCondition entities by IDs.
-func (fu *ForecastUpdate) RemoveTurbulenceConditionIDs(ids ...int) *ForecastUpdate {
+func (fu *ForecastUpdate) RemoveTurbulenceConditionIDs(ids ...uuid.UUID) *ForecastUpdate {
 	fu.mutation.RemoveTurbulenceConditionIDs(ids...)
 	return fu
 }
 
 // RemoveTurbulenceConditions removes "turbulence_conditions" edges to TurbulenceCondition entities.
 func (fu *ForecastUpdate) RemoveTurbulenceConditions(t ...*TurbulenceCondition) *ForecastUpdate {
-	ids := make([]int, len(t))
+	ids := make([]uuid.UUID, len(t))
 	for i := range t {
 		ids[i] = t[i].ID
 	}
@@ -509,14 +510,14 @@ func (fu *ForecastUpdate) ClearIcingConditions() *ForecastUpdate {
 }
 
 // RemoveIcingConditionIDs removes the "icing_conditions" edge to IcingCondition entities by IDs.
-func (fu *ForecastUpdate) RemoveIcingConditionIDs(ids ...int) *ForecastUpdate {
+func (fu *ForecastUpdate) RemoveIcingConditionIDs(ids ...uuid.UUID) *ForecastUpdate {
 	fu.mutation.RemoveIcingConditionIDs(ids...)
 	return fu
 }
 
 // RemoveIcingConditions removes "icing_conditions" edges to IcingCondition entities.
 func (fu *ForecastUpdate) RemoveIcingConditions(i ...*IcingCondition) *ForecastUpdate {
-	ids := make([]int, len(i))
+	ids := make([]uuid.UUID, len(i))
 	for j := range i {
 		ids[j] = i[j].ID
 	}
@@ -530,14 +531,14 @@ func (fu *ForecastUpdate) ClearTemperatureData() *ForecastUpdate {
 }
 
 // RemoveTemperatureDatumIDs removes the "temperature_data" edge to TemperatureData entities by IDs.
-func (fu *ForecastUpdate) RemoveTemperatureDatumIDs(ids ...int) *ForecastUpdate {
+func (fu *ForecastUpdate) RemoveTemperatureDatumIDs(ids ...uuid.UUID) *ForecastUpdate {
 	fu.mutation.RemoveTemperatureDatumIDs(ids...)
 	return fu
 }
 
 // RemoveTemperatureData removes "temperature_data" edges to TemperatureData entities.
 func (fu *ForecastUpdate) RemoveTemperatureData(t ...*TemperatureData) *ForecastUpdate {
-	ids := make([]int, len(t))
+	ids := make([]uuid.UUID, len(t))
 	for i := range t {
 		ids[i] = t[i].ID
 	}
@@ -626,7 +627,7 @@ func (fu *ForecastUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Table:   forecast.Table,
 			Columns: forecast.Columns,
 			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt,
+				Type:   field.TypeUUID,
 				Column: forecast.FieldID,
 			},
 		},
@@ -913,7 +914,7 @@ func (fu *ForecastUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
+					Type:   field.TypeUUID,
 					Column: skycondition.FieldID,
 				},
 			},
@@ -929,7 +930,7 @@ func (fu *ForecastUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
+					Type:   field.TypeUUID,
 					Column: skycondition.FieldID,
 				},
 			},
@@ -948,7 +949,7 @@ func (fu *ForecastUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
+					Type:   field.TypeUUID,
 					Column: skycondition.FieldID,
 				},
 			},
@@ -967,7 +968,7 @@ func (fu *ForecastUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
+					Type:   field.TypeUUID,
 					Column: turbulencecondition.FieldID,
 				},
 			},
@@ -983,7 +984,7 @@ func (fu *ForecastUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
+					Type:   field.TypeUUID,
 					Column: turbulencecondition.FieldID,
 				},
 			},
@@ -1002,7 +1003,7 @@ func (fu *ForecastUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
+					Type:   field.TypeUUID,
 					Column: turbulencecondition.FieldID,
 				},
 			},
@@ -1021,7 +1022,7 @@ func (fu *ForecastUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
+					Type:   field.TypeUUID,
 					Column: icingcondition.FieldID,
 				},
 			},
@@ -1037,7 +1038,7 @@ func (fu *ForecastUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
+					Type:   field.TypeUUID,
 					Column: icingcondition.FieldID,
 				},
 			},
@@ -1056,7 +1057,7 @@ func (fu *ForecastUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
+					Type:   field.TypeUUID,
 					Column: icingcondition.FieldID,
 				},
 			},
@@ -1075,7 +1076,7 @@ func (fu *ForecastUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
+					Type:   field.TypeUUID,
 					Column: temperaturedata.FieldID,
 				},
 			},
@@ -1091,7 +1092,7 @@ func (fu *ForecastUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
+					Type:   field.TypeUUID,
 					Column: temperaturedata.FieldID,
 				},
 			},
@@ -1110,7 +1111,7 @@ func (fu *ForecastUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
+					Type:   field.TypeUUID,
 					Column: temperaturedata.FieldID,
 				},
 			},
@@ -1504,14 +1505,14 @@ func (fuo *ForecastUpdateOne) ClearNotDecoded() *ForecastUpdateOne {
 }
 
 // AddSkyConditionIDs adds the "sky_conditions" edge to the SkyCondition entity by IDs.
-func (fuo *ForecastUpdateOne) AddSkyConditionIDs(ids ...int) *ForecastUpdateOne {
+func (fuo *ForecastUpdateOne) AddSkyConditionIDs(ids ...uuid.UUID) *ForecastUpdateOne {
 	fuo.mutation.AddSkyConditionIDs(ids...)
 	return fuo
 }
 
 // AddSkyConditions adds the "sky_conditions" edges to the SkyCondition entity.
 func (fuo *ForecastUpdateOne) AddSkyConditions(s ...*SkyCondition) *ForecastUpdateOne {
-	ids := make([]int, len(s))
+	ids := make([]uuid.UUID, len(s))
 	for i := range s {
 		ids[i] = s[i].ID
 	}
@@ -1519,14 +1520,14 @@ func (fuo *ForecastUpdateOne) AddSkyConditions(s ...*SkyCondition) *ForecastUpda
 }
 
 // AddTurbulenceConditionIDs adds the "turbulence_conditions" edge to the TurbulenceCondition entity by IDs.
-func (fuo *ForecastUpdateOne) AddTurbulenceConditionIDs(ids ...int) *ForecastUpdateOne {
+func (fuo *ForecastUpdateOne) AddTurbulenceConditionIDs(ids ...uuid.UUID) *ForecastUpdateOne {
 	fuo.mutation.AddTurbulenceConditionIDs(ids...)
 	return fuo
 }
 
 // AddTurbulenceConditions adds the "turbulence_conditions" edges to the TurbulenceCondition entity.
 func (fuo *ForecastUpdateOne) AddTurbulenceConditions(t ...*TurbulenceCondition) *ForecastUpdateOne {
-	ids := make([]int, len(t))
+	ids := make([]uuid.UUID, len(t))
 	for i := range t {
 		ids[i] = t[i].ID
 	}
@@ -1534,14 +1535,14 @@ func (fuo *ForecastUpdateOne) AddTurbulenceConditions(t ...*TurbulenceCondition)
 }
 
 // AddIcingConditionIDs adds the "icing_conditions" edge to the IcingCondition entity by IDs.
-func (fuo *ForecastUpdateOne) AddIcingConditionIDs(ids ...int) *ForecastUpdateOne {
+func (fuo *ForecastUpdateOne) AddIcingConditionIDs(ids ...uuid.UUID) *ForecastUpdateOne {
 	fuo.mutation.AddIcingConditionIDs(ids...)
 	return fuo
 }
 
 // AddIcingConditions adds the "icing_conditions" edges to the IcingCondition entity.
 func (fuo *ForecastUpdateOne) AddIcingConditions(i ...*IcingCondition) *ForecastUpdateOne {
-	ids := make([]int, len(i))
+	ids := make([]uuid.UUID, len(i))
 	for j := range i {
 		ids[j] = i[j].ID
 	}
@@ -1549,14 +1550,14 @@ func (fuo *ForecastUpdateOne) AddIcingConditions(i ...*IcingCondition) *Forecast
 }
 
 // AddTemperatureDatumIDs adds the "temperature_data" edge to the TemperatureData entity by IDs.
-func (fuo *ForecastUpdateOne) AddTemperatureDatumIDs(ids ...int) *ForecastUpdateOne {
+func (fuo *ForecastUpdateOne) AddTemperatureDatumIDs(ids ...uuid.UUID) *ForecastUpdateOne {
 	fuo.mutation.AddTemperatureDatumIDs(ids...)
 	return fuo
 }
 
 // AddTemperatureData adds the "temperature_data" edges to the TemperatureData entity.
 func (fuo *ForecastUpdateOne) AddTemperatureData(t ...*TemperatureData) *ForecastUpdateOne {
-	ids := make([]int, len(t))
+	ids := make([]uuid.UUID, len(t))
 	for i := range t {
 		ids[i] = t[i].ID
 	}
@@ -1575,14 +1576,14 @@ func (fuo *ForecastUpdateOne) ClearSkyConditions() *ForecastUpdateOne {
 }
 
 // RemoveSkyConditionIDs removes the "sky_conditions" edge to SkyCondition entities by IDs.
-func (fuo *ForecastUpdateOne) RemoveSkyConditionIDs(ids ...int) *ForecastUpdateOne {
+func (fuo *ForecastUpdateOne) RemoveSkyConditionIDs(ids ...uuid.UUID) *ForecastUpdateOne {
 	fuo.mutation.RemoveSkyConditionIDs(ids...)
 	return fuo
 }
 
 // RemoveSkyConditions removes "sky_conditions" edges to SkyCondition entities.
 func (fuo *ForecastUpdateOne) RemoveSkyConditions(s ...*SkyCondition) *ForecastUpdateOne {
-	ids := make([]int, len(s))
+	ids := make([]uuid.UUID, len(s))
 	for i := range s {
 		ids[i] = s[i].ID
 	}
@@ -1596,14 +1597,14 @@ func (fuo *ForecastUpdateOne) ClearTurbulenceConditions() *ForecastUpdateOne {
 }
 
 // RemoveTurbulenceConditionIDs removes the "turbulence_conditions" edge to TurbulenceCondition entities by IDs.
-func (fuo *ForecastUpdateOne) RemoveTurbulenceConditionIDs(ids ...int) *ForecastUpdateOne {
+func (fuo *ForecastUpdateOne) RemoveTurbulenceConditionIDs(ids ...uuid.UUID) *ForecastUpdateOne {
 	fuo.mutation.RemoveTurbulenceConditionIDs(ids...)
 	return fuo
 }
 
 // RemoveTurbulenceConditions removes "turbulence_conditions" edges to TurbulenceCondition entities.
 func (fuo *ForecastUpdateOne) RemoveTurbulenceConditions(t ...*TurbulenceCondition) *ForecastUpdateOne {
-	ids := make([]int, len(t))
+	ids := make([]uuid.UUID, len(t))
 	for i := range t {
 		ids[i] = t[i].ID
 	}
@@ -1617,14 +1618,14 @@ func (fuo *ForecastUpdateOne) ClearIcingConditions() *ForecastUpdateOne {
 }
 
 // RemoveIcingConditionIDs removes the "icing_conditions" edge to IcingCondition entities by IDs.
-func (fuo *ForecastUpdateOne) RemoveIcingConditionIDs(ids ...int) *ForecastUpdateOne {
+func (fuo *ForecastUpdateOne) RemoveIcingConditionIDs(ids ...uuid.UUID) *ForecastUpdateOne {
 	fuo.mutation.RemoveIcingConditionIDs(ids...)
 	return fuo
 }
 
 // RemoveIcingConditions removes "icing_conditions" edges to IcingCondition entities.
 func (fuo *ForecastUpdateOne) RemoveIcingConditions(i ...*IcingCondition) *ForecastUpdateOne {
-	ids := make([]int, len(i))
+	ids := make([]uuid.UUID, len(i))
 	for j := range i {
 		ids[j] = i[j].ID
 	}
@@ -1638,14 +1639,14 @@ func (fuo *ForecastUpdateOne) ClearTemperatureData() *ForecastUpdateOne {
 }
 
 // RemoveTemperatureDatumIDs removes the "temperature_data" edge to TemperatureData entities by IDs.
-func (fuo *ForecastUpdateOne) RemoveTemperatureDatumIDs(ids ...int) *ForecastUpdateOne {
+func (fuo *ForecastUpdateOne) RemoveTemperatureDatumIDs(ids ...uuid.UUID) *ForecastUpdateOne {
 	fuo.mutation.RemoveTemperatureDatumIDs(ids...)
 	return fuo
 }
 
 // RemoveTemperatureData removes "temperature_data" edges to TemperatureData entities.
 func (fuo *ForecastUpdateOne) RemoveTemperatureData(t ...*TemperatureData) *ForecastUpdateOne {
-	ids := make([]int, len(t))
+	ids := make([]uuid.UUID, len(t))
 	for i := range t {
 		ids[i] = t[i].ID
 	}
@@ -1747,7 +1748,7 @@ func (fuo *ForecastUpdateOne) sqlSave(ctx context.Context) (_node *Forecast, err
 			Table:   forecast.Table,
 			Columns: forecast.Columns,
 			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt,
+				Type:   field.TypeUUID,
 				Column: forecast.FieldID,
 			},
 		},
@@ -2051,7 +2052,7 @@ func (fuo *ForecastUpdateOne) sqlSave(ctx context.Context) (_node *Forecast, err
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
+					Type:   field.TypeUUID,
 					Column: skycondition.FieldID,
 				},
 			},
@@ -2067,7 +2068,7 @@ func (fuo *ForecastUpdateOne) sqlSave(ctx context.Context) (_node *Forecast, err
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
+					Type:   field.TypeUUID,
 					Column: skycondition.FieldID,
 				},
 			},
@@ -2086,7 +2087,7 @@ func (fuo *ForecastUpdateOne) sqlSave(ctx context.Context) (_node *Forecast, err
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
+					Type:   field.TypeUUID,
 					Column: skycondition.FieldID,
 				},
 			},
@@ -2105,7 +2106,7 @@ func (fuo *ForecastUpdateOne) sqlSave(ctx context.Context) (_node *Forecast, err
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
+					Type:   field.TypeUUID,
 					Column: turbulencecondition.FieldID,
 				},
 			},
@@ -2121,7 +2122,7 @@ func (fuo *ForecastUpdateOne) sqlSave(ctx context.Context) (_node *Forecast, err
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
+					Type:   field.TypeUUID,
 					Column: turbulencecondition.FieldID,
 				},
 			},
@@ -2140,7 +2141,7 @@ func (fuo *ForecastUpdateOne) sqlSave(ctx context.Context) (_node *Forecast, err
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
+					Type:   field.TypeUUID,
 					Column: turbulencecondition.FieldID,
 				},
 			},
@@ -2159,7 +2160,7 @@ func (fuo *ForecastUpdateOne) sqlSave(ctx context.Context) (_node *Forecast, err
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
+					Type:   field.TypeUUID,
 					Column: icingcondition.FieldID,
 				},
 			},
@@ -2175,7 +2176,7 @@ func (fuo *ForecastUpdateOne) sqlSave(ctx context.Context) (_node *Forecast, err
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
+					Type:   field.TypeUUID,
 					Column: icingcondition.FieldID,
 				},
 			},
@@ -2194,7 +2195,7 @@ func (fuo *ForecastUpdateOne) sqlSave(ctx context.Context) (_node *Forecast, err
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
+					Type:   field.TypeUUID,
 					Column: icingcondition.FieldID,
 				},
 			},
@@ -2213,7 +2214,7 @@ func (fuo *ForecastUpdateOne) sqlSave(ctx context.Context) (_node *Forecast, err
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
+					Type:   field.TypeUUID,
 					Column: temperaturedata.FieldID,
 				},
 			},
@@ -2229,7 +2230,7 @@ func (fuo *ForecastUpdateOne) sqlSave(ctx context.Context) (_node *Forecast, err
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
+					Type:   field.TypeUUID,
 					Column: temperaturedata.FieldID,
 				},
 			},
@@ -2248,7 +2249,7 @@ func (fuo *ForecastUpdateOne) sqlSave(ctx context.Context) (_node *Forecast, err
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
+					Type:   field.TypeUUID,
 					Column: temperaturedata.FieldID,
 				},
 			},

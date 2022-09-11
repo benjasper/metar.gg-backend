@@ -8,7 +8,7 @@ import (
 	"github.com/99designs/gqlgen/graphql"
 )
 
-func (a *Airport) Station(ctx context.Context) (*Station, error) {
+func (a *Airport) Station(ctx context.Context) (*WeatherStation, error) {
 	result, err := a.Edges.StationOrErr()
 	if IsNotLoaded(err) {
 		result, err = a.QueryStation().Only(ctx)
@@ -64,7 +64,7 @@ func (f *Frequency) Airport(ctx context.Context) (*Airport, error) {
 	return result, MaskNotFound(err)
 }
 
-func (m *Metar) Station(ctx context.Context) (*Station, error) {
+func (m *Metar) Station(ctx context.Context) (*WeatherStation, error) {
 	result, err := m.Edges.StationOrErr()
 	if IsNotLoaded(err) {
 		result, err = m.QueryStation().Only(ctx)
@@ -88,15 +88,7 @@ func (r *Runway) Airport(ctx context.Context) (*Airport, error) {
 	return result, MaskNotFound(err)
 }
 
-func (s *Station) Airport(ctx context.Context) (*Airport, error) {
-	result, err := s.Edges.AirportOrErr()
-	if IsNotLoaded(err) {
-		result, err = s.QueryAirport().Only(ctx)
-	}
-	return result, MaskNotFound(err)
-}
-
-func (t *Taf) Station(ctx context.Context) (*Station, error) {
+func (t *Taf) Station(ctx context.Context) (*WeatherStation, error) {
 	result, err := t.Edges.StationOrErr()
 	if IsNotLoaded(err) {
 		result, err = t.QueryStation().Only(ctx)
@@ -118,4 +110,12 @@ func (t *Taf) Forecast(ctx context.Context) ([]*Forecast, error) {
 		result, err = t.QueryForecast().All(ctx)
 	}
 	return result, err
+}
+
+func (ws *WeatherStation) Airport(ctx context.Context) (*Airport, error) {
+	result, err := ws.Edges.AirportOrErr()
+	if IsNotLoaded(err) {
+		result, err = ws.QueryAirport().Only(ctx)
+	}
+	return result, MaskNotFound(err)
 }

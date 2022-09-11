@@ -11,10 +11,11 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/google/uuid"
 	"metar.gg/ent/metar"
 	"metar.gg/ent/predicate"
 	"metar.gg/ent/skycondition"
-	"metar.gg/ent/station"
+	"metar.gg/ent/weatherstation"
 )
 
 // MetarQuery is the builder for querying Metar entities.
@@ -26,7 +27,7 @@ type MetarQuery struct {
 	order                  []OrderFunc
 	fields                 []string
 	predicates             []predicate.Metar
-	withStation            *StationQuery
+	withStation            *WeatherStationQuery
 	withSkyConditions      *SkyConditionQuery
 	withFKs                bool
 	loadTotal              []func(context.Context, []*Metar) error
@@ -69,8 +70,8 @@ func (mq *MetarQuery) Order(o ...OrderFunc) *MetarQuery {
 }
 
 // QueryStation chains the current query on the "station" edge.
-func (mq *MetarQuery) QueryStation() *StationQuery {
-	query := &StationQuery{config: mq.config}
+func (mq *MetarQuery) QueryStation() *WeatherStationQuery {
+	query := &WeatherStationQuery{config: mq.config}
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := mq.prepareQuery(ctx); err != nil {
 			return nil, err
@@ -81,7 +82,7 @@ func (mq *MetarQuery) QueryStation() *StationQuery {
 		}
 		step := sqlgraph.NewStep(
 			sqlgraph.From(metar.Table, metar.FieldID, selector),
-			sqlgraph.To(station.Table, station.FieldID),
+			sqlgraph.To(weatherstation.Table, weatherstation.FieldID),
 			sqlgraph.Edge(sqlgraph.M2O, true, metar.StationTable, metar.StationColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(mq.driver.Dialect(), step)
@@ -136,8 +137,8 @@ func (mq *MetarQuery) FirstX(ctx context.Context) *Metar {
 
 // FirstID returns the first Metar ID from the query.
 // Returns a *NotFoundError when no Metar ID was found.
-func (mq *MetarQuery) FirstID(ctx context.Context) (id int, err error) {
-	var ids []int
+func (mq *MetarQuery) FirstID(ctx context.Context) (id uuid.UUID, err error) {
+	var ids []uuid.UUID
 	if ids, err = mq.Limit(1).IDs(ctx); err != nil {
 		return
 	}
@@ -149,7 +150,7 @@ func (mq *MetarQuery) FirstID(ctx context.Context) (id int, err error) {
 }
 
 // FirstIDX is like FirstID, but panics if an error occurs.
-func (mq *MetarQuery) FirstIDX(ctx context.Context) int {
+func (mq *MetarQuery) FirstIDX(ctx context.Context) uuid.UUID {
 	id, err := mq.FirstID(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
@@ -187,8 +188,8 @@ func (mq *MetarQuery) OnlyX(ctx context.Context) *Metar {
 // OnlyID is like Only, but returns the only Metar ID in the query.
 // Returns a *NotSingularError when more than one Metar ID is found.
 // Returns a *NotFoundError when no entities are found.
-func (mq *MetarQuery) OnlyID(ctx context.Context) (id int, err error) {
-	var ids []int
+func (mq *MetarQuery) OnlyID(ctx context.Context) (id uuid.UUID, err error) {
+	var ids []uuid.UUID
 	if ids, err = mq.Limit(2).IDs(ctx); err != nil {
 		return
 	}
@@ -204,7 +205,7 @@ func (mq *MetarQuery) OnlyID(ctx context.Context) (id int, err error) {
 }
 
 // OnlyIDX is like OnlyID, but panics if an error occurs.
-func (mq *MetarQuery) OnlyIDX(ctx context.Context) int {
+func (mq *MetarQuery) OnlyIDX(ctx context.Context) uuid.UUID {
 	id, err := mq.OnlyID(ctx)
 	if err != nil {
 		panic(err)
@@ -230,8 +231,8 @@ func (mq *MetarQuery) AllX(ctx context.Context) []*Metar {
 }
 
 // IDs executes the query and returns a list of Metar IDs.
-func (mq *MetarQuery) IDs(ctx context.Context) ([]int, error) {
-	var ids []int
+func (mq *MetarQuery) IDs(ctx context.Context) ([]uuid.UUID, error) {
+	var ids []uuid.UUID
 	if err := mq.Select(metar.FieldID).Scan(ctx, &ids); err != nil {
 		return nil, err
 	}
@@ -239,7 +240,7 @@ func (mq *MetarQuery) IDs(ctx context.Context) ([]int, error) {
 }
 
 // IDsX is like IDs, but panics if an error occurs.
-func (mq *MetarQuery) IDsX(ctx context.Context) []int {
+func (mq *MetarQuery) IDsX(ctx context.Context) []uuid.UUID {
 	ids, err := mq.IDs(ctx)
 	if err != nil {
 		panic(err)
@@ -304,8 +305,8 @@ func (mq *MetarQuery) Clone() *MetarQuery {
 
 // WithStation tells the query-builder to eager-load the nodes that are connected to
 // the "station" edge. The optional arguments are used to configure the query builder of the edge.
-func (mq *MetarQuery) WithStation(opts ...func(*StationQuery)) *MetarQuery {
-	query := &StationQuery{config: mq.config}
+func (mq *MetarQuery) WithStation(opts ...func(*WeatherStationQuery)) *MetarQuery {
+	query := &WeatherStationQuery{config: mq.config}
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -427,7 +428,7 @@ func (mq *MetarQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Metar,
 	}
 	if query := mq.withStation; query != nil {
 		if err := mq.loadStation(ctx, query, nodes, nil,
-			func(n *Metar, e *Station) { n.Edges.Station = e }); err != nil {
+			func(n *Metar, e *WeatherStation) { n.Edges.Station = e }); err != nil {
 			return nil, err
 		}
 	}
@@ -453,20 +454,20 @@ func (mq *MetarQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Metar,
 	return nodes, nil
 }
 
-func (mq *MetarQuery) loadStation(ctx context.Context, query *StationQuery, nodes []*Metar, init func(*Metar), assign func(*Metar, *Station)) error {
-	ids := make([]int, 0, len(nodes))
-	nodeids := make(map[int][]*Metar)
+func (mq *MetarQuery) loadStation(ctx context.Context, query *WeatherStationQuery, nodes []*Metar, init func(*Metar), assign func(*Metar, *WeatherStation)) error {
+	ids := make([]uuid.UUID, 0, len(nodes))
+	nodeids := make(map[uuid.UUID][]*Metar)
 	for i := range nodes {
-		if nodes[i].station_metars == nil {
+		if nodes[i].weather_station_metars == nil {
 			continue
 		}
-		fk := *nodes[i].station_metars
+		fk := *nodes[i].weather_station_metars
 		if _, ok := nodeids[fk]; !ok {
 			ids = append(ids, fk)
 		}
 		nodeids[fk] = append(nodeids[fk], nodes[i])
 	}
-	query.Where(station.IDIn(ids...))
+	query.Where(weatherstation.IDIn(ids...))
 	neighbors, err := query.All(ctx)
 	if err != nil {
 		return err
@@ -474,7 +475,7 @@ func (mq *MetarQuery) loadStation(ctx context.Context, query *StationQuery, node
 	for _, n := range neighbors {
 		nodes, ok := nodeids[n.ID]
 		if !ok {
-			return fmt.Errorf(`unexpected foreign-key "station_metars" returned %v`, n.ID)
+			return fmt.Errorf(`unexpected foreign-key "weather_station_metars" returned %v`, n.ID)
 		}
 		for i := range nodes {
 			assign(nodes[i], n)
@@ -484,7 +485,7 @@ func (mq *MetarQuery) loadStation(ctx context.Context, query *StationQuery, node
 }
 func (mq *MetarQuery) loadSkyConditions(ctx context.Context, query *SkyConditionQuery, nodes []*Metar, init func(*Metar), assign func(*Metar, *SkyCondition)) error {
 	fks := make([]driver.Value, 0, len(nodes))
-	nodeids := make(map[int]*Metar)
+	nodeids := make(map[uuid.UUID]*Metar)
 	for i := range nodes {
 		fks = append(fks, nodes[i].ID)
 		nodeids[nodes[i].ID] = nodes[i]
@@ -540,7 +541,7 @@ func (mq *MetarQuery) querySpec() *sqlgraph.QuerySpec {
 			Table:   metar.Table,
 			Columns: metar.Columns,
 			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt,
+				Type:   field.TypeUUID,
 				Column: metar.FieldID,
 			},
 		},

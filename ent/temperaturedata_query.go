@@ -10,6 +10,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/google/uuid"
 	"metar.gg/ent/predicate"
 	"metar.gg/ent/temperaturedata"
 )
@@ -86,8 +87,8 @@ func (tdq *TemperatureDataQuery) FirstX(ctx context.Context) *TemperatureData {
 
 // FirstID returns the first TemperatureData ID from the query.
 // Returns a *NotFoundError when no TemperatureData ID was found.
-func (tdq *TemperatureDataQuery) FirstID(ctx context.Context) (id int, err error) {
-	var ids []int
+func (tdq *TemperatureDataQuery) FirstID(ctx context.Context) (id uuid.UUID, err error) {
+	var ids []uuid.UUID
 	if ids, err = tdq.Limit(1).IDs(ctx); err != nil {
 		return
 	}
@@ -99,7 +100,7 @@ func (tdq *TemperatureDataQuery) FirstID(ctx context.Context) (id int, err error
 }
 
 // FirstIDX is like FirstID, but panics if an error occurs.
-func (tdq *TemperatureDataQuery) FirstIDX(ctx context.Context) int {
+func (tdq *TemperatureDataQuery) FirstIDX(ctx context.Context) uuid.UUID {
 	id, err := tdq.FirstID(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
@@ -137,8 +138,8 @@ func (tdq *TemperatureDataQuery) OnlyX(ctx context.Context) *TemperatureData {
 // OnlyID is like Only, but returns the only TemperatureData ID in the query.
 // Returns a *NotSingularError when more than one TemperatureData ID is found.
 // Returns a *NotFoundError when no entities are found.
-func (tdq *TemperatureDataQuery) OnlyID(ctx context.Context) (id int, err error) {
-	var ids []int
+func (tdq *TemperatureDataQuery) OnlyID(ctx context.Context) (id uuid.UUID, err error) {
+	var ids []uuid.UUID
 	if ids, err = tdq.Limit(2).IDs(ctx); err != nil {
 		return
 	}
@@ -154,7 +155,7 @@ func (tdq *TemperatureDataQuery) OnlyID(ctx context.Context) (id int, err error)
 }
 
 // OnlyIDX is like OnlyID, but panics if an error occurs.
-func (tdq *TemperatureDataQuery) OnlyIDX(ctx context.Context) int {
+func (tdq *TemperatureDataQuery) OnlyIDX(ctx context.Context) uuid.UUID {
 	id, err := tdq.OnlyID(ctx)
 	if err != nil {
 		panic(err)
@@ -180,8 +181,8 @@ func (tdq *TemperatureDataQuery) AllX(ctx context.Context) []*TemperatureData {
 }
 
 // IDs executes the query and returns a list of TemperatureData IDs.
-func (tdq *TemperatureDataQuery) IDs(ctx context.Context) ([]int, error) {
-	var ids []int
+func (tdq *TemperatureDataQuery) IDs(ctx context.Context) ([]uuid.UUID, error) {
+	var ids []uuid.UUID
 	if err := tdq.Select(temperaturedata.FieldID).Scan(ctx, &ids); err != nil {
 		return nil, err
 	}
@@ -189,7 +190,7 @@ func (tdq *TemperatureDataQuery) IDs(ctx context.Context) ([]int, error) {
 }
 
 // IDsX is like IDs, but panics if an error occurs.
-func (tdq *TemperatureDataQuery) IDsX(ctx context.Context) []int {
+func (tdq *TemperatureDataQuery) IDsX(ctx context.Context) []uuid.UUID {
 	ids, err := tdq.IDs(ctx)
 	if err != nil {
 		panic(err)
@@ -377,7 +378,7 @@ func (tdq *TemperatureDataQuery) querySpec() *sqlgraph.QuerySpec {
 			Table:   temperaturedata.Table,
 			Columns: temperaturedata.Columns,
 			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt,
+				Type:   field.TypeUUID,
 				Column: temperaturedata.FieldID,
 			},
 		},

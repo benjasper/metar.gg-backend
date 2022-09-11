@@ -17,10 +17,10 @@ import (
 	"metar.gg/ent/metar"
 	"metar.gg/ent/runway"
 	"metar.gg/ent/skycondition"
-	"metar.gg/ent/station"
 	"metar.gg/ent/taf"
 	"metar.gg/ent/temperaturedata"
 	"metar.gg/ent/turbulencecondition"
+	"metar.gg/ent/weatherstation"
 )
 
 // ent aliases to avoid import conflicts in user's code.
@@ -48,10 +48,10 @@ func columnChecker(table string) func(string) error {
 		metar.Table:               metar.ValidColumn,
 		runway.Table:              runway.ValidColumn,
 		skycondition.Table:        skycondition.ValidColumn,
-		station.Table:             station.ValidColumn,
 		taf.Table:                 taf.ValidColumn,
 		temperaturedata.Table:     temperaturedata.ValidColumn,
 		turbulencecondition.Table: turbulencecondition.ValidColumn,
+		weatherstation.Table:      weatherstation.ValidColumn,
 	}
 	check, ok := checks[table]
 	if !ok {

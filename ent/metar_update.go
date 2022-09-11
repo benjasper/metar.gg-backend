@@ -11,10 +11,11 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/google/uuid"
 	"metar.gg/ent/metar"
 	"metar.gg/ent/predicate"
 	"metar.gg/ent/skycondition"
-	"metar.gg/ent/station"
+	"metar.gg/ent/weatherstation"
 )
 
 // MetarUpdate is the builder for updating Metar entities.
@@ -566,26 +567,26 @@ func (mu *MetarUpdate) SetHash(s string) *MetarUpdate {
 	return mu
 }
 
-// SetStationID sets the "station" edge to the Station entity by ID.
-func (mu *MetarUpdate) SetStationID(id int) *MetarUpdate {
+// SetStationID sets the "station" edge to the WeatherStation entity by ID.
+func (mu *MetarUpdate) SetStationID(id uuid.UUID) *MetarUpdate {
 	mu.mutation.SetStationID(id)
 	return mu
 }
 
-// SetStation sets the "station" edge to the Station entity.
-func (mu *MetarUpdate) SetStation(s *Station) *MetarUpdate {
-	return mu.SetStationID(s.ID)
+// SetStation sets the "station" edge to the WeatherStation entity.
+func (mu *MetarUpdate) SetStation(w *WeatherStation) *MetarUpdate {
+	return mu.SetStationID(w.ID)
 }
 
 // AddSkyConditionIDs adds the "sky_conditions" edge to the SkyCondition entity by IDs.
-func (mu *MetarUpdate) AddSkyConditionIDs(ids ...int) *MetarUpdate {
+func (mu *MetarUpdate) AddSkyConditionIDs(ids ...uuid.UUID) *MetarUpdate {
 	mu.mutation.AddSkyConditionIDs(ids...)
 	return mu
 }
 
 // AddSkyConditions adds the "sky_conditions" edges to the SkyCondition entity.
 func (mu *MetarUpdate) AddSkyConditions(s ...*SkyCondition) *MetarUpdate {
-	ids := make([]int, len(s))
+	ids := make([]uuid.UUID, len(s))
 	for i := range s {
 		ids[i] = s[i].ID
 	}
@@ -597,7 +598,7 @@ func (mu *MetarUpdate) Mutation() *MetarMutation {
 	return mu.mutation
 }
 
-// ClearStation clears the "station" edge to the Station entity.
+// ClearStation clears the "station" edge to the WeatherStation entity.
 func (mu *MetarUpdate) ClearStation() *MetarUpdate {
 	mu.mutation.ClearStation()
 	return mu
@@ -610,14 +611,14 @@ func (mu *MetarUpdate) ClearSkyConditions() *MetarUpdate {
 }
 
 // RemoveSkyConditionIDs removes the "sky_conditions" edge to SkyCondition entities by IDs.
-func (mu *MetarUpdate) RemoveSkyConditionIDs(ids ...int) *MetarUpdate {
+func (mu *MetarUpdate) RemoveSkyConditionIDs(ids ...uuid.UUID) *MetarUpdate {
 	mu.mutation.RemoveSkyConditionIDs(ids...)
 	return mu
 }
 
 // RemoveSkyConditions removes "sky_conditions" edges to SkyCondition entities.
 func (mu *MetarUpdate) RemoveSkyConditions(s ...*SkyCondition) *MetarUpdate {
-	ids := make([]int, len(s))
+	ids := make([]uuid.UUID, len(s))
 	for i := range s {
 		ids[i] = s[i].ID
 	}
@@ -714,7 +715,7 @@ func (mu *MetarUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Table:   metar.Table,
 			Columns: metar.Columns,
 			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt,
+				Type:   field.TypeUUID,
 				Column: metar.FieldID,
 			},
 		},
@@ -1182,8 +1183,8 @@ func (mu *MetarUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: station.FieldID,
+					Type:   field.TypeUUID,
+					Column: weatherstation.FieldID,
 				},
 			},
 		}
@@ -1198,8 +1199,8 @@ func (mu *MetarUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: station.FieldID,
+					Type:   field.TypeUUID,
+					Column: weatherstation.FieldID,
 				},
 			},
 		}
@@ -1217,7 +1218,7 @@ func (mu *MetarUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
+					Type:   field.TypeUUID,
 					Column: skycondition.FieldID,
 				},
 			},
@@ -1233,7 +1234,7 @@ func (mu *MetarUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
+					Type:   field.TypeUUID,
 					Column: skycondition.FieldID,
 				},
 			},
@@ -1252,7 +1253,7 @@ func (mu *MetarUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
+					Type:   field.TypeUUID,
 					Column: skycondition.FieldID,
 				},
 			},
@@ -1818,26 +1819,26 @@ func (muo *MetarUpdateOne) SetHash(s string) *MetarUpdateOne {
 	return muo
 }
 
-// SetStationID sets the "station" edge to the Station entity by ID.
-func (muo *MetarUpdateOne) SetStationID(id int) *MetarUpdateOne {
+// SetStationID sets the "station" edge to the WeatherStation entity by ID.
+func (muo *MetarUpdateOne) SetStationID(id uuid.UUID) *MetarUpdateOne {
 	muo.mutation.SetStationID(id)
 	return muo
 }
 
-// SetStation sets the "station" edge to the Station entity.
-func (muo *MetarUpdateOne) SetStation(s *Station) *MetarUpdateOne {
-	return muo.SetStationID(s.ID)
+// SetStation sets the "station" edge to the WeatherStation entity.
+func (muo *MetarUpdateOne) SetStation(w *WeatherStation) *MetarUpdateOne {
+	return muo.SetStationID(w.ID)
 }
 
 // AddSkyConditionIDs adds the "sky_conditions" edge to the SkyCondition entity by IDs.
-func (muo *MetarUpdateOne) AddSkyConditionIDs(ids ...int) *MetarUpdateOne {
+func (muo *MetarUpdateOne) AddSkyConditionIDs(ids ...uuid.UUID) *MetarUpdateOne {
 	muo.mutation.AddSkyConditionIDs(ids...)
 	return muo
 }
 
 // AddSkyConditions adds the "sky_conditions" edges to the SkyCondition entity.
 func (muo *MetarUpdateOne) AddSkyConditions(s ...*SkyCondition) *MetarUpdateOne {
-	ids := make([]int, len(s))
+	ids := make([]uuid.UUID, len(s))
 	for i := range s {
 		ids[i] = s[i].ID
 	}
@@ -1849,7 +1850,7 @@ func (muo *MetarUpdateOne) Mutation() *MetarMutation {
 	return muo.mutation
 }
 
-// ClearStation clears the "station" edge to the Station entity.
+// ClearStation clears the "station" edge to the WeatherStation entity.
 func (muo *MetarUpdateOne) ClearStation() *MetarUpdateOne {
 	muo.mutation.ClearStation()
 	return muo
@@ -1862,14 +1863,14 @@ func (muo *MetarUpdateOne) ClearSkyConditions() *MetarUpdateOne {
 }
 
 // RemoveSkyConditionIDs removes the "sky_conditions" edge to SkyCondition entities by IDs.
-func (muo *MetarUpdateOne) RemoveSkyConditionIDs(ids ...int) *MetarUpdateOne {
+func (muo *MetarUpdateOne) RemoveSkyConditionIDs(ids ...uuid.UUID) *MetarUpdateOne {
 	muo.mutation.RemoveSkyConditionIDs(ids...)
 	return muo
 }
 
 // RemoveSkyConditions removes "sky_conditions" edges to SkyCondition entities.
 func (muo *MetarUpdateOne) RemoveSkyConditions(s ...*SkyCondition) *MetarUpdateOne {
-	ids := make([]int, len(s))
+	ids := make([]uuid.UUID, len(s))
 	for i := range s {
 		ids[i] = s[i].ID
 	}
@@ -1979,7 +1980,7 @@ func (muo *MetarUpdateOne) sqlSave(ctx context.Context) (_node *Metar, err error
 			Table:   metar.Table,
 			Columns: metar.Columns,
 			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt,
+				Type:   field.TypeUUID,
 				Column: metar.FieldID,
 			},
 		},
@@ -2464,8 +2465,8 @@ func (muo *MetarUpdateOne) sqlSave(ctx context.Context) (_node *Metar, err error
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: station.FieldID,
+					Type:   field.TypeUUID,
+					Column: weatherstation.FieldID,
 				},
 			},
 		}
@@ -2480,8 +2481,8 @@ func (muo *MetarUpdateOne) sqlSave(ctx context.Context) (_node *Metar, err error
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: station.FieldID,
+					Type:   field.TypeUUID,
+					Column: weatherstation.FieldID,
 				},
 			},
 		}
@@ -2499,7 +2500,7 @@ func (muo *MetarUpdateOne) sqlSave(ctx context.Context) (_node *Metar, err error
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
+					Type:   field.TypeUUID,
 					Column: skycondition.FieldID,
 				},
 			},
@@ -2515,7 +2516,7 @@ func (muo *MetarUpdateOne) sqlSave(ctx context.Context) (_node *Metar, err error
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
+					Type:   field.TypeUUID,
 					Column: skycondition.FieldID,
 				},
 			},
@@ -2534,7 +2535,7 @@ func (muo *MetarUpdateOne) sqlSave(ctx context.Context) (_node *Metar, err error
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
+					Type:   field.TypeUUID,
 					Column: skycondition.FieldID,
 				},
 			},

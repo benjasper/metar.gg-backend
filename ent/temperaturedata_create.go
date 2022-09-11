@@ -8,9 +8,11 @@ import (
 	"fmt"
 	"time"
 
+	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/google/uuid"
 	"metar.gg/ent/temperaturedata"
 )
 
@@ -62,6 +64,20 @@ func (tdc *TemperatureDataCreate) SetNillableMaxTemperature(f *float64) *Tempera
 	return tdc
 }
 
+// SetID sets the "id" field.
+func (tdc *TemperatureDataCreate) SetID(u uuid.UUID) *TemperatureDataCreate {
+	tdc.mutation.SetID(u)
+	return tdc
+}
+
+// SetNillableID sets the "id" field if the given value is not nil.
+func (tdc *TemperatureDataCreate) SetNillableID(u *uuid.UUID) *TemperatureDataCreate {
+	if u != nil {
+		tdc.SetID(*u)
+	}
+	return tdc
+}
+
 // Mutation returns the TemperatureDataMutation object of the builder.
 func (tdc *TemperatureDataCreate) Mutation() *TemperatureDataMutation {
 	return tdc.mutation
@@ -73,6 +89,7 @@ func (tdc *TemperatureDataCreate) Save(ctx context.Context) (*TemperatureData, e
 		err  error
 		node *TemperatureData
 	)
+	tdc.defaults()
 	if len(tdc.hooks) == 0 {
 		if err = tdc.check(); err != nil {
 			return nil, err
@@ -136,6 +153,14 @@ func (tdc *TemperatureDataCreate) ExecX(ctx context.Context) {
 	}
 }
 
+// defaults sets the default values of the builder before save.
+func (tdc *TemperatureDataCreate) defaults() {
+	if _, ok := tdc.mutation.ID(); !ok {
+		v := temperaturedata.DefaultID()
+		tdc.mutation.SetID(v)
+	}
+}
+
 // check runs all checks and user-defined validators on the builder.
 func (tdc *TemperatureDataCreate) check() error {
 	if _, ok := tdc.mutation.ValidTime(); !ok {
@@ -155,8 +180,13 @@ func (tdc *TemperatureDataCreate) sqlSave(ctx context.Context) (*TemperatureData
 		}
 		return nil, err
 	}
-	id := _spec.ID.Value.(int64)
-	_node.ID = int(id)
+	if _spec.ID.Value != nil {
+		if id, ok := _spec.ID.Value.(*uuid.UUID); ok {
+			_node.ID = *id
+		} else if err := _node.ID.Scan(_spec.ID.Value); err != nil {
+			return nil, err
+		}
+	}
 	return _node, nil
 }
 
@@ -166,12 +196,16 @@ func (tdc *TemperatureDataCreate) createSpec() (*TemperatureData, *sqlgraph.Crea
 		_spec = &sqlgraph.CreateSpec{
 			Table: temperaturedata.Table,
 			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt,
+				Type:   field.TypeUUID,
 				Column: temperaturedata.FieldID,
 			},
 		}
 	)
 	_spec.OnConflict = tdc.conflict
+	if id, ok := tdc.mutation.ID(); ok {
+		_node.ID = id
+		_spec.ID.Value = &id
+	}
 	if value, ok := tdc.mutation.ValidTime(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
 			Type:   field.TypeTime,
@@ -334,16 +368,24 @@ func (u *TemperatureDataUpsert) ClearMaxTemperature() *TemperatureDataUpsert {
 	return u
 }
 
-// UpdateNewValues updates the mutable fields using the new values that were set on create.
+// UpdateNewValues updates the mutable fields using the new values that were set on create except the ID field.
 // Using this option is equivalent to using:
 //
 //	client.TemperatureData.Create().
 //		OnConflict(
 //			sql.ResolveWithNewValues(),
+//			sql.ResolveWith(func(u *sql.UpdateSet) {
+//				u.SetIgnore(temperaturedata.FieldID)
+//			}),
 //		).
 //		Exec(ctx)
 func (u *TemperatureDataUpsertOne) UpdateNewValues() *TemperatureDataUpsertOne {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
+	u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(s *sql.UpdateSet) {
+		if _, exists := u.create.mutation.ID(); exists {
+			s.SetIgnore(temperaturedata.FieldID)
+		}
+	}))
 	return u
 }
 
@@ -481,7 +523,12 @@ func (u *TemperatureDataUpsertOne) ExecX(ctx context.Context) {
 }
 
 // Exec executes the UPSERT query and returns the inserted/updated ID.
-func (u *TemperatureDataUpsertOne) ID(ctx context.Context) (id int, err error) {
+func (u *TemperatureDataUpsertOne) ID(ctx context.Context) (id uuid.UUID, err error) {
+	if u.create.driver.Dialect() == dialect.MySQL {
+		// In case of "ON CONFLICT", there is no way to get back non-numeric ID
+		// fields from the database since MySQL does not support the RETURNING clause.
+		return id, errors.New("ent: TemperatureDataUpsertOne.ID is not supported by MySQL driver. Use TemperatureDataUpsertOne.Exec instead")
+	}
 	node, err := u.create.Save(ctx)
 	if err != nil {
 		return id, err
@@ -490,7 +537,7 @@ func (u *TemperatureDataUpsertOne) ID(ctx context.Context) (id int, err error) {
 }
 
 // IDX is like ID, but panics if an error occurs.
-func (u *TemperatureDataUpsertOne) IDX(ctx context.Context) int {
+func (u *TemperatureDataUpsertOne) IDX(ctx context.Context) uuid.UUID {
 	id, err := u.ID(ctx)
 	if err != nil {
 		panic(err)
@@ -513,6 +560,7 @@ func (tdcb *TemperatureDataCreateBulk) Save(ctx context.Context) ([]*Temperature
 	for i := range tdcb.builders {
 		func(i int, root context.Context) {
 			builder := tdcb.builders[i]
+			builder.defaults()
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 				mutation, ok := m.(*TemperatureDataMutation)
 				if !ok {
@@ -540,10 +588,6 @@ func (tdcb *TemperatureDataCreateBulk) Save(ctx context.Context) ([]*Temperature
 					return nil, err
 				}
 				mutation.id = &nodes[i].ID
-				if specs[i].ID.Value != nil {
-					id := specs[i].ID.Value.(int64)
-					nodes[i].ID = int(id)
-				}
 				mutation.done = true
 				return nodes[i], nil
 			})
@@ -630,10 +674,20 @@ type TemperatureDataUpsertBulk struct {
 //	client.TemperatureData.Create().
 //		OnConflict(
 //			sql.ResolveWithNewValues(),
+//			sql.ResolveWith(func(u *sql.UpdateSet) {
+//				u.SetIgnore(temperaturedata.FieldID)
+//			}),
 //		).
 //		Exec(ctx)
 func (u *TemperatureDataUpsertBulk) UpdateNewValues() *TemperatureDataUpsertBulk {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
+	u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(s *sql.UpdateSet) {
+		for _, b := range u.create.builders {
+			if _, exists := b.mutation.ID(); exists {
+				s.SetIgnore(temperaturedata.FieldID)
+			}
+		}
+	}))
 	return u
 }
 

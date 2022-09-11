@@ -11,6 +11,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/google/uuid"
 	"metar.gg/ent/airport"
 	"metar.gg/ent/frequency"
 	"metar.gg/ent/predicate"
@@ -27,6 +28,19 @@ type FrequencyUpdate struct {
 // Where appends a list predicates to the FrequencyUpdate builder.
 func (fu *FrequencyUpdate) Where(ps ...predicate.Frequency) *FrequencyUpdate {
 	fu.mutation.Where(ps...)
+	return fu
+}
+
+// SetImportID sets the "import_id" field.
+func (fu *FrequencyUpdate) SetImportID(i int) *FrequencyUpdate {
+	fu.mutation.ResetImportID()
+	fu.mutation.SetImportID(i)
+	return fu
+}
+
+// AddImportID adds i to the "import_id" field.
+func (fu *FrequencyUpdate) AddImportID(i int) *FrequencyUpdate {
+	fu.mutation.AddImportID(i)
 	return fu
 }
 
@@ -90,13 +104,13 @@ func (fu *FrequencyUpdate) AddFrequency(f float64) *FrequencyUpdate {
 }
 
 // SetAirportID sets the "airport" edge to the Airport entity by ID.
-func (fu *FrequencyUpdate) SetAirportID(id int) *FrequencyUpdate {
+func (fu *FrequencyUpdate) SetAirportID(id uuid.UUID) *FrequencyUpdate {
 	fu.mutation.SetAirportID(id)
 	return fu
 }
 
 // SetNillableAirportID sets the "airport" edge to the Airport entity by ID if the given value is not nil.
-func (fu *FrequencyUpdate) SetNillableAirportID(id *int) *FrequencyUpdate {
+func (fu *FrequencyUpdate) SetNillableAirportID(id *uuid.UUID) *FrequencyUpdate {
 	if id != nil {
 		fu = fu.SetAirportID(*id)
 	}
@@ -185,7 +199,7 @@ func (fu *FrequencyUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Table:   frequency.Table,
 			Columns: frequency.Columns,
 			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt,
+				Type:   field.TypeUUID,
 				Column: frequency.FieldID,
 			},
 		},
@@ -196,6 +210,20 @@ func (fu *FrequencyUpdate) sqlSave(ctx context.Context) (n int, err error) {
 				ps[i](selector)
 			}
 		}
+	}
+	if value, ok := fu.mutation.ImportID(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt,
+			Value:  value,
+			Column: frequency.FieldImportID,
+		})
+	}
+	if value, ok := fu.mutation.AddedImportID(); ok {
+		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt,
+			Value:  value,
+			Column: frequency.FieldImportID,
+		})
 	}
 	if value, ok := fu.mutation.Hash(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
@@ -255,7 +283,7 @@ func (fu *FrequencyUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
+					Type:   field.TypeUUID,
 					Column: airport.FieldID,
 				},
 			},
@@ -271,7 +299,7 @@ func (fu *FrequencyUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
+					Type:   field.TypeUUID,
 					Column: airport.FieldID,
 				},
 			},
@@ -300,6 +328,19 @@ type FrequencyUpdateOne struct {
 	hooks     []Hook
 	mutation  *FrequencyMutation
 	modifiers []func(*sql.UpdateBuilder)
+}
+
+// SetImportID sets the "import_id" field.
+func (fuo *FrequencyUpdateOne) SetImportID(i int) *FrequencyUpdateOne {
+	fuo.mutation.ResetImportID()
+	fuo.mutation.SetImportID(i)
+	return fuo
+}
+
+// AddImportID adds i to the "import_id" field.
+func (fuo *FrequencyUpdateOne) AddImportID(i int) *FrequencyUpdateOne {
+	fuo.mutation.AddImportID(i)
+	return fuo
 }
 
 // SetHash sets the "hash" field.
@@ -362,13 +403,13 @@ func (fuo *FrequencyUpdateOne) AddFrequency(f float64) *FrequencyUpdateOne {
 }
 
 // SetAirportID sets the "airport" edge to the Airport entity by ID.
-func (fuo *FrequencyUpdateOne) SetAirportID(id int) *FrequencyUpdateOne {
+func (fuo *FrequencyUpdateOne) SetAirportID(id uuid.UUID) *FrequencyUpdateOne {
 	fuo.mutation.SetAirportID(id)
 	return fuo
 }
 
 // SetNillableAirportID sets the "airport" edge to the Airport entity by ID if the given value is not nil.
-func (fuo *FrequencyUpdateOne) SetNillableAirportID(id *int) *FrequencyUpdateOne {
+func (fuo *FrequencyUpdateOne) SetNillableAirportID(id *uuid.UUID) *FrequencyUpdateOne {
 	if id != nil {
 		fuo = fuo.SetAirportID(*id)
 	}
@@ -470,7 +511,7 @@ func (fuo *FrequencyUpdateOne) sqlSave(ctx context.Context) (_node *Frequency, e
 			Table:   frequency.Table,
 			Columns: frequency.Columns,
 			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt,
+				Type:   field.TypeUUID,
 				Column: frequency.FieldID,
 			},
 		},
@@ -498,6 +539,20 @@ func (fuo *FrequencyUpdateOne) sqlSave(ctx context.Context) (_node *Frequency, e
 				ps[i](selector)
 			}
 		}
+	}
+	if value, ok := fuo.mutation.ImportID(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt,
+			Value:  value,
+			Column: frequency.FieldImportID,
+		})
+	}
+	if value, ok := fuo.mutation.AddedImportID(); ok {
+		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt,
+			Value:  value,
+			Column: frequency.FieldImportID,
+		})
 	}
 	if value, ok := fuo.mutation.Hash(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
@@ -557,7 +612,7 @@ func (fuo *FrequencyUpdateOne) sqlSave(ctx context.Context) (_node *Frequency, e
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
+					Type:   field.TypeUUID,
 					Column: airport.FieldID,
 				},
 			},
@@ -573,7 +628,7 @@ func (fuo *FrequencyUpdateOne) sqlSave(ctx context.Context) (_node *Frequency, e
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
+					Type:   field.TypeUUID,
 					Column: airport.FieldID,
 				},
 			},

@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"entgo.io/ent/dialect/sql"
+	"github.com/google/uuid"
 	"metar.gg/ent/airport"
 	"metar.gg/ent/frequency"
 )
@@ -16,7 +17,9 @@ import (
 type Frequency struct {
 	config `json:"-"`
 	// ID of the ent.
-	ID int `json:"id,omitempty"`
+	ID uuid.UUID `json:"id,omitempty"`
+	// ImportID holds the value of the "import_id" field.
+	ImportID int `json:"import_id,omitempty"`
 	// Hash holds the value of the "hash" field.
 	Hash string `json:"hash,omitempty"`
 	// ImportFlag holds the value of the "import_flag" field.
@@ -32,7 +35,7 @@ type Frequency struct {
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the FrequencyQuery when eager-loading is set.
 	Edges               FrequencyEdges `json:"edges"`
-	airport_frequencies *int
+	airport_frequencies *uuid.UUID
 }
 
 // FrequencyEdges holds the relations/edges for other nodes in the graph.
@@ -68,14 +71,16 @@ func (*Frequency) scanValues(columns []string) ([]any, error) {
 			values[i] = new(sql.NullBool)
 		case frequency.FieldFrequency:
 			values[i] = new(sql.NullFloat64)
-		case frequency.FieldID:
+		case frequency.FieldImportID:
 			values[i] = new(sql.NullInt64)
 		case frequency.FieldHash, frequency.FieldType, frequency.FieldDescription:
 			values[i] = new(sql.NullString)
 		case frequency.FieldLastUpdated:
 			values[i] = new(sql.NullTime)
+		case frequency.FieldID:
+			values[i] = new(uuid.UUID)
 		case frequency.ForeignKeys[0]: // airport_frequencies
-			values[i] = new(sql.NullInt64)
+			values[i] = &sql.NullScanner{S: new(uuid.UUID)}
 		default:
 			return nil, fmt.Errorf("unexpected column %q for type Frequency", columns[i])
 		}
@@ -92,11 +97,17 @@ func (f *Frequency) assignValues(columns []string, values []any) error {
 	for i := range columns {
 		switch columns[i] {
 		case frequency.FieldID:
-			value, ok := values[i].(*sql.NullInt64)
-			if !ok {
-				return fmt.Errorf("unexpected type %T for field id", value)
+			if value, ok := values[i].(*uuid.UUID); !ok {
+				return fmt.Errorf("unexpected type %T for field id", values[i])
+			} else if value != nil {
+				f.ID = *value
 			}
-			f.ID = int(value.Int64)
+		case frequency.FieldImportID:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field import_id", values[i])
+			} else if value.Valid {
+				f.ImportID = int(value.Int64)
+			}
 		case frequency.FieldHash:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field hash", values[i])
@@ -134,11 +145,11 @@ func (f *Frequency) assignValues(columns []string, values []any) error {
 				f.Frequency = value.Float64
 			}
 		case frequency.ForeignKeys[0]:
-			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for edge-field airport_frequencies", value)
+			if value, ok := values[i].(*sql.NullScanner); !ok {
+				return fmt.Errorf("unexpected type %T for field airport_frequencies", values[i])
 			} else if value.Valid {
-				f.airport_frequencies = new(int)
-				*f.airport_frequencies = int(value.Int64)
+				f.airport_frequencies = new(uuid.UUID)
+				*f.airport_frequencies = *value.S.(*uuid.UUID)
 			}
 		}
 	}
@@ -173,6 +184,9 @@ func (f *Frequency) String() string {
 	var builder strings.Builder
 	builder.WriteString("Frequency(")
 	builder.WriteString(fmt.Sprintf("id=%v, ", f.ID))
+	builder.WriteString("import_id=")
+	builder.WriteString(fmt.Sprintf("%v", f.ImportID))
+	builder.WriteString(", ")
 	builder.WriteString("hash=")
 	builder.WriteString(f.Hash)
 	builder.WriteString(", ")

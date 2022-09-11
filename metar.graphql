@@ -52,6 +52,8 @@ type Query {
         before: Cursor
         last: Int
         identifier: String
+        icao: String,
+        iata: String,
         hasWeather: Boolean
     ): AirportConnection!
 }
@@ -61,7 +63,7 @@ type StationWithDistance {
     distance: Float!
 
     """The METAR for the station"""
-    station: Station!
+    station: WeatherStation!
 }
 
 extend type Airport {
@@ -72,7 +74,7 @@ extend type Airport {
     stationsVicinity(first: Int = 1, radius: Float = 50.0): [StationWithDistance!]! @goField(forceResolver: true)
 }
 
-extend type Station {
+extend type WeatherStation {
     metars(after: Cursor, first: Int, before: Cursor, last: Int): MetarConnection!
     tafs(after: Cursor, first: Int, before: Cursor, last: Int): TafConnection!
 }

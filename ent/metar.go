@@ -8,15 +8,16 @@ import (
 	"time"
 
 	"entgo.io/ent/dialect/sql"
+	"github.com/google/uuid"
 	"metar.gg/ent/metar"
-	"metar.gg/ent/station"
+	"metar.gg/ent/weatherstation"
 )
 
 // Metar is the model entity for the Metar schema.
 type Metar struct {
 	config `json:"-"`
 	// ID of the ent.
-	ID int `json:"id,omitempty"`
+	ID uuid.UUID `json:"id,omitempty"`
 	// The raw METAR text.
 	RawText string `json:"raw_text,omitempty"`
 	// The time the METAR was observed.
@@ -83,14 +84,14 @@ type Metar struct {
 	Hash string `json:"hash,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the MetarQuery when eager-loading is set.
-	Edges          MetarEdges `json:"edges"`
-	station_metars *int
+	Edges                  MetarEdges `json:"edges"`
+	weather_station_metars *uuid.UUID
 }
 
 // MetarEdges holds the relations/edges for other nodes in the graph.
 type MetarEdges struct {
 	// The station that provided the METAR.
-	Station *Station `json:"station,omitempty"`
+	Station *WeatherStation `json:"station,omitempty"`
 	// The sky conditions.
 	SkyConditions []*SkyCondition `json:"sky_conditions,omitempty"`
 	// loadedTypes holds the information for reporting if a
@@ -104,11 +105,11 @@ type MetarEdges struct {
 
 // StationOrErr returns the Station value or an error if the edge
 // was not loaded in eager-loading, or loaded but was not found.
-func (e MetarEdges) StationOrErr() (*Station, error) {
+func (e MetarEdges) StationOrErr() (*WeatherStation, error) {
 	if e.loadedTypes[0] {
 		if e.Station == nil {
 			// Edge was loaded but was not found.
-			return nil, &NotFoundError{label: station.Label}
+			return nil, &NotFoundError{label: weatherstation.Label}
 		}
 		return e.Station, nil
 	}
@@ -133,14 +134,16 @@ func (*Metar) scanValues(columns []string) ([]any, error) {
 			values[i] = new(sql.NullBool)
 		case metar.FieldTemperature, metar.FieldDewpoint, metar.FieldVisibility, metar.FieldAltimeter, metar.FieldSeaLevelPressure, metar.FieldPressureTendency, metar.FieldMaxTemp6, metar.FieldMinTemp6, metar.FieldMaxTemp24, metar.FieldMinTemp24, metar.FieldPrecipitation, metar.FieldPrecipitation3, metar.FieldPrecipitation6, metar.FieldPrecipitation24, metar.FieldSnowDepth, metar.FieldVertVis:
 			values[i] = new(sql.NullFloat64)
-		case metar.FieldID, metar.FieldWindSpeed, metar.FieldWindGust, metar.FieldWindDirection:
+		case metar.FieldWindSpeed, metar.FieldWindGust, metar.FieldWindDirection:
 			values[i] = new(sql.NullInt64)
 		case metar.FieldRawText, metar.FieldPresentWeather, metar.FieldFlightCategory, metar.FieldMetarType, metar.FieldHash:
 			values[i] = new(sql.NullString)
 		case metar.FieldObservationTime:
 			values[i] = new(sql.NullTime)
-		case metar.ForeignKeys[0]: // station_metars
-			values[i] = new(sql.NullInt64)
+		case metar.FieldID:
+			values[i] = new(uuid.UUID)
+		case metar.ForeignKeys[0]: // weather_station_metars
+			values[i] = &sql.NullScanner{S: new(uuid.UUID)}
 		default:
 			return nil, fmt.Errorf("unexpected column %q for type Metar", columns[i])
 		}
@@ -157,11 +160,11 @@ func (m *Metar) assignValues(columns []string, values []any) error {
 	for i := range columns {
 		switch columns[i] {
 		case metar.FieldID:
-			value, ok := values[i].(*sql.NullInt64)
-			if !ok {
-				return fmt.Errorf("unexpected type %T for field id", value)
+			if value, ok := values[i].(*uuid.UUID); !ok {
+				return fmt.Errorf("unexpected type %T for field id", values[i])
+			} else if value != nil {
+				m.ID = *value
 			}
-			m.ID = int(value.Int64)
 		case metar.FieldRawText:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field raw_text", values[i])
@@ -370,11 +373,11 @@ func (m *Metar) assignValues(columns []string, values []any) error {
 				m.Hash = value.String
 			}
 		case metar.ForeignKeys[0]:
-			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for edge-field station_metars", value)
+			if value, ok := values[i].(*sql.NullScanner); !ok {
+				return fmt.Errorf("unexpected type %T for field weather_station_metars", values[i])
 			} else if value.Valid {
-				m.station_metars = new(int)
-				*m.station_metars = int(value.Int64)
+				m.weather_station_metars = new(uuid.UUID)
+				*m.weather_station_metars = *value.S.(*uuid.UUID)
 			}
 		}
 	}
@@ -382,7 +385,7 @@ func (m *Metar) assignValues(columns []string, values []any) error {
 }
 
 // QueryStation queries the "station" edge of the Metar entity.
-func (m *Metar) QueryStation() *StationQuery {
+func (m *Metar) QueryStation() *WeatherStationQuery {
 	return (&MetarClient{config: m.config}).QueryStation(m)
 }
 

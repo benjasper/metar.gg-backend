@@ -26,14 +26,14 @@ type Tx struct {
 	Runway *RunwayClient
 	// SkyCondition is the client for interacting with the SkyCondition builders.
 	SkyCondition *SkyConditionClient
-	// Station is the client for interacting with the Station builders.
-	Station *StationClient
 	// Taf is the client for interacting with the Taf builders.
 	Taf *TafClient
 	// TemperatureData is the client for interacting with the TemperatureData builders.
 	TemperatureData *TemperatureDataClient
 	// TurbulenceCondition is the client for interacting with the TurbulenceCondition builders.
 	TurbulenceCondition *TurbulenceConditionClient
+	// WeatherStation is the client for interacting with the WeatherStation builders.
+	WeatherStation *WeatherStationClient
 
 	// lazily loaded.
 	client     *Client
@@ -176,10 +176,10 @@ func (tx *Tx) init() {
 	tx.Metar = NewMetarClient(tx.config)
 	tx.Runway = NewRunwayClient(tx.config)
 	tx.SkyCondition = NewSkyConditionClient(tx.config)
-	tx.Station = NewStationClient(tx.config)
 	tx.Taf = NewTafClient(tx.config)
 	tx.TemperatureData = NewTemperatureDataClient(tx.config)
 	tx.TurbulenceCondition = NewTurbulenceConditionClient(tx.config)
+	tx.WeatherStation = NewWeatherStationClient(tx.config)
 }
 
 // txDriver wraps the given dialect.Tx with a nop dialect.Driver implementation.

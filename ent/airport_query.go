@@ -11,11 +11,12 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/google/uuid"
 	"metar.gg/ent/airport"
 	"metar.gg/ent/frequency"
 	"metar.gg/ent/predicate"
 	"metar.gg/ent/runway"
-	"metar.gg/ent/station"
+	"metar.gg/ent/weatherstation"
 )
 
 // AirportQuery is the builder for querying Airport entities.
@@ -28,7 +29,7 @@ type AirportQuery struct {
 	fields               []string
 	predicates           []predicate.Airport
 	withRunways          *RunwayQuery
-	withStation          *StationQuery
+	withStation          *WeatherStationQuery
 	withFrequencies      *FrequencyQuery
 	loadTotal            []func(context.Context, []*Airport) error
 	modifiers            []func(*sql.Selector)
@@ -93,8 +94,8 @@ func (aq *AirportQuery) QueryRunways() *RunwayQuery {
 }
 
 // QueryStation chains the current query on the "station" edge.
-func (aq *AirportQuery) QueryStation() *StationQuery {
-	query := &StationQuery{config: aq.config}
+func (aq *AirportQuery) QueryStation() *WeatherStationQuery {
+	query := &WeatherStationQuery{config: aq.config}
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := aq.prepareQuery(ctx); err != nil {
 			return nil, err
@@ -105,7 +106,7 @@ func (aq *AirportQuery) QueryStation() *StationQuery {
 		}
 		step := sqlgraph.NewStep(
 			sqlgraph.From(airport.Table, airport.FieldID, selector),
-			sqlgraph.To(station.Table, station.FieldID),
+			sqlgraph.To(weatherstation.Table, weatherstation.FieldID),
 			sqlgraph.Edge(sqlgraph.O2O, false, airport.StationTable, airport.StationColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(aq.driver.Dialect(), step)
@@ -160,8 +161,8 @@ func (aq *AirportQuery) FirstX(ctx context.Context) *Airport {
 
 // FirstID returns the first Airport ID from the query.
 // Returns a *NotFoundError when no Airport ID was found.
-func (aq *AirportQuery) FirstID(ctx context.Context) (id int, err error) {
-	var ids []int
+func (aq *AirportQuery) FirstID(ctx context.Context) (id uuid.UUID, err error) {
+	var ids []uuid.UUID
 	if ids, err = aq.Limit(1).IDs(ctx); err != nil {
 		return
 	}
@@ -173,7 +174,7 @@ func (aq *AirportQuery) FirstID(ctx context.Context) (id int, err error) {
 }
 
 // FirstIDX is like FirstID, but panics if an error occurs.
-func (aq *AirportQuery) FirstIDX(ctx context.Context) int {
+func (aq *AirportQuery) FirstIDX(ctx context.Context) uuid.UUID {
 	id, err := aq.FirstID(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
@@ -211,8 +212,8 @@ func (aq *AirportQuery) OnlyX(ctx context.Context) *Airport {
 // OnlyID is like Only, but returns the only Airport ID in the query.
 // Returns a *NotSingularError when more than one Airport ID is found.
 // Returns a *NotFoundError when no entities are found.
-func (aq *AirportQuery) OnlyID(ctx context.Context) (id int, err error) {
-	var ids []int
+func (aq *AirportQuery) OnlyID(ctx context.Context) (id uuid.UUID, err error) {
+	var ids []uuid.UUID
 	if ids, err = aq.Limit(2).IDs(ctx); err != nil {
 		return
 	}
@@ -228,7 +229,7 @@ func (aq *AirportQuery) OnlyID(ctx context.Context) (id int, err error) {
 }
 
 // OnlyIDX is like OnlyID, but panics if an error occurs.
-func (aq *AirportQuery) OnlyIDX(ctx context.Context) int {
+func (aq *AirportQuery) OnlyIDX(ctx context.Context) uuid.UUID {
 	id, err := aq.OnlyID(ctx)
 	if err != nil {
 		panic(err)
@@ -254,8 +255,8 @@ func (aq *AirportQuery) AllX(ctx context.Context) []*Airport {
 }
 
 // IDs executes the query and returns a list of Airport IDs.
-func (aq *AirportQuery) IDs(ctx context.Context) ([]int, error) {
-	var ids []int
+func (aq *AirportQuery) IDs(ctx context.Context) ([]uuid.UUID, error) {
+	var ids []uuid.UUID
 	if err := aq.Select(airport.FieldID).Scan(ctx, &ids); err != nil {
 		return nil, err
 	}
@@ -263,7 +264,7 @@ func (aq *AirportQuery) IDs(ctx context.Context) ([]int, error) {
 }
 
 // IDsX is like IDs, but panics if an error occurs.
-func (aq *AirportQuery) IDsX(ctx context.Context) []int {
+func (aq *AirportQuery) IDsX(ctx context.Context) []uuid.UUID {
 	ids, err := aq.IDs(ctx)
 	if err != nil {
 		panic(err)
@@ -340,8 +341,8 @@ func (aq *AirportQuery) WithRunways(opts ...func(*RunwayQuery)) *AirportQuery {
 
 // WithStation tells the query-builder to eager-load the nodes that are connected to
 // the "station" edge. The optional arguments are used to configure the query builder of the edge.
-func (aq *AirportQuery) WithStation(opts ...func(*StationQuery)) *AirportQuery {
-	query := &StationQuery{config: aq.config}
+func (aq *AirportQuery) WithStation(opts ...func(*WeatherStationQuery)) *AirportQuery {
+	query := &WeatherStationQuery{config: aq.config}
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -366,12 +367,12 @@ func (aq *AirportQuery) WithFrequencies(opts ...func(*FrequencyQuery)) *AirportQ
 // Example:
 //
 //	var v []struct {
-//		Hash string `json:"hash,omitempty"`
+//		ImportID int `json:"import_id,omitempty"`
 //		Count int `json:"count,omitempty"`
 //	}
 //
 //	client.Airport.Query().
-//		GroupBy(airport.FieldHash).
+//		GroupBy(airport.FieldImportID).
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
 func (aq *AirportQuery) GroupBy(field string, fields ...string) *AirportGroupBy {
@@ -394,11 +395,11 @@ func (aq *AirportQuery) GroupBy(field string, fields ...string) *AirportGroupBy 
 // Example:
 //
 //	var v []struct {
-//		Hash string `json:"hash,omitempty"`
+//		ImportID int `json:"import_id,omitempty"`
 //	}
 //
 //	client.Airport.Query().
-//		Select(airport.FieldHash).
+//		Select(airport.FieldImportID).
 //		Scan(ctx, &v)
 func (aq *AirportQuery) Select(fields ...string) *AirportSelect {
 	aq.fields = append(aq.fields, fields...)
@@ -464,7 +465,7 @@ func (aq *AirportQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Airp
 	}
 	if query := aq.withStation; query != nil {
 		if err := aq.loadStation(ctx, query, nodes, nil,
-			func(n *Airport, e *Station) { n.Edges.Station = e }); err != nil {
+			func(n *Airport, e *WeatherStation) { n.Edges.Station = e }); err != nil {
 			return nil, err
 		}
 	}
@@ -499,7 +500,7 @@ func (aq *AirportQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Airp
 
 func (aq *AirportQuery) loadRunways(ctx context.Context, query *RunwayQuery, nodes []*Airport, init func(*Airport), assign func(*Airport, *Runway)) error {
 	fks := make([]driver.Value, 0, len(nodes))
-	nodeids := make(map[int]*Airport)
+	nodeids := make(map[uuid.UUID]*Airport)
 	for i := range nodes {
 		fks = append(fks, nodes[i].ID)
 		nodeids[nodes[i].ID] = nodes[i]
@@ -528,15 +529,15 @@ func (aq *AirportQuery) loadRunways(ctx context.Context, query *RunwayQuery, nod
 	}
 	return nil
 }
-func (aq *AirportQuery) loadStation(ctx context.Context, query *StationQuery, nodes []*Airport, init func(*Airport), assign func(*Airport, *Station)) error {
+func (aq *AirportQuery) loadStation(ctx context.Context, query *WeatherStationQuery, nodes []*Airport, init func(*Airport), assign func(*Airport, *WeatherStation)) error {
 	fks := make([]driver.Value, 0, len(nodes))
-	nodeids := make(map[int]*Airport)
+	nodeids := make(map[uuid.UUID]*Airport)
 	for i := range nodes {
 		fks = append(fks, nodes[i].ID)
 		nodeids[nodes[i].ID] = nodes[i]
 	}
 	query.withFKs = true
-	query.Where(predicate.Station(func(s *sql.Selector) {
+	query.Where(predicate.WeatherStation(func(s *sql.Selector) {
 		s.Where(sql.InValues(airport.StationColumn, fks...))
 	}))
 	neighbors, err := query.All(ctx)
@@ -558,7 +559,7 @@ func (aq *AirportQuery) loadStation(ctx context.Context, query *StationQuery, no
 }
 func (aq *AirportQuery) loadFrequencies(ctx context.Context, query *FrequencyQuery, nodes []*Airport, init func(*Airport), assign func(*Airport, *Frequency)) error {
 	fks := make([]driver.Value, 0, len(nodes))
-	nodeids := make(map[int]*Airport)
+	nodeids := make(map[uuid.UUID]*Airport)
 	for i := range nodes {
 		fks = append(fks, nodes[i].ID)
 		nodeids[nodes[i].ID] = nodes[i]
@@ -614,7 +615,7 @@ func (aq *AirportQuery) querySpec() *sqlgraph.QuerySpec {
 			Table:   airport.Table,
 			Columns: airport.Columns,
 			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt,
+				Type:   field.TypeUUID,
 				Column: airport.FieldID,
 			},
 		},

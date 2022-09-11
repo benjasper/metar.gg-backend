@@ -7,9 +7,11 @@ import (
 	"errors"
 	"fmt"
 
+	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/google/uuid"
 	"metar.gg/ent/skycondition"
 )
 
@@ -56,8 +58,16 @@ func (scc *SkyConditionCreate) SetNillableCloudType(st *skycondition.CloudType) 
 }
 
 // SetID sets the "id" field.
-func (scc *SkyConditionCreate) SetID(i int) *SkyConditionCreate {
-	scc.mutation.SetID(i)
+func (scc *SkyConditionCreate) SetID(u uuid.UUID) *SkyConditionCreate {
+	scc.mutation.SetID(u)
+	return scc
+}
+
+// SetNillableID sets the "id" field if the given value is not nil.
+func (scc *SkyConditionCreate) SetNillableID(u *uuid.UUID) *SkyConditionCreate {
+	if u != nil {
+		scc.SetID(*u)
+	}
 	return scc
 }
 
@@ -72,6 +82,7 @@ func (scc *SkyConditionCreate) Save(ctx context.Context) (*SkyCondition, error) 
 		err  error
 		node *SkyCondition
 	)
+	scc.defaults()
 	if len(scc.hooks) == 0 {
 		if err = scc.check(); err != nil {
 			return nil, err
@@ -135,6 +146,14 @@ func (scc *SkyConditionCreate) ExecX(ctx context.Context) {
 	}
 }
 
+// defaults sets the default values of the builder before save.
+func (scc *SkyConditionCreate) defaults() {
+	if _, ok := scc.mutation.ID(); !ok {
+		v := skycondition.DefaultID()
+		scc.mutation.SetID(v)
+	}
+}
+
 // check runs all checks and user-defined validators on the builder.
 func (scc *SkyConditionCreate) check() error {
 	if _, ok := scc.mutation.SkyCover(); !ok {
@@ -161,9 +180,12 @@ func (scc *SkyConditionCreate) sqlSave(ctx context.Context) (*SkyCondition, erro
 		}
 		return nil, err
 	}
-	if _spec.ID.Value != _node.ID {
-		id := _spec.ID.Value.(int64)
-		_node.ID = int(id)
+	if _spec.ID.Value != nil {
+		if id, ok := _spec.ID.Value.(*uuid.UUID); ok {
+			_node.ID = *id
+		} else if err := _node.ID.Scan(_spec.ID.Value); err != nil {
+			return nil, err
+		}
 	}
 	return _node, nil
 }
@@ -174,7 +196,7 @@ func (scc *SkyConditionCreate) createSpec() (*SkyCondition, *sqlgraph.CreateSpec
 		_spec = &sqlgraph.CreateSpec{
 			Table: skycondition.Table,
 			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt,
+				Type:   field.TypeUUID,
 				Column: skycondition.FieldID,
 			},
 		}
@@ -182,7 +204,7 @@ func (scc *SkyConditionCreate) createSpec() (*SkyCondition, *sqlgraph.CreateSpec
 	_spec.OnConflict = scc.conflict
 	if id, ok := scc.mutation.ID(); ok {
 		_node.ID = id
-		_spec.ID.Value = id
+		_spec.ID.Value = &id
 	}
 	if value, ok := scc.mutation.SkyCover(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
@@ -441,7 +463,12 @@ func (u *SkyConditionUpsertOne) ExecX(ctx context.Context) {
 }
 
 // Exec executes the UPSERT query and returns the inserted/updated ID.
-func (u *SkyConditionUpsertOne) ID(ctx context.Context) (id int, err error) {
+func (u *SkyConditionUpsertOne) ID(ctx context.Context) (id uuid.UUID, err error) {
+	if u.create.driver.Dialect() == dialect.MySQL {
+		// In case of "ON CONFLICT", there is no way to get back non-numeric ID
+		// fields from the database since MySQL does not support the RETURNING clause.
+		return id, errors.New("ent: SkyConditionUpsertOne.ID is not supported by MySQL driver. Use SkyConditionUpsertOne.Exec instead")
+	}
 	node, err := u.create.Save(ctx)
 	if err != nil {
 		return id, err
@@ -450,7 +477,7 @@ func (u *SkyConditionUpsertOne) ID(ctx context.Context) (id int, err error) {
 }
 
 // IDX is like ID, but panics if an error occurs.
-func (u *SkyConditionUpsertOne) IDX(ctx context.Context) int {
+func (u *SkyConditionUpsertOne) IDX(ctx context.Context) uuid.UUID {
 	id, err := u.ID(ctx)
 	if err != nil {
 		panic(err)
@@ -473,6 +500,7 @@ func (sccb *SkyConditionCreateBulk) Save(ctx context.Context) ([]*SkyCondition, 
 	for i := range sccb.builders {
 		func(i int, root context.Context) {
 			builder := sccb.builders[i]
+			builder.defaults()
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 				mutation, ok := m.(*SkyConditionMutation)
 				if !ok {
@@ -500,10 +528,6 @@ func (sccb *SkyConditionCreateBulk) Save(ctx context.Context) ([]*SkyCondition, 
 					return nil, err
 				}
 				mutation.id = &nodes[i].ID
-				if specs[i].ID.Value != nil && nodes[i].ID == 0 {
-					id := specs[i].ID.Value.(int64)
-					nodes[i].ID = int(id)
-				}
 				mutation.done = true
 				return nodes[i], nil
 			})

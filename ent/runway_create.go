@@ -8,9 +8,11 @@ import (
 	"fmt"
 	"time"
 
+	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/google/uuid"
 	"metar.gg/ent/airport"
 	"metar.gg/ent/runway"
 )
@@ -21,6 +23,12 @@ type RunwayCreate struct {
 	mutation *RunwayMutation
 	hooks    []Hook
 	conflict []sql.ConflictOption
+}
+
+// SetImportID sets the "import_id" field.
+func (rc *RunwayCreate) SetImportID(i int) *RunwayCreate {
+	rc.mutation.SetImportID(i)
+	return rc
 }
 
 // SetHash sets the "hash" field.
@@ -248,19 +256,27 @@ func (rc *RunwayCreate) SetNillableHighRunwayDisplacedThreshold(i *int) *RunwayC
 }
 
 // SetID sets the "id" field.
-func (rc *RunwayCreate) SetID(i int) *RunwayCreate {
-	rc.mutation.SetID(i)
+func (rc *RunwayCreate) SetID(u uuid.UUID) *RunwayCreate {
+	rc.mutation.SetID(u)
+	return rc
+}
+
+// SetNillableID sets the "id" field if the given value is not nil.
+func (rc *RunwayCreate) SetNillableID(u *uuid.UUID) *RunwayCreate {
+	if u != nil {
+		rc.SetID(*u)
+	}
 	return rc
 }
 
 // SetAirportID sets the "airport" edge to the Airport entity by ID.
-func (rc *RunwayCreate) SetAirportID(id int) *RunwayCreate {
+func (rc *RunwayCreate) SetAirportID(id uuid.UUID) *RunwayCreate {
 	rc.mutation.SetAirportID(id)
 	return rc
 }
 
 // SetNillableAirportID sets the "airport" edge to the Airport entity by ID if the given value is not nil.
-func (rc *RunwayCreate) SetNillableAirportID(id *int) *RunwayCreate {
+func (rc *RunwayCreate) SetNillableAirportID(id *uuid.UUID) *RunwayCreate {
 	if id != nil {
 		rc = rc.SetAirportID(*id)
 	}
@@ -357,10 +373,17 @@ func (rc *RunwayCreate) defaults() {
 		v := runway.DefaultLastUpdated()
 		rc.mutation.SetLastUpdated(v)
 	}
+	if _, ok := rc.mutation.ID(); !ok {
+		v := runway.DefaultID()
+		rc.mutation.SetID(v)
+	}
 }
 
 // check runs all checks and user-defined validators on the builder.
 func (rc *RunwayCreate) check() error {
+	if _, ok := rc.mutation.ImportID(); !ok {
+		return &ValidationError{Name: "import_id", err: errors.New(`ent: missing required field "Runway.import_id"`)}
+	}
 	if _, ok := rc.mutation.Hash(); !ok {
 		return &ValidationError{Name: "hash", err: errors.New(`ent: missing required field "Runway.hash"`)}
 	}
@@ -399,9 +422,12 @@ func (rc *RunwayCreate) sqlSave(ctx context.Context) (*Runway, error) {
 		}
 		return nil, err
 	}
-	if _spec.ID.Value != _node.ID {
-		id := _spec.ID.Value.(int64)
-		_node.ID = int(id)
+	if _spec.ID.Value != nil {
+		if id, ok := _spec.ID.Value.(*uuid.UUID); ok {
+			_node.ID = *id
+		} else if err := _node.ID.Scan(_spec.ID.Value); err != nil {
+			return nil, err
+		}
 	}
 	return _node, nil
 }
@@ -412,7 +438,7 @@ func (rc *RunwayCreate) createSpec() (*Runway, *sqlgraph.CreateSpec) {
 		_spec = &sqlgraph.CreateSpec{
 			Table: runway.Table,
 			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt,
+				Type:   field.TypeUUID,
 				Column: runway.FieldID,
 			},
 		}
@@ -420,7 +446,15 @@ func (rc *RunwayCreate) createSpec() (*Runway, *sqlgraph.CreateSpec) {
 	_spec.OnConflict = rc.conflict
 	if id, ok := rc.mutation.ID(); ok {
 		_node.ID = id
-		_spec.ID.Value = id
+		_spec.ID.Value = &id
+	}
+	if value, ok := rc.mutation.ImportID(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt,
+			Value:  value,
+			Column: runway.FieldImportID,
+		})
+		_node.ImportID = value
 	}
 	if value, ok := rc.mutation.Hash(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
@@ -591,7 +625,7 @@ func (rc *RunwayCreate) createSpec() (*Runway, *sqlgraph.CreateSpec) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
+					Type:   field.TypeUUID,
 					Column: airport.FieldID,
 				},
 			},
@@ -609,7 +643,7 @@ func (rc *RunwayCreate) createSpec() (*Runway, *sqlgraph.CreateSpec) {
 // of the `INSERT` statement. For example:
 //
 //	client.Runway.Create().
-//		SetHash(v).
+//		SetImportID(v).
 //		OnConflict(
 //			// Update the row with the new values
 //			// the was proposed for insertion.
@@ -618,7 +652,7 @@ func (rc *RunwayCreate) createSpec() (*Runway, *sqlgraph.CreateSpec) {
 //		// Override some of the fields with custom
 //		// update values.
 //		Update(func(u *ent.RunwayUpsert) {
-//			SetHash(v+v).
+//			SetImportID(v+v).
 //		}).
 //		Exec(ctx)
 func (rc *RunwayCreate) OnConflict(opts ...sql.ConflictOption) *RunwayUpsertOne {
@@ -653,6 +687,24 @@ type (
 		*sql.UpdateSet
 	}
 )
+
+// SetImportID sets the "import_id" field.
+func (u *RunwayUpsert) SetImportID(v int) *RunwayUpsert {
+	u.Set(runway.FieldImportID, v)
+	return u
+}
+
+// UpdateImportID sets the "import_id" field to the value that was provided on create.
+func (u *RunwayUpsert) UpdateImportID() *RunwayUpsert {
+	u.SetExcluded(runway.FieldImportID)
+	return u
+}
+
+// AddImportID adds v to the "import_id" field.
+func (u *RunwayUpsert) AddImportID(v int) *RunwayUpsert {
+	u.Add(runway.FieldImportID, v)
+	return u
+}
 
 // SetHash sets the "hash" field.
 func (u *RunwayUpsert) SetHash(v string) *RunwayUpsert {
@@ -1078,6 +1130,27 @@ func (u *RunwayUpsertOne) Update(set func(*RunwayUpsert)) *RunwayUpsertOne {
 		set(&RunwayUpsert{UpdateSet: update})
 	}))
 	return u
+}
+
+// SetImportID sets the "import_id" field.
+func (u *RunwayUpsertOne) SetImportID(v int) *RunwayUpsertOne {
+	return u.Update(func(s *RunwayUpsert) {
+		s.SetImportID(v)
+	})
+}
+
+// AddImportID adds v to the "import_id" field.
+func (u *RunwayUpsertOne) AddImportID(v int) *RunwayUpsertOne {
+	return u.Update(func(s *RunwayUpsert) {
+		s.AddImportID(v)
+	})
+}
+
+// UpdateImportID sets the "import_id" field to the value that was provided on create.
+func (u *RunwayUpsertOne) UpdateImportID() *RunwayUpsertOne {
+	return u.Update(func(s *RunwayUpsert) {
+		s.UpdateImportID()
+	})
 }
 
 // SetHash sets the "hash" field.
@@ -1537,7 +1610,12 @@ func (u *RunwayUpsertOne) ExecX(ctx context.Context) {
 }
 
 // Exec executes the UPSERT query and returns the inserted/updated ID.
-func (u *RunwayUpsertOne) ID(ctx context.Context) (id int, err error) {
+func (u *RunwayUpsertOne) ID(ctx context.Context) (id uuid.UUID, err error) {
+	if u.create.driver.Dialect() == dialect.MySQL {
+		// In case of "ON CONFLICT", there is no way to get back non-numeric ID
+		// fields from the database since MySQL does not support the RETURNING clause.
+		return id, errors.New("ent: RunwayUpsertOne.ID is not supported by MySQL driver. Use RunwayUpsertOne.Exec instead")
+	}
 	node, err := u.create.Save(ctx)
 	if err != nil {
 		return id, err
@@ -1546,7 +1624,7 @@ func (u *RunwayUpsertOne) ID(ctx context.Context) (id int, err error) {
 }
 
 // IDX is like ID, but panics if an error occurs.
-func (u *RunwayUpsertOne) IDX(ctx context.Context) int {
+func (u *RunwayUpsertOne) IDX(ctx context.Context) uuid.UUID {
 	id, err := u.ID(ctx)
 	if err != nil {
 		panic(err)
@@ -1597,10 +1675,6 @@ func (rcb *RunwayCreateBulk) Save(ctx context.Context) ([]*Runway, error) {
 					return nil, err
 				}
 				mutation.id = &nodes[i].ID
-				if specs[i].ID.Value != nil && nodes[i].ID == 0 {
-					id := specs[i].ID.Value.(int64)
-					nodes[i].ID = int(id)
-				}
 				mutation.done = true
 				return nodes[i], nil
 			})
@@ -1652,7 +1726,7 @@ func (rcb *RunwayCreateBulk) ExecX(ctx context.Context) {
 //		// Override some of the fields with custom
 //		// update values.
 //		Update(func(u *ent.RunwayUpsert) {
-//			SetHash(v+v).
+//			SetImportID(v+v).
 //		}).
 //		Exec(ctx)
 func (rcb *RunwayCreateBulk) OnConflict(opts ...sql.ConflictOption) *RunwayUpsertBulk {
@@ -1729,6 +1803,27 @@ func (u *RunwayUpsertBulk) Update(set func(*RunwayUpsert)) *RunwayUpsertBulk {
 		set(&RunwayUpsert{UpdateSet: update})
 	}))
 	return u
+}
+
+// SetImportID sets the "import_id" field.
+func (u *RunwayUpsertBulk) SetImportID(v int) *RunwayUpsertBulk {
+	return u.Update(func(s *RunwayUpsert) {
+		s.SetImportID(v)
+	})
+}
+
+// AddImportID adds v to the "import_id" field.
+func (u *RunwayUpsertBulk) AddImportID(v int) *RunwayUpsertBulk {
+	return u.Update(func(s *RunwayUpsert) {
+		s.AddImportID(v)
+	})
+}
+
+// UpdateImportID sets the "import_id" field to the value that was provided on create.
+func (u *RunwayUpsertBulk) UpdateImportID() *RunwayUpsertBulk {
+	return u.Update(func(s *RunwayUpsert) {
+		s.UpdateImportID()
+	})
 }
 
 // SetHash sets the "hash" field.

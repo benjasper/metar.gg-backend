@@ -11,6 +11,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/google/uuid"
 	"metar.gg/ent/airport"
 	"metar.gg/ent/predicate"
 	"metar.gg/ent/runway"
@@ -27,6 +28,19 @@ type RunwayUpdate struct {
 // Where appends a list predicates to the RunwayUpdate builder.
 func (ru *RunwayUpdate) Where(ps ...predicate.Runway) *RunwayUpdate {
 	ru.mutation.Where(ps...)
+	return ru
+}
+
+// SetImportID sets the "import_id" field.
+func (ru *RunwayUpdate) SetImportID(i int) *RunwayUpdate {
+	ru.mutation.ResetImportID()
+	ru.mutation.SetImportID(i)
+	return ru
+}
+
+// AddImportID adds i to the "import_id" field.
+func (ru *RunwayUpdate) AddImportID(i int) *RunwayUpdate {
+	ru.mutation.AddImportID(i)
 	return ru
 }
 
@@ -405,13 +419,13 @@ func (ru *RunwayUpdate) ClearHighRunwayDisplacedThreshold() *RunwayUpdate {
 }
 
 // SetAirportID sets the "airport" edge to the Airport entity by ID.
-func (ru *RunwayUpdate) SetAirportID(id int) *RunwayUpdate {
+func (ru *RunwayUpdate) SetAirportID(id uuid.UUID) *RunwayUpdate {
 	ru.mutation.SetAirportID(id)
 	return ru
 }
 
 // SetNillableAirportID sets the "airport" edge to the Airport entity by ID if the given value is not nil.
-func (ru *RunwayUpdate) SetNillableAirportID(id *int) *RunwayUpdate {
+func (ru *RunwayUpdate) SetNillableAirportID(id *uuid.UUID) *RunwayUpdate {
 	if id != nil {
 		ru = ru.SetAirportID(*id)
 	}
@@ -500,7 +514,7 @@ func (ru *RunwayUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Table:   runway.Table,
 			Columns: runway.Columns,
 			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt,
+				Type:   field.TypeUUID,
 				Column: runway.FieldID,
 			},
 		},
@@ -511,6 +525,20 @@ func (ru *RunwayUpdate) sqlSave(ctx context.Context) (n int, err error) {
 				ps[i](selector)
 			}
 		}
+	}
+	if value, ok := ru.mutation.ImportID(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt,
+			Value:  value,
+			Column: runway.FieldImportID,
+		})
+	}
+	if value, ok := ru.mutation.AddedImportID(); ok {
+		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt,
+			Value:  value,
+			Column: runway.FieldImportID,
+		})
 	}
 	if value, ok := ru.mutation.Hash(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
@@ -811,7 +839,7 @@ func (ru *RunwayUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
+					Type:   field.TypeUUID,
 					Column: airport.FieldID,
 				},
 			},
@@ -827,7 +855,7 @@ func (ru *RunwayUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
+					Type:   field.TypeUUID,
 					Column: airport.FieldID,
 				},
 			},
@@ -856,6 +884,19 @@ type RunwayUpdateOne struct {
 	hooks     []Hook
 	mutation  *RunwayMutation
 	modifiers []func(*sql.UpdateBuilder)
+}
+
+// SetImportID sets the "import_id" field.
+func (ruo *RunwayUpdateOne) SetImportID(i int) *RunwayUpdateOne {
+	ruo.mutation.ResetImportID()
+	ruo.mutation.SetImportID(i)
+	return ruo
+}
+
+// AddImportID adds i to the "import_id" field.
+func (ruo *RunwayUpdateOne) AddImportID(i int) *RunwayUpdateOne {
+	ruo.mutation.AddImportID(i)
+	return ruo
 }
 
 // SetHash sets the "hash" field.
@@ -1233,13 +1274,13 @@ func (ruo *RunwayUpdateOne) ClearHighRunwayDisplacedThreshold() *RunwayUpdateOne
 }
 
 // SetAirportID sets the "airport" edge to the Airport entity by ID.
-func (ruo *RunwayUpdateOne) SetAirportID(id int) *RunwayUpdateOne {
+func (ruo *RunwayUpdateOne) SetAirportID(id uuid.UUID) *RunwayUpdateOne {
 	ruo.mutation.SetAirportID(id)
 	return ruo
 }
 
 // SetNillableAirportID sets the "airport" edge to the Airport entity by ID if the given value is not nil.
-func (ruo *RunwayUpdateOne) SetNillableAirportID(id *int) *RunwayUpdateOne {
+func (ruo *RunwayUpdateOne) SetNillableAirportID(id *uuid.UUID) *RunwayUpdateOne {
 	if id != nil {
 		ruo = ruo.SetAirportID(*id)
 	}
@@ -1341,7 +1382,7 @@ func (ruo *RunwayUpdateOne) sqlSave(ctx context.Context) (_node *Runway, err err
 			Table:   runway.Table,
 			Columns: runway.Columns,
 			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt,
+				Type:   field.TypeUUID,
 				Column: runway.FieldID,
 			},
 		},
@@ -1369,6 +1410,20 @@ func (ruo *RunwayUpdateOne) sqlSave(ctx context.Context) (_node *Runway, err err
 				ps[i](selector)
 			}
 		}
+	}
+	if value, ok := ruo.mutation.ImportID(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt,
+			Value:  value,
+			Column: runway.FieldImportID,
+		})
+	}
+	if value, ok := ruo.mutation.AddedImportID(); ok {
+		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt,
+			Value:  value,
+			Column: runway.FieldImportID,
+		})
 	}
 	if value, ok := ruo.mutation.Hash(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
@@ -1669,7 +1724,7 @@ func (ruo *RunwayUpdateOne) sqlSave(ctx context.Context) (_node *Runway, err err
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
+					Type:   field.TypeUUID,
 					Column: airport.FieldID,
 				},
 			},
@@ -1685,7 +1740,7 @@ func (ruo *RunwayUpdateOne) sqlSave(ctx context.Context) (_node *Runway, err err
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
+					Type:   field.TypeUUID,
 					Column: airport.FieldID,
 				},
 			},

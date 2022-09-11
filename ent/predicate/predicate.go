@@ -27,9 +27,6 @@ type Runway func(*sql.Selector)
 // SkyCondition is the predicate function for skycondition builders.
 type SkyCondition func(*sql.Selector)
 
-// Station is the predicate function for station builders.
-type Station func(*sql.Selector)
-
 // Taf is the predicate function for taf builders.
 type Taf func(*sql.Selector)
 
@@ -38,3 +35,6 @@ type TemperatureData func(*sql.Selector)
 
 // TurbulenceCondition is the predicate function for turbulencecondition builders.
 type TurbulenceCondition func(*sql.Selector)
+
+// WeatherStation is the predicate function for weatherstation builders.
+type WeatherStation func(*sql.Selector)

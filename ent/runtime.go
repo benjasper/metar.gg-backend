@@ -5,10 +5,19 @@ package ent
 import (
 	"time"
 
+	"github.com/google/uuid"
 	"metar.gg/ent/airport"
+	"metar.gg/ent/forecast"
 	"metar.gg/ent/frequency"
+	"metar.gg/ent/icingcondition"
+	"metar.gg/ent/metar"
 	"metar.gg/ent/runway"
 	"metar.gg/ent/schema"
+	"metar.gg/ent/skycondition"
+	"metar.gg/ent/taf"
+	"metar.gg/ent/temperaturedata"
+	"metar.gg/ent/turbulencecondition"
+	"metar.gg/ent/weatherstation"
 )
 
 // The init function reads all schema descriptors with runtime code
@@ -21,37 +30,115 @@ func init() {
 	airportFields := schema.Airport{}.Fields()
 	_ = airportFields
 	// airportDescImportFlag is the schema descriptor for import_flag field.
-	airportDescImportFlag := airportMixinFields0[2].Descriptor()
+	airportDescImportFlag := airportMixinFields0[3].Descriptor()
 	// airport.DefaultImportFlag holds the default value on creation for the import_flag field.
 	airport.DefaultImportFlag = airportDescImportFlag.Default.(bool)
 	// airportDescLastUpdated is the schema descriptor for last_updated field.
-	airportDescLastUpdated := airportMixinFields0[3].Descriptor()
+	airportDescLastUpdated := airportMixinFields0[4].Descriptor()
 	// airport.DefaultLastUpdated holds the default value on creation for the last_updated field.
 	airport.DefaultLastUpdated = airportDescLastUpdated.Default.(func() time.Time)
+	// airportDescIcaoCode is the schema descriptor for icao_code field.
+	airportDescIcaoCode := airportFields[0].Descriptor()
+	// airport.IcaoCodeValidator is a validator for the "icao_code" field. It is called by the builders before save.
+	airport.IcaoCodeValidator = func() func(string) error {
+		validators := airportDescIcaoCode.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(icao_code string) error {
+			for _, fn := range fns {
+				if err := fn(icao_code); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// airportDescID is the schema descriptor for id field.
+	airportDescID := airportMixinFields0[0].Descriptor()
+	// airport.DefaultID holds the default value on creation for the id field.
+	airport.DefaultID = airportDescID.Default.(func() uuid.UUID)
+	forecastFields := schema.Forecast{}.Fields()
+	_ = forecastFields
+	// forecastDescID is the schema descriptor for id field.
+	forecastDescID := forecastFields[0].Descriptor()
+	// forecast.DefaultID holds the default value on creation for the id field.
+	forecast.DefaultID = forecastDescID.Default.(func() uuid.UUID)
 	frequencyMixin := schema.Frequency{}.Mixin()
 	frequencyMixinFields0 := frequencyMixin[0].Fields()
 	_ = frequencyMixinFields0
 	frequencyFields := schema.Frequency{}.Fields()
 	_ = frequencyFields
 	// frequencyDescImportFlag is the schema descriptor for import_flag field.
-	frequencyDescImportFlag := frequencyMixinFields0[2].Descriptor()
+	frequencyDescImportFlag := frequencyMixinFields0[3].Descriptor()
 	// frequency.DefaultImportFlag holds the default value on creation for the import_flag field.
 	frequency.DefaultImportFlag = frequencyDescImportFlag.Default.(bool)
 	// frequencyDescLastUpdated is the schema descriptor for last_updated field.
-	frequencyDescLastUpdated := frequencyMixinFields0[3].Descriptor()
+	frequencyDescLastUpdated := frequencyMixinFields0[4].Descriptor()
 	// frequency.DefaultLastUpdated holds the default value on creation for the last_updated field.
 	frequency.DefaultLastUpdated = frequencyDescLastUpdated.Default.(func() time.Time)
+	// frequencyDescID is the schema descriptor for id field.
+	frequencyDescID := frequencyMixinFields0[0].Descriptor()
+	// frequency.DefaultID holds the default value on creation for the id field.
+	frequency.DefaultID = frequencyDescID.Default.(func() uuid.UUID)
+	icingconditionFields := schema.IcingCondition{}.Fields()
+	_ = icingconditionFields
+	// icingconditionDescID is the schema descriptor for id field.
+	icingconditionDescID := icingconditionFields[0].Descriptor()
+	// icingcondition.DefaultID holds the default value on creation for the id field.
+	icingcondition.DefaultID = icingconditionDescID.Default.(func() uuid.UUID)
+	metarFields := schema.Metar{}.Fields()
+	_ = metarFields
+	// metarDescID is the schema descriptor for id field.
+	metarDescID := metarFields[0].Descriptor()
+	// metar.DefaultID holds the default value on creation for the id field.
+	metar.DefaultID = metarDescID.Default.(func() uuid.UUID)
 	runwayMixin := schema.Runway{}.Mixin()
 	runwayMixinFields0 := runwayMixin[0].Fields()
 	_ = runwayMixinFields0
 	runwayFields := schema.Runway{}.Fields()
 	_ = runwayFields
 	// runwayDescImportFlag is the schema descriptor for import_flag field.
-	runwayDescImportFlag := runwayMixinFields0[2].Descriptor()
+	runwayDescImportFlag := runwayMixinFields0[3].Descriptor()
 	// runway.DefaultImportFlag holds the default value on creation for the import_flag field.
 	runway.DefaultImportFlag = runwayDescImportFlag.Default.(bool)
 	// runwayDescLastUpdated is the schema descriptor for last_updated field.
-	runwayDescLastUpdated := runwayMixinFields0[3].Descriptor()
+	runwayDescLastUpdated := runwayMixinFields0[4].Descriptor()
 	// runway.DefaultLastUpdated holds the default value on creation for the last_updated field.
 	runway.DefaultLastUpdated = runwayDescLastUpdated.Default.(func() time.Time)
+	// runwayDescID is the schema descriptor for id field.
+	runwayDescID := runwayMixinFields0[0].Descriptor()
+	// runway.DefaultID holds the default value on creation for the id field.
+	runway.DefaultID = runwayDescID.Default.(func() uuid.UUID)
+	skyconditionFields := schema.SkyCondition{}.Fields()
+	_ = skyconditionFields
+	// skyconditionDescID is the schema descriptor for id field.
+	skyconditionDescID := skyconditionFields[0].Descriptor()
+	// skycondition.DefaultID holds the default value on creation for the id field.
+	skycondition.DefaultID = skyconditionDescID.Default.(func() uuid.UUID)
+	tafFields := schema.Taf{}.Fields()
+	_ = tafFields
+	// tafDescID is the schema descriptor for id field.
+	tafDescID := tafFields[0].Descriptor()
+	// taf.DefaultID holds the default value on creation for the id field.
+	taf.DefaultID = tafDescID.Default.(func() uuid.UUID)
+	temperaturedataFields := schema.TemperatureData{}.Fields()
+	_ = temperaturedataFields
+	// temperaturedataDescID is the schema descriptor for id field.
+	temperaturedataDescID := temperaturedataFields[0].Descriptor()
+	// temperaturedata.DefaultID holds the default value on creation for the id field.
+	temperaturedata.DefaultID = temperaturedataDescID.Default.(func() uuid.UUID)
+	turbulenceconditionFields := schema.TurbulenceCondition{}.Fields()
+	_ = turbulenceconditionFields
+	// turbulenceconditionDescID is the schema descriptor for id field.
+	turbulenceconditionDescID := turbulenceconditionFields[0].Descriptor()
+	// turbulencecondition.DefaultID holds the default value on creation for the id field.
+	turbulencecondition.DefaultID = turbulenceconditionDescID.Default.(func() uuid.UUID)
+	weatherstationFields := schema.WeatherStation{}.Fields()
+	_ = weatherstationFields
+	// weatherstationDescID is the schema descriptor for id field.
+	weatherstationDescID := weatherstationFields[0].Descriptor()
+	// weatherstation.DefaultID holds the default value on creation for the id field.
+	weatherstation.DefaultID = weatherstationDescID.Default.(func() uuid.UUID)
 }

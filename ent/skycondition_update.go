@@ -173,7 +173,7 @@ func (scu *SkyConditionUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Table:   skycondition.Table,
 			Columns: skycondition.Columns,
 			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt,
+				Type:   field.TypeUUID,
 				Column: skycondition.FieldID,
 			},
 		},
@@ -404,7 +404,7 @@ func (scuo *SkyConditionUpdateOne) sqlSave(ctx context.Context) (_node *SkyCondi
 			Table:   skycondition.Table,
 			Columns: skycondition.Columns,
 			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt,
+				Type:   field.TypeUUID,
 				Column: skycondition.FieldID,
 			},
 		},

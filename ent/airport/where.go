@@ -7,32 +7,33 @@ import (
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
+	"github.com/google/uuid"
 	"metar.gg/ent/predicate"
 )
 
 // ID filters vertices based on their ID field.
-func ID(id int) predicate.Airport {
+func ID(id uuid.UUID) predicate.Airport {
 	return predicate.Airport(func(s *sql.Selector) {
 		s.Where(sql.EQ(s.C(FieldID), id))
 	})
 }
 
 // IDEQ applies the EQ predicate on the ID field.
-func IDEQ(id int) predicate.Airport {
+func IDEQ(id uuid.UUID) predicate.Airport {
 	return predicate.Airport(func(s *sql.Selector) {
 		s.Where(sql.EQ(s.C(FieldID), id))
 	})
 }
 
 // IDNEQ applies the NEQ predicate on the ID field.
-func IDNEQ(id int) predicate.Airport {
+func IDNEQ(id uuid.UUID) predicate.Airport {
 	return predicate.Airport(func(s *sql.Selector) {
 		s.Where(sql.NEQ(s.C(FieldID), id))
 	})
 }
 
 // IDIn applies the In predicate on the ID field.
-func IDIn(ids ...int) predicate.Airport {
+func IDIn(ids ...uuid.UUID) predicate.Airport {
 	return predicate.Airport(func(s *sql.Selector) {
 		v := make([]any, len(ids))
 		for i := range v {
@@ -43,7 +44,7 @@ func IDIn(ids ...int) predicate.Airport {
 }
 
 // IDNotIn applies the NotIn predicate on the ID field.
-func IDNotIn(ids ...int) predicate.Airport {
+func IDNotIn(ids ...uuid.UUID) predicate.Airport {
 	return predicate.Airport(func(s *sql.Selector) {
 		v := make([]any, len(ids))
 		for i := range v {
@@ -54,30 +55,37 @@ func IDNotIn(ids ...int) predicate.Airport {
 }
 
 // IDGT applies the GT predicate on the ID field.
-func IDGT(id int) predicate.Airport {
+func IDGT(id uuid.UUID) predicate.Airport {
 	return predicate.Airport(func(s *sql.Selector) {
 		s.Where(sql.GT(s.C(FieldID), id))
 	})
 }
 
 // IDGTE applies the GTE predicate on the ID field.
-func IDGTE(id int) predicate.Airport {
+func IDGTE(id uuid.UUID) predicate.Airport {
 	return predicate.Airport(func(s *sql.Selector) {
 		s.Where(sql.GTE(s.C(FieldID), id))
 	})
 }
 
 // IDLT applies the LT predicate on the ID field.
-func IDLT(id int) predicate.Airport {
+func IDLT(id uuid.UUID) predicate.Airport {
 	return predicate.Airport(func(s *sql.Selector) {
 		s.Where(sql.LT(s.C(FieldID), id))
 	})
 }
 
 // IDLTE applies the LTE predicate on the ID field.
-func IDLTE(id int) predicate.Airport {
+func IDLTE(id uuid.UUID) predicate.Airport {
 	return predicate.Airport(func(s *sql.Selector) {
 		s.Where(sql.LTE(s.C(FieldID), id))
+	})
+}
+
+// ImportID applies equality check predicate on the "import_id" field. It's identical to ImportIDEQ.
+func ImportID(v int) predicate.Airport {
+	return predicate.Airport(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldImportID), v))
 	})
 }
 
@@ -99,6 +107,20 @@ func ImportFlag(v bool) predicate.Airport {
 func LastUpdated(v time.Time) predicate.Airport {
 	return predicate.Airport(func(s *sql.Selector) {
 		s.Where(sql.EQ(s.C(FieldLastUpdated), v))
+	})
+}
+
+// IcaoCode applies equality check predicate on the "icao_code" field. It's identical to IcaoCodeEQ.
+func IcaoCode(v string) predicate.Airport {
+	return predicate.Airport(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldIcaoCode), v))
+	})
+}
+
+// IataCode applies equality check predicate on the "iata_code" field. It's identical to IataCodeEQ.
+func IataCode(v string) predicate.Airport {
+	return predicate.Airport(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldIataCode), v))
 	})
 }
 
@@ -172,13 +194,6 @@ func GpsCode(v string) predicate.Airport {
 	})
 }
 
-// IataCode applies equality check predicate on the "iata_code" field. It's identical to IataCodeEQ.
-func IataCode(v string) predicate.Airport {
-	return predicate.Airport(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldIataCode), v))
-	})
-}
-
 // LocalCode applies equality check predicate on the "local_code" field. It's identical to LocalCodeEQ.
 func LocalCode(v string) predicate.Airport {
 	return predicate.Airport(func(s *sql.Selector) {
@@ -197,6 +212,70 @@ func Website(v string) predicate.Airport {
 func Wikipedia(v string) predicate.Airport {
 	return predicate.Airport(func(s *sql.Selector) {
 		s.Where(sql.EQ(s.C(FieldWikipedia), v))
+	})
+}
+
+// ImportIDEQ applies the EQ predicate on the "import_id" field.
+func ImportIDEQ(v int) predicate.Airport {
+	return predicate.Airport(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldImportID), v))
+	})
+}
+
+// ImportIDNEQ applies the NEQ predicate on the "import_id" field.
+func ImportIDNEQ(v int) predicate.Airport {
+	return predicate.Airport(func(s *sql.Selector) {
+		s.Where(sql.NEQ(s.C(FieldImportID), v))
+	})
+}
+
+// ImportIDIn applies the In predicate on the "import_id" field.
+func ImportIDIn(vs ...int) predicate.Airport {
+	v := make([]any, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.Airport(func(s *sql.Selector) {
+		s.Where(sql.In(s.C(FieldImportID), v...))
+	})
+}
+
+// ImportIDNotIn applies the NotIn predicate on the "import_id" field.
+func ImportIDNotIn(vs ...int) predicate.Airport {
+	v := make([]any, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.Airport(func(s *sql.Selector) {
+		s.Where(sql.NotIn(s.C(FieldImportID), v...))
+	})
+}
+
+// ImportIDGT applies the GT predicate on the "import_id" field.
+func ImportIDGT(v int) predicate.Airport {
+	return predicate.Airport(func(s *sql.Selector) {
+		s.Where(sql.GT(s.C(FieldImportID), v))
+	})
+}
+
+// ImportIDGTE applies the GTE predicate on the "import_id" field.
+func ImportIDGTE(v int) predicate.Airport {
+	return predicate.Airport(func(s *sql.Selector) {
+		s.Where(sql.GTE(s.C(FieldImportID), v))
+	})
+}
+
+// ImportIDLT applies the LT predicate on the "import_id" field.
+func ImportIDLT(v int) predicate.Airport {
+	return predicate.Airport(func(s *sql.Selector) {
+		s.Where(sql.LT(s.C(FieldImportID), v))
+	})
+}
+
+// ImportIDLTE applies the LTE predicate on the "import_id" field.
+func ImportIDLTE(v int) predicate.Airport {
+	return predicate.Airport(func(s *sql.Selector) {
+		s.Where(sql.LTE(s.C(FieldImportID), v))
 	})
 }
 
@@ -374,6 +453,232 @@ func LastUpdatedLT(v time.Time) predicate.Airport {
 func LastUpdatedLTE(v time.Time) predicate.Airport {
 	return predicate.Airport(func(s *sql.Selector) {
 		s.Where(sql.LTE(s.C(FieldLastUpdated), v))
+	})
+}
+
+// IcaoCodeEQ applies the EQ predicate on the "icao_code" field.
+func IcaoCodeEQ(v string) predicate.Airport {
+	return predicate.Airport(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldIcaoCode), v))
+	})
+}
+
+// IcaoCodeNEQ applies the NEQ predicate on the "icao_code" field.
+func IcaoCodeNEQ(v string) predicate.Airport {
+	return predicate.Airport(func(s *sql.Selector) {
+		s.Where(sql.NEQ(s.C(FieldIcaoCode), v))
+	})
+}
+
+// IcaoCodeIn applies the In predicate on the "icao_code" field.
+func IcaoCodeIn(vs ...string) predicate.Airport {
+	v := make([]any, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.Airport(func(s *sql.Selector) {
+		s.Where(sql.In(s.C(FieldIcaoCode), v...))
+	})
+}
+
+// IcaoCodeNotIn applies the NotIn predicate on the "icao_code" field.
+func IcaoCodeNotIn(vs ...string) predicate.Airport {
+	v := make([]any, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.Airport(func(s *sql.Selector) {
+		s.Where(sql.NotIn(s.C(FieldIcaoCode), v...))
+	})
+}
+
+// IcaoCodeGT applies the GT predicate on the "icao_code" field.
+func IcaoCodeGT(v string) predicate.Airport {
+	return predicate.Airport(func(s *sql.Selector) {
+		s.Where(sql.GT(s.C(FieldIcaoCode), v))
+	})
+}
+
+// IcaoCodeGTE applies the GTE predicate on the "icao_code" field.
+func IcaoCodeGTE(v string) predicate.Airport {
+	return predicate.Airport(func(s *sql.Selector) {
+		s.Where(sql.GTE(s.C(FieldIcaoCode), v))
+	})
+}
+
+// IcaoCodeLT applies the LT predicate on the "icao_code" field.
+func IcaoCodeLT(v string) predicate.Airport {
+	return predicate.Airport(func(s *sql.Selector) {
+		s.Where(sql.LT(s.C(FieldIcaoCode), v))
+	})
+}
+
+// IcaoCodeLTE applies the LTE predicate on the "icao_code" field.
+func IcaoCodeLTE(v string) predicate.Airport {
+	return predicate.Airport(func(s *sql.Selector) {
+		s.Where(sql.LTE(s.C(FieldIcaoCode), v))
+	})
+}
+
+// IcaoCodeContains applies the Contains predicate on the "icao_code" field.
+func IcaoCodeContains(v string) predicate.Airport {
+	return predicate.Airport(func(s *sql.Selector) {
+		s.Where(sql.Contains(s.C(FieldIcaoCode), v))
+	})
+}
+
+// IcaoCodeHasPrefix applies the HasPrefix predicate on the "icao_code" field.
+func IcaoCodeHasPrefix(v string) predicate.Airport {
+	return predicate.Airport(func(s *sql.Selector) {
+		s.Where(sql.HasPrefix(s.C(FieldIcaoCode), v))
+	})
+}
+
+// IcaoCodeHasSuffix applies the HasSuffix predicate on the "icao_code" field.
+func IcaoCodeHasSuffix(v string) predicate.Airport {
+	return predicate.Airport(func(s *sql.Selector) {
+		s.Where(sql.HasSuffix(s.C(FieldIcaoCode), v))
+	})
+}
+
+// IcaoCodeIsNil applies the IsNil predicate on the "icao_code" field.
+func IcaoCodeIsNil() predicate.Airport {
+	return predicate.Airport(func(s *sql.Selector) {
+		s.Where(sql.IsNull(s.C(FieldIcaoCode)))
+	})
+}
+
+// IcaoCodeNotNil applies the NotNil predicate on the "icao_code" field.
+func IcaoCodeNotNil() predicate.Airport {
+	return predicate.Airport(func(s *sql.Selector) {
+		s.Where(sql.NotNull(s.C(FieldIcaoCode)))
+	})
+}
+
+// IcaoCodeEqualFold applies the EqualFold predicate on the "icao_code" field.
+func IcaoCodeEqualFold(v string) predicate.Airport {
+	return predicate.Airport(func(s *sql.Selector) {
+		s.Where(sql.EqualFold(s.C(FieldIcaoCode), v))
+	})
+}
+
+// IcaoCodeContainsFold applies the ContainsFold predicate on the "icao_code" field.
+func IcaoCodeContainsFold(v string) predicate.Airport {
+	return predicate.Airport(func(s *sql.Selector) {
+		s.Where(sql.ContainsFold(s.C(FieldIcaoCode), v))
+	})
+}
+
+// IataCodeEQ applies the EQ predicate on the "iata_code" field.
+func IataCodeEQ(v string) predicate.Airport {
+	return predicate.Airport(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldIataCode), v))
+	})
+}
+
+// IataCodeNEQ applies the NEQ predicate on the "iata_code" field.
+func IataCodeNEQ(v string) predicate.Airport {
+	return predicate.Airport(func(s *sql.Selector) {
+		s.Where(sql.NEQ(s.C(FieldIataCode), v))
+	})
+}
+
+// IataCodeIn applies the In predicate on the "iata_code" field.
+func IataCodeIn(vs ...string) predicate.Airport {
+	v := make([]any, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.Airport(func(s *sql.Selector) {
+		s.Where(sql.In(s.C(FieldIataCode), v...))
+	})
+}
+
+// IataCodeNotIn applies the NotIn predicate on the "iata_code" field.
+func IataCodeNotIn(vs ...string) predicate.Airport {
+	v := make([]any, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.Airport(func(s *sql.Selector) {
+		s.Where(sql.NotIn(s.C(FieldIataCode), v...))
+	})
+}
+
+// IataCodeGT applies the GT predicate on the "iata_code" field.
+func IataCodeGT(v string) predicate.Airport {
+	return predicate.Airport(func(s *sql.Selector) {
+		s.Where(sql.GT(s.C(FieldIataCode), v))
+	})
+}
+
+// IataCodeGTE applies the GTE predicate on the "iata_code" field.
+func IataCodeGTE(v string) predicate.Airport {
+	return predicate.Airport(func(s *sql.Selector) {
+		s.Where(sql.GTE(s.C(FieldIataCode), v))
+	})
+}
+
+// IataCodeLT applies the LT predicate on the "iata_code" field.
+func IataCodeLT(v string) predicate.Airport {
+	return predicate.Airport(func(s *sql.Selector) {
+		s.Where(sql.LT(s.C(FieldIataCode), v))
+	})
+}
+
+// IataCodeLTE applies the LTE predicate on the "iata_code" field.
+func IataCodeLTE(v string) predicate.Airport {
+	return predicate.Airport(func(s *sql.Selector) {
+		s.Where(sql.LTE(s.C(FieldIataCode), v))
+	})
+}
+
+// IataCodeContains applies the Contains predicate on the "iata_code" field.
+func IataCodeContains(v string) predicate.Airport {
+	return predicate.Airport(func(s *sql.Selector) {
+		s.Where(sql.Contains(s.C(FieldIataCode), v))
+	})
+}
+
+// IataCodeHasPrefix applies the HasPrefix predicate on the "iata_code" field.
+func IataCodeHasPrefix(v string) predicate.Airport {
+	return predicate.Airport(func(s *sql.Selector) {
+		s.Where(sql.HasPrefix(s.C(FieldIataCode), v))
+	})
+}
+
+// IataCodeHasSuffix applies the HasSuffix predicate on the "iata_code" field.
+func IataCodeHasSuffix(v string) predicate.Airport {
+	return predicate.Airport(func(s *sql.Selector) {
+		s.Where(sql.HasSuffix(s.C(FieldIataCode), v))
+	})
+}
+
+// IataCodeIsNil applies the IsNil predicate on the "iata_code" field.
+func IataCodeIsNil() predicate.Airport {
+	return predicate.Airport(func(s *sql.Selector) {
+		s.Where(sql.IsNull(s.C(FieldIataCode)))
+	})
+}
+
+// IataCodeNotNil applies the NotNil predicate on the "iata_code" field.
+func IataCodeNotNil() predicate.Airport {
+	return predicate.Airport(func(s *sql.Selector) {
+		s.Where(sql.NotNull(s.C(FieldIataCode)))
+	})
+}
+
+// IataCodeEqualFold applies the EqualFold predicate on the "iata_code" field.
+func IataCodeEqualFold(v string) predicate.Airport {
+	return predicate.Airport(func(s *sql.Selector) {
+		s.Where(sql.EqualFold(s.C(FieldIataCode), v))
+	})
+}
+
+// IataCodeContainsFold applies the ContainsFold predicate on the "iata_code" field.
+func IataCodeContainsFold(v string) predicate.Airport {
+	return predicate.Airport(func(s *sql.Selector) {
+		s.Where(sql.ContainsFold(s.C(FieldIataCode), v))
 	})
 }
 
@@ -1291,119 +1596,6 @@ func GpsCodeContainsFold(v string) predicate.Airport {
 	})
 }
 
-// IataCodeEQ applies the EQ predicate on the "iata_code" field.
-func IataCodeEQ(v string) predicate.Airport {
-	return predicate.Airport(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldIataCode), v))
-	})
-}
-
-// IataCodeNEQ applies the NEQ predicate on the "iata_code" field.
-func IataCodeNEQ(v string) predicate.Airport {
-	return predicate.Airport(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldIataCode), v))
-	})
-}
-
-// IataCodeIn applies the In predicate on the "iata_code" field.
-func IataCodeIn(vs ...string) predicate.Airport {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Airport(func(s *sql.Selector) {
-		s.Where(sql.In(s.C(FieldIataCode), v...))
-	})
-}
-
-// IataCodeNotIn applies the NotIn predicate on the "iata_code" field.
-func IataCodeNotIn(vs ...string) predicate.Airport {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Airport(func(s *sql.Selector) {
-		s.Where(sql.NotIn(s.C(FieldIataCode), v...))
-	})
-}
-
-// IataCodeGT applies the GT predicate on the "iata_code" field.
-func IataCodeGT(v string) predicate.Airport {
-	return predicate.Airport(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldIataCode), v))
-	})
-}
-
-// IataCodeGTE applies the GTE predicate on the "iata_code" field.
-func IataCodeGTE(v string) predicate.Airport {
-	return predicate.Airport(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldIataCode), v))
-	})
-}
-
-// IataCodeLT applies the LT predicate on the "iata_code" field.
-func IataCodeLT(v string) predicate.Airport {
-	return predicate.Airport(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldIataCode), v))
-	})
-}
-
-// IataCodeLTE applies the LTE predicate on the "iata_code" field.
-func IataCodeLTE(v string) predicate.Airport {
-	return predicate.Airport(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldIataCode), v))
-	})
-}
-
-// IataCodeContains applies the Contains predicate on the "iata_code" field.
-func IataCodeContains(v string) predicate.Airport {
-	return predicate.Airport(func(s *sql.Selector) {
-		s.Where(sql.Contains(s.C(FieldIataCode), v))
-	})
-}
-
-// IataCodeHasPrefix applies the HasPrefix predicate on the "iata_code" field.
-func IataCodeHasPrefix(v string) predicate.Airport {
-	return predicate.Airport(func(s *sql.Selector) {
-		s.Where(sql.HasPrefix(s.C(FieldIataCode), v))
-	})
-}
-
-// IataCodeHasSuffix applies the HasSuffix predicate on the "iata_code" field.
-func IataCodeHasSuffix(v string) predicate.Airport {
-	return predicate.Airport(func(s *sql.Selector) {
-		s.Where(sql.HasSuffix(s.C(FieldIataCode), v))
-	})
-}
-
-// IataCodeIsNil applies the IsNil predicate on the "iata_code" field.
-func IataCodeIsNil() predicate.Airport {
-	return predicate.Airport(func(s *sql.Selector) {
-		s.Where(sql.IsNull(s.C(FieldIataCode)))
-	})
-}
-
-// IataCodeNotNil applies the NotNil predicate on the "iata_code" field.
-func IataCodeNotNil() predicate.Airport {
-	return predicate.Airport(func(s *sql.Selector) {
-		s.Where(sql.NotNull(s.C(FieldIataCode)))
-	})
-}
-
-// IataCodeEqualFold applies the EqualFold predicate on the "iata_code" field.
-func IataCodeEqualFold(v string) predicate.Airport {
-	return predicate.Airport(func(s *sql.Selector) {
-		s.Where(sql.EqualFold(s.C(FieldIataCode), v))
-	})
-}
-
-// IataCodeContainsFold applies the ContainsFold predicate on the "iata_code" field.
-func IataCodeContainsFold(v string) predicate.Airport {
-	return predicate.Airport(func(s *sql.Selector) {
-		s.Where(sql.ContainsFold(s.C(FieldIataCode), v))
-	})
-}
-
 // LocalCodeEQ applies the EQ predicate on the "local_code" field.
 func LocalCodeEQ(v string) predicate.Airport {
 	return predicate.Airport(func(s *sql.Selector) {
@@ -1784,7 +1976,7 @@ func HasStation() predicate.Airport {
 }
 
 // HasStationWith applies the HasEdge predicate on the "station" edge with a given conditions (other predicates).
-func HasStationWith(preds ...predicate.Station) predicate.Airport {
+func HasStationWith(preds ...predicate.WeatherStation) predicate.Airport {
 	return predicate.Airport(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),

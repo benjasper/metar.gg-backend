@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"log"
 
+	"github.com/google/uuid"
 	"metar.gg/ent/migrate"
 
 	"metar.gg/ent/airport"
@@ -17,10 +18,10 @@ import (
 	"metar.gg/ent/metar"
 	"metar.gg/ent/runway"
 	"metar.gg/ent/skycondition"
-	"metar.gg/ent/station"
 	"metar.gg/ent/taf"
 	"metar.gg/ent/temperaturedata"
 	"metar.gg/ent/turbulencecondition"
+	"metar.gg/ent/weatherstation"
 
 	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/sql"
@@ -46,16 +47,14 @@ type Client struct {
 	Runway *RunwayClient
 	// SkyCondition is the client for interacting with the SkyCondition builders.
 	SkyCondition *SkyConditionClient
-	// Station is the client for interacting with the Station builders.
-	Station *StationClient
 	// Taf is the client for interacting with the Taf builders.
 	Taf *TafClient
 	// TemperatureData is the client for interacting with the TemperatureData builders.
 	TemperatureData *TemperatureDataClient
 	// TurbulenceCondition is the client for interacting with the TurbulenceCondition builders.
 	TurbulenceCondition *TurbulenceConditionClient
-	// additional fields for node api
-	tables tables
+	// WeatherStation is the client for interacting with the WeatherStation builders.
+	WeatherStation *WeatherStationClient
 }
 
 // NewClient creates a new client configured with the given options.
@@ -76,10 +75,10 @@ func (c *Client) init() {
 	c.Metar = NewMetarClient(c.config)
 	c.Runway = NewRunwayClient(c.config)
 	c.SkyCondition = NewSkyConditionClient(c.config)
-	c.Station = NewStationClient(c.config)
 	c.Taf = NewTafClient(c.config)
 	c.TemperatureData = NewTemperatureDataClient(c.config)
 	c.TurbulenceCondition = NewTurbulenceConditionClient(c.config)
+	c.WeatherStation = NewWeatherStationClient(c.config)
 }
 
 // Open opens a database/sql.DB specified by the driver name and
@@ -120,10 +119,10 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 		Metar:               NewMetarClient(cfg),
 		Runway:              NewRunwayClient(cfg),
 		SkyCondition:        NewSkyConditionClient(cfg),
-		Station:             NewStationClient(cfg),
 		Taf:                 NewTafClient(cfg),
 		TemperatureData:     NewTemperatureDataClient(cfg),
 		TurbulenceCondition: NewTurbulenceConditionClient(cfg),
+		WeatherStation:      NewWeatherStationClient(cfg),
 	}, nil
 }
 
@@ -150,10 +149,10 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 		Metar:               NewMetarClient(cfg),
 		Runway:              NewRunwayClient(cfg),
 		SkyCondition:        NewSkyConditionClient(cfg),
-		Station:             NewStationClient(cfg),
 		Taf:                 NewTafClient(cfg),
 		TemperatureData:     NewTemperatureDataClient(cfg),
 		TurbulenceCondition: NewTurbulenceConditionClient(cfg),
+		WeatherStation:      NewWeatherStationClient(cfg),
 	}, nil
 }
 
@@ -189,10 +188,10 @@ func (c *Client) Use(hooks ...Hook) {
 	c.Metar.Use(hooks...)
 	c.Runway.Use(hooks...)
 	c.SkyCondition.Use(hooks...)
-	c.Station.Use(hooks...)
 	c.Taf.Use(hooks...)
 	c.TemperatureData.Use(hooks...)
 	c.TurbulenceCondition.Use(hooks...)
+	c.WeatherStation.Use(hooks...)
 }
 
 // AirportClient is a client for the Airport schema.
@@ -235,7 +234,7 @@ func (c *AirportClient) UpdateOne(a *Airport) *AirportUpdateOne {
 }
 
 // UpdateOneID returns an update builder for the given id.
-func (c *AirportClient) UpdateOneID(id int) *AirportUpdateOne {
+func (c *AirportClient) UpdateOneID(id uuid.UUID) *AirportUpdateOne {
 	mutation := newAirportMutation(c.config, OpUpdateOne, withAirportID(id))
 	return &AirportUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
@@ -252,7 +251,7 @@ func (c *AirportClient) DeleteOne(a *Airport) *AirportDeleteOne {
 }
 
 // DeleteOne returns a builder for deleting the given entity by its id.
-func (c *AirportClient) DeleteOneID(id int) *AirportDeleteOne {
+func (c *AirportClient) DeleteOneID(id uuid.UUID) *AirportDeleteOne {
 	builder := c.Delete().Where(airport.ID(id))
 	builder.mutation.id = &id
 	builder.mutation.op = OpDeleteOne
@@ -267,12 +266,12 @@ func (c *AirportClient) Query() *AirportQuery {
 }
 
 // Get returns a Airport entity by its id.
-func (c *AirportClient) Get(ctx context.Context, id int) (*Airport, error) {
+func (c *AirportClient) Get(ctx context.Context, id uuid.UUID) (*Airport, error) {
 	return c.Query().Where(airport.ID(id)).Only(ctx)
 }
 
 // GetX is like Get, but panics if an error occurs.
-func (c *AirportClient) GetX(ctx context.Context, id int) *Airport {
+func (c *AirportClient) GetX(ctx context.Context, id uuid.UUID) *Airport {
 	obj, err := c.Get(ctx, id)
 	if err != nil {
 		panic(err)
@@ -297,13 +296,13 @@ func (c *AirportClient) QueryRunways(a *Airport) *RunwayQuery {
 }
 
 // QueryStation queries the station edge of a Airport.
-func (c *AirportClient) QueryStation(a *Airport) *StationQuery {
-	query := &StationQuery{config: c.config}
+func (c *AirportClient) QueryStation(a *Airport) *WeatherStationQuery {
+	query := &WeatherStationQuery{config: c.config}
 	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
 		id := a.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(airport.Table, airport.FieldID, id),
-			sqlgraph.To(station.Table, station.FieldID),
+			sqlgraph.To(weatherstation.Table, weatherstation.FieldID),
 			sqlgraph.Edge(sqlgraph.O2O, false, airport.StationTable, airport.StationColumn),
 		)
 		fromV = sqlgraph.Neighbors(a.driver.Dialect(), step)
@@ -373,7 +372,7 @@ func (c *ForecastClient) UpdateOne(f *Forecast) *ForecastUpdateOne {
 }
 
 // UpdateOneID returns an update builder for the given id.
-func (c *ForecastClient) UpdateOneID(id int) *ForecastUpdateOne {
+func (c *ForecastClient) UpdateOneID(id uuid.UUID) *ForecastUpdateOne {
 	mutation := newForecastMutation(c.config, OpUpdateOne, withForecastID(id))
 	return &ForecastUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
@@ -390,7 +389,7 @@ func (c *ForecastClient) DeleteOne(f *Forecast) *ForecastDeleteOne {
 }
 
 // DeleteOne returns a builder for deleting the given entity by its id.
-func (c *ForecastClient) DeleteOneID(id int) *ForecastDeleteOne {
+func (c *ForecastClient) DeleteOneID(id uuid.UUID) *ForecastDeleteOne {
 	builder := c.Delete().Where(forecast.ID(id))
 	builder.mutation.id = &id
 	builder.mutation.op = OpDeleteOne
@@ -405,12 +404,12 @@ func (c *ForecastClient) Query() *ForecastQuery {
 }
 
 // Get returns a Forecast entity by its id.
-func (c *ForecastClient) Get(ctx context.Context, id int) (*Forecast, error) {
+func (c *ForecastClient) Get(ctx context.Context, id uuid.UUID) (*Forecast, error) {
 	return c.Query().Where(forecast.ID(id)).Only(ctx)
 }
 
 // GetX is like Get, but panics if an error occurs.
-func (c *ForecastClient) GetX(ctx context.Context, id int) *Forecast {
+func (c *ForecastClient) GetX(ctx context.Context, id uuid.UUID) *Forecast {
 	obj, err := c.Get(ctx, id)
 	if err != nil {
 		panic(err)
@@ -527,7 +526,7 @@ func (c *FrequencyClient) UpdateOne(f *Frequency) *FrequencyUpdateOne {
 }
 
 // UpdateOneID returns an update builder for the given id.
-func (c *FrequencyClient) UpdateOneID(id int) *FrequencyUpdateOne {
+func (c *FrequencyClient) UpdateOneID(id uuid.UUID) *FrequencyUpdateOne {
 	mutation := newFrequencyMutation(c.config, OpUpdateOne, withFrequencyID(id))
 	return &FrequencyUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
@@ -544,7 +543,7 @@ func (c *FrequencyClient) DeleteOne(f *Frequency) *FrequencyDeleteOne {
 }
 
 // DeleteOne returns a builder for deleting the given entity by its id.
-func (c *FrequencyClient) DeleteOneID(id int) *FrequencyDeleteOne {
+func (c *FrequencyClient) DeleteOneID(id uuid.UUID) *FrequencyDeleteOne {
 	builder := c.Delete().Where(frequency.ID(id))
 	builder.mutation.id = &id
 	builder.mutation.op = OpDeleteOne
@@ -559,12 +558,12 @@ func (c *FrequencyClient) Query() *FrequencyQuery {
 }
 
 // Get returns a Frequency entity by its id.
-func (c *FrequencyClient) Get(ctx context.Context, id int) (*Frequency, error) {
+func (c *FrequencyClient) Get(ctx context.Context, id uuid.UUID) (*Frequency, error) {
 	return c.Query().Where(frequency.ID(id)).Only(ctx)
 }
 
 // GetX is like Get, but panics if an error occurs.
-func (c *FrequencyClient) GetX(ctx context.Context, id int) *Frequency {
+func (c *FrequencyClient) GetX(ctx context.Context, id uuid.UUID) *Frequency {
 	obj, err := c.Get(ctx, id)
 	if err != nil {
 		panic(err)
@@ -633,7 +632,7 @@ func (c *IcingConditionClient) UpdateOne(ic *IcingCondition) *IcingConditionUpda
 }
 
 // UpdateOneID returns an update builder for the given id.
-func (c *IcingConditionClient) UpdateOneID(id int) *IcingConditionUpdateOne {
+func (c *IcingConditionClient) UpdateOneID(id uuid.UUID) *IcingConditionUpdateOne {
 	mutation := newIcingConditionMutation(c.config, OpUpdateOne, withIcingConditionID(id))
 	return &IcingConditionUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
@@ -650,7 +649,7 @@ func (c *IcingConditionClient) DeleteOne(ic *IcingCondition) *IcingConditionDele
 }
 
 // DeleteOne returns a builder for deleting the given entity by its id.
-func (c *IcingConditionClient) DeleteOneID(id int) *IcingConditionDeleteOne {
+func (c *IcingConditionClient) DeleteOneID(id uuid.UUID) *IcingConditionDeleteOne {
 	builder := c.Delete().Where(icingcondition.ID(id))
 	builder.mutation.id = &id
 	builder.mutation.op = OpDeleteOne
@@ -665,12 +664,12 @@ func (c *IcingConditionClient) Query() *IcingConditionQuery {
 }
 
 // Get returns a IcingCondition entity by its id.
-func (c *IcingConditionClient) Get(ctx context.Context, id int) (*IcingCondition, error) {
+func (c *IcingConditionClient) Get(ctx context.Context, id uuid.UUID) (*IcingCondition, error) {
 	return c.Query().Where(icingcondition.ID(id)).Only(ctx)
 }
 
 // GetX is like Get, but panics if an error occurs.
-func (c *IcingConditionClient) GetX(ctx context.Context, id int) *IcingCondition {
+func (c *IcingConditionClient) GetX(ctx context.Context, id uuid.UUID) *IcingCondition {
 	obj, err := c.Get(ctx, id)
 	if err != nil {
 		panic(err)
@@ -723,7 +722,7 @@ func (c *MetarClient) UpdateOne(m *Metar) *MetarUpdateOne {
 }
 
 // UpdateOneID returns an update builder for the given id.
-func (c *MetarClient) UpdateOneID(id int) *MetarUpdateOne {
+func (c *MetarClient) UpdateOneID(id uuid.UUID) *MetarUpdateOne {
 	mutation := newMetarMutation(c.config, OpUpdateOne, withMetarID(id))
 	return &MetarUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
@@ -740,7 +739,7 @@ func (c *MetarClient) DeleteOne(m *Metar) *MetarDeleteOne {
 }
 
 // DeleteOne returns a builder for deleting the given entity by its id.
-func (c *MetarClient) DeleteOneID(id int) *MetarDeleteOne {
+func (c *MetarClient) DeleteOneID(id uuid.UUID) *MetarDeleteOne {
 	builder := c.Delete().Where(metar.ID(id))
 	builder.mutation.id = &id
 	builder.mutation.op = OpDeleteOne
@@ -755,12 +754,12 @@ func (c *MetarClient) Query() *MetarQuery {
 }
 
 // Get returns a Metar entity by its id.
-func (c *MetarClient) Get(ctx context.Context, id int) (*Metar, error) {
+func (c *MetarClient) Get(ctx context.Context, id uuid.UUID) (*Metar, error) {
 	return c.Query().Where(metar.ID(id)).Only(ctx)
 }
 
 // GetX is like Get, but panics if an error occurs.
-func (c *MetarClient) GetX(ctx context.Context, id int) *Metar {
+func (c *MetarClient) GetX(ctx context.Context, id uuid.UUID) *Metar {
 	obj, err := c.Get(ctx, id)
 	if err != nil {
 		panic(err)
@@ -769,13 +768,13 @@ func (c *MetarClient) GetX(ctx context.Context, id int) *Metar {
 }
 
 // QueryStation queries the station edge of a Metar.
-func (c *MetarClient) QueryStation(m *Metar) *StationQuery {
-	query := &StationQuery{config: c.config}
+func (c *MetarClient) QueryStation(m *Metar) *WeatherStationQuery {
+	query := &WeatherStationQuery{config: c.config}
 	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
 		id := m.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(metar.Table, metar.FieldID, id),
-			sqlgraph.To(station.Table, station.FieldID),
+			sqlgraph.To(weatherstation.Table, weatherstation.FieldID),
 			sqlgraph.Edge(sqlgraph.M2O, true, metar.StationTable, metar.StationColumn),
 		)
 		fromV = sqlgraph.Neighbors(m.driver.Dialect(), step)
@@ -845,7 +844,7 @@ func (c *RunwayClient) UpdateOne(r *Runway) *RunwayUpdateOne {
 }
 
 // UpdateOneID returns an update builder for the given id.
-func (c *RunwayClient) UpdateOneID(id int) *RunwayUpdateOne {
+func (c *RunwayClient) UpdateOneID(id uuid.UUID) *RunwayUpdateOne {
 	mutation := newRunwayMutation(c.config, OpUpdateOne, withRunwayID(id))
 	return &RunwayUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
@@ -862,7 +861,7 @@ func (c *RunwayClient) DeleteOne(r *Runway) *RunwayDeleteOne {
 }
 
 // DeleteOne returns a builder for deleting the given entity by its id.
-func (c *RunwayClient) DeleteOneID(id int) *RunwayDeleteOne {
+func (c *RunwayClient) DeleteOneID(id uuid.UUID) *RunwayDeleteOne {
 	builder := c.Delete().Where(runway.ID(id))
 	builder.mutation.id = &id
 	builder.mutation.op = OpDeleteOne
@@ -877,12 +876,12 @@ func (c *RunwayClient) Query() *RunwayQuery {
 }
 
 // Get returns a Runway entity by its id.
-func (c *RunwayClient) Get(ctx context.Context, id int) (*Runway, error) {
+func (c *RunwayClient) Get(ctx context.Context, id uuid.UUID) (*Runway, error) {
 	return c.Query().Where(runway.ID(id)).Only(ctx)
 }
 
 // GetX is like Get, but panics if an error occurs.
-func (c *RunwayClient) GetX(ctx context.Context, id int) *Runway {
+func (c *RunwayClient) GetX(ctx context.Context, id uuid.UUID) *Runway {
 	obj, err := c.Get(ctx, id)
 	if err != nil {
 		panic(err)
@@ -951,7 +950,7 @@ func (c *SkyConditionClient) UpdateOne(sc *SkyCondition) *SkyConditionUpdateOne 
 }
 
 // UpdateOneID returns an update builder for the given id.
-func (c *SkyConditionClient) UpdateOneID(id int) *SkyConditionUpdateOne {
+func (c *SkyConditionClient) UpdateOneID(id uuid.UUID) *SkyConditionUpdateOne {
 	mutation := newSkyConditionMutation(c.config, OpUpdateOne, withSkyConditionID(id))
 	return &SkyConditionUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
@@ -968,7 +967,7 @@ func (c *SkyConditionClient) DeleteOne(sc *SkyCondition) *SkyConditionDeleteOne 
 }
 
 // DeleteOne returns a builder for deleting the given entity by its id.
-func (c *SkyConditionClient) DeleteOneID(id int) *SkyConditionDeleteOne {
+func (c *SkyConditionClient) DeleteOneID(id uuid.UUID) *SkyConditionDeleteOne {
 	builder := c.Delete().Where(skycondition.ID(id))
 	builder.mutation.id = &id
 	builder.mutation.op = OpDeleteOne
@@ -983,12 +982,12 @@ func (c *SkyConditionClient) Query() *SkyConditionQuery {
 }
 
 // Get returns a SkyCondition entity by its id.
-func (c *SkyConditionClient) Get(ctx context.Context, id int) (*SkyCondition, error) {
+func (c *SkyConditionClient) Get(ctx context.Context, id uuid.UUID) (*SkyCondition, error) {
 	return c.Query().Where(skycondition.ID(id)).Only(ctx)
 }
 
 // GetX is like Get, but panics if an error occurs.
-func (c *SkyConditionClient) GetX(ctx context.Context, id int) *SkyCondition {
+func (c *SkyConditionClient) GetX(ctx context.Context, id uuid.UUID) *SkyCondition {
 	obj, err := c.Get(ctx, id)
 	if err != nil {
 		panic(err)
@@ -999,144 +998,6 @@ func (c *SkyConditionClient) GetX(ctx context.Context, id int) *SkyCondition {
 // Hooks returns the client hooks.
 func (c *SkyConditionClient) Hooks() []Hook {
 	return c.hooks.SkyCondition
-}
-
-// StationClient is a client for the Station schema.
-type StationClient struct {
-	config
-}
-
-// NewStationClient returns a client for the Station from the given config.
-func NewStationClient(c config) *StationClient {
-	return &StationClient{config: c}
-}
-
-// Use adds a list of mutation hooks to the hooks stack.
-// A call to `Use(f, g, h)` equals to `station.Hooks(f(g(h())))`.
-func (c *StationClient) Use(hooks ...Hook) {
-	c.hooks.Station = append(c.hooks.Station, hooks...)
-}
-
-// Create returns a builder for creating a Station entity.
-func (c *StationClient) Create() *StationCreate {
-	mutation := newStationMutation(c.config, OpCreate)
-	return &StationCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// CreateBulk returns a builder for creating a bulk of Station entities.
-func (c *StationClient) CreateBulk(builders ...*StationCreate) *StationCreateBulk {
-	return &StationCreateBulk{config: c.config, builders: builders}
-}
-
-// Update returns an update builder for Station.
-func (c *StationClient) Update() *StationUpdate {
-	mutation := newStationMutation(c.config, OpUpdate)
-	return &StationUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// UpdateOne returns an update builder for the given entity.
-func (c *StationClient) UpdateOne(s *Station) *StationUpdateOne {
-	mutation := newStationMutation(c.config, OpUpdateOne, withStation(s))
-	return &StationUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// UpdateOneID returns an update builder for the given id.
-func (c *StationClient) UpdateOneID(id int) *StationUpdateOne {
-	mutation := newStationMutation(c.config, OpUpdateOne, withStationID(id))
-	return &StationUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// Delete returns a delete builder for Station.
-func (c *StationClient) Delete() *StationDelete {
-	mutation := newStationMutation(c.config, OpDelete)
-	return &StationDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// DeleteOne returns a builder for deleting the given entity.
-func (c *StationClient) DeleteOne(s *Station) *StationDeleteOne {
-	return c.DeleteOneID(s.ID)
-}
-
-// DeleteOne returns a builder for deleting the given entity by its id.
-func (c *StationClient) DeleteOneID(id int) *StationDeleteOne {
-	builder := c.Delete().Where(station.ID(id))
-	builder.mutation.id = &id
-	builder.mutation.op = OpDeleteOne
-	return &StationDeleteOne{builder}
-}
-
-// Query returns a query builder for Station.
-func (c *StationClient) Query() *StationQuery {
-	return &StationQuery{
-		config: c.config,
-	}
-}
-
-// Get returns a Station entity by its id.
-func (c *StationClient) Get(ctx context.Context, id int) (*Station, error) {
-	return c.Query().Where(station.ID(id)).Only(ctx)
-}
-
-// GetX is like Get, but panics if an error occurs.
-func (c *StationClient) GetX(ctx context.Context, id int) *Station {
-	obj, err := c.Get(ctx, id)
-	if err != nil {
-		panic(err)
-	}
-	return obj
-}
-
-// QueryAirport queries the airport edge of a Station.
-func (c *StationClient) QueryAirport(s *Station) *AirportQuery {
-	query := &AirportQuery{config: c.config}
-	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
-		id := s.ID
-		step := sqlgraph.NewStep(
-			sqlgraph.From(station.Table, station.FieldID, id),
-			sqlgraph.To(airport.Table, airport.FieldID),
-			sqlgraph.Edge(sqlgraph.O2O, true, station.AirportTable, station.AirportColumn),
-		)
-		fromV = sqlgraph.Neighbors(s.driver.Dialect(), step)
-		return fromV, nil
-	}
-	return query
-}
-
-// QueryMetars queries the metars edge of a Station.
-func (c *StationClient) QueryMetars(s *Station) *MetarQuery {
-	query := &MetarQuery{config: c.config}
-	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
-		id := s.ID
-		step := sqlgraph.NewStep(
-			sqlgraph.From(station.Table, station.FieldID, id),
-			sqlgraph.To(metar.Table, metar.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, station.MetarsTable, station.MetarsColumn),
-		)
-		fromV = sqlgraph.Neighbors(s.driver.Dialect(), step)
-		return fromV, nil
-	}
-	return query
-}
-
-// QueryTafs queries the tafs edge of a Station.
-func (c *StationClient) QueryTafs(s *Station) *TafQuery {
-	query := &TafQuery{config: c.config}
-	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
-		id := s.ID
-		step := sqlgraph.NewStep(
-			sqlgraph.From(station.Table, station.FieldID, id),
-			sqlgraph.To(taf.Table, taf.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, station.TafsTable, station.TafsColumn),
-		)
-		fromV = sqlgraph.Neighbors(s.driver.Dialect(), step)
-		return fromV, nil
-	}
-	return query
-}
-
-// Hooks returns the client hooks.
-func (c *StationClient) Hooks() []Hook {
-	return c.hooks.Station
 }
 
 // TafClient is a client for the Taf schema.
@@ -1179,7 +1040,7 @@ func (c *TafClient) UpdateOne(t *Taf) *TafUpdateOne {
 }
 
 // UpdateOneID returns an update builder for the given id.
-func (c *TafClient) UpdateOneID(id int) *TafUpdateOne {
+func (c *TafClient) UpdateOneID(id uuid.UUID) *TafUpdateOne {
 	mutation := newTafMutation(c.config, OpUpdateOne, withTafID(id))
 	return &TafUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
@@ -1196,7 +1057,7 @@ func (c *TafClient) DeleteOne(t *Taf) *TafDeleteOne {
 }
 
 // DeleteOne returns a builder for deleting the given entity by its id.
-func (c *TafClient) DeleteOneID(id int) *TafDeleteOne {
+func (c *TafClient) DeleteOneID(id uuid.UUID) *TafDeleteOne {
 	builder := c.Delete().Where(taf.ID(id))
 	builder.mutation.id = &id
 	builder.mutation.op = OpDeleteOne
@@ -1211,12 +1072,12 @@ func (c *TafClient) Query() *TafQuery {
 }
 
 // Get returns a Taf entity by its id.
-func (c *TafClient) Get(ctx context.Context, id int) (*Taf, error) {
+func (c *TafClient) Get(ctx context.Context, id uuid.UUID) (*Taf, error) {
 	return c.Query().Where(taf.ID(id)).Only(ctx)
 }
 
 // GetX is like Get, but panics if an error occurs.
-func (c *TafClient) GetX(ctx context.Context, id int) *Taf {
+func (c *TafClient) GetX(ctx context.Context, id uuid.UUID) *Taf {
 	obj, err := c.Get(ctx, id)
 	if err != nil {
 		panic(err)
@@ -1225,13 +1086,13 @@ func (c *TafClient) GetX(ctx context.Context, id int) *Taf {
 }
 
 // QueryStation queries the station edge of a Taf.
-func (c *TafClient) QueryStation(t *Taf) *StationQuery {
-	query := &StationQuery{config: c.config}
+func (c *TafClient) QueryStation(t *Taf) *WeatherStationQuery {
+	query := &WeatherStationQuery{config: c.config}
 	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
 		id := t.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(taf.Table, taf.FieldID, id),
-			sqlgraph.To(station.Table, station.FieldID),
+			sqlgraph.To(weatherstation.Table, weatherstation.FieldID),
 			sqlgraph.Edge(sqlgraph.M2O, true, taf.StationTable, taf.StationColumn),
 		)
 		fromV = sqlgraph.Neighbors(t.driver.Dialect(), step)
@@ -1317,7 +1178,7 @@ func (c *TemperatureDataClient) UpdateOne(td *TemperatureData) *TemperatureDataU
 }
 
 // UpdateOneID returns an update builder for the given id.
-func (c *TemperatureDataClient) UpdateOneID(id int) *TemperatureDataUpdateOne {
+func (c *TemperatureDataClient) UpdateOneID(id uuid.UUID) *TemperatureDataUpdateOne {
 	mutation := newTemperatureDataMutation(c.config, OpUpdateOne, withTemperatureDataID(id))
 	return &TemperatureDataUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
@@ -1334,7 +1195,7 @@ func (c *TemperatureDataClient) DeleteOne(td *TemperatureData) *TemperatureDataD
 }
 
 // DeleteOne returns a builder for deleting the given entity by its id.
-func (c *TemperatureDataClient) DeleteOneID(id int) *TemperatureDataDeleteOne {
+func (c *TemperatureDataClient) DeleteOneID(id uuid.UUID) *TemperatureDataDeleteOne {
 	builder := c.Delete().Where(temperaturedata.ID(id))
 	builder.mutation.id = &id
 	builder.mutation.op = OpDeleteOne
@@ -1349,12 +1210,12 @@ func (c *TemperatureDataClient) Query() *TemperatureDataQuery {
 }
 
 // Get returns a TemperatureData entity by its id.
-func (c *TemperatureDataClient) Get(ctx context.Context, id int) (*TemperatureData, error) {
+func (c *TemperatureDataClient) Get(ctx context.Context, id uuid.UUID) (*TemperatureData, error) {
 	return c.Query().Where(temperaturedata.ID(id)).Only(ctx)
 }
 
 // GetX is like Get, but panics if an error occurs.
-func (c *TemperatureDataClient) GetX(ctx context.Context, id int) *TemperatureData {
+func (c *TemperatureDataClient) GetX(ctx context.Context, id uuid.UUID) *TemperatureData {
 	obj, err := c.Get(ctx, id)
 	if err != nil {
 		panic(err)
@@ -1407,7 +1268,7 @@ func (c *TurbulenceConditionClient) UpdateOne(tc *TurbulenceCondition) *Turbulen
 }
 
 // UpdateOneID returns an update builder for the given id.
-func (c *TurbulenceConditionClient) UpdateOneID(id int) *TurbulenceConditionUpdateOne {
+func (c *TurbulenceConditionClient) UpdateOneID(id uuid.UUID) *TurbulenceConditionUpdateOne {
 	mutation := newTurbulenceConditionMutation(c.config, OpUpdateOne, withTurbulenceConditionID(id))
 	return &TurbulenceConditionUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
@@ -1424,7 +1285,7 @@ func (c *TurbulenceConditionClient) DeleteOne(tc *TurbulenceCondition) *Turbulen
 }
 
 // DeleteOne returns a builder for deleting the given entity by its id.
-func (c *TurbulenceConditionClient) DeleteOneID(id int) *TurbulenceConditionDeleteOne {
+func (c *TurbulenceConditionClient) DeleteOneID(id uuid.UUID) *TurbulenceConditionDeleteOne {
 	builder := c.Delete().Where(turbulencecondition.ID(id))
 	builder.mutation.id = &id
 	builder.mutation.op = OpDeleteOne
@@ -1439,12 +1300,12 @@ func (c *TurbulenceConditionClient) Query() *TurbulenceConditionQuery {
 }
 
 // Get returns a TurbulenceCondition entity by its id.
-func (c *TurbulenceConditionClient) Get(ctx context.Context, id int) (*TurbulenceCondition, error) {
+func (c *TurbulenceConditionClient) Get(ctx context.Context, id uuid.UUID) (*TurbulenceCondition, error) {
 	return c.Query().Where(turbulencecondition.ID(id)).Only(ctx)
 }
 
 // GetX is like Get, but panics if an error occurs.
-func (c *TurbulenceConditionClient) GetX(ctx context.Context, id int) *TurbulenceCondition {
+func (c *TurbulenceConditionClient) GetX(ctx context.Context, id uuid.UUID) *TurbulenceCondition {
 	obj, err := c.Get(ctx, id)
 	if err != nil {
 		panic(err)
@@ -1455,4 +1316,142 @@ func (c *TurbulenceConditionClient) GetX(ctx context.Context, id int) *Turbulenc
 // Hooks returns the client hooks.
 func (c *TurbulenceConditionClient) Hooks() []Hook {
 	return c.hooks.TurbulenceCondition
+}
+
+// WeatherStationClient is a client for the WeatherStation schema.
+type WeatherStationClient struct {
+	config
+}
+
+// NewWeatherStationClient returns a client for the WeatherStation from the given config.
+func NewWeatherStationClient(c config) *WeatherStationClient {
+	return &WeatherStationClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `weatherstation.Hooks(f(g(h())))`.
+func (c *WeatherStationClient) Use(hooks ...Hook) {
+	c.hooks.WeatherStation = append(c.hooks.WeatherStation, hooks...)
+}
+
+// Create returns a builder for creating a WeatherStation entity.
+func (c *WeatherStationClient) Create() *WeatherStationCreate {
+	mutation := newWeatherStationMutation(c.config, OpCreate)
+	return &WeatherStationCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of WeatherStation entities.
+func (c *WeatherStationClient) CreateBulk(builders ...*WeatherStationCreate) *WeatherStationCreateBulk {
+	return &WeatherStationCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for WeatherStation.
+func (c *WeatherStationClient) Update() *WeatherStationUpdate {
+	mutation := newWeatherStationMutation(c.config, OpUpdate)
+	return &WeatherStationUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *WeatherStationClient) UpdateOne(ws *WeatherStation) *WeatherStationUpdateOne {
+	mutation := newWeatherStationMutation(c.config, OpUpdateOne, withWeatherStation(ws))
+	return &WeatherStationUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *WeatherStationClient) UpdateOneID(id uuid.UUID) *WeatherStationUpdateOne {
+	mutation := newWeatherStationMutation(c.config, OpUpdateOne, withWeatherStationID(id))
+	return &WeatherStationUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for WeatherStation.
+func (c *WeatherStationClient) Delete() *WeatherStationDelete {
+	mutation := newWeatherStationMutation(c.config, OpDelete)
+	return &WeatherStationDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *WeatherStationClient) DeleteOne(ws *WeatherStation) *WeatherStationDeleteOne {
+	return c.DeleteOneID(ws.ID)
+}
+
+// DeleteOne returns a builder for deleting the given entity by its id.
+func (c *WeatherStationClient) DeleteOneID(id uuid.UUID) *WeatherStationDeleteOne {
+	builder := c.Delete().Where(weatherstation.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &WeatherStationDeleteOne{builder}
+}
+
+// Query returns a query builder for WeatherStation.
+func (c *WeatherStationClient) Query() *WeatherStationQuery {
+	return &WeatherStationQuery{
+		config: c.config,
+	}
+}
+
+// Get returns a WeatherStation entity by its id.
+func (c *WeatherStationClient) Get(ctx context.Context, id uuid.UUID) (*WeatherStation, error) {
+	return c.Query().Where(weatherstation.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *WeatherStationClient) GetX(ctx context.Context, id uuid.UUID) *WeatherStation {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryAirport queries the airport edge of a WeatherStation.
+func (c *WeatherStationClient) QueryAirport(ws *WeatherStation) *AirportQuery {
+	query := &AirportQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := ws.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(weatherstation.Table, weatherstation.FieldID, id),
+			sqlgraph.To(airport.Table, airport.FieldID),
+			sqlgraph.Edge(sqlgraph.O2O, true, weatherstation.AirportTable, weatherstation.AirportColumn),
+		)
+		fromV = sqlgraph.Neighbors(ws.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryMetars queries the metars edge of a WeatherStation.
+func (c *WeatherStationClient) QueryMetars(ws *WeatherStation) *MetarQuery {
+	query := &MetarQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := ws.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(weatherstation.Table, weatherstation.FieldID, id),
+			sqlgraph.To(metar.Table, metar.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, weatherstation.MetarsTable, weatherstation.MetarsColumn),
+		)
+		fromV = sqlgraph.Neighbors(ws.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryTafs queries the tafs edge of a WeatherStation.
+func (c *WeatherStationClient) QueryTafs(ws *WeatherStation) *TafQuery {
+	query := &TafQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := ws.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(weatherstation.Table, weatherstation.FieldID, id),
+			sqlgraph.To(taf.Table, taf.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, weatherstation.TafsTable, weatherstation.TafsColumn),
+		)
+		fromV = sqlgraph.Neighbors(ws.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *WeatherStationClient) Hooks() []Hook {
+	return c.hooks.WeatherStation
 }

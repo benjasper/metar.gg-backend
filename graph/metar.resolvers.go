@@ -6,15 +6,16 @@ package graph
 import (
 	"context"
 	"fmt"
-	"metar.gg/ent/metar"
-	"metar.gg/ent/taf"
 
 	"entgo.io/ent/dialect/sql"
+	"github.com/google/uuid"
 	"metar.gg/ent"
 	"metar.gg/ent/airport"
+	"metar.gg/ent/metar"
 	"metar.gg/ent/predicate"
 	"metar.gg/ent/runway"
-	"metar.gg/ent/station"
+	"metar.gg/ent/taf"
+	"metar.gg/ent/weatherstation"
 	"metar.gg/graph/generated"
 	"metar.gg/graph/model"
 )
@@ -45,8 +46,8 @@ func (r *airportResolver) StationsVicinity(ctx context.Context, obj *ent.Airport
 
 	var stationsWithIDAndDistance []*model.StationWithDistanceUnstructured
 
-	err := r.client.Station.Query().Where(
-		station.LatitudeLTE(maxLat), station.LatitudeGTE(minLat), station.LongitudeLTE(maxLon), station.LongitudeGTE(minLon),
+	err := r.client.WeatherStation.Query().Where(
+		weatherstation.LatitudeLTE(maxLat), weatherstation.LatitudeGTE(minLat), weatherstation.LongitudeLTE(maxLon), weatherstation.LongitudeGTE(minLon),
 	).Modify(func(s *sql.Selector) {
 		s.AppendSelect(fmt.Sprintf("%s as distance", geoSQLQuery))
 		s.Where(sql.ExprP(fmt.Sprintf("%s < %f", geoSQLQuery, *radius)))
@@ -57,18 +58,18 @@ func (r *airportResolver) StationsVicinity(ctx context.Context, obj *ent.Airport
 	}
 
 	// Get all ids of stationsWithIDAndDistance
-	var ids []int
+	var ids []uuid.UUID
 	for _, m := range stationsWithIDAndDistance {
 		ids = append(ids, m.ID)
 	}
 
-	stations, err := r.client.Station.Query().Where(station.IDIn(ids...)).All(ctx)
+	stations, err := r.client.WeatherStation.Query().Where(weatherstation.IDIn(ids...)).All(ctx)
 	if err != nil {
 		return nil, err
 	}
 
 	// Create a map of id -> m
-	stationsMap := make(map[int]*ent.Station)
+	stationsMap := make(map[uuid.UUID]*ent.WeatherStation)
 	for _, m := range stations {
 		stationsMap[m.ID] = m
 	}
@@ -86,12 +87,20 @@ func (r *airportResolver) StationsVicinity(ctx context.Context, obj *ent.Airport
 }
 
 // GetAirports is the resolver for the getAirports field.
-func (r *queryResolver) GetAirports(ctx context.Context, after *ent.Cursor, first *int, before *ent.Cursor, last *int, identifier *string, hasWeather *bool) (*ent.AirportConnection, error) {
+func (r *queryResolver) GetAirports(ctx context.Context, after *ent.Cursor, first *int, before *ent.Cursor, last *int, identifier *string, icao *string, iata *string, hasWeather *bool) (*ent.AirportConnection, error) {
 	first, last = BoundsForPagination(first, last)
 
 	var where []predicate.Airport
 	if identifier != nil {
 		where = append(where, airport.IdentifierEqualFold(*identifier))
+	}
+
+	if icao != nil {
+		where = append(where, airport.IcaoCodeEqualFold(*icao))
+	}
+
+	if iata != nil {
+		where = append(where, airport.IataCodeEqualFold(*iata))
 	}
 
 	if hasWeather != nil && *hasWeather {
@@ -111,7 +120,7 @@ func (r *queryResolver) GetAirports(ctx context.Context, after *ent.Cursor, firs
 }
 
 // Metars is the resolver for the metars field.
-func (r *stationResolver) Metars(ctx context.Context, obj *ent.Station, after *ent.Cursor, first *int, before *ent.Cursor, last *int) (*ent.MetarConnection, error) {
+func (r *weatherStationResolver) Metars(ctx context.Context, obj *ent.WeatherStation, after *ent.Cursor, first *int, before *ent.Cursor, last *int) (*ent.MetarConnection, error) {
 	first, last = BoundsForPagination(first, last)
 
 	connection, err := obj.QueryMetars().Order(ent.Desc(metar.FieldObservationTime)).Paginate(ctx, after, first, before, last)
@@ -123,7 +132,7 @@ func (r *stationResolver) Metars(ctx context.Context, obj *ent.Station, after *e
 }
 
 // Tafs is the resolver for the tafs field.
-func (r *stationResolver) Tafs(ctx context.Context, obj *ent.Station, after *ent.Cursor, first *int, before *ent.Cursor, last *int) (*ent.TafConnection, error) {
+func (r *weatherStationResolver) Tafs(ctx context.Context, obj *ent.WeatherStation, after *ent.Cursor, first *int, before *ent.Cursor, last *int) (*ent.TafConnection, error) {
 	first, last = BoundsForPagination(first, last)
 
 	connection, err := obj.QueryTafs().Order(ent.Desc(taf.FieldIssueTime)).Paginate(ctx, after, first, before, last)

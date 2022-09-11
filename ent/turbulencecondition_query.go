@@ -10,6 +10,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/google/uuid"
 	"metar.gg/ent/predicate"
 	"metar.gg/ent/turbulencecondition"
 )
@@ -86,8 +87,8 @@ func (tcq *TurbulenceConditionQuery) FirstX(ctx context.Context) *TurbulenceCond
 
 // FirstID returns the first TurbulenceCondition ID from the query.
 // Returns a *NotFoundError when no TurbulenceCondition ID was found.
-func (tcq *TurbulenceConditionQuery) FirstID(ctx context.Context) (id int, err error) {
-	var ids []int
+func (tcq *TurbulenceConditionQuery) FirstID(ctx context.Context) (id uuid.UUID, err error) {
+	var ids []uuid.UUID
 	if ids, err = tcq.Limit(1).IDs(ctx); err != nil {
 		return
 	}
@@ -99,7 +100,7 @@ func (tcq *TurbulenceConditionQuery) FirstID(ctx context.Context) (id int, err e
 }
 
 // FirstIDX is like FirstID, but panics if an error occurs.
-func (tcq *TurbulenceConditionQuery) FirstIDX(ctx context.Context) int {
+func (tcq *TurbulenceConditionQuery) FirstIDX(ctx context.Context) uuid.UUID {
 	id, err := tcq.FirstID(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
@@ -137,8 +138,8 @@ func (tcq *TurbulenceConditionQuery) OnlyX(ctx context.Context) *TurbulenceCondi
 // OnlyID is like Only, but returns the only TurbulenceCondition ID in the query.
 // Returns a *NotSingularError when more than one TurbulenceCondition ID is found.
 // Returns a *NotFoundError when no entities are found.
-func (tcq *TurbulenceConditionQuery) OnlyID(ctx context.Context) (id int, err error) {
-	var ids []int
+func (tcq *TurbulenceConditionQuery) OnlyID(ctx context.Context) (id uuid.UUID, err error) {
+	var ids []uuid.UUID
 	if ids, err = tcq.Limit(2).IDs(ctx); err != nil {
 		return
 	}
@@ -154,7 +155,7 @@ func (tcq *TurbulenceConditionQuery) OnlyID(ctx context.Context) (id int, err er
 }
 
 // OnlyIDX is like OnlyID, but panics if an error occurs.
-func (tcq *TurbulenceConditionQuery) OnlyIDX(ctx context.Context) int {
+func (tcq *TurbulenceConditionQuery) OnlyIDX(ctx context.Context) uuid.UUID {
 	id, err := tcq.OnlyID(ctx)
 	if err != nil {
 		panic(err)
@@ -180,8 +181,8 @@ func (tcq *TurbulenceConditionQuery) AllX(ctx context.Context) []*TurbulenceCond
 }
 
 // IDs executes the query and returns a list of TurbulenceCondition IDs.
-func (tcq *TurbulenceConditionQuery) IDs(ctx context.Context) ([]int, error) {
-	var ids []int
+func (tcq *TurbulenceConditionQuery) IDs(ctx context.Context) ([]uuid.UUID, error) {
+	var ids []uuid.UUID
 	if err := tcq.Select(turbulencecondition.FieldID).Scan(ctx, &ids); err != nil {
 		return nil, err
 	}
@@ -189,7 +190,7 @@ func (tcq *TurbulenceConditionQuery) IDs(ctx context.Context) ([]int, error) {
 }
 
 // IDsX is like IDs, but panics if an error occurs.
-func (tcq *TurbulenceConditionQuery) IDsX(ctx context.Context) []int {
+func (tcq *TurbulenceConditionQuery) IDsX(ctx context.Context) []uuid.UUID {
 	ids, err := tcq.IDs(ctx)
 	if err != nil {
 		panic(err)
@@ -377,7 +378,7 @@ func (tcq *TurbulenceConditionQuery) querySpec() *sqlgraph.QuerySpec {
 			Table:   turbulencecondition.Table,
 			Columns: turbulencecondition.Columns,
 			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt,
+				Type:   field.TypeUUID,
 				Column: turbulencecondition.FieldID,
 			},
 		},

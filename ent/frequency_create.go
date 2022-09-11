@@ -8,9 +8,11 @@ import (
 	"fmt"
 	"time"
 
+	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/google/uuid"
 	"metar.gg/ent/airport"
 	"metar.gg/ent/frequency"
 )
@@ -21,6 +23,12 @@ type FrequencyCreate struct {
 	mutation *FrequencyMutation
 	hooks    []Hook
 	conflict []sql.ConflictOption
+}
+
+// SetImportID sets the "import_id" field.
+func (fc *FrequencyCreate) SetImportID(i int) *FrequencyCreate {
+	fc.mutation.SetImportID(i)
+	return fc
 }
 
 // SetHash sets the "hash" field.
@@ -76,19 +84,27 @@ func (fc *FrequencyCreate) SetFrequency(f float64) *FrequencyCreate {
 }
 
 // SetID sets the "id" field.
-func (fc *FrequencyCreate) SetID(i int) *FrequencyCreate {
-	fc.mutation.SetID(i)
+func (fc *FrequencyCreate) SetID(u uuid.UUID) *FrequencyCreate {
+	fc.mutation.SetID(u)
+	return fc
+}
+
+// SetNillableID sets the "id" field if the given value is not nil.
+func (fc *FrequencyCreate) SetNillableID(u *uuid.UUID) *FrequencyCreate {
+	if u != nil {
+		fc.SetID(*u)
+	}
 	return fc
 }
 
 // SetAirportID sets the "airport" edge to the Airport entity by ID.
-func (fc *FrequencyCreate) SetAirportID(id int) *FrequencyCreate {
+func (fc *FrequencyCreate) SetAirportID(id uuid.UUID) *FrequencyCreate {
 	fc.mutation.SetAirportID(id)
 	return fc
 }
 
 // SetNillableAirportID sets the "airport" edge to the Airport entity by ID if the given value is not nil.
-func (fc *FrequencyCreate) SetNillableAirportID(id *int) *FrequencyCreate {
+func (fc *FrequencyCreate) SetNillableAirportID(id *uuid.UUID) *FrequencyCreate {
 	if id != nil {
 		fc = fc.SetAirportID(*id)
 	}
@@ -185,10 +201,17 @@ func (fc *FrequencyCreate) defaults() {
 		v := frequency.DefaultLastUpdated()
 		fc.mutation.SetLastUpdated(v)
 	}
+	if _, ok := fc.mutation.ID(); !ok {
+		v := frequency.DefaultID()
+		fc.mutation.SetID(v)
+	}
 }
 
 // check runs all checks and user-defined validators on the builder.
 func (fc *FrequencyCreate) check() error {
+	if _, ok := fc.mutation.ImportID(); !ok {
+		return &ValidationError{Name: "import_id", err: errors.New(`ent: missing required field "Frequency.import_id"`)}
+	}
 	if _, ok := fc.mutation.Hash(); !ok {
 		return &ValidationError{Name: "hash", err: errors.New(`ent: missing required field "Frequency.hash"`)}
 	}
@@ -218,9 +241,12 @@ func (fc *FrequencyCreate) sqlSave(ctx context.Context) (*Frequency, error) {
 		}
 		return nil, err
 	}
-	if _spec.ID.Value != _node.ID {
-		id := _spec.ID.Value.(int64)
-		_node.ID = int(id)
+	if _spec.ID.Value != nil {
+		if id, ok := _spec.ID.Value.(*uuid.UUID); ok {
+			_node.ID = *id
+		} else if err := _node.ID.Scan(_spec.ID.Value); err != nil {
+			return nil, err
+		}
 	}
 	return _node, nil
 }
@@ -231,7 +257,7 @@ func (fc *FrequencyCreate) createSpec() (*Frequency, *sqlgraph.CreateSpec) {
 		_spec = &sqlgraph.CreateSpec{
 			Table: frequency.Table,
 			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt,
+				Type:   field.TypeUUID,
 				Column: frequency.FieldID,
 			},
 		}
@@ -239,7 +265,15 @@ func (fc *FrequencyCreate) createSpec() (*Frequency, *sqlgraph.CreateSpec) {
 	_spec.OnConflict = fc.conflict
 	if id, ok := fc.mutation.ID(); ok {
 		_node.ID = id
-		_spec.ID.Value = id
+		_spec.ID.Value = &id
+	}
+	if value, ok := fc.mutation.ImportID(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt,
+			Value:  value,
+			Column: frequency.FieldImportID,
+		})
+		_node.ImportID = value
 	}
 	if value, ok := fc.mutation.Hash(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
@@ -298,7 +332,7 @@ func (fc *FrequencyCreate) createSpec() (*Frequency, *sqlgraph.CreateSpec) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
+					Type:   field.TypeUUID,
 					Column: airport.FieldID,
 				},
 			},
@@ -316,7 +350,7 @@ func (fc *FrequencyCreate) createSpec() (*Frequency, *sqlgraph.CreateSpec) {
 // of the `INSERT` statement. For example:
 //
 //	client.Frequency.Create().
-//		SetHash(v).
+//		SetImportID(v).
 //		OnConflict(
 //			// Update the row with the new values
 //			// the was proposed for insertion.
@@ -325,7 +359,7 @@ func (fc *FrequencyCreate) createSpec() (*Frequency, *sqlgraph.CreateSpec) {
 //		// Override some of the fields with custom
 //		// update values.
 //		Update(func(u *ent.FrequencyUpsert) {
-//			SetHash(v+v).
+//			SetImportID(v+v).
 //		}).
 //		Exec(ctx)
 func (fc *FrequencyCreate) OnConflict(opts ...sql.ConflictOption) *FrequencyUpsertOne {
@@ -360,6 +394,24 @@ type (
 		*sql.UpdateSet
 	}
 )
+
+// SetImportID sets the "import_id" field.
+func (u *FrequencyUpsert) SetImportID(v int) *FrequencyUpsert {
+	u.Set(frequency.FieldImportID, v)
+	return u
+}
+
+// UpdateImportID sets the "import_id" field to the value that was provided on create.
+func (u *FrequencyUpsert) UpdateImportID() *FrequencyUpsert {
+	u.SetExcluded(frequency.FieldImportID)
+	return u
+}
+
+// AddImportID adds v to the "import_id" field.
+func (u *FrequencyUpsert) AddImportID(v int) *FrequencyUpsert {
+	u.Add(frequency.FieldImportID, v)
+	return u
+}
 
 // SetHash sets the "hash" field.
 func (u *FrequencyUpsert) SetHash(v string) *FrequencyUpsert {
@@ -487,6 +539,27 @@ func (u *FrequencyUpsertOne) Update(set func(*FrequencyUpsert)) *FrequencyUpsert
 	return u
 }
 
+// SetImportID sets the "import_id" field.
+func (u *FrequencyUpsertOne) SetImportID(v int) *FrequencyUpsertOne {
+	return u.Update(func(s *FrequencyUpsert) {
+		s.SetImportID(v)
+	})
+}
+
+// AddImportID adds v to the "import_id" field.
+func (u *FrequencyUpsertOne) AddImportID(v int) *FrequencyUpsertOne {
+	return u.Update(func(s *FrequencyUpsert) {
+		s.AddImportID(v)
+	})
+}
+
+// UpdateImportID sets the "import_id" field to the value that was provided on create.
+func (u *FrequencyUpsertOne) UpdateImportID() *FrequencyUpsertOne {
+	return u.Update(func(s *FrequencyUpsert) {
+		s.UpdateImportID()
+	})
+}
+
 // SetHash sets the "hash" field.
 func (u *FrequencyUpsertOne) SetHash(v string) *FrequencyUpsertOne {
 	return u.Update(func(s *FrequencyUpsert) {
@@ -594,7 +667,12 @@ func (u *FrequencyUpsertOne) ExecX(ctx context.Context) {
 }
 
 // Exec executes the UPSERT query and returns the inserted/updated ID.
-func (u *FrequencyUpsertOne) ID(ctx context.Context) (id int, err error) {
+func (u *FrequencyUpsertOne) ID(ctx context.Context) (id uuid.UUID, err error) {
+	if u.create.driver.Dialect() == dialect.MySQL {
+		// In case of "ON CONFLICT", there is no way to get back non-numeric ID
+		// fields from the database since MySQL does not support the RETURNING clause.
+		return id, errors.New("ent: FrequencyUpsertOne.ID is not supported by MySQL driver. Use FrequencyUpsertOne.Exec instead")
+	}
 	node, err := u.create.Save(ctx)
 	if err != nil {
 		return id, err
@@ -603,7 +681,7 @@ func (u *FrequencyUpsertOne) ID(ctx context.Context) (id int, err error) {
 }
 
 // IDX is like ID, but panics if an error occurs.
-func (u *FrequencyUpsertOne) IDX(ctx context.Context) int {
+func (u *FrequencyUpsertOne) IDX(ctx context.Context) uuid.UUID {
 	id, err := u.ID(ctx)
 	if err != nil {
 		panic(err)
@@ -654,10 +732,6 @@ func (fcb *FrequencyCreateBulk) Save(ctx context.Context) ([]*Frequency, error) 
 					return nil, err
 				}
 				mutation.id = &nodes[i].ID
-				if specs[i].ID.Value != nil && nodes[i].ID == 0 {
-					id := specs[i].ID.Value.(int64)
-					nodes[i].ID = int(id)
-				}
 				mutation.done = true
 				return nodes[i], nil
 			})
@@ -709,7 +783,7 @@ func (fcb *FrequencyCreateBulk) ExecX(ctx context.Context) {
 //		// Override some of the fields with custom
 //		// update values.
 //		Update(func(u *ent.FrequencyUpsert) {
-//			SetHash(v+v).
+//			SetImportID(v+v).
 //		}).
 //		Exec(ctx)
 func (fcb *FrequencyCreateBulk) OnConflict(opts ...sql.ConflictOption) *FrequencyUpsertBulk {
@@ -786,6 +860,27 @@ func (u *FrequencyUpsertBulk) Update(set func(*FrequencyUpsert)) *FrequencyUpser
 		set(&FrequencyUpsert{UpdateSet: update})
 	}))
 	return u
+}
+
+// SetImportID sets the "import_id" field.
+func (u *FrequencyUpsertBulk) SetImportID(v int) *FrequencyUpsertBulk {
+	return u.Update(func(s *FrequencyUpsert) {
+		s.SetImportID(v)
+	})
+}
+
+// AddImportID adds v to the "import_id" field.
+func (u *FrequencyUpsertBulk) AddImportID(v int) *FrequencyUpsertBulk {
+	return u.Update(func(s *FrequencyUpsert) {
+		s.AddImportID(v)
+	})
+}
+
+// UpdateImportID sets the "import_id" field to the value that was provided on create.
+func (u *FrequencyUpsertBulk) UpdateImportID() *FrequencyUpsertBulk {
+	return u.Update(func(s *FrequencyUpsert) {
+		s.UpdateImportID()
+	})
 }
 
 // SetHash sets the "hash" field.

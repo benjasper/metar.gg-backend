@@ -11,8 +11,8 @@ import (
 	"metar.gg/ent/forecast"
 	"metar.gg/ent/metar"
 	"metar.gg/ent/skycondition"
-	"metar.gg/ent/station"
 	"metar.gg/ent/taf"
+	"metar.gg/ent/weatherstation"
 	"metar.gg/environment"
 	"metar.gg/logging"
 	"metar.gg/utils"
@@ -358,7 +358,7 @@ func (i *NoaaWeatherImporter) importTaf(x *XmlTaf, ctx context.Context) error {
 				fc.SetChangeIndicator(forecast.ChangeIndicatorPROB)
 				break
 			default:
-				i.logger.Error(fmt.Sprintf("unknown forecast change indicator %s", xmlForecast.Change))
+				i.logger.Error(fmt.Sprintf("unknown forecast change indicator %s", *xmlForecast.Change))
 				break
 			}
 		}
@@ -496,7 +496,7 @@ func getSkyCoverFromString(input string) (skycondition.SkyCover, error) {
 	return skyCover, nil
 }
 
-func (i *NoaaWeatherImporter) getStation(ctx context.Context, stationID string, latitude float64, longitude float64, elevation float64) (*ent.Station, error) {
+func (i *NoaaWeatherImporter) getStation(ctx context.Context, stationID string, latitude float64, longitude float64, elevation float64) (*ent.WeatherStation, error) {
 	// Check if we have an airport with this station ID
 	a, _ := i.db.Airport.Query().Where(airport.Identifier(stationID)).Only(ctx)
 
@@ -509,7 +509,7 @@ func (i *NoaaWeatherImporter) getStation(ctx context.Context, stationID string, 
 	hash := strconv.FormatUint(fnv1a.HashString64(line), 10)
 
 	// Check if we already have this s
-	s, _ := i.db.Station.Query().Where(station.StationID(stationID)).Only(ctx)
+	s, _ := i.db.WeatherStation.Query().Where(weatherstation.StationID(stationID)).Only(ctx)
 	if s != nil {
 		if s.Hash == hash {
 			return s, nil
@@ -531,7 +531,7 @@ func (i *NoaaWeatherImporter) getStation(ctx context.Context, stationID string, 
 
 	var err error
 
-	stationCreation := i.db.Station.Create().SetHash(hash).SetLatitude(latitude).SetLongitude(longitude).SetElevation(elevation).SetStationID(stationID)
+	stationCreation := i.db.WeatherStation.Create().SetHash(hash).SetLatitude(latitude).SetLongitude(longitude).SetElevation(elevation).SetStationID(stationID)
 	if a != nil {
 		stationCreation.SetAirport(a)
 	}

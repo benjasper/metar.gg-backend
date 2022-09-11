@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"entgo.io/ent/dialect/sql"
+	"github.com/google/uuid"
 	"metar.gg/ent/airport"
 	"metar.gg/ent/runway"
 )
@@ -16,7 +17,9 @@ import (
 type Runway struct {
 	config `json:"-"`
 	// ID of the ent.
-	ID int `json:"id,omitempty"`
+	ID uuid.UUID `json:"id,omitempty"`
+	// ImportID holds the value of the "import_id" field.
+	ImportID int `json:"import_id,omitempty"`
 	// Hash holds the value of the "hash" field.
 	Hash string `json:"hash,omitempty"`
 	// ImportFlag holds the value of the "import_flag" field.
@@ -60,7 +63,7 @@ type Runway struct {
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the RunwayQuery when eager-loading is set.
 	Edges           RunwayEdges `json:"edges"`
-	airport_runways *int
+	airport_runways *uuid.UUID
 }
 
 // RunwayEdges holds the relations/edges for other nodes in the graph.
@@ -96,14 +99,16 @@ func (*Runway) scanValues(columns []string) ([]any, error) {
 			values[i] = new(sql.NullBool)
 		case runway.FieldLowRunwayLatitude, runway.FieldLowRunwayLongitude, runway.FieldLowRunwayHeading, runway.FieldHighRunwayLatitude, runway.FieldHighRunwayLongitude, runway.FieldHighRunwayHeading:
 			values[i] = new(sql.NullFloat64)
-		case runway.FieldID, runway.FieldLength, runway.FieldWidth, runway.FieldLowRunwayElevation, runway.FieldLowRunwayDisplacedThreshold, runway.FieldHighRunwayElevation, runway.FieldHighRunwayDisplacedThreshold:
+		case runway.FieldImportID, runway.FieldLength, runway.FieldWidth, runway.FieldLowRunwayElevation, runway.FieldLowRunwayDisplacedThreshold, runway.FieldHighRunwayElevation, runway.FieldHighRunwayDisplacedThreshold:
 			values[i] = new(sql.NullInt64)
 		case runway.FieldHash, runway.FieldSurface, runway.FieldLowRunwayIdentifier, runway.FieldHighRunwayIdentifier:
 			values[i] = new(sql.NullString)
 		case runway.FieldLastUpdated:
 			values[i] = new(sql.NullTime)
+		case runway.FieldID:
+			values[i] = new(uuid.UUID)
 		case runway.ForeignKeys[0]: // airport_runways
-			values[i] = new(sql.NullInt64)
+			values[i] = &sql.NullScanner{S: new(uuid.UUID)}
 		default:
 			return nil, fmt.Errorf("unexpected column %q for type Runway", columns[i])
 		}
@@ -120,11 +125,17 @@ func (r *Runway) assignValues(columns []string, values []any) error {
 	for i := range columns {
 		switch columns[i] {
 		case runway.FieldID:
-			value, ok := values[i].(*sql.NullInt64)
-			if !ok {
-				return fmt.Errorf("unexpected type %T for field id", value)
+			if value, ok := values[i].(*uuid.UUID); !ok {
+				return fmt.Errorf("unexpected type %T for field id", values[i])
+			} else if value != nil {
+				r.ID = *value
 			}
-			r.ID = int(value.Int64)
+		case runway.FieldImportID:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field import_id", values[i])
+			} else if value.Valid {
+				r.ImportID = int(value.Int64)
+			}
 		case runway.FieldHash:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field hash", values[i])
@@ -257,11 +268,11 @@ func (r *Runway) assignValues(columns []string, values []any) error {
 				*r.HighRunwayDisplacedThreshold = int(value.Int64)
 			}
 		case runway.ForeignKeys[0]:
-			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for edge-field airport_runways", value)
+			if value, ok := values[i].(*sql.NullScanner); !ok {
+				return fmt.Errorf("unexpected type %T for field airport_runways", values[i])
 			} else if value.Valid {
-				r.airport_runways = new(int)
-				*r.airport_runways = int(value.Int64)
+				r.airport_runways = new(uuid.UUID)
+				*r.airport_runways = *value.S.(*uuid.UUID)
 			}
 		}
 	}
@@ -296,6 +307,9 @@ func (r *Runway) String() string {
 	var builder strings.Builder
 	builder.WriteString("Runway(")
 	builder.WriteString(fmt.Sprintf("id=%v, ", r.ID))
+	builder.WriteString("import_id=")
+	builder.WriteString(fmt.Sprintf("%v", r.ImportID))
+	builder.WriteString(", ")
 	builder.WriteString("hash=")
 	builder.WriteString(r.Hash)
 	builder.WriteString(", ")

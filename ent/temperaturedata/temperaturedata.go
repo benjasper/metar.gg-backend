@@ -2,6 +2,10 @@
 
 package temperaturedata
 
+import (
+	"github.com/google/uuid"
+)
+
 const (
 	// Label holds the string label denoting the temperaturedata type in the database.
 	Label = "temperature_data"
@@ -48,3 +52,8 @@ func ValidColumn(column string) bool {
 	}
 	return false
 }
+
+var (
+	// DefaultID holds the default value on creation for the "id" field.
+	DefaultID func() uuid.UUID
+)

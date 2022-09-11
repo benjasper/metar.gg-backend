@@ -10,6 +10,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/google/uuid"
 	"metar.gg/ent/airport"
 	"metar.gg/ent/frequency"
 	"metar.gg/ent/predicate"
@@ -110,8 +111,8 @@ func (fq *FrequencyQuery) FirstX(ctx context.Context) *Frequency {
 
 // FirstID returns the first Frequency ID from the query.
 // Returns a *NotFoundError when no Frequency ID was found.
-func (fq *FrequencyQuery) FirstID(ctx context.Context) (id int, err error) {
-	var ids []int
+func (fq *FrequencyQuery) FirstID(ctx context.Context) (id uuid.UUID, err error) {
+	var ids []uuid.UUID
 	if ids, err = fq.Limit(1).IDs(ctx); err != nil {
 		return
 	}
@@ -123,7 +124,7 @@ func (fq *FrequencyQuery) FirstID(ctx context.Context) (id int, err error) {
 }
 
 // FirstIDX is like FirstID, but panics if an error occurs.
-func (fq *FrequencyQuery) FirstIDX(ctx context.Context) int {
+func (fq *FrequencyQuery) FirstIDX(ctx context.Context) uuid.UUID {
 	id, err := fq.FirstID(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
@@ -161,8 +162,8 @@ func (fq *FrequencyQuery) OnlyX(ctx context.Context) *Frequency {
 // OnlyID is like Only, but returns the only Frequency ID in the query.
 // Returns a *NotSingularError when more than one Frequency ID is found.
 // Returns a *NotFoundError when no entities are found.
-func (fq *FrequencyQuery) OnlyID(ctx context.Context) (id int, err error) {
-	var ids []int
+func (fq *FrequencyQuery) OnlyID(ctx context.Context) (id uuid.UUID, err error) {
+	var ids []uuid.UUID
 	if ids, err = fq.Limit(2).IDs(ctx); err != nil {
 		return
 	}
@@ -178,7 +179,7 @@ func (fq *FrequencyQuery) OnlyID(ctx context.Context) (id int, err error) {
 }
 
 // OnlyIDX is like OnlyID, but panics if an error occurs.
-func (fq *FrequencyQuery) OnlyIDX(ctx context.Context) int {
+func (fq *FrequencyQuery) OnlyIDX(ctx context.Context) uuid.UUID {
 	id, err := fq.OnlyID(ctx)
 	if err != nil {
 		panic(err)
@@ -204,8 +205,8 @@ func (fq *FrequencyQuery) AllX(ctx context.Context) []*Frequency {
 }
 
 // IDs executes the query and returns a list of Frequency IDs.
-func (fq *FrequencyQuery) IDs(ctx context.Context) ([]int, error) {
-	var ids []int
+func (fq *FrequencyQuery) IDs(ctx context.Context) ([]uuid.UUID, error) {
+	var ids []uuid.UUID
 	if err := fq.Select(frequency.FieldID).Scan(ctx, &ids); err != nil {
 		return nil, err
 	}
@@ -213,7 +214,7 @@ func (fq *FrequencyQuery) IDs(ctx context.Context) ([]int, error) {
 }
 
 // IDsX is like IDs, but panics if an error occurs.
-func (fq *FrequencyQuery) IDsX(ctx context.Context) []int {
+func (fq *FrequencyQuery) IDsX(ctx context.Context) []uuid.UUID {
 	ids, err := fq.IDs(ctx)
 	if err != nil {
 		panic(err)
@@ -292,12 +293,12 @@ func (fq *FrequencyQuery) WithAirport(opts ...func(*AirportQuery)) *FrequencyQue
 // Example:
 //
 //	var v []struct {
-//		Hash string `json:"hash,omitempty"`
+//		ImportID int `json:"import_id,omitempty"`
 //		Count int `json:"count,omitempty"`
 //	}
 //
 //	client.Frequency.Query().
-//		GroupBy(frequency.FieldHash).
+//		GroupBy(frequency.FieldImportID).
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
 func (fq *FrequencyQuery) GroupBy(field string, fields ...string) *FrequencyGroupBy {
@@ -320,11 +321,11 @@ func (fq *FrequencyQuery) GroupBy(field string, fields ...string) *FrequencyGrou
 // Example:
 //
 //	var v []struct {
-//		Hash string `json:"hash,omitempty"`
+//		ImportID int `json:"import_id,omitempty"`
 //	}
 //
 //	client.Frequency.Query().
-//		Select(frequency.FieldHash).
+//		Select(frequency.FieldImportID).
 //		Scan(ctx, &v)
 func (fq *FrequencyQuery) Select(fields ...string) *FrequencySelect {
 	fq.fields = append(fq.fields, fields...)
@@ -401,8 +402,8 @@ func (fq *FrequencyQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Fr
 }
 
 func (fq *FrequencyQuery) loadAirport(ctx context.Context, query *AirportQuery, nodes []*Frequency, init func(*Frequency), assign func(*Frequency, *Airport)) error {
-	ids := make([]int, 0, len(nodes))
-	nodeids := make(map[int][]*Frequency)
+	ids := make([]uuid.UUID, 0, len(nodes))
+	nodeids := make(map[uuid.UUID][]*Frequency)
 	for i := range nodes {
 		if nodes[i].airport_frequencies == nil {
 			continue
@@ -456,7 +457,7 @@ func (fq *FrequencyQuery) querySpec() *sqlgraph.QuerySpec {
 			Table:   frequency.Table,
 			Columns: frequency.Columns,
 			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt,
+				Type:   field.TypeUUID,
 				Column: frequency.FieldID,
 			},
 		},

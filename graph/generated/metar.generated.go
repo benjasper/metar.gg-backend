@@ -21,7 +21,7 @@ import (
 // region    ************************** generated!.gotpl **************************
 
 type QueryResolver interface {
-	GetAirports(ctx context.Context, after *ent.Cursor, first *int, before *ent.Cursor, last *int, identifier *string, hasWeather *bool) (*ent.AirportConnection, error)
+	GetAirports(ctx context.Context, after *ent.Cursor, first *int, before *ent.Cursor, last *int, identifier *string, icao *string, iata *string, hasWeather *bool) (*ent.AirportConnection, error)
 }
 
 // endregion ************************** generated!.gotpl **************************
@@ -91,15 +91,33 @@ func (ec *executionContext) field_Query_getAirports_args(ctx context.Context, ra
 		}
 	}
 	args["identifier"] = arg4
-	var arg5 *bool
-	if tmp, ok := rawArgs["hasWeather"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("hasWeather"))
-		arg5, err = ec.unmarshalOBoolean2ᚖbool(ctx, tmp)
+	var arg5 *string
+	if tmp, ok := rawArgs["icao"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("icao"))
+		arg5, err = ec.unmarshalOString2ᚖstring(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["hasWeather"] = arg5
+	args["icao"] = arg5
+	var arg6 *string
+	if tmp, ok := rawArgs["iata"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("iata"))
+		arg6, err = ec.unmarshalOString2ᚖstring(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["iata"] = arg6
+	var arg7 *bool
+	if tmp, ok := rawArgs["hasWeather"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("hasWeather"))
+		arg7, err = ec.unmarshalOBoolean2ᚖbool(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["hasWeather"] = arg7
 	return args, nil
 }
 
@@ -300,8 +318,14 @@ func (ec *executionContext) fieldContext_AirportEdge_node(ctx context.Context, f
 			switch field.Name {
 			case "id":
 				return ec.fieldContext_Airport_id(ctx, field)
+			case "importID":
+				return ec.fieldContext_Airport_importID(ctx, field)
 			case "lastUpdated":
 				return ec.fieldContext_Airport_lastUpdated(ctx, field)
+			case "icaoCode":
+				return ec.fieldContext_Airport_icaoCode(ctx, field)
+			case "iataCode":
+				return ec.fieldContext_Airport_iataCode(ctx, field)
 			case "identifier":
 				return ec.fieldContext_Airport_identifier(ctx, field)
 			case "type":
@@ -326,8 +350,6 @@ func (ec *executionContext) fieldContext_AirportEdge_node(ctx context.Context, f
 				return ec.fieldContext_Airport_scheduledService(ctx, field)
 			case "gpsCode":
 				return ec.fieldContext_Airport_gpsCode(ctx, field)
-			case "iataCode":
-				return ec.fieldContext_Airport_iataCode(ctx, field)
 			case "localCode":
 				return ec.fieldContext_Airport_localCode(ctx, field)
 			case "website":
@@ -582,6 +604,8 @@ func (ec *executionContext) fieldContext_MetarEdge_node(ctx context.Context, fie
 		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			switch field.Name {
+			case "id":
+				return ec.fieldContext_Metar_id(ctx, field)
 			case "rawText":
 				return ec.fieldContext_Metar_rawText(ctx, field)
 			case "observationTime":
@@ -883,7 +907,7 @@ func (ec *executionContext) _Query_getAirports(ctx context.Context, field graphq
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().GetAirports(rctx, fc.Args["after"].(*ent.Cursor), fc.Args["first"].(*int), fc.Args["before"].(*ent.Cursor), fc.Args["last"].(*int), fc.Args["identifier"].(*string), fc.Args["hasWeather"].(*bool))
+		return ec.resolvers.Query().GetAirports(rctx, fc.Args["after"].(*ent.Cursor), fc.Args["first"].(*int), fc.Args["before"].(*ent.Cursor), fc.Args["last"].(*int), fc.Args["identifier"].(*string), fc.Args["icao"].(*string), fc.Args["iata"].(*string), fc.Args["hasWeather"].(*bool))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -1131,9 +1155,9 @@ func (ec *executionContext) _StationWithDistance_station(ctx context.Context, fi
 		}
 		return graphql.Null
 	}
-	res := resTmp.(*ent.Station)
+	res := resTmp.(*ent.WeatherStation)
 	fc.Result = res
-	return ec.marshalNStation2ᚖmetarᚗggᚋentᚐStation(ctx, field.Selections, res)
+	return ec.marshalNWeatherStation2ᚖmetarᚗggᚋentᚐWeatherStation(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_StationWithDistance_station(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -1144,22 +1168,24 @@ func (ec *executionContext) fieldContext_StationWithDistance_station(ctx context
 		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			switch field.Name {
+			case "id":
+				return ec.fieldContext_WeatherStation_id(ctx, field)
 			case "stationID":
-				return ec.fieldContext_Station_stationID(ctx, field)
+				return ec.fieldContext_WeatherStation_stationID(ctx, field)
 			case "latitude":
-				return ec.fieldContext_Station_latitude(ctx, field)
+				return ec.fieldContext_WeatherStation_latitude(ctx, field)
 			case "longitude":
-				return ec.fieldContext_Station_longitude(ctx, field)
+				return ec.fieldContext_WeatherStation_longitude(ctx, field)
 			case "elevation":
-				return ec.fieldContext_Station_elevation(ctx, field)
+				return ec.fieldContext_WeatherStation_elevation(ctx, field)
 			case "airport":
-				return ec.fieldContext_Station_airport(ctx, field)
+				return ec.fieldContext_WeatherStation_airport(ctx, field)
 			case "metars":
-				return ec.fieldContext_Station_metars(ctx, field)
+				return ec.fieldContext_WeatherStation_metars(ctx, field)
 			case "tafs":
-				return ec.fieldContext_Station_tafs(ctx, field)
+				return ec.fieldContext_WeatherStation_tafs(ctx, field)
 			}
-			return nil, fmt.Errorf("no field named %q was found under type Station", field.Name)
+			return nil, fmt.Errorf("no field named %q was found under type WeatherStation", field.Name)
 		},
 	}
 	return fc, nil
@@ -1352,6 +1378,8 @@ func (ec *executionContext) fieldContext_TafEdge_node(ctx context.Context, field
 		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			switch field.Name {
+			case "id":
+				return ec.fieldContext_Taf_id(ctx, field)
 			case "rawText":
 				return ec.fieldContext_Taf_rawText(ctx, field)
 			case "issueTime":

@@ -131,7 +131,7 @@ func (tcu *TurbulenceConditionUpdate) sqlSave(ctx context.Context) (n int, err e
 			Table:   turbulencecondition.Table,
 			Columns: turbulencecondition.Columns,
 			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt,
+				Type:   field.TypeUUID,
 				Column: turbulencecondition.FieldID,
 			},
 		},
@@ -315,7 +315,7 @@ func (tcuo *TurbulenceConditionUpdateOne) sqlSave(ctx context.Context) (_node *T
 			Table:   turbulencecondition.Table,
 			Columns: turbulencecondition.Columns,
 			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt,
+				Type:   field.TypeUUID,
 				Column: turbulencecondition.FieldID,
 			},
 		},

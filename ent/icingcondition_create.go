@@ -7,9 +7,11 @@ import (
 	"errors"
 	"fmt"
 
+	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/google/uuid"
 	"metar.gg/ent/icingcondition"
 )
 
@@ -55,6 +57,20 @@ func (icc *IcingConditionCreate) SetNillableMaxAltitude(i *int) *IcingConditionC
 	return icc
 }
 
+// SetID sets the "id" field.
+func (icc *IcingConditionCreate) SetID(u uuid.UUID) *IcingConditionCreate {
+	icc.mutation.SetID(u)
+	return icc
+}
+
+// SetNillableID sets the "id" field if the given value is not nil.
+func (icc *IcingConditionCreate) SetNillableID(u *uuid.UUID) *IcingConditionCreate {
+	if u != nil {
+		icc.SetID(*u)
+	}
+	return icc
+}
+
 // Mutation returns the IcingConditionMutation object of the builder.
 func (icc *IcingConditionCreate) Mutation() *IcingConditionMutation {
 	return icc.mutation
@@ -66,6 +82,7 @@ func (icc *IcingConditionCreate) Save(ctx context.Context) (*IcingCondition, err
 		err  error
 		node *IcingCondition
 	)
+	icc.defaults()
 	if len(icc.hooks) == 0 {
 		if err = icc.check(); err != nil {
 			return nil, err
@@ -129,6 +146,14 @@ func (icc *IcingConditionCreate) ExecX(ctx context.Context) {
 	}
 }
 
+// defaults sets the default values of the builder before save.
+func (icc *IcingConditionCreate) defaults() {
+	if _, ok := icc.mutation.ID(); !ok {
+		v := icingcondition.DefaultID()
+		icc.mutation.SetID(v)
+	}
+}
+
 // check runs all checks and user-defined validators on the builder.
 func (icc *IcingConditionCreate) check() error {
 	if _, ok := icc.mutation.Intensity(); !ok {
@@ -145,8 +170,13 @@ func (icc *IcingConditionCreate) sqlSave(ctx context.Context) (*IcingCondition, 
 		}
 		return nil, err
 	}
-	id := _spec.ID.Value.(int64)
-	_node.ID = int(id)
+	if _spec.ID.Value != nil {
+		if id, ok := _spec.ID.Value.(*uuid.UUID); ok {
+			_node.ID = *id
+		} else if err := _node.ID.Scan(_spec.ID.Value); err != nil {
+			return nil, err
+		}
+	}
 	return _node, nil
 }
 
@@ -156,12 +186,16 @@ func (icc *IcingConditionCreate) createSpec() (*IcingCondition, *sqlgraph.Create
 		_spec = &sqlgraph.CreateSpec{
 			Table: icingcondition.Table,
 			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt,
+				Type:   field.TypeUUID,
 				Column: icingcondition.FieldID,
 			},
 		}
 	)
 	_spec.OnConflict = icc.conflict
+	if id, ok := icc.mutation.ID(); ok {
+		_node.ID = id
+		_spec.ID.Value = &id
+	}
 	if value, ok := icc.mutation.Intensity(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
@@ -298,16 +332,24 @@ func (u *IcingConditionUpsert) ClearMaxAltitude() *IcingConditionUpsert {
 	return u
 }
 
-// UpdateNewValues updates the mutable fields using the new values that were set on create.
+// UpdateNewValues updates the mutable fields using the new values that were set on create except the ID field.
 // Using this option is equivalent to using:
 //
 //	client.IcingCondition.Create().
 //		OnConflict(
 //			sql.ResolveWithNewValues(),
+//			sql.ResolveWith(func(u *sql.UpdateSet) {
+//				u.SetIgnore(icingcondition.FieldID)
+//			}),
 //		).
 //		Exec(ctx)
 func (u *IcingConditionUpsertOne) UpdateNewValues() *IcingConditionUpsertOne {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
+	u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(s *sql.UpdateSet) {
+		if _, exists := u.create.mutation.ID(); exists {
+			s.SetIgnore(icingcondition.FieldID)
+		}
+	}))
 	return u
 }
 
@@ -424,7 +466,12 @@ func (u *IcingConditionUpsertOne) ExecX(ctx context.Context) {
 }
 
 // Exec executes the UPSERT query and returns the inserted/updated ID.
-func (u *IcingConditionUpsertOne) ID(ctx context.Context) (id int, err error) {
+func (u *IcingConditionUpsertOne) ID(ctx context.Context) (id uuid.UUID, err error) {
+	if u.create.driver.Dialect() == dialect.MySQL {
+		// In case of "ON CONFLICT", there is no way to get back non-numeric ID
+		// fields from the database since MySQL does not support the RETURNING clause.
+		return id, errors.New("ent: IcingConditionUpsertOne.ID is not supported by MySQL driver. Use IcingConditionUpsertOne.Exec instead")
+	}
 	node, err := u.create.Save(ctx)
 	if err != nil {
 		return id, err
@@ -433,7 +480,7 @@ func (u *IcingConditionUpsertOne) ID(ctx context.Context) (id int, err error) {
 }
 
 // IDX is like ID, but panics if an error occurs.
-func (u *IcingConditionUpsertOne) IDX(ctx context.Context) int {
+func (u *IcingConditionUpsertOne) IDX(ctx context.Context) uuid.UUID {
 	id, err := u.ID(ctx)
 	if err != nil {
 		panic(err)
@@ -456,6 +503,7 @@ func (iccb *IcingConditionCreateBulk) Save(ctx context.Context) ([]*IcingConditi
 	for i := range iccb.builders {
 		func(i int, root context.Context) {
 			builder := iccb.builders[i]
+			builder.defaults()
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 				mutation, ok := m.(*IcingConditionMutation)
 				if !ok {
@@ -483,10 +531,6 @@ func (iccb *IcingConditionCreateBulk) Save(ctx context.Context) ([]*IcingConditi
 					return nil, err
 				}
 				mutation.id = &nodes[i].ID
-				if specs[i].ID.Value != nil {
-					id := specs[i].ID.Value.(int64)
-					nodes[i].ID = int(id)
-				}
 				mutation.done = true
 				return nodes[i], nil
 			})
@@ -573,10 +617,20 @@ type IcingConditionUpsertBulk struct {
 //	client.IcingCondition.Create().
 //		OnConflict(
 //			sql.ResolveWithNewValues(),
+//			sql.ResolveWith(func(u *sql.UpdateSet) {
+//				u.SetIgnore(icingcondition.FieldID)
+//			}),
 //		).
 //		Exec(ctx)
 func (u *IcingConditionUpsertBulk) UpdateNewValues() *IcingConditionUpsertBulk {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
+	u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(s *sql.UpdateSet) {
+		for _, b := range u.create.builders {
+			if _, exists := b.mutation.ID(); exists {
+				s.SetIgnore(icingcondition.FieldID)
+			}
+		}
+	}))
 	return u
 }
 

@@ -9,21 +9,28 @@ import (
 	"time"
 
 	"entgo.io/ent/dialect/sql"
+	"github.com/google/uuid"
 	"metar.gg/ent/airport"
-	"metar.gg/ent/station"
+	"metar.gg/ent/weatherstation"
 )
 
 // Airport is the model entity for the Airport schema.
 type Airport struct {
 	config `json:"-"`
 	// ID of the ent.
-	ID int `json:"id,omitempty"`
+	ID uuid.UUID `json:"id,omitempty"`
+	// ImportID holds the value of the "import_id" field.
+	ImportID int `json:"import_id,omitempty"`
 	// Hash holds the value of the "hash" field.
 	Hash string `json:"hash,omitempty"`
 	// ImportFlag holds the value of the "import_flag" field.
 	ImportFlag bool `json:"import_flag,omitempty"`
 	// LastUpdated holds the value of the "last_updated" field.
 	LastUpdated time.Time `json:"last_updated,omitempty"`
+	// The four-letter ICAO code of the airport.
+	IcaoCode string `json:"icao_code,omitempty"`
+	// The three-letter IATA code for the airport.
+	IataCode *string `json:"iata_code,omitempty"`
 	// This will be the ICAO code if available. Otherwise, it will be a local airport code (if no conflict), or if nothing else is available, an internally-generated code starting with the ISO2 country code, followed by a dash and a four-digit number.
 	Identifier string `json:"identifier,omitempty"`
 	// Type of airport.
@@ -48,8 +55,6 @@ type Airport struct {
 	ScheduledService bool `json:"scheduled_service,omitempty"`
 	// The code that an aviation GPS database (such as Jeppesen's or Garmin's) would normally use for the airport. This will always be the ICAO code if one exists. Note that, unlike the ident column, this is not guaranteed to be globally unique.
 	GpsCode *string `json:"gps_code,omitempty"`
-	// The three-letter IATA code for the airport.
-	IataCode *string `json:"iata_code,omitempty"`
 	// The local country code for the airport, if different from the gps_code and iata_code fields (used mainly for US airports).
 	LocalCode *string `json:"local_code,omitempty"`
 	// The URL of the airport's website.
@@ -68,7 +73,7 @@ type AirportEdges struct {
 	// Runways at the airport.
 	Runways []*Runway `json:"runways,omitempty"`
 	// Weather station at the airport.
-	Station *Station `json:"station,omitempty"`
+	Station *WeatherStation `json:"station,omitempty"`
 	// Frequencies at the airport.
 	Frequencies []*Frequency `json:"frequencies,omitempty"`
 	// loadedTypes holds the information for reporting if a
@@ -92,11 +97,11 @@ func (e AirportEdges) RunwaysOrErr() ([]*Runway, error) {
 
 // StationOrErr returns the Station value or an error if the edge
 // was not loaded in eager-loading, or loaded but was not found.
-func (e AirportEdges) StationOrErr() (*Station, error) {
+func (e AirportEdges) StationOrErr() (*WeatherStation, error) {
 	if e.loadedTypes[1] {
 		if e.Station == nil {
 			// Edge was loaded but was not found.
-			return nil, &NotFoundError{label: station.Label}
+			return nil, &NotFoundError{label: weatherstation.Label}
 		}
 		return e.Station, nil
 	}
@@ -123,12 +128,14 @@ func (*Airport) scanValues(columns []string) ([]any, error) {
 			values[i] = new(sql.NullBool)
 		case airport.FieldLatitude, airport.FieldLongitude:
 			values[i] = new(sql.NullFloat64)
-		case airport.FieldID, airport.FieldElevation:
+		case airport.FieldImportID, airport.FieldElevation:
 			values[i] = new(sql.NullInt64)
-		case airport.FieldHash, airport.FieldIdentifier, airport.FieldType, airport.FieldName, airport.FieldContinent, airport.FieldCountry, airport.FieldRegion, airport.FieldMunicipality, airport.FieldGpsCode, airport.FieldIataCode, airport.FieldLocalCode, airport.FieldWebsite, airport.FieldWikipedia:
+		case airport.FieldHash, airport.FieldIcaoCode, airport.FieldIataCode, airport.FieldIdentifier, airport.FieldType, airport.FieldName, airport.FieldContinent, airport.FieldCountry, airport.FieldRegion, airport.FieldMunicipality, airport.FieldGpsCode, airport.FieldLocalCode, airport.FieldWebsite, airport.FieldWikipedia:
 			values[i] = new(sql.NullString)
 		case airport.FieldLastUpdated:
 			values[i] = new(sql.NullTime)
+		case airport.FieldID:
+			values[i] = new(uuid.UUID)
 		default:
 			return nil, fmt.Errorf("unexpected column %q for type Airport", columns[i])
 		}
@@ -145,11 +152,17 @@ func (a *Airport) assignValues(columns []string, values []any) error {
 	for i := range columns {
 		switch columns[i] {
 		case airport.FieldID:
-			value, ok := values[i].(*sql.NullInt64)
-			if !ok {
-				return fmt.Errorf("unexpected type %T for field id", value)
+			if value, ok := values[i].(*uuid.UUID); !ok {
+				return fmt.Errorf("unexpected type %T for field id", values[i])
+			} else if value != nil {
+				a.ID = *value
 			}
-			a.ID = int(value.Int64)
+		case airport.FieldImportID:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field import_id", values[i])
+			} else if value.Valid {
+				a.ImportID = int(value.Int64)
+			}
 		case airport.FieldHash:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field hash", values[i])
@@ -167,6 +180,19 @@ func (a *Airport) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field last_updated", values[i])
 			} else if value.Valid {
 				a.LastUpdated = value.Time
+			}
+		case airport.FieldIcaoCode:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field icao_code", values[i])
+			} else if value.Valid {
+				a.IcaoCode = value.String
+			}
+		case airport.FieldIataCode:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field iata_code", values[i])
+			} else if value.Valid {
+				a.IataCode = new(string)
+				*a.IataCode = value.String
 			}
 		case airport.FieldIdentifier:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -243,13 +269,6 @@ func (a *Airport) assignValues(columns []string, values []any) error {
 				a.GpsCode = new(string)
 				*a.GpsCode = value.String
 			}
-		case airport.FieldIataCode:
-			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field iata_code", values[i])
-			} else if value.Valid {
-				a.IataCode = new(string)
-				*a.IataCode = value.String
-			}
 		case airport.FieldLocalCode:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field local_code", values[i])
@@ -290,7 +309,7 @@ func (a *Airport) QueryRunways() *RunwayQuery {
 }
 
 // QueryStation queries the "station" edge of the Airport entity.
-func (a *Airport) QueryStation() *StationQuery {
+func (a *Airport) QueryStation() *WeatherStationQuery {
 	return (&AirportClient{config: a.config}).QueryStation(a)
 }
 
@@ -322,6 +341,9 @@ func (a *Airport) String() string {
 	var builder strings.Builder
 	builder.WriteString("Airport(")
 	builder.WriteString(fmt.Sprintf("id=%v, ", a.ID))
+	builder.WriteString("import_id=")
+	builder.WriteString(fmt.Sprintf("%v", a.ImportID))
+	builder.WriteString(", ")
 	builder.WriteString("hash=")
 	builder.WriteString(a.Hash)
 	builder.WriteString(", ")
@@ -330,6 +352,14 @@ func (a *Airport) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("last_updated=")
 	builder.WriteString(a.LastUpdated.Format(time.ANSIC))
+	builder.WriteString(", ")
+	builder.WriteString("icao_code=")
+	builder.WriteString(a.IcaoCode)
+	builder.WriteString(", ")
+	if v := a.IataCode; v != nil {
+		builder.WriteString("iata_code=")
+		builder.WriteString(*v)
+	}
 	builder.WriteString(", ")
 	builder.WriteString("identifier=")
 	builder.WriteString(a.Identifier)
@@ -370,11 +400,6 @@ func (a *Airport) String() string {
 	builder.WriteString(", ")
 	if v := a.GpsCode; v != nil {
 		builder.WriteString("gps_code=")
-		builder.WriteString(*v)
-	}
-	builder.WriteString(", ")
-	if v := a.IataCode; v != nil {
-		builder.WriteString("iata_code=")
 		builder.WriteString(*v)
 	}
 	builder.WriteString(", ")

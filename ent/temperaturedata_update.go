@@ -173,7 +173,7 @@ func (tdu *TemperatureDataUpdate) sqlSave(ctx context.Context) (n int, err error
 			Table:   temperaturedata.Table,
 			Columns: temperaturedata.Columns,
 			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt,
+				Type:   field.TypeUUID,
 				Column: temperaturedata.FieldID,
 			},
 		},
@@ -424,7 +424,7 @@ func (tduo *TemperatureDataUpdateOne) sqlSave(ctx context.Context) (_node *Tempe
 			Table:   temperaturedata.Table,
 			Columns: temperaturedata.Columns,
 			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt,
+				Type:   field.TypeUUID,
 				Column: temperaturedata.FieldID,
 			},
 		},

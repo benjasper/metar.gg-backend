@@ -11,11 +11,12 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/google/uuid"
 	"metar.gg/ent/forecast"
 	"metar.gg/ent/predicate"
 	"metar.gg/ent/skycondition"
-	"metar.gg/ent/station"
 	"metar.gg/ent/taf"
+	"metar.gg/ent/weatherstation"
 )
 
 // TafQuery is the builder for querying Taf entities.
@@ -27,7 +28,7 @@ type TafQuery struct {
 	order                  []OrderFunc
 	fields                 []string
 	predicates             []predicate.Taf
-	withStation            *StationQuery
+	withStation            *WeatherStationQuery
 	withSkyConditions      *SkyConditionQuery
 	withForecast           *ForecastQuery
 	withFKs                bool
@@ -72,8 +73,8 @@ func (tq *TafQuery) Order(o ...OrderFunc) *TafQuery {
 }
 
 // QueryStation chains the current query on the "station" edge.
-func (tq *TafQuery) QueryStation() *StationQuery {
-	query := &StationQuery{config: tq.config}
+func (tq *TafQuery) QueryStation() *WeatherStationQuery {
+	query := &WeatherStationQuery{config: tq.config}
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := tq.prepareQuery(ctx); err != nil {
 			return nil, err
@@ -84,7 +85,7 @@ func (tq *TafQuery) QueryStation() *StationQuery {
 		}
 		step := sqlgraph.NewStep(
 			sqlgraph.From(taf.Table, taf.FieldID, selector),
-			sqlgraph.To(station.Table, station.FieldID),
+			sqlgraph.To(weatherstation.Table, weatherstation.FieldID),
 			sqlgraph.Edge(sqlgraph.M2O, true, taf.StationTable, taf.StationColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(tq.driver.Dialect(), step)
@@ -161,8 +162,8 @@ func (tq *TafQuery) FirstX(ctx context.Context) *Taf {
 
 // FirstID returns the first Taf ID from the query.
 // Returns a *NotFoundError when no Taf ID was found.
-func (tq *TafQuery) FirstID(ctx context.Context) (id int, err error) {
-	var ids []int
+func (tq *TafQuery) FirstID(ctx context.Context) (id uuid.UUID, err error) {
+	var ids []uuid.UUID
 	if ids, err = tq.Limit(1).IDs(ctx); err != nil {
 		return
 	}
@@ -174,7 +175,7 @@ func (tq *TafQuery) FirstID(ctx context.Context) (id int, err error) {
 }
 
 // FirstIDX is like FirstID, but panics if an error occurs.
-func (tq *TafQuery) FirstIDX(ctx context.Context) int {
+func (tq *TafQuery) FirstIDX(ctx context.Context) uuid.UUID {
 	id, err := tq.FirstID(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
@@ -212,8 +213,8 @@ func (tq *TafQuery) OnlyX(ctx context.Context) *Taf {
 // OnlyID is like Only, but returns the only Taf ID in the query.
 // Returns a *NotSingularError when more than one Taf ID is found.
 // Returns a *NotFoundError when no entities are found.
-func (tq *TafQuery) OnlyID(ctx context.Context) (id int, err error) {
-	var ids []int
+func (tq *TafQuery) OnlyID(ctx context.Context) (id uuid.UUID, err error) {
+	var ids []uuid.UUID
 	if ids, err = tq.Limit(2).IDs(ctx); err != nil {
 		return
 	}
@@ -229,7 +230,7 @@ func (tq *TafQuery) OnlyID(ctx context.Context) (id int, err error) {
 }
 
 // OnlyIDX is like OnlyID, but panics if an error occurs.
-func (tq *TafQuery) OnlyIDX(ctx context.Context) int {
+func (tq *TafQuery) OnlyIDX(ctx context.Context) uuid.UUID {
 	id, err := tq.OnlyID(ctx)
 	if err != nil {
 		panic(err)
@@ -255,8 +256,8 @@ func (tq *TafQuery) AllX(ctx context.Context) []*Taf {
 }
 
 // IDs executes the query and returns a list of Taf IDs.
-func (tq *TafQuery) IDs(ctx context.Context) ([]int, error) {
-	var ids []int
+func (tq *TafQuery) IDs(ctx context.Context) ([]uuid.UUID, error) {
+	var ids []uuid.UUID
 	if err := tq.Select(taf.FieldID).Scan(ctx, &ids); err != nil {
 		return nil, err
 	}
@@ -264,7 +265,7 @@ func (tq *TafQuery) IDs(ctx context.Context) ([]int, error) {
 }
 
 // IDsX is like IDs, but panics if an error occurs.
-func (tq *TafQuery) IDsX(ctx context.Context) []int {
+func (tq *TafQuery) IDsX(ctx context.Context) []uuid.UUID {
 	ids, err := tq.IDs(ctx)
 	if err != nil {
 		panic(err)
@@ -330,8 +331,8 @@ func (tq *TafQuery) Clone() *TafQuery {
 
 // WithStation tells the query-builder to eager-load the nodes that are connected to
 // the "station" edge. The optional arguments are used to configure the query builder of the edge.
-func (tq *TafQuery) WithStation(opts ...func(*StationQuery)) *TafQuery {
-	query := &StationQuery{config: tq.config}
+func (tq *TafQuery) WithStation(opts ...func(*WeatherStationQuery)) *TafQuery {
+	query := &WeatherStationQuery{config: tq.config}
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -465,7 +466,7 @@ func (tq *TafQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Taf, err
 	}
 	if query := tq.withStation; query != nil {
 		if err := tq.loadStation(ctx, query, nodes, nil,
-			func(n *Taf, e *Station) { n.Edges.Station = e }); err != nil {
+			func(n *Taf, e *WeatherStation) { n.Edges.Station = e }); err != nil {
 			return nil, err
 		}
 	}
@@ -505,20 +506,20 @@ func (tq *TafQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Taf, err
 	return nodes, nil
 }
 
-func (tq *TafQuery) loadStation(ctx context.Context, query *StationQuery, nodes []*Taf, init func(*Taf), assign func(*Taf, *Station)) error {
-	ids := make([]int, 0, len(nodes))
-	nodeids := make(map[int][]*Taf)
+func (tq *TafQuery) loadStation(ctx context.Context, query *WeatherStationQuery, nodes []*Taf, init func(*Taf), assign func(*Taf, *WeatherStation)) error {
+	ids := make([]uuid.UUID, 0, len(nodes))
+	nodeids := make(map[uuid.UUID][]*Taf)
 	for i := range nodes {
-		if nodes[i].station_tafs == nil {
+		if nodes[i].weather_station_tafs == nil {
 			continue
 		}
-		fk := *nodes[i].station_tafs
+		fk := *nodes[i].weather_station_tafs
 		if _, ok := nodeids[fk]; !ok {
 			ids = append(ids, fk)
 		}
 		nodeids[fk] = append(nodeids[fk], nodes[i])
 	}
-	query.Where(station.IDIn(ids...))
+	query.Where(weatherstation.IDIn(ids...))
 	neighbors, err := query.All(ctx)
 	if err != nil {
 		return err
@@ -526,7 +527,7 @@ func (tq *TafQuery) loadStation(ctx context.Context, query *StationQuery, nodes 
 	for _, n := range neighbors {
 		nodes, ok := nodeids[n.ID]
 		if !ok {
-			return fmt.Errorf(`unexpected foreign-key "station_tafs" returned %v`, n.ID)
+			return fmt.Errorf(`unexpected foreign-key "weather_station_tafs" returned %v`, n.ID)
 		}
 		for i := range nodes {
 			assign(nodes[i], n)
@@ -536,7 +537,7 @@ func (tq *TafQuery) loadStation(ctx context.Context, query *StationQuery, nodes 
 }
 func (tq *TafQuery) loadSkyConditions(ctx context.Context, query *SkyConditionQuery, nodes []*Taf, init func(*Taf), assign func(*Taf, *SkyCondition)) error {
 	fks := make([]driver.Value, 0, len(nodes))
-	nodeids := make(map[int]*Taf)
+	nodeids := make(map[uuid.UUID]*Taf)
 	for i := range nodes {
 		fks = append(fks, nodes[i].ID)
 		nodeids[nodes[i].ID] = nodes[i]
@@ -567,7 +568,7 @@ func (tq *TafQuery) loadSkyConditions(ctx context.Context, query *SkyConditionQu
 }
 func (tq *TafQuery) loadForecast(ctx context.Context, query *ForecastQuery, nodes []*Taf, init func(*Taf), assign func(*Taf, *Forecast)) error {
 	fks := make([]driver.Value, 0, len(nodes))
-	nodeids := make(map[int]*Taf)
+	nodeids := make(map[uuid.UUID]*Taf)
 	for i := range nodes {
 		fks = append(fks, nodes[i].ID)
 		nodeids[nodes[i].ID] = nodes[i]
@@ -623,7 +624,7 @@ func (tq *TafQuery) querySpec() *sqlgraph.QuerySpec {
 			Table:   taf.Table,
 			Columns: taf.Columns,
 			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt,
+				Type:   field.TypeUUID,
 				Column: taf.FieldID,
 			},
 		},

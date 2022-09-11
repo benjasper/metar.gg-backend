@@ -7,6 +7,8 @@ import (
 	"io"
 	"strconv"
 	"time"
+
+	"github.com/google/uuid"
 )
 
 const (
@@ -14,12 +16,18 @@ const (
 	Label = "airport"
 	// FieldID holds the string denoting the id field in the database.
 	FieldID = "id"
+	// FieldImportID holds the string denoting the import_id field in the database.
+	FieldImportID = "import_id"
 	// FieldHash holds the string denoting the hash field in the database.
 	FieldHash = "hash"
 	// FieldImportFlag holds the string denoting the import_flag field in the database.
 	FieldImportFlag = "import_flag"
 	// FieldLastUpdated holds the string denoting the last_updated field in the database.
 	FieldLastUpdated = "last_updated"
+	// FieldIcaoCode holds the string denoting the icao_code field in the database.
+	FieldIcaoCode = "icao_code"
+	// FieldIataCode holds the string denoting the iata_code field in the database.
+	FieldIataCode = "iata_code"
 	// FieldIdentifier holds the string denoting the identifier field in the database.
 	FieldIdentifier = "identifier"
 	// FieldType holds the string denoting the type field in the database.
@@ -44,8 +52,6 @@ const (
 	FieldScheduledService = "scheduled_service"
 	// FieldGpsCode holds the string denoting the gps_code field in the database.
 	FieldGpsCode = "gps_code"
-	// FieldIataCode holds the string denoting the iata_code field in the database.
-	FieldIataCode = "iata_code"
 	// FieldLocalCode holds the string denoting the local_code field in the database.
 	FieldLocalCode = "local_code"
 	// FieldWebsite holds the string denoting the website field in the database.
@@ -70,10 +76,10 @@ const (
 	// RunwaysColumn is the table column denoting the runways relation/edge.
 	RunwaysColumn = "airport_runways"
 	// StationTable is the table that holds the station relation/edge.
-	StationTable = "stations"
-	// StationInverseTable is the table name for the Station entity.
-	// It exists in this package in order to avoid circular dependency with the "station" package.
-	StationInverseTable = "stations"
+	StationTable = "weather_stations"
+	// StationInverseTable is the table name for the WeatherStation entity.
+	// It exists in this package in order to avoid circular dependency with the "weatherstation" package.
+	StationInverseTable = "weather_stations"
 	// StationColumn is the table column denoting the station relation/edge.
 	StationColumn = "airport_station"
 	// FrequenciesTable is the table that holds the frequencies relation/edge.
@@ -88,9 +94,12 @@ const (
 // Columns holds all SQL columns for airport fields.
 var Columns = []string{
 	FieldID,
+	FieldImportID,
 	FieldHash,
 	FieldImportFlag,
 	FieldLastUpdated,
+	FieldIcaoCode,
+	FieldIataCode,
 	FieldIdentifier,
 	FieldType,
 	FieldName,
@@ -103,7 +112,6 @@ var Columns = []string{
 	FieldMunicipality,
 	FieldScheduledService,
 	FieldGpsCode,
-	FieldIataCode,
 	FieldLocalCode,
 	FieldWebsite,
 	FieldWikipedia,
@@ -125,6 +133,10 @@ var (
 	DefaultImportFlag bool
 	// DefaultLastUpdated holds the default value on creation for the "last_updated" field.
 	DefaultLastUpdated func() time.Time
+	// IcaoCodeValidator is a validator for the "icao_code" field. It is called by the builders before save.
+	IcaoCodeValidator func(string) error
+	// DefaultID holds the default value on creation for the "id" field.
+	DefaultID func() uuid.UUID
 )
 
 // Type defines the type for the "type" enum field.

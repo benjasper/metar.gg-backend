@@ -8,15 +8,16 @@ import (
 	"time"
 
 	"entgo.io/ent/dialect/sql"
-	"metar.gg/ent/station"
+	"github.com/google/uuid"
 	"metar.gg/ent/taf"
+	"metar.gg/ent/weatherstation"
 )
 
 // Taf is the model entity for the Taf schema.
 type Taf struct {
 	config `json:"-"`
 	// ID of the ent.
-	ID int `json:"id,omitempty"`
+	ID uuid.UUID `json:"id,omitempty"`
 	// The raw TAF text.
 	RawText string `json:"raw_text,omitempty"`
 	// The time the TAF was issued.
@@ -33,14 +34,14 @@ type Taf struct {
 	Hash string `json:"hash,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the TafQuery when eager-loading is set.
-	Edges        TafEdges `json:"edges"`
-	station_tafs *int
+	Edges                TafEdges `json:"edges"`
+	weather_station_tafs *uuid.UUID
 }
 
 // TafEdges holds the relations/edges for other nodes in the graph.
 type TafEdges struct {
 	// The station that issued this taf.
-	Station *Station `json:"station,omitempty"`
+	Station *WeatherStation `json:"station,omitempty"`
 	// The sky conditions.
 	SkyConditions []*SkyCondition `json:"sky_conditions,omitempty"`
 	// The forecasts
@@ -57,11 +58,11 @@ type TafEdges struct {
 
 // StationOrErr returns the Station value or an error if the edge
 // was not loaded in eager-loading, or loaded but was not found.
-func (e TafEdges) StationOrErr() (*Station, error) {
+func (e TafEdges) StationOrErr() (*WeatherStation, error) {
 	if e.loadedTypes[0] {
 		if e.Station == nil {
 			// Edge was loaded but was not found.
-			return nil, &NotFoundError{label: station.Label}
+			return nil, &NotFoundError{label: weatherstation.Label}
 		}
 		return e.Station, nil
 	}
@@ -91,14 +92,14 @@ func (*Taf) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case taf.FieldID:
-			values[i] = new(sql.NullInt64)
 		case taf.FieldRawText, taf.FieldRemarks, taf.FieldHash:
 			values[i] = new(sql.NullString)
 		case taf.FieldIssueTime, taf.FieldBulletinTime, taf.FieldValidFromTime, taf.FieldValidToTime:
 			values[i] = new(sql.NullTime)
-		case taf.ForeignKeys[0]: // station_tafs
-			values[i] = new(sql.NullInt64)
+		case taf.FieldID:
+			values[i] = new(uuid.UUID)
+		case taf.ForeignKeys[0]: // weather_station_tafs
+			values[i] = &sql.NullScanner{S: new(uuid.UUID)}
 		default:
 			return nil, fmt.Errorf("unexpected column %q for type Taf", columns[i])
 		}
@@ -115,11 +116,11 @@ func (t *Taf) assignValues(columns []string, values []any) error {
 	for i := range columns {
 		switch columns[i] {
 		case taf.FieldID:
-			value, ok := values[i].(*sql.NullInt64)
-			if !ok {
-				return fmt.Errorf("unexpected type %T for field id", value)
+			if value, ok := values[i].(*uuid.UUID); !ok {
+				return fmt.Errorf("unexpected type %T for field id", values[i])
+			} else if value != nil {
+				t.ID = *value
 			}
-			t.ID = int(value.Int64)
 		case taf.FieldRawText:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field raw_text", values[i])
@@ -163,11 +164,11 @@ func (t *Taf) assignValues(columns []string, values []any) error {
 				t.Hash = value.String
 			}
 		case taf.ForeignKeys[0]:
-			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for edge-field station_tafs", value)
+			if value, ok := values[i].(*sql.NullScanner); !ok {
+				return fmt.Errorf("unexpected type %T for field weather_station_tafs", values[i])
 			} else if value.Valid {
-				t.station_tafs = new(int)
-				*t.station_tafs = int(value.Int64)
+				t.weather_station_tafs = new(uuid.UUID)
+				*t.weather_station_tafs = *value.S.(*uuid.UUID)
 			}
 		}
 	}
@@ -175,7 +176,7 @@ func (t *Taf) assignValues(columns []string, values []any) error {
 }
 
 // QueryStation queries the "station" edge of the Taf entity.
-func (t *Taf) QueryStation() *StationQuery {
+func (t *Taf) QueryStation() *WeatherStationQuery {
 	return (&TafClient{config: t.config}).QueryStation(t)
 }
 

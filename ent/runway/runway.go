@@ -4,6 +4,8 @@ package runway
 
 import (
 	"time"
+
+	"github.com/google/uuid"
 )
 
 const (
@@ -11,6 +13,8 @@ const (
 	Label = "runway"
 	// FieldID holds the string denoting the id field in the database.
 	FieldID = "id"
+	// FieldImportID holds the string denoting the import_id field in the database.
+	FieldImportID = "import_id"
 	// FieldHash holds the string denoting the hash field in the database.
 	FieldHash = "hash"
 	// FieldImportFlag holds the string denoting the import_flag field in the database.
@@ -67,6 +71,7 @@ const (
 // Columns holds all SQL columns for runway fields.
 var Columns = []string{
 	FieldID,
+	FieldImportID,
 	FieldHash,
 	FieldImportFlag,
 	FieldLastUpdated,
@@ -115,4 +120,6 @@ var (
 	DefaultImportFlag bool
 	// DefaultLastUpdated holds the default value on creation for the "last_updated" field.
 	DefaultLastUpdated func() time.Time
+	// DefaultID holds the default value on creation for the "id" field.
+	DefaultID func() uuid.UUID
 )

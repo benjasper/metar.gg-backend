@@ -11,11 +11,12 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/google/uuid"
 	"metar.gg/ent/forecast"
 	"metar.gg/ent/predicate"
 	"metar.gg/ent/skycondition"
-	"metar.gg/ent/station"
 	"metar.gg/ent/taf"
+	"metar.gg/ent/weatherstation"
 )
 
 // TafUpdate is the builder for updating Taf entities.
@@ -74,26 +75,26 @@ func (tu *TafUpdate) SetHash(s string) *TafUpdate {
 	return tu
 }
 
-// SetStationID sets the "station" edge to the Station entity by ID.
-func (tu *TafUpdate) SetStationID(id int) *TafUpdate {
+// SetStationID sets the "station" edge to the WeatherStation entity by ID.
+func (tu *TafUpdate) SetStationID(id uuid.UUID) *TafUpdate {
 	tu.mutation.SetStationID(id)
 	return tu
 }
 
-// SetStation sets the "station" edge to the Station entity.
-func (tu *TafUpdate) SetStation(s *Station) *TafUpdate {
-	return tu.SetStationID(s.ID)
+// SetStation sets the "station" edge to the WeatherStation entity.
+func (tu *TafUpdate) SetStation(w *WeatherStation) *TafUpdate {
+	return tu.SetStationID(w.ID)
 }
 
 // AddSkyConditionIDs adds the "sky_conditions" edge to the SkyCondition entity by IDs.
-func (tu *TafUpdate) AddSkyConditionIDs(ids ...int) *TafUpdate {
+func (tu *TafUpdate) AddSkyConditionIDs(ids ...uuid.UUID) *TafUpdate {
 	tu.mutation.AddSkyConditionIDs(ids...)
 	return tu
 }
 
 // AddSkyConditions adds the "sky_conditions" edges to the SkyCondition entity.
 func (tu *TafUpdate) AddSkyConditions(s ...*SkyCondition) *TafUpdate {
-	ids := make([]int, len(s))
+	ids := make([]uuid.UUID, len(s))
 	for i := range s {
 		ids[i] = s[i].ID
 	}
@@ -101,14 +102,14 @@ func (tu *TafUpdate) AddSkyConditions(s ...*SkyCondition) *TafUpdate {
 }
 
 // AddForecastIDs adds the "forecast" edge to the Forecast entity by IDs.
-func (tu *TafUpdate) AddForecastIDs(ids ...int) *TafUpdate {
+func (tu *TafUpdate) AddForecastIDs(ids ...uuid.UUID) *TafUpdate {
 	tu.mutation.AddForecastIDs(ids...)
 	return tu
 }
 
 // AddForecast adds the "forecast" edges to the Forecast entity.
 func (tu *TafUpdate) AddForecast(f ...*Forecast) *TafUpdate {
-	ids := make([]int, len(f))
+	ids := make([]uuid.UUID, len(f))
 	for i := range f {
 		ids[i] = f[i].ID
 	}
@@ -120,7 +121,7 @@ func (tu *TafUpdate) Mutation() *TafMutation {
 	return tu.mutation
 }
 
-// ClearStation clears the "station" edge to the Station entity.
+// ClearStation clears the "station" edge to the WeatherStation entity.
 func (tu *TafUpdate) ClearStation() *TafUpdate {
 	tu.mutation.ClearStation()
 	return tu
@@ -133,14 +134,14 @@ func (tu *TafUpdate) ClearSkyConditions() *TafUpdate {
 }
 
 // RemoveSkyConditionIDs removes the "sky_conditions" edge to SkyCondition entities by IDs.
-func (tu *TafUpdate) RemoveSkyConditionIDs(ids ...int) *TafUpdate {
+func (tu *TafUpdate) RemoveSkyConditionIDs(ids ...uuid.UUID) *TafUpdate {
 	tu.mutation.RemoveSkyConditionIDs(ids...)
 	return tu
 }
 
 // RemoveSkyConditions removes "sky_conditions" edges to SkyCondition entities.
 func (tu *TafUpdate) RemoveSkyConditions(s ...*SkyCondition) *TafUpdate {
-	ids := make([]int, len(s))
+	ids := make([]uuid.UUID, len(s))
 	for i := range s {
 		ids[i] = s[i].ID
 	}
@@ -154,14 +155,14 @@ func (tu *TafUpdate) ClearForecast() *TafUpdate {
 }
 
 // RemoveForecastIDs removes the "forecast" edge to Forecast entities by IDs.
-func (tu *TafUpdate) RemoveForecastIDs(ids ...int) *TafUpdate {
+func (tu *TafUpdate) RemoveForecastIDs(ids ...uuid.UUID) *TafUpdate {
 	tu.mutation.RemoveForecastIDs(ids...)
 	return tu
 }
 
 // RemoveForecast removes "forecast" edges to Forecast entities.
 func (tu *TafUpdate) RemoveForecast(f ...*Forecast) *TafUpdate {
-	ids := make([]int, len(f))
+	ids := make([]uuid.UUID, len(f))
 	for i := range f {
 		ids[i] = f[i].ID
 	}
@@ -248,7 +249,7 @@ func (tu *TafUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Table:   taf.Table,
 			Columns: taf.Columns,
 			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt,
+				Type:   field.TypeUUID,
 				Column: taf.FieldID,
 			},
 		},
@@ -318,8 +319,8 @@ func (tu *TafUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: station.FieldID,
+					Type:   field.TypeUUID,
+					Column: weatherstation.FieldID,
 				},
 			},
 		}
@@ -334,8 +335,8 @@ func (tu *TafUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: station.FieldID,
+					Type:   field.TypeUUID,
+					Column: weatherstation.FieldID,
 				},
 			},
 		}
@@ -353,7 +354,7 @@ func (tu *TafUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
+					Type:   field.TypeUUID,
 					Column: skycondition.FieldID,
 				},
 			},
@@ -369,7 +370,7 @@ func (tu *TafUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
+					Type:   field.TypeUUID,
 					Column: skycondition.FieldID,
 				},
 			},
@@ -388,7 +389,7 @@ func (tu *TafUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
+					Type:   field.TypeUUID,
 					Column: skycondition.FieldID,
 				},
 			},
@@ -407,7 +408,7 @@ func (tu *TafUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
+					Type:   field.TypeUUID,
 					Column: forecast.FieldID,
 				},
 			},
@@ -423,7 +424,7 @@ func (tu *TafUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
+					Type:   field.TypeUUID,
 					Column: forecast.FieldID,
 				},
 			},
@@ -442,7 +443,7 @@ func (tu *TafUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
+					Type:   field.TypeUUID,
 					Column: forecast.FieldID,
 				},
 			},
@@ -515,26 +516,26 @@ func (tuo *TafUpdateOne) SetHash(s string) *TafUpdateOne {
 	return tuo
 }
 
-// SetStationID sets the "station" edge to the Station entity by ID.
-func (tuo *TafUpdateOne) SetStationID(id int) *TafUpdateOne {
+// SetStationID sets the "station" edge to the WeatherStation entity by ID.
+func (tuo *TafUpdateOne) SetStationID(id uuid.UUID) *TafUpdateOne {
 	tuo.mutation.SetStationID(id)
 	return tuo
 }
 
-// SetStation sets the "station" edge to the Station entity.
-func (tuo *TafUpdateOne) SetStation(s *Station) *TafUpdateOne {
-	return tuo.SetStationID(s.ID)
+// SetStation sets the "station" edge to the WeatherStation entity.
+func (tuo *TafUpdateOne) SetStation(w *WeatherStation) *TafUpdateOne {
+	return tuo.SetStationID(w.ID)
 }
 
 // AddSkyConditionIDs adds the "sky_conditions" edge to the SkyCondition entity by IDs.
-func (tuo *TafUpdateOne) AddSkyConditionIDs(ids ...int) *TafUpdateOne {
+func (tuo *TafUpdateOne) AddSkyConditionIDs(ids ...uuid.UUID) *TafUpdateOne {
 	tuo.mutation.AddSkyConditionIDs(ids...)
 	return tuo
 }
 
 // AddSkyConditions adds the "sky_conditions" edges to the SkyCondition entity.
 func (tuo *TafUpdateOne) AddSkyConditions(s ...*SkyCondition) *TafUpdateOne {
-	ids := make([]int, len(s))
+	ids := make([]uuid.UUID, len(s))
 	for i := range s {
 		ids[i] = s[i].ID
 	}
@@ -542,14 +543,14 @@ func (tuo *TafUpdateOne) AddSkyConditions(s ...*SkyCondition) *TafUpdateOne {
 }
 
 // AddForecastIDs adds the "forecast" edge to the Forecast entity by IDs.
-func (tuo *TafUpdateOne) AddForecastIDs(ids ...int) *TafUpdateOne {
+func (tuo *TafUpdateOne) AddForecastIDs(ids ...uuid.UUID) *TafUpdateOne {
 	tuo.mutation.AddForecastIDs(ids...)
 	return tuo
 }
 
 // AddForecast adds the "forecast" edges to the Forecast entity.
 func (tuo *TafUpdateOne) AddForecast(f ...*Forecast) *TafUpdateOne {
-	ids := make([]int, len(f))
+	ids := make([]uuid.UUID, len(f))
 	for i := range f {
 		ids[i] = f[i].ID
 	}
@@ -561,7 +562,7 @@ func (tuo *TafUpdateOne) Mutation() *TafMutation {
 	return tuo.mutation
 }
 
-// ClearStation clears the "station" edge to the Station entity.
+// ClearStation clears the "station" edge to the WeatherStation entity.
 func (tuo *TafUpdateOne) ClearStation() *TafUpdateOne {
 	tuo.mutation.ClearStation()
 	return tuo
@@ -574,14 +575,14 @@ func (tuo *TafUpdateOne) ClearSkyConditions() *TafUpdateOne {
 }
 
 // RemoveSkyConditionIDs removes the "sky_conditions" edge to SkyCondition entities by IDs.
-func (tuo *TafUpdateOne) RemoveSkyConditionIDs(ids ...int) *TafUpdateOne {
+func (tuo *TafUpdateOne) RemoveSkyConditionIDs(ids ...uuid.UUID) *TafUpdateOne {
 	tuo.mutation.RemoveSkyConditionIDs(ids...)
 	return tuo
 }
 
 // RemoveSkyConditions removes "sky_conditions" edges to SkyCondition entities.
 func (tuo *TafUpdateOne) RemoveSkyConditions(s ...*SkyCondition) *TafUpdateOne {
-	ids := make([]int, len(s))
+	ids := make([]uuid.UUID, len(s))
 	for i := range s {
 		ids[i] = s[i].ID
 	}
@@ -595,14 +596,14 @@ func (tuo *TafUpdateOne) ClearForecast() *TafUpdateOne {
 }
 
 // RemoveForecastIDs removes the "forecast" edge to Forecast entities by IDs.
-func (tuo *TafUpdateOne) RemoveForecastIDs(ids ...int) *TafUpdateOne {
+func (tuo *TafUpdateOne) RemoveForecastIDs(ids ...uuid.UUID) *TafUpdateOne {
 	tuo.mutation.RemoveForecastIDs(ids...)
 	return tuo
 }
 
 // RemoveForecast removes "forecast" edges to Forecast entities.
 func (tuo *TafUpdateOne) RemoveForecast(f ...*Forecast) *TafUpdateOne {
-	ids := make([]int, len(f))
+	ids := make([]uuid.UUID, len(f))
 	for i := range f {
 		ids[i] = f[i].ID
 	}
@@ -702,7 +703,7 @@ func (tuo *TafUpdateOne) sqlSave(ctx context.Context) (_node *Taf, err error) {
 			Table:   taf.Table,
 			Columns: taf.Columns,
 			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt,
+				Type:   field.TypeUUID,
 				Column: taf.FieldID,
 			},
 		},
@@ -789,8 +790,8 @@ func (tuo *TafUpdateOne) sqlSave(ctx context.Context) (_node *Taf, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: station.FieldID,
+					Type:   field.TypeUUID,
+					Column: weatherstation.FieldID,
 				},
 			},
 		}
@@ -805,8 +806,8 @@ func (tuo *TafUpdateOne) sqlSave(ctx context.Context) (_node *Taf, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: station.FieldID,
+					Type:   field.TypeUUID,
+					Column: weatherstation.FieldID,
 				},
 			},
 		}
@@ -824,7 +825,7 @@ func (tuo *TafUpdateOne) sqlSave(ctx context.Context) (_node *Taf, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
+					Type:   field.TypeUUID,
 					Column: skycondition.FieldID,
 				},
 			},
@@ -840,7 +841,7 @@ func (tuo *TafUpdateOne) sqlSave(ctx context.Context) (_node *Taf, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
+					Type:   field.TypeUUID,
 					Column: skycondition.FieldID,
 				},
 			},
@@ -859,7 +860,7 @@ func (tuo *TafUpdateOne) sqlSave(ctx context.Context) (_node *Taf, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
+					Type:   field.TypeUUID,
 					Column: skycondition.FieldID,
 				},
 			},
@@ -878,7 +879,7 @@ func (tuo *TafUpdateOne) sqlSave(ctx context.Context) (_node *Taf, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
+					Type:   field.TypeUUID,
 					Column: forecast.FieldID,
 				},
 			},
@@ -894,7 +895,7 @@ func (tuo *TafUpdateOne) sqlSave(ctx context.Context) (_node *Taf, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
+					Type:   field.TypeUUID,
 					Column: forecast.FieldID,
 				},
 			},
@@ -913,7 +914,7 @@ func (tuo *TafUpdateOne) sqlSave(ctx context.Context) (_node *Taf, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
+					Type:   field.TypeUUID,
 					Column: forecast.FieldID,
 				},
 			},

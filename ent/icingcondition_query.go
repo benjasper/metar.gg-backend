@@ -10,6 +10,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/google/uuid"
 	"metar.gg/ent/icingcondition"
 	"metar.gg/ent/predicate"
 )
@@ -86,8 +87,8 @@ func (icq *IcingConditionQuery) FirstX(ctx context.Context) *IcingCondition {
 
 // FirstID returns the first IcingCondition ID from the query.
 // Returns a *NotFoundError when no IcingCondition ID was found.
-func (icq *IcingConditionQuery) FirstID(ctx context.Context) (id int, err error) {
-	var ids []int
+func (icq *IcingConditionQuery) FirstID(ctx context.Context) (id uuid.UUID, err error) {
+	var ids []uuid.UUID
 	if ids, err = icq.Limit(1).IDs(ctx); err != nil {
 		return
 	}
@@ -99,7 +100,7 @@ func (icq *IcingConditionQuery) FirstID(ctx context.Context) (id int, err error)
 }
 
 // FirstIDX is like FirstID, but panics if an error occurs.
-func (icq *IcingConditionQuery) FirstIDX(ctx context.Context) int {
+func (icq *IcingConditionQuery) FirstIDX(ctx context.Context) uuid.UUID {
 	id, err := icq.FirstID(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
@@ -137,8 +138,8 @@ func (icq *IcingConditionQuery) OnlyX(ctx context.Context) *IcingCondition {
 // OnlyID is like Only, but returns the only IcingCondition ID in the query.
 // Returns a *NotSingularError when more than one IcingCondition ID is found.
 // Returns a *NotFoundError when no entities are found.
-func (icq *IcingConditionQuery) OnlyID(ctx context.Context) (id int, err error) {
-	var ids []int
+func (icq *IcingConditionQuery) OnlyID(ctx context.Context) (id uuid.UUID, err error) {
+	var ids []uuid.UUID
 	if ids, err = icq.Limit(2).IDs(ctx); err != nil {
 		return
 	}
@@ -154,7 +155,7 @@ func (icq *IcingConditionQuery) OnlyID(ctx context.Context) (id int, err error) 
 }
 
 // OnlyIDX is like OnlyID, but panics if an error occurs.
-func (icq *IcingConditionQuery) OnlyIDX(ctx context.Context) int {
+func (icq *IcingConditionQuery) OnlyIDX(ctx context.Context) uuid.UUID {
 	id, err := icq.OnlyID(ctx)
 	if err != nil {
 		panic(err)
@@ -180,8 +181,8 @@ func (icq *IcingConditionQuery) AllX(ctx context.Context) []*IcingCondition {
 }
 
 // IDs executes the query and returns a list of IcingCondition IDs.
-func (icq *IcingConditionQuery) IDs(ctx context.Context) ([]int, error) {
-	var ids []int
+func (icq *IcingConditionQuery) IDs(ctx context.Context) ([]uuid.UUID, error) {
+	var ids []uuid.UUID
 	if err := icq.Select(icingcondition.FieldID).Scan(ctx, &ids); err != nil {
 		return nil, err
 	}
@@ -189,7 +190,7 @@ func (icq *IcingConditionQuery) IDs(ctx context.Context) ([]int, error) {
 }
 
 // IDsX is like IDs, but panics if an error occurs.
-func (icq *IcingConditionQuery) IDsX(ctx context.Context) []int {
+func (icq *IcingConditionQuery) IDsX(ctx context.Context) []uuid.UUID {
 	ids, err := icq.IDs(ctx)
 	if err != nil {
 		panic(err)
@@ -377,7 +378,7 @@ func (icq *IcingConditionQuery) querySpec() *sqlgraph.QuerySpec {
 			Table:   icingcondition.Table,
 			Columns: icingcondition.Columns,
 			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt,
+				Type:   field.TypeUUID,
 				Column: icingcondition.FieldID,
 			},
 		},

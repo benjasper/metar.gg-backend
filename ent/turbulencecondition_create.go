@@ -7,9 +7,11 @@ import (
 	"errors"
 	"fmt"
 
+	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/google/uuid"
 	"metar.gg/ent/turbulencecondition"
 )
 
@@ -39,6 +41,20 @@ func (tcc *TurbulenceConditionCreate) SetMaxAltitude(i int) *TurbulenceCondition
 	return tcc
 }
 
+// SetID sets the "id" field.
+func (tcc *TurbulenceConditionCreate) SetID(u uuid.UUID) *TurbulenceConditionCreate {
+	tcc.mutation.SetID(u)
+	return tcc
+}
+
+// SetNillableID sets the "id" field if the given value is not nil.
+func (tcc *TurbulenceConditionCreate) SetNillableID(u *uuid.UUID) *TurbulenceConditionCreate {
+	if u != nil {
+		tcc.SetID(*u)
+	}
+	return tcc
+}
+
 // Mutation returns the TurbulenceConditionMutation object of the builder.
 func (tcc *TurbulenceConditionCreate) Mutation() *TurbulenceConditionMutation {
 	return tcc.mutation
@@ -50,6 +66,7 @@ func (tcc *TurbulenceConditionCreate) Save(ctx context.Context) (*TurbulenceCond
 		err  error
 		node *TurbulenceCondition
 	)
+	tcc.defaults()
 	if len(tcc.hooks) == 0 {
 		if err = tcc.check(); err != nil {
 			return nil, err
@@ -113,6 +130,14 @@ func (tcc *TurbulenceConditionCreate) ExecX(ctx context.Context) {
 	}
 }
 
+// defaults sets the default values of the builder before save.
+func (tcc *TurbulenceConditionCreate) defaults() {
+	if _, ok := tcc.mutation.ID(); !ok {
+		v := turbulencecondition.DefaultID()
+		tcc.mutation.SetID(v)
+	}
+}
+
 // check runs all checks and user-defined validators on the builder.
 func (tcc *TurbulenceConditionCreate) check() error {
 	if _, ok := tcc.mutation.Intensity(); !ok {
@@ -135,8 +160,13 @@ func (tcc *TurbulenceConditionCreate) sqlSave(ctx context.Context) (*TurbulenceC
 		}
 		return nil, err
 	}
-	id := _spec.ID.Value.(int64)
-	_node.ID = int(id)
+	if _spec.ID.Value != nil {
+		if id, ok := _spec.ID.Value.(*uuid.UUID); ok {
+			_node.ID = *id
+		} else if err := _node.ID.Scan(_spec.ID.Value); err != nil {
+			return nil, err
+		}
+	}
 	return _node, nil
 }
 
@@ -146,12 +176,16 @@ func (tcc *TurbulenceConditionCreate) createSpec() (*TurbulenceCondition, *sqlgr
 		_spec = &sqlgraph.CreateSpec{
 			Table: turbulencecondition.Table,
 			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt,
+				Type:   field.TypeUUID,
 				Column: turbulencecondition.FieldID,
 			},
 		}
 	)
 	_spec.OnConflict = tcc.conflict
+	if id, ok := tcc.mutation.ID(); ok {
+		_node.ID = id
+		_spec.ID.Value = &id
+	}
 	if value, ok := tcc.mutation.Intensity(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
@@ -276,16 +310,24 @@ func (u *TurbulenceConditionUpsert) AddMaxAltitude(v int) *TurbulenceConditionUp
 	return u
 }
 
-// UpdateNewValues updates the mutable fields using the new values that were set on create.
+// UpdateNewValues updates the mutable fields using the new values that were set on create except the ID field.
 // Using this option is equivalent to using:
 //
 //	client.TurbulenceCondition.Create().
 //		OnConflict(
 //			sql.ResolveWithNewValues(),
+//			sql.ResolveWith(func(u *sql.UpdateSet) {
+//				u.SetIgnore(turbulencecondition.FieldID)
+//			}),
 //		).
 //		Exec(ctx)
 func (u *TurbulenceConditionUpsertOne) UpdateNewValues() *TurbulenceConditionUpsertOne {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
+	u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(s *sql.UpdateSet) {
+		if _, exists := u.create.mutation.ID(); exists {
+			s.SetIgnore(turbulencecondition.FieldID)
+		}
+	}))
 	return u
 }
 
@@ -388,7 +430,12 @@ func (u *TurbulenceConditionUpsertOne) ExecX(ctx context.Context) {
 }
 
 // Exec executes the UPSERT query and returns the inserted/updated ID.
-func (u *TurbulenceConditionUpsertOne) ID(ctx context.Context) (id int, err error) {
+func (u *TurbulenceConditionUpsertOne) ID(ctx context.Context) (id uuid.UUID, err error) {
+	if u.create.driver.Dialect() == dialect.MySQL {
+		// In case of "ON CONFLICT", there is no way to get back non-numeric ID
+		// fields from the database since MySQL does not support the RETURNING clause.
+		return id, errors.New("ent: TurbulenceConditionUpsertOne.ID is not supported by MySQL driver. Use TurbulenceConditionUpsertOne.Exec instead")
+	}
 	node, err := u.create.Save(ctx)
 	if err != nil {
 		return id, err
@@ -397,7 +444,7 @@ func (u *TurbulenceConditionUpsertOne) ID(ctx context.Context) (id int, err erro
 }
 
 // IDX is like ID, but panics if an error occurs.
-func (u *TurbulenceConditionUpsertOne) IDX(ctx context.Context) int {
+func (u *TurbulenceConditionUpsertOne) IDX(ctx context.Context) uuid.UUID {
 	id, err := u.ID(ctx)
 	if err != nil {
 		panic(err)
@@ -420,6 +467,7 @@ func (tccb *TurbulenceConditionCreateBulk) Save(ctx context.Context) ([]*Turbule
 	for i := range tccb.builders {
 		func(i int, root context.Context) {
 			builder := tccb.builders[i]
+			builder.defaults()
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 				mutation, ok := m.(*TurbulenceConditionMutation)
 				if !ok {
@@ -447,10 +495,6 @@ func (tccb *TurbulenceConditionCreateBulk) Save(ctx context.Context) ([]*Turbule
 					return nil, err
 				}
 				mutation.id = &nodes[i].ID
-				if specs[i].ID.Value != nil {
-					id := specs[i].ID.Value.(int64)
-					nodes[i].ID = int(id)
-				}
 				mutation.done = true
 				return nodes[i], nil
 			})
@@ -537,10 +581,20 @@ type TurbulenceConditionUpsertBulk struct {
 //	client.TurbulenceCondition.Create().
 //		OnConflict(
 //			sql.ResolveWithNewValues(),
+//			sql.ResolveWith(func(u *sql.UpdateSet) {
+//				u.SetIgnore(turbulencecondition.FieldID)
+//			}),
 //		).
 //		Exec(ctx)
 func (u *TurbulenceConditionUpsertBulk) UpdateNewValues() *TurbulenceConditionUpsertBulk {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
+	u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(s *sql.UpdateSet) {
+		for _, b := range u.create.builders {
+			if _, exists := b.mutation.ID(); exists {
+				s.SetIgnore(turbulencecondition.FieldID)
+			}
+		}
+	}))
 	return u
 }
 

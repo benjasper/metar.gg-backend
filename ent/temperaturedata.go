@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"entgo.io/ent/dialect/sql"
+	"github.com/google/uuid"
 	"metar.gg/ent/temperaturedata"
 )
 
@@ -15,7 +16,7 @@ import (
 type TemperatureData struct {
 	config `json:"-"`
 	// ID of the ent.
-	ID int `json:"id,omitempty"`
+	ID uuid.UUID `json:"id,omitempty"`
 	// The time the temperature data is valid.
 	ValidTime time.Time `json:"valid_time,omitempty"`
 	// The surface temperature in degrees Celsius.
@@ -24,7 +25,7 @@ type TemperatureData struct {
 	MinTemperature *float64 `json:"min_temperature,omitempty"`
 	// The maximum temperature in degrees Celsius.
 	MaxTemperature            *float64 `json:"max_temperature,omitempty"`
-	forecast_temperature_data *int
+	forecast_temperature_data *uuid.UUID
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -34,12 +35,12 @@ func (*TemperatureData) scanValues(columns []string) ([]any, error) {
 		switch columns[i] {
 		case temperaturedata.FieldTemperature, temperaturedata.FieldMinTemperature, temperaturedata.FieldMaxTemperature:
 			values[i] = new(sql.NullFloat64)
-		case temperaturedata.FieldID:
-			values[i] = new(sql.NullInt64)
 		case temperaturedata.FieldValidTime:
 			values[i] = new(sql.NullTime)
+		case temperaturedata.FieldID:
+			values[i] = new(uuid.UUID)
 		case temperaturedata.ForeignKeys[0]: // forecast_temperature_data
-			values[i] = new(sql.NullInt64)
+			values[i] = &sql.NullScanner{S: new(uuid.UUID)}
 		default:
 			return nil, fmt.Errorf("unexpected column %q for type TemperatureData", columns[i])
 		}
@@ -56,11 +57,11 @@ func (td *TemperatureData) assignValues(columns []string, values []any) error {
 	for i := range columns {
 		switch columns[i] {
 		case temperaturedata.FieldID:
-			value, ok := values[i].(*sql.NullInt64)
-			if !ok {
-				return fmt.Errorf("unexpected type %T for field id", value)
+			if value, ok := values[i].(*uuid.UUID); !ok {
+				return fmt.Errorf("unexpected type %T for field id", values[i])
+			} else if value != nil {
+				td.ID = *value
 			}
-			td.ID = int(value.Int64)
 		case temperaturedata.FieldValidTime:
 			if value, ok := values[i].(*sql.NullTime); !ok {
 				return fmt.Errorf("unexpected type %T for field valid_time", values[i])
@@ -88,11 +89,11 @@ func (td *TemperatureData) assignValues(columns []string, values []any) error {
 				*td.MaxTemperature = value.Float64
 			}
 		case temperaturedata.ForeignKeys[0]:
-			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for edge-field forecast_temperature_data", value)
+			if value, ok := values[i].(*sql.NullScanner); !ok {
+				return fmt.Errorf("unexpected type %T for field forecast_temperature_data", values[i])
 			} else if value.Valid {
-				td.forecast_temperature_data = new(int)
-				*td.forecast_temperature_data = int(value.Int64)
+				td.forecast_temperature_data = new(uuid.UUID)
+				*td.forecast_temperature_data = *value.S.(*uuid.UUID)
 			}
 		}
 	}

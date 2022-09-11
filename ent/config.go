@@ -31,10 +31,10 @@ type hooks struct {
 	Metar               []ent.Hook
 	Runway              []ent.Hook
 	SkyCondition        []ent.Hook
-	Station             []ent.Hook
 	Taf                 []ent.Hook
 	TemperatureData     []ent.Hook
 	TurbulenceCondition []ent.Hook
+	WeatherStation      []ent.Hook
 }
 
 // Options applies the options on the config object.

@@ -11,6 +11,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/google/uuid"
 	"metar.gg/ent/forecast"
 	"metar.gg/ent/icingcondition"
 	"metar.gg/ent/predicate"
@@ -187,8 +188,8 @@ func (fq *ForecastQuery) FirstX(ctx context.Context) *Forecast {
 
 // FirstID returns the first Forecast ID from the query.
 // Returns a *NotFoundError when no Forecast ID was found.
-func (fq *ForecastQuery) FirstID(ctx context.Context) (id int, err error) {
-	var ids []int
+func (fq *ForecastQuery) FirstID(ctx context.Context) (id uuid.UUID, err error) {
+	var ids []uuid.UUID
 	if ids, err = fq.Limit(1).IDs(ctx); err != nil {
 		return
 	}
@@ -200,7 +201,7 @@ func (fq *ForecastQuery) FirstID(ctx context.Context) (id int, err error) {
 }
 
 // FirstIDX is like FirstID, but panics if an error occurs.
-func (fq *ForecastQuery) FirstIDX(ctx context.Context) int {
+func (fq *ForecastQuery) FirstIDX(ctx context.Context) uuid.UUID {
 	id, err := fq.FirstID(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
@@ -238,8 +239,8 @@ func (fq *ForecastQuery) OnlyX(ctx context.Context) *Forecast {
 // OnlyID is like Only, but returns the only Forecast ID in the query.
 // Returns a *NotSingularError when more than one Forecast ID is found.
 // Returns a *NotFoundError when no entities are found.
-func (fq *ForecastQuery) OnlyID(ctx context.Context) (id int, err error) {
-	var ids []int
+func (fq *ForecastQuery) OnlyID(ctx context.Context) (id uuid.UUID, err error) {
+	var ids []uuid.UUID
 	if ids, err = fq.Limit(2).IDs(ctx); err != nil {
 		return
 	}
@@ -255,7 +256,7 @@ func (fq *ForecastQuery) OnlyID(ctx context.Context) (id int, err error) {
 }
 
 // OnlyIDX is like OnlyID, but panics if an error occurs.
-func (fq *ForecastQuery) OnlyIDX(ctx context.Context) int {
+func (fq *ForecastQuery) OnlyIDX(ctx context.Context) uuid.UUID {
 	id, err := fq.OnlyID(ctx)
 	if err != nil {
 		panic(err)
@@ -281,8 +282,8 @@ func (fq *ForecastQuery) AllX(ctx context.Context) []*Forecast {
 }
 
 // IDs executes the query and returns a list of Forecast IDs.
-func (fq *ForecastQuery) IDs(ctx context.Context) ([]int, error) {
-	var ids []int
+func (fq *ForecastQuery) IDs(ctx context.Context) ([]uuid.UUID, error) {
+	var ids []uuid.UUID
 	if err := fq.Select(forecast.FieldID).Scan(ctx, &ids); err != nil {
 		return nil, err
 	}
@@ -290,7 +291,7 @@ func (fq *ForecastQuery) IDs(ctx context.Context) ([]int, error) {
 }
 
 // IDsX is like IDs, but panics if an error occurs.
-func (fq *ForecastQuery) IDsX(ctx context.Context) []int {
+func (fq *ForecastQuery) IDsX(ctx context.Context) []uuid.UUID {
 	ids, err := fq.IDs(ctx)
 	if err != nil {
 		panic(err)
@@ -567,7 +568,7 @@ func (fq *ForecastQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*For
 
 func (fq *ForecastQuery) loadSkyConditions(ctx context.Context, query *SkyConditionQuery, nodes []*Forecast, init func(*Forecast), assign func(*Forecast, *SkyCondition)) error {
 	fks := make([]driver.Value, 0, len(nodes))
-	nodeids := make(map[int]*Forecast)
+	nodeids := make(map[uuid.UUID]*Forecast)
 	for i := range nodes {
 		fks = append(fks, nodes[i].ID)
 		nodeids[nodes[i].ID] = nodes[i]
@@ -598,7 +599,7 @@ func (fq *ForecastQuery) loadSkyConditions(ctx context.Context, query *SkyCondit
 }
 func (fq *ForecastQuery) loadTurbulenceConditions(ctx context.Context, query *TurbulenceConditionQuery, nodes []*Forecast, init func(*Forecast), assign func(*Forecast, *TurbulenceCondition)) error {
 	fks := make([]driver.Value, 0, len(nodes))
-	nodeids := make(map[int]*Forecast)
+	nodeids := make(map[uuid.UUID]*Forecast)
 	for i := range nodes {
 		fks = append(fks, nodes[i].ID)
 		nodeids[nodes[i].ID] = nodes[i]
@@ -629,7 +630,7 @@ func (fq *ForecastQuery) loadTurbulenceConditions(ctx context.Context, query *Tu
 }
 func (fq *ForecastQuery) loadIcingConditions(ctx context.Context, query *IcingConditionQuery, nodes []*Forecast, init func(*Forecast), assign func(*Forecast, *IcingCondition)) error {
 	fks := make([]driver.Value, 0, len(nodes))
-	nodeids := make(map[int]*Forecast)
+	nodeids := make(map[uuid.UUID]*Forecast)
 	for i := range nodes {
 		fks = append(fks, nodes[i].ID)
 		nodeids[nodes[i].ID] = nodes[i]
@@ -660,7 +661,7 @@ func (fq *ForecastQuery) loadIcingConditions(ctx context.Context, query *IcingCo
 }
 func (fq *ForecastQuery) loadTemperatureData(ctx context.Context, query *TemperatureDataQuery, nodes []*Forecast, init func(*Forecast), assign func(*Forecast, *TemperatureData)) error {
 	fks := make([]driver.Value, 0, len(nodes))
-	nodeids := make(map[int]*Forecast)
+	nodeids := make(map[uuid.UUID]*Forecast)
 	for i := range nodes {
 		fks = append(fks, nodes[i].ID)
 		nodeids[nodes[i].ID] = nodes[i]
@@ -716,7 +717,7 @@ func (fq *ForecastQuery) querySpec() *sqlgraph.QuerySpec {
 			Table:   forecast.Table,
 			Columns: forecast.Columns,
 			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt,
+				Type:   field.TypeUUID,
 				Column: forecast.FieldID,
 			},
 		},

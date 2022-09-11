@@ -10,8 +10,10 @@ import (
 // Airport returns generated.AirportResolver implementation.
 func (r *Resolver) Airport() generated.AirportResolver { return &airportResolver{r} }
 
-// Station returns generated.StationResolver implementation.
-func (r *Resolver) Station() generated.StationResolver { return &stationResolver{r} }
+// WeatherStation returns generated.WeatherStationResolver implementation.
+func (r *Resolver) WeatherStation() generated.WeatherStationResolver {
+	return &weatherStationResolver{r}
+}
 
 type airportResolver struct{ *Resolver }
-type stationResolver struct{ *Resolver }
+type weatherStationResolver struct{ *Resolver }

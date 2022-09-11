@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"entgo.io/ent/dialect/sql"
+	"github.com/google/uuid"
 	"metar.gg/ent/forecast"
 )
 
@@ -15,7 +16,7 @@ import (
 type Forecast struct {
 	config `json:"-"`
 	// ID of the ent.
-	ID int `json:"id,omitempty"`
+	ID uuid.UUID `json:"id,omitempty"`
 	// The start time of the forecast period.
 	FromTime time.Time `json:"from_time,omitempty"`
 	// The end time of the forecast period.
@@ -51,7 +52,7 @@ type Forecast struct {
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the ForecastQuery when eager-loading is set.
 	Edges        ForecastEdges `json:"edges"`
-	taf_forecast *int
+	taf_forecast *uuid.UUID
 }
 
 // ForecastEdges holds the relations/edges for other nodes in the graph.
@@ -119,14 +120,16 @@ func (*Forecast) scanValues(columns []string) ([]any, error) {
 		switch columns[i] {
 		case forecast.FieldVisibilityHorizontal, forecast.FieldAltimeter:
 			values[i] = new(sql.NullFloat64)
-		case forecast.FieldID, forecast.FieldChangeProbability, forecast.FieldWindDirection, forecast.FieldWindSpeed, forecast.FieldWindGust, forecast.FieldWindShearHeight, forecast.FieldWindShearDirection, forecast.FieldWindShearSpeed, forecast.FieldVisibilityVertical:
+		case forecast.FieldChangeProbability, forecast.FieldWindDirection, forecast.FieldWindSpeed, forecast.FieldWindGust, forecast.FieldWindShearHeight, forecast.FieldWindShearDirection, forecast.FieldWindShearSpeed, forecast.FieldVisibilityVertical:
 			values[i] = new(sql.NullInt64)
 		case forecast.FieldChangeIndicator, forecast.FieldWeather, forecast.FieldNotDecoded:
 			values[i] = new(sql.NullString)
 		case forecast.FieldFromTime, forecast.FieldToTime, forecast.FieldChangeTime:
 			values[i] = new(sql.NullTime)
+		case forecast.FieldID:
+			values[i] = new(uuid.UUID)
 		case forecast.ForeignKeys[0]: // taf_forecast
-			values[i] = new(sql.NullInt64)
+			values[i] = &sql.NullScanner{S: new(uuid.UUID)}
 		default:
 			return nil, fmt.Errorf("unexpected column %q for type Forecast", columns[i])
 		}
@@ -143,11 +146,11 @@ func (f *Forecast) assignValues(columns []string, values []any) error {
 	for i := range columns {
 		switch columns[i] {
 		case forecast.FieldID:
-			value, ok := values[i].(*sql.NullInt64)
-			if !ok {
-				return fmt.Errorf("unexpected type %T for field id", value)
+			if value, ok := values[i].(*uuid.UUID); !ok {
+				return fmt.Errorf("unexpected type %T for field id", values[i])
+			} else if value != nil {
+				f.ID = *value
 			}
-			f.ID = int(value.Int64)
 		case forecast.FieldFromTime:
 			if value, ok := values[i].(*sql.NullTime); !ok {
 				return fmt.Errorf("unexpected type %T for field from_time", values[i])
@@ -257,11 +260,11 @@ func (f *Forecast) assignValues(columns []string, values []any) error {
 				f.NotDecoded = value.String
 			}
 		case forecast.ForeignKeys[0]:
-			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for edge-field taf_forecast", value)
+			if value, ok := values[i].(*sql.NullScanner); !ok {
+				return fmt.Errorf("unexpected type %T for field taf_forecast", values[i])
 			} else if value.Valid {
-				f.taf_forecast = new(int)
-				*f.taf_forecast = int(value.Int64)
+				f.taf_forecast = new(uuid.UUID)
+				*f.taf_forecast = *value.S.(*uuid.UUID)
 			}
 		}
 	}

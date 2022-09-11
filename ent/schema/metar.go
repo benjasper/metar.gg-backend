@@ -7,6 +7,7 @@ import (
 	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
 	"entgo.io/ent/schema/index"
+	"github.com/google/uuid"
 )
 
 // Metar holds the schema definition for the Metar entity.
@@ -17,7 +18,7 @@ type Metar struct {
 // Fields of the Metar.
 func (Metar) Fields() []ent.Field {
 	return []ent.Field{
-		field.Int("id").Annotations(entgql.Skip()),
+		field.UUID("id", uuid.UUID{}).Default(uuid.New).Immutable(),
 		field.Text("raw_text").Comment("The raw METAR text."),
 		field.Time("observation_time").Comment("The time the METAR was observed."),
 		field.Float("temperature").Comment("The temperature in Celsius."),
@@ -56,7 +57,7 @@ func (Metar) Fields() []ent.Field {
 // Edges of the Metar.
 func (Metar) Edges() []ent.Edge {
 	return []ent.Edge{
-		edge.From("station", Station.Type).Ref("metars").Unique().Required().Comment("The station that provided the METAR."),
+		edge.From("station", WeatherStation.Type).Ref("metars").Unique().Required().Comment("The station that provided the METAR."),
 		edge.To("sky_conditions", SkyCondition.Type).Comment("The sky conditions.").Annotations(entsql.Annotation{
 			OnDelete: entsql.Cascade,
 		}),

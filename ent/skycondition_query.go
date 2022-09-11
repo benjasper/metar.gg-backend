@@ -10,6 +10,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/google/uuid"
 	"metar.gg/ent/predicate"
 	"metar.gg/ent/skycondition"
 )
@@ -86,8 +87,8 @@ func (scq *SkyConditionQuery) FirstX(ctx context.Context) *SkyCondition {
 
 // FirstID returns the first SkyCondition ID from the query.
 // Returns a *NotFoundError when no SkyCondition ID was found.
-func (scq *SkyConditionQuery) FirstID(ctx context.Context) (id int, err error) {
-	var ids []int
+func (scq *SkyConditionQuery) FirstID(ctx context.Context) (id uuid.UUID, err error) {
+	var ids []uuid.UUID
 	if ids, err = scq.Limit(1).IDs(ctx); err != nil {
 		return
 	}
@@ -99,7 +100,7 @@ func (scq *SkyConditionQuery) FirstID(ctx context.Context) (id int, err error) {
 }
 
 // FirstIDX is like FirstID, but panics if an error occurs.
-func (scq *SkyConditionQuery) FirstIDX(ctx context.Context) int {
+func (scq *SkyConditionQuery) FirstIDX(ctx context.Context) uuid.UUID {
 	id, err := scq.FirstID(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
@@ -137,8 +138,8 @@ func (scq *SkyConditionQuery) OnlyX(ctx context.Context) *SkyCondition {
 // OnlyID is like Only, but returns the only SkyCondition ID in the query.
 // Returns a *NotSingularError when more than one SkyCondition ID is found.
 // Returns a *NotFoundError when no entities are found.
-func (scq *SkyConditionQuery) OnlyID(ctx context.Context) (id int, err error) {
-	var ids []int
+func (scq *SkyConditionQuery) OnlyID(ctx context.Context) (id uuid.UUID, err error) {
+	var ids []uuid.UUID
 	if ids, err = scq.Limit(2).IDs(ctx); err != nil {
 		return
 	}
@@ -154,7 +155,7 @@ func (scq *SkyConditionQuery) OnlyID(ctx context.Context) (id int, err error) {
 }
 
 // OnlyIDX is like OnlyID, but panics if an error occurs.
-func (scq *SkyConditionQuery) OnlyIDX(ctx context.Context) int {
+func (scq *SkyConditionQuery) OnlyIDX(ctx context.Context) uuid.UUID {
 	id, err := scq.OnlyID(ctx)
 	if err != nil {
 		panic(err)
@@ -180,8 +181,8 @@ func (scq *SkyConditionQuery) AllX(ctx context.Context) []*SkyCondition {
 }
 
 // IDs executes the query and returns a list of SkyCondition IDs.
-func (scq *SkyConditionQuery) IDs(ctx context.Context) ([]int, error) {
-	var ids []int
+func (scq *SkyConditionQuery) IDs(ctx context.Context) ([]uuid.UUID, error) {
+	var ids []uuid.UUID
 	if err := scq.Select(skycondition.FieldID).Scan(ctx, &ids); err != nil {
 		return nil, err
 	}
@@ -189,7 +190,7 @@ func (scq *SkyConditionQuery) IDs(ctx context.Context) ([]int, error) {
 }
 
 // IDsX is like IDs, but panics if an error occurs.
-func (scq *SkyConditionQuery) IDsX(ctx context.Context) []int {
+func (scq *SkyConditionQuery) IDsX(ctx context.Context) []uuid.UUID {
 	ids, err := scq.IDs(ctx)
 	if err != nil {
 		panic(err)
@@ -377,7 +378,7 @@ func (scq *SkyConditionQuery) querySpec() *sqlgraph.QuerySpec {
 			Table:   skycondition.Table,
 			Columns: skycondition.Columns,
 			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt,
+				Type:   field.TypeUUID,
 				Column: skycondition.FieldID,
 			},
 		},

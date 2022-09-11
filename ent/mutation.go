@@ -9,6 +9,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/google/uuid"
 	"metar.gg/ent/airport"
 	"metar.gg/ent/forecast"
 	"metar.gg/ent/frequency"
@@ -17,10 +18,10 @@ import (
 	"metar.gg/ent/predicate"
 	"metar.gg/ent/runway"
 	"metar.gg/ent/skycondition"
-	"metar.gg/ent/station"
 	"metar.gg/ent/taf"
 	"metar.gg/ent/temperaturedata"
 	"metar.gg/ent/turbulencecondition"
+	"metar.gg/ent/weatherstation"
 
 	"entgo.io/ent"
 )
@@ -41,10 +42,10 @@ const (
 	TypeMetar               = "Metar"
 	TypeRunway              = "Runway"
 	TypeSkyCondition        = "SkyCondition"
-	TypeStation             = "Station"
 	TypeTaf                 = "Taf"
 	TypeTemperatureData     = "TemperatureData"
 	TypeTurbulenceCondition = "TurbulenceCondition"
+	TypeWeatherStation      = "WeatherStation"
 )
 
 // AirportMutation represents an operation that mutates the Airport nodes in the graph.
@@ -52,10 +53,14 @@ type AirportMutation struct {
 	config
 	op                 Op
 	typ                string
-	id                 *int
+	id                 *uuid.UUID
+	import_id          *int
+	addimport_id       *int
 	hash               *string
 	import_flag        *bool
 	last_updated       *time.Time
+	icao_code          *string
+	iata_code          *string
 	identifier         *string
 	_type              *airport.Type
 	name               *string
@@ -71,19 +76,18 @@ type AirportMutation struct {
 	municipality       *string
 	scheduled_service  *bool
 	gps_code           *string
-	iata_code          *string
 	local_code         *string
 	website            *string
 	wikipedia          *string
 	keywords           *[]string
 	clearedFields      map[string]struct{}
-	runways            map[int]struct{}
-	removedrunways     map[int]struct{}
+	runways            map[uuid.UUID]struct{}
+	removedrunways     map[uuid.UUID]struct{}
 	clearedrunways     bool
-	station            *int
+	station            *uuid.UUID
 	clearedstation     bool
-	frequencies        map[int]struct{}
-	removedfrequencies map[int]struct{}
+	frequencies        map[uuid.UUID]struct{}
+	removedfrequencies map[uuid.UUID]struct{}
 	clearedfrequencies bool
 	done               bool
 	oldValue           func(context.Context) (*Airport, error)
@@ -110,7 +114,7 @@ func newAirportMutation(c config, op Op, opts ...airportOption) *AirportMutation
 }
 
 // withAirportID sets the ID field of the mutation.
-func withAirportID(id int) airportOption {
+func withAirportID(id uuid.UUID) airportOption {
 	return func(m *AirportMutation) {
 		var (
 			err   error
@@ -162,13 +166,13 @@ func (m AirportMutation) Tx() (*Tx, error) {
 
 // SetID sets the value of the id field. Note that this
 // operation is only accepted on creation of Airport entities.
-func (m *AirportMutation) SetID(id int) {
+func (m *AirportMutation) SetID(id uuid.UUID) {
 	m.id = &id
 }
 
 // ID returns the ID value in the mutation. Note that the ID is only available
 // if it was provided to the builder or after it was returned from the database.
-func (m *AirportMutation) ID() (id int, exists bool) {
+func (m *AirportMutation) ID() (id uuid.UUID, exists bool) {
 	if m.id == nil {
 		return
 	}
@@ -179,12 +183,12 @@ func (m *AirportMutation) ID() (id int, exists bool) {
 // That means, if the mutation is applied within a transaction with an isolation level such
 // as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
 // or updated by the mutation.
-func (m *AirportMutation) IDs(ctx context.Context) ([]int, error) {
+func (m *AirportMutation) IDs(ctx context.Context) ([]uuid.UUID, error) {
 	switch {
 	case m.op.Is(OpUpdateOne | OpDeleteOne):
 		id, exists := m.ID()
 		if exists {
-			return []int{id}, nil
+			return []uuid.UUID{id}, nil
 		}
 		fallthrough
 	case m.op.Is(OpUpdate | OpDelete):
@@ -192,6 +196,62 @@ func (m *AirportMutation) IDs(ctx context.Context) ([]int, error) {
 	default:
 		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
 	}
+}
+
+// SetImportID sets the "import_id" field.
+func (m *AirportMutation) SetImportID(i int) {
+	m.import_id = &i
+	m.addimport_id = nil
+}
+
+// ImportID returns the value of the "import_id" field in the mutation.
+func (m *AirportMutation) ImportID() (r int, exists bool) {
+	v := m.import_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldImportID returns the old "import_id" field's value of the Airport entity.
+// If the Airport object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *AirportMutation) OldImportID(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldImportID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldImportID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldImportID: %w", err)
+	}
+	return oldValue.ImportID, nil
+}
+
+// AddImportID adds i to the "import_id" field.
+func (m *AirportMutation) AddImportID(i int) {
+	if m.addimport_id != nil {
+		*m.addimport_id += i
+	} else {
+		m.addimport_id = &i
+	}
+}
+
+// AddedImportID returns the value that was added to the "import_id" field in this mutation.
+func (m *AirportMutation) AddedImportID() (r int, exists bool) {
+	v := m.addimport_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetImportID resets all changes to the "import_id" field.
+func (m *AirportMutation) ResetImportID() {
+	m.import_id = nil
+	m.addimport_id = nil
 }
 
 // SetHash sets the "hash" field.
@@ -300,6 +360,104 @@ func (m *AirportMutation) OldLastUpdated(ctx context.Context) (v time.Time, err 
 // ResetLastUpdated resets all changes to the "last_updated" field.
 func (m *AirportMutation) ResetLastUpdated() {
 	m.last_updated = nil
+}
+
+// SetIcaoCode sets the "icao_code" field.
+func (m *AirportMutation) SetIcaoCode(s string) {
+	m.icao_code = &s
+}
+
+// IcaoCode returns the value of the "icao_code" field in the mutation.
+func (m *AirportMutation) IcaoCode() (r string, exists bool) {
+	v := m.icao_code
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldIcaoCode returns the old "icao_code" field's value of the Airport entity.
+// If the Airport object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *AirportMutation) OldIcaoCode(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldIcaoCode is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldIcaoCode requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldIcaoCode: %w", err)
+	}
+	return oldValue.IcaoCode, nil
+}
+
+// ClearIcaoCode clears the value of the "icao_code" field.
+func (m *AirportMutation) ClearIcaoCode() {
+	m.icao_code = nil
+	m.clearedFields[airport.FieldIcaoCode] = struct{}{}
+}
+
+// IcaoCodeCleared returns if the "icao_code" field was cleared in this mutation.
+func (m *AirportMutation) IcaoCodeCleared() bool {
+	_, ok := m.clearedFields[airport.FieldIcaoCode]
+	return ok
+}
+
+// ResetIcaoCode resets all changes to the "icao_code" field.
+func (m *AirportMutation) ResetIcaoCode() {
+	m.icao_code = nil
+	delete(m.clearedFields, airport.FieldIcaoCode)
+}
+
+// SetIataCode sets the "iata_code" field.
+func (m *AirportMutation) SetIataCode(s string) {
+	m.iata_code = &s
+}
+
+// IataCode returns the value of the "iata_code" field in the mutation.
+func (m *AirportMutation) IataCode() (r string, exists bool) {
+	v := m.iata_code
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldIataCode returns the old "iata_code" field's value of the Airport entity.
+// If the Airport object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *AirportMutation) OldIataCode(ctx context.Context) (v *string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldIataCode is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldIataCode requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldIataCode: %w", err)
+	}
+	return oldValue.IataCode, nil
+}
+
+// ClearIataCode clears the value of the "iata_code" field.
+func (m *AirportMutation) ClearIataCode() {
+	m.iata_code = nil
+	m.clearedFields[airport.FieldIataCode] = struct{}{}
+}
+
+// IataCodeCleared returns if the "iata_code" field was cleared in this mutation.
+func (m *AirportMutation) IataCodeCleared() bool {
+	_, ok := m.clearedFields[airport.FieldIataCode]
+	return ok
+}
+
+// ResetIataCode resets all changes to the "iata_code" field.
+func (m *AirportMutation) ResetIataCode() {
+	m.iata_code = nil
+	delete(m.clearedFields, airport.FieldIataCode)
 }
 
 // SetIdentifier sets the "identifier" field.
@@ -834,55 +992,6 @@ func (m *AirportMutation) ResetGpsCode() {
 	delete(m.clearedFields, airport.FieldGpsCode)
 }
 
-// SetIataCode sets the "iata_code" field.
-func (m *AirportMutation) SetIataCode(s string) {
-	m.iata_code = &s
-}
-
-// IataCode returns the value of the "iata_code" field in the mutation.
-func (m *AirportMutation) IataCode() (r string, exists bool) {
-	v := m.iata_code
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldIataCode returns the old "iata_code" field's value of the Airport entity.
-// If the Airport object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *AirportMutation) OldIataCode(ctx context.Context) (v *string, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldIataCode is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldIataCode requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldIataCode: %w", err)
-	}
-	return oldValue.IataCode, nil
-}
-
-// ClearIataCode clears the value of the "iata_code" field.
-func (m *AirportMutation) ClearIataCode() {
-	m.iata_code = nil
-	m.clearedFields[airport.FieldIataCode] = struct{}{}
-}
-
-// IataCodeCleared returns if the "iata_code" field was cleared in this mutation.
-func (m *AirportMutation) IataCodeCleared() bool {
-	_, ok := m.clearedFields[airport.FieldIataCode]
-	return ok
-}
-
-// ResetIataCode resets all changes to the "iata_code" field.
-func (m *AirportMutation) ResetIataCode() {
-	m.iata_code = nil
-	delete(m.clearedFields, airport.FieldIataCode)
-}
-
 // SetLocalCode sets the "local_code" field.
 func (m *AirportMutation) SetLocalCode(s string) {
 	m.local_code = &s
@@ -1067,9 +1176,9 @@ func (m *AirportMutation) ResetKeywords() {
 }
 
 // AddRunwayIDs adds the "runways" edge to the Runway entity by ids.
-func (m *AirportMutation) AddRunwayIDs(ids ...int) {
+func (m *AirportMutation) AddRunwayIDs(ids ...uuid.UUID) {
 	if m.runways == nil {
-		m.runways = make(map[int]struct{})
+		m.runways = make(map[uuid.UUID]struct{})
 	}
 	for i := range ids {
 		m.runways[ids[i]] = struct{}{}
@@ -1087,9 +1196,9 @@ func (m *AirportMutation) RunwaysCleared() bool {
 }
 
 // RemoveRunwayIDs removes the "runways" edge to the Runway entity by IDs.
-func (m *AirportMutation) RemoveRunwayIDs(ids ...int) {
+func (m *AirportMutation) RemoveRunwayIDs(ids ...uuid.UUID) {
 	if m.removedrunways == nil {
-		m.removedrunways = make(map[int]struct{})
+		m.removedrunways = make(map[uuid.UUID]struct{})
 	}
 	for i := range ids {
 		delete(m.runways, ids[i])
@@ -1098,7 +1207,7 @@ func (m *AirportMutation) RemoveRunwayIDs(ids ...int) {
 }
 
 // RemovedRunways returns the removed IDs of the "runways" edge to the Runway entity.
-func (m *AirportMutation) RemovedRunwaysIDs() (ids []int) {
+func (m *AirportMutation) RemovedRunwaysIDs() (ids []uuid.UUID) {
 	for id := range m.removedrunways {
 		ids = append(ids, id)
 	}
@@ -1106,7 +1215,7 @@ func (m *AirportMutation) RemovedRunwaysIDs() (ids []int) {
 }
 
 // RunwaysIDs returns the "runways" edge IDs in the mutation.
-func (m *AirportMutation) RunwaysIDs() (ids []int) {
+func (m *AirportMutation) RunwaysIDs() (ids []uuid.UUID) {
 	for id := range m.runways {
 		ids = append(ids, id)
 	}
@@ -1120,23 +1229,23 @@ func (m *AirportMutation) ResetRunways() {
 	m.removedrunways = nil
 }
 
-// SetStationID sets the "station" edge to the Station entity by id.
-func (m *AirportMutation) SetStationID(id int) {
+// SetStationID sets the "station" edge to the WeatherStation entity by id.
+func (m *AirportMutation) SetStationID(id uuid.UUID) {
 	m.station = &id
 }
 
-// ClearStation clears the "station" edge to the Station entity.
+// ClearStation clears the "station" edge to the WeatherStation entity.
 func (m *AirportMutation) ClearStation() {
 	m.clearedstation = true
 }
 
-// StationCleared reports if the "station" edge to the Station entity was cleared.
+// StationCleared reports if the "station" edge to the WeatherStation entity was cleared.
 func (m *AirportMutation) StationCleared() bool {
 	return m.clearedstation
 }
 
 // StationID returns the "station" edge ID in the mutation.
-func (m *AirportMutation) StationID() (id int, exists bool) {
+func (m *AirportMutation) StationID() (id uuid.UUID, exists bool) {
 	if m.station != nil {
 		return *m.station, true
 	}
@@ -1146,7 +1255,7 @@ func (m *AirportMutation) StationID() (id int, exists bool) {
 // StationIDs returns the "station" edge IDs in the mutation.
 // Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
 // StationID instead. It exists only for internal usage by the builders.
-func (m *AirportMutation) StationIDs() (ids []int) {
+func (m *AirportMutation) StationIDs() (ids []uuid.UUID) {
 	if id := m.station; id != nil {
 		ids = append(ids, *id)
 	}
@@ -1160,9 +1269,9 @@ func (m *AirportMutation) ResetStation() {
 }
 
 // AddFrequencyIDs adds the "frequencies" edge to the Frequency entity by ids.
-func (m *AirportMutation) AddFrequencyIDs(ids ...int) {
+func (m *AirportMutation) AddFrequencyIDs(ids ...uuid.UUID) {
 	if m.frequencies == nil {
-		m.frequencies = make(map[int]struct{})
+		m.frequencies = make(map[uuid.UUID]struct{})
 	}
 	for i := range ids {
 		m.frequencies[ids[i]] = struct{}{}
@@ -1180,9 +1289,9 @@ func (m *AirportMutation) FrequenciesCleared() bool {
 }
 
 // RemoveFrequencyIDs removes the "frequencies" edge to the Frequency entity by IDs.
-func (m *AirportMutation) RemoveFrequencyIDs(ids ...int) {
+func (m *AirportMutation) RemoveFrequencyIDs(ids ...uuid.UUID) {
 	if m.removedfrequencies == nil {
-		m.removedfrequencies = make(map[int]struct{})
+		m.removedfrequencies = make(map[uuid.UUID]struct{})
 	}
 	for i := range ids {
 		delete(m.frequencies, ids[i])
@@ -1191,7 +1300,7 @@ func (m *AirportMutation) RemoveFrequencyIDs(ids ...int) {
 }
 
 // RemovedFrequencies returns the removed IDs of the "frequencies" edge to the Frequency entity.
-func (m *AirportMutation) RemovedFrequenciesIDs() (ids []int) {
+func (m *AirportMutation) RemovedFrequenciesIDs() (ids []uuid.UUID) {
 	for id := range m.removedfrequencies {
 		ids = append(ids, id)
 	}
@@ -1199,7 +1308,7 @@ func (m *AirportMutation) RemovedFrequenciesIDs() (ids []int) {
 }
 
 // FrequenciesIDs returns the "frequencies" edge IDs in the mutation.
-func (m *AirportMutation) FrequenciesIDs() (ids []int) {
+func (m *AirportMutation) FrequenciesIDs() (ids []uuid.UUID) {
 	for id := range m.frequencies {
 		ids = append(ids, id)
 	}
@@ -1232,7 +1341,10 @@ func (m *AirportMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *AirportMutation) Fields() []string {
-	fields := make([]string, 0, 20)
+	fields := make([]string, 0, 22)
+	if m.import_id != nil {
+		fields = append(fields, airport.FieldImportID)
+	}
 	if m.hash != nil {
 		fields = append(fields, airport.FieldHash)
 	}
@@ -1241,6 +1353,12 @@ func (m *AirportMutation) Fields() []string {
 	}
 	if m.last_updated != nil {
 		fields = append(fields, airport.FieldLastUpdated)
+	}
+	if m.icao_code != nil {
+		fields = append(fields, airport.FieldIcaoCode)
+	}
+	if m.iata_code != nil {
+		fields = append(fields, airport.FieldIataCode)
 	}
 	if m.identifier != nil {
 		fields = append(fields, airport.FieldIdentifier)
@@ -1278,9 +1396,6 @@ func (m *AirportMutation) Fields() []string {
 	if m.gps_code != nil {
 		fields = append(fields, airport.FieldGpsCode)
 	}
-	if m.iata_code != nil {
-		fields = append(fields, airport.FieldIataCode)
-	}
 	if m.local_code != nil {
 		fields = append(fields, airport.FieldLocalCode)
 	}
@@ -1301,12 +1416,18 @@ func (m *AirportMutation) Fields() []string {
 // schema.
 func (m *AirportMutation) Field(name string) (ent.Value, bool) {
 	switch name {
+	case airport.FieldImportID:
+		return m.ImportID()
 	case airport.FieldHash:
 		return m.Hash()
 	case airport.FieldImportFlag:
 		return m.ImportFlag()
 	case airport.FieldLastUpdated:
 		return m.LastUpdated()
+	case airport.FieldIcaoCode:
+		return m.IcaoCode()
+	case airport.FieldIataCode:
+		return m.IataCode()
 	case airport.FieldIdentifier:
 		return m.Identifier()
 	case airport.FieldType:
@@ -1331,8 +1452,6 @@ func (m *AirportMutation) Field(name string) (ent.Value, bool) {
 		return m.ScheduledService()
 	case airport.FieldGpsCode:
 		return m.GpsCode()
-	case airport.FieldIataCode:
-		return m.IataCode()
 	case airport.FieldLocalCode:
 		return m.LocalCode()
 	case airport.FieldWebsite:
@@ -1350,12 +1469,18 @@ func (m *AirportMutation) Field(name string) (ent.Value, bool) {
 // database failed.
 func (m *AirportMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
 	switch name {
+	case airport.FieldImportID:
+		return m.OldImportID(ctx)
 	case airport.FieldHash:
 		return m.OldHash(ctx)
 	case airport.FieldImportFlag:
 		return m.OldImportFlag(ctx)
 	case airport.FieldLastUpdated:
 		return m.OldLastUpdated(ctx)
+	case airport.FieldIcaoCode:
+		return m.OldIcaoCode(ctx)
+	case airport.FieldIataCode:
+		return m.OldIataCode(ctx)
 	case airport.FieldIdentifier:
 		return m.OldIdentifier(ctx)
 	case airport.FieldType:
@@ -1380,8 +1505,6 @@ func (m *AirportMutation) OldField(ctx context.Context, name string) (ent.Value,
 		return m.OldScheduledService(ctx)
 	case airport.FieldGpsCode:
 		return m.OldGpsCode(ctx)
-	case airport.FieldIataCode:
-		return m.OldIataCode(ctx)
 	case airport.FieldLocalCode:
 		return m.OldLocalCode(ctx)
 	case airport.FieldWebsite:
@@ -1399,6 +1522,13 @@ func (m *AirportMutation) OldField(ctx context.Context, name string) (ent.Value,
 // type.
 func (m *AirportMutation) SetField(name string, value ent.Value) error {
 	switch name {
+	case airport.FieldImportID:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetImportID(v)
+		return nil
 	case airport.FieldHash:
 		v, ok := value.(string)
 		if !ok {
@@ -1419,6 +1549,20 @@ func (m *AirportMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetLastUpdated(v)
+		return nil
+	case airport.FieldIcaoCode:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetIcaoCode(v)
+		return nil
+	case airport.FieldIataCode:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetIataCode(v)
 		return nil
 	case airport.FieldIdentifier:
 		v, ok := value.(string)
@@ -1504,13 +1648,6 @@ func (m *AirportMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetGpsCode(v)
 		return nil
-	case airport.FieldIataCode:
-		v, ok := value.(string)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetIataCode(v)
-		return nil
 	case airport.FieldLocalCode:
 		v, ok := value.(string)
 		if !ok {
@@ -1547,6 +1684,9 @@ func (m *AirportMutation) SetField(name string, value ent.Value) error {
 // this mutation.
 func (m *AirportMutation) AddedFields() []string {
 	var fields []string
+	if m.addimport_id != nil {
+		fields = append(fields, airport.FieldImportID)
+	}
 	if m.addlatitude != nil {
 		fields = append(fields, airport.FieldLatitude)
 	}
@@ -1564,6 +1704,8 @@ func (m *AirportMutation) AddedFields() []string {
 // was not set, or was not defined in the schema.
 func (m *AirportMutation) AddedField(name string) (ent.Value, bool) {
 	switch name {
+	case airport.FieldImportID:
+		return m.AddedImportID()
 	case airport.FieldLatitude:
 		return m.AddedLatitude()
 	case airport.FieldLongitude:
@@ -1579,6 +1721,13 @@ func (m *AirportMutation) AddedField(name string) (ent.Value, bool) {
 // type.
 func (m *AirportMutation) AddField(name string, value ent.Value) error {
 	switch name {
+	case airport.FieldImportID:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddImportID(v)
+		return nil
 	case airport.FieldLatitude:
 		v, ok := value.(float64)
 		if !ok {
@@ -1608,6 +1757,12 @@ func (m *AirportMutation) AddField(name string, value ent.Value) error {
 // mutation.
 func (m *AirportMutation) ClearedFields() []string {
 	var fields []string
+	if m.FieldCleared(airport.FieldIcaoCode) {
+		fields = append(fields, airport.FieldIcaoCode)
+	}
+	if m.FieldCleared(airport.FieldIataCode) {
+		fields = append(fields, airport.FieldIataCode)
+	}
 	if m.FieldCleared(airport.FieldElevation) {
 		fields = append(fields, airport.FieldElevation)
 	}
@@ -1616,9 +1771,6 @@ func (m *AirportMutation) ClearedFields() []string {
 	}
 	if m.FieldCleared(airport.FieldGpsCode) {
 		fields = append(fields, airport.FieldGpsCode)
-	}
-	if m.FieldCleared(airport.FieldIataCode) {
-		fields = append(fields, airport.FieldIataCode)
 	}
 	if m.FieldCleared(airport.FieldLocalCode) {
 		fields = append(fields, airport.FieldLocalCode)
@@ -1643,6 +1795,12 @@ func (m *AirportMutation) FieldCleared(name string) bool {
 // error if the field is not defined in the schema.
 func (m *AirportMutation) ClearField(name string) error {
 	switch name {
+	case airport.FieldIcaoCode:
+		m.ClearIcaoCode()
+		return nil
+	case airport.FieldIataCode:
+		m.ClearIataCode()
+		return nil
 	case airport.FieldElevation:
 		m.ClearElevation()
 		return nil
@@ -1651,9 +1809,6 @@ func (m *AirportMutation) ClearField(name string) error {
 		return nil
 	case airport.FieldGpsCode:
 		m.ClearGpsCode()
-		return nil
-	case airport.FieldIataCode:
-		m.ClearIataCode()
 		return nil
 	case airport.FieldLocalCode:
 		m.ClearLocalCode()
@@ -1672,6 +1827,9 @@ func (m *AirportMutation) ClearField(name string) error {
 // It returns an error if the field is not defined in the schema.
 func (m *AirportMutation) ResetField(name string) error {
 	switch name {
+	case airport.FieldImportID:
+		m.ResetImportID()
+		return nil
 	case airport.FieldHash:
 		m.ResetHash()
 		return nil
@@ -1680,6 +1838,12 @@ func (m *AirportMutation) ResetField(name string) error {
 		return nil
 	case airport.FieldLastUpdated:
 		m.ResetLastUpdated()
+		return nil
+	case airport.FieldIcaoCode:
+		m.ResetIcaoCode()
+		return nil
+	case airport.FieldIataCode:
+		m.ResetIataCode()
 		return nil
 	case airport.FieldIdentifier:
 		m.ResetIdentifier()
@@ -1716,9 +1880,6 @@ func (m *AirportMutation) ResetField(name string) error {
 		return nil
 	case airport.FieldGpsCode:
 		m.ResetGpsCode()
-		return nil
-	case airport.FieldIataCode:
-		m.ResetIataCode()
 		return nil
 	case airport.FieldLocalCode:
 		m.ResetLocalCode()
@@ -1869,7 +2030,7 @@ type ForecastMutation struct {
 	config
 	op                           Op
 	typ                          string
-	id                           *int
+	id                           *uuid.UUID
 	from_time                    *time.Time
 	to_time                      *time.Time
 	change_indicator             *forecast.ChangeIndicator
@@ -1897,17 +2058,17 @@ type ForecastMutation struct {
 	weather                      *string
 	not_decoded                  *string
 	clearedFields                map[string]struct{}
-	sky_conditions               map[int]struct{}
-	removedsky_conditions        map[int]struct{}
+	sky_conditions               map[uuid.UUID]struct{}
+	removedsky_conditions        map[uuid.UUID]struct{}
 	clearedsky_conditions        bool
-	turbulence_conditions        map[int]struct{}
-	removedturbulence_conditions map[int]struct{}
+	turbulence_conditions        map[uuid.UUID]struct{}
+	removedturbulence_conditions map[uuid.UUID]struct{}
 	clearedturbulence_conditions bool
-	icing_conditions             map[int]struct{}
-	removedicing_conditions      map[int]struct{}
+	icing_conditions             map[uuid.UUID]struct{}
+	removedicing_conditions      map[uuid.UUID]struct{}
 	clearedicing_conditions      bool
-	temperature_data             map[int]struct{}
-	removedtemperature_data      map[int]struct{}
+	temperature_data             map[uuid.UUID]struct{}
+	removedtemperature_data      map[uuid.UUID]struct{}
 	clearedtemperature_data      bool
 	done                         bool
 	oldValue                     func(context.Context) (*Forecast, error)
@@ -1934,7 +2095,7 @@ func newForecastMutation(c config, op Op, opts ...forecastOption) *ForecastMutat
 }
 
 // withForecastID sets the ID field of the mutation.
-func withForecastID(id int) forecastOption {
+func withForecastID(id uuid.UUID) forecastOption {
 	return func(m *ForecastMutation) {
 		var (
 			err   error
@@ -1984,9 +2145,15 @@ func (m ForecastMutation) Tx() (*Tx, error) {
 	return tx, nil
 }
 
+// SetID sets the value of the id field. Note that this
+// operation is only accepted on creation of Forecast entities.
+func (m *ForecastMutation) SetID(id uuid.UUID) {
+	m.id = &id
+}
+
 // ID returns the ID value in the mutation. Note that the ID is only available
 // if it was provided to the builder or after it was returned from the database.
-func (m *ForecastMutation) ID() (id int, exists bool) {
+func (m *ForecastMutation) ID() (id uuid.UUID, exists bool) {
 	if m.id == nil {
 		return
 	}
@@ -1997,12 +2164,12 @@ func (m *ForecastMutation) ID() (id int, exists bool) {
 // That means, if the mutation is applied within a transaction with an isolation level such
 // as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
 // or updated by the mutation.
-func (m *ForecastMutation) IDs(ctx context.Context) ([]int, error) {
+func (m *ForecastMutation) IDs(ctx context.Context) ([]uuid.UUID, error) {
 	switch {
 	case m.op.Is(OpUpdateOne | OpDeleteOne):
 		id, exists := m.ID()
 		if exists {
-			return []int{id}, nil
+			return []uuid.UUID{id}, nil
 		}
 		fallthrough
 	case m.op.Is(OpUpdate | OpDelete):
@@ -2981,9 +3148,9 @@ func (m *ForecastMutation) ResetNotDecoded() {
 }
 
 // AddSkyConditionIDs adds the "sky_conditions" edge to the SkyCondition entity by ids.
-func (m *ForecastMutation) AddSkyConditionIDs(ids ...int) {
+func (m *ForecastMutation) AddSkyConditionIDs(ids ...uuid.UUID) {
 	if m.sky_conditions == nil {
-		m.sky_conditions = make(map[int]struct{})
+		m.sky_conditions = make(map[uuid.UUID]struct{})
 	}
 	for i := range ids {
 		m.sky_conditions[ids[i]] = struct{}{}
@@ -3001,9 +3168,9 @@ func (m *ForecastMutation) SkyConditionsCleared() bool {
 }
 
 // RemoveSkyConditionIDs removes the "sky_conditions" edge to the SkyCondition entity by IDs.
-func (m *ForecastMutation) RemoveSkyConditionIDs(ids ...int) {
+func (m *ForecastMutation) RemoveSkyConditionIDs(ids ...uuid.UUID) {
 	if m.removedsky_conditions == nil {
-		m.removedsky_conditions = make(map[int]struct{})
+		m.removedsky_conditions = make(map[uuid.UUID]struct{})
 	}
 	for i := range ids {
 		delete(m.sky_conditions, ids[i])
@@ -3012,7 +3179,7 @@ func (m *ForecastMutation) RemoveSkyConditionIDs(ids ...int) {
 }
 
 // RemovedSkyConditions returns the removed IDs of the "sky_conditions" edge to the SkyCondition entity.
-func (m *ForecastMutation) RemovedSkyConditionsIDs() (ids []int) {
+func (m *ForecastMutation) RemovedSkyConditionsIDs() (ids []uuid.UUID) {
 	for id := range m.removedsky_conditions {
 		ids = append(ids, id)
 	}
@@ -3020,7 +3187,7 @@ func (m *ForecastMutation) RemovedSkyConditionsIDs() (ids []int) {
 }
 
 // SkyConditionsIDs returns the "sky_conditions" edge IDs in the mutation.
-func (m *ForecastMutation) SkyConditionsIDs() (ids []int) {
+func (m *ForecastMutation) SkyConditionsIDs() (ids []uuid.UUID) {
 	for id := range m.sky_conditions {
 		ids = append(ids, id)
 	}
@@ -3035,9 +3202,9 @@ func (m *ForecastMutation) ResetSkyConditions() {
 }
 
 // AddTurbulenceConditionIDs adds the "turbulence_conditions" edge to the TurbulenceCondition entity by ids.
-func (m *ForecastMutation) AddTurbulenceConditionIDs(ids ...int) {
+func (m *ForecastMutation) AddTurbulenceConditionIDs(ids ...uuid.UUID) {
 	if m.turbulence_conditions == nil {
-		m.turbulence_conditions = make(map[int]struct{})
+		m.turbulence_conditions = make(map[uuid.UUID]struct{})
 	}
 	for i := range ids {
 		m.turbulence_conditions[ids[i]] = struct{}{}
@@ -3055,9 +3222,9 @@ func (m *ForecastMutation) TurbulenceConditionsCleared() bool {
 }
 
 // RemoveTurbulenceConditionIDs removes the "turbulence_conditions" edge to the TurbulenceCondition entity by IDs.
-func (m *ForecastMutation) RemoveTurbulenceConditionIDs(ids ...int) {
+func (m *ForecastMutation) RemoveTurbulenceConditionIDs(ids ...uuid.UUID) {
 	if m.removedturbulence_conditions == nil {
-		m.removedturbulence_conditions = make(map[int]struct{})
+		m.removedturbulence_conditions = make(map[uuid.UUID]struct{})
 	}
 	for i := range ids {
 		delete(m.turbulence_conditions, ids[i])
@@ -3066,7 +3233,7 @@ func (m *ForecastMutation) RemoveTurbulenceConditionIDs(ids ...int) {
 }
 
 // RemovedTurbulenceConditions returns the removed IDs of the "turbulence_conditions" edge to the TurbulenceCondition entity.
-func (m *ForecastMutation) RemovedTurbulenceConditionsIDs() (ids []int) {
+func (m *ForecastMutation) RemovedTurbulenceConditionsIDs() (ids []uuid.UUID) {
 	for id := range m.removedturbulence_conditions {
 		ids = append(ids, id)
 	}
@@ -3074,7 +3241,7 @@ func (m *ForecastMutation) RemovedTurbulenceConditionsIDs() (ids []int) {
 }
 
 // TurbulenceConditionsIDs returns the "turbulence_conditions" edge IDs in the mutation.
-func (m *ForecastMutation) TurbulenceConditionsIDs() (ids []int) {
+func (m *ForecastMutation) TurbulenceConditionsIDs() (ids []uuid.UUID) {
 	for id := range m.turbulence_conditions {
 		ids = append(ids, id)
 	}
@@ -3089,9 +3256,9 @@ func (m *ForecastMutation) ResetTurbulenceConditions() {
 }
 
 // AddIcingConditionIDs adds the "icing_conditions" edge to the IcingCondition entity by ids.
-func (m *ForecastMutation) AddIcingConditionIDs(ids ...int) {
+func (m *ForecastMutation) AddIcingConditionIDs(ids ...uuid.UUID) {
 	if m.icing_conditions == nil {
-		m.icing_conditions = make(map[int]struct{})
+		m.icing_conditions = make(map[uuid.UUID]struct{})
 	}
 	for i := range ids {
 		m.icing_conditions[ids[i]] = struct{}{}
@@ -3109,9 +3276,9 @@ func (m *ForecastMutation) IcingConditionsCleared() bool {
 }
 
 // RemoveIcingConditionIDs removes the "icing_conditions" edge to the IcingCondition entity by IDs.
-func (m *ForecastMutation) RemoveIcingConditionIDs(ids ...int) {
+func (m *ForecastMutation) RemoveIcingConditionIDs(ids ...uuid.UUID) {
 	if m.removedicing_conditions == nil {
-		m.removedicing_conditions = make(map[int]struct{})
+		m.removedicing_conditions = make(map[uuid.UUID]struct{})
 	}
 	for i := range ids {
 		delete(m.icing_conditions, ids[i])
@@ -3120,7 +3287,7 @@ func (m *ForecastMutation) RemoveIcingConditionIDs(ids ...int) {
 }
 
 // RemovedIcingConditions returns the removed IDs of the "icing_conditions" edge to the IcingCondition entity.
-func (m *ForecastMutation) RemovedIcingConditionsIDs() (ids []int) {
+func (m *ForecastMutation) RemovedIcingConditionsIDs() (ids []uuid.UUID) {
 	for id := range m.removedicing_conditions {
 		ids = append(ids, id)
 	}
@@ -3128,7 +3295,7 @@ func (m *ForecastMutation) RemovedIcingConditionsIDs() (ids []int) {
 }
 
 // IcingConditionsIDs returns the "icing_conditions" edge IDs in the mutation.
-func (m *ForecastMutation) IcingConditionsIDs() (ids []int) {
+func (m *ForecastMutation) IcingConditionsIDs() (ids []uuid.UUID) {
 	for id := range m.icing_conditions {
 		ids = append(ids, id)
 	}
@@ -3143,9 +3310,9 @@ func (m *ForecastMutation) ResetIcingConditions() {
 }
 
 // AddTemperatureDatumIDs adds the "temperature_data" edge to the TemperatureData entity by ids.
-func (m *ForecastMutation) AddTemperatureDatumIDs(ids ...int) {
+func (m *ForecastMutation) AddTemperatureDatumIDs(ids ...uuid.UUID) {
 	if m.temperature_data == nil {
-		m.temperature_data = make(map[int]struct{})
+		m.temperature_data = make(map[uuid.UUID]struct{})
 	}
 	for i := range ids {
 		m.temperature_data[ids[i]] = struct{}{}
@@ -3163,9 +3330,9 @@ func (m *ForecastMutation) TemperatureDataCleared() bool {
 }
 
 // RemoveTemperatureDatumIDs removes the "temperature_data" edge to the TemperatureData entity by IDs.
-func (m *ForecastMutation) RemoveTemperatureDatumIDs(ids ...int) {
+func (m *ForecastMutation) RemoveTemperatureDatumIDs(ids ...uuid.UUID) {
 	if m.removedtemperature_data == nil {
-		m.removedtemperature_data = make(map[int]struct{})
+		m.removedtemperature_data = make(map[uuid.UUID]struct{})
 	}
 	for i := range ids {
 		delete(m.temperature_data, ids[i])
@@ -3174,7 +3341,7 @@ func (m *ForecastMutation) RemoveTemperatureDatumIDs(ids ...int) {
 }
 
 // RemovedTemperatureData returns the removed IDs of the "temperature_data" edge to the TemperatureData entity.
-func (m *ForecastMutation) RemovedTemperatureDataIDs() (ids []int) {
+func (m *ForecastMutation) RemovedTemperatureDataIDs() (ids []uuid.UUID) {
 	for id := range m.removedtemperature_data {
 		ids = append(ids, id)
 	}
@@ -3182,7 +3349,7 @@ func (m *ForecastMutation) RemovedTemperatureDataIDs() (ids []int) {
 }
 
 // TemperatureDataIDs returns the "temperature_data" edge IDs in the mutation.
-func (m *ForecastMutation) TemperatureDataIDs() (ids []int) {
+func (m *ForecastMutation) TemperatureDataIDs() (ids []uuid.UUID) {
 	for id := range m.temperature_data {
 		ids = append(ids, id)
 	}
@@ -3944,7 +4111,9 @@ type FrequencyMutation struct {
 	config
 	op             Op
 	typ            string
-	id             *int
+	id             *uuid.UUID
+	import_id      *int
+	addimport_id   *int
 	hash           *string
 	import_flag    *bool
 	last_updated   *time.Time
@@ -3953,7 +4122,7 @@ type FrequencyMutation struct {
 	frequency      *float64
 	addfrequency   *float64
 	clearedFields  map[string]struct{}
-	airport        *int
+	airport        *uuid.UUID
 	clearedairport bool
 	done           bool
 	oldValue       func(context.Context) (*Frequency, error)
@@ -3980,7 +4149,7 @@ func newFrequencyMutation(c config, op Op, opts ...frequencyOption) *FrequencyMu
 }
 
 // withFrequencyID sets the ID field of the mutation.
-func withFrequencyID(id int) frequencyOption {
+func withFrequencyID(id uuid.UUID) frequencyOption {
 	return func(m *FrequencyMutation) {
 		var (
 			err   error
@@ -4032,13 +4201,13 @@ func (m FrequencyMutation) Tx() (*Tx, error) {
 
 // SetID sets the value of the id field. Note that this
 // operation is only accepted on creation of Frequency entities.
-func (m *FrequencyMutation) SetID(id int) {
+func (m *FrequencyMutation) SetID(id uuid.UUID) {
 	m.id = &id
 }
 
 // ID returns the ID value in the mutation. Note that the ID is only available
 // if it was provided to the builder or after it was returned from the database.
-func (m *FrequencyMutation) ID() (id int, exists bool) {
+func (m *FrequencyMutation) ID() (id uuid.UUID, exists bool) {
 	if m.id == nil {
 		return
 	}
@@ -4049,12 +4218,12 @@ func (m *FrequencyMutation) ID() (id int, exists bool) {
 // That means, if the mutation is applied within a transaction with an isolation level such
 // as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
 // or updated by the mutation.
-func (m *FrequencyMutation) IDs(ctx context.Context) ([]int, error) {
+func (m *FrequencyMutation) IDs(ctx context.Context) ([]uuid.UUID, error) {
 	switch {
 	case m.op.Is(OpUpdateOne | OpDeleteOne):
 		id, exists := m.ID()
 		if exists {
-			return []int{id}, nil
+			return []uuid.UUID{id}, nil
 		}
 		fallthrough
 	case m.op.Is(OpUpdate | OpDelete):
@@ -4062,6 +4231,62 @@ func (m *FrequencyMutation) IDs(ctx context.Context) ([]int, error) {
 	default:
 		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
 	}
+}
+
+// SetImportID sets the "import_id" field.
+func (m *FrequencyMutation) SetImportID(i int) {
+	m.import_id = &i
+	m.addimport_id = nil
+}
+
+// ImportID returns the value of the "import_id" field in the mutation.
+func (m *FrequencyMutation) ImportID() (r int, exists bool) {
+	v := m.import_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldImportID returns the old "import_id" field's value of the Frequency entity.
+// If the Frequency object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *FrequencyMutation) OldImportID(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldImportID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldImportID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldImportID: %w", err)
+	}
+	return oldValue.ImportID, nil
+}
+
+// AddImportID adds i to the "import_id" field.
+func (m *FrequencyMutation) AddImportID(i int) {
+	if m.addimport_id != nil {
+		*m.addimport_id += i
+	} else {
+		m.addimport_id = &i
+	}
+}
+
+// AddedImportID returns the value that was added to the "import_id" field in this mutation.
+func (m *FrequencyMutation) AddedImportID() (r int, exists bool) {
+	v := m.addimport_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetImportID resets all changes to the "import_id" field.
+func (m *FrequencyMutation) ResetImportID() {
+	m.import_id = nil
+	m.addimport_id = nil
 }
 
 // SetHash sets the "hash" field.
@@ -4301,7 +4526,7 @@ func (m *FrequencyMutation) ResetFrequency() {
 }
 
 // SetAirportID sets the "airport" edge to the Airport entity by id.
-func (m *FrequencyMutation) SetAirportID(id int) {
+func (m *FrequencyMutation) SetAirportID(id uuid.UUID) {
 	m.airport = &id
 }
 
@@ -4316,7 +4541,7 @@ func (m *FrequencyMutation) AirportCleared() bool {
 }
 
 // AirportID returns the "airport" edge ID in the mutation.
-func (m *FrequencyMutation) AirportID() (id int, exists bool) {
+func (m *FrequencyMutation) AirportID() (id uuid.UUID, exists bool) {
 	if m.airport != nil {
 		return *m.airport, true
 	}
@@ -4326,7 +4551,7 @@ func (m *FrequencyMutation) AirportID() (id int, exists bool) {
 // AirportIDs returns the "airport" edge IDs in the mutation.
 // Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
 // AirportID instead. It exists only for internal usage by the builders.
-func (m *FrequencyMutation) AirportIDs() (ids []int) {
+func (m *FrequencyMutation) AirportIDs() (ids []uuid.UUID) {
 	if id := m.airport; id != nil {
 		ids = append(ids, *id)
 	}
@@ -4358,7 +4583,10 @@ func (m *FrequencyMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *FrequencyMutation) Fields() []string {
-	fields := make([]string, 0, 6)
+	fields := make([]string, 0, 7)
+	if m.import_id != nil {
+		fields = append(fields, frequency.FieldImportID)
+	}
 	if m.hash != nil {
 		fields = append(fields, frequency.FieldHash)
 	}
@@ -4385,6 +4613,8 @@ func (m *FrequencyMutation) Fields() []string {
 // schema.
 func (m *FrequencyMutation) Field(name string) (ent.Value, bool) {
 	switch name {
+	case frequency.FieldImportID:
+		return m.ImportID()
 	case frequency.FieldHash:
 		return m.Hash()
 	case frequency.FieldImportFlag:
@@ -4406,6 +4636,8 @@ func (m *FrequencyMutation) Field(name string) (ent.Value, bool) {
 // database failed.
 func (m *FrequencyMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
 	switch name {
+	case frequency.FieldImportID:
+		return m.OldImportID(ctx)
 	case frequency.FieldHash:
 		return m.OldHash(ctx)
 	case frequency.FieldImportFlag:
@@ -4427,6 +4659,13 @@ func (m *FrequencyMutation) OldField(ctx context.Context, name string) (ent.Valu
 // type.
 func (m *FrequencyMutation) SetField(name string, value ent.Value) error {
 	switch name {
+	case frequency.FieldImportID:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetImportID(v)
+		return nil
 	case frequency.FieldHash:
 		v, ok := value.(string)
 		if !ok {
@@ -4477,6 +4716,9 @@ func (m *FrequencyMutation) SetField(name string, value ent.Value) error {
 // this mutation.
 func (m *FrequencyMutation) AddedFields() []string {
 	var fields []string
+	if m.addimport_id != nil {
+		fields = append(fields, frequency.FieldImportID)
+	}
 	if m.addfrequency != nil {
 		fields = append(fields, frequency.FieldFrequency)
 	}
@@ -4488,6 +4730,8 @@ func (m *FrequencyMutation) AddedFields() []string {
 // was not set, or was not defined in the schema.
 func (m *FrequencyMutation) AddedField(name string) (ent.Value, bool) {
 	switch name {
+	case frequency.FieldImportID:
+		return m.AddedImportID()
 	case frequency.FieldFrequency:
 		return m.AddedFrequency()
 	}
@@ -4499,6 +4743,13 @@ func (m *FrequencyMutation) AddedField(name string) (ent.Value, bool) {
 // type.
 func (m *FrequencyMutation) AddField(name string, value ent.Value) error {
 	switch name {
+	case frequency.FieldImportID:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddImportID(v)
+		return nil
 	case frequency.FieldFrequency:
 		v, ok := value.(float64)
 		if !ok {
@@ -4533,6 +4784,9 @@ func (m *FrequencyMutation) ClearField(name string) error {
 // It returns an error if the field is not defined in the schema.
 func (m *FrequencyMutation) ResetField(name string) error {
 	switch name {
+	case frequency.FieldImportID:
+		m.ResetImportID()
+		return nil
 	case frequency.FieldHash:
 		m.ResetHash()
 		return nil
@@ -4634,7 +4888,7 @@ type IcingConditionMutation struct {
 	config
 	op              Op
 	typ             string
-	id              *int
+	id              *uuid.UUID
 	intensity       *string
 	min_altitude    *int
 	addmin_altitude *int
@@ -4666,7 +4920,7 @@ func newIcingConditionMutation(c config, op Op, opts ...icingconditionOption) *I
 }
 
 // withIcingConditionID sets the ID field of the mutation.
-func withIcingConditionID(id int) icingconditionOption {
+func withIcingConditionID(id uuid.UUID) icingconditionOption {
 	return func(m *IcingConditionMutation) {
 		var (
 			err   error
@@ -4716,9 +4970,15 @@ func (m IcingConditionMutation) Tx() (*Tx, error) {
 	return tx, nil
 }
 
+// SetID sets the value of the id field. Note that this
+// operation is only accepted on creation of IcingCondition entities.
+func (m *IcingConditionMutation) SetID(id uuid.UUID) {
+	m.id = &id
+}
+
 // ID returns the ID value in the mutation. Note that the ID is only available
 // if it was provided to the builder or after it was returned from the database.
-func (m *IcingConditionMutation) ID() (id int, exists bool) {
+func (m *IcingConditionMutation) ID() (id uuid.UUID, exists bool) {
 	if m.id == nil {
 		return
 	}
@@ -4729,12 +4989,12 @@ func (m *IcingConditionMutation) ID() (id int, exists bool) {
 // That means, if the mutation is applied within a transaction with an isolation level such
 // as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
 // or updated by the mutation.
-func (m *IcingConditionMutation) IDs(ctx context.Context) ([]int, error) {
+func (m *IcingConditionMutation) IDs(ctx context.Context) ([]uuid.UUID, error) {
 	switch {
 	case m.op.Is(OpUpdateOne | OpDeleteOne):
 		id, exists := m.ID()
 		if exists {
-			return []int{id}, nil
+			return []uuid.UUID{id}, nil
 		}
 		fallthrough
 	case m.op.Is(OpUpdate | OpDelete):
@@ -5165,7 +5425,7 @@ type MetarMutation struct {
 	config
 	op                                         Op
 	typ                                        string
-	id                                         *int
+	id                                         *uuid.UUID
 	raw_text                                   *string
 	observation_time                           *time.Time
 	temperature                                *float64
@@ -5218,10 +5478,10 @@ type MetarMutation struct {
 	metar_type                                 *metar.MetarType
 	hash                                       *string
 	clearedFields                              map[string]struct{}
-	station                                    *int
+	station                                    *uuid.UUID
 	clearedstation                             bool
-	sky_conditions                             map[int]struct{}
-	removedsky_conditions                      map[int]struct{}
+	sky_conditions                             map[uuid.UUID]struct{}
+	removedsky_conditions                      map[uuid.UUID]struct{}
 	clearedsky_conditions                      bool
 	done                                       bool
 	oldValue                                   func(context.Context) (*Metar, error)
@@ -5248,7 +5508,7 @@ func newMetarMutation(c config, op Op, opts ...metarOption) *MetarMutation {
 }
 
 // withMetarID sets the ID field of the mutation.
-func withMetarID(id int) metarOption {
+func withMetarID(id uuid.UUID) metarOption {
 	return func(m *MetarMutation) {
 		var (
 			err   error
@@ -5300,13 +5560,13 @@ func (m MetarMutation) Tx() (*Tx, error) {
 
 // SetID sets the value of the id field. Note that this
 // operation is only accepted on creation of Metar entities.
-func (m *MetarMutation) SetID(id int) {
+func (m *MetarMutation) SetID(id uuid.UUID) {
 	m.id = &id
 }
 
 // ID returns the ID value in the mutation. Note that the ID is only available
 // if it was provided to the builder or after it was returned from the database.
-func (m *MetarMutation) ID() (id int, exists bool) {
+func (m *MetarMutation) ID() (id uuid.UUID, exists bool) {
 	if m.id == nil {
 		return
 	}
@@ -5317,12 +5577,12 @@ func (m *MetarMutation) ID() (id int, exists bool) {
 // That means, if the mutation is applied within a transaction with an isolation level such
 // as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
 // or updated by the mutation.
-func (m *MetarMutation) IDs(ctx context.Context) ([]int, error) {
+func (m *MetarMutation) IDs(ctx context.Context) ([]uuid.UUID, error) {
 	switch {
 	case m.op.Is(OpUpdateOne | OpDeleteOne):
 		id, exists := m.ID()
 		if exists {
-			return []int{id}, nil
+			return []uuid.UUID{id}, nil
 		}
 		fallthrough
 	case m.op.Is(OpUpdate | OpDelete):
@@ -7071,23 +7331,23 @@ func (m *MetarMutation) ResetHash() {
 	m.hash = nil
 }
 
-// SetStationID sets the "station" edge to the Station entity by id.
-func (m *MetarMutation) SetStationID(id int) {
+// SetStationID sets the "station" edge to the WeatherStation entity by id.
+func (m *MetarMutation) SetStationID(id uuid.UUID) {
 	m.station = &id
 }
 
-// ClearStation clears the "station" edge to the Station entity.
+// ClearStation clears the "station" edge to the WeatherStation entity.
 func (m *MetarMutation) ClearStation() {
 	m.clearedstation = true
 }
 
-// StationCleared reports if the "station" edge to the Station entity was cleared.
+// StationCleared reports if the "station" edge to the WeatherStation entity was cleared.
 func (m *MetarMutation) StationCleared() bool {
 	return m.clearedstation
 }
 
 // StationID returns the "station" edge ID in the mutation.
-func (m *MetarMutation) StationID() (id int, exists bool) {
+func (m *MetarMutation) StationID() (id uuid.UUID, exists bool) {
 	if m.station != nil {
 		return *m.station, true
 	}
@@ -7097,7 +7357,7 @@ func (m *MetarMutation) StationID() (id int, exists bool) {
 // StationIDs returns the "station" edge IDs in the mutation.
 // Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
 // StationID instead. It exists only for internal usage by the builders.
-func (m *MetarMutation) StationIDs() (ids []int) {
+func (m *MetarMutation) StationIDs() (ids []uuid.UUID) {
 	if id := m.station; id != nil {
 		ids = append(ids, *id)
 	}
@@ -7111,9 +7371,9 @@ func (m *MetarMutation) ResetStation() {
 }
 
 // AddSkyConditionIDs adds the "sky_conditions" edge to the SkyCondition entity by ids.
-func (m *MetarMutation) AddSkyConditionIDs(ids ...int) {
+func (m *MetarMutation) AddSkyConditionIDs(ids ...uuid.UUID) {
 	if m.sky_conditions == nil {
-		m.sky_conditions = make(map[int]struct{})
+		m.sky_conditions = make(map[uuid.UUID]struct{})
 	}
 	for i := range ids {
 		m.sky_conditions[ids[i]] = struct{}{}
@@ -7131,9 +7391,9 @@ func (m *MetarMutation) SkyConditionsCleared() bool {
 }
 
 // RemoveSkyConditionIDs removes the "sky_conditions" edge to the SkyCondition entity by IDs.
-func (m *MetarMutation) RemoveSkyConditionIDs(ids ...int) {
+func (m *MetarMutation) RemoveSkyConditionIDs(ids ...uuid.UUID) {
 	if m.removedsky_conditions == nil {
-		m.removedsky_conditions = make(map[int]struct{})
+		m.removedsky_conditions = make(map[uuid.UUID]struct{})
 	}
 	for i := range ids {
 		delete(m.sky_conditions, ids[i])
@@ -7142,7 +7402,7 @@ func (m *MetarMutation) RemoveSkyConditionIDs(ids ...int) {
 }
 
 // RemovedSkyConditions returns the removed IDs of the "sky_conditions" edge to the SkyCondition entity.
-func (m *MetarMutation) RemovedSkyConditionsIDs() (ids []int) {
+func (m *MetarMutation) RemovedSkyConditionsIDs() (ids []uuid.UUID) {
 	for id := range m.removedsky_conditions {
 		ids = append(ids, id)
 	}
@@ -7150,7 +7410,7 @@ func (m *MetarMutation) RemovedSkyConditionsIDs() (ids []int) {
 }
 
 // SkyConditionsIDs returns the "sky_conditions" edge IDs in the mutation.
-func (m *MetarMutation) SkyConditionsIDs() (ids []int) {
+func (m *MetarMutation) SkyConditionsIDs() (ids []uuid.UUID) {
 	for id := range m.sky_conditions {
 		ids = append(ids, id)
 	}
@@ -8238,7 +8498,9 @@ type RunwayMutation struct {
 	config
 	op                                 Op
 	typ                                string
-	id                                 *int
+	id                                 *uuid.UUID
+	import_id                          *int
+	addimport_id                       *int
 	hash                               *string
 	import_flag                        *bool
 	last_updated                       *time.Time
@@ -8272,7 +8534,7 @@ type RunwayMutation struct {
 	high_runway_displaced_threshold    *int
 	addhigh_runway_displaced_threshold *int
 	clearedFields                      map[string]struct{}
-	airport                            *int
+	airport                            *uuid.UUID
 	clearedairport                     bool
 	done                               bool
 	oldValue                           func(context.Context) (*Runway, error)
@@ -8299,7 +8561,7 @@ func newRunwayMutation(c config, op Op, opts ...runwayOption) *RunwayMutation {
 }
 
 // withRunwayID sets the ID field of the mutation.
-func withRunwayID(id int) runwayOption {
+func withRunwayID(id uuid.UUID) runwayOption {
 	return func(m *RunwayMutation) {
 		var (
 			err   error
@@ -8351,13 +8613,13 @@ func (m RunwayMutation) Tx() (*Tx, error) {
 
 // SetID sets the value of the id field. Note that this
 // operation is only accepted on creation of Runway entities.
-func (m *RunwayMutation) SetID(id int) {
+func (m *RunwayMutation) SetID(id uuid.UUID) {
 	m.id = &id
 }
 
 // ID returns the ID value in the mutation. Note that the ID is only available
 // if it was provided to the builder or after it was returned from the database.
-func (m *RunwayMutation) ID() (id int, exists bool) {
+func (m *RunwayMutation) ID() (id uuid.UUID, exists bool) {
 	if m.id == nil {
 		return
 	}
@@ -8368,12 +8630,12 @@ func (m *RunwayMutation) ID() (id int, exists bool) {
 // That means, if the mutation is applied within a transaction with an isolation level such
 // as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
 // or updated by the mutation.
-func (m *RunwayMutation) IDs(ctx context.Context) ([]int, error) {
+func (m *RunwayMutation) IDs(ctx context.Context) ([]uuid.UUID, error) {
 	switch {
 	case m.op.Is(OpUpdateOne | OpDeleteOne):
 		id, exists := m.ID()
 		if exists {
-			return []int{id}, nil
+			return []uuid.UUID{id}, nil
 		}
 		fallthrough
 	case m.op.Is(OpUpdate | OpDelete):
@@ -8381,6 +8643,62 @@ func (m *RunwayMutation) IDs(ctx context.Context) ([]int, error) {
 	default:
 		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
 	}
+}
+
+// SetImportID sets the "import_id" field.
+func (m *RunwayMutation) SetImportID(i int) {
+	m.import_id = &i
+	m.addimport_id = nil
+}
+
+// ImportID returns the value of the "import_id" field in the mutation.
+func (m *RunwayMutation) ImportID() (r int, exists bool) {
+	v := m.import_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldImportID returns the old "import_id" field's value of the Runway entity.
+// If the Runway object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *RunwayMutation) OldImportID(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldImportID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldImportID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldImportID: %w", err)
+	}
+	return oldValue.ImportID, nil
+}
+
+// AddImportID adds i to the "import_id" field.
+func (m *RunwayMutation) AddImportID(i int) {
+	if m.addimport_id != nil {
+		*m.addimport_id += i
+	} else {
+		m.addimport_id = &i
+	}
+}
+
+// AddedImportID returns the value that was added to the "import_id" field in this mutation.
+func (m *RunwayMutation) AddedImportID() (r int, exists bool) {
+	v := m.addimport_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetImportID resets all changes to the "import_id" field.
+func (m *RunwayMutation) ResetImportID() {
+	m.import_id = nil
+	m.addimport_id = nil
 }
 
 // SetHash sets the "hash" field.
@@ -9497,7 +9815,7 @@ func (m *RunwayMutation) ResetHighRunwayDisplacedThreshold() {
 }
 
 // SetAirportID sets the "airport" edge to the Airport entity by id.
-func (m *RunwayMutation) SetAirportID(id int) {
+func (m *RunwayMutation) SetAirportID(id uuid.UUID) {
 	m.airport = &id
 }
 
@@ -9512,7 +9830,7 @@ func (m *RunwayMutation) AirportCleared() bool {
 }
 
 // AirportID returns the "airport" edge ID in the mutation.
-func (m *RunwayMutation) AirportID() (id int, exists bool) {
+func (m *RunwayMutation) AirportID() (id uuid.UUID, exists bool) {
 	if m.airport != nil {
 		return *m.airport, true
 	}
@@ -9522,7 +9840,7 @@ func (m *RunwayMutation) AirportID() (id int, exists bool) {
 // AirportIDs returns the "airport" edge IDs in the mutation.
 // Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
 // AirportID instead. It exists only for internal usage by the builders.
-func (m *RunwayMutation) AirportIDs() (ids []int) {
+func (m *RunwayMutation) AirportIDs() (ids []uuid.UUID) {
 	if id := m.airport; id != nil {
 		ids = append(ids, *id)
 	}
@@ -9554,7 +9872,10 @@ func (m *RunwayMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *RunwayMutation) Fields() []string {
-	fields := make([]string, 0, 20)
+	fields := make([]string, 0, 21)
+	if m.import_id != nil {
+		fields = append(fields, runway.FieldImportID)
+	}
 	if m.hash != nil {
 		fields = append(fields, runway.FieldHash)
 	}
@@ -9623,6 +9944,8 @@ func (m *RunwayMutation) Fields() []string {
 // schema.
 func (m *RunwayMutation) Field(name string) (ent.Value, bool) {
 	switch name {
+	case runway.FieldImportID:
+		return m.ImportID()
 	case runway.FieldHash:
 		return m.Hash()
 	case runway.FieldImportFlag:
@@ -9672,6 +9995,8 @@ func (m *RunwayMutation) Field(name string) (ent.Value, bool) {
 // database failed.
 func (m *RunwayMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
 	switch name {
+	case runway.FieldImportID:
+		return m.OldImportID(ctx)
 	case runway.FieldHash:
 		return m.OldHash(ctx)
 	case runway.FieldImportFlag:
@@ -9721,6 +10046,13 @@ func (m *RunwayMutation) OldField(ctx context.Context, name string) (ent.Value, 
 // type.
 func (m *RunwayMutation) SetField(name string, value ent.Value) error {
 	switch name {
+	case runway.FieldImportID:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetImportID(v)
+		return nil
 	case runway.FieldHash:
 		v, ok := value.(string)
 		if !ok {
@@ -9869,6 +10201,9 @@ func (m *RunwayMutation) SetField(name string, value ent.Value) error {
 // this mutation.
 func (m *RunwayMutation) AddedFields() []string {
 	var fields []string
+	if m.addimport_id != nil {
+		fields = append(fields, runway.FieldImportID)
+	}
 	if m.addlength != nil {
 		fields = append(fields, runway.FieldLength)
 	}
@@ -9913,6 +10248,8 @@ func (m *RunwayMutation) AddedFields() []string {
 // was not set, or was not defined in the schema.
 func (m *RunwayMutation) AddedField(name string) (ent.Value, bool) {
 	switch name {
+	case runway.FieldImportID:
+		return m.AddedImportID()
 	case runway.FieldLength:
 		return m.AddedLength()
 	case runway.FieldWidth:
@@ -9946,6 +10283,13 @@ func (m *RunwayMutation) AddedField(name string) (ent.Value, bool) {
 // type.
 func (m *RunwayMutation) AddField(name string, value ent.Value) error {
 	switch name {
+	case runway.FieldImportID:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddImportID(v)
+		return nil
 	case runway.FieldLength:
 		v, ok := value.(int)
 		if !ok {
@@ -10126,6 +10470,9 @@ func (m *RunwayMutation) ClearField(name string) error {
 // It returns an error if the field is not defined in the schema.
 func (m *RunwayMutation) ResetField(name string) error {
 	switch name {
+	case runway.FieldImportID:
+		m.ResetImportID()
+		return nil
 	case runway.FieldHash:
 		m.ResetHash()
 		return nil
@@ -10269,7 +10616,7 @@ type SkyConditionMutation struct {
 	config
 	op            Op
 	typ           string
-	id            *int
+	id            *uuid.UUID
 	sky_cover     *skycondition.SkyCover
 	cloud_base    *int
 	addcloud_base *int
@@ -10300,7 +10647,7 @@ func newSkyConditionMutation(c config, op Op, opts ...skyconditionOption) *SkyCo
 }
 
 // withSkyConditionID sets the ID field of the mutation.
-func withSkyConditionID(id int) skyconditionOption {
+func withSkyConditionID(id uuid.UUID) skyconditionOption {
 	return func(m *SkyConditionMutation) {
 		var (
 			err   error
@@ -10352,13 +10699,13 @@ func (m SkyConditionMutation) Tx() (*Tx, error) {
 
 // SetID sets the value of the id field. Note that this
 // operation is only accepted on creation of SkyCondition entities.
-func (m *SkyConditionMutation) SetID(id int) {
+func (m *SkyConditionMutation) SetID(id uuid.UUID) {
 	m.id = &id
 }
 
 // ID returns the ID value in the mutation. Note that the ID is only available
 // if it was provided to the builder or after it was returned from the database.
-func (m *SkyConditionMutation) ID() (id int, exists bool) {
+func (m *SkyConditionMutation) ID() (id uuid.UUID, exists bool) {
 	if m.id == nil {
 		return
 	}
@@ -10369,12 +10716,12 @@ func (m *SkyConditionMutation) ID() (id int, exists bool) {
 // That means, if the mutation is applied within a transaction with an isolation level such
 // as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
 // or updated by the mutation.
-func (m *SkyConditionMutation) IDs(ctx context.Context) ([]int, error) {
+func (m *SkyConditionMutation) IDs(ctx context.Context) ([]uuid.UUID, error) {
 	switch {
 	case m.op.Is(OpUpdateOne | OpDeleteOne):
 		id, exists := m.ID()
 		if exists {
-			return []int{id}, nil
+			return []uuid.UUID{id}, nil
 		}
 		fallthrough
 	case m.op.Is(OpUpdate | OpDelete):
@@ -10767,945 +11114,12 @@ func (m *SkyConditionMutation) ResetEdge(name string) error {
 	return fmt.Errorf("unknown SkyCondition edge %s", name)
 }
 
-// StationMutation represents an operation that mutates the Station nodes in the graph.
-type StationMutation struct {
-	config
-	op             Op
-	typ            string
-	id             *int
-	station_id     *string
-	latitude       *float64
-	addlatitude    *float64
-	longitude      *float64
-	addlongitude   *float64
-	elevation      *float64
-	addelevation   *float64
-	hash           *string
-	clearedFields  map[string]struct{}
-	airport        *int
-	clearedairport bool
-	metars         map[int]struct{}
-	removedmetars  map[int]struct{}
-	clearedmetars  bool
-	tafs           map[int]struct{}
-	removedtafs    map[int]struct{}
-	clearedtafs    bool
-	done           bool
-	oldValue       func(context.Context) (*Station, error)
-	predicates     []predicate.Station
-}
-
-var _ ent.Mutation = (*StationMutation)(nil)
-
-// stationOption allows management of the mutation configuration using functional options.
-type stationOption func(*StationMutation)
-
-// newStationMutation creates new mutation for the Station entity.
-func newStationMutation(c config, op Op, opts ...stationOption) *StationMutation {
-	m := &StationMutation{
-		config:        c,
-		op:            op,
-		typ:           TypeStation,
-		clearedFields: make(map[string]struct{}),
-	}
-	for _, opt := range opts {
-		opt(m)
-	}
-	return m
-}
-
-// withStationID sets the ID field of the mutation.
-func withStationID(id int) stationOption {
-	return func(m *StationMutation) {
-		var (
-			err   error
-			once  sync.Once
-			value *Station
-		)
-		m.oldValue = func(ctx context.Context) (*Station, error) {
-			once.Do(func() {
-				if m.done {
-					err = errors.New("querying old values post mutation is not allowed")
-				} else {
-					value, err = m.Client().Station.Get(ctx, id)
-				}
-			})
-			return value, err
-		}
-		m.id = &id
-	}
-}
-
-// withStation sets the old Station of the mutation.
-func withStation(node *Station) stationOption {
-	return func(m *StationMutation) {
-		m.oldValue = func(context.Context) (*Station, error) {
-			return node, nil
-		}
-		m.id = &node.ID
-	}
-}
-
-// Client returns a new `ent.Client` from the mutation. If the mutation was
-// executed in a transaction (ent.Tx), a transactional client is returned.
-func (m StationMutation) Client() *Client {
-	client := &Client{config: m.config}
-	client.init()
-	return client
-}
-
-// Tx returns an `ent.Tx` for mutations that were executed in transactions;
-// it returns an error otherwise.
-func (m StationMutation) Tx() (*Tx, error) {
-	if _, ok := m.driver.(*txDriver); !ok {
-		return nil, errors.New("ent: mutation is not running in a transaction")
-	}
-	tx := &Tx{config: m.config}
-	tx.init()
-	return tx, nil
-}
-
-// SetID sets the value of the id field. Note that this
-// operation is only accepted on creation of Station entities.
-func (m *StationMutation) SetID(id int) {
-	m.id = &id
-}
-
-// ID returns the ID value in the mutation. Note that the ID is only available
-// if it was provided to the builder or after it was returned from the database.
-func (m *StationMutation) ID() (id int, exists bool) {
-	if m.id == nil {
-		return
-	}
-	return *m.id, true
-}
-
-// IDs queries the database and returns the entity ids that match the mutation's predicate.
-// That means, if the mutation is applied within a transaction with an isolation level such
-// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
-// or updated by the mutation.
-func (m *StationMutation) IDs(ctx context.Context) ([]int, error) {
-	switch {
-	case m.op.Is(OpUpdateOne | OpDeleteOne):
-		id, exists := m.ID()
-		if exists {
-			return []int{id}, nil
-		}
-		fallthrough
-	case m.op.Is(OpUpdate | OpDelete):
-		return m.Client().Station.Query().Where(m.predicates...).IDs(ctx)
-	default:
-		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
-	}
-}
-
-// SetStationID sets the "station_id" field.
-func (m *StationMutation) SetStationID(s string) {
-	m.station_id = &s
-}
-
-// StationID returns the value of the "station_id" field in the mutation.
-func (m *StationMutation) StationID() (r string, exists bool) {
-	v := m.station_id
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldStationID returns the old "station_id" field's value of the Station entity.
-// If the Station object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *StationMutation) OldStationID(ctx context.Context) (v string, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldStationID is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldStationID requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldStationID: %w", err)
-	}
-	return oldValue.StationID, nil
-}
-
-// ResetStationID resets all changes to the "station_id" field.
-func (m *StationMutation) ResetStationID() {
-	m.station_id = nil
-}
-
-// SetLatitude sets the "latitude" field.
-func (m *StationMutation) SetLatitude(f float64) {
-	m.latitude = &f
-	m.addlatitude = nil
-}
-
-// Latitude returns the value of the "latitude" field in the mutation.
-func (m *StationMutation) Latitude() (r float64, exists bool) {
-	v := m.latitude
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldLatitude returns the old "latitude" field's value of the Station entity.
-// If the Station object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *StationMutation) OldLatitude(ctx context.Context) (v *float64, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldLatitude is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldLatitude requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldLatitude: %w", err)
-	}
-	return oldValue.Latitude, nil
-}
-
-// AddLatitude adds f to the "latitude" field.
-func (m *StationMutation) AddLatitude(f float64) {
-	if m.addlatitude != nil {
-		*m.addlatitude += f
-	} else {
-		m.addlatitude = &f
-	}
-}
-
-// AddedLatitude returns the value that was added to the "latitude" field in this mutation.
-func (m *StationMutation) AddedLatitude() (r float64, exists bool) {
-	v := m.addlatitude
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// ClearLatitude clears the value of the "latitude" field.
-func (m *StationMutation) ClearLatitude() {
-	m.latitude = nil
-	m.addlatitude = nil
-	m.clearedFields[station.FieldLatitude] = struct{}{}
-}
-
-// LatitudeCleared returns if the "latitude" field was cleared in this mutation.
-func (m *StationMutation) LatitudeCleared() bool {
-	_, ok := m.clearedFields[station.FieldLatitude]
-	return ok
-}
-
-// ResetLatitude resets all changes to the "latitude" field.
-func (m *StationMutation) ResetLatitude() {
-	m.latitude = nil
-	m.addlatitude = nil
-	delete(m.clearedFields, station.FieldLatitude)
-}
-
-// SetLongitude sets the "longitude" field.
-func (m *StationMutation) SetLongitude(f float64) {
-	m.longitude = &f
-	m.addlongitude = nil
-}
-
-// Longitude returns the value of the "longitude" field in the mutation.
-func (m *StationMutation) Longitude() (r float64, exists bool) {
-	v := m.longitude
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldLongitude returns the old "longitude" field's value of the Station entity.
-// If the Station object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *StationMutation) OldLongitude(ctx context.Context) (v *float64, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldLongitude is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldLongitude requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldLongitude: %w", err)
-	}
-	return oldValue.Longitude, nil
-}
-
-// AddLongitude adds f to the "longitude" field.
-func (m *StationMutation) AddLongitude(f float64) {
-	if m.addlongitude != nil {
-		*m.addlongitude += f
-	} else {
-		m.addlongitude = &f
-	}
-}
-
-// AddedLongitude returns the value that was added to the "longitude" field in this mutation.
-func (m *StationMutation) AddedLongitude() (r float64, exists bool) {
-	v := m.addlongitude
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// ClearLongitude clears the value of the "longitude" field.
-func (m *StationMutation) ClearLongitude() {
-	m.longitude = nil
-	m.addlongitude = nil
-	m.clearedFields[station.FieldLongitude] = struct{}{}
-}
-
-// LongitudeCleared returns if the "longitude" field was cleared in this mutation.
-func (m *StationMutation) LongitudeCleared() bool {
-	_, ok := m.clearedFields[station.FieldLongitude]
-	return ok
-}
-
-// ResetLongitude resets all changes to the "longitude" field.
-func (m *StationMutation) ResetLongitude() {
-	m.longitude = nil
-	m.addlongitude = nil
-	delete(m.clearedFields, station.FieldLongitude)
-}
-
-// SetElevation sets the "elevation" field.
-func (m *StationMutation) SetElevation(f float64) {
-	m.elevation = &f
-	m.addelevation = nil
-}
-
-// Elevation returns the value of the "elevation" field in the mutation.
-func (m *StationMutation) Elevation() (r float64, exists bool) {
-	v := m.elevation
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldElevation returns the old "elevation" field's value of the Station entity.
-// If the Station object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *StationMutation) OldElevation(ctx context.Context) (v *float64, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldElevation is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldElevation requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldElevation: %w", err)
-	}
-	return oldValue.Elevation, nil
-}
-
-// AddElevation adds f to the "elevation" field.
-func (m *StationMutation) AddElevation(f float64) {
-	if m.addelevation != nil {
-		*m.addelevation += f
-	} else {
-		m.addelevation = &f
-	}
-}
-
-// AddedElevation returns the value that was added to the "elevation" field in this mutation.
-func (m *StationMutation) AddedElevation() (r float64, exists bool) {
-	v := m.addelevation
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// ClearElevation clears the value of the "elevation" field.
-func (m *StationMutation) ClearElevation() {
-	m.elevation = nil
-	m.addelevation = nil
-	m.clearedFields[station.FieldElevation] = struct{}{}
-}
-
-// ElevationCleared returns if the "elevation" field was cleared in this mutation.
-func (m *StationMutation) ElevationCleared() bool {
-	_, ok := m.clearedFields[station.FieldElevation]
-	return ok
-}
-
-// ResetElevation resets all changes to the "elevation" field.
-func (m *StationMutation) ResetElevation() {
-	m.elevation = nil
-	m.addelevation = nil
-	delete(m.clearedFields, station.FieldElevation)
-}
-
-// SetHash sets the "hash" field.
-func (m *StationMutation) SetHash(s string) {
-	m.hash = &s
-}
-
-// Hash returns the value of the "hash" field in the mutation.
-func (m *StationMutation) Hash() (r string, exists bool) {
-	v := m.hash
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldHash returns the old "hash" field's value of the Station entity.
-// If the Station object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *StationMutation) OldHash(ctx context.Context) (v string, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldHash is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldHash requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldHash: %w", err)
-	}
-	return oldValue.Hash, nil
-}
-
-// ResetHash resets all changes to the "hash" field.
-func (m *StationMutation) ResetHash() {
-	m.hash = nil
-}
-
-// SetAirportID sets the "airport" edge to the Airport entity by id.
-func (m *StationMutation) SetAirportID(id int) {
-	m.airport = &id
-}
-
-// ClearAirport clears the "airport" edge to the Airport entity.
-func (m *StationMutation) ClearAirport() {
-	m.clearedairport = true
-}
-
-// AirportCleared reports if the "airport" edge to the Airport entity was cleared.
-func (m *StationMutation) AirportCleared() bool {
-	return m.clearedairport
-}
-
-// AirportID returns the "airport" edge ID in the mutation.
-func (m *StationMutation) AirportID() (id int, exists bool) {
-	if m.airport != nil {
-		return *m.airport, true
-	}
-	return
-}
-
-// AirportIDs returns the "airport" edge IDs in the mutation.
-// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
-// AirportID instead. It exists only for internal usage by the builders.
-func (m *StationMutation) AirportIDs() (ids []int) {
-	if id := m.airport; id != nil {
-		ids = append(ids, *id)
-	}
-	return
-}
-
-// ResetAirport resets all changes to the "airport" edge.
-func (m *StationMutation) ResetAirport() {
-	m.airport = nil
-	m.clearedairport = false
-}
-
-// AddMetarIDs adds the "metars" edge to the Metar entity by ids.
-func (m *StationMutation) AddMetarIDs(ids ...int) {
-	if m.metars == nil {
-		m.metars = make(map[int]struct{})
-	}
-	for i := range ids {
-		m.metars[ids[i]] = struct{}{}
-	}
-}
-
-// ClearMetars clears the "metars" edge to the Metar entity.
-func (m *StationMutation) ClearMetars() {
-	m.clearedmetars = true
-}
-
-// MetarsCleared reports if the "metars" edge to the Metar entity was cleared.
-func (m *StationMutation) MetarsCleared() bool {
-	return m.clearedmetars
-}
-
-// RemoveMetarIDs removes the "metars" edge to the Metar entity by IDs.
-func (m *StationMutation) RemoveMetarIDs(ids ...int) {
-	if m.removedmetars == nil {
-		m.removedmetars = make(map[int]struct{})
-	}
-	for i := range ids {
-		delete(m.metars, ids[i])
-		m.removedmetars[ids[i]] = struct{}{}
-	}
-}
-
-// RemovedMetars returns the removed IDs of the "metars" edge to the Metar entity.
-func (m *StationMutation) RemovedMetarsIDs() (ids []int) {
-	for id := range m.removedmetars {
-		ids = append(ids, id)
-	}
-	return
-}
-
-// MetarsIDs returns the "metars" edge IDs in the mutation.
-func (m *StationMutation) MetarsIDs() (ids []int) {
-	for id := range m.metars {
-		ids = append(ids, id)
-	}
-	return
-}
-
-// ResetMetars resets all changes to the "metars" edge.
-func (m *StationMutation) ResetMetars() {
-	m.metars = nil
-	m.clearedmetars = false
-	m.removedmetars = nil
-}
-
-// AddTafIDs adds the "tafs" edge to the Taf entity by ids.
-func (m *StationMutation) AddTafIDs(ids ...int) {
-	if m.tafs == nil {
-		m.tafs = make(map[int]struct{})
-	}
-	for i := range ids {
-		m.tafs[ids[i]] = struct{}{}
-	}
-}
-
-// ClearTafs clears the "tafs" edge to the Taf entity.
-func (m *StationMutation) ClearTafs() {
-	m.clearedtafs = true
-}
-
-// TafsCleared reports if the "tafs" edge to the Taf entity was cleared.
-func (m *StationMutation) TafsCleared() bool {
-	return m.clearedtafs
-}
-
-// RemoveTafIDs removes the "tafs" edge to the Taf entity by IDs.
-func (m *StationMutation) RemoveTafIDs(ids ...int) {
-	if m.removedtafs == nil {
-		m.removedtafs = make(map[int]struct{})
-	}
-	for i := range ids {
-		delete(m.tafs, ids[i])
-		m.removedtafs[ids[i]] = struct{}{}
-	}
-}
-
-// RemovedTafs returns the removed IDs of the "tafs" edge to the Taf entity.
-func (m *StationMutation) RemovedTafsIDs() (ids []int) {
-	for id := range m.removedtafs {
-		ids = append(ids, id)
-	}
-	return
-}
-
-// TafsIDs returns the "tafs" edge IDs in the mutation.
-func (m *StationMutation) TafsIDs() (ids []int) {
-	for id := range m.tafs {
-		ids = append(ids, id)
-	}
-	return
-}
-
-// ResetTafs resets all changes to the "tafs" edge.
-func (m *StationMutation) ResetTafs() {
-	m.tafs = nil
-	m.clearedtafs = false
-	m.removedtafs = nil
-}
-
-// Where appends a list predicates to the StationMutation builder.
-func (m *StationMutation) Where(ps ...predicate.Station) {
-	m.predicates = append(m.predicates, ps...)
-}
-
-// Op returns the operation name.
-func (m *StationMutation) Op() Op {
-	return m.op
-}
-
-// Type returns the node type of this mutation (Station).
-func (m *StationMutation) Type() string {
-	return m.typ
-}
-
-// Fields returns all fields that were changed during this mutation. Note that in
-// order to get all numeric fields that were incremented/decremented, call
-// AddedFields().
-func (m *StationMutation) Fields() []string {
-	fields := make([]string, 0, 5)
-	if m.station_id != nil {
-		fields = append(fields, station.FieldStationID)
-	}
-	if m.latitude != nil {
-		fields = append(fields, station.FieldLatitude)
-	}
-	if m.longitude != nil {
-		fields = append(fields, station.FieldLongitude)
-	}
-	if m.elevation != nil {
-		fields = append(fields, station.FieldElevation)
-	}
-	if m.hash != nil {
-		fields = append(fields, station.FieldHash)
-	}
-	return fields
-}
-
-// Field returns the value of a field with the given name. The second boolean
-// return value indicates that this field was not set, or was not defined in the
-// schema.
-func (m *StationMutation) Field(name string) (ent.Value, bool) {
-	switch name {
-	case station.FieldStationID:
-		return m.StationID()
-	case station.FieldLatitude:
-		return m.Latitude()
-	case station.FieldLongitude:
-		return m.Longitude()
-	case station.FieldElevation:
-		return m.Elevation()
-	case station.FieldHash:
-		return m.Hash()
-	}
-	return nil, false
-}
-
-// OldField returns the old value of the field from the database. An error is
-// returned if the mutation operation is not UpdateOne, or the query to the
-// database failed.
-func (m *StationMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
-	switch name {
-	case station.FieldStationID:
-		return m.OldStationID(ctx)
-	case station.FieldLatitude:
-		return m.OldLatitude(ctx)
-	case station.FieldLongitude:
-		return m.OldLongitude(ctx)
-	case station.FieldElevation:
-		return m.OldElevation(ctx)
-	case station.FieldHash:
-		return m.OldHash(ctx)
-	}
-	return nil, fmt.Errorf("unknown Station field %s", name)
-}
-
-// SetField sets the value of a field with the given name. It returns an error if
-// the field is not defined in the schema, or if the type mismatched the field
-// type.
-func (m *StationMutation) SetField(name string, value ent.Value) error {
-	switch name {
-	case station.FieldStationID:
-		v, ok := value.(string)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetStationID(v)
-		return nil
-	case station.FieldLatitude:
-		v, ok := value.(float64)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetLatitude(v)
-		return nil
-	case station.FieldLongitude:
-		v, ok := value.(float64)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetLongitude(v)
-		return nil
-	case station.FieldElevation:
-		v, ok := value.(float64)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetElevation(v)
-		return nil
-	case station.FieldHash:
-		v, ok := value.(string)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetHash(v)
-		return nil
-	}
-	return fmt.Errorf("unknown Station field %s", name)
-}
-
-// AddedFields returns all numeric fields that were incremented/decremented during
-// this mutation.
-func (m *StationMutation) AddedFields() []string {
-	var fields []string
-	if m.addlatitude != nil {
-		fields = append(fields, station.FieldLatitude)
-	}
-	if m.addlongitude != nil {
-		fields = append(fields, station.FieldLongitude)
-	}
-	if m.addelevation != nil {
-		fields = append(fields, station.FieldElevation)
-	}
-	return fields
-}
-
-// AddedField returns the numeric value that was incremented/decremented on a field
-// with the given name. The second boolean return value indicates that this field
-// was not set, or was not defined in the schema.
-func (m *StationMutation) AddedField(name string) (ent.Value, bool) {
-	switch name {
-	case station.FieldLatitude:
-		return m.AddedLatitude()
-	case station.FieldLongitude:
-		return m.AddedLongitude()
-	case station.FieldElevation:
-		return m.AddedElevation()
-	}
-	return nil, false
-}
-
-// AddField adds the value to the field with the given name. It returns an error if
-// the field is not defined in the schema, or if the type mismatched the field
-// type.
-func (m *StationMutation) AddField(name string, value ent.Value) error {
-	switch name {
-	case station.FieldLatitude:
-		v, ok := value.(float64)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.AddLatitude(v)
-		return nil
-	case station.FieldLongitude:
-		v, ok := value.(float64)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.AddLongitude(v)
-		return nil
-	case station.FieldElevation:
-		v, ok := value.(float64)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.AddElevation(v)
-		return nil
-	}
-	return fmt.Errorf("unknown Station numeric field %s", name)
-}
-
-// ClearedFields returns all nullable fields that were cleared during this
-// mutation.
-func (m *StationMutation) ClearedFields() []string {
-	var fields []string
-	if m.FieldCleared(station.FieldLatitude) {
-		fields = append(fields, station.FieldLatitude)
-	}
-	if m.FieldCleared(station.FieldLongitude) {
-		fields = append(fields, station.FieldLongitude)
-	}
-	if m.FieldCleared(station.FieldElevation) {
-		fields = append(fields, station.FieldElevation)
-	}
-	return fields
-}
-
-// FieldCleared returns a boolean indicating if a field with the given name was
-// cleared in this mutation.
-func (m *StationMutation) FieldCleared(name string) bool {
-	_, ok := m.clearedFields[name]
-	return ok
-}
-
-// ClearField clears the value of the field with the given name. It returns an
-// error if the field is not defined in the schema.
-func (m *StationMutation) ClearField(name string) error {
-	switch name {
-	case station.FieldLatitude:
-		m.ClearLatitude()
-		return nil
-	case station.FieldLongitude:
-		m.ClearLongitude()
-		return nil
-	case station.FieldElevation:
-		m.ClearElevation()
-		return nil
-	}
-	return fmt.Errorf("unknown Station nullable field %s", name)
-}
-
-// ResetField resets all changes in the mutation for the field with the given name.
-// It returns an error if the field is not defined in the schema.
-func (m *StationMutation) ResetField(name string) error {
-	switch name {
-	case station.FieldStationID:
-		m.ResetStationID()
-		return nil
-	case station.FieldLatitude:
-		m.ResetLatitude()
-		return nil
-	case station.FieldLongitude:
-		m.ResetLongitude()
-		return nil
-	case station.FieldElevation:
-		m.ResetElevation()
-		return nil
-	case station.FieldHash:
-		m.ResetHash()
-		return nil
-	}
-	return fmt.Errorf("unknown Station field %s", name)
-}
-
-// AddedEdges returns all edge names that were set/added in this mutation.
-func (m *StationMutation) AddedEdges() []string {
-	edges := make([]string, 0, 3)
-	if m.airport != nil {
-		edges = append(edges, station.EdgeAirport)
-	}
-	if m.metars != nil {
-		edges = append(edges, station.EdgeMetars)
-	}
-	if m.tafs != nil {
-		edges = append(edges, station.EdgeTafs)
-	}
-	return edges
-}
-
-// AddedIDs returns all IDs (to other nodes) that were added for the given edge
-// name in this mutation.
-func (m *StationMutation) AddedIDs(name string) []ent.Value {
-	switch name {
-	case station.EdgeAirport:
-		if id := m.airport; id != nil {
-			return []ent.Value{*id}
-		}
-	case station.EdgeMetars:
-		ids := make([]ent.Value, 0, len(m.metars))
-		for id := range m.metars {
-			ids = append(ids, id)
-		}
-		return ids
-	case station.EdgeTafs:
-		ids := make([]ent.Value, 0, len(m.tafs))
-		for id := range m.tafs {
-			ids = append(ids, id)
-		}
-		return ids
-	}
-	return nil
-}
-
-// RemovedEdges returns all edge names that were removed in this mutation.
-func (m *StationMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 3)
-	if m.removedmetars != nil {
-		edges = append(edges, station.EdgeMetars)
-	}
-	if m.removedtafs != nil {
-		edges = append(edges, station.EdgeTafs)
-	}
-	return edges
-}
-
-// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
-// the given name in this mutation.
-func (m *StationMutation) RemovedIDs(name string) []ent.Value {
-	switch name {
-	case station.EdgeMetars:
-		ids := make([]ent.Value, 0, len(m.removedmetars))
-		for id := range m.removedmetars {
-			ids = append(ids, id)
-		}
-		return ids
-	case station.EdgeTafs:
-		ids := make([]ent.Value, 0, len(m.removedtafs))
-		for id := range m.removedtafs {
-			ids = append(ids, id)
-		}
-		return ids
-	}
-	return nil
-}
-
-// ClearedEdges returns all edge names that were cleared in this mutation.
-func (m *StationMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 3)
-	if m.clearedairport {
-		edges = append(edges, station.EdgeAirport)
-	}
-	if m.clearedmetars {
-		edges = append(edges, station.EdgeMetars)
-	}
-	if m.clearedtafs {
-		edges = append(edges, station.EdgeTafs)
-	}
-	return edges
-}
-
-// EdgeCleared returns a boolean which indicates if the edge with the given name
-// was cleared in this mutation.
-func (m *StationMutation) EdgeCleared(name string) bool {
-	switch name {
-	case station.EdgeAirport:
-		return m.clearedairport
-	case station.EdgeMetars:
-		return m.clearedmetars
-	case station.EdgeTafs:
-		return m.clearedtafs
-	}
-	return false
-}
-
-// ClearEdge clears the value of the edge with the given name. It returns an error
-// if that edge is not defined in the schema.
-func (m *StationMutation) ClearEdge(name string) error {
-	switch name {
-	case station.EdgeAirport:
-		m.ClearAirport()
-		return nil
-	}
-	return fmt.Errorf("unknown Station unique edge %s", name)
-}
-
-// ResetEdge resets all changes to the edge with the given name in this mutation.
-// It returns an error if the edge is not defined in the schema.
-func (m *StationMutation) ResetEdge(name string) error {
-	switch name {
-	case station.EdgeAirport:
-		m.ResetAirport()
-		return nil
-	case station.EdgeMetars:
-		m.ResetMetars()
-		return nil
-	case station.EdgeTafs:
-		m.ResetTafs()
-		return nil
-	}
-	return fmt.Errorf("unknown Station edge %s", name)
-}
-
 // TafMutation represents an operation that mutates the Taf nodes in the graph.
 type TafMutation struct {
 	config
 	op                    Op
 	typ                   string
-	id                    *int
+	id                    *uuid.UUID
 	raw_text              *string
 	issue_time            *time.Time
 	bulletin_time         *time.Time
@@ -11714,13 +11128,13 @@ type TafMutation struct {
 	remarks               *string
 	hash                  *string
 	clearedFields         map[string]struct{}
-	station               *int
+	station               *uuid.UUID
 	clearedstation        bool
-	sky_conditions        map[int]struct{}
-	removedsky_conditions map[int]struct{}
+	sky_conditions        map[uuid.UUID]struct{}
+	removedsky_conditions map[uuid.UUID]struct{}
 	clearedsky_conditions bool
-	forecast              map[int]struct{}
-	removedforecast       map[int]struct{}
+	forecast              map[uuid.UUID]struct{}
+	removedforecast       map[uuid.UUID]struct{}
 	clearedforecast       bool
 	done                  bool
 	oldValue              func(context.Context) (*Taf, error)
@@ -11747,7 +11161,7 @@ func newTafMutation(c config, op Op, opts ...tafOption) *TafMutation {
 }
 
 // withTafID sets the ID field of the mutation.
-func withTafID(id int) tafOption {
+func withTafID(id uuid.UUID) tafOption {
 	return func(m *TafMutation) {
 		var (
 			err   error
@@ -11799,13 +11213,13 @@ func (m TafMutation) Tx() (*Tx, error) {
 
 // SetID sets the value of the id field. Note that this
 // operation is only accepted on creation of Taf entities.
-func (m *TafMutation) SetID(id int) {
+func (m *TafMutation) SetID(id uuid.UUID) {
 	m.id = &id
 }
 
 // ID returns the ID value in the mutation. Note that the ID is only available
 // if it was provided to the builder or after it was returned from the database.
-func (m *TafMutation) ID() (id int, exists bool) {
+func (m *TafMutation) ID() (id uuid.UUID, exists bool) {
 	if m.id == nil {
 		return
 	}
@@ -11816,12 +11230,12 @@ func (m *TafMutation) ID() (id int, exists bool) {
 // That means, if the mutation is applied within a transaction with an isolation level such
 // as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
 // or updated by the mutation.
-func (m *TafMutation) IDs(ctx context.Context) ([]int, error) {
+func (m *TafMutation) IDs(ctx context.Context) ([]uuid.UUID, error) {
 	switch {
 	case m.op.Is(OpUpdateOne | OpDeleteOne):
 		id, exists := m.ID()
 		if exists {
-			return []int{id}, nil
+			return []uuid.UUID{id}, nil
 		}
 		fallthrough
 	case m.op.Is(OpUpdate | OpDelete):
@@ -12083,23 +11497,23 @@ func (m *TafMutation) ResetHash() {
 	m.hash = nil
 }
 
-// SetStationID sets the "station" edge to the Station entity by id.
-func (m *TafMutation) SetStationID(id int) {
+// SetStationID sets the "station" edge to the WeatherStation entity by id.
+func (m *TafMutation) SetStationID(id uuid.UUID) {
 	m.station = &id
 }
 
-// ClearStation clears the "station" edge to the Station entity.
+// ClearStation clears the "station" edge to the WeatherStation entity.
 func (m *TafMutation) ClearStation() {
 	m.clearedstation = true
 }
 
-// StationCleared reports if the "station" edge to the Station entity was cleared.
+// StationCleared reports if the "station" edge to the WeatherStation entity was cleared.
 func (m *TafMutation) StationCleared() bool {
 	return m.clearedstation
 }
 
 // StationID returns the "station" edge ID in the mutation.
-func (m *TafMutation) StationID() (id int, exists bool) {
+func (m *TafMutation) StationID() (id uuid.UUID, exists bool) {
 	if m.station != nil {
 		return *m.station, true
 	}
@@ -12109,7 +11523,7 @@ func (m *TafMutation) StationID() (id int, exists bool) {
 // StationIDs returns the "station" edge IDs in the mutation.
 // Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
 // StationID instead. It exists only for internal usage by the builders.
-func (m *TafMutation) StationIDs() (ids []int) {
+func (m *TafMutation) StationIDs() (ids []uuid.UUID) {
 	if id := m.station; id != nil {
 		ids = append(ids, *id)
 	}
@@ -12123,9 +11537,9 @@ func (m *TafMutation) ResetStation() {
 }
 
 // AddSkyConditionIDs adds the "sky_conditions" edge to the SkyCondition entity by ids.
-func (m *TafMutation) AddSkyConditionIDs(ids ...int) {
+func (m *TafMutation) AddSkyConditionIDs(ids ...uuid.UUID) {
 	if m.sky_conditions == nil {
-		m.sky_conditions = make(map[int]struct{})
+		m.sky_conditions = make(map[uuid.UUID]struct{})
 	}
 	for i := range ids {
 		m.sky_conditions[ids[i]] = struct{}{}
@@ -12143,9 +11557,9 @@ func (m *TafMutation) SkyConditionsCleared() bool {
 }
 
 // RemoveSkyConditionIDs removes the "sky_conditions" edge to the SkyCondition entity by IDs.
-func (m *TafMutation) RemoveSkyConditionIDs(ids ...int) {
+func (m *TafMutation) RemoveSkyConditionIDs(ids ...uuid.UUID) {
 	if m.removedsky_conditions == nil {
-		m.removedsky_conditions = make(map[int]struct{})
+		m.removedsky_conditions = make(map[uuid.UUID]struct{})
 	}
 	for i := range ids {
 		delete(m.sky_conditions, ids[i])
@@ -12154,7 +11568,7 @@ func (m *TafMutation) RemoveSkyConditionIDs(ids ...int) {
 }
 
 // RemovedSkyConditions returns the removed IDs of the "sky_conditions" edge to the SkyCondition entity.
-func (m *TafMutation) RemovedSkyConditionsIDs() (ids []int) {
+func (m *TafMutation) RemovedSkyConditionsIDs() (ids []uuid.UUID) {
 	for id := range m.removedsky_conditions {
 		ids = append(ids, id)
 	}
@@ -12162,7 +11576,7 @@ func (m *TafMutation) RemovedSkyConditionsIDs() (ids []int) {
 }
 
 // SkyConditionsIDs returns the "sky_conditions" edge IDs in the mutation.
-func (m *TafMutation) SkyConditionsIDs() (ids []int) {
+func (m *TafMutation) SkyConditionsIDs() (ids []uuid.UUID) {
 	for id := range m.sky_conditions {
 		ids = append(ids, id)
 	}
@@ -12177,9 +11591,9 @@ func (m *TafMutation) ResetSkyConditions() {
 }
 
 // AddForecastIDs adds the "forecast" edge to the Forecast entity by ids.
-func (m *TafMutation) AddForecastIDs(ids ...int) {
+func (m *TafMutation) AddForecastIDs(ids ...uuid.UUID) {
 	if m.forecast == nil {
-		m.forecast = make(map[int]struct{})
+		m.forecast = make(map[uuid.UUID]struct{})
 	}
 	for i := range ids {
 		m.forecast[ids[i]] = struct{}{}
@@ -12197,9 +11611,9 @@ func (m *TafMutation) ForecastCleared() bool {
 }
 
 // RemoveForecastIDs removes the "forecast" edge to the Forecast entity by IDs.
-func (m *TafMutation) RemoveForecastIDs(ids ...int) {
+func (m *TafMutation) RemoveForecastIDs(ids ...uuid.UUID) {
 	if m.removedforecast == nil {
-		m.removedforecast = make(map[int]struct{})
+		m.removedforecast = make(map[uuid.UUID]struct{})
 	}
 	for i := range ids {
 		delete(m.forecast, ids[i])
@@ -12208,7 +11622,7 @@ func (m *TafMutation) RemoveForecastIDs(ids ...int) {
 }
 
 // RemovedForecast returns the removed IDs of the "forecast" edge to the Forecast entity.
-func (m *TafMutation) RemovedForecastIDs() (ids []int) {
+func (m *TafMutation) RemovedForecastIDs() (ids []uuid.UUID) {
 	for id := range m.removedforecast {
 		ids = append(ids, id)
 	}
@@ -12216,7 +11630,7 @@ func (m *TafMutation) RemovedForecastIDs() (ids []int) {
 }
 
 // ForecastIDs returns the "forecast" edge IDs in the mutation.
-func (m *TafMutation) ForecastIDs() (ids []int) {
+func (m *TafMutation) ForecastIDs() (ids []uuid.UUID) {
 	for id := range m.forecast {
 		ids = append(ids, id)
 	}
@@ -12581,7 +11995,7 @@ type TemperatureDataMutation struct {
 	config
 	op                 Op
 	typ                string
-	id                 *int
+	id                 *uuid.UUID
 	valid_time         *time.Time
 	temperature        *float64
 	addtemperature     *float64
@@ -12615,7 +12029,7 @@ func newTemperatureDataMutation(c config, op Op, opts ...temperaturedataOption) 
 }
 
 // withTemperatureDataID sets the ID field of the mutation.
-func withTemperatureDataID(id int) temperaturedataOption {
+func withTemperatureDataID(id uuid.UUID) temperaturedataOption {
 	return func(m *TemperatureDataMutation) {
 		var (
 			err   error
@@ -12665,9 +12079,15 @@ func (m TemperatureDataMutation) Tx() (*Tx, error) {
 	return tx, nil
 }
 
+// SetID sets the value of the id field. Note that this
+// operation is only accepted on creation of TemperatureData entities.
+func (m *TemperatureDataMutation) SetID(id uuid.UUID) {
+	m.id = &id
+}
+
 // ID returns the ID value in the mutation. Note that the ID is only available
 // if it was provided to the builder or after it was returned from the database.
-func (m *TemperatureDataMutation) ID() (id int, exists bool) {
+func (m *TemperatureDataMutation) ID() (id uuid.UUID, exists bool) {
 	if m.id == nil {
 		return
 	}
@@ -12678,12 +12098,12 @@ func (m *TemperatureDataMutation) ID() (id int, exists bool) {
 // That means, if the mutation is applied within a transaction with an isolation level such
 // as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
 // or updated by the mutation.
-func (m *TemperatureDataMutation) IDs(ctx context.Context) ([]int, error) {
+func (m *TemperatureDataMutation) IDs(ctx context.Context) ([]uuid.UUID, error) {
 	switch {
 	case m.op.Is(OpUpdateOne | OpDeleteOne):
 		id, exists := m.ID()
 		if exists {
-			return []int{id}, nil
+			return []uuid.UUID{id}, nil
 		}
 		fallthrough
 	case m.op.Is(OpUpdate | OpDelete):
@@ -13199,7 +12619,7 @@ type TurbulenceConditionMutation struct {
 	config
 	op              Op
 	typ             string
-	id              *int
+	id              *uuid.UUID
 	intensity       *string
 	min_altitude    *int
 	addmin_altitude *int
@@ -13231,7 +12651,7 @@ func newTurbulenceConditionMutation(c config, op Op, opts ...turbulencecondition
 }
 
 // withTurbulenceConditionID sets the ID field of the mutation.
-func withTurbulenceConditionID(id int) turbulenceconditionOption {
+func withTurbulenceConditionID(id uuid.UUID) turbulenceconditionOption {
 	return func(m *TurbulenceConditionMutation) {
 		var (
 			err   error
@@ -13281,9 +12701,15 @@ func (m TurbulenceConditionMutation) Tx() (*Tx, error) {
 	return tx, nil
 }
 
+// SetID sets the value of the id field. Note that this
+// operation is only accepted on creation of TurbulenceCondition entities.
+func (m *TurbulenceConditionMutation) SetID(id uuid.UUID) {
+	m.id = &id
+}
+
 // ID returns the ID value in the mutation. Note that the ID is only available
 // if it was provided to the builder or after it was returned from the database.
-func (m *TurbulenceConditionMutation) ID() (id int, exists bool) {
+func (m *TurbulenceConditionMutation) ID() (id uuid.UUID, exists bool) {
 	if m.id == nil {
 		return
 	}
@@ -13294,12 +12720,12 @@ func (m *TurbulenceConditionMutation) ID() (id int, exists bool) {
 // That means, if the mutation is applied within a transaction with an isolation level such
 // as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
 // or updated by the mutation.
-func (m *TurbulenceConditionMutation) IDs(ctx context.Context) ([]int, error) {
+func (m *TurbulenceConditionMutation) IDs(ctx context.Context) ([]uuid.UUID, error) {
 	switch {
 	case m.op.Is(OpUpdateOne | OpDeleteOne):
 		id, exists := m.ID()
 		if exists {
-			return []int{id}, nil
+			return []uuid.UUID{id}, nil
 		}
 		fallthrough
 	case m.op.Is(OpUpdate | OpDelete):
@@ -13680,4 +13106,937 @@ func (m *TurbulenceConditionMutation) ClearEdge(name string) error {
 // It returns an error if the edge is not defined in the schema.
 func (m *TurbulenceConditionMutation) ResetEdge(name string) error {
 	return fmt.Errorf("unknown TurbulenceCondition edge %s", name)
+}
+
+// WeatherStationMutation represents an operation that mutates the WeatherStation nodes in the graph.
+type WeatherStationMutation struct {
+	config
+	op             Op
+	typ            string
+	id             *uuid.UUID
+	station_id     *string
+	latitude       *float64
+	addlatitude    *float64
+	longitude      *float64
+	addlongitude   *float64
+	elevation      *float64
+	addelevation   *float64
+	hash           *string
+	clearedFields  map[string]struct{}
+	airport        *uuid.UUID
+	clearedairport bool
+	metars         map[uuid.UUID]struct{}
+	removedmetars  map[uuid.UUID]struct{}
+	clearedmetars  bool
+	tafs           map[uuid.UUID]struct{}
+	removedtafs    map[uuid.UUID]struct{}
+	clearedtafs    bool
+	done           bool
+	oldValue       func(context.Context) (*WeatherStation, error)
+	predicates     []predicate.WeatherStation
+}
+
+var _ ent.Mutation = (*WeatherStationMutation)(nil)
+
+// weatherstationOption allows management of the mutation configuration using functional options.
+type weatherstationOption func(*WeatherStationMutation)
+
+// newWeatherStationMutation creates new mutation for the WeatherStation entity.
+func newWeatherStationMutation(c config, op Op, opts ...weatherstationOption) *WeatherStationMutation {
+	m := &WeatherStationMutation{
+		config:        c,
+		op:            op,
+		typ:           TypeWeatherStation,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withWeatherStationID sets the ID field of the mutation.
+func withWeatherStationID(id uuid.UUID) weatherstationOption {
+	return func(m *WeatherStationMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *WeatherStation
+		)
+		m.oldValue = func(ctx context.Context) (*WeatherStation, error) {
+			once.Do(func() {
+				if m.done {
+					err = errors.New("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().WeatherStation.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withWeatherStation sets the old WeatherStation of the mutation.
+func withWeatherStation(node *WeatherStation) weatherstationOption {
+	return func(m *WeatherStationMutation) {
+		m.oldValue = func(context.Context) (*WeatherStation, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m WeatherStationMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m WeatherStationMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, errors.New("ent: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// SetID sets the value of the id field. Note that this
+// operation is only accepted on creation of WeatherStation entities.
+func (m *WeatherStationMutation) SetID(id uuid.UUID) {
+	m.id = &id
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *WeatherStationMutation) ID() (id uuid.UUID, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *WeatherStationMutation) IDs(ctx context.Context) ([]uuid.UUID, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []uuid.UUID{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().WeatherStation.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
+}
+
+// SetStationID sets the "station_id" field.
+func (m *WeatherStationMutation) SetStationID(s string) {
+	m.station_id = &s
+}
+
+// StationID returns the value of the "station_id" field in the mutation.
+func (m *WeatherStationMutation) StationID() (r string, exists bool) {
+	v := m.station_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldStationID returns the old "station_id" field's value of the WeatherStation entity.
+// If the WeatherStation object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *WeatherStationMutation) OldStationID(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldStationID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldStationID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldStationID: %w", err)
+	}
+	return oldValue.StationID, nil
+}
+
+// ResetStationID resets all changes to the "station_id" field.
+func (m *WeatherStationMutation) ResetStationID() {
+	m.station_id = nil
+}
+
+// SetLatitude sets the "latitude" field.
+func (m *WeatherStationMutation) SetLatitude(f float64) {
+	m.latitude = &f
+	m.addlatitude = nil
+}
+
+// Latitude returns the value of the "latitude" field in the mutation.
+func (m *WeatherStationMutation) Latitude() (r float64, exists bool) {
+	v := m.latitude
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldLatitude returns the old "latitude" field's value of the WeatherStation entity.
+// If the WeatherStation object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *WeatherStationMutation) OldLatitude(ctx context.Context) (v *float64, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldLatitude is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldLatitude requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldLatitude: %w", err)
+	}
+	return oldValue.Latitude, nil
+}
+
+// AddLatitude adds f to the "latitude" field.
+func (m *WeatherStationMutation) AddLatitude(f float64) {
+	if m.addlatitude != nil {
+		*m.addlatitude += f
+	} else {
+		m.addlatitude = &f
+	}
+}
+
+// AddedLatitude returns the value that was added to the "latitude" field in this mutation.
+func (m *WeatherStationMutation) AddedLatitude() (r float64, exists bool) {
+	v := m.addlatitude
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ClearLatitude clears the value of the "latitude" field.
+func (m *WeatherStationMutation) ClearLatitude() {
+	m.latitude = nil
+	m.addlatitude = nil
+	m.clearedFields[weatherstation.FieldLatitude] = struct{}{}
+}
+
+// LatitudeCleared returns if the "latitude" field was cleared in this mutation.
+func (m *WeatherStationMutation) LatitudeCleared() bool {
+	_, ok := m.clearedFields[weatherstation.FieldLatitude]
+	return ok
+}
+
+// ResetLatitude resets all changes to the "latitude" field.
+func (m *WeatherStationMutation) ResetLatitude() {
+	m.latitude = nil
+	m.addlatitude = nil
+	delete(m.clearedFields, weatherstation.FieldLatitude)
+}
+
+// SetLongitude sets the "longitude" field.
+func (m *WeatherStationMutation) SetLongitude(f float64) {
+	m.longitude = &f
+	m.addlongitude = nil
+}
+
+// Longitude returns the value of the "longitude" field in the mutation.
+func (m *WeatherStationMutation) Longitude() (r float64, exists bool) {
+	v := m.longitude
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldLongitude returns the old "longitude" field's value of the WeatherStation entity.
+// If the WeatherStation object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *WeatherStationMutation) OldLongitude(ctx context.Context) (v *float64, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldLongitude is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldLongitude requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldLongitude: %w", err)
+	}
+	return oldValue.Longitude, nil
+}
+
+// AddLongitude adds f to the "longitude" field.
+func (m *WeatherStationMutation) AddLongitude(f float64) {
+	if m.addlongitude != nil {
+		*m.addlongitude += f
+	} else {
+		m.addlongitude = &f
+	}
+}
+
+// AddedLongitude returns the value that was added to the "longitude" field in this mutation.
+func (m *WeatherStationMutation) AddedLongitude() (r float64, exists bool) {
+	v := m.addlongitude
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ClearLongitude clears the value of the "longitude" field.
+func (m *WeatherStationMutation) ClearLongitude() {
+	m.longitude = nil
+	m.addlongitude = nil
+	m.clearedFields[weatherstation.FieldLongitude] = struct{}{}
+}
+
+// LongitudeCleared returns if the "longitude" field was cleared in this mutation.
+func (m *WeatherStationMutation) LongitudeCleared() bool {
+	_, ok := m.clearedFields[weatherstation.FieldLongitude]
+	return ok
+}
+
+// ResetLongitude resets all changes to the "longitude" field.
+func (m *WeatherStationMutation) ResetLongitude() {
+	m.longitude = nil
+	m.addlongitude = nil
+	delete(m.clearedFields, weatherstation.FieldLongitude)
+}
+
+// SetElevation sets the "elevation" field.
+func (m *WeatherStationMutation) SetElevation(f float64) {
+	m.elevation = &f
+	m.addelevation = nil
+}
+
+// Elevation returns the value of the "elevation" field in the mutation.
+func (m *WeatherStationMutation) Elevation() (r float64, exists bool) {
+	v := m.elevation
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldElevation returns the old "elevation" field's value of the WeatherStation entity.
+// If the WeatherStation object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *WeatherStationMutation) OldElevation(ctx context.Context) (v *float64, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldElevation is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldElevation requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldElevation: %w", err)
+	}
+	return oldValue.Elevation, nil
+}
+
+// AddElevation adds f to the "elevation" field.
+func (m *WeatherStationMutation) AddElevation(f float64) {
+	if m.addelevation != nil {
+		*m.addelevation += f
+	} else {
+		m.addelevation = &f
+	}
+}
+
+// AddedElevation returns the value that was added to the "elevation" field in this mutation.
+func (m *WeatherStationMutation) AddedElevation() (r float64, exists bool) {
+	v := m.addelevation
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ClearElevation clears the value of the "elevation" field.
+func (m *WeatherStationMutation) ClearElevation() {
+	m.elevation = nil
+	m.addelevation = nil
+	m.clearedFields[weatherstation.FieldElevation] = struct{}{}
+}
+
+// ElevationCleared returns if the "elevation" field was cleared in this mutation.
+func (m *WeatherStationMutation) ElevationCleared() bool {
+	_, ok := m.clearedFields[weatherstation.FieldElevation]
+	return ok
+}
+
+// ResetElevation resets all changes to the "elevation" field.
+func (m *WeatherStationMutation) ResetElevation() {
+	m.elevation = nil
+	m.addelevation = nil
+	delete(m.clearedFields, weatherstation.FieldElevation)
+}
+
+// SetHash sets the "hash" field.
+func (m *WeatherStationMutation) SetHash(s string) {
+	m.hash = &s
+}
+
+// Hash returns the value of the "hash" field in the mutation.
+func (m *WeatherStationMutation) Hash() (r string, exists bool) {
+	v := m.hash
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldHash returns the old "hash" field's value of the WeatherStation entity.
+// If the WeatherStation object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *WeatherStationMutation) OldHash(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldHash is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldHash requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldHash: %w", err)
+	}
+	return oldValue.Hash, nil
+}
+
+// ResetHash resets all changes to the "hash" field.
+func (m *WeatherStationMutation) ResetHash() {
+	m.hash = nil
+}
+
+// SetAirportID sets the "airport" edge to the Airport entity by id.
+func (m *WeatherStationMutation) SetAirportID(id uuid.UUID) {
+	m.airport = &id
+}
+
+// ClearAirport clears the "airport" edge to the Airport entity.
+func (m *WeatherStationMutation) ClearAirport() {
+	m.clearedairport = true
+}
+
+// AirportCleared reports if the "airport" edge to the Airport entity was cleared.
+func (m *WeatherStationMutation) AirportCleared() bool {
+	return m.clearedairport
+}
+
+// AirportID returns the "airport" edge ID in the mutation.
+func (m *WeatherStationMutation) AirportID() (id uuid.UUID, exists bool) {
+	if m.airport != nil {
+		return *m.airport, true
+	}
+	return
+}
+
+// AirportIDs returns the "airport" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// AirportID instead. It exists only for internal usage by the builders.
+func (m *WeatherStationMutation) AirportIDs() (ids []uuid.UUID) {
+	if id := m.airport; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetAirport resets all changes to the "airport" edge.
+func (m *WeatherStationMutation) ResetAirport() {
+	m.airport = nil
+	m.clearedairport = false
+}
+
+// AddMetarIDs adds the "metars" edge to the Metar entity by ids.
+func (m *WeatherStationMutation) AddMetarIDs(ids ...uuid.UUID) {
+	if m.metars == nil {
+		m.metars = make(map[uuid.UUID]struct{})
+	}
+	for i := range ids {
+		m.metars[ids[i]] = struct{}{}
+	}
+}
+
+// ClearMetars clears the "metars" edge to the Metar entity.
+func (m *WeatherStationMutation) ClearMetars() {
+	m.clearedmetars = true
+}
+
+// MetarsCleared reports if the "metars" edge to the Metar entity was cleared.
+func (m *WeatherStationMutation) MetarsCleared() bool {
+	return m.clearedmetars
+}
+
+// RemoveMetarIDs removes the "metars" edge to the Metar entity by IDs.
+func (m *WeatherStationMutation) RemoveMetarIDs(ids ...uuid.UUID) {
+	if m.removedmetars == nil {
+		m.removedmetars = make(map[uuid.UUID]struct{})
+	}
+	for i := range ids {
+		delete(m.metars, ids[i])
+		m.removedmetars[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedMetars returns the removed IDs of the "metars" edge to the Metar entity.
+func (m *WeatherStationMutation) RemovedMetarsIDs() (ids []uuid.UUID) {
+	for id := range m.removedmetars {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// MetarsIDs returns the "metars" edge IDs in the mutation.
+func (m *WeatherStationMutation) MetarsIDs() (ids []uuid.UUID) {
+	for id := range m.metars {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetMetars resets all changes to the "metars" edge.
+func (m *WeatherStationMutation) ResetMetars() {
+	m.metars = nil
+	m.clearedmetars = false
+	m.removedmetars = nil
+}
+
+// AddTafIDs adds the "tafs" edge to the Taf entity by ids.
+func (m *WeatherStationMutation) AddTafIDs(ids ...uuid.UUID) {
+	if m.tafs == nil {
+		m.tafs = make(map[uuid.UUID]struct{})
+	}
+	for i := range ids {
+		m.tafs[ids[i]] = struct{}{}
+	}
+}
+
+// ClearTafs clears the "tafs" edge to the Taf entity.
+func (m *WeatherStationMutation) ClearTafs() {
+	m.clearedtafs = true
+}
+
+// TafsCleared reports if the "tafs" edge to the Taf entity was cleared.
+func (m *WeatherStationMutation) TafsCleared() bool {
+	return m.clearedtafs
+}
+
+// RemoveTafIDs removes the "tafs" edge to the Taf entity by IDs.
+func (m *WeatherStationMutation) RemoveTafIDs(ids ...uuid.UUID) {
+	if m.removedtafs == nil {
+		m.removedtafs = make(map[uuid.UUID]struct{})
+	}
+	for i := range ids {
+		delete(m.tafs, ids[i])
+		m.removedtafs[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedTafs returns the removed IDs of the "tafs" edge to the Taf entity.
+func (m *WeatherStationMutation) RemovedTafsIDs() (ids []uuid.UUID) {
+	for id := range m.removedtafs {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// TafsIDs returns the "tafs" edge IDs in the mutation.
+func (m *WeatherStationMutation) TafsIDs() (ids []uuid.UUID) {
+	for id := range m.tafs {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetTafs resets all changes to the "tafs" edge.
+func (m *WeatherStationMutation) ResetTafs() {
+	m.tafs = nil
+	m.clearedtafs = false
+	m.removedtafs = nil
+}
+
+// Where appends a list predicates to the WeatherStationMutation builder.
+func (m *WeatherStationMutation) Where(ps ...predicate.WeatherStation) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// Op returns the operation name.
+func (m *WeatherStationMutation) Op() Op {
+	return m.op
+}
+
+// Type returns the node type of this mutation (WeatherStation).
+func (m *WeatherStationMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *WeatherStationMutation) Fields() []string {
+	fields := make([]string, 0, 5)
+	if m.station_id != nil {
+		fields = append(fields, weatherstation.FieldStationID)
+	}
+	if m.latitude != nil {
+		fields = append(fields, weatherstation.FieldLatitude)
+	}
+	if m.longitude != nil {
+		fields = append(fields, weatherstation.FieldLongitude)
+	}
+	if m.elevation != nil {
+		fields = append(fields, weatherstation.FieldElevation)
+	}
+	if m.hash != nil {
+		fields = append(fields, weatherstation.FieldHash)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *WeatherStationMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case weatherstation.FieldStationID:
+		return m.StationID()
+	case weatherstation.FieldLatitude:
+		return m.Latitude()
+	case weatherstation.FieldLongitude:
+		return m.Longitude()
+	case weatherstation.FieldElevation:
+		return m.Elevation()
+	case weatherstation.FieldHash:
+		return m.Hash()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *WeatherStationMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case weatherstation.FieldStationID:
+		return m.OldStationID(ctx)
+	case weatherstation.FieldLatitude:
+		return m.OldLatitude(ctx)
+	case weatherstation.FieldLongitude:
+		return m.OldLongitude(ctx)
+	case weatherstation.FieldElevation:
+		return m.OldElevation(ctx)
+	case weatherstation.FieldHash:
+		return m.OldHash(ctx)
+	}
+	return nil, fmt.Errorf("unknown WeatherStation field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *WeatherStationMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case weatherstation.FieldStationID:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetStationID(v)
+		return nil
+	case weatherstation.FieldLatitude:
+		v, ok := value.(float64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetLatitude(v)
+		return nil
+	case weatherstation.FieldLongitude:
+		v, ok := value.(float64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetLongitude(v)
+		return nil
+	case weatherstation.FieldElevation:
+		v, ok := value.(float64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetElevation(v)
+		return nil
+	case weatherstation.FieldHash:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetHash(v)
+		return nil
+	}
+	return fmt.Errorf("unknown WeatherStation field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *WeatherStationMutation) AddedFields() []string {
+	var fields []string
+	if m.addlatitude != nil {
+		fields = append(fields, weatherstation.FieldLatitude)
+	}
+	if m.addlongitude != nil {
+		fields = append(fields, weatherstation.FieldLongitude)
+	}
+	if m.addelevation != nil {
+		fields = append(fields, weatherstation.FieldElevation)
+	}
+	return fields
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *WeatherStationMutation) AddedField(name string) (ent.Value, bool) {
+	switch name {
+	case weatherstation.FieldLatitude:
+		return m.AddedLatitude()
+	case weatherstation.FieldLongitude:
+		return m.AddedLongitude()
+	case weatherstation.FieldElevation:
+		return m.AddedElevation()
+	}
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *WeatherStationMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	case weatherstation.FieldLatitude:
+		v, ok := value.(float64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddLatitude(v)
+		return nil
+	case weatherstation.FieldLongitude:
+		v, ok := value.(float64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddLongitude(v)
+		return nil
+	case weatherstation.FieldElevation:
+		v, ok := value.(float64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddElevation(v)
+		return nil
+	}
+	return fmt.Errorf("unknown WeatherStation numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *WeatherStationMutation) ClearedFields() []string {
+	var fields []string
+	if m.FieldCleared(weatherstation.FieldLatitude) {
+		fields = append(fields, weatherstation.FieldLatitude)
+	}
+	if m.FieldCleared(weatherstation.FieldLongitude) {
+		fields = append(fields, weatherstation.FieldLongitude)
+	}
+	if m.FieldCleared(weatherstation.FieldElevation) {
+		fields = append(fields, weatherstation.FieldElevation)
+	}
+	return fields
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *WeatherStationMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *WeatherStationMutation) ClearField(name string) error {
+	switch name {
+	case weatherstation.FieldLatitude:
+		m.ClearLatitude()
+		return nil
+	case weatherstation.FieldLongitude:
+		m.ClearLongitude()
+		return nil
+	case weatherstation.FieldElevation:
+		m.ClearElevation()
+		return nil
+	}
+	return fmt.Errorf("unknown WeatherStation nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *WeatherStationMutation) ResetField(name string) error {
+	switch name {
+	case weatherstation.FieldStationID:
+		m.ResetStationID()
+		return nil
+	case weatherstation.FieldLatitude:
+		m.ResetLatitude()
+		return nil
+	case weatherstation.FieldLongitude:
+		m.ResetLongitude()
+		return nil
+	case weatherstation.FieldElevation:
+		m.ResetElevation()
+		return nil
+	case weatherstation.FieldHash:
+		m.ResetHash()
+		return nil
+	}
+	return fmt.Errorf("unknown WeatherStation field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *WeatherStationMutation) AddedEdges() []string {
+	edges := make([]string, 0, 3)
+	if m.airport != nil {
+		edges = append(edges, weatherstation.EdgeAirport)
+	}
+	if m.metars != nil {
+		edges = append(edges, weatherstation.EdgeMetars)
+	}
+	if m.tafs != nil {
+		edges = append(edges, weatherstation.EdgeTafs)
+	}
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *WeatherStationMutation) AddedIDs(name string) []ent.Value {
+	switch name {
+	case weatherstation.EdgeAirport:
+		if id := m.airport; id != nil {
+			return []ent.Value{*id}
+		}
+	case weatherstation.EdgeMetars:
+		ids := make([]ent.Value, 0, len(m.metars))
+		for id := range m.metars {
+			ids = append(ids, id)
+		}
+		return ids
+	case weatherstation.EdgeTafs:
+		ids := make([]ent.Value, 0, len(m.tafs))
+		for id := range m.tafs {
+			ids = append(ids, id)
+		}
+		return ids
+	}
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *WeatherStationMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 3)
+	if m.removedmetars != nil {
+		edges = append(edges, weatherstation.EdgeMetars)
+	}
+	if m.removedtafs != nil {
+		edges = append(edges, weatherstation.EdgeTafs)
+	}
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *WeatherStationMutation) RemovedIDs(name string) []ent.Value {
+	switch name {
+	case weatherstation.EdgeMetars:
+		ids := make([]ent.Value, 0, len(m.removedmetars))
+		for id := range m.removedmetars {
+			ids = append(ids, id)
+		}
+		return ids
+	case weatherstation.EdgeTafs:
+		ids := make([]ent.Value, 0, len(m.removedtafs))
+		for id := range m.removedtafs {
+			ids = append(ids, id)
+		}
+		return ids
+	}
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *WeatherStationMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 3)
+	if m.clearedairport {
+		edges = append(edges, weatherstation.EdgeAirport)
+	}
+	if m.clearedmetars {
+		edges = append(edges, weatherstation.EdgeMetars)
+	}
+	if m.clearedtafs {
+		edges = append(edges, weatherstation.EdgeTafs)
+	}
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *WeatherStationMutation) EdgeCleared(name string) bool {
+	switch name {
+	case weatherstation.EdgeAirport:
+		return m.clearedairport
+	case weatherstation.EdgeMetars:
+		return m.clearedmetars
+	case weatherstation.EdgeTafs:
+		return m.clearedtafs
+	}
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *WeatherStationMutation) ClearEdge(name string) error {
+	switch name {
+	case weatherstation.EdgeAirport:
+		m.ClearAirport()
+		return nil
+	}
+	return fmt.Errorf("unknown WeatherStation unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *WeatherStationMutation) ResetEdge(name string) error {
+	switch name {
+	case weatherstation.EdgeAirport:
+		m.ResetAirport()
+		return nil
+	case weatherstation.EdgeMetars:
+		m.ResetMetars()
+		return nil
+	case weatherstation.EdgeTafs:
+		m.ResetTafs()
+		return nil
+	}
+	return fmt.Errorf("unknown WeatherStation edge %s", name)
 }

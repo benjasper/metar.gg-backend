@@ -8,13 +8,15 @@ import (
 	"fmt"
 	"time"
 
+	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/google/uuid"
 	"metar.gg/ent/airport"
 	"metar.gg/ent/frequency"
 	"metar.gg/ent/runway"
-	"metar.gg/ent/station"
+	"metar.gg/ent/weatherstation"
 )
 
 // AirportCreate is the builder for creating a Airport entity.
@@ -23,6 +25,12 @@ type AirportCreate struct {
 	mutation *AirportMutation
 	hooks    []Hook
 	conflict []sql.ConflictOption
+}
+
+// SetImportID sets the "import_id" field.
+func (ac *AirportCreate) SetImportID(i int) *AirportCreate {
+	ac.mutation.SetImportID(i)
+	return ac
 }
 
 // SetHash sets the "hash" field.
@@ -55,6 +63,34 @@ func (ac *AirportCreate) SetLastUpdated(t time.Time) *AirportCreate {
 func (ac *AirportCreate) SetNillableLastUpdated(t *time.Time) *AirportCreate {
 	if t != nil {
 		ac.SetLastUpdated(*t)
+	}
+	return ac
+}
+
+// SetIcaoCode sets the "icao_code" field.
+func (ac *AirportCreate) SetIcaoCode(s string) *AirportCreate {
+	ac.mutation.SetIcaoCode(s)
+	return ac
+}
+
+// SetNillableIcaoCode sets the "icao_code" field if the given value is not nil.
+func (ac *AirportCreate) SetNillableIcaoCode(s *string) *AirportCreate {
+	if s != nil {
+		ac.SetIcaoCode(*s)
+	}
+	return ac
+}
+
+// SetIataCode sets the "iata_code" field.
+func (ac *AirportCreate) SetIataCode(s string) *AirportCreate {
+	ac.mutation.SetIataCode(s)
+	return ac
+}
+
+// SetNillableIataCode sets the "iata_code" field if the given value is not nil.
+func (ac *AirportCreate) SetNillableIataCode(s *string) *AirportCreate {
+	if s != nil {
+		ac.SetIataCode(*s)
 	}
 	return ac
 }
@@ -155,20 +191,6 @@ func (ac *AirportCreate) SetNillableGpsCode(s *string) *AirportCreate {
 	return ac
 }
 
-// SetIataCode sets the "iata_code" field.
-func (ac *AirportCreate) SetIataCode(s string) *AirportCreate {
-	ac.mutation.SetIataCode(s)
-	return ac
-}
-
-// SetNillableIataCode sets the "iata_code" field if the given value is not nil.
-func (ac *AirportCreate) SetNillableIataCode(s *string) *AirportCreate {
-	if s != nil {
-		ac.SetIataCode(*s)
-	}
-	return ac
-}
-
 // SetLocalCode sets the "local_code" field.
 func (ac *AirportCreate) SetLocalCode(s string) *AirportCreate {
 	ac.mutation.SetLocalCode(s)
@@ -218,54 +240,62 @@ func (ac *AirportCreate) SetKeywords(s []string) *AirportCreate {
 }
 
 // SetID sets the "id" field.
-func (ac *AirportCreate) SetID(i int) *AirportCreate {
-	ac.mutation.SetID(i)
+func (ac *AirportCreate) SetID(u uuid.UUID) *AirportCreate {
+	ac.mutation.SetID(u)
+	return ac
+}
+
+// SetNillableID sets the "id" field if the given value is not nil.
+func (ac *AirportCreate) SetNillableID(u *uuid.UUID) *AirportCreate {
+	if u != nil {
+		ac.SetID(*u)
+	}
 	return ac
 }
 
 // AddRunwayIDs adds the "runways" edge to the Runway entity by IDs.
-func (ac *AirportCreate) AddRunwayIDs(ids ...int) *AirportCreate {
+func (ac *AirportCreate) AddRunwayIDs(ids ...uuid.UUID) *AirportCreate {
 	ac.mutation.AddRunwayIDs(ids...)
 	return ac
 }
 
 // AddRunways adds the "runways" edges to the Runway entity.
 func (ac *AirportCreate) AddRunways(r ...*Runway) *AirportCreate {
-	ids := make([]int, len(r))
+	ids := make([]uuid.UUID, len(r))
 	for i := range r {
 		ids[i] = r[i].ID
 	}
 	return ac.AddRunwayIDs(ids...)
 }
 
-// SetStationID sets the "station" edge to the Station entity by ID.
-func (ac *AirportCreate) SetStationID(id int) *AirportCreate {
+// SetStationID sets the "station" edge to the WeatherStation entity by ID.
+func (ac *AirportCreate) SetStationID(id uuid.UUID) *AirportCreate {
 	ac.mutation.SetStationID(id)
 	return ac
 }
 
-// SetNillableStationID sets the "station" edge to the Station entity by ID if the given value is not nil.
-func (ac *AirportCreate) SetNillableStationID(id *int) *AirportCreate {
+// SetNillableStationID sets the "station" edge to the WeatherStation entity by ID if the given value is not nil.
+func (ac *AirportCreate) SetNillableStationID(id *uuid.UUID) *AirportCreate {
 	if id != nil {
 		ac = ac.SetStationID(*id)
 	}
 	return ac
 }
 
-// SetStation sets the "station" edge to the Station entity.
-func (ac *AirportCreate) SetStation(s *Station) *AirportCreate {
-	return ac.SetStationID(s.ID)
+// SetStation sets the "station" edge to the WeatherStation entity.
+func (ac *AirportCreate) SetStation(w *WeatherStation) *AirportCreate {
+	return ac.SetStationID(w.ID)
 }
 
 // AddFrequencyIDs adds the "frequencies" edge to the Frequency entity by IDs.
-func (ac *AirportCreate) AddFrequencyIDs(ids ...int) *AirportCreate {
+func (ac *AirportCreate) AddFrequencyIDs(ids ...uuid.UUID) *AirportCreate {
 	ac.mutation.AddFrequencyIDs(ids...)
 	return ac
 }
 
 // AddFrequencies adds the "frequencies" edges to the Frequency entity.
 func (ac *AirportCreate) AddFrequencies(f ...*Frequency) *AirportCreate {
-	ids := make([]int, len(f))
+	ids := make([]uuid.UUID, len(f))
 	for i := range f {
 		ids[i] = f[i].ID
 	}
@@ -357,10 +387,17 @@ func (ac *AirportCreate) defaults() {
 		v := airport.DefaultLastUpdated()
 		ac.mutation.SetLastUpdated(v)
 	}
+	if _, ok := ac.mutation.ID(); !ok {
+		v := airport.DefaultID()
+		ac.mutation.SetID(v)
+	}
 }
 
 // check runs all checks and user-defined validators on the builder.
 func (ac *AirportCreate) check() error {
+	if _, ok := ac.mutation.ImportID(); !ok {
+		return &ValidationError{Name: "import_id", err: errors.New(`ent: missing required field "Airport.import_id"`)}
+	}
 	if _, ok := ac.mutation.Hash(); !ok {
 		return &ValidationError{Name: "hash", err: errors.New(`ent: missing required field "Airport.hash"`)}
 	}
@@ -369,6 +406,11 @@ func (ac *AirportCreate) check() error {
 	}
 	if _, ok := ac.mutation.LastUpdated(); !ok {
 		return &ValidationError{Name: "last_updated", err: errors.New(`ent: missing required field "Airport.last_updated"`)}
+	}
+	if v, ok := ac.mutation.IcaoCode(); ok {
+		if err := airport.IcaoCodeValidator(v); err != nil {
+			return &ValidationError{Name: "icao_code", err: fmt.Errorf(`ent: validator failed for field "Airport.icao_code": %w`, err)}
+		}
 	}
 	if _, ok := ac.mutation.Identifier(); !ok {
 		return &ValidationError{Name: "identifier", err: errors.New(`ent: missing required field "Airport.identifier"`)}
@@ -421,9 +463,12 @@ func (ac *AirportCreate) sqlSave(ctx context.Context) (*Airport, error) {
 		}
 		return nil, err
 	}
-	if _spec.ID.Value != _node.ID {
-		id := _spec.ID.Value.(int64)
-		_node.ID = int(id)
+	if _spec.ID.Value != nil {
+		if id, ok := _spec.ID.Value.(*uuid.UUID); ok {
+			_node.ID = *id
+		} else if err := _node.ID.Scan(_spec.ID.Value); err != nil {
+			return nil, err
+		}
 	}
 	return _node, nil
 }
@@ -434,7 +479,7 @@ func (ac *AirportCreate) createSpec() (*Airport, *sqlgraph.CreateSpec) {
 		_spec = &sqlgraph.CreateSpec{
 			Table: airport.Table,
 			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt,
+				Type:   field.TypeUUID,
 				Column: airport.FieldID,
 			},
 		}
@@ -442,7 +487,15 @@ func (ac *AirportCreate) createSpec() (*Airport, *sqlgraph.CreateSpec) {
 	_spec.OnConflict = ac.conflict
 	if id, ok := ac.mutation.ID(); ok {
 		_node.ID = id
-		_spec.ID.Value = id
+		_spec.ID.Value = &id
+	}
+	if value, ok := ac.mutation.ImportID(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt,
+			Value:  value,
+			Column: airport.FieldImportID,
+		})
+		_node.ImportID = value
 	}
 	if value, ok := ac.mutation.Hash(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
@@ -467,6 +520,22 @@ func (ac *AirportCreate) createSpec() (*Airport, *sqlgraph.CreateSpec) {
 			Column: airport.FieldLastUpdated,
 		})
 		_node.LastUpdated = value
+	}
+	if value, ok := ac.mutation.IcaoCode(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: airport.FieldIcaoCode,
+		})
+		_node.IcaoCode = value
+	}
+	if value, ok := ac.mutation.IataCode(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: airport.FieldIataCode,
+		})
+		_node.IataCode = &value
 	}
 	if value, ok := ac.mutation.Identifier(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
@@ -564,14 +633,6 @@ func (ac *AirportCreate) createSpec() (*Airport, *sqlgraph.CreateSpec) {
 		})
 		_node.GpsCode = &value
 	}
-	if value, ok := ac.mutation.IataCode(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: airport.FieldIataCode,
-		})
-		_node.IataCode = &value
-	}
 	if value, ok := ac.mutation.LocalCode(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
@@ -613,7 +674,7 @@ func (ac *AirportCreate) createSpec() (*Airport, *sqlgraph.CreateSpec) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
+					Type:   field.TypeUUID,
 					Column: runway.FieldID,
 				},
 			},
@@ -632,8 +693,8 @@ func (ac *AirportCreate) createSpec() (*Airport, *sqlgraph.CreateSpec) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: station.FieldID,
+					Type:   field.TypeUUID,
+					Column: weatherstation.FieldID,
 				},
 			},
 		}
@@ -651,7 +712,7 @@ func (ac *AirportCreate) createSpec() (*Airport, *sqlgraph.CreateSpec) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
+					Type:   field.TypeUUID,
 					Column: frequency.FieldID,
 				},
 			},
@@ -668,7 +729,7 @@ func (ac *AirportCreate) createSpec() (*Airport, *sqlgraph.CreateSpec) {
 // of the `INSERT` statement. For example:
 //
 //	client.Airport.Create().
-//		SetHash(v).
+//		SetImportID(v).
 //		OnConflict(
 //			// Update the row with the new values
 //			// the was proposed for insertion.
@@ -677,7 +738,7 @@ func (ac *AirportCreate) createSpec() (*Airport, *sqlgraph.CreateSpec) {
 //		// Override some of the fields with custom
 //		// update values.
 //		Update(func(u *ent.AirportUpsert) {
-//			SetHash(v+v).
+//			SetImportID(v+v).
 //		}).
 //		Exec(ctx)
 func (ac *AirportCreate) OnConflict(opts ...sql.ConflictOption) *AirportUpsertOne {
@@ -713,6 +774,24 @@ type (
 	}
 )
 
+// SetImportID sets the "import_id" field.
+func (u *AirportUpsert) SetImportID(v int) *AirportUpsert {
+	u.Set(airport.FieldImportID, v)
+	return u
+}
+
+// UpdateImportID sets the "import_id" field to the value that was provided on create.
+func (u *AirportUpsert) UpdateImportID() *AirportUpsert {
+	u.SetExcluded(airport.FieldImportID)
+	return u
+}
+
+// AddImportID adds v to the "import_id" field.
+func (u *AirportUpsert) AddImportID(v int) *AirportUpsert {
+	u.Add(airport.FieldImportID, v)
+	return u
+}
+
 // SetHash sets the "hash" field.
 func (u *AirportUpsert) SetHash(v string) *AirportUpsert {
 	u.Set(airport.FieldHash, v)
@@ -746,6 +825,42 @@ func (u *AirportUpsert) SetLastUpdated(v time.Time) *AirportUpsert {
 // UpdateLastUpdated sets the "last_updated" field to the value that was provided on create.
 func (u *AirportUpsert) UpdateLastUpdated() *AirportUpsert {
 	u.SetExcluded(airport.FieldLastUpdated)
+	return u
+}
+
+// SetIcaoCode sets the "icao_code" field.
+func (u *AirportUpsert) SetIcaoCode(v string) *AirportUpsert {
+	u.Set(airport.FieldIcaoCode, v)
+	return u
+}
+
+// UpdateIcaoCode sets the "icao_code" field to the value that was provided on create.
+func (u *AirportUpsert) UpdateIcaoCode() *AirportUpsert {
+	u.SetExcluded(airport.FieldIcaoCode)
+	return u
+}
+
+// ClearIcaoCode clears the value of the "icao_code" field.
+func (u *AirportUpsert) ClearIcaoCode() *AirportUpsert {
+	u.SetNull(airport.FieldIcaoCode)
+	return u
+}
+
+// SetIataCode sets the "iata_code" field.
+func (u *AirportUpsert) SetIataCode(v string) *AirportUpsert {
+	u.Set(airport.FieldIataCode, v)
+	return u
+}
+
+// UpdateIataCode sets the "iata_code" field to the value that was provided on create.
+func (u *AirportUpsert) UpdateIataCode() *AirportUpsert {
+	u.SetExcluded(airport.FieldIataCode)
+	return u
+}
+
+// ClearIataCode clears the value of the "iata_code" field.
+func (u *AirportUpsert) ClearIataCode() *AirportUpsert {
+	u.SetNull(airport.FieldIataCode)
 	return u
 }
 
@@ -929,24 +1044,6 @@ func (u *AirportUpsert) ClearGpsCode() *AirportUpsert {
 	return u
 }
 
-// SetIataCode sets the "iata_code" field.
-func (u *AirportUpsert) SetIataCode(v string) *AirportUpsert {
-	u.Set(airport.FieldIataCode, v)
-	return u
-}
-
-// UpdateIataCode sets the "iata_code" field to the value that was provided on create.
-func (u *AirportUpsert) UpdateIataCode() *AirportUpsert {
-	u.SetExcluded(airport.FieldIataCode)
-	return u
-}
-
-// ClearIataCode clears the value of the "iata_code" field.
-func (u *AirportUpsert) ClearIataCode() *AirportUpsert {
-	u.SetNull(airport.FieldIataCode)
-	return u
-}
-
 // SetLocalCode sets the "local_code" field.
 func (u *AirportUpsert) SetLocalCode(v string) *AirportUpsert {
 	u.Set(airport.FieldLocalCode, v)
@@ -1061,6 +1158,27 @@ func (u *AirportUpsertOne) Update(set func(*AirportUpsert)) *AirportUpsertOne {
 	return u
 }
 
+// SetImportID sets the "import_id" field.
+func (u *AirportUpsertOne) SetImportID(v int) *AirportUpsertOne {
+	return u.Update(func(s *AirportUpsert) {
+		s.SetImportID(v)
+	})
+}
+
+// AddImportID adds v to the "import_id" field.
+func (u *AirportUpsertOne) AddImportID(v int) *AirportUpsertOne {
+	return u.Update(func(s *AirportUpsert) {
+		s.AddImportID(v)
+	})
+}
+
+// UpdateImportID sets the "import_id" field to the value that was provided on create.
+func (u *AirportUpsertOne) UpdateImportID() *AirportUpsertOne {
+	return u.Update(func(s *AirportUpsert) {
+		s.UpdateImportID()
+	})
+}
+
 // SetHash sets the "hash" field.
 func (u *AirportUpsertOne) SetHash(v string) *AirportUpsertOne {
 	return u.Update(func(s *AirportUpsert) {
@@ -1100,6 +1218,48 @@ func (u *AirportUpsertOne) SetLastUpdated(v time.Time) *AirportUpsertOne {
 func (u *AirportUpsertOne) UpdateLastUpdated() *AirportUpsertOne {
 	return u.Update(func(s *AirportUpsert) {
 		s.UpdateLastUpdated()
+	})
+}
+
+// SetIcaoCode sets the "icao_code" field.
+func (u *AirportUpsertOne) SetIcaoCode(v string) *AirportUpsertOne {
+	return u.Update(func(s *AirportUpsert) {
+		s.SetIcaoCode(v)
+	})
+}
+
+// UpdateIcaoCode sets the "icao_code" field to the value that was provided on create.
+func (u *AirportUpsertOne) UpdateIcaoCode() *AirportUpsertOne {
+	return u.Update(func(s *AirportUpsert) {
+		s.UpdateIcaoCode()
+	})
+}
+
+// ClearIcaoCode clears the value of the "icao_code" field.
+func (u *AirportUpsertOne) ClearIcaoCode() *AirportUpsertOne {
+	return u.Update(func(s *AirportUpsert) {
+		s.ClearIcaoCode()
+	})
+}
+
+// SetIataCode sets the "iata_code" field.
+func (u *AirportUpsertOne) SetIataCode(v string) *AirportUpsertOne {
+	return u.Update(func(s *AirportUpsert) {
+		s.SetIataCode(v)
+	})
+}
+
+// UpdateIataCode sets the "iata_code" field to the value that was provided on create.
+func (u *AirportUpsertOne) UpdateIataCode() *AirportUpsertOne {
+	return u.Update(func(s *AirportUpsert) {
+		s.UpdateIataCode()
+	})
+}
+
+// ClearIataCode clears the value of the "iata_code" field.
+func (u *AirportUpsertOne) ClearIataCode() *AirportUpsertOne {
+	return u.Update(func(s *AirportUpsert) {
+		s.ClearIataCode()
 	})
 }
 
@@ -1313,27 +1473,6 @@ func (u *AirportUpsertOne) ClearGpsCode() *AirportUpsertOne {
 	})
 }
 
-// SetIataCode sets the "iata_code" field.
-func (u *AirportUpsertOne) SetIataCode(v string) *AirportUpsertOne {
-	return u.Update(func(s *AirportUpsert) {
-		s.SetIataCode(v)
-	})
-}
-
-// UpdateIataCode sets the "iata_code" field to the value that was provided on create.
-func (u *AirportUpsertOne) UpdateIataCode() *AirportUpsertOne {
-	return u.Update(func(s *AirportUpsert) {
-		s.UpdateIataCode()
-	})
-}
-
-// ClearIataCode clears the value of the "iata_code" field.
-func (u *AirportUpsertOne) ClearIataCode() *AirportUpsertOne {
-	return u.Update(func(s *AirportUpsert) {
-		s.ClearIataCode()
-	})
-}
-
 // SetLocalCode sets the "local_code" field.
 func (u *AirportUpsertOne) SetLocalCode(v string) *AirportUpsertOne {
 	return u.Update(func(s *AirportUpsert) {
@@ -1427,7 +1566,12 @@ func (u *AirportUpsertOne) ExecX(ctx context.Context) {
 }
 
 // Exec executes the UPSERT query and returns the inserted/updated ID.
-func (u *AirportUpsertOne) ID(ctx context.Context) (id int, err error) {
+func (u *AirportUpsertOne) ID(ctx context.Context) (id uuid.UUID, err error) {
+	if u.create.driver.Dialect() == dialect.MySQL {
+		// In case of "ON CONFLICT", there is no way to get back non-numeric ID
+		// fields from the database since MySQL does not support the RETURNING clause.
+		return id, errors.New("ent: AirportUpsertOne.ID is not supported by MySQL driver. Use AirportUpsertOne.Exec instead")
+	}
 	node, err := u.create.Save(ctx)
 	if err != nil {
 		return id, err
@@ -1436,7 +1580,7 @@ func (u *AirportUpsertOne) ID(ctx context.Context) (id int, err error) {
 }
 
 // IDX is like ID, but panics if an error occurs.
-func (u *AirportUpsertOne) IDX(ctx context.Context) int {
+func (u *AirportUpsertOne) IDX(ctx context.Context) uuid.UUID {
 	id, err := u.ID(ctx)
 	if err != nil {
 		panic(err)
@@ -1487,10 +1631,6 @@ func (acb *AirportCreateBulk) Save(ctx context.Context) ([]*Airport, error) {
 					return nil, err
 				}
 				mutation.id = &nodes[i].ID
-				if specs[i].ID.Value != nil && nodes[i].ID == 0 {
-					id := specs[i].ID.Value.(int64)
-					nodes[i].ID = int(id)
-				}
 				mutation.done = true
 				return nodes[i], nil
 			})
@@ -1542,7 +1682,7 @@ func (acb *AirportCreateBulk) ExecX(ctx context.Context) {
 //		// Override some of the fields with custom
 //		// update values.
 //		Update(func(u *ent.AirportUpsert) {
-//			SetHash(v+v).
+//			SetImportID(v+v).
 //		}).
 //		Exec(ctx)
 func (acb *AirportCreateBulk) OnConflict(opts ...sql.ConflictOption) *AirportUpsertBulk {
@@ -1621,6 +1761,27 @@ func (u *AirportUpsertBulk) Update(set func(*AirportUpsert)) *AirportUpsertBulk 
 	return u
 }
 
+// SetImportID sets the "import_id" field.
+func (u *AirportUpsertBulk) SetImportID(v int) *AirportUpsertBulk {
+	return u.Update(func(s *AirportUpsert) {
+		s.SetImportID(v)
+	})
+}
+
+// AddImportID adds v to the "import_id" field.
+func (u *AirportUpsertBulk) AddImportID(v int) *AirportUpsertBulk {
+	return u.Update(func(s *AirportUpsert) {
+		s.AddImportID(v)
+	})
+}
+
+// UpdateImportID sets the "import_id" field to the value that was provided on create.
+func (u *AirportUpsertBulk) UpdateImportID() *AirportUpsertBulk {
+	return u.Update(func(s *AirportUpsert) {
+		s.UpdateImportID()
+	})
+}
+
 // SetHash sets the "hash" field.
 func (u *AirportUpsertBulk) SetHash(v string) *AirportUpsertBulk {
 	return u.Update(func(s *AirportUpsert) {
@@ -1660,6 +1821,48 @@ func (u *AirportUpsertBulk) SetLastUpdated(v time.Time) *AirportUpsertBulk {
 func (u *AirportUpsertBulk) UpdateLastUpdated() *AirportUpsertBulk {
 	return u.Update(func(s *AirportUpsert) {
 		s.UpdateLastUpdated()
+	})
+}
+
+// SetIcaoCode sets the "icao_code" field.
+func (u *AirportUpsertBulk) SetIcaoCode(v string) *AirportUpsertBulk {
+	return u.Update(func(s *AirportUpsert) {
+		s.SetIcaoCode(v)
+	})
+}
+
+// UpdateIcaoCode sets the "icao_code" field to the value that was provided on create.
+func (u *AirportUpsertBulk) UpdateIcaoCode() *AirportUpsertBulk {
+	return u.Update(func(s *AirportUpsert) {
+		s.UpdateIcaoCode()
+	})
+}
+
+// ClearIcaoCode clears the value of the "icao_code" field.
+func (u *AirportUpsertBulk) ClearIcaoCode() *AirportUpsertBulk {
+	return u.Update(func(s *AirportUpsert) {
+		s.ClearIcaoCode()
+	})
+}
+
+// SetIataCode sets the "iata_code" field.
+func (u *AirportUpsertBulk) SetIataCode(v string) *AirportUpsertBulk {
+	return u.Update(func(s *AirportUpsert) {
+		s.SetIataCode(v)
+	})
+}
+
+// UpdateIataCode sets the "iata_code" field to the value that was provided on create.
+func (u *AirportUpsertBulk) UpdateIataCode() *AirportUpsertBulk {
+	return u.Update(func(s *AirportUpsert) {
+		s.UpdateIataCode()
+	})
+}
+
+// ClearIataCode clears the value of the "iata_code" field.
+func (u *AirportUpsertBulk) ClearIataCode() *AirportUpsertBulk {
+	return u.Update(func(s *AirportUpsert) {
+		s.ClearIataCode()
 	})
 }
 
@@ -1870,27 +2073,6 @@ func (u *AirportUpsertBulk) UpdateGpsCode() *AirportUpsertBulk {
 func (u *AirportUpsertBulk) ClearGpsCode() *AirportUpsertBulk {
 	return u.Update(func(s *AirportUpsert) {
 		s.ClearGpsCode()
-	})
-}
-
-// SetIataCode sets the "iata_code" field.
-func (u *AirportUpsertBulk) SetIataCode(v string) *AirportUpsertBulk {
-	return u.Update(func(s *AirportUpsert) {
-		s.SetIataCode(v)
-	})
-}
-
-// UpdateIataCode sets the "iata_code" field to the value that was provided on create.
-func (u *AirportUpsertBulk) UpdateIataCode() *AirportUpsertBulk {
-	return u.Update(func(s *AirportUpsert) {
-		s.UpdateIataCode()
-	})
-}
-
-// ClearIataCode clears the value of the "iata_code" field.
-func (u *AirportUpsertBulk) ClearIataCode() *AirportUpsertBulk {
-	return u.Update(func(s *AirportUpsert) {
-		s.ClearIataCode()
 	})
 }
 

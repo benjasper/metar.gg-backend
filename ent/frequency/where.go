@@ -7,32 +7,33 @@ import (
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
+	"github.com/google/uuid"
 	"metar.gg/ent/predicate"
 )
 
 // ID filters vertices based on their ID field.
-func ID(id int) predicate.Frequency {
+func ID(id uuid.UUID) predicate.Frequency {
 	return predicate.Frequency(func(s *sql.Selector) {
 		s.Where(sql.EQ(s.C(FieldID), id))
 	})
 }
 
 // IDEQ applies the EQ predicate on the ID field.
-func IDEQ(id int) predicate.Frequency {
+func IDEQ(id uuid.UUID) predicate.Frequency {
 	return predicate.Frequency(func(s *sql.Selector) {
 		s.Where(sql.EQ(s.C(FieldID), id))
 	})
 }
 
 // IDNEQ applies the NEQ predicate on the ID field.
-func IDNEQ(id int) predicate.Frequency {
+func IDNEQ(id uuid.UUID) predicate.Frequency {
 	return predicate.Frequency(func(s *sql.Selector) {
 		s.Where(sql.NEQ(s.C(FieldID), id))
 	})
 }
 
 // IDIn applies the In predicate on the ID field.
-func IDIn(ids ...int) predicate.Frequency {
+func IDIn(ids ...uuid.UUID) predicate.Frequency {
 	return predicate.Frequency(func(s *sql.Selector) {
 		v := make([]any, len(ids))
 		for i := range v {
@@ -43,7 +44,7 @@ func IDIn(ids ...int) predicate.Frequency {
 }
 
 // IDNotIn applies the NotIn predicate on the ID field.
-func IDNotIn(ids ...int) predicate.Frequency {
+func IDNotIn(ids ...uuid.UUID) predicate.Frequency {
 	return predicate.Frequency(func(s *sql.Selector) {
 		v := make([]any, len(ids))
 		for i := range v {
@@ -54,30 +55,37 @@ func IDNotIn(ids ...int) predicate.Frequency {
 }
 
 // IDGT applies the GT predicate on the ID field.
-func IDGT(id int) predicate.Frequency {
+func IDGT(id uuid.UUID) predicate.Frequency {
 	return predicate.Frequency(func(s *sql.Selector) {
 		s.Where(sql.GT(s.C(FieldID), id))
 	})
 }
 
 // IDGTE applies the GTE predicate on the ID field.
-func IDGTE(id int) predicate.Frequency {
+func IDGTE(id uuid.UUID) predicate.Frequency {
 	return predicate.Frequency(func(s *sql.Selector) {
 		s.Where(sql.GTE(s.C(FieldID), id))
 	})
 }
 
 // IDLT applies the LT predicate on the ID field.
-func IDLT(id int) predicate.Frequency {
+func IDLT(id uuid.UUID) predicate.Frequency {
 	return predicate.Frequency(func(s *sql.Selector) {
 		s.Where(sql.LT(s.C(FieldID), id))
 	})
 }
 
 // IDLTE applies the LTE predicate on the ID field.
-func IDLTE(id int) predicate.Frequency {
+func IDLTE(id uuid.UUID) predicate.Frequency {
 	return predicate.Frequency(func(s *sql.Selector) {
 		s.Where(sql.LTE(s.C(FieldID), id))
+	})
+}
+
+// ImportID applies equality check predicate on the "import_id" field. It's identical to ImportIDEQ.
+func ImportID(v int) predicate.Frequency {
+	return predicate.Frequency(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldImportID), v))
 	})
 }
 
@@ -120,6 +128,70 @@ func Description(v string) predicate.Frequency {
 func Frequency(v float64) predicate.Frequency {
 	return predicate.Frequency(func(s *sql.Selector) {
 		s.Where(sql.EQ(s.C(FieldFrequency), v))
+	})
+}
+
+// ImportIDEQ applies the EQ predicate on the "import_id" field.
+func ImportIDEQ(v int) predicate.Frequency {
+	return predicate.Frequency(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldImportID), v))
+	})
+}
+
+// ImportIDNEQ applies the NEQ predicate on the "import_id" field.
+func ImportIDNEQ(v int) predicate.Frequency {
+	return predicate.Frequency(func(s *sql.Selector) {
+		s.Where(sql.NEQ(s.C(FieldImportID), v))
+	})
+}
+
+// ImportIDIn applies the In predicate on the "import_id" field.
+func ImportIDIn(vs ...int) predicate.Frequency {
+	v := make([]any, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.Frequency(func(s *sql.Selector) {
+		s.Where(sql.In(s.C(FieldImportID), v...))
+	})
+}
+
+// ImportIDNotIn applies the NotIn predicate on the "import_id" field.
+func ImportIDNotIn(vs ...int) predicate.Frequency {
+	v := make([]any, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.Frequency(func(s *sql.Selector) {
+		s.Where(sql.NotIn(s.C(FieldImportID), v...))
+	})
+}
+
+// ImportIDGT applies the GT predicate on the "import_id" field.
+func ImportIDGT(v int) predicate.Frequency {
+	return predicate.Frequency(func(s *sql.Selector) {
+		s.Where(sql.GT(s.C(FieldImportID), v))
+	})
+}
+
+// ImportIDGTE applies the GTE predicate on the "import_id" field.
+func ImportIDGTE(v int) predicate.Frequency {
+	return predicate.Frequency(func(s *sql.Selector) {
+		s.Where(sql.GTE(s.C(FieldImportID), v))
+	})
+}
+
+// ImportIDLT applies the LT predicate on the "import_id" field.
+func ImportIDLT(v int) predicate.Frequency {
+	return predicate.Frequency(func(s *sql.Selector) {
+		s.Where(sql.LT(s.C(FieldImportID), v))
+	})
+}
+
+// ImportIDLTE applies the LTE predicate on the "import_id" field.
+func ImportIDLTE(v int) predicate.Frequency {
+	return predicate.Frequency(func(s *sql.Selector) {
+		s.Where(sql.LTE(s.C(FieldImportID), v))
 	})
 }
 

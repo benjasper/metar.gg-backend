@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"io"
 	"strconv"
+
+	"github.com/google/uuid"
 )
 
 const (
@@ -85,11 +87,11 @@ const (
 	Table = "metars"
 	// StationTable is the table that holds the station relation/edge.
 	StationTable = "metars"
-	// StationInverseTable is the table name for the Station entity.
-	// It exists in this package in order to avoid circular dependency with the "station" package.
-	StationInverseTable = "stations"
+	// StationInverseTable is the table name for the WeatherStation entity.
+	// It exists in this package in order to avoid circular dependency with the "weatherstation" package.
+	StationInverseTable = "weather_stations"
 	// StationColumn is the table column denoting the station relation/edge.
-	StationColumn = "station_metars"
+	StationColumn = "weather_station_metars"
 	// SkyConditionsTable is the table that holds the sky_conditions relation/edge.
 	SkyConditionsTable = "sky_conditions"
 	// SkyConditionsInverseTable is the table name for the SkyCondition entity.
@@ -139,7 +141,7 @@ var Columns = []string{
 // ForeignKeys holds the SQL foreign-keys that are owned by the "metars"
 // table and are not defined as standalone fields in the schema.
 var ForeignKeys = []string{
-	"station_metars",
+	"weather_station_metars",
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).
@@ -156,6 +158,11 @@ func ValidColumn(column string) bool {
 	}
 	return false
 }
+
+var (
+	// DefaultID holds the default value on creation for the "id" field.
+	DefaultID func() uuid.UUID
+)
 
 // FlightCategory defines the type for the "flight_category" enum field.
 type FlightCategory string

@@ -4,6 +4,7 @@ import (
 	"entgo.io/ent"
 	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
+	"github.com/google/uuid"
 )
 
 // Forecast holds the schema definition for the Forecast entity.
@@ -14,6 +15,7 @@ type Forecast struct {
 // Fields of the Forecast.
 func (Forecast) Fields() []ent.Field {
 	return []ent.Field{
+		field.UUID("id", uuid.UUID{}).Default(uuid.New).Immutable(),
 		field.Time("from_time").Comment("The start time of the forecast period."),
 		field.Time("to_time").Comment("The end time of the forecast period."),
 		field.Enum("change_indicator").Nillable().Optional().Values("BECMG", "FM", "TEMPO", "PROB").Comment("The change indicator."),

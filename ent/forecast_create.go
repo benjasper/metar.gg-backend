@@ -8,9 +8,11 @@ import (
 	"fmt"
 	"time"
 
+	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/google/uuid"
 	"metar.gg/ent/forecast"
 	"metar.gg/ent/icingcondition"
 	"metar.gg/ent/skycondition"
@@ -234,15 +236,29 @@ func (fc *ForecastCreate) SetNillableNotDecoded(s *string) *ForecastCreate {
 	return fc
 }
 
+// SetID sets the "id" field.
+func (fc *ForecastCreate) SetID(u uuid.UUID) *ForecastCreate {
+	fc.mutation.SetID(u)
+	return fc
+}
+
+// SetNillableID sets the "id" field if the given value is not nil.
+func (fc *ForecastCreate) SetNillableID(u *uuid.UUID) *ForecastCreate {
+	if u != nil {
+		fc.SetID(*u)
+	}
+	return fc
+}
+
 // AddSkyConditionIDs adds the "sky_conditions" edge to the SkyCondition entity by IDs.
-func (fc *ForecastCreate) AddSkyConditionIDs(ids ...int) *ForecastCreate {
+func (fc *ForecastCreate) AddSkyConditionIDs(ids ...uuid.UUID) *ForecastCreate {
 	fc.mutation.AddSkyConditionIDs(ids...)
 	return fc
 }
 
 // AddSkyConditions adds the "sky_conditions" edges to the SkyCondition entity.
 func (fc *ForecastCreate) AddSkyConditions(s ...*SkyCondition) *ForecastCreate {
-	ids := make([]int, len(s))
+	ids := make([]uuid.UUID, len(s))
 	for i := range s {
 		ids[i] = s[i].ID
 	}
@@ -250,14 +266,14 @@ func (fc *ForecastCreate) AddSkyConditions(s ...*SkyCondition) *ForecastCreate {
 }
 
 // AddTurbulenceConditionIDs adds the "turbulence_conditions" edge to the TurbulenceCondition entity by IDs.
-func (fc *ForecastCreate) AddTurbulenceConditionIDs(ids ...int) *ForecastCreate {
+func (fc *ForecastCreate) AddTurbulenceConditionIDs(ids ...uuid.UUID) *ForecastCreate {
 	fc.mutation.AddTurbulenceConditionIDs(ids...)
 	return fc
 }
 
 // AddTurbulenceConditions adds the "turbulence_conditions" edges to the TurbulenceCondition entity.
 func (fc *ForecastCreate) AddTurbulenceConditions(t ...*TurbulenceCondition) *ForecastCreate {
-	ids := make([]int, len(t))
+	ids := make([]uuid.UUID, len(t))
 	for i := range t {
 		ids[i] = t[i].ID
 	}
@@ -265,14 +281,14 @@ func (fc *ForecastCreate) AddTurbulenceConditions(t ...*TurbulenceCondition) *Fo
 }
 
 // AddIcingConditionIDs adds the "icing_conditions" edge to the IcingCondition entity by IDs.
-func (fc *ForecastCreate) AddIcingConditionIDs(ids ...int) *ForecastCreate {
+func (fc *ForecastCreate) AddIcingConditionIDs(ids ...uuid.UUID) *ForecastCreate {
 	fc.mutation.AddIcingConditionIDs(ids...)
 	return fc
 }
 
 // AddIcingConditions adds the "icing_conditions" edges to the IcingCondition entity.
 func (fc *ForecastCreate) AddIcingConditions(i ...*IcingCondition) *ForecastCreate {
-	ids := make([]int, len(i))
+	ids := make([]uuid.UUID, len(i))
 	for j := range i {
 		ids[j] = i[j].ID
 	}
@@ -280,14 +296,14 @@ func (fc *ForecastCreate) AddIcingConditions(i ...*IcingCondition) *ForecastCrea
 }
 
 // AddTemperatureDatumIDs adds the "temperature_data" edge to the TemperatureData entity by IDs.
-func (fc *ForecastCreate) AddTemperatureDatumIDs(ids ...int) *ForecastCreate {
+func (fc *ForecastCreate) AddTemperatureDatumIDs(ids ...uuid.UUID) *ForecastCreate {
 	fc.mutation.AddTemperatureDatumIDs(ids...)
 	return fc
 }
 
 // AddTemperatureData adds the "temperature_data" edges to the TemperatureData entity.
 func (fc *ForecastCreate) AddTemperatureData(t ...*TemperatureData) *ForecastCreate {
-	ids := make([]int, len(t))
+	ids := make([]uuid.UUID, len(t))
 	for i := range t {
 		ids[i] = t[i].ID
 	}
@@ -305,6 +321,7 @@ func (fc *ForecastCreate) Save(ctx context.Context) (*Forecast, error) {
 		err  error
 		node *Forecast
 	)
+	fc.defaults()
 	if len(fc.hooks) == 0 {
 		if err = fc.check(); err != nil {
 			return nil, err
@@ -368,6 +385,14 @@ func (fc *ForecastCreate) ExecX(ctx context.Context) {
 	}
 }
 
+// defaults sets the default values of the builder before save.
+func (fc *ForecastCreate) defaults() {
+	if _, ok := fc.mutation.ID(); !ok {
+		v := forecast.DefaultID()
+		fc.mutation.SetID(v)
+	}
+}
+
 // check runs all checks and user-defined validators on the builder.
 func (fc *ForecastCreate) check() error {
 	if _, ok := fc.mutation.FromTime(); !ok {
@@ -392,8 +417,13 @@ func (fc *ForecastCreate) sqlSave(ctx context.Context) (*Forecast, error) {
 		}
 		return nil, err
 	}
-	id := _spec.ID.Value.(int64)
-	_node.ID = int(id)
+	if _spec.ID.Value != nil {
+		if id, ok := _spec.ID.Value.(*uuid.UUID); ok {
+			_node.ID = *id
+		} else if err := _node.ID.Scan(_spec.ID.Value); err != nil {
+			return nil, err
+		}
+	}
 	return _node, nil
 }
 
@@ -403,12 +433,16 @@ func (fc *ForecastCreate) createSpec() (*Forecast, *sqlgraph.CreateSpec) {
 		_spec = &sqlgraph.CreateSpec{
 			Table: forecast.Table,
 			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt,
+				Type:   field.TypeUUID,
 				Column: forecast.FieldID,
 			},
 		}
 	)
 	_spec.OnConflict = fc.conflict
+	if id, ok := fc.mutation.ID(); ok {
+		_node.ID = id
+		_spec.ID.Value = &id
+	}
 	if value, ok := fc.mutation.FromTime(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
 			Type:   field.TypeTime,
@@ -546,7 +580,7 @@ func (fc *ForecastCreate) createSpec() (*Forecast, *sqlgraph.CreateSpec) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
+					Type:   field.TypeUUID,
 					Column: skycondition.FieldID,
 				},
 			},
@@ -565,7 +599,7 @@ func (fc *ForecastCreate) createSpec() (*Forecast, *sqlgraph.CreateSpec) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
+					Type:   field.TypeUUID,
 					Column: turbulencecondition.FieldID,
 				},
 			},
@@ -584,7 +618,7 @@ func (fc *ForecastCreate) createSpec() (*Forecast, *sqlgraph.CreateSpec) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
+					Type:   field.TypeUUID,
 					Column: icingcondition.FieldID,
 				},
 			},
@@ -603,7 +637,7 @@ func (fc *ForecastCreate) createSpec() (*Forecast, *sqlgraph.CreateSpec) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
+					Type:   field.TypeUUID,
 					Column: temperaturedata.FieldID,
 				},
 			},
@@ -1001,16 +1035,24 @@ func (u *ForecastUpsert) ClearNotDecoded() *ForecastUpsert {
 	return u
 }
 
-// UpdateNewValues updates the mutable fields using the new values that were set on create.
+// UpdateNewValues updates the mutable fields using the new values that were set on create except the ID field.
 // Using this option is equivalent to using:
 //
 //	client.Forecast.Create().
 //		OnConflict(
 //			sql.ResolveWithNewValues(),
+//			sql.ResolveWith(func(u *sql.UpdateSet) {
+//				u.SetIgnore(forecast.FieldID)
+//			}),
 //		).
 //		Exec(ctx)
 func (u *ForecastUpsertOne) UpdateNewValues() *ForecastUpsertOne {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
+	u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(s *sql.UpdateSet) {
+		if _, exists := u.create.mutation.ID(); exists {
+			s.SetIgnore(forecast.FieldID)
+		}
+	}))
 	return u
 }
 
@@ -1449,7 +1491,12 @@ func (u *ForecastUpsertOne) ExecX(ctx context.Context) {
 }
 
 // Exec executes the UPSERT query and returns the inserted/updated ID.
-func (u *ForecastUpsertOne) ID(ctx context.Context) (id int, err error) {
+func (u *ForecastUpsertOne) ID(ctx context.Context) (id uuid.UUID, err error) {
+	if u.create.driver.Dialect() == dialect.MySQL {
+		// In case of "ON CONFLICT", there is no way to get back non-numeric ID
+		// fields from the database since MySQL does not support the RETURNING clause.
+		return id, errors.New("ent: ForecastUpsertOne.ID is not supported by MySQL driver. Use ForecastUpsertOne.Exec instead")
+	}
 	node, err := u.create.Save(ctx)
 	if err != nil {
 		return id, err
@@ -1458,7 +1505,7 @@ func (u *ForecastUpsertOne) ID(ctx context.Context) (id int, err error) {
 }
 
 // IDX is like ID, but panics if an error occurs.
-func (u *ForecastUpsertOne) IDX(ctx context.Context) int {
+func (u *ForecastUpsertOne) IDX(ctx context.Context) uuid.UUID {
 	id, err := u.ID(ctx)
 	if err != nil {
 		panic(err)
@@ -1481,6 +1528,7 @@ func (fcb *ForecastCreateBulk) Save(ctx context.Context) ([]*Forecast, error) {
 	for i := range fcb.builders {
 		func(i int, root context.Context) {
 			builder := fcb.builders[i]
+			builder.defaults()
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 				mutation, ok := m.(*ForecastMutation)
 				if !ok {
@@ -1508,10 +1556,6 @@ func (fcb *ForecastCreateBulk) Save(ctx context.Context) ([]*Forecast, error) {
 					return nil, err
 				}
 				mutation.id = &nodes[i].ID
-				if specs[i].ID.Value != nil {
-					id := specs[i].ID.Value.(int64)
-					nodes[i].ID = int(id)
-				}
 				mutation.done = true
 				return nodes[i], nil
 			})
@@ -1598,10 +1642,20 @@ type ForecastUpsertBulk struct {
 //	client.Forecast.Create().
 //		OnConflict(
 //			sql.ResolveWithNewValues(),
+//			sql.ResolveWith(func(u *sql.UpdateSet) {
+//				u.SetIgnore(forecast.FieldID)
+//			}),
 //		).
 //		Exec(ctx)
 func (u *ForecastUpsertBulk) UpdateNewValues() *ForecastUpsertBulk {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
+	u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(s *sql.UpdateSet) {
+		for _, b := range u.create.builders {
+			if _, exists := b.mutation.ID(); exists {
+				s.SetIgnore(forecast.FieldID)
+			}
+		}
+	}))
 	return u
 }
 

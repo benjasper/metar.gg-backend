@@ -10,5 +10,5 @@ type StationWithDistance struct {
 	// The distance in meters from the given location to the airport
 	Distance float64 `json:"distance"`
 	// The METAR for the station
-	Station *ent.Station `json:"station"`
+	Station *ent.WeatherStation `json:"station"`
 }

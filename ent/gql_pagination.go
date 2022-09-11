@@ -14,6 +14,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"github.com/99designs/gqlgen/graphql"
 	"github.com/99designs/gqlgen/graphql/errcode"
+	"github.com/google/uuid"
 	"github.com/vektah/gqlparser/v2/gqlerror"
 	"github.com/vmihailenco/msgpack/v5"
 	"metar.gg/ent/airport"
@@ -23,10 +24,10 @@ import (
 	"metar.gg/ent/metar"
 	"metar.gg/ent/runway"
 	"metar.gg/ent/skycondition"
-	"metar.gg/ent/station"
 	"metar.gg/ent/taf"
 	"metar.gg/ent/temperaturedata"
 	"metar.gg/ent/turbulencecondition"
+	"metar.gg/ent/weatherstation"
 )
 
 // OrderDirection defines the directions in which to order a list of items.
@@ -154,8 +155,8 @@ type PageInfo struct {
 
 // Cursor of an edge type.
 type Cursor struct {
-	ID    int   `msgpack:"i"`
-	Value Value `msgpack:"v,omitempty"`
+	ID    uuid.UUID `msgpack:"i"`
+	Value Value     `msgpack:"v,omitempty"`
 }
 
 // MarshalGQL implements graphql.Marshaler interface.
@@ -1868,237 +1869,6 @@ func (sc *SkyCondition) ToEdge(order *SkyConditionOrder) *SkyConditionEdge {
 	}
 }
 
-// StationEdge is the edge representation of Station.
-type StationEdge struct {
-	Node   *Station `json:"node"`
-	Cursor Cursor   `json:"cursor"`
-}
-
-// StationConnection is the connection containing edges to Station.
-type StationConnection struct {
-	Edges      []*StationEdge `json:"edges"`
-	PageInfo   PageInfo       `json:"pageInfo"`
-	TotalCount int            `json:"totalCount"`
-}
-
-func (c *StationConnection) build(nodes []*Station, pager *stationPager, after *Cursor, first *int, before *Cursor, last *int) {
-	c.PageInfo.HasNextPage = before != nil
-	c.PageInfo.HasPreviousPage = after != nil
-	if first != nil && *first+1 == len(nodes) {
-		c.PageInfo.HasNextPage = true
-		nodes = nodes[:len(nodes)-1]
-	} else if last != nil && *last+1 == len(nodes) {
-		c.PageInfo.HasPreviousPage = true
-		nodes = nodes[:len(nodes)-1]
-	}
-	var nodeAt func(int) *Station
-	if last != nil {
-		n := len(nodes) - 1
-		nodeAt = func(i int) *Station {
-			return nodes[n-i]
-		}
-	} else {
-		nodeAt = func(i int) *Station {
-			return nodes[i]
-		}
-	}
-	c.Edges = make([]*StationEdge, len(nodes))
-	for i := range nodes {
-		node := nodeAt(i)
-		c.Edges[i] = &StationEdge{
-			Node:   node,
-			Cursor: pager.toCursor(node),
-		}
-	}
-	if l := len(c.Edges); l > 0 {
-		c.PageInfo.StartCursor = &c.Edges[0].Cursor
-		c.PageInfo.EndCursor = &c.Edges[l-1].Cursor
-	}
-	if c.TotalCount == 0 {
-		c.TotalCount = len(nodes)
-	}
-}
-
-// StationPaginateOption enables pagination customization.
-type StationPaginateOption func(*stationPager) error
-
-// WithStationOrder configures pagination ordering.
-func WithStationOrder(order *StationOrder) StationPaginateOption {
-	if order == nil {
-		order = DefaultStationOrder
-	}
-	o := *order
-	return func(pager *stationPager) error {
-		if err := o.Direction.Validate(); err != nil {
-			return err
-		}
-		if o.Field == nil {
-			o.Field = DefaultStationOrder.Field
-		}
-		pager.order = &o
-		return nil
-	}
-}
-
-// WithStationFilter configures pagination filter.
-func WithStationFilter(filter func(*StationQuery) (*StationQuery, error)) StationPaginateOption {
-	return func(pager *stationPager) error {
-		if filter == nil {
-			return errors.New("StationQuery filter cannot be nil")
-		}
-		pager.filter = filter
-		return nil
-	}
-}
-
-type stationPager struct {
-	order  *StationOrder
-	filter func(*StationQuery) (*StationQuery, error)
-}
-
-func newStationPager(opts []StationPaginateOption) (*stationPager, error) {
-	pager := &stationPager{}
-	for _, opt := range opts {
-		if err := opt(pager); err != nil {
-			return nil, err
-		}
-	}
-	if pager.order == nil {
-		pager.order = DefaultStationOrder
-	}
-	return pager, nil
-}
-
-func (p *stationPager) applyFilter(query *StationQuery) (*StationQuery, error) {
-	if p.filter != nil {
-		return p.filter(query)
-	}
-	return query, nil
-}
-
-func (p *stationPager) toCursor(s *Station) Cursor {
-	return p.order.Field.toCursor(s)
-}
-
-func (p *stationPager) applyCursors(query *StationQuery, after, before *Cursor) *StationQuery {
-	for _, predicate := range cursorsToPredicates(
-		p.order.Direction, after, before,
-		p.order.Field.field, DefaultStationOrder.Field.field,
-	) {
-		query = query.Where(predicate)
-	}
-	return query
-}
-
-func (p *stationPager) applyOrder(query *StationQuery, reverse bool) *StationQuery {
-	direction := p.order.Direction
-	if reverse {
-		direction = direction.reverse()
-	}
-	query = query.Order(direction.orderFunc(p.order.Field.field))
-	if p.order.Field != DefaultStationOrder.Field {
-		query = query.Order(direction.orderFunc(DefaultStationOrder.Field.field))
-	}
-	return query
-}
-
-func (p *stationPager) orderExpr(reverse bool) sql.Querier {
-	direction := p.order.Direction
-	if reverse {
-		direction = direction.reverse()
-	}
-	return sql.ExprFunc(func(b *sql.Builder) {
-		b.Ident(p.order.Field.field).Pad().WriteString(string(direction))
-		if p.order.Field != DefaultStationOrder.Field {
-			b.Comma().Ident(DefaultStationOrder.Field.field).Pad().WriteString(string(direction))
-		}
-	})
-}
-
-// Paginate executes the query and returns a relay based cursor connection to Station.
-func (s *StationQuery) Paginate(
-	ctx context.Context, after *Cursor, first *int,
-	before *Cursor, last *int, opts ...StationPaginateOption,
-) (*StationConnection, error) {
-	if err := validateFirstLast(first, last); err != nil {
-		return nil, err
-	}
-	pager, err := newStationPager(opts)
-	if err != nil {
-		return nil, err
-	}
-	if s, err = pager.applyFilter(s); err != nil {
-		return nil, err
-	}
-	conn := &StationConnection{Edges: []*StationEdge{}}
-	ignoredEdges := !hasCollectedField(ctx, edgesField)
-	if hasCollectedField(ctx, totalCountField) || hasCollectedField(ctx, pageInfoField) {
-		hasPagination := after != nil || first != nil || before != nil || last != nil
-		if hasPagination || ignoredEdges {
-			if conn.TotalCount, err = s.Count(ctx); err != nil {
-				return nil, err
-			}
-			conn.PageInfo.HasNextPage = first != nil && conn.TotalCount > 0
-			conn.PageInfo.HasPreviousPage = last != nil && conn.TotalCount > 0
-		}
-	}
-	if ignoredEdges || (first != nil && *first == 0) || (last != nil && *last == 0) {
-		return conn, nil
-	}
-
-	s = pager.applyCursors(s, after, before)
-	s = pager.applyOrder(s, last != nil)
-	if limit := paginateLimit(first, last); limit != 0 {
-		s.Limit(limit)
-	}
-	if field := collectedField(ctx, edgesField, nodeField); field != nil {
-		if err := s.collectField(ctx, graphql.GetOperationContext(ctx), *field, []string{edgesField, nodeField}); err != nil {
-			return nil, err
-		}
-	}
-
-	nodes, err := s.All(ctx)
-	if err != nil {
-		return nil, err
-	}
-	conn.build(nodes, pager, after, first, before, last)
-	return conn, nil
-}
-
-// StationOrderField defines the ordering field of Station.
-type StationOrderField struct {
-	field    string
-	toCursor func(*Station) Cursor
-}
-
-// StationOrder defines the ordering of Station.
-type StationOrder struct {
-	Direction OrderDirection     `json:"direction"`
-	Field     *StationOrderField `json:"field"`
-}
-
-// DefaultStationOrder is the default ordering of Station.
-var DefaultStationOrder = &StationOrder{
-	Direction: OrderDirectionAsc,
-	Field: &StationOrderField{
-		field: station.FieldID,
-		toCursor: func(s *Station) Cursor {
-			return Cursor{ID: s.ID}
-		},
-	},
-}
-
-// ToEdge converts Station into StationEdge.
-func (s *Station) ToEdge(order *StationOrder) *StationEdge {
-	if order == nil {
-		order = DefaultStationOrder
-	}
-	return &StationEdge{
-		Node:   s,
-		Cursor: order.Field.toCursor(s),
-	}
-}
-
 // TafEdge is the edge representation of Taf.
 type TafEdge struct {
 	Node   *Taf   `json:"node"`
@@ -2832,5 +2602,236 @@ func (tc *TurbulenceCondition) ToEdge(order *TurbulenceConditionOrder) *Turbulen
 	return &TurbulenceConditionEdge{
 		Node:   tc,
 		Cursor: order.Field.toCursor(tc),
+	}
+}
+
+// WeatherStationEdge is the edge representation of WeatherStation.
+type WeatherStationEdge struct {
+	Node   *WeatherStation `json:"node"`
+	Cursor Cursor          `json:"cursor"`
+}
+
+// WeatherStationConnection is the connection containing edges to WeatherStation.
+type WeatherStationConnection struct {
+	Edges      []*WeatherStationEdge `json:"edges"`
+	PageInfo   PageInfo              `json:"pageInfo"`
+	TotalCount int                   `json:"totalCount"`
+}
+
+func (c *WeatherStationConnection) build(nodes []*WeatherStation, pager *weatherstationPager, after *Cursor, first *int, before *Cursor, last *int) {
+	c.PageInfo.HasNextPage = before != nil
+	c.PageInfo.HasPreviousPage = after != nil
+	if first != nil && *first+1 == len(nodes) {
+		c.PageInfo.HasNextPage = true
+		nodes = nodes[:len(nodes)-1]
+	} else if last != nil && *last+1 == len(nodes) {
+		c.PageInfo.HasPreviousPage = true
+		nodes = nodes[:len(nodes)-1]
+	}
+	var nodeAt func(int) *WeatherStation
+	if last != nil {
+		n := len(nodes) - 1
+		nodeAt = func(i int) *WeatherStation {
+			return nodes[n-i]
+		}
+	} else {
+		nodeAt = func(i int) *WeatherStation {
+			return nodes[i]
+		}
+	}
+	c.Edges = make([]*WeatherStationEdge, len(nodes))
+	for i := range nodes {
+		node := nodeAt(i)
+		c.Edges[i] = &WeatherStationEdge{
+			Node:   node,
+			Cursor: pager.toCursor(node),
+		}
+	}
+	if l := len(c.Edges); l > 0 {
+		c.PageInfo.StartCursor = &c.Edges[0].Cursor
+		c.PageInfo.EndCursor = &c.Edges[l-1].Cursor
+	}
+	if c.TotalCount == 0 {
+		c.TotalCount = len(nodes)
+	}
+}
+
+// WeatherStationPaginateOption enables pagination customization.
+type WeatherStationPaginateOption func(*weatherstationPager) error
+
+// WithWeatherStationOrder configures pagination ordering.
+func WithWeatherStationOrder(order *WeatherStationOrder) WeatherStationPaginateOption {
+	if order == nil {
+		order = DefaultWeatherStationOrder
+	}
+	o := *order
+	return func(pager *weatherstationPager) error {
+		if err := o.Direction.Validate(); err != nil {
+			return err
+		}
+		if o.Field == nil {
+			o.Field = DefaultWeatherStationOrder.Field
+		}
+		pager.order = &o
+		return nil
+	}
+}
+
+// WithWeatherStationFilter configures pagination filter.
+func WithWeatherStationFilter(filter func(*WeatherStationQuery) (*WeatherStationQuery, error)) WeatherStationPaginateOption {
+	return func(pager *weatherstationPager) error {
+		if filter == nil {
+			return errors.New("WeatherStationQuery filter cannot be nil")
+		}
+		pager.filter = filter
+		return nil
+	}
+}
+
+type weatherstationPager struct {
+	order  *WeatherStationOrder
+	filter func(*WeatherStationQuery) (*WeatherStationQuery, error)
+}
+
+func newWeatherStationPager(opts []WeatherStationPaginateOption) (*weatherstationPager, error) {
+	pager := &weatherstationPager{}
+	for _, opt := range opts {
+		if err := opt(pager); err != nil {
+			return nil, err
+		}
+	}
+	if pager.order == nil {
+		pager.order = DefaultWeatherStationOrder
+	}
+	return pager, nil
+}
+
+func (p *weatherstationPager) applyFilter(query *WeatherStationQuery) (*WeatherStationQuery, error) {
+	if p.filter != nil {
+		return p.filter(query)
+	}
+	return query, nil
+}
+
+func (p *weatherstationPager) toCursor(ws *WeatherStation) Cursor {
+	return p.order.Field.toCursor(ws)
+}
+
+func (p *weatherstationPager) applyCursors(query *WeatherStationQuery, after, before *Cursor) *WeatherStationQuery {
+	for _, predicate := range cursorsToPredicates(
+		p.order.Direction, after, before,
+		p.order.Field.field, DefaultWeatherStationOrder.Field.field,
+	) {
+		query = query.Where(predicate)
+	}
+	return query
+}
+
+func (p *weatherstationPager) applyOrder(query *WeatherStationQuery, reverse bool) *WeatherStationQuery {
+	direction := p.order.Direction
+	if reverse {
+		direction = direction.reverse()
+	}
+	query = query.Order(direction.orderFunc(p.order.Field.field))
+	if p.order.Field != DefaultWeatherStationOrder.Field {
+		query = query.Order(direction.orderFunc(DefaultWeatherStationOrder.Field.field))
+	}
+	return query
+}
+
+func (p *weatherstationPager) orderExpr(reverse bool) sql.Querier {
+	direction := p.order.Direction
+	if reverse {
+		direction = direction.reverse()
+	}
+	return sql.ExprFunc(func(b *sql.Builder) {
+		b.Ident(p.order.Field.field).Pad().WriteString(string(direction))
+		if p.order.Field != DefaultWeatherStationOrder.Field {
+			b.Comma().Ident(DefaultWeatherStationOrder.Field.field).Pad().WriteString(string(direction))
+		}
+	})
+}
+
+// Paginate executes the query and returns a relay based cursor connection to WeatherStation.
+func (ws *WeatherStationQuery) Paginate(
+	ctx context.Context, after *Cursor, first *int,
+	before *Cursor, last *int, opts ...WeatherStationPaginateOption,
+) (*WeatherStationConnection, error) {
+	if err := validateFirstLast(first, last); err != nil {
+		return nil, err
+	}
+	pager, err := newWeatherStationPager(opts)
+	if err != nil {
+		return nil, err
+	}
+	if ws, err = pager.applyFilter(ws); err != nil {
+		return nil, err
+	}
+	conn := &WeatherStationConnection{Edges: []*WeatherStationEdge{}}
+	ignoredEdges := !hasCollectedField(ctx, edgesField)
+	if hasCollectedField(ctx, totalCountField) || hasCollectedField(ctx, pageInfoField) {
+		hasPagination := after != nil || first != nil || before != nil || last != nil
+		if hasPagination || ignoredEdges {
+			if conn.TotalCount, err = ws.Count(ctx); err != nil {
+				return nil, err
+			}
+			conn.PageInfo.HasNextPage = first != nil && conn.TotalCount > 0
+			conn.PageInfo.HasPreviousPage = last != nil && conn.TotalCount > 0
+		}
+	}
+	if ignoredEdges || (first != nil && *first == 0) || (last != nil && *last == 0) {
+		return conn, nil
+	}
+
+	ws = pager.applyCursors(ws, after, before)
+	ws = pager.applyOrder(ws, last != nil)
+	if limit := paginateLimit(first, last); limit != 0 {
+		ws.Limit(limit)
+	}
+	if field := collectedField(ctx, edgesField, nodeField); field != nil {
+		if err := ws.collectField(ctx, graphql.GetOperationContext(ctx), *field, []string{edgesField, nodeField}); err != nil {
+			return nil, err
+		}
+	}
+
+	nodes, err := ws.All(ctx)
+	if err != nil {
+		return nil, err
+	}
+	conn.build(nodes, pager, after, first, before, last)
+	return conn, nil
+}
+
+// WeatherStationOrderField defines the ordering field of WeatherStation.
+type WeatherStationOrderField struct {
+	field    string
+	toCursor func(*WeatherStation) Cursor
+}
+
+// WeatherStationOrder defines the ordering of WeatherStation.
+type WeatherStationOrder struct {
+	Direction OrderDirection            `json:"direction"`
+	Field     *WeatherStationOrderField `json:"field"`
+}
+
+// DefaultWeatherStationOrder is the default ordering of WeatherStation.
+var DefaultWeatherStationOrder = &WeatherStationOrder{
+	Direction: OrderDirectionAsc,
+	Field: &WeatherStationOrderField{
+		field: weatherstation.FieldID,
+		toCursor: func(ws *WeatherStation) Cursor {
+			return Cursor{ID: ws.ID}
+		},
+	},
+}
+
+// ToEdge converts WeatherStation into WeatherStationEdge.
+func (ws *WeatherStation) ToEdge(order *WeatherStationOrder) *WeatherStationEdge {
+	if order == nil {
+		order = DefaultWeatherStationOrder
+	}
+	return &WeatherStationEdge{
+		Node:   ws,
+		Cursor: order.Field.toCursor(ws),
 	}
 }

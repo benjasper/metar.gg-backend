@@ -7,15 +7,16 @@ import (
 	"strings"
 
 	"entgo.io/ent/dialect/sql"
+	"github.com/google/uuid"
 	"metar.gg/ent/airport"
-	"metar.gg/ent/station"
+	"metar.gg/ent/weatherstation"
 )
 
-// Station is the model entity for the Station schema.
-type Station struct {
+// WeatherStation is the model entity for the WeatherStation schema.
+type WeatherStation struct {
 	config `json:"-"`
 	// ID of the ent.
-	ID int `json:"id,omitempty"`
+	ID uuid.UUID `json:"id,omitempty"`
 	// The ICAO identifier of the station that provided the weather data or identifier of the weather station.
 	StationID string `json:"station_id,omitempty"`
 	// The latitude in decimal degrees of the station.
@@ -27,13 +28,13 @@ type Station struct {
 	// Hash holds the value of the "hash" field.
 	Hash string `json:"hash,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
-	// The values are being populated by the StationQuery when eager-loading is set.
-	Edges           StationEdges `json:"edges"`
-	airport_station *int
+	// The values are being populated by the WeatherStationQuery when eager-loading is set.
+	Edges           WeatherStationEdges `json:"edges"`
+	airport_station *uuid.UUID
 }
 
-// StationEdges holds the relations/edges for other nodes in the graph.
-type StationEdges struct {
+// WeatherStationEdges holds the relations/edges for other nodes in the graph.
+type WeatherStationEdges struct {
 	// The airport that hosts this station. This can also be empty if the metar is from a weather station outside an airport.
 	Airport *Airport `json:"airport,omitempty"`
 	// The metars that were reported by this station.
@@ -52,7 +53,7 @@ type StationEdges struct {
 
 // AirportOrErr returns the Airport value or an error if the edge
 // was not loaded in eager-loading, or loaded but was not found.
-func (e StationEdges) AirportOrErr() (*Airport, error) {
+func (e WeatherStationEdges) AirportOrErr() (*Airport, error) {
 	if e.loadedTypes[0] {
 		if e.Airport == nil {
 			// Edge was loaded but was not found.
@@ -65,7 +66,7 @@ func (e StationEdges) AirportOrErr() (*Airport, error) {
 
 // MetarsOrErr returns the Metars value or an error if the edge
 // was not loaded in eager-loading.
-func (e StationEdges) MetarsOrErr() ([]*Metar, error) {
+func (e WeatherStationEdges) MetarsOrErr() ([]*Metar, error) {
 	if e.loadedTypes[1] {
 		return e.Metars, nil
 	}
@@ -74,7 +75,7 @@ func (e StationEdges) MetarsOrErr() ([]*Metar, error) {
 
 // TafsOrErr returns the Tafs value or an error if the edge
 // was not loaded in eager-loading.
-func (e StationEdges) TafsOrErr() ([]*Taf, error) {
+func (e WeatherStationEdges) TafsOrErr() ([]*Taf, error) {
 	if e.loadedTypes[2] {
 		return e.Tafs, nil
 	}
@@ -82,199 +83,199 @@ func (e StationEdges) TafsOrErr() ([]*Taf, error) {
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
-func (*Station) scanValues(columns []string) ([]any, error) {
+func (*WeatherStation) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case station.FieldLatitude, station.FieldLongitude, station.FieldElevation:
+		case weatherstation.FieldLatitude, weatherstation.FieldLongitude, weatherstation.FieldElevation:
 			values[i] = new(sql.NullFloat64)
-		case station.FieldID:
-			values[i] = new(sql.NullInt64)
-		case station.FieldStationID, station.FieldHash:
+		case weatherstation.FieldStationID, weatherstation.FieldHash:
 			values[i] = new(sql.NullString)
-		case station.ForeignKeys[0]: // airport_station
-			values[i] = new(sql.NullInt64)
+		case weatherstation.FieldID:
+			values[i] = new(uuid.UUID)
+		case weatherstation.ForeignKeys[0]: // airport_station
+			values[i] = &sql.NullScanner{S: new(uuid.UUID)}
 		default:
-			return nil, fmt.Errorf("unexpected column %q for type Station", columns[i])
+			return nil, fmt.Errorf("unexpected column %q for type WeatherStation", columns[i])
 		}
 	}
 	return values, nil
 }
 
 // assignValues assigns the values that were returned from sql.Rows (after scanning)
-// to the Station fields.
-func (s *Station) assignValues(columns []string, values []any) error {
+// to the WeatherStation fields.
+func (ws *WeatherStation) assignValues(columns []string, values []any) error {
 	if m, n := len(values), len(columns); m < n {
 		return fmt.Errorf("mismatch number of scan values: %d != %d", m, n)
 	}
 	for i := range columns {
 		switch columns[i] {
-		case station.FieldID:
-			value, ok := values[i].(*sql.NullInt64)
-			if !ok {
-				return fmt.Errorf("unexpected type %T for field id", value)
+		case weatherstation.FieldID:
+			if value, ok := values[i].(*uuid.UUID); !ok {
+				return fmt.Errorf("unexpected type %T for field id", values[i])
+			} else if value != nil {
+				ws.ID = *value
 			}
-			s.ID = int(value.Int64)
-		case station.FieldStationID:
+		case weatherstation.FieldStationID:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field station_id", values[i])
 			} else if value.Valid {
-				s.StationID = value.String
+				ws.StationID = value.String
 			}
-		case station.FieldLatitude:
+		case weatherstation.FieldLatitude:
 			if value, ok := values[i].(*sql.NullFloat64); !ok {
 				return fmt.Errorf("unexpected type %T for field latitude", values[i])
 			} else if value.Valid {
-				s.Latitude = new(float64)
-				*s.Latitude = value.Float64
+				ws.Latitude = new(float64)
+				*ws.Latitude = value.Float64
 			}
-		case station.FieldLongitude:
+		case weatherstation.FieldLongitude:
 			if value, ok := values[i].(*sql.NullFloat64); !ok {
 				return fmt.Errorf("unexpected type %T for field longitude", values[i])
 			} else if value.Valid {
-				s.Longitude = new(float64)
-				*s.Longitude = value.Float64
+				ws.Longitude = new(float64)
+				*ws.Longitude = value.Float64
 			}
-		case station.FieldElevation:
+		case weatherstation.FieldElevation:
 			if value, ok := values[i].(*sql.NullFloat64); !ok {
 				return fmt.Errorf("unexpected type %T for field elevation", values[i])
 			} else if value.Valid {
-				s.Elevation = new(float64)
-				*s.Elevation = value.Float64
+				ws.Elevation = new(float64)
+				*ws.Elevation = value.Float64
 			}
-		case station.FieldHash:
+		case weatherstation.FieldHash:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field hash", values[i])
 			} else if value.Valid {
-				s.Hash = value.String
+				ws.Hash = value.String
 			}
-		case station.ForeignKeys[0]:
-			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for edge-field airport_station", value)
+		case weatherstation.ForeignKeys[0]:
+			if value, ok := values[i].(*sql.NullScanner); !ok {
+				return fmt.Errorf("unexpected type %T for field airport_station", values[i])
 			} else if value.Valid {
-				s.airport_station = new(int)
-				*s.airport_station = int(value.Int64)
+				ws.airport_station = new(uuid.UUID)
+				*ws.airport_station = *value.S.(*uuid.UUID)
 			}
 		}
 	}
 	return nil
 }
 
-// QueryAirport queries the "airport" edge of the Station entity.
-func (s *Station) QueryAirport() *AirportQuery {
-	return (&StationClient{config: s.config}).QueryAirport(s)
+// QueryAirport queries the "airport" edge of the WeatherStation entity.
+func (ws *WeatherStation) QueryAirport() *AirportQuery {
+	return (&WeatherStationClient{config: ws.config}).QueryAirport(ws)
 }
 
-// QueryMetars queries the "metars" edge of the Station entity.
-func (s *Station) QueryMetars() *MetarQuery {
-	return (&StationClient{config: s.config}).QueryMetars(s)
+// QueryMetars queries the "metars" edge of the WeatherStation entity.
+func (ws *WeatherStation) QueryMetars() *MetarQuery {
+	return (&WeatherStationClient{config: ws.config}).QueryMetars(ws)
 }
 
-// QueryTafs queries the "tafs" edge of the Station entity.
-func (s *Station) QueryTafs() *TafQuery {
-	return (&StationClient{config: s.config}).QueryTafs(s)
+// QueryTafs queries the "tafs" edge of the WeatherStation entity.
+func (ws *WeatherStation) QueryTafs() *TafQuery {
+	return (&WeatherStationClient{config: ws.config}).QueryTafs(ws)
 }
 
-// Update returns a builder for updating this Station.
-// Note that you need to call Station.Unwrap() before calling this method if this Station
+// Update returns a builder for updating this WeatherStation.
+// Note that you need to call WeatherStation.Unwrap() before calling this method if this WeatherStation
 // was returned from a transaction, and the transaction was committed or rolled back.
-func (s *Station) Update() *StationUpdateOne {
-	return (&StationClient{config: s.config}).UpdateOne(s)
+func (ws *WeatherStation) Update() *WeatherStationUpdateOne {
+	return (&WeatherStationClient{config: ws.config}).UpdateOne(ws)
 }
 
-// Unwrap unwraps the Station entity that was returned from a transaction after it was closed,
+// Unwrap unwraps the WeatherStation entity that was returned from a transaction after it was closed,
 // so that all future queries will be executed through the driver which created the transaction.
-func (s *Station) Unwrap() *Station {
-	_tx, ok := s.config.driver.(*txDriver)
+func (ws *WeatherStation) Unwrap() *WeatherStation {
+	_tx, ok := ws.config.driver.(*txDriver)
 	if !ok {
-		panic("ent: Station is not a transactional entity")
+		panic("ent: WeatherStation is not a transactional entity")
 	}
-	s.config.driver = _tx.drv
-	return s
+	ws.config.driver = _tx.drv
+	return ws
 }
 
 // String implements the fmt.Stringer.
-func (s *Station) String() string {
+func (ws *WeatherStation) String() string {
 	var builder strings.Builder
-	builder.WriteString("Station(")
-	builder.WriteString(fmt.Sprintf("id=%v, ", s.ID))
+	builder.WriteString("WeatherStation(")
+	builder.WriteString(fmt.Sprintf("id=%v, ", ws.ID))
 	builder.WriteString("station_id=")
-	builder.WriteString(s.StationID)
+	builder.WriteString(ws.StationID)
 	builder.WriteString(", ")
-	if v := s.Latitude; v != nil {
+	if v := ws.Latitude; v != nil {
 		builder.WriteString("latitude=")
 		builder.WriteString(fmt.Sprintf("%v", *v))
 	}
 	builder.WriteString(", ")
-	if v := s.Longitude; v != nil {
+	if v := ws.Longitude; v != nil {
 		builder.WriteString("longitude=")
 		builder.WriteString(fmt.Sprintf("%v", *v))
 	}
 	builder.WriteString(", ")
-	if v := s.Elevation; v != nil {
+	if v := ws.Elevation; v != nil {
 		builder.WriteString("elevation=")
 		builder.WriteString(fmt.Sprintf("%v", *v))
 	}
 	builder.WriteString(", ")
 	builder.WriteString("hash=")
-	builder.WriteString(s.Hash)
+	builder.WriteString(ws.Hash)
 	builder.WriteByte(')')
 	return builder.String()
 }
 
 // NamedMetars returns the Metars named value or an error if the edge was not
 // loaded in eager-loading with this name.
-func (s *Station) NamedMetars(name string) ([]*Metar, error) {
-	if s.Edges.namedMetars == nil {
+func (ws *WeatherStation) NamedMetars(name string) ([]*Metar, error) {
+	if ws.Edges.namedMetars == nil {
 		return nil, &NotLoadedError{edge: name}
 	}
-	nodes, ok := s.Edges.namedMetars[name]
+	nodes, ok := ws.Edges.namedMetars[name]
 	if !ok {
 		return nil, &NotLoadedError{edge: name}
 	}
 	return nodes, nil
 }
 
-func (s *Station) appendNamedMetars(name string, edges ...*Metar) {
-	if s.Edges.namedMetars == nil {
-		s.Edges.namedMetars = make(map[string][]*Metar)
+func (ws *WeatherStation) appendNamedMetars(name string, edges ...*Metar) {
+	if ws.Edges.namedMetars == nil {
+		ws.Edges.namedMetars = make(map[string][]*Metar)
 	}
 	if len(edges) == 0 {
-		s.Edges.namedMetars[name] = []*Metar{}
+		ws.Edges.namedMetars[name] = []*Metar{}
 	} else {
-		s.Edges.namedMetars[name] = append(s.Edges.namedMetars[name], edges...)
+		ws.Edges.namedMetars[name] = append(ws.Edges.namedMetars[name], edges...)
 	}
 }
 
 // NamedTafs returns the Tafs named value or an error if the edge was not
 // loaded in eager-loading with this name.
-func (s *Station) NamedTafs(name string) ([]*Taf, error) {
-	if s.Edges.namedTafs == nil {
+func (ws *WeatherStation) NamedTafs(name string) ([]*Taf, error) {
+	if ws.Edges.namedTafs == nil {
 		return nil, &NotLoadedError{edge: name}
 	}
-	nodes, ok := s.Edges.namedTafs[name]
+	nodes, ok := ws.Edges.namedTafs[name]
 	if !ok {
 		return nil, &NotLoadedError{edge: name}
 	}
 	return nodes, nil
 }
 
-func (s *Station) appendNamedTafs(name string, edges ...*Taf) {
-	if s.Edges.namedTafs == nil {
-		s.Edges.namedTafs = make(map[string][]*Taf)
+func (ws *WeatherStation) appendNamedTafs(name string, edges ...*Taf) {
+	if ws.Edges.namedTafs == nil {
+		ws.Edges.namedTafs = make(map[string][]*Taf)
 	}
 	if len(edges) == 0 {
-		s.Edges.namedTafs[name] = []*Taf{}
+		ws.Edges.namedTafs[name] = []*Taf{}
 	} else {
-		s.Edges.namedTafs[name] = append(s.Edges.namedTafs[name], edges...)
+		ws.Edges.namedTafs[name] = append(ws.Edges.namedTafs[name], edges...)
 	}
 }
 
-// Stations is a parsable slice of Station.
-type Stations []*Station
+// WeatherStations is a parsable slice of WeatherStation.
+type WeatherStations []*WeatherStation
 
-func (s Stations) config(cfg config) {
-	for _i := range s {
-		s[_i].config = cfg
+func (ws WeatherStations) config(cfg config) {
+	for _i := range ws {
+		ws[_i].config = cfg
 	}
 }

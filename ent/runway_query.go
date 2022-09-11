@@ -10,6 +10,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/google/uuid"
 	"metar.gg/ent/airport"
 	"metar.gg/ent/predicate"
 	"metar.gg/ent/runway"
@@ -110,8 +111,8 @@ func (rq *RunwayQuery) FirstX(ctx context.Context) *Runway {
 
 // FirstID returns the first Runway ID from the query.
 // Returns a *NotFoundError when no Runway ID was found.
-func (rq *RunwayQuery) FirstID(ctx context.Context) (id int, err error) {
-	var ids []int
+func (rq *RunwayQuery) FirstID(ctx context.Context) (id uuid.UUID, err error) {
+	var ids []uuid.UUID
 	if ids, err = rq.Limit(1).IDs(ctx); err != nil {
 		return
 	}
@@ -123,7 +124,7 @@ func (rq *RunwayQuery) FirstID(ctx context.Context) (id int, err error) {
 }
 
 // FirstIDX is like FirstID, but panics if an error occurs.
-func (rq *RunwayQuery) FirstIDX(ctx context.Context) int {
+func (rq *RunwayQuery) FirstIDX(ctx context.Context) uuid.UUID {
 	id, err := rq.FirstID(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
@@ -161,8 +162,8 @@ func (rq *RunwayQuery) OnlyX(ctx context.Context) *Runway {
 // OnlyID is like Only, but returns the only Runway ID in the query.
 // Returns a *NotSingularError when more than one Runway ID is found.
 // Returns a *NotFoundError when no entities are found.
-func (rq *RunwayQuery) OnlyID(ctx context.Context) (id int, err error) {
-	var ids []int
+func (rq *RunwayQuery) OnlyID(ctx context.Context) (id uuid.UUID, err error) {
+	var ids []uuid.UUID
 	if ids, err = rq.Limit(2).IDs(ctx); err != nil {
 		return
 	}
@@ -178,7 +179,7 @@ func (rq *RunwayQuery) OnlyID(ctx context.Context) (id int, err error) {
 }
 
 // OnlyIDX is like OnlyID, but panics if an error occurs.
-func (rq *RunwayQuery) OnlyIDX(ctx context.Context) int {
+func (rq *RunwayQuery) OnlyIDX(ctx context.Context) uuid.UUID {
 	id, err := rq.OnlyID(ctx)
 	if err != nil {
 		panic(err)
@@ -204,8 +205,8 @@ func (rq *RunwayQuery) AllX(ctx context.Context) []*Runway {
 }
 
 // IDs executes the query and returns a list of Runway IDs.
-func (rq *RunwayQuery) IDs(ctx context.Context) ([]int, error) {
-	var ids []int
+func (rq *RunwayQuery) IDs(ctx context.Context) ([]uuid.UUID, error) {
+	var ids []uuid.UUID
 	if err := rq.Select(runway.FieldID).Scan(ctx, &ids); err != nil {
 		return nil, err
 	}
@@ -213,7 +214,7 @@ func (rq *RunwayQuery) IDs(ctx context.Context) ([]int, error) {
 }
 
 // IDsX is like IDs, but panics if an error occurs.
-func (rq *RunwayQuery) IDsX(ctx context.Context) []int {
+func (rq *RunwayQuery) IDsX(ctx context.Context) []uuid.UUID {
 	ids, err := rq.IDs(ctx)
 	if err != nil {
 		panic(err)
@@ -292,12 +293,12 @@ func (rq *RunwayQuery) WithAirport(opts ...func(*AirportQuery)) *RunwayQuery {
 // Example:
 //
 //	var v []struct {
-//		Hash string `json:"hash,omitempty"`
+//		ImportID int `json:"import_id,omitempty"`
 //		Count int `json:"count,omitempty"`
 //	}
 //
 //	client.Runway.Query().
-//		GroupBy(runway.FieldHash).
+//		GroupBy(runway.FieldImportID).
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
 func (rq *RunwayQuery) GroupBy(field string, fields ...string) *RunwayGroupBy {
@@ -320,11 +321,11 @@ func (rq *RunwayQuery) GroupBy(field string, fields ...string) *RunwayGroupBy {
 // Example:
 //
 //	var v []struct {
-//		Hash string `json:"hash,omitempty"`
+//		ImportID int `json:"import_id,omitempty"`
 //	}
 //
 //	client.Runway.Query().
-//		Select(runway.FieldHash).
+//		Select(runway.FieldImportID).
 //		Scan(ctx, &v)
 func (rq *RunwayQuery) Select(fields ...string) *RunwaySelect {
 	rq.fields = append(rq.fields, fields...)
@@ -401,8 +402,8 @@ func (rq *RunwayQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Runwa
 }
 
 func (rq *RunwayQuery) loadAirport(ctx context.Context, query *AirportQuery, nodes []*Runway, init func(*Runway), assign func(*Runway, *Airport)) error {
-	ids := make([]int, 0, len(nodes))
-	nodeids := make(map[int][]*Runway)
+	ids := make([]uuid.UUID, 0, len(nodes))
+	nodeids := make(map[uuid.UUID][]*Runway)
 	for i := range nodes {
 		if nodes[i].airport_runways == nil {
 			continue
@@ -456,7 +457,7 @@ func (rq *RunwayQuery) querySpec() *sqlgraph.QuerySpec {
 			Table:   runway.Table,
 			Columns: runway.Columns,
 			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt,
+				Type:   field.TypeUUID,
 				Column: runway.FieldID,
 			},
 		},
