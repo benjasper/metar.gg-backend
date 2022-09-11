@@ -5,9 +5,8 @@ package graph
 
 import (
 	"context"
-	"fmt"
-
 	"entgo.io/ent/dialect/sql"
+	"fmt"
 	"github.com/google/uuid"
 	"metar.gg/ent"
 	"metar.gg/ent/airport"
@@ -92,15 +91,15 @@ func (r *queryResolver) GetAirports(ctx context.Context, after *ent.Cursor, firs
 
 	var where []predicate.Airport
 	if identifier != nil {
-		where = append(where, airport.IdentifierEqualFold(*identifier))
+		where = append(where, airport.Or(airport.IdentifierEqualFold(*identifier), airport.IdentifierHasPrefix(*identifier)))
 	}
 
 	if icao != nil {
-		where = append(where, airport.IcaoCodeEqualFold(*icao))
+		where = append(where, airport.Or(airport.IcaoCodeEqualFold(*icao), airport.IcaoCodeHasPrefix(*icao)))
 	}
 
 	if iata != nil {
-		where = append(where, airport.IataCodeEqualFold(*iata))
+		where = append(where, airport.Or(airport.IataCodeEqualFold(*iata), airport.IataCodeHasPrefix(*iata)))
 	}
 
 	if hasWeather != nil && *hasWeather {
@@ -110,6 +109,25 @@ func (r *queryResolver) GetAirports(ctx context.Context, after *ent.Cursor, firs
 	}
 
 	connection, err := r.client.Airport.Query().Where(
+		where...,
+	).Paginate(ctx, after, first, before, last)
+	if err != nil {
+		return nil, err
+	}
+
+	return connection, nil
+}
+
+// GetStations is the resolver for the getStations field.
+func (r *queryResolver) GetStations(ctx context.Context, after *ent.Cursor, first *int, before *ent.Cursor, last *int, identifier *string) (*ent.WeatherStationConnection, error) {
+	first, last = BoundsForPagination(first, last)
+
+	var where []predicate.WeatherStation
+	if identifier != nil {
+		where = append(where, weatherstation.Or(weatherstation.StationIDEqualFold(*identifier), weatherstation.StationIDHasPrefix(*identifier)))
+	}
+
+	connection, err := r.client.WeatherStation.Query().Where(
 		where...,
 	).Paginate(ctx, after, first, before, last)
 	if err != nil {

@@ -45,6 +45,17 @@ type TafEdge {
     cursor: Cursor!
 }
 
+type WeatherStationConnection {
+    totalCount: Int!
+    pageInfo: PageInfo!
+    edges: [WeatherStationEdge!]!
+}
+
+type WeatherStationEdge {
+    node: WeatherStation!
+    cursor: Cursor!
+}
+
 type Query {
     getAirports(
         after: Cursor
@@ -56,6 +67,14 @@ type Query {
         iata: String,
         hasWeather: Boolean
     ): AirportConnection!
+
+    getStations(
+        after: Cursor
+        first: Int
+        before: Cursor
+        last: Int
+        identifier: String
+    ): WeatherStationConnection!
 }
 
 type StationWithDistance {

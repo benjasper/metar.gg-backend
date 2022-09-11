@@ -176,6 +176,7 @@ type ComplexityRoot struct {
 
 	Query struct {
 		GetAirports func(childComplexity int, after *ent.Cursor, first *int, before *ent.Cursor, last *int, identifier *string, icao *string, iata *string, hasWeather *bool) int
+		GetStations func(childComplexity int, after *ent.Cursor, first *int, before *ent.Cursor, last *int, identifier *string) int
 	}
 
 	Runway struct {
@@ -262,6 +263,17 @@ type ComplexityRoot struct {
 		Metars    func(childComplexity int, after *ent.Cursor, first *int, before *ent.Cursor, last *int) int
 		StationID func(childComplexity int) int
 		Tafs      func(childComplexity int, after *ent.Cursor, first *int, before *ent.Cursor, last *int) int
+	}
+
+	WeatherStationConnection struct {
+		Edges      func(childComplexity int) int
+		PageInfo   func(childComplexity int) int
+		TotalCount func(childComplexity int) int
+	}
+
+	WeatherStationEdge struct {
+		Cursor func(childComplexity int) int
+		Node   func(childComplexity int) int
 	}
 }
 
@@ -1037,6 +1049,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Query.GetAirports(childComplexity, args["after"].(*ent.Cursor), args["first"].(*int), args["before"].(*ent.Cursor), args["last"].(*int), args["identifier"].(*string), args["icao"].(*string), args["iata"].(*string), args["hasWeather"].(*bool)), true
 
+	case "Query.getStations":
+		if e.complexity.Query.GetStations == nil {
+			break
+		}
+
+		args, err := ec.field_Query_getStations_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.GetStations(childComplexity, args["after"].(*ent.Cursor), args["first"].(*int), args["before"].(*ent.Cursor), args["last"].(*int), args["identifier"].(*string)), true
+
 	case "Runway.airport":
 		if e.complexity.Runway.Airport == nil {
 			break
@@ -1459,6 +1483,41 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.WeatherStation.Tafs(childComplexity, args["after"].(*ent.Cursor), args["first"].(*int), args["before"].(*ent.Cursor), args["last"].(*int)), true
+
+	case "WeatherStationConnection.edges":
+		if e.complexity.WeatherStationConnection.Edges == nil {
+			break
+		}
+
+		return e.complexity.WeatherStationConnection.Edges(childComplexity), true
+
+	case "WeatherStationConnection.pageInfo":
+		if e.complexity.WeatherStationConnection.PageInfo == nil {
+			break
+		}
+
+		return e.complexity.WeatherStationConnection.PageInfo(childComplexity), true
+
+	case "WeatherStationConnection.totalCount":
+		if e.complexity.WeatherStationConnection.TotalCount == nil {
+			break
+		}
+
+		return e.complexity.WeatherStationConnection.TotalCount(childComplexity), true
+
+	case "WeatherStationEdge.cursor":
+		if e.complexity.WeatherStationEdge.Cursor == nil {
+			break
+		}
+
+		return e.complexity.WeatherStationEdge.Cursor(childComplexity), true
+
+	case "WeatherStationEdge.node":
+		if e.complexity.WeatherStationEdge.Node == nil {
+			break
+		}
+
+		return e.complexity.WeatherStationEdge.Node(childComplexity), true
 
 	}
 	return 0, false
@@ -1904,6 +1963,17 @@ type TafEdge {
     cursor: Cursor!
 }
 
+type WeatherStationConnection {
+    totalCount: Int!
+    pageInfo: PageInfo!
+    edges: [WeatherStationEdge!]!
+}
+
+type WeatherStationEdge {
+    node: WeatherStation!
+    cursor: Cursor!
+}
+
 type Query {
     getAirports(
         after: Cursor
@@ -1915,6 +1985,14 @@ type Query {
         iata: String,
         hasWeather: Boolean
     ): AirportConnection!
+
+    getStations(
+        after: Cursor
+        first: Int
+        before: Cursor
+        last: Int
+        identifier: String
+    ): WeatherStationConnection!
 }
 
 type StationWithDistance {
