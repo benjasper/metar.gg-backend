@@ -185,7 +185,9 @@ type ComplexityRoot struct {
 	}
 
 	Query struct {
+		GetAirport  func(childComplexity int, id *string, identifier *string, icao *string, iata *string) int
 		GetAirports func(childComplexity int, after *ent.Cursor, first *int, before *ent.Cursor, last *int, identifier *string, icao *string, iata *string, hasWeather *bool) int
+		GetStation  func(childComplexity int, id *string, identifier *string) int
 		GetStations func(childComplexity int, after *ent.Cursor, first *int, before *ent.Cursor, last *int, identifier *string) int
 	}
 
@@ -1107,6 +1109,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.PageInfo.StartCursor(childComplexity), true
 
+	case "Query.getAirport":
+		if e.complexity.Query.GetAirport == nil {
+			break
+		}
+
+		args, err := ec.field_Query_getAirport_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.GetAirport(childComplexity, args["id"].(*string), args["identifier"].(*string), args["icao"].(*string), args["iata"].(*string)), true
+
 	case "Query.getAirports":
 		if e.complexity.Query.GetAirports == nil {
 			break
@@ -1118,6 +1132,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Query.GetAirports(childComplexity, args["after"].(*ent.Cursor), args["first"].(*int), args["before"].(*ent.Cursor), args["last"].(*int), args["identifier"].(*string), args["icao"].(*string), args["iata"].(*string), args["hasWeather"].(*bool)), true
+
+	case "Query.getStation":
+		if e.complexity.Query.GetStation == nil {
+			break
+		}
+
+		args, err := ec.field_Query_getStation_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.GetStation(childComplexity, args["id"].(*string), args["identifier"].(*string)), true
 
 	case "Query.getStations":
 		if e.complexity.Query.GetStations == nil {
@@ -2092,7 +2118,10 @@ type WeatherStation {
   airport: Airport
 }
 `, BuiltIn: false},
-	{Name: "../../metar.graphql", Input: `scalar Cursor
+	{Name: "../../metar.graphql", Input: `"""The cursor string to use for pagination"""
+scalar Cursor
+
+"""Time string, in RFC3339 format"""
 scalar Time
 
 type PageInfo {
@@ -2151,6 +2180,7 @@ type WeatherStationEdge {
 }
 
 type Query {
+    """Search for airports by a variety of criteria."""
     getAirports(
         after: Cursor
         first: Int
@@ -2162,6 +2192,10 @@ type Query {
         hasWeather: Boolean
     ): AirportConnection!
 
+    """Get a single airport by it's id, identifier, icao code or iata code."""
+    getAirport(id: String, identifier: String, icao: String, iata: String,): Airport
+
+    """Search for weather stations by it's identifier."""
     getStations(
         after: Cursor
         first: Int
@@ -2169,6 +2203,9 @@ type Query {
         last: Int
         identifier: String
     ): WeatherStationConnection!
+
+    """Get a single weather station by it's id or identifier."""
+    getStation(id: String, identifier: String): WeatherStation
 }
 
 type StationWithDistance {

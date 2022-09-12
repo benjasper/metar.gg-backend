@@ -119,6 +119,38 @@ func (r *queryResolver) GetAirports(ctx context.Context, after *ent.Cursor, firs
 	return connection, nil
 }
 
+// GetAirport is the resolver for the getAirport field.
+func (r *queryResolver) GetAirport(ctx context.Context, id *string, identifier *string, icao *string, iata *string) (*ent.Airport, error) {
+	var where []predicate.Airport
+	if id != nil {
+		uid, err := uuid.Parse(*id)
+		if err != nil {
+			return nil, err
+		}
+
+		where = append(where, airport.ID(uid))
+	}
+
+	if identifier != nil {
+		where = append(where, airport.IdentifierEqualFold(*identifier))
+	}
+
+	if icao != nil {
+		where = append(where, airport.IcaoCodeEqualFold(*icao))
+	}
+
+	if iata != nil {
+		where = append(where, airport.IataCodeEqualFold(*iata))
+	}
+
+	a, err := r.client.Airport.Query().Where(airport.Or(where...)).First(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	return a, nil
+}
+
 // GetStations is the resolver for the getStations field.
 func (r *queryResolver) GetStations(ctx context.Context, after *ent.Cursor, first *int, before *ent.Cursor, last *int, identifier *string) (*ent.WeatherStationConnection, error) {
 	first, last = BoundsForPagination(first, last)
@@ -136,6 +168,26 @@ func (r *queryResolver) GetStations(ctx context.Context, after *ent.Cursor, firs
 	}
 
 	return connection, nil
+}
+
+// GetStation is the resolver for the getStation field.
+func (r *queryResolver) GetStation(ctx context.Context, id *string, identifier *string) (*ent.WeatherStation, error) {
+	var orPredicates []predicate.WeatherStation
+
+	if id != nil {
+		uid, err := uuid.Parse(*id)
+		if err != nil {
+			return nil, err
+		}
+
+		orPredicates = append(orPredicates, weatherstation.ID(uid))
+	}
+
+	if identifier != nil {
+		orPredicates = append(orPredicates, weatherstation.StationIDEqualFold(*identifier))
+	}
+
+	return r.client.WeatherStation.Query().Where(weatherstation.Or(orPredicates...)).First(ctx)
 }
 
 // Metars is the resolver for the metars field.

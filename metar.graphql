@@ -1,4 +1,7 @@
+"""The cursor string to use for pagination"""
 scalar Cursor
+
+"""Time string, in RFC3339 format"""
 scalar Time
 
 type PageInfo {
@@ -57,6 +60,7 @@ type WeatherStationEdge {
 }
 
 type Query {
+    """Search for airports by a variety of criteria."""
     getAirports(
         after: Cursor
         first: Int
@@ -68,6 +72,10 @@ type Query {
         hasWeather: Boolean
     ): AirportConnection!
 
+    """Get a single airport by it's id, identifier, icao code or iata code."""
+    getAirport(id: String, identifier: String, icao: String, iata: String,): Airport
+
+    """Search for weather stations by it's identifier."""
     getStations(
         after: Cursor
         first: Int
@@ -75,6 +83,9 @@ type Query {
         last: Int
         identifier: String
     ): WeatherStationConnection!
+
+    """Get a single weather station by it's id or identifier."""
+    getStation(id: String, identifier: String): WeatherStation
 }
 
 type StationWithDistance {
