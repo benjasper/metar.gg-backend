@@ -17,6 +17,7 @@ import (
 type Taf struct {
 	config `json:"-"`
 	// ID of the ent.
+	// The unique identifier of the record.
 	ID uuid.UUID `json:"id,omitempty"`
 	// The raw TAF text.
 	RawText string `json:"raw_text,omitempty"`

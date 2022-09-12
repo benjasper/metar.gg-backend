@@ -16,6 +16,7 @@ import (
 type Forecast struct {
 	config `json:"-"`
 	// ID of the ent.
+	// The unique identifier of the record.
 	ID uuid.UUID `json:"id,omitempty"`
 	// The start time of the forecast period.
 	FromTime time.Time `json:"from_time,omitempty"`

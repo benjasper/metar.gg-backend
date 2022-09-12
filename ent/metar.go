@@ -17,6 +17,7 @@ import (
 type Metar struct {
 	config `json:"-"`
 	// ID of the ent.
+	// The unique identifier of the record.
 	ID uuid.UUID `json:"id,omitempty"`
 	// The raw METAR text.
 	RawText string `json:"raw_text,omitempty"`
@@ -54,7 +55,7 @@ type Metar struct {
 	QualityControlFreezingRainSensorOff bool `json:"quality_control_freezing_rain_sensor_off,omitempty"`
 	// Whether Present weather sensor is off.
 	QualityControlPresentWeatherSensorOff bool `json:"quality_control_present_weather_sensor_off,omitempty"`
-	// The sea level pressure in hectopascal.s
+	// The sea level pressure in hectopascals.
 	SeaLevelPressure *float64 `json:"sea_level_pressure,omitempty"`
 	// The pressur_6e tendency in hectopascals.
 	PressureTendency *float64 `json:"pressure_tendency,omitempty"`
@@ -66,13 +67,13 @@ type Metar struct {
 	MaxTemp24 *float64 `json:"max_temp_24,omitempty"`
 	// The minimum air temperature in Celsius from the past 24 hours.
 	MinTemp24 *float64 `json:"min_temp_24,omitempty"`
-	// The precipitation in inches from since the last observation. 0.0005 in = trace precipitation
+	// The precipitation in inches from since the last observation. 0.0005 in = trace precipitation.
 	Precipitation *float64 `json:"precipitation,omitempty"`
-	// The precipitation in inches from the past 3 hours. 0.0005 in = trace precipitation
+	// The precipitation in inches from the past 3 hours. 0.0005 in = trace precipitation.
 	Precipitation3 *float64 `json:"precipitation_3,omitempty"`
-	// The precipitation in inches from the past 6 hours. 0.0005 in = trace precipitation
+	// The precipitation in inches from the past 6 hours. 0.0005 in = trace precipitation.
 	Precipitation6 *float64 `json:"precipitation_6,omitempty"`
-	// The precipitation in inches from the past 24 hours. 0.0005 in = trace precipitation
+	// The precipitation in inches from the past 24 hours. 0.0005 in = trace precipitation.
 	Precipitation24 *float64 `json:"precipitation_24,omitempty"`
 	// The snow depth in inches.
 	SnowDepth *float64 `json:"snow_depth,omitempty"`

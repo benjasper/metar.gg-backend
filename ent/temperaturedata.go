@@ -16,6 +16,7 @@ import (
 type TemperatureData struct {
 	config `json:"-"`
 	// ID of the ent.
+	// The unique identifier of the record.
 	ID uuid.UUID `json:"id,omitempty"`
 	// The time the temperature data is valid.
 	ValidTime time.Time `json:"valid_time,omitempty"`

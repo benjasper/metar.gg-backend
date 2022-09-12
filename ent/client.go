@@ -12,10 +12,12 @@ import (
 	"metar.gg/ent/migrate"
 
 	"metar.gg/ent/airport"
+	"metar.gg/ent/country"
 	"metar.gg/ent/forecast"
 	"metar.gg/ent/frequency"
 	"metar.gg/ent/icingcondition"
 	"metar.gg/ent/metar"
+	"metar.gg/ent/region"
 	"metar.gg/ent/runway"
 	"metar.gg/ent/skycondition"
 	"metar.gg/ent/taf"
@@ -35,6 +37,8 @@ type Client struct {
 	Schema *migrate.Schema
 	// Airport is the client for interacting with the Airport builders.
 	Airport *AirportClient
+	// Country is the client for interacting with the Country builders.
+	Country *CountryClient
 	// Forecast is the client for interacting with the Forecast builders.
 	Forecast *ForecastClient
 	// Frequency is the client for interacting with the Frequency builders.
@@ -43,6 +47,8 @@ type Client struct {
 	IcingCondition *IcingConditionClient
 	// Metar is the client for interacting with the Metar builders.
 	Metar *MetarClient
+	// Region is the client for interacting with the Region builders.
+	Region *RegionClient
 	// Runway is the client for interacting with the Runway builders.
 	Runway *RunwayClient
 	// SkyCondition is the client for interacting with the SkyCondition builders.
@@ -69,10 +75,12 @@ func NewClient(opts ...Option) *Client {
 func (c *Client) init() {
 	c.Schema = migrate.NewSchema(c.driver)
 	c.Airport = NewAirportClient(c.config)
+	c.Country = NewCountryClient(c.config)
 	c.Forecast = NewForecastClient(c.config)
 	c.Frequency = NewFrequencyClient(c.config)
 	c.IcingCondition = NewIcingConditionClient(c.config)
 	c.Metar = NewMetarClient(c.config)
+	c.Region = NewRegionClient(c.config)
 	c.Runway = NewRunwayClient(c.config)
 	c.SkyCondition = NewSkyConditionClient(c.config)
 	c.Taf = NewTafClient(c.config)
@@ -113,10 +121,12 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 		ctx:                 ctx,
 		config:              cfg,
 		Airport:             NewAirportClient(cfg),
+		Country:             NewCountryClient(cfg),
 		Forecast:            NewForecastClient(cfg),
 		Frequency:           NewFrequencyClient(cfg),
 		IcingCondition:      NewIcingConditionClient(cfg),
 		Metar:               NewMetarClient(cfg),
+		Region:              NewRegionClient(cfg),
 		Runway:              NewRunwayClient(cfg),
 		SkyCondition:        NewSkyConditionClient(cfg),
 		Taf:                 NewTafClient(cfg),
@@ -143,10 +153,12 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 		ctx:                 ctx,
 		config:              cfg,
 		Airport:             NewAirportClient(cfg),
+		Country:             NewCountryClient(cfg),
 		Forecast:            NewForecastClient(cfg),
 		Frequency:           NewFrequencyClient(cfg),
 		IcingCondition:      NewIcingConditionClient(cfg),
 		Metar:               NewMetarClient(cfg),
+		Region:              NewRegionClient(cfg),
 		Runway:              NewRunwayClient(cfg),
 		SkyCondition:        NewSkyConditionClient(cfg),
 		Taf:                 NewTafClient(cfg),
@@ -182,10 +194,12 @@ func (c *Client) Close() error {
 // In order to add hooks to a specific client, call: `client.Node.Use(...)`.
 func (c *Client) Use(hooks ...Hook) {
 	c.Airport.Use(hooks...)
+	c.Country.Use(hooks...)
 	c.Forecast.Use(hooks...)
 	c.Frequency.Use(hooks...)
 	c.IcingCondition.Use(hooks...)
 	c.Metar.Use(hooks...)
+	c.Region.Use(hooks...)
 	c.Runway.Use(hooks...)
 	c.SkyCondition.Use(hooks...)
 	c.Taf.Use(hooks...)
@@ -279,6 +293,38 @@ func (c *AirportClient) GetX(ctx context.Context, id uuid.UUID) *Airport {
 	return obj
 }
 
+// QueryRegion queries the region edge of a Airport.
+func (c *AirportClient) QueryRegion(a *Airport) *RegionQuery {
+	query := &RegionQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := a.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(airport.Table, airport.FieldID, id),
+			sqlgraph.To(region.Table, region.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, airport.RegionTable, airport.RegionColumn),
+		)
+		fromV = sqlgraph.Neighbors(a.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryCountry queries the country edge of a Airport.
+func (c *AirportClient) QueryCountry(a *Airport) *CountryQuery {
+	query := &CountryQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := a.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(airport.Table, airport.FieldID, id),
+			sqlgraph.To(country.Table, country.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, airport.CountryTable, airport.CountryColumn),
+		)
+		fromV = sqlgraph.Neighbors(a.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // QueryRunways queries the runways edge of a Airport.
 func (c *AirportClient) QueryRunways(a *Airport) *RunwayQuery {
 	query := &RunwayQuery{config: c.config}
@@ -288,22 +334,6 @@ func (c *AirportClient) QueryRunways(a *Airport) *RunwayQuery {
 			sqlgraph.From(airport.Table, airport.FieldID, id),
 			sqlgraph.To(runway.Table, runway.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, false, airport.RunwaysTable, airport.RunwaysColumn),
-		)
-		fromV = sqlgraph.Neighbors(a.driver.Dialect(), step)
-		return fromV, nil
-	}
-	return query
-}
-
-// QueryStation queries the station edge of a Airport.
-func (c *AirportClient) QueryStation(a *Airport) *WeatherStationQuery {
-	query := &WeatherStationQuery{config: c.config}
-	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
-		id := a.ID
-		step := sqlgraph.NewStep(
-			sqlgraph.From(airport.Table, airport.FieldID, id),
-			sqlgraph.To(weatherstation.Table, weatherstation.FieldID),
-			sqlgraph.Edge(sqlgraph.O2O, false, airport.StationTable, airport.StationColumn),
 		)
 		fromV = sqlgraph.Neighbors(a.driver.Dialect(), step)
 		return fromV, nil
@@ -327,9 +357,131 @@ func (c *AirportClient) QueryFrequencies(a *Airport) *FrequencyQuery {
 	return query
 }
 
+// QueryStation queries the station edge of a Airport.
+func (c *AirportClient) QueryStation(a *Airport) *WeatherStationQuery {
+	query := &WeatherStationQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := a.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(airport.Table, airport.FieldID, id),
+			sqlgraph.To(weatherstation.Table, weatherstation.FieldID),
+			sqlgraph.Edge(sqlgraph.O2O, false, airport.StationTable, airport.StationColumn),
+		)
+		fromV = sqlgraph.Neighbors(a.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // Hooks returns the client hooks.
 func (c *AirportClient) Hooks() []Hook {
 	return c.hooks.Airport
+}
+
+// CountryClient is a client for the Country schema.
+type CountryClient struct {
+	config
+}
+
+// NewCountryClient returns a client for the Country from the given config.
+func NewCountryClient(c config) *CountryClient {
+	return &CountryClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `country.Hooks(f(g(h())))`.
+func (c *CountryClient) Use(hooks ...Hook) {
+	c.hooks.Country = append(c.hooks.Country, hooks...)
+}
+
+// Create returns a builder for creating a Country entity.
+func (c *CountryClient) Create() *CountryCreate {
+	mutation := newCountryMutation(c.config, OpCreate)
+	return &CountryCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of Country entities.
+func (c *CountryClient) CreateBulk(builders ...*CountryCreate) *CountryCreateBulk {
+	return &CountryCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for Country.
+func (c *CountryClient) Update() *CountryUpdate {
+	mutation := newCountryMutation(c.config, OpUpdate)
+	return &CountryUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *CountryClient) UpdateOne(co *Country) *CountryUpdateOne {
+	mutation := newCountryMutation(c.config, OpUpdateOne, withCountry(co))
+	return &CountryUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *CountryClient) UpdateOneID(id uuid.UUID) *CountryUpdateOne {
+	mutation := newCountryMutation(c.config, OpUpdateOne, withCountryID(id))
+	return &CountryUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for Country.
+func (c *CountryClient) Delete() *CountryDelete {
+	mutation := newCountryMutation(c.config, OpDelete)
+	return &CountryDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *CountryClient) DeleteOne(co *Country) *CountryDeleteOne {
+	return c.DeleteOneID(co.ID)
+}
+
+// DeleteOne returns a builder for deleting the given entity by its id.
+func (c *CountryClient) DeleteOneID(id uuid.UUID) *CountryDeleteOne {
+	builder := c.Delete().Where(country.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &CountryDeleteOne{builder}
+}
+
+// Query returns a query builder for Country.
+func (c *CountryClient) Query() *CountryQuery {
+	return &CountryQuery{
+		config: c.config,
+	}
+}
+
+// Get returns a Country entity by its id.
+func (c *CountryClient) Get(ctx context.Context, id uuid.UUID) (*Country, error) {
+	return c.Query().Where(country.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *CountryClient) GetX(ctx context.Context, id uuid.UUID) *Country {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryAirports queries the airports edge of a Country.
+func (c *CountryClient) QueryAirports(co *Country) *AirportQuery {
+	query := &AirportQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := co.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(country.Table, country.FieldID, id),
+			sqlgraph.To(airport.Table, airport.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, country.AirportsTable, country.AirportsColumn),
+		)
+		fromV = sqlgraph.Neighbors(co.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *CountryClient) Hooks() []Hook {
+	return c.hooks.Country
 }
 
 // ForecastClient is a client for the Forecast schema.
@@ -802,6 +954,112 @@ func (c *MetarClient) QuerySkyConditions(m *Metar) *SkyConditionQuery {
 // Hooks returns the client hooks.
 func (c *MetarClient) Hooks() []Hook {
 	return c.hooks.Metar
+}
+
+// RegionClient is a client for the Region schema.
+type RegionClient struct {
+	config
+}
+
+// NewRegionClient returns a client for the Region from the given config.
+func NewRegionClient(c config) *RegionClient {
+	return &RegionClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `region.Hooks(f(g(h())))`.
+func (c *RegionClient) Use(hooks ...Hook) {
+	c.hooks.Region = append(c.hooks.Region, hooks...)
+}
+
+// Create returns a builder for creating a Region entity.
+func (c *RegionClient) Create() *RegionCreate {
+	mutation := newRegionMutation(c.config, OpCreate)
+	return &RegionCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of Region entities.
+func (c *RegionClient) CreateBulk(builders ...*RegionCreate) *RegionCreateBulk {
+	return &RegionCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for Region.
+func (c *RegionClient) Update() *RegionUpdate {
+	mutation := newRegionMutation(c.config, OpUpdate)
+	return &RegionUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *RegionClient) UpdateOne(r *Region) *RegionUpdateOne {
+	mutation := newRegionMutation(c.config, OpUpdateOne, withRegion(r))
+	return &RegionUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *RegionClient) UpdateOneID(id uuid.UUID) *RegionUpdateOne {
+	mutation := newRegionMutation(c.config, OpUpdateOne, withRegionID(id))
+	return &RegionUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for Region.
+func (c *RegionClient) Delete() *RegionDelete {
+	mutation := newRegionMutation(c.config, OpDelete)
+	return &RegionDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *RegionClient) DeleteOne(r *Region) *RegionDeleteOne {
+	return c.DeleteOneID(r.ID)
+}
+
+// DeleteOne returns a builder for deleting the given entity by its id.
+func (c *RegionClient) DeleteOneID(id uuid.UUID) *RegionDeleteOne {
+	builder := c.Delete().Where(region.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &RegionDeleteOne{builder}
+}
+
+// Query returns a query builder for Region.
+func (c *RegionClient) Query() *RegionQuery {
+	return &RegionQuery{
+		config: c.config,
+	}
+}
+
+// Get returns a Region entity by its id.
+func (c *RegionClient) Get(ctx context.Context, id uuid.UUID) (*Region, error) {
+	return c.Query().Where(region.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *RegionClient) GetX(ctx context.Context, id uuid.UUID) *Region {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryAirports queries the airports edge of a Region.
+func (c *RegionClient) QueryAirports(r *Region) *AirportQuery {
+	query := &AirportQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := r.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(region.Table, region.FieldID, id),
+			sqlgraph.To(airport.Table, airport.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, region.AirportsTable, region.AirportsColumn),
+		)
+		fromV = sqlgraph.Neighbors(r.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *RegionClient) Hooks() []Hook {
+	return c.hooks.Region
 }
 
 // RunwayClient is a client for the Runway schema.

@@ -17,14 +17,15 @@ import (
 type Runway struct {
 	config `json:"-"`
 	// ID of the ent.
+	// The unique identifier of the record.
 	ID uuid.UUID `json:"id,omitempty"`
-	// ImportID holds the value of the "import_id" field.
+	// The unique identifier of the import.
 	ImportID int `json:"import_id,omitempty"`
 	// Hash holds the value of the "hash" field.
 	Hash string `json:"hash,omitempty"`
 	// ImportFlag holds the value of the "import_flag" field.
 	ImportFlag bool `json:"import_flag,omitempty"`
-	// LastUpdated holds the value of the "last_updated" field.
+	// The last time the record was updated/created.
 	LastUpdated time.Time `json:"last_updated,omitempty"`
 	// Length of the runway in feet.
 	Length int `json:"length,omitempty"`

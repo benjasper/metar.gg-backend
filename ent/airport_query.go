@@ -13,8 +13,10 @@ import (
 	"entgo.io/ent/schema/field"
 	"github.com/google/uuid"
 	"metar.gg/ent/airport"
+	"metar.gg/ent/country"
 	"metar.gg/ent/frequency"
 	"metar.gg/ent/predicate"
+	"metar.gg/ent/region"
 	"metar.gg/ent/runway"
 	"metar.gg/ent/weatherstation"
 )
@@ -28,9 +30,12 @@ type AirportQuery struct {
 	order                []OrderFunc
 	fields               []string
 	predicates           []predicate.Airport
+	withRegion           *RegionQuery
+	withCountry          *CountryQuery
 	withRunways          *RunwayQuery
-	withStation          *WeatherStationQuery
 	withFrequencies      *FrequencyQuery
+	withStation          *WeatherStationQuery
+	withFKs              bool
 	loadTotal            []func(context.Context, []*Airport) error
 	modifiers            []func(*sql.Selector)
 	withNamedRunways     map[string]*RunwayQuery
@@ -71,6 +76,50 @@ func (aq *AirportQuery) Order(o ...OrderFunc) *AirportQuery {
 	return aq
 }
 
+// QueryRegion chains the current query on the "region" edge.
+func (aq *AirportQuery) QueryRegion() *RegionQuery {
+	query := &RegionQuery{config: aq.config}
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := aq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := aq.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(airport.Table, airport.FieldID, selector),
+			sqlgraph.To(region.Table, region.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, airport.RegionTable, airport.RegionColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(aq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryCountry chains the current query on the "country" edge.
+func (aq *AirportQuery) QueryCountry() *CountryQuery {
+	query := &CountryQuery{config: aq.config}
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := aq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := aq.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(airport.Table, airport.FieldID, selector),
+			sqlgraph.To(country.Table, country.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, airport.CountryTable, airport.CountryColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(aq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
 // QueryRunways chains the current query on the "runways" edge.
 func (aq *AirportQuery) QueryRunways() *RunwayQuery {
 	query := &RunwayQuery{config: aq.config}
@@ -93,28 +142,6 @@ func (aq *AirportQuery) QueryRunways() *RunwayQuery {
 	return query
 }
 
-// QueryStation chains the current query on the "station" edge.
-func (aq *AirportQuery) QueryStation() *WeatherStationQuery {
-	query := &WeatherStationQuery{config: aq.config}
-	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
-		if err := aq.prepareQuery(ctx); err != nil {
-			return nil, err
-		}
-		selector := aq.sqlQuery(ctx)
-		if err := selector.Err(); err != nil {
-			return nil, err
-		}
-		step := sqlgraph.NewStep(
-			sqlgraph.From(airport.Table, airport.FieldID, selector),
-			sqlgraph.To(weatherstation.Table, weatherstation.FieldID),
-			sqlgraph.Edge(sqlgraph.O2O, false, airport.StationTable, airport.StationColumn),
-		)
-		fromU = sqlgraph.SetNeighbors(aq.driver.Dialect(), step)
-		return fromU, nil
-	}
-	return query
-}
-
 // QueryFrequencies chains the current query on the "frequencies" edge.
 func (aq *AirportQuery) QueryFrequencies() *FrequencyQuery {
 	query := &FrequencyQuery{config: aq.config}
@@ -130,6 +157,28 @@ func (aq *AirportQuery) QueryFrequencies() *FrequencyQuery {
 			sqlgraph.From(airport.Table, airport.FieldID, selector),
 			sqlgraph.To(frequency.Table, frequency.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, false, airport.FrequenciesTable, airport.FrequenciesColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(aq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryStation chains the current query on the "station" edge.
+func (aq *AirportQuery) QueryStation() *WeatherStationQuery {
+	query := &WeatherStationQuery{config: aq.config}
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := aq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := aq.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(airport.Table, airport.FieldID, selector),
+			sqlgraph.To(weatherstation.Table, weatherstation.FieldID),
+			sqlgraph.Edge(sqlgraph.O2O, false, airport.StationTable, airport.StationColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(aq.driver.Dialect(), step)
 		return fromU, nil
@@ -318,14 +367,38 @@ func (aq *AirportQuery) Clone() *AirportQuery {
 		offset:          aq.offset,
 		order:           append([]OrderFunc{}, aq.order...),
 		predicates:      append([]predicate.Airport{}, aq.predicates...),
+		withRegion:      aq.withRegion.Clone(),
+		withCountry:     aq.withCountry.Clone(),
 		withRunways:     aq.withRunways.Clone(),
-		withStation:     aq.withStation.Clone(),
 		withFrequencies: aq.withFrequencies.Clone(),
+		withStation:     aq.withStation.Clone(),
 		// clone intermediate query.
 		sql:    aq.sql.Clone(),
 		path:   aq.path,
 		unique: aq.unique,
 	}
+}
+
+// WithRegion tells the query-builder to eager-load the nodes that are connected to
+// the "region" edge. The optional arguments are used to configure the query builder of the edge.
+func (aq *AirportQuery) WithRegion(opts ...func(*RegionQuery)) *AirportQuery {
+	query := &RegionQuery{config: aq.config}
+	for _, opt := range opts {
+		opt(query)
+	}
+	aq.withRegion = query
+	return aq
+}
+
+// WithCountry tells the query-builder to eager-load the nodes that are connected to
+// the "country" edge. The optional arguments are used to configure the query builder of the edge.
+func (aq *AirportQuery) WithCountry(opts ...func(*CountryQuery)) *AirportQuery {
+	query := &CountryQuery{config: aq.config}
+	for _, opt := range opts {
+		opt(query)
+	}
+	aq.withCountry = query
+	return aq
 }
 
 // WithRunways tells the query-builder to eager-load the nodes that are connected to
@@ -339,17 +412,6 @@ func (aq *AirportQuery) WithRunways(opts ...func(*RunwayQuery)) *AirportQuery {
 	return aq
 }
 
-// WithStation tells the query-builder to eager-load the nodes that are connected to
-// the "station" edge. The optional arguments are used to configure the query builder of the edge.
-func (aq *AirportQuery) WithStation(opts ...func(*WeatherStationQuery)) *AirportQuery {
-	query := &WeatherStationQuery{config: aq.config}
-	for _, opt := range opts {
-		opt(query)
-	}
-	aq.withStation = query
-	return aq
-}
-
 // WithFrequencies tells the query-builder to eager-load the nodes that are connected to
 // the "frequencies" edge. The optional arguments are used to configure the query builder of the edge.
 func (aq *AirportQuery) WithFrequencies(opts ...func(*FrequencyQuery)) *AirportQuery {
@@ -358,6 +420,17 @@ func (aq *AirportQuery) WithFrequencies(opts ...func(*FrequencyQuery)) *AirportQ
 		opt(query)
 	}
 	aq.withFrequencies = query
+	return aq
+}
+
+// WithStation tells the query-builder to eager-load the nodes that are connected to
+// the "station" edge. The optional arguments are used to configure the query builder of the edge.
+func (aq *AirportQuery) WithStation(opts ...func(*WeatherStationQuery)) *AirportQuery {
+	query := &WeatherStationQuery{config: aq.config}
+	for _, opt := range opts {
+		opt(query)
+	}
+	aq.withStation = query
 	return aq
 }
 
@@ -428,13 +501,22 @@ func (aq *AirportQuery) prepareQuery(ctx context.Context) error {
 func (aq *AirportQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Airport, error) {
 	var (
 		nodes       = []*Airport{}
+		withFKs     = aq.withFKs
 		_spec       = aq.querySpec()
-		loadedTypes = [3]bool{
+		loadedTypes = [5]bool{
+			aq.withRegion != nil,
+			aq.withCountry != nil,
 			aq.withRunways != nil,
-			aq.withStation != nil,
 			aq.withFrequencies != nil,
+			aq.withStation != nil,
 		}
 	)
+	if aq.withRegion != nil || aq.withCountry != nil {
+		withFKs = true
+	}
+	if withFKs {
+		_spec.Node.Columns = append(_spec.Node.Columns, airport.ForeignKeys...)
+	}
 	_spec.ScanValues = func(columns []string) ([]any, error) {
 		return (*Airport).scanValues(nil, columns)
 	}
@@ -456,6 +538,18 @@ func (aq *AirportQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Airp
 	if len(nodes) == 0 {
 		return nodes, nil
 	}
+	if query := aq.withRegion; query != nil {
+		if err := aq.loadRegion(ctx, query, nodes, nil,
+			func(n *Airport, e *Region) { n.Edges.Region = e }); err != nil {
+			return nil, err
+		}
+	}
+	if query := aq.withCountry; query != nil {
+		if err := aq.loadCountry(ctx, query, nodes, nil,
+			func(n *Airport, e *Country) { n.Edges.Country = e }); err != nil {
+			return nil, err
+		}
+	}
 	if query := aq.withRunways; query != nil {
 		if err := aq.loadRunways(ctx, query, nodes,
 			func(n *Airport) { n.Edges.Runways = []*Runway{} },
@@ -463,16 +557,16 @@ func (aq *AirportQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Airp
 			return nil, err
 		}
 	}
-	if query := aq.withStation; query != nil {
-		if err := aq.loadStation(ctx, query, nodes, nil,
-			func(n *Airport, e *WeatherStation) { n.Edges.Station = e }); err != nil {
-			return nil, err
-		}
-	}
 	if query := aq.withFrequencies; query != nil {
 		if err := aq.loadFrequencies(ctx, query, nodes,
 			func(n *Airport) { n.Edges.Frequencies = []*Frequency{} },
 			func(n *Airport, e *Frequency) { n.Edges.Frequencies = append(n.Edges.Frequencies, e) }); err != nil {
+			return nil, err
+		}
+	}
+	if query := aq.withStation; query != nil {
+		if err := aq.loadStation(ctx, query, nodes, nil,
+			func(n *Airport, e *WeatherStation) { n.Edges.Station = e }); err != nil {
 			return nil, err
 		}
 	}
@@ -498,6 +592,64 @@ func (aq *AirportQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Airp
 	return nodes, nil
 }
 
+func (aq *AirportQuery) loadRegion(ctx context.Context, query *RegionQuery, nodes []*Airport, init func(*Airport), assign func(*Airport, *Region)) error {
+	ids := make([]uuid.UUID, 0, len(nodes))
+	nodeids := make(map[uuid.UUID][]*Airport)
+	for i := range nodes {
+		if nodes[i].region_airports == nil {
+			continue
+		}
+		fk := *nodes[i].region_airports
+		if _, ok := nodeids[fk]; !ok {
+			ids = append(ids, fk)
+		}
+		nodeids[fk] = append(nodeids[fk], nodes[i])
+	}
+	query.Where(region.IDIn(ids...))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		nodes, ok := nodeids[n.ID]
+		if !ok {
+			return fmt.Errorf(`unexpected foreign-key "region_airports" returned %v`, n.ID)
+		}
+		for i := range nodes {
+			assign(nodes[i], n)
+		}
+	}
+	return nil
+}
+func (aq *AirportQuery) loadCountry(ctx context.Context, query *CountryQuery, nodes []*Airport, init func(*Airport), assign func(*Airport, *Country)) error {
+	ids := make([]uuid.UUID, 0, len(nodes))
+	nodeids := make(map[uuid.UUID][]*Airport)
+	for i := range nodes {
+		if nodes[i].country_airports == nil {
+			continue
+		}
+		fk := *nodes[i].country_airports
+		if _, ok := nodeids[fk]; !ok {
+			ids = append(ids, fk)
+		}
+		nodeids[fk] = append(nodeids[fk], nodes[i])
+	}
+	query.Where(country.IDIn(ids...))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		nodes, ok := nodeids[n.ID]
+		if !ok {
+			return fmt.Errorf(`unexpected foreign-key "country_airports" returned %v`, n.ID)
+		}
+		for i := range nodes {
+			assign(nodes[i], n)
+		}
+	}
+	return nil
+}
 func (aq *AirportQuery) loadRunways(ctx context.Context, query *RunwayQuery, nodes []*Airport, init func(*Airport), assign func(*Airport, *Runway)) error {
 	fks := make([]driver.Value, 0, len(nodes))
 	nodeids := make(map[uuid.UUID]*Airport)
@@ -529,34 +681,6 @@ func (aq *AirportQuery) loadRunways(ctx context.Context, query *RunwayQuery, nod
 	}
 	return nil
 }
-func (aq *AirportQuery) loadStation(ctx context.Context, query *WeatherStationQuery, nodes []*Airport, init func(*Airport), assign func(*Airport, *WeatherStation)) error {
-	fks := make([]driver.Value, 0, len(nodes))
-	nodeids := make(map[uuid.UUID]*Airport)
-	for i := range nodes {
-		fks = append(fks, nodes[i].ID)
-		nodeids[nodes[i].ID] = nodes[i]
-	}
-	query.withFKs = true
-	query.Where(predicate.WeatherStation(func(s *sql.Selector) {
-		s.Where(sql.InValues(airport.StationColumn, fks...))
-	}))
-	neighbors, err := query.All(ctx)
-	if err != nil {
-		return err
-	}
-	for _, n := range neighbors {
-		fk := n.airport_station
-		if fk == nil {
-			return fmt.Errorf(`foreign-key "airport_station" is nil for node %v`, n.ID)
-		}
-		node, ok := nodeids[*fk]
-		if !ok {
-			return fmt.Errorf(`unexpected foreign-key "airport_station" returned %v for node %v`, *fk, n.ID)
-		}
-		assign(node, n)
-	}
-	return nil
-}
 func (aq *AirportQuery) loadFrequencies(ctx context.Context, query *FrequencyQuery, nodes []*Airport, init func(*Airport), assign func(*Airport, *Frequency)) error {
 	fks := make([]driver.Value, 0, len(nodes))
 	nodeids := make(map[uuid.UUID]*Airport)
@@ -583,6 +707,34 @@ func (aq *AirportQuery) loadFrequencies(ctx context.Context, query *FrequencyQue
 		node, ok := nodeids[*fk]
 		if !ok {
 			return fmt.Errorf(`unexpected foreign-key "airport_frequencies" returned %v for node %v`, *fk, n.ID)
+		}
+		assign(node, n)
+	}
+	return nil
+}
+func (aq *AirportQuery) loadStation(ctx context.Context, query *WeatherStationQuery, nodes []*Airport, init func(*Airport), assign func(*Airport, *WeatherStation)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[uuid.UUID]*Airport)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+	}
+	query.withFKs = true
+	query.Where(predicate.WeatherStation(func(s *sql.Selector) {
+		s.Where(sql.InValues(airport.StationColumn, fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.airport_station
+		if fk == nil {
+			return fmt.Errorf(`foreign-key "airport_station" is nil for node %v`, n.ID)
+		}
+		node, ok := nodeids[*fk]
+		if !ok {
+			return fmt.Errorf(`unexpected foreign-key "airport_station" returned %v for node %v`, *fk, n.ID)
 		}
 		assign(node, n)
 	}

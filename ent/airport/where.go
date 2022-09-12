@@ -159,20 +159,6 @@ func Elevation(v int) predicate.Airport {
 	})
 }
 
-// Country applies equality check predicate on the "country" field. It's identical to CountryEQ.
-func Country(v string) predicate.Airport {
-	return predicate.Airport(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldCountry), v))
-	})
-}
-
-// Region applies equality check predicate on the "region" field. It's identical to RegionEQ.
-func Region(v string) predicate.Airport {
-	return predicate.Airport(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldRegion), v))
-	})
-}
-
 // Municipality applies equality check predicate on the "municipality" field. It's identical to MunicipalityEQ.
 func Municipality(v string) predicate.Airport {
 	return predicate.Airport(func(s *sql.Selector) {
@@ -1122,240 +1108,6 @@ func ElevationNotNil() predicate.Airport {
 	})
 }
 
-// ContinentEQ applies the EQ predicate on the "continent" field.
-func ContinentEQ(v Continent) predicate.Airport {
-	return predicate.Airport(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldContinent), v))
-	})
-}
-
-// ContinentNEQ applies the NEQ predicate on the "continent" field.
-func ContinentNEQ(v Continent) predicate.Airport {
-	return predicate.Airport(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldContinent), v))
-	})
-}
-
-// ContinentIn applies the In predicate on the "continent" field.
-func ContinentIn(vs ...Continent) predicate.Airport {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Airport(func(s *sql.Selector) {
-		s.Where(sql.In(s.C(FieldContinent), v...))
-	})
-}
-
-// ContinentNotIn applies the NotIn predicate on the "continent" field.
-func ContinentNotIn(vs ...Continent) predicate.Airport {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Airport(func(s *sql.Selector) {
-		s.Where(sql.NotIn(s.C(FieldContinent), v...))
-	})
-}
-
-// CountryEQ applies the EQ predicate on the "country" field.
-func CountryEQ(v string) predicate.Airport {
-	return predicate.Airport(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldCountry), v))
-	})
-}
-
-// CountryNEQ applies the NEQ predicate on the "country" field.
-func CountryNEQ(v string) predicate.Airport {
-	return predicate.Airport(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldCountry), v))
-	})
-}
-
-// CountryIn applies the In predicate on the "country" field.
-func CountryIn(vs ...string) predicate.Airport {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Airport(func(s *sql.Selector) {
-		s.Where(sql.In(s.C(FieldCountry), v...))
-	})
-}
-
-// CountryNotIn applies the NotIn predicate on the "country" field.
-func CountryNotIn(vs ...string) predicate.Airport {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Airport(func(s *sql.Selector) {
-		s.Where(sql.NotIn(s.C(FieldCountry), v...))
-	})
-}
-
-// CountryGT applies the GT predicate on the "country" field.
-func CountryGT(v string) predicate.Airport {
-	return predicate.Airport(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldCountry), v))
-	})
-}
-
-// CountryGTE applies the GTE predicate on the "country" field.
-func CountryGTE(v string) predicate.Airport {
-	return predicate.Airport(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldCountry), v))
-	})
-}
-
-// CountryLT applies the LT predicate on the "country" field.
-func CountryLT(v string) predicate.Airport {
-	return predicate.Airport(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldCountry), v))
-	})
-}
-
-// CountryLTE applies the LTE predicate on the "country" field.
-func CountryLTE(v string) predicate.Airport {
-	return predicate.Airport(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldCountry), v))
-	})
-}
-
-// CountryContains applies the Contains predicate on the "country" field.
-func CountryContains(v string) predicate.Airport {
-	return predicate.Airport(func(s *sql.Selector) {
-		s.Where(sql.Contains(s.C(FieldCountry), v))
-	})
-}
-
-// CountryHasPrefix applies the HasPrefix predicate on the "country" field.
-func CountryHasPrefix(v string) predicate.Airport {
-	return predicate.Airport(func(s *sql.Selector) {
-		s.Where(sql.HasPrefix(s.C(FieldCountry), v))
-	})
-}
-
-// CountryHasSuffix applies the HasSuffix predicate on the "country" field.
-func CountryHasSuffix(v string) predicate.Airport {
-	return predicate.Airport(func(s *sql.Selector) {
-		s.Where(sql.HasSuffix(s.C(FieldCountry), v))
-	})
-}
-
-// CountryEqualFold applies the EqualFold predicate on the "country" field.
-func CountryEqualFold(v string) predicate.Airport {
-	return predicate.Airport(func(s *sql.Selector) {
-		s.Where(sql.EqualFold(s.C(FieldCountry), v))
-	})
-}
-
-// CountryContainsFold applies the ContainsFold predicate on the "country" field.
-func CountryContainsFold(v string) predicate.Airport {
-	return predicate.Airport(func(s *sql.Selector) {
-		s.Where(sql.ContainsFold(s.C(FieldCountry), v))
-	})
-}
-
-// RegionEQ applies the EQ predicate on the "region" field.
-func RegionEQ(v string) predicate.Airport {
-	return predicate.Airport(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldRegion), v))
-	})
-}
-
-// RegionNEQ applies the NEQ predicate on the "region" field.
-func RegionNEQ(v string) predicate.Airport {
-	return predicate.Airport(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldRegion), v))
-	})
-}
-
-// RegionIn applies the In predicate on the "region" field.
-func RegionIn(vs ...string) predicate.Airport {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Airport(func(s *sql.Selector) {
-		s.Where(sql.In(s.C(FieldRegion), v...))
-	})
-}
-
-// RegionNotIn applies the NotIn predicate on the "region" field.
-func RegionNotIn(vs ...string) predicate.Airport {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Airport(func(s *sql.Selector) {
-		s.Where(sql.NotIn(s.C(FieldRegion), v...))
-	})
-}
-
-// RegionGT applies the GT predicate on the "region" field.
-func RegionGT(v string) predicate.Airport {
-	return predicate.Airport(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldRegion), v))
-	})
-}
-
-// RegionGTE applies the GTE predicate on the "region" field.
-func RegionGTE(v string) predicate.Airport {
-	return predicate.Airport(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldRegion), v))
-	})
-}
-
-// RegionLT applies the LT predicate on the "region" field.
-func RegionLT(v string) predicate.Airport {
-	return predicate.Airport(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldRegion), v))
-	})
-}
-
-// RegionLTE applies the LTE predicate on the "region" field.
-func RegionLTE(v string) predicate.Airport {
-	return predicate.Airport(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldRegion), v))
-	})
-}
-
-// RegionContains applies the Contains predicate on the "region" field.
-func RegionContains(v string) predicate.Airport {
-	return predicate.Airport(func(s *sql.Selector) {
-		s.Where(sql.Contains(s.C(FieldRegion), v))
-	})
-}
-
-// RegionHasPrefix applies the HasPrefix predicate on the "region" field.
-func RegionHasPrefix(v string) predicate.Airport {
-	return predicate.Airport(func(s *sql.Selector) {
-		s.Where(sql.HasPrefix(s.C(FieldRegion), v))
-	})
-}
-
-// RegionHasSuffix applies the HasSuffix predicate on the "region" field.
-func RegionHasSuffix(v string) predicate.Airport {
-	return predicate.Airport(func(s *sql.Selector) {
-		s.Where(sql.HasSuffix(s.C(FieldRegion), v))
-	})
-}
-
-// RegionEqualFold applies the EqualFold predicate on the "region" field.
-func RegionEqualFold(v string) predicate.Airport {
-	return predicate.Airport(func(s *sql.Selector) {
-		s.Where(sql.EqualFold(s.C(FieldRegion), v))
-	})
-}
-
-// RegionContainsFold applies the ContainsFold predicate on the "region" field.
-func RegionContainsFold(v string) predicate.Airport {
-	return predicate.Airport(func(s *sql.Selector) {
-		s.Where(sql.ContainsFold(s.C(FieldRegion), v))
-	})
-}
-
 // MunicipalityEQ applies the EQ predicate on the "municipality" field.
 func MunicipalityEQ(v string) predicate.Airport {
 	return predicate.Airport(func(s *sql.Selector) {
@@ -1935,6 +1687,62 @@ func WikipediaContainsFold(v string) predicate.Airport {
 	})
 }
 
+// HasRegion applies the HasEdge predicate on the "region" edge.
+func HasRegion() predicate.Airport {
+	return predicate.Airport(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.To(RegionTable, FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, RegionTable, RegionColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasRegionWith applies the HasEdge predicate on the "region" edge with a given conditions (other predicates).
+func HasRegionWith(preds ...predicate.Region) predicate.Airport {
+	return predicate.Airport(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.To(RegionInverseTable, FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, RegionTable, RegionColumn),
+		)
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
+// HasCountry applies the HasEdge predicate on the "country" edge.
+func HasCountry() predicate.Airport {
+	return predicate.Airport(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.To(CountryTable, FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, CountryTable, CountryColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasCountryWith applies the HasEdge predicate on the "country" edge with a given conditions (other predicates).
+func HasCountryWith(preds ...predicate.Country) predicate.Airport {
+	return predicate.Airport(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.To(CountryInverseTable, FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, CountryTable, CountryColumn),
+		)
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
 // HasRunways applies the HasEdge predicate on the "runways" edge.
 func HasRunways() predicate.Airport {
 	return predicate.Airport(func(s *sql.Selector) {
@@ -1963,34 +1771,6 @@ func HasRunwaysWith(preds ...predicate.Runway) predicate.Airport {
 	})
 }
 
-// HasStation applies the HasEdge predicate on the "station" edge.
-func HasStation() predicate.Airport {
-	return predicate.Airport(func(s *sql.Selector) {
-		step := sqlgraph.NewStep(
-			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(StationTable, FieldID),
-			sqlgraph.Edge(sqlgraph.O2O, false, StationTable, StationColumn),
-		)
-		sqlgraph.HasNeighbors(s, step)
-	})
-}
-
-// HasStationWith applies the HasEdge predicate on the "station" edge with a given conditions (other predicates).
-func HasStationWith(preds ...predicate.WeatherStation) predicate.Airport {
-	return predicate.Airport(func(s *sql.Selector) {
-		step := sqlgraph.NewStep(
-			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(StationInverseTable, FieldID),
-			sqlgraph.Edge(sqlgraph.O2O, false, StationTable, StationColumn),
-		)
-		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
-			for _, p := range preds {
-				p(s)
-			}
-		})
-	})
-}
-
 // HasFrequencies applies the HasEdge predicate on the "frequencies" edge.
 func HasFrequencies() predicate.Airport {
 	return predicate.Airport(func(s *sql.Selector) {
@@ -2010,6 +1790,34 @@ func HasFrequenciesWith(preds ...predicate.Frequency) predicate.Airport {
 			sqlgraph.From(Table, FieldID),
 			sqlgraph.To(FrequenciesInverseTable, FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, false, FrequenciesTable, FrequenciesColumn),
+		)
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
+// HasStation applies the HasEdge predicate on the "station" edge.
+func HasStation() predicate.Airport {
+	return predicate.Airport(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.To(StationTable, FieldID),
+			sqlgraph.Edge(sqlgraph.O2O, false, StationTable, StationColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasStationWith applies the HasEdge predicate on the "station" edge with a given conditions (other predicates).
+func HasStationWith(preds ...predicate.WeatherStation) predicate.Airport {
+	return predicate.Airport(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.To(StationInverseTable, FieldID),
+			sqlgraph.Edge(sqlgraph.O2O, false, StationTable, StationColumn),
 		)
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {

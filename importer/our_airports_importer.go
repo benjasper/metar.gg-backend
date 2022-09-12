@@ -3,12 +3,15 @@ package importer
 import (
 	"context"
 	"encoding/csv"
+	"fmt"
 	"github.com/segmentio/fasthash/fnv1a"
 	"golang.org/x/sync/errgroup"
 	"io"
 	"metar.gg/ent"
 	"metar.gg/ent/airport"
+	"metar.gg/ent/country"
 	"metar.gg/ent/frequency"
+	"metar.gg/ent/region"
 	"metar.gg/ent/runway"
 	"metar.gg/environment"
 	"metar.gg/logging"
@@ -63,6 +66,28 @@ func (i *Importer) ImportFrequencies(ctx context.Context, url string) error {
 	i.stats = NewImportStatistics("FREQUENCIES", i.logger)
 
 	err := i.importModelType(ctx, url, i.importFrequencyLine, i.cleanupFrequencies)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (i *Importer) ImportCountries(ctx context.Context, url string) error {
+	i.stats = NewImportStatistics("COUNTRIES", i.logger)
+
+	err := i.importModelType(ctx, url, i.importCountryLine, i.cleanupCountries)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (i *Importer) ImportRegions(ctx context.Context, url string) error {
+	i.stats = NewImportStatistics("REGIONS", i.logger)
+
+	err := i.importModelType(ctx, url, i.importRegionLine, i.cleanupRegions)
 	if err != nil {
 		return err
 	}
@@ -139,6 +164,27 @@ func (i *Importer) importModelType(ctx context.Context, url string, importFuncti
 	return err
 }
 
+func stringContinentToEnumContinent(continent string) country.Continent {
+	switch continent {
+	case country.ContinentAfrica.String():
+		return country.ContinentAfrica
+	case country.ContinentAntarctica.String():
+		return country.ContinentAntarctica
+	case country.ContinentAsia.String():
+		return country.ContinentAsia
+	case country.ContinentOceania.String():
+		return country.ContinentOceania
+	case country.ContinentSouthAmerica.String():
+		return country.ContinentSouthAmerica
+	case country.ContinentNorthAmerica.String():
+		return country.ContinentNorthAmerica
+	case country.ContinentEurope.String():
+		return country.ContinentEurope
+	}
+
+	return ""
+}
+
 // CSV file format: "id","ident","type","name","latitude_deg","longitude_deg","elevation_ft","continent","iso_country","iso_region","municipality","scheduled_service","gps_code","iata_code","local_code","home_link","wikipedia_link","keywords"
 func (i *Importer) importAirportLine(ctx context.Context, data []string) error {
 	// Hash the current line via md5
@@ -200,26 +246,16 @@ func (i *Importer) importAirportLine(ctx context.Context, data []string) error {
 		break
 	}
 
-	continent := airport.ContinentEurope
-	switch data[11] {
-	case airport.ContinentAfrica.String():
-		continent = airport.ContinentAfrica
-		break
-	case airport.ContinentAntarctica.String():
-		continent = airport.ContinentAntarctica
-		break
-	case airport.ContinentAsia.String():
-		continent = airport.ContinentAsia
-		break
-	case airport.ContinentOceania.String():
-		continent = airport.ContinentOceania
-		break
-	case airport.ContinentSouthAmerica.String():
-		continent = airport.ContinentSouthAmerica
-		break
-	case airport.ContinentNorthAmerica.String():
-		continent = airport.ContinentNorthAmerica
-		break
+	// Fetch country
+	c, err := i.db.Country.Query().Where(country.Code(data[8])).Only(ctx)
+	if err != nil {
+		i.logger.Error(fmt.Sprintf("[IMPORT] Could not find country with code %s", data[8]))
+	}
+
+	// Fetch region
+	r, err := i.db.Region.Query().Where(region.Code(data[9])).Only(ctx)
+	if err != nil {
+		i.logger.Error(fmt.Sprintf("[IMPORT] Could not find region with code %s", data[9]))
 	}
 
 	createAirport := i.db.Airport.Create().
@@ -232,9 +268,6 @@ func (i *Importer) importAirportLine(ctx context.Context, data []string) error {
 		SetLatitude(lat).
 		SetLongitude(lon).
 		SetNillableElevation(utils.NillableWithInput(data[6], int(elevation))).
-		SetContinent(continent).
-		SetCountry(data[8]).
-		SetRegion(data[9]).
 		SetNillableMunicipality(utils.NillableString(data[10])).
 		SetScheduledService(scheduledService).
 		SetNillableGpsCode(utils.NillableString(data[12])).
@@ -244,6 +277,14 @@ func (i *Importer) importAirportLine(ctx context.Context, data []string) error {
 		SetNillableWikipedia(utils.NillableString(data[16])).
 		SetKeywords(keywords).
 		SetLastUpdated(time.Now())
+
+	if c != nil {
+		createAirport.SetCountryID(c.ID)
+	}
+
+	if r != nil {
+		createAirport.SetRegionID(r.ID)
+	}
 
 	// Check if identifier is all letters and only 4 characters long.
 	potentialIcao := strings.Trim(data[1], " ")
@@ -452,6 +493,137 @@ func (i *Importer) cleanupFrequencies(ctx context.Context) error {
 
 	_, err = i.db.Frequency.Update().Where(
 		frequency.ImportFlag(true),
+	).SetImportFlag(false).Save(ctx)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// The raw data is in the following order: "id","code","name","continent","wikipedia_link","keywords"
+func (i *Importer) importCountryLine(ctx context.Context, data []string) error {
+	// Hash the current line via md5
+	line := strings.Join(data, "")
+	hash := strconv.FormatUint(fnv1a.HashString64(line), 10)
+	countryID, _ := strconv.ParseInt(data[0], 10, 64)
+
+	found, err := i.db.Country.Update().Where(
+		country.Hash(hash),
+		country.ImportID(int(countryID)),
+	).
+		SetImportFlag(true).
+		Save(ctx)
+	if err != nil {
+		return err
+	}
+
+	if found == 1 {
+		return nil
+	}
+
+	keywords := make([]string, 0)
+	if data[5] != "" {
+		keywords = strings.Split(data[5], ", ")
+	}
+
+	err = i.db.Country.Create().
+		SetImportFlag(true).
+		SetHash(hash).
+		SetImportID(int(countryID)).
+		SetCode(data[1]).
+		SetName(data[2]).
+		SetContinent(stringContinentToEnumContinent(data[3])).
+		SetWikipediaLink(data[4]).
+		SetKeywords(keywords).
+		SetLastUpdated(time.Now()).
+		OnConflict().
+		UpdateNewValues().
+		Exec(ctx)
+	if err != nil {
+		return err
+	}
+
+	i.stats.AddUpdated()
+
+	return nil
+}
+
+func (i *Importer) cleanupCountries(ctx context.Context) error {
+	deleted, err := i.db.Country.Delete().Where(
+		country.ImportFlag(false),
+	).Exec(ctx)
+	if err != nil {
+		return err
+	}
+
+	i.stats.AddMultipleDeleted(deleted)
+
+	_, err = i.db.Country.Update().Where(
+		country.ImportFlag(true),
+	).SetImportFlag(false).Save(ctx)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// CSV fields: "id","code","local_code","name","continent","iso_country","wikipedia_link","keywords"
+func (i *Importer) importRegionLine(ctx context.Context, data []string) error {
+	// Hash the current line via md5
+	line := strings.Join(data, "")
+	hash := strconv.FormatUint(fnv1a.HashString64(line), 10)
+	regionID, _ := strconv.ParseInt(data[0], 10, 64)
+
+	found, err := i.db.Region.Update().Where(
+		region.Hash(hash),
+		region.ImportID(int(regionID)),
+	).
+		SetImportFlag(true).
+		Save(ctx)
+	if err != nil {
+		return err
+	}
+
+	if found == 1 {
+		return nil
+	}
+
+	err = i.db.Region.Create().
+		SetImportFlag(true).
+		SetHash(hash).
+		SetImportID(int(regionID)).
+		SetCode(data[1]).
+		SetLocalCode(data[2]).
+		SetName(data[3]).
+		SetWikipediaLink(data[6]).
+		SetKeywords(strings.Split(data[7], ", ")).
+		SetLastUpdated(time.Now()).
+		OnConflict().
+		UpdateNewValues().
+		Exec(ctx)
+	if err != nil {
+		return err
+	}
+
+	i.stats.AddUpdated()
+
+	return nil
+}
+
+func (i *Importer) cleanupRegions(ctx context.Context) error {
+	deleted, err := i.db.Region.Delete().Where(
+		region.ImportFlag(false),
+	).Exec(ctx)
+	if err != nil {
+		return err
+	}
+
+	i.stats.AddMultipleDeleted(deleted)
+
+	_, err = i.db.Region.Update().Where(
+		region.ImportFlag(true),
 	).SetImportFlag(false).Save(ctx)
 	if err != nil {
 		return err

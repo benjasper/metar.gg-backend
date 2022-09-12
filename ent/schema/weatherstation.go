@@ -6,7 +6,6 @@ import (
 	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
 	"entgo.io/ent/schema/index"
-	"github.com/google/uuid"
 )
 
 // WeatherStation holds the schema definition for the WeatherStation entity.
@@ -17,7 +16,6 @@ type WeatherStation struct {
 // Fields of the Metar.
 func (WeatherStation) Fields() []ent.Field {
 	return []ent.Field{
-		field.UUID("id", uuid.UUID{}).Default(uuid.New).Immutable(),
 		field.String("station_id").Immutable().Unique().Comment("The ICAO identifier of the station that provided the weather data or identifier of the weather station."),
 		field.Float("latitude").Optional().Nillable().Comment("The latitude in decimal degrees of the station."),
 		field.Float("longitude").Optional().Nillable().Comment("The longitude in decimal degrees of the station."),
@@ -48,5 +46,7 @@ func (WeatherStation) Indexes() []ent.Index {
 
 // Mixin of the Metar.
 func (WeatherStation) Mixin() []ent.Mixin {
-	return nil
+	return []ent.Mixin{
+		IDMixin{},
+	}
 }

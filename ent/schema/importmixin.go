@@ -6,7 +6,6 @@ import (
 	"entgo.io/ent/schema/field"
 	"entgo.io/ent/schema/index"
 	"entgo.io/ent/schema/mixin"
-	"github.com/google/uuid"
 	"time"
 )
 
@@ -22,11 +21,10 @@ func now() time.Time {
 // Fields of the ImportMixin.
 func (ImportMixin) Fields() []ent.Field {
 	return []ent.Field{
-		field.UUID("id", uuid.UUID{}).Default(uuid.New).Immutable(),
-		field.Int("import_id"),
+		field.Int("import_id").Comment("The unique identifier of the import."),
 		field.String("hash").Annotations(entgql.Skip()),
 		field.Bool("import_flag").Default(false).Annotations(entgql.Skip()),
-		field.Time("last_updated").Default(now),
+		field.Time("last_updated").Default(now).Comment("The last time the record was updated/created."),
 	}
 }
 

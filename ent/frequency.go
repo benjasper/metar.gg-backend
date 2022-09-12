@@ -17,14 +17,15 @@ import (
 type Frequency struct {
 	config `json:"-"`
 	// ID of the ent.
+	// The unique identifier of the record.
 	ID uuid.UUID `json:"id,omitempty"`
-	// ImportID holds the value of the "import_id" field.
+	// The unique identifier of the import.
 	ImportID int `json:"import_id,omitempty"`
 	// Hash holds the value of the "hash" field.
 	Hash string `json:"hash,omitempty"`
 	// ImportFlag holds the value of the "import_flag" field.
 	ImportFlag bool `json:"import_flag,omitempty"`
-	// LastUpdated holds the value of the "last_updated" field.
+	// The last time the record was updated/created.
 	LastUpdated time.Time `json:"last_updated,omitempty"`
 	// A code for the frequency type. Some common values are "TWR" (tower), "ATF" or "CTAF" (common traffic frequency), "GND" (ground control), "RMP" (ramp control), "ATIS" (automated weather), "RCO" (remote radio outlet), "ARR" (arrivals), "DEP" (departures), "UNICOM" (monitored ground station), and "RDO" (a flight-service station).
 	Type string `json:"type,omitempty"`

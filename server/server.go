@@ -83,7 +83,17 @@ func (s *Server) Run(db *ent.Client, logger *logging.Logger) error {
 func RunAirportImport(ctx context.Context, db *ent.Client, logger *logging.Logger) {
 	imp := importer.NewImporter(db, logger)
 
-	err := imp.ImportAirports(ctx, "https://raw.githubusercontent.com/davidmegginson/ourairports-data/main/airports.csv")
+	err := imp.ImportCountries(ctx, "https://raw.githubusercontent.com/davidmegginson/ourairports-data/main/countries.csv")
+	if err != nil {
+		logger.Error(fmt.Sprintf("[IMPORT] Failed to import countries: %s", err))
+	}
+
+	err = imp.ImportRegions(ctx, "https://raw.githubusercontent.com/davidmegginson/ourairports-data/main/regions.csv")
+	if err != nil {
+		logger.Error(fmt.Sprintf("[IMPORT] Failed to import regions: %s", err))
+	}
+
+	err = imp.ImportAirports(ctx, "https://raw.githubusercontent.com/davidmegginson/ourairports-data/main/airports.csv")
 	if err != nil {
 		logger.Error(fmt.Sprintf("[IMPORT] Failed to import airports: %s", err))
 	}

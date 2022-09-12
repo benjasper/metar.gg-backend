@@ -25,10 +25,12 @@ type config struct {
 // hooks per client, for fast access.
 type hooks struct {
 	Airport             []ent.Hook
+	Country             []ent.Hook
 	Forecast            []ent.Hook
 	Frequency           []ent.Hook
 	IcingCondition      []ent.Hook
 	Metar               []ent.Hook
+	Region              []ent.Hook
 	Runway              []ent.Hook
 	SkyCondition        []ent.Hook
 	Taf                 []ent.Hook

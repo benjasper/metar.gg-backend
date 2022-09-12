@@ -8,10 +8,18 @@ import (
 	"github.com/99designs/gqlgen/graphql"
 )
 
-func (a *Airport) Station(ctx context.Context) (*WeatherStation, error) {
-	result, err := a.Edges.StationOrErr()
+func (a *Airport) Region(ctx context.Context) (*Region, error) {
+	result, err := a.Edges.RegionOrErr()
 	if IsNotLoaded(err) {
-		result, err = a.QueryStation().Only(ctx)
+		result, err = a.QueryRegion().Only(ctx)
+	}
+	return result, MaskNotFound(err)
+}
+
+func (a *Airport) Country(ctx context.Context) (*Country, error) {
+	result, err := a.Edges.CountryOrErr()
+	if IsNotLoaded(err) {
+		result, err = a.QueryCountry().Only(ctx)
 	}
 	return result, MaskNotFound(err)
 }
@@ -22,6 +30,14 @@ func (a *Airport) Frequencies(ctx context.Context) ([]*Frequency, error) {
 		result, err = a.QueryFrequencies().All(ctx)
 	}
 	return result, err
+}
+
+func (a *Airport) Station(ctx context.Context) (*WeatherStation, error) {
+	result, err := a.Edges.StationOrErr()
+	if IsNotLoaded(err) {
+		result, err = a.QueryStation().Only(ctx)
+	}
+	return result, MaskNotFound(err)
 }
 
 func (f *Forecast) SkyConditions(ctx context.Context) ([]*SkyCondition, error) {

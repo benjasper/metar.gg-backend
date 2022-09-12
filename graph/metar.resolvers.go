@@ -5,8 +5,9 @@ package graph
 
 import (
 	"context"
-	"entgo.io/ent/dialect/sql"
 	"fmt"
+
+	"entgo.io/ent/dialect/sql"
 	"github.com/google/uuid"
 	"metar.gg/ent"
 	"metar.gg/ent/airport"

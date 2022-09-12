@@ -11,6 +11,8 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"github.com/google/uuid"
 	"metar.gg/ent/airport"
+	"metar.gg/ent/country"
+	"metar.gg/ent/region"
 	"metar.gg/ent/weatherstation"
 )
 
@@ -18,14 +20,15 @@ import (
 type Airport struct {
 	config `json:"-"`
 	// ID of the ent.
+	// The unique identifier of the record.
 	ID uuid.UUID `json:"id,omitempty"`
-	// ImportID holds the value of the "import_id" field.
+	// The unique identifier of the import.
 	ImportID int `json:"import_id,omitempty"`
 	// Hash holds the value of the "hash" field.
 	Hash string `json:"hash,omitempty"`
 	// ImportFlag holds the value of the "import_flag" field.
 	ImportFlag bool `json:"import_flag,omitempty"`
-	// LastUpdated holds the value of the "last_updated" field.
+	// The last time the record was updated/created.
 	LastUpdated time.Time `json:"last_updated,omitempty"`
 	// The four-letter ICAO code of the airport.
 	IcaoCode string `json:"icao_code,omitempty"`
@@ -43,12 +46,6 @@ type Airport struct {
 	Longitude float64 `json:"longitude,omitempty"`
 	// Elevation of the airport, in feet.
 	Elevation *int `json:"elevation,omitempty"`
-	// Where the airport is (primarily) located.
-	Continent airport.Continent `json:"continent,omitempty"`
-	// Country holds the value of the "country" field.
-	Country string `json:"country,omitempty"`
-	// Region holds the value of the "region" field.
-	Region string `json:"region,omitempty"`
 	// The primary municipality that the airport serves (when available). Note that this is not necessarily the municipality where the airport is physically located.
 	Municipality *string `json:"municipality,omitempty"`
 	// Whether the airport has scheduled airline service.
@@ -65,40 +62,81 @@ type Airport struct {
 	Keywords []string `json:"keywords,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the AirportQuery when eager-loading is set.
-	Edges AirportEdges `json:"edges"`
+	Edges            AirportEdges `json:"edges"`
+	country_airports *uuid.UUID
+	region_airports  *uuid.UUID
 }
 
 // AirportEdges holds the relations/edges for other nodes in the graph.
 type AirportEdges struct {
+	// The region that the airport is located in.
+	Region *Region `json:"region,omitempty"`
+	// The country that the airport is located in.
+	Country *Country `json:"country,omitempty"`
 	// Runways at the airport.
 	Runways []*Runway `json:"runways,omitempty"`
-	// Weather station at the airport.
-	Station *WeatherStation `json:"station,omitempty"`
 	// Frequencies at the airport.
 	Frequencies []*Frequency `json:"frequencies,omitempty"`
+	// Weather station at the airport.
+	Station *WeatherStation `json:"station,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [3]bool
+	loadedTypes [5]bool
 	// totalCount holds the count of the edges above.
-	totalCount [2]map[string]int
+	totalCount [4]map[string]int
 
 	namedRunways     map[string][]*Runway
 	namedFrequencies map[string][]*Frequency
 }
 
+// RegionOrErr returns the Region value or an error if the edge
+// was not loaded in eager-loading, or loaded but was not found.
+func (e AirportEdges) RegionOrErr() (*Region, error) {
+	if e.loadedTypes[0] {
+		if e.Region == nil {
+			// Edge was loaded but was not found.
+			return nil, &NotFoundError{label: region.Label}
+		}
+		return e.Region, nil
+	}
+	return nil, &NotLoadedError{edge: "region"}
+}
+
+// CountryOrErr returns the Country value or an error if the edge
+// was not loaded in eager-loading, or loaded but was not found.
+func (e AirportEdges) CountryOrErr() (*Country, error) {
+	if e.loadedTypes[1] {
+		if e.Country == nil {
+			// Edge was loaded but was not found.
+			return nil, &NotFoundError{label: country.Label}
+		}
+		return e.Country, nil
+	}
+	return nil, &NotLoadedError{edge: "country"}
+}
+
 // RunwaysOrErr returns the Runways value or an error if the edge
 // was not loaded in eager-loading.
 func (e AirportEdges) RunwaysOrErr() ([]*Runway, error) {
-	if e.loadedTypes[0] {
+	if e.loadedTypes[2] {
 		return e.Runways, nil
 	}
 	return nil, &NotLoadedError{edge: "runways"}
 }
 
+// FrequenciesOrErr returns the Frequencies value or an error if the edge
+// was not loaded in eager-loading.
+func (e AirportEdges) FrequenciesOrErr() ([]*Frequency, error) {
+	if e.loadedTypes[3] {
+		return e.Frequencies, nil
+	}
+	return nil, &NotLoadedError{edge: "frequencies"}
+}
+
 // StationOrErr returns the Station value or an error if the edge
 // was not loaded in eager-loading, or loaded but was not found.
 func (e AirportEdges) StationOrErr() (*WeatherStation, error) {
-	if e.loadedTypes[1] {
+	if e.loadedTypes[4] {
 		if e.Station == nil {
 			// Edge was loaded but was not found.
 			return nil, &NotFoundError{label: weatherstation.Label}
@@ -106,15 +144,6 @@ func (e AirportEdges) StationOrErr() (*WeatherStation, error) {
 		return e.Station, nil
 	}
 	return nil, &NotLoadedError{edge: "station"}
-}
-
-// FrequenciesOrErr returns the Frequencies value or an error if the edge
-// was not loaded in eager-loading.
-func (e AirportEdges) FrequenciesOrErr() ([]*Frequency, error) {
-	if e.loadedTypes[2] {
-		return e.Frequencies, nil
-	}
-	return nil, &NotLoadedError{edge: "frequencies"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -130,12 +159,16 @@ func (*Airport) scanValues(columns []string) ([]any, error) {
 			values[i] = new(sql.NullFloat64)
 		case airport.FieldImportID, airport.FieldElevation:
 			values[i] = new(sql.NullInt64)
-		case airport.FieldHash, airport.FieldIcaoCode, airport.FieldIataCode, airport.FieldIdentifier, airport.FieldType, airport.FieldName, airport.FieldContinent, airport.FieldCountry, airport.FieldRegion, airport.FieldMunicipality, airport.FieldGpsCode, airport.FieldLocalCode, airport.FieldWebsite, airport.FieldWikipedia:
+		case airport.FieldHash, airport.FieldIcaoCode, airport.FieldIataCode, airport.FieldIdentifier, airport.FieldType, airport.FieldName, airport.FieldMunicipality, airport.FieldGpsCode, airport.FieldLocalCode, airport.FieldWebsite, airport.FieldWikipedia:
 			values[i] = new(sql.NullString)
 		case airport.FieldLastUpdated:
 			values[i] = new(sql.NullTime)
 		case airport.FieldID:
 			values[i] = new(uuid.UUID)
+		case airport.ForeignKeys[0]: // country_airports
+			values[i] = &sql.NullScanner{S: new(uuid.UUID)}
+		case airport.ForeignKeys[1]: // region_airports
+			values[i] = &sql.NullScanner{S: new(uuid.UUID)}
 		default:
 			return nil, fmt.Errorf("unexpected column %q for type Airport", columns[i])
 		}
@@ -231,24 +264,6 @@ func (a *Airport) assignValues(columns []string, values []any) error {
 				a.Elevation = new(int)
 				*a.Elevation = int(value.Int64)
 			}
-		case airport.FieldContinent:
-			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field continent", values[i])
-			} else if value.Valid {
-				a.Continent = airport.Continent(value.String)
-			}
-		case airport.FieldCountry:
-			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field country", values[i])
-			} else if value.Valid {
-				a.Country = value.String
-			}
-		case airport.FieldRegion:
-			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field region", values[i])
-			} else if value.Valid {
-				a.Region = value.String
-			}
 		case airport.FieldMunicipality:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field municipality", values[i])
@@ -298,9 +313,33 @@ func (a *Airport) assignValues(columns []string, values []any) error {
 					return fmt.Errorf("unmarshal field keywords: %w", err)
 				}
 			}
+		case airport.ForeignKeys[0]:
+			if value, ok := values[i].(*sql.NullScanner); !ok {
+				return fmt.Errorf("unexpected type %T for field country_airports", values[i])
+			} else if value.Valid {
+				a.country_airports = new(uuid.UUID)
+				*a.country_airports = *value.S.(*uuid.UUID)
+			}
+		case airport.ForeignKeys[1]:
+			if value, ok := values[i].(*sql.NullScanner); !ok {
+				return fmt.Errorf("unexpected type %T for field region_airports", values[i])
+			} else if value.Valid {
+				a.region_airports = new(uuid.UUID)
+				*a.region_airports = *value.S.(*uuid.UUID)
+			}
 		}
 	}
 	return nil
+}
+
+// QueryRegion queries the "region" edge of the Airport entity.
+func (a *Airport) QueryRegion() *RegionQuery {
+	return (&AirportClient{config: a.config}).QueryRegion(a)
+}
+
+// QueryCountry queries the "country" edge of the Airport entity.
+func (a *Airport) QueryCountry() *CountryQuery {
+	return (&AirportClient{config: a.config}).QueryCountry(a)
 }
 
 // QueryRunways queries the "runways" edge of the Airport entity.
@@ -308,14 +347,14 @@ func (a *Airport) QueryRunways() *RunwayQuery {
 	return (&AirportClient{config: a.config}).QueryRunways(a)
 }
 
-// QueryStation queries the "station" edge of the Airport entity.
-func (a *Airport) QueryStation() *WeatherStationQuery {
-	return (&AirportClient{config: a.config}).QueryStation(a)
-}
-
 // QueryFrequencies queries the "frequencies" edge of the Airport entity.
 func (a *Airport) QueryFrequencies() *FrequencyQuery {
 	return (&AirportClient{config: a.config}).QueryFrequencies(a)
+}
+
+// QueryStation queries the "station" edge of the Airport entity.
+func (a *Airport) QueryStation() *WeatherStationQuery {
+	return (&AirportClient{config: a.config}).QueryStation(a)
 }
 
 // Update returns a builder for updating this Airport.
@@ -380,15 +419,6 @@ func (a *Airport) String() string {
 		builder.WriteString("elevation=")
 		builder.WriteString(fmt.Sprintf("%v", *v))
 	}
-	builder.WriteString(", ")
-	builder.WriteString("continent=")
-	builder.WriteString(fmt.Sprintf("%v", a.Continent))
-	builder.WriteString(", ")
-	builder.WriteString("country=")
-	builder.WriteString(a.Country)
-	builder.WriteString(", ")
-	builder.WriteString("region=")
-	builder.WriteString(a.Region)
 	builder.WriteString(", ")
 	if v := a.Municipality; v != nil {
 		builder.WriteString("municipality=")

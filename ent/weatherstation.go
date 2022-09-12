@@ -16,6 +16,7 @@ import (
 type WeatherStation struct {
 	config `json:"-"`
 	// ID of the ent.
+	// The unique identifier of the record.
 	ID uuid.UUID `json:"id,omitempty"`
 	// The ICAO identifier of the station that provided the weather data or identifier of the weather station.
 	StationID string `json:"station_id,omitempty"`

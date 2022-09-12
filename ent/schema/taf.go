@@ -7,7 +7,6 @@ import (
 	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
 	"entgo.io/ent/schema/index"
-	"github.com/google/uuid"
 )
 
 // Taf holds the schema definition for the Metar entity.
@@ -18,7 +17,6 @@ type Taf struct {
 // Fields of the Metar.
 func (Taf) Fields() []ent.Field {
 	return []ent.Field{
-		field.UUID("id", uuid.UUID{}).Default(uuid.New).Immutable(),
 		field.Text("raw_text").Comment("The raw TAF text."),
 		field.Time("issue_time").Comment("The time the TAF was issued."),
 		field.Time("bulletin_time").Comment("TAF bulletin time."),
@@ -53,5 +51,7 @@ func (Taf) Indexes() []ent.Index {
 
 // Mixin of the Metar.
 func (Taf) Mixin() []ent.Mixin {
-	return nil
+	return []ent.Mixin{
+		IDMixin{},
+	}
 }

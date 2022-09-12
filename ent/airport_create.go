@@ -14,7 +14,9 @@ import (
 	"entgo.io/ent/schema/field"
 	"github.com/google/uuid"
 	"metar.gg/ent/airport"
+	"metar.gg/ent/country"
 	"metar.gg/ent/frequency"
+	"metar.gg/ent/region"
 	"metar.gg/ent/runway"
 	"metar.gg/ent/weatherstation"
 )
@@ -139,24 +141,6 @@ func (ac *AirportCreate) SetNillableElevation(i *int) *AirportCreate {
 	return ac
 }
 
-// SetContinent sets the "continent" field.
-func (ac *AirportCreate) SetContinent(a airport.Continent) *AirportCreate {
-	ac.mutation.SetContinent(a)
-	return ac
-}
-
-// SetCountry sets the "country" field.
-func (ac *AirportCreate) SetCountry(s string) *AirportCreate {
-	ac.mutation.SetCountry(s)
-	return ac
-}
-
-// SetRegion sets the "region" field.
-func (ac *AirportCreate) SetRegion(s string) *AirportCreate {
-	ac.mutation.SetRegion(s)
-	return ac
-}
-
 // SetMunicipality sets the "municipality" field.
 func (ac *AirportCreate) SetMunicipality(s string) *AirportCreate {
 	ac.mutation.SetMunicipality(s)
@@ -253,6 +237,44 @@ func (ac *AirportCreate) SetNillableID(u *uuid.UUID) *AirportCreate {
 	return ac
 }
 
+// SetRegionID sets the "region" edge to the Region entity by ID.
+func (ac *AirportCreate) SetRegionID(id uuid.UUID) *AirportCreate {
+	ac.mutation.SetRegionID(id)
+	return ac
+}
+
+// SetNillableRegionID sets the "region" edge to the Region entity by ID if the given value is not nil.
+func (ac *AirportCreate) SetNillableRegionID(id *uuid.UUID) *AirportCreate {
+	if id != nil {
+		ac = ac.SetRegionID(*id)
+	}
+	return ac
+}
+
+// SetRegion sets the "region" edge to the Region entity.
+func (ac *AirportCreate) SetRegion(r *Region) *AirportCreate {
+	return ac.SetRegionID(r.ID)
+}
+
+// SetCountryID sets the "country" edge to the Country entity by ID.
+func (ac *AirportCreate) SetCountryID(id uuid.UUID) *AirportCreate {
+	ac.mutation.SetCountryID(id)
+	return ac
+}
+
+// SetNillableCountryID sets the "country" edge to the Country entity by ID if the given value is not nil.
+func (ac *AirportCreate) SetNillableCountryID(id *uuid.UUID) *AirportCreate {
+	if id != nil {
+		ac = ac.SetCountryID(*id)
+	}
+	return ac
+}
+
+// SetCountry sets the "country" edge to the Country entity.
+func (ac *AirportCreate) SetCountry(c *Country) *AirportCreate {
+	return ac.SetCountryID(c.ID)
+}
+
 // AddRunwayIDs adds the "runways" edge to the Runway entity by IDs.
 func (ac *AirportCreate) AddRunwayIDs(ids ...uuid.UUID) *AirportCreate {
 	ac.mutation.AddRunwayIDs(ids...)
@@ -266,6 +288,21 @@ func (ac *AirportCreate) AddRunways(r ...*Runway) *AirportCreate {
 		ids[i] = r[i].ID
 	}
 	return ac.AddRunwayIDs(ids...)
+}
+
+// AddFrequencyIDs adds the "frequencies" edge to the Frequency entity by IDs.
+func (ac *AirportCreate) AddFrequencyIDs(ids ...uuid.UUID) *AirportCreate {
+	ac.mutation.AddFrequencyIDs(ids...)
+	return ac
+}
+
+// AddFrequencies adds the "frequencies" edges to the Frequency entity.
+func (ac *AirportCreate) AddFrequencies(f ...*Frequency) *AirportCreate {
+	ids := make([]uuid.UUID, len(f))
+	for i := range f {
+		ids[i] = f[i].ID
+	}
+	return ac.AddFrequencyIDs(ids...)
 }
 
 // SetStationID sets the "station" edge to the WeatherStation entity by ID.
@@ -285,21 +322,6 @@ func (ac *AirportCreate) SetNillableStationID(id *uuid.UUID) *AirportCreate {
 // SetStation sets the "station" edge to the WeatherStation entity.
 func (ac *AirportCreate) SetStation(w *WeatherStation) *AirportCreate {
 	return ac.SetStationID(w.ID)
-}
-
-// AddFrequencyIDs adds the "frequencies" edge to the Frequency entity by IDs.
-func (ac *AirportCreate) AddFrequencyIDs(ids ...uuid.UUID) *AirportCreate {
-	ac.mutation.AddFrequencyIDs(ids...)
-	return ac
-}
-
-// AddFrequencies adds the "frequencies" edges to the Frequency entity.
-func (ac *AirportCreate) AddFrequencies(f ...*Frequency) *AirportCreate {
-	ids := make([]uuid.UUID, len(f))
-	for i := range f {
-		ids[i] = f[i].ID
-	}
-	return ac.AddFrequencyIDs(ids...)
 }
 
 // Mutation returns the AirportMutation object of the builder.
@@ -431,20 +453,6 @@ func (ac *AirportCreate) check() error {
 	}
 	if _, ok := ac.mutation.Longitude(); !ok {
 		return &ValidationError{Name: "longitude", err: errors.New(`ent: missing required field "Airport.longitude"`)}
-	}
-	if _, ok := ac.mutation.Continent(); !ok {
-		return &ValidationError{Name: "continent", err: errors.New(`ent: missing required field "Airport.continent"`)}
-	}
-	if v, ok := ac.mutation.Continent(); ok {
-		if err := airport.ContinentValidator(v); err != nil {
-			return &ValidationError{Name: "continent", err: fmt.Errorf(`ent: validator failed for field "Airport.continent": %w`, err)}
-		}
-	}
-	if _, ok := ac.mutation.Country(); !ok {
-		return &ValidationError{Name: "country", err: errors.New(`ent: missing required field "Airport.country"`)}
-	}
-	if _, ok := ac.mutation.Region(); !ok {
-		return &ValidationError{Name: "region", err: errors.New(`ent: missing required field "Airport.region"`)}
 	}
 	if _, ok := ac.mutation.ScheduledService(); !ok {
 		return &ValidationError{Name: "scheduled_service", err: errors.New(`ent: missing required field "Airport.scheduled_service"`)}
@@ -585,30 +593,6 @@ func (ac *AirportCreate) createSpec() (*Airport, *sqlgraph.CreateSpec) {
 		})
 		_node.Elevation = &value
 	}
-	if value, ok := ac.mutation.Continent(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeEnum,
-			Value:  value,
-			Column: airport.FieldContinent,
-		})
-		_node.Continent = value
-	}
-	if value, ok := ac.mutation.Country(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: airport.FieldCountry,
-		})
-		_node.Country = value
-	}
-	if value, ok := ac.mutation.Region(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: airport.FieldRegion,
-		})
-		_node.Region = value
-	}
 	if value, ok := ac.mutation.Municipality(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
@@ -665,6 +649,46 @@ func (ac *AirportCreate) createSpec() (*Airport, *sqlgraph.CreateSpec) {
 		})
 		_node.Keywords = value
 	}
+	if nodes := ac.mutation.RegionIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   airport.RegionTable,
+			Columns: []string{airport.RegionColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeUUID,
+					Column: region.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_node.region_airports = &nodes[0]
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := ac.mutation.CountryIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   airport.CountryTable,
+			Columns: []string{airport.CountryColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeUUID,
+					Column: country.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_node.country_airports = &nodes[0]
+		_spec.Edges = append(_spec.Edges, edge)
+	}
 	if nodes := ac.mutation.RunwaysIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
@@ -684,25 +708,6 @@ func (ac *AirportCreate) createSpec() (*Airport, *sqlgraph.CreateSpec) {
 		}
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if nodes := ac.mutation.StationIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2O,
-			Inverse: false,
-			Table:   airport.StationTable,
-			Columns: []string{airport.StationColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: weatherstation.FieldID,
-				},
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges = append(_spec.Edges, edge)
-	}
 	if nodes := ac.mutation.FrequenciesIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
@@ -714,6 +719,25 @@ func (ac *AirportCreate) createSpec() (*Airport, *sqlgraph.CreateSpec) {
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeUUID,
 					Column: frequency.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := ac.mutation.StationIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2O,
+			Inverse: false,
+			Table:   airport.StationTable,
+			Columns: []string{airport.StationColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeUUID,
+					Column: weatherstation.FieldID,
 				},
 			},
 		}
@@ -957,42 +981,6 @@ func (u *AirportUpsert) AddElevation(v int) *AirportUpsert {
 // ClearElevation clears the value of the "elevation" field.
 func (u *AirportUpsert) ClearElevation() *AirportUpsert {
 	u.SetNull(airport.FieldElevation)
-	return u
-}
-
-// SetContinent sets the "continent" field.
-func (u *AirportUpsert) SetContinent(v airport.Continent) *AirportUpsert {
-	u.Set(airport.FieldContinent, v)
-	return u
-}
-
-// UpdateContinent sets the "continent" field to the value that was provided on create.
-func (u *AirportUpsert) UpdateContinent() *AirportUpsert {
-	u.SetExcluded(airport.FieldContinent)
-	return u
-}
-
-// SetCountry sets the "country" field.
-func (u *AirportUpsert) SetCountry(v string) *AirportUpsert {
-	u.Set(airport.FieldCountry, v)
-	return u
-}
-
-// UpdateCountry sets the "country" field to the value that was provided on create.
-func (u *AirportUpsert) UpdateCountry() *AirportUpsert {
-	u.SetExcluded(airport.FieldCountry)
-	return u
-}
-
-// SetRegion sets the "region" field.
-func (u *AirportUpsert) SetRegion(v string) *AirportUpsert {
-	u.Set(airport.FieldRegion, v)
-	return u
-}
-
-// UpdateRegion sets the "region" field to the value that was provided on create.
-func (u *AirportUpsert) UpdateRegion() *AirportUpsert {
-	u.SetExcluded(airport.FieldRegion)
 	return u
 }
 
@@ -1372,48 +1360,6 @@ func (u *AirportUpsertOne) UpdateElevation() *AirportUpsertOne {
 func (u *AirportUpsertOne) ClearElevation() *AirportUpsertOne {
 	return u.Update(func(s *AirportUpsert) {
 		s.ClearElevation()
-	})
-}
-
-// SetContinent sets the "continent" field.
-func (u *AirportUpsertOne) SetContinent(v airport.Continent) *AirportUpsertOne {
-	return u.Update(func(s *AirportUpsert) {
-		s.SetContinent(v)
-	})
-}
-
-// UpdateContinent sets the "continent" field to the value that was provided on create.
-func (u *AirportUpsertOne) UpdateContinent() *AirportUpsertOne {
-	return u.Update(func(s *AirportUpsert) {
-		s.UpdateContinent()
-	})
-}
-
-// SetCountry sets the "country" field.
-func (u *AirportUpsertOne) SetCountry(v string) *AirportUpsertOne {
-	return u.Update(func(s *AirportUpsert) {
-		s.SetCountry(v)
-	})
-}
-
-// UpdateCountry sets the "country" field to the value that was provided on create.
-func (u *AirportUpsertOne) UpdateCountry() *AirportUpsertOne {
-	return u.Update(func(s *AirportUpsert) {
-		s.UpdateCountry()
-	})
-}
-
-// SetRegion sets the "region" field.
-func (u *AirportUpsertOne) SetRegion(v string) *AirportUpsertOne {
-	return u.Update(func(s *AirportUpsert) {
-		s.SetRegion(v)
-	})
-}
-
-// UpdateRegion sets the "region" field to the value that was provided on create.
-func (u *AirportUpsertOne) UpdateRegion() *AirportUpsertOne {
-	return u.Update(func(s *AirportUpsert) {
-		s.UpdateRegion()
 	})
 }
 
@@ -1975,48 +1921,6 @@ func (u *AirportUpsertBulk) UpdateElevation() *AirportUpsertBulk {
 func (u *AirportUpsertBulk) ClearElevation() *AirportUpsertBulk {
 	return u.Update(func(s *AirportUpsert) {
 		s.ClearElevation()
-	})
-}
-
-// SetContinent sets the "continent" field.
-func (u *AirportUpsertBulk) SetContinent(v airport.Continent) *AirportUpsertBulk {
-	return u.Update(func(s *AirportUpsert) {
-		s.SetContinent(v)
-	})
-}
-
-// UpdateContinent sets the "continent" field to the value that was provided on create.
-func (u *AirportUpsertBulk) UpdateContinent() *AirportUpsertBulk {
-	return u.Update(func(s *AirportUpsert) {
-		s.UpdateContinent()
-	})
-}
-
-// SetCountry sets the "country" field.
-func (u *AirportUpsertBulk) SetCountry(v string) *AirportUpsertBulk {
-	return u.Update(func(s *AirportUpsert) {
-		s.SetCountry(v)
-	})
-}
-
-// UpdateCountry sets the "country" field to the value that was provided on create.
-func (u *AirportUpsertBulk) UpdateCountry() *AirportUpsertBulk {
-	return u.Update(func(s *AirportUpsert) {
-		s.UpdateCountry()
-	})
-}
-
-// SetRegion sets the "region" field.
-func (u *AirportUpsertBulk) SetRegion(v string) *AirportUpsertBulk {
-	return u.Update(func(s *AirportUpsert) {
-		s.SetRegion(v)
-	})
-}
-
-// UpdateRegion sets the "region" field to the value that was provided on create.
-func (u *AirportUpsertBulk) UpdateRegion() *AirportUpsertBulk {
-	return u.Update(func(s *AirportUpsert) {
-		s.UpdateRegion()
 	})
 }
 

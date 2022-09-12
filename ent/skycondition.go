@@ -15,6 +15,7 @@ import (
 type SkyCondition struct {
 	config `json:"-"`
 	// ID of the ent.
+	// The unique identifier of the record.
 	ID uuid.UUID `json:"id,omitempty"`
 	// SkyCover holds the value of the "sky_cover" field.
 	SkyCover skycondition.SkyCover `json:"sky_cover,omitempty"`

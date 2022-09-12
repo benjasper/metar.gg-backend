@@ -11,11 +11,13 @@ import (
 
 	"github.com/google/uuid"
 	"metar.gg/ent/airport"
+	"metar.gg/ent/country"
 	"metar.gg/ent/forecast"
 	"metar.gg/ent/frequency"
 	"metar.gg/ent/icingcondition"
 	"metar.gg/ent/metar"
 	"metar.gg/ent/predicate"
+	"metar.gg/ent/region"
 	"metar.gg/ent/runway"
 	"metar.gg/ent/skycondition"
 	"metar.gg/ent/taf"
@@ -36,10 +38,12 @@ const (
 
 	// Node types.
 	TypeAirport             = "Airport"
+	TypeCountry             = "Country"
 	TypeForecast            = "Forecast"
 	TypeFrequency           = "Frequency"
 	TypeIcingCondition      = "IcingCondition"
 	TypeMetar               = "Metar"
+	TypeRegion              = "Region"
 	TypeRunway              = "Runway"
 	TypeSkyCondition        = "SkyCondition"
 	TypeTaf                 = "Taf"
@@ -70,9 +74,6 @@ type AirportMutation struct {
 	addlongitude       *float64
 	elevation          *int
 	addelevation       *int
-	continent          *airport.Continent
-	country            *string
-	region             *string
 	municipality       *string
 	scheduled_service  *bool
 	gps_code           *string
@@ -81,14 +82,18 @@ type AirportMutation struct {
 	wikipedia          *string
 	keywords           *[]string
 	clearedFields      map[string]struct{}
+	region             *uuid.UUID
+	clearedregion      bool
+	country            *uuid.UUID
+	clearedcountry     bool
 	runways            map[uuid.UUID]struct{}
 	removedrunways     map[uuid.UUID]struct{}
 	clearedrunways     bool
-	station            *uuid.UUID
-	clearedstation     bool
 	frequencies        map[uuid.UUID]struct{}
 	removedfrequencies map[uuid.UUID]struct{}
 	clearedfrequencies bool
+	station            *uuid.UUID
+	clearedstation     bool
 	done               bool
 	oldValue           func(context.Context) (*Airport, error)
 	predicates         []predicate.Airport
@@ -750,114 +755,6 @@ func (m *AirportMutation) ResetElevation() {
 	delete(m.clearedFields, airport.FieldElevation)
 }
 
-// SetContinent sets the "continent" field.
-func (m *AirportMutation) SetContinent(a airport.Continent) {
-	m.continent = &a
-}
-
-// Continent returns the value of the "continent" field in the mutation.
-func (m *AirportMutation) Continent() (r airport.Continent, exists bool) {
-	v := m.continent
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldContinent returns the old "continent" field's value of the Airport entity.
-// If the Airport object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *AirportMutation) OldContinent(ctx context.Context) (v airport.Continent, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldContinent is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldContinent requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldContinent: %w", err)
-	}
-	return oldValue.Continent, nil
-}
-
-// ResetContinent resets all changes to the "continent" field.
-func (m *AirportMutation) ResetContinent() {
-	m.continent = nil
-}
-
-// SetCountry sets the "country" field.
-func (m *AirportMutation) SetCountry(s string) {
-	m.country = &s
-}
-
-// Country returns the value of the "country" field in the mutation.
-func (m *AirportMutation) Country() (r string, exists bool) {
-	v := m.country
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldCountry returns the old "country" field's value of the Airport entity.
-// If the Airport object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *AirportMutation) OldCountry(ctx context.Context) (v string, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldCountry is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldCountry requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldCountry: %w", err)
-	}
-	return oldValue.Country, nil
-}
-
-// ResetCountry resets all changes to the "country" field.
-func (m *AirportMutation) ResetCountry() {
-	m.country = nil
-}
-
-// SetRegion sets the "region" field.
-func (m *AirportMutation) SetRegion(s string) {
-	m.region = &s
-}
-
-// Region returns the value of the "region" field in the mutation.
-func (m *AirportMutation) Region() (r string, exists bool) {
-	v := m.region
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldRegion returns the old "region" field's value of the Airport entity.
-// If the Airport object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *AirportMutation) OldRegion(ctx context.Context) (v string, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldRegion is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldRegion requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldRegion: %w", err)
-	}
-	return oldValue.Region, nil
-}
-
-// ResetRegion resets all changes to the "region" field.
-func (m *AirportMutation) ResetRegion() {
-	m.region = nil
-}
-
 // SetMunicipality sets the "municipality" field.
 func (m *AirportMutation) SetMunicipality(s string) {
 	m.municipality = &s
@@ -1175,6 +1072,84 @@ func (m *AirportMutation) ResetKeywords() {
 	m.keywords = nil
 }
 
+// SetRegionID sets the "region" edge to the Region entity by id.
+func (m *AirportMutation) SetRegionID(id uuid.UUID) {
+	m.region = &id
+}
+
+// ClearRegion clears the "region" edge to the Region entity.
+func (m *AirportMutation) ClearRegion() {
+	m.clearedregion = true
+}
+
+// RegionCleared reports if the "region" edge to the Region entity was cleared.
+func (m *AirportMutation) RegionCleared() bool {
+	return m.clearedregion
+}
+
+// RegionID returns the "region" edge ID in the mutation.
+func (m *AirportMutation) RegionID() (id uuid.UUID, exists bool) {
+	if m.region != nil {
+		return *m.region, true
+	}
+	return
+}
+
+// RegionIDs returns the "region" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// RegionID instead. It exists only for internal usage by the builders.
+func (m *AirportMutation) RegionIDs() (ids []uuid.UUID) {
+	if id := m.region; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetRegion resets all changes to the "region" edge.
+func (m *AirportMutation) ResetRegion() {
+	m.region = nil
+	m.clearedregion = false
+}
+
+// SetCountryID sets the "country" edge to the Country entity by id.
+func (m *AirportMutation) SetCountryID(id uuid.UUID) {
+	m.country = &id
+}
+
+// ClearCountry clears the "country" edge to the Country entity.
+func (m *AirportMutation) ClearCountry() {
+	m.clearedcountry = true
+}
+
+// CountryCleared reports if the "country" edge to the Country entity was cleared.
+func (m *AirportMutation) CountryCleared() bool {
+	return m.clearedcountry
+}
+
+// CountryID returns the "country" edge ID in the mutation.
+func (m *AirportMutation) CountryID() (id uuid.UUID, exists bool) {
+	if m.country != nil {
+		return *m.country, true
+	}
+	return
+}
+
+// CountryIDs returns the "country" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// CountryID instead. It exists only for internal usage by the builders.
+func (m *AirportMutation) CountryIDs() (ids []uuid.UUID) {
+	if id := m.country; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetCountry resets all changes to the "country" edge.
+func (m *AirportMutation) ResetCountry() {
+	m.country = nil
+	m.clearedcountry = false
+}
+
 // AddRunwayIDs adds the "runways" edge to the Runway entity by ids.
 func (m *AirportMutation) AddRunwayIDs(ids ...uuid.UUID) {
 	if m.runways == nil {
@@ -1227,45 +1202,6 @@ func (m *AirportMutation) ResetRunways() {
 	m.runways = nil
 	m.clearedrunways = false
 	m.removedrunways = nil
-}
-
-// SetStationID sets the "station" edge to the WeatherStation entity by id.
-func (m *AirportMutation) SetStationID(id uuid.UUID) {
-	m.station = &id
-}
-
-// ClearStation clears the "station" edge to the WeatherStation entity.
-func (m *AirportMutation) ClearStation() {
-	m.clearedstation = true
-}
-
-// StationCleared reports if the "station" edge to the WeatherStation entity was cleared.
-func (m *AirportMutation) StationCleared() bool {
-	return m.clearedstation
-}
-
-// StationID returns the "station" edge ID in the mutation.
-func (m *AirportMutation) StationID() (id uuid.UUID, exists bool) {
-	if m.station != nil {
-		return *m.station, true
-	}
-	return
-}
-
-// StationIDs returns the "station" edge IDs in the mutation.
-// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
-// StationID instead. It exists only for internal usage by the builders.
-func (m *AirportMutation) StationIDs() (ids []uuid.UUID) {
-	if id := m.station; id != nil {
-		ids = append(ids, *id)
-	}
-	return
-}
-
-// ResetStation resets all changes to the "station" edge.
-func (m *AirportMutation) ResetStation() {
-	m.station = nil
-	m.clearedstation = false
 }
 
 // AddFrequencyIDs adds the "frequencies" edge to the Frequency entity by ids.
@@ -1322,6 +1258,45 @@ func (m *AirportMutation) ResetFrequencies() {
 	m.removedfrequencies = nil
 }
 
+// SetStationID sets the "station" edge to the WeatherStation entity by id.
+func (m *AirportMutation) SetStationID(id uuid.UUID) {
+	m.station = &id
+}
+
+// ClearStation clears the "station" edge to the WeatherStation entity.
+func (m *AirportMutation) ClearStation() {
+	m.clearedstation = true
+}
+
+// StationCleared reports if the "station" edge to the WeatherStation entity was cleared.
+func (m *AirportMutation) StationCleared() bool {
+	return m.clearedstation
+}
+
+// StationID returns the "station" edge ID in the mutation.
+func (m *AirportMutation) StationID() (id uuid.UUID, exists bool) {
+	if m.station != nil {
+		return *m.station, true
+	}
+	return
+}
+
+// StationIDs returns the "station" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// StationID instead. It exists only for internal usage by the builders.
+func (m *AirportMutation) StationIDs() (ids []uuid.UUID) {
+	if id := m.station; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetStation resets all changes to the "station" edge.
+func (m *AirportMutation) ResetStation() {
+	m.station = nil
+	m.clearedstation = false
+}
+
 // Where appends a list predicates to the AirportMutation builder.
 func (m *AirportMutation) Where(ps ...predicate.Airport) {
 	m.predicates = append(m.predicates, ps...)
@@ -1341,7 +1316,7 @@ func (m *AirportMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *AirportMutation) Fields() []string {
-	fields := make([]string, 0, 22)
+	fields := make([]string, 0, 19)
 	if m.import_id != nil {
 		fields = append(fields, airport.FieldImportID)
 	}
@@ -1377,15 +1352,6 @@ func (m *AirportMutation) Fields() []string {
 	}
 	if m.elevation != nil {
 		fields = append(fields, airport.FieldElevation)
-	}
-	if m.continent != nil {
-		fields = append(fields, airport.FieldContinent)
-	}
-	if m.country != nil {
-		fields = append(fields, airport.FieldCountry)
-	}
-	if m.region != nil {
-		fields = append(fields, airport.FieldRegion)
 	}
 	if m.municipality != nil {
 		fields = append(fields, airport.FieldMunicipality)
@@ -1440,12 +1406,6 @@ func (m *AirportMutation) Field(name string) (ent.Value, bool) {
 		return m.Longitude()
 	case airport.FieldElevation:
 		return m.Elevation()
-	case airport.FieldContinent:
-		return m.Continent()
-	case airport.FieldCountry:
-		return m.Country()
-	case airport.FieldRegion:
-		return m.Region()
 	case airport.FieldMunicipality:
 		return m.Municipality()
 	case airport.FieldScheduledService:
@@ -1493,12 +1453,6 @@ func (m *AirportMutation) OldField(ctx context.Context, name string) (ent.Value,
 		return m.OldLongitude(ctx)
 	case airport.FieldElevation:
 		return m.OldElevation(ctx)
-	case airport.FieldContinent:
-		return m.OldContinent(ctx)
-	case airport.FieldCountry:
-		return m.OldCountry(ctx)
-	case airport.FieldRegion:
-		return m.OldRegion(ctx)
 	case airport.FieldMunicipality:
 		return m.OldMunicipality(ctx)
 	case airport.FieldScheduledService:
@@ -1605,27 +1559,6 @@ func (m *AirportMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetElevation(v)
-		return nil
-	case airport.FieldContinent:
-		v, ok := value.(airport.Continent)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetContinent(v)
-		return nil
-	case airport.FieldCountry:
-		v, ok := value.(string)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetCountry(v)
-		return nil
-	case airport.FieldRegion:
-		v, ok := value.(string)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetRegion(v)
 		return nil
 	case airport.FieldMunicipality:
 		v, ok := value.(string)
@@ -1863,15 +1796,6 @@ func (m *AirportMutation) ResetField(name string) error {
 	case airport.FieldElevation:
 		m.ResetElevation()
 		return nil
-	case airport.FieldContinent:
-		m.ResetContinent()
-		return nil
-	case airport.FieldCountry:
-		m.ResetCountry()
-		return nil
-	case airport.FieldRegion:
-		m.ResetRegion()
-		return nil
 	case airport.FieldMunicipality:
 		m.ResetMunicipality()
 		return nil
@@ -1899,15 +1823,21 @@ func (m *AirportMutation) ResetField(name string) error {
 
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *AirportMutation) AddedEdges() []string {
-	edges := make([]string, 0, 3)
+	edges := make([]string, 0, 5)
+	if m.region != nil {
+		edges = append(edges, airport.EdgeRegion)
+	}
+	if m.country != nil {
+		edges = append(edges, airport.EdgeCountry)
+	}
 	if m.runways != nil {
 		edges = append(edges, airport.EdgeRunways)
 	}
-	if m.station != nil {
-		edges = append(edges, airport.EdgeStation)
-	}
 	if m.frequencies != nil {
 		edges = append(edges, airport.EdgeFrequencies)
+	}
+	if m.station != nil {
+		edges = append(edges, airport.EdgeStation)
 	}
 	return edges
 }
@@ -1916,9 +1846,23 @@ func (m *AirportMutation) AddedEdges() []string {
 // name in this mutation.
 func (m *AirportMutation) AddedIDs(name string) []ent.Value {
 	switch name {
+	case airport.EdgeRegion:
+		if id := m.region; id != nil {
+			return []ent.Value{*id}
+		}
+	case airport.EdgeCountry:
+		if id := m.country; id != nil {
+			return []ent.Value{*id}
+		}
 	case airport.EdgeRunways:
 		ids := make([]ent.Value, 0, len(m.runways))
 		for id := range m.runways {
+			ids = append(ids, id)
+		}
+		return ids
+	case airport.EdgeFrequencies:
+		ids := make([]ent.Value, 0, len(m.frequencies))
+		for id := range m.frequencies {
 			ids = append(ids, id)
 		}
 		return ids
@@ -1926,19 +1870,13 @@ func (m *AirportMutation) AddedIDs(name string) []ent.Value {
 		if id := m.station; id != nil {
 			return []ent.Value{*id}
 		}
-	case airport.EdgeFrequencies:
-		ids := make([]ent.Value, 0, len(m.frequencies))
-		for id := range m.frequencies {
-			ids = append(ids, id)
-		}
-		return ids
 	}
 	return nil
 }
 
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *AirportMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 3)
+	edges := make([]string, 0, 5)
 	if m.removedrunways != nil {
 		edges = append(edges, airport.EdgeRunways)
 	}
@@ -1970,15 +1908,21 @@ func (m *AirportMutation) RemovedIDs(name string) []ent.Value {
 
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *AirportMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 3)
+	edges := make([]string, 0, 5)
+	if m.clearedregion {
+		edges = append(edges, airport.EdgeRegion)
+	}
+	if m.clearedcountry {
+		edges = append(edges, airport.EdgeCountry)
+	}
 	if m.clearedrunways {
 		edges = append(edges, airport.EdgeRunways)
 	}
-	if m.clearedstation {
-		edges = append(edges, airport.EdgeStation)
-	}
 	if m.clearedfrequencies {
 		edges = append(edges, airport.EdgeFrequencies)
+	}
+	if m.clearedstation {
+		edges = append(edges, airport.EdgeStation)
 	}
 	return edges
 }
@@ -1987,12 +1931,16 @@ func (m *AirportMutation) ClearedEdges() []string {
 // was cleared in this mutation.
 func (m *AirportMutation) EdgeCleared(name string) bool {
 	switch name {
+	case airport.EdgeRegion:
+		return m.clearedregion
+	case airport.EdgeCountry:
+		return m.clearedcountry
 	case airport.EdgeRunways:
 		return m.clearedrunways
-	case airport.EdgeStation:
-		return m.clearedstation
 	case airport.EdgeFrequencies:
 		return m.clearedfrequencies
+	case airport.EdgeStation:
+		return m.clearedstation
 	}
 	return false
 }
@@ -2001,6 +1949,12 @@ func (m *AirportMutation) EdgeCleared(name string) bool {
 // if that edge is not defined in the schema.
 func (m *AirportMutation) ClearEdge(name string) error {
 	switch name {
+	case airport.EdgeRegion:
+		m.ClearRegion()
+		return nil
+	case airport.EdgeCountry:
+		m.ClearCountry()
+		return nil
 	case airport.EdgeStation:
 		m.ClearStation()
 		return nil
@@ -2012,17 +1966,901 @@ func (m *AirportMutation) ClearEdge(name string) error {
 // It returns an error if the edge is not defined in the schema.
 func (m *AirportMutation) ResetEdge(name string) error {
 	switch name {
+	case airport.EdgeRegion:
+		m.ResetRegion()
+		return nil
+	case airport.EdgeCountry:
+		m.ResetCountry()
+		return nil
 	case airport.EdgeRunways:
 		m.ResetRunways()
-		return nil
-	case airport.EdgeStation:
-		m.ResetStation()
 		return nil
 	case airport.EdgeFrequencies:
 		m.ResetFrequencies()
 		return nil
+	case airport.EdgeStation:
+		m.ResetStation()
+		return nil
 	}
 	return fmt.Errorf("unknown Airport edge %s", name)
+}
+
+// CountryMutation represents an operation that mutates the Country nodes in the graph.
+type CountryMutation struct {
+	config
+	op              Op
+	typ             string
+	id              *uuid.UUID
+	import_id       *int
+	addimport_id    *int
+	hash            *string
+	import_flag     *bool
+	last_updated    *time.Time
+	code            *string
+	name            *string
+	continent       *country.Continent
+	wikipedia_link  *string
+	keywords        *[]string
+	clearedFields   map[string]struct{}
+	airports        map[uuid.UUID]struct{}
+	removedairports map[uuid.UUID]struct{}
+	clearedairports bool
+	done            bool
+	oldValue        func(context.Context) (*Country, error)
+	predicates      []predicate.Country
+}
+
+var _ ent.Mutation = (*CountryMutation)(nil)
+
+// countryOption allows management of the mutation configuration using functional options.
+type countryOption func(*CountryMutation)
+
+// newCountryMutation creates new mutation for the Country entity.
+func newCountryMutation(c config, op Op, opts ...countryOption) *CountryMutation {
+	m := &CountryMutation{
+		config:        c,
+		op:            op,
+		typ:           TypeCountry,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withCountryID sets the ID field of the mutation.
+func withCountryID(id uuid.UUID) countryOption {
+	return func(m *CountryMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *Country
+		)
+		m.oldValue = func(ctx context.Context) (*Country, error) {
+			once.Do(func() {
+				if m.done {
+					err = errors.New("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().Country.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withCountry sets the old Country of the mutation.
+func withCountry(node *Country) countryOption {
+	return func(m *CountryMutation) {
+		m.oldValue = func(context.Context) (*Country, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m CountryMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m CountryMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, errors.New("ent: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// SetID sets the value of the id field. Note that this
+// operation is only accepted on creation of Country entities.
+func (m *CountryMutation) SetID(id uuid.UUID) {
+	m.id = &id
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *CountryMutation) ID() (id uuid.UUID, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *CountryMutation) IDs(ctx context.Context) ([]uuid.UUID, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []uuid.UUID{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().Country.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
+}
+
+// SetImportID sets the "import_id" field.
+func (m *CountryMutation) SetImportID(i int) {
+	m.import_id = &i
+	m.addimport_id = nil
+}
+
+// ImportID returns the value of the "import_id" field in the mutation.
+func (m *CountryMutation) ImportID() (r int, exists bool) {
+	v := m.import_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldImportID returns the old "import_id" field's value of the Country entity.
+// If the Country object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CountryMutation) OldImportID(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldImportID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldImportID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldImportID: %w", err)
+	}
+	return oldValue.ImportID, nil
+}
+
+// AddImportID adds i to the "import_id" field.
+func (m *CountryMutation) AddImportID(i int) {
+	if m.addimport_id != nil {
+		*m.addimport_id += i
+	} else {
+		m.addimport_id = &i
+	}
+}
+
+// AddedImportID returns the value that was added to the "import_id" field in this mutation.
+func (m *CountryMutation) AddedImportID() (r int, exists bool) {
+	v := m.addimport_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetImportID resets all changes to the "import_id" field.
+func (m *CountryMutation) ResetImportID() {
+	m.import_id = nil
+	m.addimport_id = nil
+}
+
+// SetHash sets the "hash" field.
+func (m *CountryMutation) SetHash(s string) {
+	m.hash = &s
+}
+
+// Hash returns the value of the "hash" field in the mutation.
+func (m *CountryMutation) Hash() (r string, exists bool) {
+	v := m.hash
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldHash returns the old "hash" field's value of the Country entity.
+// If the Country object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CountryMutation) OldHash(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldHash is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldHash requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldHash: %w", err)
+	}
+	return oldValue.Hash, nil
+}
+
+// ResetHash resets all changes to the "hash" field.
+func (m *CountryMutation) ResetHash() {
+	m.hash = nil
+}
+
+// SetImportFlag sets the "import_flag" field.
+func (m *CountryMutation) SetImportFlag(b bool) {
+	m.import_flag = &b
+}
+
+// ImportFlag returns the value of the "import_flag" field in the mutation.
+func (m *CountryMutation) ImportFlag() (r bool, exists bool) {
+	v := m.import_flag
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldImportFlag returns the old "import_flag" field's value of the Country entity.
+// If the Country object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CountryMutation) OldImportFlag(ctx context.Context) (v bool, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldImportFlag is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldImportFlag requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldImportFlag: %w", err)
+	}
+	return oldValue.ImportFlag, nil
+}
+
+// ResetImportFlag resets all changes to the "import_flag" field.
+func (m *CountryMutation) ResetImportFlag() {
+	m.import_flag = nil
+}
+
+// SetLastUpdated sets the "last_updated" field.
+func (m *CountryMutation) SetLastUpdated(t time.Time) {
+	m.last_updated = &t
+}
+
+// LastUpdated returns the value of the "last_updated" field in the mutation.
+func (m *CountryMutation) LastUpdated() (r time.Time, exists bool) {
+	v := m.last_updated
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldLastUpdated returns the old "last_updated" field's value of the Country entity.
+// If the Country object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CountryMutation) OldLastUpdated(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldLastUpdated is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldLastUpdated requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldLastUpdated: %w", err)
+	}
+	return oldValue.LastUpdated, nil
+}
+
+// ResetLastUpdated resets all changes to the "last_updated" field.
+func (m *CountryMutation) ResetLastUpdated() {
+	m.last_updated = nil
+}
+
+// SetCode sets the "code" field.
+func (m *CountryMutation) SetCode(s string) {
+	m.code = &s
+}
+
+// Code returns the value of the "code" field in the mutation.
+func (m *CountryMutation) Code() (r string, exists bool) {
+	v := m.code
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCode returns the old "code" field's value of the Country entity.
+// If the Country object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CountryMutation) OldCode(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCode is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCode requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCode: %w", err)
+	}
+	return oldValue.Code, nil
+}
+
+// ResetCode resets all changes to the "code" field.
+func (m *CountryMutation) ResetCode() {
+	m.code = nil
+}
+
+// SetName sets the "name" field.
+func (m *CountryMutation) SetName(s string) {
+	m.name = &s
+}
+
+// Name returns the value of the "name" field in the mutation.
+func (m *CountryMutation) Name() (r string, exists bool) {
+	v := m.name
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldName returns the old "name" field's value of the Country entity.
+// If the Country object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CountryMutation) OldName(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldName is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldName requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldName: %w", err)
+	}
+	return oldValue.Name, nil
+}
+
+// ResetName resets all changes to the "name" field.
+func (m *CountryMutation) ResetName() {
+	m.name = nil
+}
+
+// SetContinent sets the "continent" field.
+func (m *CountryMutation) SetContinent(c country.Continent) {
+	m.continent = &c
+}
+
+// Continent returns the value of the "continent" field in the mutation.
+func (m *CountryMutation) Continent() (r country.Continent, exists bool) {
+	v := m.continent
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldContinent returns the old "continent" field's value of the Country entity.
+// If the Country object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CountryMutation) OldContinent(ctx context.Context) (v country.Continent, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldContinent is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldContinent requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldContinent: %w", err)
+	}
+	return oldValue.Continent, nil
+}
+
+// ResetContinent resets all changes to the "continent" field.
+func (m *CountryMutation) ResetContinent() {
+	m.continent = nil
+}
+
+// SetWikipediaLink sets the "wikipedia_link" field.
+func (m *CountryMutation) SetWikipediaLink(s string) {
+	m.wikipedia_link = &s
+}
+
+// WikipediaLink returns the value of the "wikipedia_link" field in the mutation.
+func (m *CountryMutation) WikipediaLink() (r string, exists bool) {
+	v := m.wikipedia_link
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldWikipediaLink returns the old "wikipedia_link" field's value of the Country entity.
+// If the Country object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CountryMutation) OldWikipediaLink(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldWikipediaLink is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldWikipediaLink requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldWikipediaLink: %w", err)
+	}
+	return oldValue.WikipediaLink, nil
+}
+
+// ResetWikipediaLink resets all changes to the "wikipedia_link" field.
+func (m *CountryMutation) ResetWikipediaLink() {
+	m.wikipedia_link = nil
+}
+
+// SetKeywords sets the "keywords" field.
+func (m *CountryMutation) SetKeywords(s []string) {
+	m.keywords = &s
+}
+
+// Keywords returns the value of the "keywords" field in the mutation.
+func (m *CountryMutation) Keywords() (r []string, exists bool) {
+	v := m.keywords
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldKeywords returns the old "keywords" field's value of the Country entity.
+// If the Country object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CountryMutation) OldKeywords(ctx context.Context) (v []string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldKeywords is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldKeywords requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldKeywords: %w", err)
+	}
+	return oldValue.Keywords, nil
+}
+
+// ResetKeywords resets all changes to the "keywords" field.
+func (m *CountryMutation) ResetKeywords() {
+	m.keywords = nil
+}
+
+// AddAirportIDs adds the "airports" edge to the Airport entity by ids.
+func (m *CountryMutation) AddAirportIDs(ids ...uuid.UUID) {
+	if m.airports == nil {
+		m.airports = make(map[uuid.UUID]struct{})
+	}
+	for i := range ids {
+		m.airports[ids[i]] = struct{}{}
+	}
+}
+
+// ClearAirports clears the "airports" edge to the Airport entity.
+func (m *CountryMutation) ClearAirports() {
+	m.clearedairports = true
+}
+
+// AirportsCleared reports if the "airports" edge to the Airport entity was cleared.
+func (m *CountryMutation) AirportsCleared() bool {
+	return m.clearedairports
+}
+
+// RemoveAirportIDs removes the "airports" edge to the Airport entity by IDs.
+func (m *CountryMutation) RemoveAirportIDs(ids ...uuid.UUID) {
+	if m.removedairports == nil {
+		m.removedairports = make(map[uuid.UUID]struct{})
+	}
+	for i := range ids {
+		delete(m.airports, ids[i])
+		m.removedairports[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedAirports returns the removed IDs of the "airports" edge to the Airport entity.
+func (m *CountryMutation) RemovedAirportsIDs() (ids []uuid.UUID) {
+	for id := range m.removedairports {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// AirportsIDs returns the "airports" edge IDs in the mutation.
+func (m *CountryMutation) AirportsIDs() (ids []uuid.UUID) {
+	for id := range m.airports {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetAirports resets all changes to the "airports" edge.
+func (m *CountryMutation) ResetAirports() {
+	m.airports = nil
+	m.clearedairports = false
+	m.removedairports = nil
+}
+
+// Where appends a list predicates to the CountryMutation builder.
+func (m *CountryMutation) Where(ps ...predicate.Country) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// Op returns the operation name.
+func (m *CountryMutation) Op() Op {
+	return m.op
+}
+
+// Type returns the node type of this mutation (Country).
+func (m *CountryMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *CountryMutation) Fields() []string {
+	fields := make([]string, 0, 9)
+	if m.import_id != nil {
+		fields = append(fields, country.FieldImportID)
+	}
+	if m.hash != nil {
+		fields = append(fields, country.FieldHash)
+	}
+	if m.import_flag != nil {
+		fields = append(fields, country.FieldImportFlag)
+	}
+	if m.last_updated != nil {
+		fields = append(fields, country.FieldLastUpdated)
+	}
+	if m.code != nil {
+		fields = append(fields, country.FieldCode)
+	}
+	if m.name != nil {
+		fields = append(fields, country.FieldName)
+	}
+	if m.continent != nil {
+		fields = append(fields, country.FieldContinent)
+	}
+	if m.wikipedia_link != nil {
+		fields = append(fields, country.FieldWikipediaLink)
+	}
+	if m.keywords != nil {
+		fields = append(fields, country.FieldKeywords)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *CountryMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case country.FieldImportID:
+		return m.ImportID()
+	case country.FieldHash:
+		return m.Hash()
+	case country.FieldImportFlag:
+		return m.ImportFlag()
+	case country.FieldLastUpdated:
+		return m.LastUpdated()
+	case country.FieldCode:
+		return m.Code()
+	case country.FieldName:
+		return m.Name()
+	case country.FieldContinent:
+		return m.Continent()
+	case country.FieldWikipediaLink:
+		return m.WikipediaLink()
+	case country.FieldKeywords:
+		return m.Keywords()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *CountryMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case country.FieldImportID:
+		return m.OldImportID(ctx)
+	case country.FieldHash:
+		return m.OldHash(ctx)
+	case country.FieldImportFlag:
+		return m.OldImportFlag(ctx)
+	case country.FieldLastUpdated:
+		return m.OldLastUpdated(ctx)
+	case country.FieldCode:
+		return m.OldCode(ctx)
+	case country.FieldName:
+		return m.OldName(ctx)
+	case country.FieldContinent:
+		return m.OldContinent(ctx)
+	case country.FieldWikipediaLink:
+		return m.OldWikipediaLink(ctx)
+	case country.FieldKeywords:
+		return m.OldKeywords(ctx)
+	}
+	return nil, fmt.Errorf("unknown Country field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *CountryMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case country.FieldImportID:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetImportID(v)
+		return nil
+	case country.FieldHash:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetHash(v)
+		return nil
+	case country.FieldImportFlag:
+		v, ok := value.(bool)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetImportFlag(v)
+		return nil
+	case country.FieldLastUpdated:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetLastUpdated(v)
+		return nil
+	case country.FieldCode:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCode(v)
+		return nil
+	case country.FieldName:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetName(v)
+		return nil
+	case country.FieldContinent:
+		v, ok := value.(country.Continent)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetContinent(v)
+		return nil
+	case country.FieldWikipediaLink:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetWikipediaLink(v)
+		return nil
+	case country.FieldKeywords:
+		v, ok := value.([]string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetKeywords(v)
+		return nil
+	}
+	return fmt.Errorf("unknown Country field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *CountryMutation) AddedFields() []string {
+	var fields []string
+	if m.addimport_id != nil {
+		fields = append(fields, country.FieldImportID)
+	}
+	return fields
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *CountryMutation) AddedField(name string) (ent.Value, bool) {
+	switch name {
+	case country.FieldImportID:
+		return m.AddedImportID()
+	}
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *CountryMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	case country.FieldImportID:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddImportID(v)
+		return nil
+	}
+	return fmt.Errorf("unknown Country numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *CountryMutation) ClearedFields() []string {
+	return nil
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *CountryMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *CountryMutation) ClearField(name string) error {
+	return fmt.Errorf("unknown Country nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *CountryMutation) ResetField(name string) error {
+	switch name {
+	case country.FieldImportID:
+		m.ResetImportID()
+		return nil
+	case country.FieldHash:
+		m.ResetHash()
+		return nil
+	case country.FieldImportFlag:
+		m.ResetImportFlag()
+		return nil
+	case country.FieldLastUpdated:
+		m.ResetLastUpdated()
+		return nil
+	case country.FieldCode:
+		m.ResetCode()
+		return nil
+	case country.FieldName:
+		m.ResetName()
+		return nil
+	case country.FieldContinent:
+		m.ResetContinent()
+		return nil
+	case country.FieldWikipediaLink:
+		m.ResetWikipediaLink()
+		return nil
+	case country.FieldKeywords:
+		m.ResetKeywords()
+		return nil
+	}
+	return fmt.Errorf("unknown Country field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *CountryMutation) AddedEdges() []string {
+	edges := make([]string, 0, 1)
+	if m.airports != nil {
+		edges = append(edges, country.EdgeAirports)
+	}
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *CountryMutation) AddedIDs(name string) []ent.Value {
+	switch name {
+	case country.EdgeAirports:
+		ids := make([]ent.Value, 0, len(m.airports))
+		for id := range m.airports {
+			ids = append(ids, id)
+		}
+		return ids
+	}
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *CountryMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 1)
+	if m.removedairports != nil {
+		edges = append(edges, country.EdgeAirports)
+	}
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *CountryMutation) RemovedIDs(name string) []ent.Value {
+	switch name {
+	case country.EdgeAirports:
+		ids := make([]ent.Value, 0, len(m.removedairports))
+		for id := range m.removedairports {
+			ids = append(ids, id)
+		}
+		return ids
+	}
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *CountryMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 1)
+	if m.clearedairports {
+		edges = append(edges, country.EdgeAirports)
+	}
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *CountryMutation) EdgeCleared(name string) bool {
+	switch name {
+	case country.EdgeAirports:
+		return m.clearedairports
+	}
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *CountryMutation) ClearEdge(name string) error {
+	switch name {
+	}
+	return fmt.Errorf("unknown Country unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *CountryMutation) ResetEdge(name string) error {
+	switch name {
+	case country.EdgeAirports:
+		m.ResetAirports()
+		return nil
+	}
+	return fmt.Errorf("unknown Country edge %s", name)
 }
 
 // ForecastMutation represents an operation that mutates the Forecast nodes in the graph.
@@ -8491,6 +9329,884 @@ func (m *MetarMutation) ResetEdge(name string) error {
 		return nil
 	}
 	return fmt.Errorf("unknown Metar edge %s", name)
+}
+
+// RegionMutation represents an operation that mutates the Region nodes in the graph.
+type RegionMutation struct {
+	config
+	op              Op
+	typ             string
+	id              *uuid.UUID
+	import_id       *int
+	addimport_id    *int
+	hash            *string
+	import_flag     *bool
+	last_updated    *time.Time
+	code            *string
+	local_code      *string
+	name            *string
+	wikipedia_link  *string
+	keywords        *[]string
+	clearedFields   map[string]struct{}
+	airports        map[uuid.UUID]struct{}
+	removedairports map[uuid.UUID]struct{}
+	clearedairports bool
+	done            bool
+	oldValue        func(context.Context) (*Region, error)
+	predicates      []predicate.Region
+}
+
+var _ ent.Mutation = (*RegionMutation)(nil)
+
+// regionOption allows management of the mutation configuration using functional options.
+type regionOption func(*RegionMutation)
+
+// newRegionMutation creates new mutation for the Region entity.
+func newRegionMutation(c config, op Op, opts ...regionOption) *RegionMutation {
+	m := &RegionMutation{
+		config:        c,
+		op:            op,
+		typ:           TypeRegion,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withRegionID sets the ID field of the mutation.
+func withRegionID(id uuid.UUID) regionOption {
+	return func(m *RegionMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *Region
+		)
+		m.oldValue = func(ctx context.Context) (*Region, error) {
+			once.Do(func() {
+				if m.done {
+					err = errors.New("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().Region.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withRegion sets the old Region of the mutation.
+func withRegion(node *Region) regionOption {
+	return func(m *RegionMutation) {
+		m.oldValue = func(context.Context) (*Region, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m RegionMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m RegionMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, errors.New("ent: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// SetID sets the value of the id field. Note that this
+// operation is only accepted on creation of Region entities.
+func (m *RegionMutation) SetID(id uuid.UUID) {
+	m.id = &id
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *RegionMutation) ID() (id uuid.UUID, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *RegionMutation) IDs(ctx context.Context) ([]uuid.UUID, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []uuid.UUID{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().Region.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
+}
+
+// SetImportID sets the "import_id" field.
+func (m *RegionMutation) SetImportID(i int) {
+	m.import_id = &i
+	m.addimport_id = nil
+}
+
+// ImportID returns the value of the "import_id" field in the mutation.
+func (m *RegionMutation) ImportID() (r int, exists bool) {
+	v := m.import_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldImportID returns the old "import_id" field's value of the Region entity.
+// If the Region object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *RegionMutation) OldImportID(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldImportID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldImportID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldImportID: %w", err)
+	}
+	return oldValue.ImportID, nil
+}
+
+// AddImportID adds i to the "import_id" field.
+func (m *RegionMutation) AddImportID(i int) {
+	if m.addimport_id != nil {
+		*m.addimport_id += i
+	} else {
+		m.addimport_id = &i
+	}
+}
+
+// AddedImportID returns the value that was added to the "import_id" field in this mutation.
+func (m *RegionMutation) AddedImportID() (r int, exists bool) {
+	v := m.addimport_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetImportID resets all changes to the "import_id" field.
+func (m *RegionMutation) ResetImportID() {
+	m.import_id = nil
+	m.addimport_id = nil
+}
+
+// SetHash sets the "hash" field.
+func (m *RegionMutation) SetHash(s string) {
+	m.hash = &s
+}
+
+// Hash returns the value of the "hash" field in the mutation.
+func (m *RegionMutation) Hash() (r string, exists bool) {
+	v := m.hash
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldHash returns the old "hash" field's value of the Region entity.
+// If the Region object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *RegionMutation) OldHash(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldHash is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldHash requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldHash: %w", err)
+	}
+	return oldValue.Hash, nil
+}
+
+// ResetHash resets all changes to the "hash" field.
+func (m *RegionMutation) ResetHash() {
+	m.hash = nil
+}
+
+// SetImportFlag sets the "import_flag" field.
+func (m *RegionMutation) SetImportFlag(b bool) {
+	m.import_flag = &b
+}
+
+// ImportFlag returns the value of the "import_flag" field in the mutation.
+func (m *RegionMutation) ImportFlag() (r bool, exists bool) {
+	v := m.import_flag
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldImportFlag returns the old "import_flag" field's value of the Region entity.
+// If the Region object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *RegionMutation) OldImportFlag(ctx context.Context) (v bool, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldImportFlag is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldImportFlag requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldImportFlag: %w", err)
+	}
+	return oldValue.ImportFlag, nil
+}
+
+// ResetImportFlag resets all changes to the "import_flag" field.
+func (m *RegionMutation) ResetImportFlag() {
+	m.import_flag = nil
+}
+
+// SetLastUpdated sets the "last_updated" field.
+func (m *RegionMutation) SetLastUpdated(t time.Time) {
+	m.last_updated = &t
+}
+
+// LastUpdated returns the value of the "last_updated" field in the mutation.
+func (m *RegionMutation) LastUpdated() (r time.Time, exists bool) {
+	v := m.last_updated
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldLastUpdated returns the old "last_updated" field's value of the Region entity.
+// If the Region object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *RegionMutation) OldLastUpdated(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldLastUpdated is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldLastUpdated requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldLastUpdated: %w", err)
+	}
+	return oldValue.LastUpdated, nil
+}
+
+// ResetLastUpdated resets all changes to the "last_updated" field.
+func (m *RegionMutation) ResetLastUpdated() {
+	m.last_updated = nil
+}
+
+// SetCode sets the "code" field.
+func (m *RegionMutation) SetCode(s string) {
+	m.code = &s
+}
+
+// Code returns the value of the "code" field in the mutation.
+func (m *RegionMutation) Code() (r string, exists bool) {
+	v := m.code
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCode returns the old "code" field's value of the Region entity.
+// If the Region object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *RegionMutation) OldCode(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCode is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCode requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCode: %w", err)
+	}
+	return oldValue.Code, nil
+}
+
+// ResetCode resets all changes to the "code" field.
+func (m *RegionMutation) ResetCode() {
+	m.code = nil
+}
+
+// SetLocalCode sets the "local_code" field.
+func (m *RegionMutation) SetLocalCode(s string) {
+	m.local_code = &s
+}
+
+// LocalCode returns the value of the "local_code" field in the mutation.
+func (m *RegionMutation) LocalCode() (r string, exists bool) {
+	v := m.local_code
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldLocalCode returns the old "local_code" field's value of the Region entity.
+// If the Region object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *RegionMutation) OldLocalCode(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldLocalCode is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldLocalCode requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldLocalCode: %w", err)
+	}
+	return oldValue.LocalCode, nil
+}
+
+// ResetLocalCode resets all changes to the "local_code" field.
+func (m *RegionMutation) ResetLocalCode() {
+	m.local_code = nil
+}
+
+// SetName sets the "name" field.
+func (m *RegionMutation) SetName(s string) {
+	m.name = &s
+}
+
+// Name returns the value of the "name" field in the mutation.
+func (m *RegionMutation) Name() (r string, exists bool) {
+	v := m.name
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldName returns the old "name" field's value of the Region entity.
+// If the Region object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *RegionMutation) OldName(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldName is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldName requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldName: %w", err)
+	}
+	return oldValue.Name, nil
+}
+
+// ResetName resets all changes to the "name" field.
+func (m *RegionMutation) ResetName() {
+	m.name = nil
+}
+
+// SetWikipediaLink sets the "wikipedia_link" field.
+func (m *RegionMutation) SetWikipediaLink(s string) {
+	m.wikipedia_link = &s
+}
+
+// WikipediaLink returns the value of the "wikipedia_link" field in the mutation.
+func (m *RegionMutation) WikipediaLink() (r string, exists bool) {
+	v := m.wikipedia_link
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldWikipediaLink returns the old "wikipedia_link" field's value of the Region entity.
+// If the Region object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *RegionMutation) OldWikipediaLink(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldWikipediaLink is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldWikipediaLink requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldWikipediaLink: %w", err)
+	}
+	return oldValue.WikipediaLink, nil
+}
+
+// ResetWikipediaLink resets all changes to the "wikipedia_link" field.
+func (m *RegionMutation) ResetWikipediaLink() {
+	m.wikipedia_link = nil
+}
+
+// SetKeywords sets the "keywords" field.
+func (m *RegionMutation) SetKeywords(s []string) {
+	m.keywords = &s
+}
+
+// Keywords returns the value of the "keywords" field in the mutation.
+func (m *RegionMutation) Keywords() (r []string, exists bool) {
+	v := m.keywords
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldKeywords returns the old "keywords" field's value of the Region entity.
+// If the Region object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *RegionMutation) OldKeywords(ctx context.Context) (v []string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldKeywords is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldKeywords requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldKeywords: %w", err)
+	}
+	return oldValue.Keywords, nil
+}
+
+// ResetKeywords resets all changes to the "keywords" field.
+func (m *RegionMutation) ResetKeywords() {
+	m.keywords = nil
+}
+
+// AddAirportIDs adds the "airports" edge to the Airport entity by ids.
+func (m *RegionMutation) AddAirportIDs(ids ...uuid.UUID) {
+	if m.airports == nil {
+		m.airports = make(map[uuid.UUID]struct{})
+	}
+	for i := range ids {
+		m.airports[ids[i]] = struct{}{}
+	}
+}
+
+// ClearAirports clears the "airports" edge to the Airport entity.
+func (m *RegionMutation) ClearAirports() {
+	m.clearedairports = true
+}
+
+// AirportsCleared reports if the "airports" edge to the Airport entity was cleared.
+func (m *RegionMutation) AirportsCleared() bool {
+	return m.clearedairports
+}
+
+// RemoveAirportIDs removes the "airports" edge to the Airport entity by IDs.
+func (m *RegionMutation) RemoveAirportIDs(ids ...uuid.UUID) {
+	if m.removedairports == nil {
+		m.removedairports = make(map[uuid.UUID]struct{})
+	}
+	for i := range ids {
+		delete(m.airports, ids[i])
+		m.removedairports[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedAirports returns the removed IDs of the "airports" edge to the Airport entity.
+func (m *RegionMutation) RemovedAirportsIDs() (ids []uuid.UUID) {
+	for id := range m.removedairports {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// AirportsIDs returns the "airports" edge IDs in the mutation.
+func (m *RegionMutation) AirportsIDs() (ids []uuid.UUID) {
+	for id := range m.airports {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetAirports resets all changes to the "airports" edge.
+func (m *RegionMutation) ResetAirports() {
+	m.airports = nil
+	m.clearedairports = false
+	m.removedairports = nil
+}
+
+// Where appends a list predicates to the RegionMutation builder.
+func (m *RegionMutation) Where(ps ...predicate.Region) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// Op returns the operation name.
+func (m *RegionMutation) Op() Op {
+	return m.op
+}
+
+// Type returns the node type of this mutation (Region).
+func (m *RegionMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *RegionMutation) Fields() []string {
+	fields := make([]string, 0, 9)
+	if m.import_id != nil {
+		fields = append(fields, region.FieldImportID)
+	}
+	if m.hash != nil {
+		fields = append(fields, region.FieldHash)
+	}
+	if m.import_flag != nil {
+		fields = append(fields, region.FieldImportFlag)
+	}
+	if m.last_updated != nil {
+		fields = append(fields, region.FieldLastUpdated)
+	}
+	if m.code != nil {
+		fields = append(fields, region.FieldCode)
+	}
+	if m.local_code != nil {
+		fields = append(fields, region.FieldLocalCode)
+	}
+	if m.name != nil {
+		fields = append(fields, region.FieldName)
+	}
+	if m.wikipedia_link != nil {
+		fields = append(fields, region.FieldWikipediaLink)
+	}
+	if m.keywords != nil {
+		fields = append(fields, region.FieldKeywords)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *RegionMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case region.FieldImportID:
+		return m.ImportID()
+	case region.FieldHash:
+		return m.Hash()
+	case region.FieldImportFlag:
+		return m.ImportFlag()
+	case region.FieldLastUpdated:
+		return m.LastUpdated()
+	case region.FieldCode:
+		return m.Code()
+	case region.FieldLocalCode:
+		return m.LocalCode()
+	case region.FieldName:
+		return m.Name()
+	case region.FieldWikipediaLink:
+		return m.WikipediaLink()
+	case region.FieldKeywords:
+		return m.Keywords()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *RegionMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case region.FieldImportID:
+		return m.OldImportID(ctx)
+	case region.FieldHash:
+		return m.OldHash(ctx)
+	case region.FieldImportFlag:
+		return m.OldImportFlag(ctx)
+	case region.FieldLastUpdated:
+		return m.OldLastUpdated(ctx)
+	case region.FieldCode:
+		return m.OldCode(ctx)
+	case region.FieldLocalCode:
+		return m.OldLocalCode(ctx)
+	case region.FieldName:
+		return m.OldName(ctx)
+	case region.FieldWikipediaLink:
+		return m.OldWikipediaLink(ctx)
+	case region.FieldKeywords:
+		return m.OldKeywords(ctx)
+	}
+	return nil, fmt.Errorf("unknown Region field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *RegionMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case region.FieldImportID:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetImportID(v)
+		return nil
+	case region.FieldHash:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetHash(v)
+		return nil
+	case region.FieldImportFlag:
+		v, ok := value.(bool)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetImportFlag(v)
+		return nil
+	case region.FieldLastUpdated:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetLastUpdated(v)
+		return nil
+	case region.FieldCode:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCode(v)
+		return nil
+	case region.FieldLocalCode:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetLocalCode(v)
+		return nil
+	case region.FieldName:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetName(v)
+		return nil
+	case region.FieldWikipediaLink:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetWikipediaLink(v)
+		return nil
+	case region.FieldKeywords:
+		v, ok := value.([]string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetKeywords(v)
+		return nil
+	}
+	return fmt.Errorf("unknown Region field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *RegionMutation) AddedFields() []string {
+	var fields []string
+	if m.addimport_id != nil {
+		fields = append(fields, region.FieldImportID)
+	}
+	return fields
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *RegionMutation) AddedField(name string) (ent.Value, bool) {
+	switch name {
+	case region.FieldImportID:
+		return m.AddedImportID()
+	}
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *RegionMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	case region.FieldImportID:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddImportID(v)
+		return nil
+	}
+	return fmt.Errorf("unknown Region numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *RegionMutation) ClearedFields() []string {
+	return nil
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *RegionMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *RegionMutation) ClearField(name string) error {
+	return fmt.Errorf("unknown Region nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *RegionMutation) ResetField(name string) error {
+	switch name {
+	case region.FieldImportID:
+		m.ResetImportID()
+		return nil
+	case region.FieldHash:
+		m.ResetHash()
+		return nil
+	case region.FieldImportFlag:
+		m.ResetImportFlag()
+		return nil
+	case region.FieldLastUpdated:
+		m.ResetLastUpdated()
+		return nil
+	case region.FieldCode:
+		m.ResetCode()
+		return nil
+	case region.FieldLocalCode:
+		m.ResetLocalCode()
+		return nil
+	case region.FieldName:
+		m.ResetName()
+		return nil
+	case region.FieldWikipediaLink:
+		m.ResetWikipediaLink()
+		return nil
+	case region.FieldKeywords:
+		m.ResetKeywords()
+		return nil
+	}
+	return fmt.Errorf("unknown Region field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *RegionMutation) AddedEdges() []string {
+	edges := make([]string, 0, 1)
+	if m.airports != nil {
+		edges = append(edges, region.EdgeAirports)
+	}
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *RegionMutation) AddedIDs(name string) []ent.Value {
+	switch name {
+	case region.EdgeAirports:
+		ids := make([]ent.Value, 0, len(m.airports))
+		for id := range m.airports {
+			ids = append(ids, id)
+		}
+		return ids
+	}
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *RegionMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 1)
+	if m.removedairports != nil {
+		edges = append(edges, region.EdgeAirports)
+	}
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *RegionMutation) RemovedIDs(name string) []ent.Value {
+	switch name {
+	case region.EdgeAirports:
+		ids := make([]ent.Value, 0, len(m.removedairports))
+		for id := range m.removedairports {
+			ids = append(ids, id)
+		}
+		return ids
+	}
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *RegionMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 1)
+	if m.clearedairports {
+		edges = append(edges, region.EdgeAirports)
+	}
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *RegionMutation) EdgeCleared(name string) bool {
+	switch name {
+	case region.EdgeAirports:
+		return m.clearedairports
+	}
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *RegionMutation) ClearEdge(name string) error {
+	switch name {
+	}
+	return fmt.Errorf("unknown Region unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *RegionMutation) ResetEdge(name string) error {
+	switch name {
+	case region.EdgeAirports:
+		m.ResetAirports()
+		return nil
+	}
+	return fmt.Errorf("unknown Region edge %s", name)
 }
 
 // RunwayMutation represents an operation that mutates the Runway nodes in the graph.

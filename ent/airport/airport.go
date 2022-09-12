@@ -40,12 +40,6 @@ const (
 	FieldLongitude = "longitude"
 	// FieldElevation holds the string denoting the elevation field in the database.
 	FieldElevation = "elevation"
-	// FieldContinent holds the string denoting the continent field in the database.
-	FieldContinent = "continent"
-	// FieldCountry holds the string denoting the country field in the database.
-	FieldCountry = "country"
-	// FieldRegion holds the string denoting the region field in the database.
-	FieldRegion = "region"
 	// FieldMunicipality holds the string denoting the municipality field in the database.
 	FieldMunicipality = "municipality"
 	// FieldScheduledService holds the string denoting the scheduled_service field in the database.
@@ -60,14 +54,32 @@ const (
 	FieldWikipedia = "wikipedia"
 	// FieldKeywords holds the string denoting the keywords field in the database.
 	FieldKeywords = "keywords"
+	// EdgeRegion holds the string denoting the region edge name in mutations.
+	EdgeRegion = "region"
+	// EdgeCountry holds the string denoting the country edge name in mutations.
+	EdgeCountry = "country"
 	// EdgeRunways holds the string denoting the runways edge name in mutations.
 	EdgeRunways = "runways"
-	// EdgeStation holds the string denoting the station edge name in mutations.
-	EdgeStation = "station"
 	// EdgeFrequencies holds the string denoting the frequencies edge name in mutations.
 	EdgeFrequencies = "frequencies"
+	// EdgeStation holds the string denoting the station edge name in mutations.
+	EdgeStation = "station"
 	// Table holds the table name of the airport in the database.
 	Table = "airports"
+	// RegionTable is the table that holds the region relation/edge.
+	RegionTable = "airports"
+	// RegionInverseTable is the table name for the Region entity.
+	// It exists in this package in order to avoid circular dependency with the "region" package.
+	RegionInverseTable = "regions"
+	// RegionColumn is the table column denoting the region relation/edge.
+	RegionColumn = "region_airports"
+	// CountryTable is the table that holds the country relation/edge.
+	CountryTable = "airports"
+	// CountryInverseTable is the table name for the Country entity.
+	// It exists in this package in order to avoid circular dependency with the "country" package.
+	CountryInverseTable = "countries"
+	// CountryColumn is the table column denoting the country relation/edge.
+	CountryColumn = "country_airports"
 	// RunwaysTable is the table that holds the runways relation/edge.
 	RunwaysTable = "runways"
 	// RunwaysInverseTable is the table name for the Runway entity.
@@ -75,13 +87,6 @@ const (
 	RunwaysInverseTable = "runways"
 	// RunwaysColumn is the table column denoting the runways relation/edge.
 	RunwaysColumn = "airport_runways"
-	// StationTable is the table that holds the station relation/edge.
-	StationTable = "weather_stations"
-	// StationInverseTable is the table name for the WeatherStation entity.
-	// It exists in this package in order to avoid circular dependency with the "weatherstation" package.
-	StationInverseTable = "weather_stations"
-	// StationColumn is the table column denoting the station relation/edge.
-	StationColumn = "airport_station"
 	// FrequenciesTable is the table that holds the frequencies relation/edge.
 	FrequenciesTable = "frequencies"
 	// FrequenciesInverseTable is the table name for the Frequency entity.
@@ -89,6 +94,13 @@ const (
 	FrequenciesInverseTable = "frequencies"
 	// FrequenciesColumn is the table column denoting the frequencies relation/edge.
 	FrequenciesColumn = "airport_frequencies"
+	// StationTable is the table that holds the station relation/edge.
+	StationTable = "weather_stations"
+	// StationInverseTable is the table name for the WeatherStation entity.
+	// It exists in this package in order to avoid circular dependency with the "weatherstation" package.
+	StationInverseTable = "weather_stations"
+	// StationColumn is the table column denoting the station relation/edge.
+	StationColumn = "airport_station"
 )
 
 // Columns holds all SQL columns for airport fields.
@@ -106,9 +118,6 @@ var Columns = []string{
 	FieldLatitude,
 	FieldLongitude,
 	FieldElevation,
-	FieldContinent,
-	FieldCountry,
-	FieldRegion,
 	FieldMunicipality,
 	FieldScheduledService,
 	FieldGpsCode,
@@ -118,10 +127,22 @@ var Columns = []string{
 	FieldKeywords,
 }
 
+// ForeignKeys holds the SQL foreign-keys that are owned by the "airports"
+// table and are not defined as standalone fields in the schema.
+var ForeignKeys = []string{
+	"country_airports",
+	"region_airports",
+}
+
 // ValidColumn reports if the column name is valid (part of the table columns).
 func ValidColumn(column string) bool {
 	for i := range Columns {
 		if column == Columns[i] {
+			return true
+		}
+	}
+	for i := range ForeignKeys {
+		if column == ForeignKeys[i] {
 			return true
 		}
 	}
@@ -166,34 +187,6 @@ func TypeValidator(_type Type) error {
 	}
 }
 
-// Continent defines the type for the "continent" enum field.
-type Continent string
-
-// Continent values.
-const (
-	ContinentAfrica       Continent = "AF"
-	ContinentAntarctica   Continent = "AN"
-	ContinentAsia         Continent = "AS"
-	ContinentEurope       Continent = "EU"
-	ContinentNorthAmerica Continent = "NA"
-	ContinentSouthAmerica Continent = "SA"
-	ContinentOceania      Continent = "OC"
-)
-
-func (c Continent) String() string {
-	return string(c)
-}
-
-// ContinentValidator is a validator for the "continent" field enum values. It is called by the builders before save.
-func ContinentValidator(c Continent) error {
-	switch c {
-	case ContinentAfrica, ContinentAntarctica, ContinentAsia, ContinentEurope, ContinentNorthAmerica, ContinentSouthAmerica, ContinentOceania:
-		return nil
-	default:
-		return fmt.Errorf("airport: invalid enum value for continent field: %q", c)
-	}
-}
-
 // MarshalGQL implements graphql.Marshaler interface.
 func (e Type) MarshalGQL(w io.Writer) {
 	io.WriteString(w, strconv.Quote(e.String()))
@@ -208,24 +201,6 @@ func (e *Type) UnmarshalGQL(val interface{}) error {
 	*e = Type(str)
 	if err := TypeValidator(*e); err != nil {
 		return fmt.Errorf("%s is not a valid Type", str)
-	}
-	return nil
-}
-
-// MarshalGQL implements graphql.Marshaler interface.
-func (e Continent) MarshalGQL(w io.Writer) {
-	io.WriteString(w, strconv.Quote(e.String()))
-}
-
-// UnmarshalGQL implements graphql.Unmarshaler interface.
-func (e *Continent) UnmarshalGQL(val interface{}) error {
-	str, ok := val.(string)
-	if !ok {
-		return fmt.Errorf("enum %T must be a string", val)
-	}
-	*e = Continent(str)
-	if err := ContinentValidator(*e); err != nil {
-		return fmt.Errorf("%s is not a valid Continent", str)
 	}
 	return nil
 }

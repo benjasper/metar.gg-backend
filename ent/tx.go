@@ -14,6 +14,8 @@ type Tx struct {
 	config
 	// Airport is the client for interacting with the Airport builders.
 	Airport *AirportClient
+	// Country is the client for interacting with the Country builders.
+	Country *CountryClient
 	// Forecast is the client for interacting with the Forecast builders.
 	Forecast *ForecastClient
 	// Frequency is the client for interacting with the Frequency builders.
@@ -22,6 +24,8 @@ type Tx struct {
 	IcingCondition *IcingConditionClient
 	// Metar is the client for interacting with the Metar builders.
 	Metar *MetarClient
+	// Region is the client for interacting with the Region builders.
+	Region *RegionClient
 	// Runway is the client for interacting with the Runway builders.
 	Runway *RunwayClient
 	// SkyCondition is the client for interacting with the SkyCondition builders.
@@ -170,10 +174,12 @@ func (tx *Tx) Client() *Client {
 
 func (tx *Tx) init() {
 	tx.Airport = NewAirportClient(tx.config)
+	tx.Country = NewCountryClient(tx.config)
 	tx.Forecast = NewForecastClient(tx.config)
 	tx.Frequency = NewFrequencyClient(tx.config)
 	tx.IcingCondition = NewIcingConditionClient(tx.config)
 	tx.Metar = NewMetarClient(tx.config)
+	tx.Region = NewRegionClient(tx.config)
 	tx.Runway = NewRunwayClient(tx.config)
 	tx.SkyCondition = NewSkyConditionClient(tx.config)
 	tx.Taf = NewTafClient(tx.config)

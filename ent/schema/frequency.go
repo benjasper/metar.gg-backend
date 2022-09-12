@@ -36,5 +36,5 @@ func (Frequency) Indexes() []ent.Index {
 
 // Mixin of the Frequency.
 func (Frequency) Mixin() []ent.Mixin {
-	return []ent.Mixin{ImportMixin{}}
+	return []ent.Mixin{ImportMixin{}, IDMixin{}}
 }

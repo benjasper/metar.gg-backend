@@ -40,7 +40,6 @@ type DirectiveRoot struct {
 
 type ComplexityRoot struct {
 	Airport struct {
-		Continent        func(childComplexity int) int
 		Country          func(childComplexity int) int
 		Elevation        func(childComplexity int) int
 		Frequencies      func(childComplexity int) int
@@ -76,6 +75,17 @@ type ComplexityRoot struct {
 	AirportEdge struct {
 		Cursor func(childComplexity int) int
 		Node   func(childComplexity int) int
+	}
+
+	Country struct {
+		Code          func(childComplexity int) int
+		Continent     func(childComplexity int) int
+		ID            func(childComplexity int) int
+		ImportID      func(childComplexity int) int
+		Keywords      func(childComplexity int) int
+		LastUpdated   func(childComplexity int) int
+		Name          func(childComplexity int) int
+		WikipediaLink func(childComplexity int) int
 	}
 
 	Forecast struct {
@@ -177,6 +187,17 @@ type ComplexityRoot struct {
 	Query struct {
 		GetAirports func(childComplexity int, after *ent.Cursor, first *int, before *ent.Cursor, last *int, identifier *string, icao *string, iata *string, hasWeather *bool) int
 		GetStations func(childComplexity int, after *ent.Cursor, first *int, before *ent.Cursor, last *int, identifier *string) int
+	}
+
+	Region struct {
+		Code          func(childComplexity int) int
+		ID            func(childComplexity int) int
+		ImportID      func(childComplexity int) int
+		Keywords      func(childComplexity int) int
+		LastUpdated   func(childComplexity int) int
+		LocalCode     func(childComplexity int) int
+		Name          func(childComplexity int) int
+		WikipediaLink func(childComplexity int) int
 	}
 
 	Runway struct {
@@ -291,13 +312,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 	ec := executionContext{nil, e}
 	_ = ec
 	switch typeName + "." + field {
-
-	case "Airport.continent":
-		if e.complexity.Airport.Continent == nil {
-			break
-		}
-
-		return e.complexity.Airport.Continent(childComplexity), true
 
 	case "Airport.country":
 		if e.complexity.Airport.Country == nil {
@@ -511,6 +525,62 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.AirportEdge.Node(childComplexity), true
+
+	case "Country.code":
+		if e.complexity.Country.Code == nil {
+			break
+		}
+
+		return e.complexity.Country.Code(childComplexity), true
+
+	case "Country.continent":
+		if e.complexity.Country.Continent == nil {
+			break
+		}
+
+		return e.complexity.Country.Continent(childComplexity), true
+
+	case "Country.id":
+		if e.complexity.Country.ID == nil {
+			break
+		}
+
+		return e.complexity.Country.ID(childComplexity), true
+
+	case "Country.importID":
+		if e.complexity.Country.ImportID == nil {
+			break
+		}
+
+		return e.complexity.Country.ImportID(childComplexity), true
+
+	case "Country.keywords":
+		if e.complexity.Country.Keywords == nil {
+			break
+		}
+
+		return e.complexity.Country.Keywords(childComplexity), true
+
+	case "Country.lastUpdated":
+		if e.complexity.Country.LastUpdated == nil {
+			break
+		}
+
+		return e.complexity.Country.LastUpdated(childComplexity), true
+
+	case "Country.name":
+		if e.complexity.Country.Name == nil {
+			break
+		}
+
+		return e.complexity.Country.Name(childComplexity), true
+
+	case "Country.wikipediaLink":
+		if e.complexity.Country.WikipediaLink == nil {
+			break
+		}
+
+		return e.complexity.Country.WikipediaLink(childComplexity), true
 
 	case "Forecast.altimeter":
 		if e.complexity.Forecast.Altimeter == nil {
@@ -1061,6 +1131,62 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Query.GetStations(childComplexity, args["after"].(*ent.Cursor), args["first"].(*int), args["before"].(*ent.Cursor), args["last"].(*int), args["identifier"].(*string)), true
 
+	case "Region.code":
+		if e.complexity.Region.Code == nil {
+			break
+		}
+
+		return e.complexity.Region.Code(childComplexity), true
+
+	case "Region.id":
+		if e.complexity.Region.ID == nil {
+			break
+		}
+
+		return e.complexity.Region.ID(childComplexity), true
+
+	case "Region.importID":
+		if e.complexity.Region.ImportID == nil {
+			break
+		}
+
+		return e.complexity.Region.ImportID(childComplexity), true
+
+	case "Region.keywords":
+		if e.complexity.Region.Keywords == nil {
+			break
+		}
+
+		return e.complexity.Region.Keywords(childComplexity), true
+
+	case "Region.lastUpdated":
+		if e.complexity.Region.LastUpdated == nil {
+			break
+		}
+
+		return e.complexity.Region.LastUpdated(childComplexity), true
+
+	case "Region.localCode":
+		if e.complexity.Region.LocalCode == nil {
+			break
+		}
+
+		return e.complexity.Region.LocalCode(childComplexity), true
+
+	case "Region.name":
+		if e.complexity.Region.Name == nil {
+			break
+		}
+
+		return e.complexity.Region.Name(childComplexity), true
+
+	case "Region.wikipediaLink":
+		if e.complexity.Region.WikipediaLink == nil {
+			break
+		}
+
+		return e.complexity.Region.WikipediaLink(childComplexity), true
+
 	case "Runway.airport":
 		if e.complexity.Runway.Airport == nil {
 			break
@@ -1576,8 +1702,11 @@ var sources = []*ast.Source{
 	{Name: "../../ent.graphql", Input: `directive @goField(forceResolver: Boolean, name: String) on FIELD_DEFINITION | INPUT_FIELD_DEFINITION
 directive @goModel(model: String, models: [String!]) on OBJECT | INPUT_OBJECT | SCALAR | ENUM | INTERFACE | UNION
 type Airport {
+  """The unique identifier of the record."""
   id: ID!
+  """The unique identifier of the import."""
   importID: Int!
+  """The last time the record was updated/created."""
   lastUpdated: Time!
   """The four-letter ICAO code of the airport."""
   icaoCode: String
@@ -1595,10 +1724,6 @@ type Airport {
   longitude: Float!
   """Elevation of the airport, in feet."""
   elevation: Int
-  """Where the airport is (primarily) located."""
-  continent: AirportContinent!
-  country: String!
-  region: String!
   """The primary municipality that the airport serves (when available). Note that this is not necessarily the municipality where the airport is physically located."""
   municipality: String
   """Whether the airport has scheduled airline service."""
@@ -1613,18 +1738,10 @@ type Airport {
   wikipedia: String
   """Extra keywords/phrases to assist with search. May include former names for the airport, alternate codes, names in other languages, nearby tourist destinations, etc."""
   keywords: [String!]!
-  station: WeatherStation
+  region: Region
+  country: Country
   frequencies: [Frequency!]
-}
-"""AirportContinent is enum for the field continent"""
-enum AirportContinent @goModel(model: "metar.gg/ent/airport.Continent") {
-  AF
-  AN
-  AS
-  EU
-  NA
-  SA
-  OC
+  station: WeatherStation
 }
 """AirportType is enum for the field type"""
 enum AirportType @goModel(model: "metar.gg/ent/airport.Type") {
@@ -1635,7 +1752,36 @@ enum AirportType @goModel(model: "metar.gg/ent/airport.Type") {
   heliport
   seaplane_base
 }
+type Country {
+  """The unique identifier of the record."""
+  id: ID!
+  """The unique identifier of the import."""
+  importID: Int!
+  """The last time the record was updated/created."""
+  lastUpdated: Time!
+  """The ISO 3166-1 alpha-2 code of the country. A handful of unofficial, non-ISO codes are also in use, such as "XK" for Kosovo."""
+  code: String!
+  """The name of the country."""
+  name: String!
+  """Where the airport is (primarily) located."""
+  continent: CountryContinent!
+  """The wikipedia link of the country."""
+  wikipediaLink: String!
+  """Keywords that can be used to search for the country."""
+  keywords: [String!]!
+}
+"""CountryContinent is enum for the field continent"""
+enum CountryContinent @goModel(model: "metar.gg/ent/country.Continent") {
+  AF
+  AN
+  AS
+  EU
+  NA
+  SA
+  OC
+}
 type Forecast {
+  """The unique identifier of the record."""
   id: ID!
   """The start time of the forecast period."""
   fromTime: Time!
@@ -1682,8 +1828,11 @@ enum ForecastChangeIndicator @goModel(model: "metar.gg/ent/forecast.ChangeIndica
   PROB
 }
 type Frequency {
+  """The unique identifier of the record."""
   id: ID!
+  """The unique identifier of the import."""
   importID: Int!
+  """The last time the record was updated/created."""
   lastUpdated: Time!
   """A code for the frequency type. Some common values are "TWR" (tower), "ATF" or "CTAF" (common traffic frequency), "GND" (ground control), "RMP" (ramp control), "ATIS" (automated weather), "RCO" (remote radio outlet), "ARR" (arrivals), "DEP" (departures), "UNICOM" (monitored ground station), and "RDO" (a flight-service station)."""
   type: String!
@@ -1694,6 +1843,7 @@ type Frequency {
   airport: Airport
 }
 type IcingCondition {
+  """The unique identifier of the record."""
   id: ID!
   """The intensity of the icing."""
   intensity: String!
@@ -1703,6 +1853,7 @@ type IcingCondition {
   maxAltitude: Int
 }
 type Metar {
+  """The unique identifier of the record."""
   id: ID!
   """The raw METAR text."""
   rawText: String!
@@ -1739,7 +1890,7 @@ type Metar {
   qualityControlFreezingRainSensorOff: Boolean!
   """Whether Present weather sensor is off."""
   qualityControlPresentWeatherSensorOff: Boolean!
-  """The sea level pressure in hectopascal.s"""
+  """The sea level pressure in hectopascals."""
   seaLevelPressure: Float
   """The pressur_6e tendency in hectopascals."""
   pressureTendency: Float
@@ -1751,13 +1902,13 @@ type Metar {
   maxTemp24: Float
   """The minimum air temperature in Celsius from the past 24 hours."""
   minTemp24: Float
-  """The precipitation in inches from since the last observation. 0.0005 in = trace precipitation"""
+  """The precipitation in inches from since the last observation. 0.0005 in = trace precipitation."""
   precipitation: Float
-  """The precipitation in inches from the past 3 hours. 0.0005 in = trace precipitation"""
+  """The precipitation in inches from the past 3 hours. 0.0005 in = trace precipitation."""
   precipitation3: Float
-  """The precipitation in inches from the past 6 hours. 0.0005 in = trace precipitation"""
+  """The precipitation in inches from the past 6 hours. 0.0005 in = trace precipitation."""
   precipitation6: Float
-  """The precipitation in inches from the past 24 hours. 0.0005 in = trace precipitation"""
+  """The precipitation in inches from the past 24 hours. 0.0005 in = trace precipitation."""
   precipitation24: Float
   """The snow depth in inches."""
   snowDepth: Float
@@ -1787,9 +1938,29 @@ enum OrderDirection {
   """Specifies a descending order for a given ` + "`" + `orderBy` + "`" + ` argument."""
   DESC
 }
-type Runway {
+type Region {
+  """The unique identifier of the record."""
   id: ID!
+  """The unique identifier of the import."""
   importID: Int!
+  """The last time the record was updated/created."""
+  lastUpdated: Time!
+  """local_code prefixed with the country code to make a globally-unique identifier."""
+  code: String!
+  """The local code for the administrative subdivision. Whenever possible, these are official ISO 3166:2, at the highest level available, but in some cases OurAirports has to use unofficial codes. There is also a pseudo code "U-A" for each country, which means that the airport has not yet been assigned to a region (or perhaps can't be, as in the case of a deep-sea oil platform)."""
+  localCode: String!
+  name: String!
+  """The wikipedia link of the region."""
+  wikipediaLink: String!
+  """Keywords that can be used to search for the region."""
+  keywords: [String!]!
+}
+type Runway {
+  """The unique identifier of the record."""
+  id: ID!
+  """The unique identifier of the import."""
+  importID: Int!
+  """The last time the record was updated/created."""
   lastUpdated: Time!
   """Length of the runway in feet."""
   length: Int!
@@ -1828,6 +1999,7 @@ type Runway {
   airport: Airport
 }
 type SkyCondition {
+  """The unique identifier of the record."""
   id: ID!
   skyCover: SkyConditionSkyCover!
   """Cloud base in feet."""
@@ -1855,6 +2027,7 @@ enum SkyConditionSkyCover @goModel(model: "metar.gg/ent/skycondition.SkyCover") 
   CAVOK
 }
 type Taf {
+  """The unique identifier of the record."""
   id: ID!
   """The raw TAF text."""
   rawText: String!
@@ -1884,6 +2057,7 @@ enum TafOrderField {
   valid_from_time
 }
 type TemperatureData {
+  """The unique identifier of the record."""
   id: ID!
   """The time the temperature data is valid."""
   validTime: Time!
@@ -1895,6 +2069,7 @@ type TemperatureData {
   maxTemperature: Float
 }
 type TurbulenceCondition {
+  """The unique identifier of the record."""
   id: ID!
   """The intensity of the turbulence."""
   intensity: String!
@@ -1904,6 +2079,7 @@ type TurbulenceCondition {
   maxAltitude: Int!
 }
 type WeatherStation {
+  """The unique identifier of the record."""
   id: ID!
   """The ICAO identifier of the station that provided the weather data or identifier of the weather station."""
   stationID: String!

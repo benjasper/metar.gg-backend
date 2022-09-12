@@ -25,16 +25,26 @@ func (a *AirportQuery) collectField(ctx context.Context, op *graphql.OperationCo
 	path = append([]string(nil), path...)
 	for _, field := range graphql.CollectFields(op, field.Selections, satisfies) {
 		switch field.Name {
-		case "station":
+		case "region":
 			var (
 				alias = field.Alias
 				path  = append(path, alias)
-				query = &WeatherStationQuery{config: a.config}
+				query = &RegionQuery{config: a.config}
 			)
 			if err := query.collectField(ctx, op, field, path, satisfies...); err != nil {
 				return err
 			}
-			a.withStation = query
+			a.withRegion = query
+		case "country":
+			var (
+				alias = field.Alias
+				path  = append(path, alias)
+				query = &CountryQuery{config: a.config}
+			)
+			if err := query.collectField(ctx, op, field, path, satisfies...); err != nil {
+				return err
+			}
+			a.withCountry = query
 		case "frequencies":
 			var (
 				alias = field.Alias
@@ -47,6 +57,16 @@ func (a *AirportQuery) collectField(ctx context.Context, op *graphql.OperationCo
 			a.WithNamedFrequencies(alias, func(wq *FrequencyQuery) {
 				*wq = *query
 			})
+		case "station":
+			var (
+				alias = field.Alias
+				path  = append(path, alias)
+				query = &WeatherStationQuery{config: a.config}
+			)
+			if err := query.collectField(ctx, op, field, path, satisfies...); err != nil {
+				return err
+			}
+			a.withStation = query
 		}
 	}
 	return nil
@@ -60,6 +80,49 @@ type airportPaginateArgs struct {
 
 func newAirportPaginateArgs(rv map[string]interface{}) *airportPaginateArgs {
 	args := &airportPaginateArgs{}
+	if rv == nil {
+		return args
+	}
+	if v := rv[firstField]; v != nil {
+		args.first = v.(*int)
+	}
+	if v := rv[lastField]; v != nil {
+		args.last = v.(*int)
+	}
+	if v := rv[afterField]; v != nil {
+		args.after = v.(*Cursor)
+	}
+	if v := rv[beforeField]; v != nil {
+		args.before = v.(*Cursor)
+	}
+	return args
+}
+
+// CollectFields tells the query-builder to eagerly load connected nodes by resolver context.
+func (c *CountryQuery) CollectFields(ctx context.Context, satisfies ...string) (*CountryQuery, error) {
+	fc := graphql.GetFieldContext(ctx)
+	if fc == nil {
+		return c, nil
+	}
+	if err := c.collectField(ctx, graphql.GetOperationContext(ctx), fc.Field, nil, satisfies...); err != nil {
+		return nil, err
+	}
+	return c, nil
+}
+
+func (c *CountryQuery) collectField(ctx context.Context, op *graphql.OperationContext, field graphql.CollectedField, path []string, satisfies ...string) error {
+	path = append([]string(nil), path...)
+	return nil
+}
+
+type countryPaginateArgs struct {
+	first, last   *int
+	after, before *Cursor
+	opts          []CountryPaginateOption
+}
+
+func newCountryPaginateArgs(rv map[string]interface{}) *countryPaginateArgs {
+	args := &countryPaginateArgs{}
 	if rv == nil {
 		return args
 	}
@@ -324,6 +387,49 @@ type metarPaginateArgs struct {
 
 func newMetarPaginateArgs(rv map[string]interface{}) *metarPaginateArgs {
 	args := &metarPaginateArgs{}
+	if rv == nil {
+		return args
+	}
+	if v := rv[firstField]; v != nil {
+		args.first = v.(*int)
+	}
+	if v := rv[lastField]; v != nil {
+		args.last = v.(*int)
+	}
+	if v := rv[afterField]; v != nil {
+		args.after = v.(*Cursor)
+	}
+	if v := rv[beforeField]; v != nil {
+		args.before = v.(*Cursor)
+	}
+	return args
+}
+
+// CollectFields tells the query-builder to eagerly load connected nodes by resolver context.
+func (r *RegionQuery) CollectFields(ctx context.Context, satisfies ...string) (*RegionQuery, error) {
+	fc := graphql.GetFieldContext(ctx)
+	if fc == nil {
+		return r, nil
+	}
+	if err := r.collectField(ctx, graphql.GetOperationContext(ctx), fc.Field, nil, satisfies...); err != nil {
+		return nil, err
+	}
+	return r, nil
+}
+
+func (r *RegionQuery) collectField(ctx context.Context, op *graphql.OperationContext, field graphql.CollectedField, path []string, satisfies ...string) error {
+	path = append([]string(nil), path...)
+	return nil
+}
+
+type regionPaginateArgs struct {
+	first, last   *int
+	after, before *Cursor
+	opts          []RegionPaginateOption
+}
+
+func newRegionPaginateArgs(rv map[string]interface{}) *regionPaginateArgs {
+	args := &regionPaginateArgs{}
 	if rv == nil {
 		return args
 	}

@@ -390,12 +390,6 @@ func (ec *executionContext) fieldContext_AirportEdge_node(ctx context.Context, f
 				return ec.fieldContext_Airport_longitude(ctx, field)
 			case "elevation":
 				return ec.fieldContext_Airport_elevation(ctx, field)
-			case "continent":
-				return ec.fieldContext_Airport_continent(ctx, field)
-			case "country":
-				return ec.fieldContext_Airport_country(ctx, field)
-			case "region":
-				return ec.fieldContext_Airport_region(ctx, field)
 			case "municipality":
 				return ec.fieldContext_Airport_municipality(ctx, field)
 			case "scheduledService":
@@ -410,10 +404,14 @@ func (ec *executionContext) fieldContext_AirportEdge_node(ctx context.Context, f
 				return ec.fieldContext_Airport_wikipedia(ctx, field)
 			case "keywords":
 				return ec.fieldContext_Airport_keywords(ctx, field)
-			case "station":
-				return ec.fieldContext_Airport_station(ctx, field)
+			case "region":
+				return ec.fieldContext_Airport_region(ctx, field)
+			case "country":
+				return ec.fieldContext_Airport_country(ctx, field)
 			case "frequencies":
 				return ec.fieldContext_Airport_frequencies(ctx, field)
+			case "station":
+				return ec.fieldContext_Airport_station(ctx, field)
 			case "runways":
 				return ec.fieldContext_Airport_runways(ctx, field)
 			case "stationsVicinity":

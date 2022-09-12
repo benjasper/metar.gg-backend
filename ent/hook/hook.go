@@ -22,6 +22,19 @@ func (f AirportFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, err
 	return f(ctx, mv)
 }
 
+// The CountryFunc type is an adapter to allow the use of ordinary
+// function as Country mutator.
+type CountryFunc func(context.Context, *ent.CountryMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f CountryFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	mv, ok := m.(*ent.CountryMutation)
+	if !ok {
+		return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.CountryMutation", m)
+	}
+	return f(ctx, mv)
+}
+
 // The ForecastFunc type is an adapter to allow the use of ordinary
 // function as Forecast mutator.
 type ForecastFunc func(context.Context, *ent.ForecastMutation) (ent.Value, error)
@@ -70,6 +83,19 @@ func (f MetarFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error
 	mv, ok := m.(*ent.MetarMutation)
 	if !ok {
 		return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.MetarMutation", m)
+	}
+	return f(ctx, mv)
+}
+
+// The RegionFunc type is an adapter to allow the use of ordinary
+// function as Region mutator.
+type RegionFunc func(context.Context, *ent.RegionMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f RegionFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	mv, ok := m.(*ent.RegionMutation)
+	if !ok {
+		return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.RegionMutation", m)
 	}
 	return f(ctx, mv)
 }

@@ -7,7 +7,6 @@ import (
 	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
 	"entgo.io/ent/schema/index"
-	"github.com/google/uuid"
 )
 
 // Metar holds the schema definition for the Metar entity.
@@ -18,7 +17,6 @@ type Metar struct {
 // Fields of the Metar.
 func (Metar) Fields() []ent.Field {
 	return []ent.Field{
-		field.UUID("id", uuid.UUID{}).Default(uuid.New).Immutable(),
 		field.Text("raw_text").Comment("The raw METAR text."),
 		field.Time("observation_time").Comment("The time the METAR was observed."),
 		field.Float("temperature").Comment("The temperature in Celsius."),
@@ -74,5 +72,7 @@ func (Metar) Indexes() []ent.Index {
 
 // Mixin of the Metar.
 func (Metar) Mixin() []ent.Mixin {
-	return nil
+	return []ent.Mixin{
+		IDMixin{},
+	}
 }

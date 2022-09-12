@@ -54,6 +54,6 @@ func (Runway) Indexes() []ent.Index {
 func (Runway) Mixin() []ent.Mixin {
 	return []ent.Mixin{
 		ImportMixin{},
-		//mixin.Time{},
+		IDMixin{},
 	}
 }

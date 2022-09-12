@@ -11,10 +11,12 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"metar.gg/ent/airport"
+	"metar.gg/ent/country"
 	"metar.gg/ent/forecast"
 	"metar.gg/ent/frequency"
 	"metar.gg/ent/icingcondition"
 	"metar.gg/ent/metar"
+	"metar.gg/ent/region"
 	"metar.gg/ent/runway"
 	"metar.gg/ent/skycondition"
 	"metar.gg/ent/taf"
@@ -42,10 +44,12 @@ type OrderFunc func(*sql.Selector)
 func columnChecker(table string) func(string) error {
 	checks := map[string]func(string) bool{
 		airport.Table:             airport.ValidColumn,
+		country.Table:             country.ValidColumn,
 		forecast.Table:            forecast.ValidColumn,
 		frequency.Table:           frequency.ValidColumn,
 		icingcondition.Table:      icingcondition.ValidColumn,
 		metar.Table:               metar.ValidColumn,
+		region.Table:              region.ValidColumn,
 		runway.Table:              runway.ValidColumn,
 		skycondition.Table:        skycondition.ValidColumn,
 		taf.Table:                 taf.ValidColumn,

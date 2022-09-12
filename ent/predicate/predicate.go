@@ -9,6 +9,9 @@ import (
 // Airport is the predicate function for airport builders.
 type Airport func(*sql.Selector)
 
+// Country is the predicate function for country builders.
+type Country func(*sql.Selector)
+
 // Forecast is the predicate function for forecast builders.
 type Forecast func(*sql.Selector)
 
@@ -20,6 +23,9 @@ type IcingCondition func(*sql.Selector)
 
 // Metar is the predicate function for metar builders.
 type Metar func(*sql.Selector)
+
+// Region is the predicate function for region builders.
+type Region func(*sql.Selector)
 
 // Runway is the predicate function for runway builders.
 type Runway func(*sql.Selector)

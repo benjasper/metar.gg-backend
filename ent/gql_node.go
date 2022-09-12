@@ -12,10 +12,12 @@ import (
 	"github.com/google/uuid"
 	"github.com/hashicorp/go-multierror"
 	"metar.gg/ent/airport"
+	"metar.gg/ent/country"
 	"metar.gg/ent/forecast"
 	"metar.gg/ent/frequency"
 	"metar.gg/ent/icingcondition"
 	"metar.gg/ent/metar"
+	"metar.gg/ent/region"
 	"metar.gg/ent/runway"
 	"metar.gg/ent/skycondition"
 	"metar.gg/ent/taf"
@@ -55,8 +57,8 @@ func (a *Airport) Node(ctx context.Context) (node *Node, err error) {
 	node = &Node{
 		ID:     a.ID,
 		Type:   "Airport",
-		Fields: make([]*Field, 20),
-		Edges:  make([]*Edge, 2),
+		Fields: make([]*Field, 17),
+		Edges:  make([]*Edge, 4),
 	}
 	var buf []byte
 	if buf, err = json.Marshal(a.ImportID); err != nil {
@@ -139,34 +141,10 @@ func (a *Airport) Node(ctx context.Context) (node *Node, err error) {
 		Name:  "elevation",
 		Value: string(buf),
 	}
-	if buf, err = json.Marshal(a.Continent); err != nil {
-		return nil, err
-	}
-	node.Fields[10] = &Field{
-		Type:  "airport.Continent",
-		Name:  "continent",
-		Value: string(buf),
-	}
-	if buf, err = json.Marshal(a.Country); err != nil {
-		return nil, err
-	}
-	node.Fields[11] = &Field{
-		Type:  "string",
-		Name:  "country",
-		Value: string(buf),
-	}
-	if buf, err = json.Marshal(a.Region); err != nil {
-		return nil, err
-	}
-	node.Fields[12] = &Field{
-		Type:  "string",
-		Name:  "region",
-		Value: string(buf),
-	}
 	if buf, err = json.Marshal(a.Municipality); err != nil {
 		return nil, err
 	}
-	node.Fields[13] = &Field{
+	node.Fields[10] = &Field{
 		Type:  "string",
 		Name:  "municipality",
 		Value: string(buf),
@@ -174,7 +152,7 @@ func (a *Airport) Node(ctx context.Context) (node *Node, err error) {
 	if buf, err = json.Marshal(a.ScheduledService); err != nil {
 		return nil, err
 	}
-	node.Fields[14] = &Field{
+	node.Fields[11] = &Field{
 		Type:  "bool",
 		Name:  "scheduled_service",
 		Value: string(buf),
@@ -182,7 +160,7 @@ func (a *Airport) Node(ctx context.Context) (node *Node, err error) {
 	if buf, err = json.Marshal(a.GpsCode); err != nil {
 		return nil, err
 	}
-	node.Fields[15] = &Field{
+	node.Fields[12] = &Field{
 		Type:  "string",
 		Name:  "gps_code",
 		Value: string(buf),
@@ -190,7 +168,7 @@ func (a *Airport) Node(ctx context.Context) (node *Node, err error) {
 	if buf, err = json.Marshal(a.LocalCode); err != nil {
 		return nil, err
 	}
-	node.Fields[16] = &Field{
+	node.Fields[13] = &Field{
 		Type:  "string",
 		Name:  "local_code",
 		Value: string(buf),
@@ -198,7 +176,7 @@ func (a *Airport) Node(ctx context.Context) (node *Node, err error) {
 	if buf, err = json.Marshal(a.Website); err != nil {
 		return nil, err
 	}
-	node.Fields[17] = &Field{
+	node.Fields[14] = &Field{
 		Type:  "string",
 		Name:  "website",
 		Value: string(buf),
@@ -206,7 +184,7 @@ func (a *Airport) Node(ctx context.Context) (node *Node, err error) {
 	if buf, err = json.Marshal(a.Wikipedia); err != nil {
 		return nil, err
 	}
-	node.Fields[18] = &Field{
+	node.Fields[15] = &Field{
 		Type:  "string",
 		Name:  "wikipedia",
 		Value: string(buf),
@@ -214,30 +192,117 @@ func (a *Airport) Node(ctx context.Context) (node *Node, err error) {
 	if buf, err = json.Marshal(a.Keywords); err != nil {
 		return nil, err
 	}
-	node.Fields[19] = &Field{
+	node.Fields[16] = &Field{
 		Type:  "[]string",
 		Name:  "keywords",
 		Value: string(buf),
 	}
 	node.Edges[0] = &Edge{
-		Type: "WeatherStation",
-		Name: "station",
+		Type: "Region",
+		Name: "region",
 	}
-	err = a.QueryStation().
-		Select(weatherstation.FieldID).
+	err = a.QueryRegion().
+		Select(region.FieldID).
 		Scan(ctx, &node.Edges[0].IDs)
 	if err != nil {
 		return nil, err
 	}
 	node.Edges[1] = &Edge{
+		Type: "Country",
+		Name: "country",
+	}
+	err = a.QueryCountry().
+		Select(country.FieldID).
+		Scan(ctx, &node.Edges[1].IDs)
+	if err != nil {
+		return nil, err
+	}
+	node.Edges[2] = &Edge{
 		Type: "Frequency",
 		Name: "frequencies",
 	}
 	err = a.QueryFrequencies().
 		Select(frequency.FieldID).
-		Scan(ctx, &node.Edges[1].IDs)
+		Scan(ctx, &node.Edges[2].IDs)
 	if err != nil {
 		return nil, err
+	}
+	node.Edges[3] = &Edge{
+		Type: "WeatherStation",
+		Name: "station",
+	}
+	err = a.QueryStation().
+		Select(weatherstation.FieldID).
+		Scan(ctx, &node.Edges[3].IDs)
+	if err != nil {
+		return nil, err
+	}
+	return node, nil
+}
+
+func (c *Country) Node(ctx context.Context) (node *Node, err error) {
+	node = &Node{
+		ID:     c.ID,
+		Type:   "Country",
+		Fields: make([]*Field, 7),
+		Edges:  make([]*Edge, 0),
+	}
+	var buf []byte
+	if buf, err = json.Marshal(c.ImportID); err != nil {
+		return nil, err
+	}
+	node.Fields[0] = &Field{
+		Type:  "int",
+		Name:  "import_id",
+		Value: string(buf),
+	}
+	if buf, err = json.Marshal(c.LastUpdated); err != nil {
+		return nil, err
+	}
+	node.Fields[1] = &Field{
+		Type:  "time.Time",
+		Name:  "last_updated",
+		Value: string(buf),
+	}
+	if buf, err = json.Marshal(c.Code); err != nil {
+		return nil, err
+	}
+	node.Fields[2] = &Field{
+		Type:  "string",
+		Name:  "code",
+		Value: string(buf),
+	}
+	if buf, err = json.Marshal(c.Name); err != nil {
+		return nil, err
+	}
+	node.Fields[3] = &Field{
+		Type:  "string",
+		Name:  "name",
+		Value: string(buf),
+	}
+	if buf, err = json.Marshal(c.Continent); err != nil {
+		return nil, err
+	}
+	node.Fields[4] = &Field{
+		Type:  "country.Continent",
+		Name:  "continent",
+		Value: string(buf),
+	}
+	if buf, err = json.Marshal(c.WikipediaLink); err != nil {
+		return nil, err
+	}
+	node.Fields[5] = &Field{
+		Type:  "string",
+		Name:  "wikipedia_link",
+		Value: string(buf),
+	}
+	if buf, err = json.Marshal(c.Keywords); err != nil {
+		return nil, err
+	}
+	node.Fields[6] = &Field{
+		Type:  "[]string",
+		Name:  "keywords",
+		Value: string(buf),
 	}
 	return node, nil
 }
@@ -796,6 +861,73 @@ func (m *Metar) Node(ctx context.Context) (node *Node, err error) {
 	return node, nil
 }
 
+func (r *Region) Node(ctx context.Context) (node *Node, err error) {
+	node = &Node{
+		ID:     r.ID,
+		Type:   "Region",
+		Fields: make([]*Field, 7),
+		Edges:  make([]*Edge, 0),
+	}
+	var buf []byte
+	if buf, err = json.Marshal(r.ImportID); err != nil {
+		return nil, err
+	}
+	node.Fields[0] = &Field{
+		Type:  "int",
+		Name:  "import_id",
+		Value: string(buf),
+	}
+	if buf, err = json.Marshal(r.LastUpdated); err != nil {
+		return nil, err
+	}
+	node.Fields[1] = &Field{
+		Type:  "time.Time",
+		Name:  "last_updated",
+		Value: string(buf),
+	}
+	if buf, err = json.Marshal(r.Code); err != nil {
+		return nil, err
+	}
+	node.Fields[2] = &Field{
+		Type:  "string",
+		Name:  "code",
+		Value: string(buf),
+	}
+	if buf, err = json.Marshal(r.LocalCode); err != nil {
+		return nil, err
+	}
+	node.Fields[3] = &Field{
+		Type:  "string",
+		Name:  "local_code",
+		Value: string(buf),
+	}
+	if buf, err = json.Marshal(r.Name); err != nil {
+		return nil, err
+	}
+	node.Fields[4] = &Field{
+		Type:  "string",
+		Name:  "name",
+		Value: string(buf),
+	}
+	if buf, err = json.Marshal(r.WikipediaLink); err != nil {
+		return nil, err
+	}
+	node.Fields[5] = &Field{
+		Type:  "string",
+		Name:  "wikipedia_link",
+		Value: string(buf),
+	}
+	if buf, err = json.Marshal(r.Keywords); err != nil {
+		return nil, err
+	}
+	node.Fields[6] = &Field{
+		Type:  "[]string",
+		Name:  "keywords",
+		Value: string(buf),
+	}
+	return node, nil
+}
+
 func (r *Runway) Node(ctx context.Context) (node *Node, err error) {
 	node = &Node{
 		ID:     r.ID,
@@ -1302,6 +1434,18 @@ func (c *Client) noder(ctx context.Context, table string, id uuid.UUID) (Noder, 
 			return nil, err
 		}
 		return n, nil
+	case country.Table:
+		query := c.Country.Query().
+			Where(country.ID(id))
+		query, err := query.CollectFields(ctx, "Country")
+		if err != nil {
+			return nil, err
+		}
+		n, err := query.Only(ctx)
+		if err != nil {
+			return nil, err
+		}
+		return n, nil
 	case forecast.Table:
 		query := c.Forecast.Query().
 			Where(forecast.ID(id))
@@ -1342,6 +1486,18 @@ func (c *Client) noder(ctx context.Context, table string, id uuid.UUID) (Noder, 
 		query := c.Metar.Query().
 			Where(metar.ID(id))
 		query, err := query.CollectFields(ctx, "Metar")
+		if err != nil {
+			return nil, err
+		}
+		n, err := query.Only(ctx)
+		if err != nil {
+			return nil, err
+		}
+		return n, nil
+	case region.Table:
+		query := c.Region.Query().
+			Where(region.ID(id))
+		query, err := query.CollectFields(ctx, "Region")
 		if err != nil {
 			return nil, err
 		}
@@ -1511,6 +1667,22 @@ func (c *Client) noders(ctx context.Context, table string, ids []uuid.UUID) ([]N
 				*noder = node
 			}
 		}
+	case country.Table:
+		query := c.Country.Query().
+			Where(country.IDIn(ids...))
+		query, err := query.CollectFields(ctx, "Country")
+		if err != nil {
+			return nil, err
+		}
+		nodes, err := query.All(ctx)
+		if err != nil {
+			return nil, err
+		}
+		for _, node := range nodes {
+			for _, noder := range idmap[node.ID] {
+				*noder = node
+			}
+		}
 	case forecast.Table:
 		query := c.Forecast.Query().
 			Where(forecast.IDIn(ids...))
@@ -1563,6 +1735,22 @@ func (c *Client) noders(ctx context.Context, table string, ids []uuid.UUID) ([]N
 		query := c.Metar.Query().
 			Where(metar.IDIn(ids...))
 		query, err := query.CollectFields(ctx, "Metar")
+		if err != nil {
+			return nil, err
+		}
+		nodes, err := query.All(ctx)
+		if err != nil {
+			return nil, err
+		}
+		for _, node := range nodes {
+			for _, noder := range idmap[node.ID] {
+				*noder = node
+			}
+		}
+	case region.Table:
+		query := c.Region.Query().
+			Where(region.IDIn(ids...))
+		query, err := query.CollectFields(ctx, "Region")
 		if err != nil {
 			return nil, err
 		}

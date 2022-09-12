@@ -25,9 +25,6 @@ func (Airport) Fields() []ent.Field {
 		field.Float("latitude").Comment("Latitude of the airport in decimal degrees (positive is north)."),
 		field.Float("longitude").Comment("Longitude of the airport in decimal degrees (positive is east)."),
 		field.Int("elevation").Optional().Nillable().Comment("Elevation of the airport, in feet."),
-		field.Enum("continent").NamedValues("Africa", "AF", "Antarctica", "AN", "Asia", "AS", "Europe", "EU", "North America", "NA", "South America", "SA", "Oceania", "OC").Comment("Where the airport is (primarily) located."),
-		field.String("country"),
-		field.String("region"),
 		field.String("municipality").Optional().Nillable().Comment("The primary municipality that the airport serves (when available). Note that this is not necessarily the municipality where the airport is physically located."),
 		field.Bool("scheduled_service").Comment("Whether the airport has scheduled airline service."),
 		field.String("gps_code").Optional().Nillable().Comment("The code that an aviation GPS database (such as Jeppesen's or Garmin's) would normally use for the airport. This will always be the ICAO code if one exists. Note that, unlike the ident column, this is not guaranteed to be globally unique."),
@@ -41,6 +38,8 @@ func (Airport) Fields() []ent.Field {
 // Edges of the Airport.
 func (Airport) Edges() []ent.Edge {
 	return []ent.Edge{
+		edge.From("region", Region.Type).Ref("airports").Unique().Comment("The region that the airport is located in."),
+		edge.From("country", Country.Type).Ref("airports").Unique().Comment("The country that the airport is located in."),
 		edge.To("runways", Runway.Type).Comment("Runways at the airport.").Annotations(entgql.Skip(), entsql.Annotation{
 			OnDelete: entsql.Cascade,
 		}),
@@ -65,6 +64,6 @@ func (Airport) Indexes() []ent.Index {
 func (Airport) Mixin() []ent.Mixin {
 	return []ent.Mixin{
 		ImportMixin{},
-		//mixin.Time{},
+		IDMixin{},
 	}
 }

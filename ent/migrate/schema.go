@@ -23,9 +23,6 @@ var (
 		{Name: "latitude", Type: field.TypeFloat64},
 		{Name: "longitude", Type: field.TypeFloat64},
 		{Name: "elevation", Type: field.TypeInt, Nullable: true},
-		{Name: "continent", Type: field.TypeEnum, Enums: []string{"AF", "AN", "AS", "EU", "NA", "SA", "OC"}},
-		{Name: "country", Type: field.TypeString},
-		{Name: "region", Type: field.TypeString},
 		{Name: "municipality", Type: field.TypeString, Nullable: true},
 		{Name: "scheduled_service", Type: field.TypeBool},
 		{Name: "gps_code", Type: field.TypeString, Nullable: true},
@@ -33,12 +30,28 @@ var (
 		{Name: "website", Type: field.TypeString, Nullable: true},
 		{Name: "wikipedia", Type: field.TypeString, Nullable: true},
 		{Name: "keywords", Type: field.TypeJSON},
+		{Name: "country_airports", Type: field.TypeUUID, Nullable: true},
+		{Name: "region_airports", Type: field.TypeUUID, Nullable: true},
 	}
 	// AirportsTable holds the schema information for the "airports" table.
 	AirportsTable = &schema.Table{
 		Name:       "airports",
 		Columns:    AirportsColumns,
 		PrimaryKey: []*schema.Column{AirportsColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "airports_countries_airports",
+				Columns:    []*schema.Column{AirportsColumns[20]},
+				RefColumns: []*schema.Column{CountriesColumns[0]},
+				OnDelete:   schema.SetNull,
+			},
+			{
+				Symbol:     "airports_regions_airports",
+				Columns:    []*schema.Column{AirportsColumns[21]},
+				RefColumns: []*schema.Column{RegionsColumns[0]},
+				OnDelete:   schema.SetNull,
+			},
+		},
 		Indexes: []*schema.Index{
 			{
 				Name:    "airport_hash",
@@ -64,6 +77,37 @@ var (
 				Name:    "airport_iata_code",
 				Unique:  false,
 				Columns: []*schema.Column{AirportsColumns[6]},
+			},
+		},
+	}
+	// CountriesColumns holds the columns for the "countries" table.
+	CountriesColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeUUID},
+		{Name: "import_id", Type: field.TypeInt},
+		{Name: "hash", Type: field.TypeString},
+		{Name: "import_flag", Type: field.TypeBool, Default: false},
+		{Name: "last_updated", Type: field.TypeTime},
+		{Name: "code", Type: field.TypeString, Unique: true},
+		{Name: "name", Type: field.TypeString},
+		{Name: "continent", Type: field.TypeEnum, Enums: []string{"AF", "AN", "AS", "EU", "NA", "SA", "OC"}},
+		{Name: "wikipedia_link", Type: field.TypeString},
+		{Name: "keywords", Type: field.TypeJSON},
+	}
+	// CountriesTable holds the schema information for the "countries" table.
+	CountriesTable = &schema.Table{
+		Name:       "countries",
+		Columns:    CountriesColumns,
+		PrimaryKey: []*schema.Column{CountriesColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "country_hash",
+				Unique:  false,
+				Columns: []*schema.Column{CountriesColumns[2]},
+			},
+			{
+				Name:    "country_import_id",
+				Unique:  false,
+				Columns: []*schema.Column{CountriesColumns[1]},
 			},
 		},
 	}
@@ -98,7 +142,7 @@ var (
 				Symbol:     "forecasts_tafs_forecast",
 				Columns:    []*schema.Column{ForecastsColumns[17]},
 				RefColumns: []*schema.Column{TafsColumns[0]},
-				OnDelete:   schema.SetNull,
+				OnDelete:   schema.Cascade,
 			},
 		},
 	}
@@ -124,7 +168,7 @@ var (
 				Symbol:     "frequencies_airports_frequencies",
 				Columns:    []*schema.Column{FrequenciesColumns[8]},
 				RefColumns: []*schema.Column{AirportsColumns[0]},
-				OnDelete:   schema.SetNull,
+				OnDelete:   schema.Cascade,
 			},
 		},
 		Indexes: []*schema.Index{
@@ -158,7 +202,7 @@ var (
 				Symbol:     "icing_conditions_forecasts_icing_conditions",
 				Columns:    []*schema.Column{IcingConditionsColumns[4]},
 				RefColumns: []*schema.Column{ForecastsColumns[0]},
-				OnDelete:   schema.SetNull,
+				OnDelete:   schema.Cascade,
 			},
 		},
 	}
@@ -225,6 +269,37 @@ var (
 			},
 		},
 	}
+	// RegionsColumns holds the columns for the "regions" table.
+	RegionsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeUUID},
+		{Name: "import_id", Type: field.TypeInt},
+		{Name: "hash", Type: field.TypeString},
+		{Name: "import_flag", Type: field.TypeBool, Default: false},
+		{Name: "last_updated", Type: field.TypeTime},
+		{Name: "code", Type: field.TypeString},
+		{Name: "local_code", Type: field.TypeString},
+		{Name: "name", Type: field.TypeString},
+		{Name: "wikipedia_link", Type: field.TypeString},
+		{Name: "keywords", Type: field.TypeJSON},
+	}
+	// RegionsTable holds the schema information for the "regions" table.
+	RegionsTable = &schema.Table{
+		Name:       "regions",
+		Columns:    RegionsColumns,
+		PrimaryKey: []*schema.Column{RegionsColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "region_hash",
+				Unique:  false,
+				Columns: []*schema.Column{RegionsColumns[2]},
+			},
+			{
+				Name:    "region_import_id",
+				Unique:  false,
+				Columns: []*schema.Column{RegionsColumns[1]},
+			},
+		},
+	}
 	// RunwaysColumns holds the columns for the "runways" table.
 	RunwaysColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeUUID},
@@ -261,7 +336,7 @@ var (
 				Symbol:     "runways_airports_runways",
 				Columns:    []*schema.Column{RunwaysColumns[22]},
 				RefColumns: []*schema.Column{AirportsColumns[0]},
-				OnDelete:   schema.SetNull,
+				OnDelete:   schema.Cascade,
 			},
 		},
 		Indexes: []*schema.Index{
@@ -297,7 +372,7 @@ var (
 				Symbol:     "sky_conditions_forecasts_sky_conditions",
 				Columns:    []*schema.Column{SkyConditionsColumns[4]},
 				RefColumns: []*schema.Column{ForecastsColumns[0]},
-				OnDelete:   schema.SetNull,
+				OnDelete:   schema.Cascade,
 			},
 			{
 				Symbol:     "sky_conditions_metars_sky_conditions",
@@ -365,7 +440,7 @@ var (
 				Symbol:     "temperature_data_forecasts_temperature_data",
 				Columns:    []*schema.Column{TemperatureDataColumns[5]},
 				RefColumns: []*schema.Column{ForecastsColumns[0]},
-				OnDelete:   schema.SetNull,
+				OnDelete:   schema.Cascade,
 			},
 		},
 	}
@@ -387,7 +462,7 @@ var (
 				Symbol:     "turbulence_conditions_forecasts_turbulence_conditions",
 				Columns:    []*schema.Column{TurbulenceConditionsColumns[4]},
 				RefColumns: []*schema.Column{ForecastsColumns[0]},
-				OnDelete:   schema.SetNull,
+				OnDelete:   schema.Cascade,
 			},
 		},
 	}
@@ -440,10 +515,12 @@ var (
 	// Tables holds all the tables in the schema.
 	Tables = []*schema.Table{
 		AirportsTable,
+		CountriesTable,
 		ForecastsTable,
 		FrequenciesTable,
 		IcingConditionsTable,
 		MetarsTable,
+		RegionsTable,
 		RunwaysTable,
 		SkyConditionsTable,
 		TafsTable,
@@ -454,6 +531,8 @@ var (
 )
 
 func init() {
+	AirportsTable.ForeignKeys[0].RefTable = CountriesTable
+	AirportsTable.ForeignKeys[1].RefTable = RegionsTable
 	ForecastsTable.ForeignKeys[0].RefTable = TafsTable
 	FrequenciesTable.ForeignKeys[0].RefTable = AirportsTable
 	IcingConditionsTable.ForeignKeys[0].RefTable = ForecastsTable
