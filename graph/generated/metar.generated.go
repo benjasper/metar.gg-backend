@@ -15,13 +15,14 @@ import (
 	"github.com/99designs/gqlgen/graphql/introspection"
 	"github.com/vektah/gqlparser/v2/ast"
 	"metar.gg/ent"
+	"metar.gg/ent/airport"
 	"metar.gg/graph/model"
 )
 
 // region    ************************** generated!.gotpl **************************
 
 type QueryResolver interface {
-	GetAirports(ctx context.Context, first *int, after *ent.Cursor, before *ent.Cursor, last *int, identifier *string, icao *string, iata *string, hasWeather *bool) (*ent.AirportConnection, error)
+	GetAirports(ctx context.Context, first *int, after *ent.Cursor, before *ent.Cursor, last *int, identifier *string, icao *string, iata *string, typeArg *airport.Type, search *string, hasWeather *bool) (*ent.AirportConnection, error)
 	GetAirport(ctx context.Context, id *string, identifier *string, icao *string, iata *string) (*ent.Airport, error)
 	GetStations(ctx context.Context, first *int, after *ent.Cursor, before *ent.Cursor, last *int, identifier *string) (*ent.WeatherStationConnection, error)
 	GetStation(ctx context.Context, id *string, identifier *string) (*ent.WeatherStation, error)
@@ -154,15 +155,33 @@ func (ec *executionContext) field_Query_getAirports_args(ctx context.Context, ra
 		}
 	}
 	args["iata"] = arg6
-	var arg7 *bool
-	if tmp, ok := rawArgs["hasWeather"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("hasWeather"))
-		arg7, err = ec.unmarshalOBoolean2ᚖbool(ctx, tmp)
+	var arg7 *airport.Type
+	if tmp, ok := rawArgs["type"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("type"))
+		arg7, err = ec.unmarshalOAirportType2ᚖmetarᚗggᚋentᚋairportᚐType(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["hasWeather"] = arg7
+	args["type"] = arg7
+	var arg8 *string
+	if tmp, ok := rawArgs["search"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("search"))
+		arg8, err = ec.unmarshalOString2ᚖstring(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["search"] = arg8
+	var arg9 *bool
+	if tmp, ok := rawArgs["hasWeather"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("hasWeather"))
+		arg9, err = ec.unmarshalOBoolean2ᚖbool(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["hasWeather"] = arg9
 	return args, nil
 }
 
@@ -1025,7 +1044,7 @@ func (ec *executionContext) _Query_getAirports(ctx context.Context, field graphq
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().GetAirports(rctx, fc.Args["first"].(*int), fc.Args["after"].(*ent.Cursor), fc.Args["before"].(*ent.Cursor), fc.Args["last"].(*int), fc.Args["identifier"].(*string), fc.Args["icao"].(*string), fc.Args["iata"].(*string), fc.Args["hasWeather"].(*bool))
+		return ec.resolvers.Query().GetAirports(rctx, fc.Args["first"].(*int), fc.Args["after"].(*ent.Cursor), fc.Args["before"].(*ent.Cursor), fc.Args["last"].(*int), fc.Args["identifier"].(*string), fc.Args["icao"].(*string), fc.Args["iata"].(*string), fc.Args["type"].(*airport.Type), fc.Args["search"].(*string), fc.Args["hasWeather"].(*bool))
 	})
 	if err != nil {
 		ec.Error(ctx, err)

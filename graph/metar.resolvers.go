@@ -6,6 +6,7 @@ package graph
 import (
 	"context"
 	"fmt"
+	"metar.gg/ent/region"
 
 	"entgo.io/ent/dialect/sql"
 	"github.com/google/uuid"
@@ -87,7 +88,7 @@ func (r *airportResolver) StationsVicinity(ctx context.Context, obj *ent.Airport
 }
 
 // GetAirports is the resolver for the getAirports field.
-func (r *queryResolver) GetAirports(ctx context.Context, first *int, after *ent.Cursor, before *ent.Cursor, last *int, identifier *string, icao *string, iata *string, hasWeather *bool) (*ent.AirportConnection, error) {
+func (r *queryResolver) GetAirports(ctx context.Context, first *int, after *ent.Cursor, before *ent.Cursor, last *int, identifier *string, icao *string, iata *string, typeArg *airport.Type, search *string, hasWeather *bool) (*ent.AirportConnection, error) {
 	first, last = BoundsForPagination(first, last)
 
 	var where []predicate.Airport
@@ -103,6 +104,27 @@ func (r *queryResolver) GetAirports(ctx context.Context, first *int, after *ent.
 		where = append(where, airport.Or(airport.IataCodeEqualFold(*iata), airport.IataCodeHasPrefix(*iata)))
 	}
 
+	if typeArg != nil {
+		where = append(where, airport.TypeEQ(*typeArg))
+	}
+
+	if search != nil {
+		// Search the airport by its name, ICAO, IATA, GPS code, municipality, local code and keywords.
+		where = append(where, airport.Or(
+			airport.NameContainsFold(*search),
+			airport.IcaoCodeEqualFold(*search),
+			airport.IcaoCodeHasPrefix(*search),
+			airport.IataCodeEqualFold(*search),
+			airport.IataCodeHasPrefix(*search),
+			airport.GpsCodeEqualFold(*search),
+			airport.GpsCodeHasPrefix(*search),
+			airport.MunicipalityContains(*search),
+			airport.LocalCodeEqualFold(*search),
+			airport.LocalCodeHasPrefix(*search),
+			airport.HasRegionWith(region.NameContainsFold(*search)),
+		))
+	}
+
 	if hasWeather != nil && *hasWeather {
 		where = append(where, airport.HasStation())
 	} else if hasWeather != nil && !*hasWeather {
@@ -110,8 +132,8 @@ func (r *queryResolver) GetAirports(ctx context.Context, first *int, after *ent.
 	}
 
 	connection, err := r.client.Airport.Query().Where(
-		where...,
-	).Paginate(ctx, after, first, before, last)
+		airport.Or(where...),
+	).Order(ent.Asc(airport.FieldIdentifier)).Paginate(ctx, after, first, before, last)
 	if err != nil {
 		return nil, err
 	}

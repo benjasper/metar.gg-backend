@@ -111,6 +111,12 @@ type Query {
         """Search the airport by its IATA code."""
         iata: String,
 
+        """Filter by airport type."""
+        type: AirportType
+
+        """Search the airport by its name, ICAO, IATA, GPS code, municipality, local code and keywords."""
+        search: String,
+
         """Filter whether the airport provides METARs."""
         hasWeather: Boolean
     ): AirportConnection!

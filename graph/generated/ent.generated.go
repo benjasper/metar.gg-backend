@@ -9089,6 +9089,22 @@ func (ec *executionContext) marshalOAirport2ᚖmetarᚗggᚋentᚐAirport(ctx co
 	return ec._Airport(ctx, sel, v)
 }
 
+func (ec *executionContext) unmarshalOAirportType2ᚖmetarᚗggᚋentᚋairportᚐType(ctx context.Context, v interface{}) (*airport.Type, error) {
+	if v == nil {
+		return nil, nil
+	}
+	var res = new(airport.Type)
+	err := res.UnmarshalGQL(v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalOAirportType2ᚖmetarᚗggᚋentᚋairportᚐType(ctx context.Context, sel ast.SelectionSet, v *airport.Type) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return v
+}
+
 func (ec *executionContext) marshalOCountry2ᚖmetarᚗggᚋentᚐCountry(ctx context.Context, sel ast.SelectionSet, v *ent.Country) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null

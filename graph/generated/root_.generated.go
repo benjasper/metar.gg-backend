@@ -12,6 +12,7 @@ import (
 	gqlparser "github.com/vektah/gqlparser/v2"
 	"github.com/vektah/gqlparser/v2/ast"
 	"metar.gg/ent"
+	"metar.gg/ent/airport"
 )
 
 // NewExecutableSchema creates an ExecutableSchema from the ResolverRoot interface.
@@ -186,7 +187,7 @@ type ComplexityRoot struct {
 
 	Query struct {
 		GetAirport  func(childComplexity int, id *string, identifier *string, icao *string, iata *string) int
-		GetAirports func(childComplexity int, first *int, after *ent.Cursor, before *ent.Cursor, last *int, identifier *string, icao *string, iata *string, hasWeather *bool) int
+		GetAirports func(childComplexity int, first *int, after *ent.Cursor, before *ent.Cursor, last *int, identifier *string, icao *string, iata *string, typeArg *airport.Type, search *string, hasWeather *bool) int
 		GetStation  func(childComplexity int, id *string, identifier *string) int
 		GetStations func(childComplexity int, first *int, after *ent.Cursor, before *ent.Cursor, last *int, identifier *string) int
 	}
@@ -1131,7 +1132,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Query.GetAirports(childComplexity, args["first"].(*int), args["after"].(*ent.Cursor), args["before"].(*ent.Cursor), args["last"].(*int), args["identifier"].(*string), args["icao"].(*string), args["iata"].(*string), args["hasWeather"].(*bool)), true
+		return e.complexity.Query.GetAirports(childComplexity, args["first"].(*int), args["after"].(*ent.Cursor), args["before"].(*ent.Cursor), args["last"].(*int), args["identifier"].(*string), args["icao"].(*string), args["iata"].(*string), args["type"].(*airport.Type), args["search"].(*string), args["hasWeather"].(*bool)), true
 
 	case "Query.getStation":
 		if e.complexity.Query.GetStation == nil {
@@ -2118,99 +2119,99 @@ type WeatherStation {
   airport: Airport
 }
 `, BuiltIn: false},
-	{Name: "../../metar.graphql", Input: `"""The cursor string to use for pagination"""
+	{Name: "../../metar.graphql", Input: `"""The cursor string to use for pagination."""
 scalar Cursor
 
-"""Time string, in RFC3339 format"""
+"""Time string, in RFC3339 format."""
 scalar Time
 
 type PageInfo {
-    """Whether there is at least one more page"""
+    """Whether there is at least one more page."""
     hasNextPage: Boolean!
 
-    """Whether there is a previous page"""
+    """Whether there is a previous page."""
     hasPreviousPage: Boolean!
 
-    """The cursor to the first element of the current page"""
+    """The cursor to the first element of the current page."""
     startCursor: Cursor
 
-    """The cursor to the last element of the current page"""
+    """The cursor to the last element of the current page."""
     endCursor: Cursor
 }
 
 type AirportConnection {
-    """Total number of airports"""
+    """Total number of airports."""
     totalCount: Int!
 
-    """Page info of this connection"""
+    """Page info of this connection."""
     pageInfo: PageInfo!
 
-    """List of airport edges"""
+    """List of airport edges."""
     edges: [AirportEdge!]!
 }
 
 type AirportEdge {
-    """The airport object"""
+    """The airport object."""
     node: Airport!
 
-    """The cursor of this airport"""
+    """The cursor of this airport."""
     cursor: Cursor!
 }
 
 type MetarConnection {
-    """Total number of airports"""
+    """Total number of airports."""
     totalCount: Int!
 
-    """Page info of this connection"""
+    """Page info of this connection."""
     pageInfo: PageInfo!
 
-    """List of metar edges"""
+    """List of metar edges."""
     edges: [MetarEdge!]!
 }
 
 type MetarEdge {
-    """The metar object"""
+    """The metar object."""
     node: Metar!
 
-    """The cursor of this metar"""
+    """The cursor of this metar."""
     cursor: Cursor!
 }
 
 type TafConnection {
-    """Total number of tafs"""
+    """Total number of tafs."""
     totalCount: Int!
 
-    """Page info of this connection"""
+    """Page info of this connection."""
     pageInfo: PageInfo!
 
-    """List of taf edges"""
+    """List of taf edges."""
     edges: [TafEdge!]!
 }
 
 type TafEdge {
-    """The taf object"""
+    """The taf object."""
     node: Taf!
 
-    """The cursor of this taf"""
+    """The cursor of this taf."""
     cursor: Cursor!
 }
 
 type WeatherStationConnection {
-    """Total number of weather stations"""
+    """Total number of weather stations."""
     totalCount: Int!
 
-    """Page info of this connection"""
+    """Page info of this connection."""
     pageInfo: PageInfo!
 
-    """List of weather station edges"""
+    """List of weather station edges."""
     edges: [WeatherStationEdge!]!
 }
 
 type WeatherStationEdge {
-    """The weather station object"""
+    """The weather station object."""
     node: WeatherStation!
 
-    """The cursor of this weather station"""
+    """The cursor of this weather station."""
     cursor: Cursor!
 }
 
@@ -2225,13 +2226,19 @@ type Query {
         """Search the airport by its ICAO code if available. Otherwise, it will be a local airport code (if no conflict), or if nothing else is available, an internally-generated code starting with the ISO2 country code, followed by a dash and a four-digit number."""
         identifier: String
 
-        """Search the airport by its ICAO code"""
+        """Search the airport by its ICAO code."""
         icao: String,
 
-        """Search the airport by its IATA code"""
+        """Search the airport by its IATA code."""
         iata: String,
 
-        """Filter whether the airport provides METARs"""
+        """Filter by airport type."""
+        type: AirportType
+
+        """Search the airport by its name, ICAO, IATA, GPS code, municipality, local code and keywords."""
+        search: String,
+
+        """Filter whether the airport provides METARs."""
         hasWeather: Boolean
     ): AirportConnection!
 
@@ -2254,10 +2261,10 @@ type Query {
 }
 
 type StationWithDistance {
-    """The distance in meters from the given location to the airport"""
+    """The distance in meters from the given location to the airport."""
     distance: Float!
 
-    """The METAR for the station"""
+    """The METAR for the station."""
     station: WeatherStation!
 }
 
