@@ -186,9 +186,9 @@ type ComplexityRoot struct {
 
 	Query struct {
 		GetAirport  func(childComplexity int, id *string, identifier *string, icao *string, iata *string) int
-		GetAirports func(childComplexity int, after *ent.Cursor, first *int, before *ent.Cursor, last *int, identifier *string, icao *string, iata *string, hasWeather *bool) int
+		GetAirports func(childComplexity int, first *int, after *ent.Cursor, before *ent.Cursor, last *int, identifier *string, icao *string, iata *string, hasWeather *bool) int
 		GetStation  func(childComplexity int, id *string, identifier *string) int
-		GetStations func(childComplexity int, after *ent.Cursor, first *int, before *ent.Cursor, last *int, identifier *string) int
+		GetStations func(childComplexity int, first *int, after *ent.Cursor, before *ent.Cursor, last *int, identifier *string) int
 	}
 
 	Region struct {
@@ -1131,7 +1131,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Query.GetAirports(childComplexity, args["after"].(*ent.Cursor), args["first"].(*int), args["before"].(*ent.Cursor), args["last"].(*int), args["identifier"].(*string), args["icao"].(*string), args["iata"].(*string), args["hasWeather"].(*bool)), true
+		return e.complexity.Query.GetAirports(childComplexity, args["first"].(*int), args["after"].(*ent.Cursor), args["before"].(*ent.Cursor), args["last"].(*int), args["identifier"].(*string), args["icao"].(*string), args["iata"].(*string), args["hasWeather"].(*bool)), true
 
 	case "Query.getStation":
 		if e.complexity.Query.GetStation == nil {
@@ -1155,7 +1155,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Query.GetStations(childComplexity, args["after"].(*ent.Cursor), args["first"].(*int), args["before"].(*ent.Cursor), args["last"].(*int), args["identifier"].(*string)), true
+		return e.complexity.Query.GetStations(childComplexity, args["first"].(*int), args["after"].(*ent.Cursor), args["before"].(*ent.Cursor), args["last"].(*int), args["identifier"].(*string)), true
 
 	case "Region.code":
 		if e.complexity.Region.Code == nil {
@@ -2127,68 +2127,111 @@ scalar Time
 type PageInfo {
     """Whether there is at least one more page"""
     hasNextPage: Boolean!
+
     """Whether there is a previous page"""
     hasPreviousPage: Boolean!
+
     """The cursor to the first element of the current page"""
     startCursor: Cursor
+
     """The cursor to the last element of the current page"""
     endCursor: Cursor
 }
 
 type AirportConnection {
+    """Total number of airports"""
     totalCount: Int!
+
+    """Page info of this connection"""
     pageInfo: PageInfo!
+
+    """List of airport edges"""
     edges: [AirportEdge!]!
 }
 
 type AirportEdge {
+    """The airport object"""
     node: Airport!
+
+    """The cursor of this airport"""
     cursor: Cursor!
 }
 
 type MetarConnection {
+    """Total number of airports"""
     totalCount: Int!
+
+    """Page info of this connection"""
     pageInfo: PageInfo!
+
+    """List of metar edges"""
     edges: [MetarEdge!]!
 }
 
 type MetarEdge {
+    """The metar object"""
     node: Metar!
+
+    """The cursor of this metar"""
     cursor: Cursor!
 }
 
 type TafConnection {
+    """Total number of tafs"""
     totalCount: Int!
+
+    """Page info of this connection"""
     pageInfo: PageInfo!
+
+    """List of taf edges"""
     edges: [TafEdge!]!
 }
 
 type TafEdge {
+    """The taf object"""
     node: Taf!
+
+    """The cursor of this taf"""
     cursor: Cursor!
 }
 
 type WeatherStationConnection {
+    """Total number of weather stations"""
     totalCount: Int!
+
+    """Page info of this connection"""
     pageInfo: PageInfo!
+
+    """List of weather station edges"""
     edges: [WeatherStationEdge!]!
 }
 
 type WeatherStationEdge {
+    """The weather station object"""
     node: WeatherStation!
+
+    """The cursor of this weather station"""
     cursor: Cursor!
 }
 
 type Query {
     """Search for airports by a variety of criteria."""
     getAirports(
-        after: Cursor
         first: Int
+        after: Cursor
         before: Cursor
         last: Int
+
+        """Search the airport by its ICAO code if available. Otherwise, it will be a local airport code (if no conflict), or if nothing else is available, an internally-generated code starting with the ISO2 country code, followed by a dash and a four-digit number."""
         identifier: String
+
+        """Search the airport by its ICAO code"""
         icao: String,
+
+        """Search the airport by its IATA code"""
         iata: String,
+
+        """Filter whether the airport provides METARs"""
         hasWeather: Boolean
     ): AirportConnection!
 
@@ -2197,10 +2240,12 @@ type Query {
 
     """Search for weather stations by it's identifier."""
     getStations(
-        after: Cursor
         first: Int
+        after: Cursor
         before: Cursor
         last: Int
+
+        """Search the weather station by it's identifier, this is usually the ICAO code of the airport it is located at."""
         identifier: String
     ): WeatherStationConnection!
 
@@ -2225,7 +2270,10 @@ extend type Airport {
 }
 
 extend type WeatherStation {
+    """Returns the latest METARs for this station sorted by their observation time."""
     metars(after: Cursor, first: Int, before: Cursor, last: Int): MetarConnection!
+
+    """Returns the latest TAFs for this station sorted by their issued time."""
     tafs(after: Cursor, first: Int, before: Cursor, last: Int): TafConnection!
 }`, BuiltIn: false},
 }

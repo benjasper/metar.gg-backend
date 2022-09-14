@@ -87,7 +87,7 @@ func (r *airportResolver) StationsVicinity(ctx context.Context, obj *ent.Airport
 }
 
 // GetAirports is the resolver for the getAirports field.
-func (r *queryResolver) GetAirports(ctx context.Context, after *ent.Cursor, first *int, before *ent.Cursor, last *int, identifier *string, icao *string, iata *string, hasWeather *bool) (*ent.AirportConnection, error) {
+func (r *queryResolver) GetAirports(ctx context.Context, first *int, after *ent.Cursor, before *ent.Cursor, last *int, identifier *string, icao *string, iata *string, hasWeather *bool) (*ent.AirportConnection, error) {
 	first, last = BoundsForPagination(first, last)
 
 	var where []predicate.Airport
@@ -152,7 +152,7 @@ func (r *queryResolver) GetAirport(ctx context.Context, id *string, identifier *
 }
 
 // GetStations is the resolver for the getStations field.
-func (r *queryResolver) GetStations(ctx context.Context, after *ent.Cursor, first *int, before *ent.Cursor, last *int, identifier *string) (*ent.WeatherStationConnection, error) {
+func (r *queryResolver) GetStations(ctx context.Context, first *int, after *ent.Cursor, before *ent.Cursor, last *int, identifier *string) (*ent.WeatherStationConnection, error) {
 	first, last = BoundsForPagination(first, last)
 
 	var where []predicate.WeatherStation
