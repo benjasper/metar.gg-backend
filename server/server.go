@@ -8,11 +8,14 @@ import (
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"metar.gg/ent"
+	"metar.gg/ent/metar"
+	"metar.gg/ent/taf"
 	"metar.gg/environment"
 	"metar.gg/graph"
 	"metar.gg/importer"
 	"metar.gg/logging"
 	"net/http"
+	"time"
 )
 
 type Server struct {
@@ -73,6 +76,18 @@ func (s *Server) Run(db *ent.Client, logger *logging.Logger) error {
 		c.Status(http.StatusNoContent)
 	})
 
+	r.POST("/clean", func(c *gin.Context) {
+		if !isAuthorized(c.Writer, c.Request) {
+			return
+		}
+
+		go func() {
+			DeleteOldData(context.Background(), db, logger)
+		}()
+
+		c.Status(http.StatusNoContent)
+	})
+
 	logger.Info("Starting server on port " + port)
 
 	r.Run(":" + port)
@@ -121,6 +136,25 @@ func RunWeatherImport(ctx context.Context, db *ent.Client, logger *logging.Logge
 	if err != nil {
 		logger.Error(fmt.Sprintf("[IMPORT] Failed to import TAFs: %s", err))
 	}
+}
+
+func DeleteOldData(ctx context.Context, db *ent.Client, logger *logging.Logger) {
+
+	cutoff := time.Now().Add(-24 * time.Hour)
+	result, err := db.Metar.Delete().Where(metar.ObservationTimeLT(cutoff)).Exec(ctx)
+	if err != nil {
+		logger.Error(fmt.Sprintf("Failed to delete old METARs: %s", err))
+	}
+
+	logger.Info(fmt.Sprintf("Deleted %d old METARs, observed before %s", result, cutoff.Format(time.RFC1123Z)))
+
+	cutoff = time.Now().Add(-36 * time.Hour)
+	result, err = db.Taf.Delete().Where(taf.IssueTimeLT(cutoff)).Exec(ctx)
+	if err != nil {
+		logger.Error(fmt.Sprintf("Failed to delete old TAFs: %s", err))
+	}
+
+	logger.Info(fmt.Sprintf("Deleted %d old TAFs issued before %s", result, cutoff.Format(time.RFC1123Z)))
 }
 
 func isAuthorized(w http.ResponseWriter, r *http.Request) bool {
