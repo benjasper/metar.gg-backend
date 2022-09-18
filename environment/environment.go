@@ -15,7 +15,7 @@ type Environment struct {
 	Port                        string `mapstructure:"PORT"`
 	MaxConcurrentImports        int    `mapstructure:"MAX_CONCURRENT_IMPORTS"`
 	AxiomDataset                string `mapstructure:"AXIOM_DATASET"`
-	KeepDataForDays             int    `mapstructure:"KEEP_DATA_FOR_DAYS"`
+	WeatherDataRetentionDays    int    `mapstructure:"WEATHER_DATA_RETENTION_DAYS"`
 	GraphQLQueryComplexityLimit int    `mapstructure:"GRAPHQL_QUERY_COMPLEXITY_LIMIT"`
 }
 
@@ -43,11 +43,11 @@ func Initialize() {
 			continue
 		}
 
-		if split[0] == "KEEP_DATA_FOR_DAYS" {
+		if split[0] == "WEATHER_DATA_RETENTION_DAYS" {
 			// Convert to int
 			data[split[0]], err = strconv.Atoi(split[1])
 			if err != nil || data[split[0]].(int) < 1 {
-				log.Println("Did not receive a valid value for KEEP_DATA_FOR_DAYS, defaulting to 1 day")
+				log.Println("Did not receive a valid value for WEATHER_DATA_RETENTION_DAYS, defaulting to 1 day")
 				data[split[0]] = 1
 			}
 
@@ -79,8 +79,8 @@ func Initialize() {
 		Global.MaxConcurrentImports = 1
 	}
 
-	if Global.KeepDataForDays == 0 {
-		Global.KeepDataForDays = 1
+	if Global.WeatherDataRetentionDays == 0 {
+		Global.WeatherDataRetentionDays = 1
 	}
 
 	if Global.GraphQLQueryComplexityLimit == 0 {

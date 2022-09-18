@@ -148,7 +148,7 @@ func DeleteOldData(ctx context.Context, db *ent.Client, logger *logging.Logger) 
 
 	logger.Info(fmt.Sprintf("Deleted %d old METARs, observed before %s", result, cutoff.Format(time.RFC1123Z)))
 
-	keepDataFor := time.Duration(environment.Global.KeepDataForDays)
+	keepDataFor := time.Duration(environment.Global.WeatherDataRetentionDays)
 
 	cutoff = time.Now().Add(-24 * keepDataFor * time.Hour)
 	result, err = db.Taf.Delete().Where(taf.IssueTimeLT(cutoff)).Exec(ctx)
