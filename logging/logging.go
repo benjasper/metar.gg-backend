@@ -36,13 +36,15 @@ func NewLogger() *Logger {
 		axiomClient: client,
 	}
 
-	// Trigger upload every minute
-	go func() {
-		for {
-			time.Sleep(30 * time.Second)
-			loggerObject.uploadLog()
-		}
-	}()
+	// Trigger upload every 10 seconds, when axiom is configured
+	if environment.Global.AxiomDataset != "" {
+		go func() {
+			for {
+				time.Sleep(10 * time.Second)
+				loggerObject.uploadLog()
+			}
+		}()
+	}
 
 	return loggerObject
 }
@@ -113,6 +115,10 @@ func (l *Logger) Fatal(input error) {
 }
 
 func (l *Logger) messageToAxiomEvent(message *Message) {
+	if environment.Global.AxiomDataset == "" {
+		return
+	}
+
 	// Marshal to JSON string
 	event := axiom.Event{
 		"type":    message.Type,

@@ -10,11 +10,13 @@ import (
 )
 
 type Environment struct {
-	AdminSecret          string `mapstructure:"ADMIN_SECRET"`
-	Database             string `mapstructure:"DATABASE"`
-	Port                 string `mapstructure:"PORT"`
-	MaxConcurrentImports int    `mapstructure:"MAX_CONCURRENT_IMPORTS"`
-	AxiomDataset         string `mapstructure:"AXIOM_DATASET"`
+	AdminSecret                 string `mapstructure:"ADMIN_SECRET"`
+	Database                    string `mapstructure:"DATABASE"`
+	Port                        string `mapstructure:"PORT"`
+	MaxConcurrentImports        int    `mapstructure:"MAX_CONCURRENT_IMPORTS"`
+	AxiomDataset                string `mapstructure:"AXIOM_DATASET"`
+	KeepDataForDays             int    `mapstructure:"KEEP_DATA_FOR_DAYS"`
+	GraphQLQueryComplexityLimit int    `mapstructure:"GRAPHQL_QUERY_COMPLEXITY_LIMIT"`
 }
 
 var Global Environment
@@ -36,6 +38,28 @@ func Initialize() {
 			data[split[0]], err = strconv.Atoi(split[1])
 			if err != nil {
 				log.Fatal("Could not convert MAX_CONCURRENT_IMPORTS to int")
+			}
+
+			continue
+		}
+
+		if split[0] == "KEEP_DATA_FOR_DAYS" {
+			// Convert to int
+			data[split[0]], err = strconv.Atoi(split[1])
+			if err != nil || data[split[0]].(int) < 1 {
+				log.Println("Did not receive a valid value for KEEP_DATA_FOR_DAYS, defaulting to 1 day")
+				data[split[0]] = 1
+			}
+
+			continue
+		}
+
+		if split[0] == "GRAPHQL_QUERY_COMPLEXITY_LIMIT" {
+			// Convert to int
+			data[split[0]], err = strconv.Atoi(split[1])
+			if err != nil || data[split[0]].(int) < 1 {
+				log.Println("Did not receive a valid value for GRAPHQL_QUERY_COMPLEXITY_LIMIT, defaulting to 80")
+				data[split[0]] = 80
 			}
 
 			continue

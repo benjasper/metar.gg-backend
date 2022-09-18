@@ -35,7 +35,7 @@ func (s *Server) Run(db *ent.Client, logger *logging.Logger) error {
 	port := environment.Global.Port
 
 	srv := handler.NewDefaultServer(graph.NewSchema(db))
-	srv.Use(extension.FixedComplexityLimit(80))
+	srv.Use(extension.FixedComplexityLimit(environment.Global.GraphQLQueryComplexityLimit))
 
 	r := gin.New()
 
@@ -148,7 +148,9 @@ func DeleteOldData(ctx context.Context, db *ent.Client, logger *logging.Logger) 
 
 	logger.Info(fmt.Sprintf("Deleted %d old METARs, observed before %s", result, cutoff.Format(time.RFC1123Z)))
 
-	cutoff = time.Now().Add(-36 * time.Hour)
+	keepDataFor := time.Duration(environment.Global.KeepDataForDays)
+
+	cutoff = time.Now().Add(-24 * keepDataFor * time.Hour)
 	result, err = db.Taf.Delete().Where(taf.IssueTimeLT(cutoff)).Exec(ctx)
 	if err != nil {
 		logger.Error(fmt.Sprintf("Failed to delete old TAFs: %s", err))
