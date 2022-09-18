@@ -1,4 +1,5 @@
-# metar.gg - Aviation weather and airport data
+<h1 align="center">metar.gg</h1>
+<p align="center">Latest worldwide aviation weather and airport data, delivered via GraphQL</p>
 
 ## What is this?
 
