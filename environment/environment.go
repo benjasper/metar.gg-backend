@@ -73,4 +73,21 @@ func Initialize() {
 	if err != nil {
 		log.Fatal(err)
 	}
+
+	// Set default values
+	if Global.MaxConcurrentImports == 0 {
+		Global.MaxConcurrentImports = 1
+	}
+
+	if Global.KeepDataForDays == 0 {
+		Global.KeepDataForDays = 1
+	}
+
+	if Global.GraphQLQueryComplexityLimit == 0 {
+		Global.GraphQLQueryComplexityLimit = 80
+	}
+
+	if Global.Port == "" {
+		Global.Port = "80"
+	}
 }

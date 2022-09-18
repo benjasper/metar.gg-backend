@@ -1,7 +1,5 @@
 version: "3.9"
 services:
-  redis:
-    image: redis
   db:
     image: mysql
     ports:

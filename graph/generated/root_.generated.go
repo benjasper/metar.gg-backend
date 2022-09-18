@@ -2119,7 +2119,7 @@ type WeatherStation {
   airport: Airport
 }
 `, BuiltIn: false},
-	{Name: "../../metar.graphql", Input: `"""The cursor string to use for pagination."""
+	{Name: "../schema.queries.graphql", Input: `"""The cursor string to use for pagination."""
 scalar Cursor
 
 """Time string, in RFC3339 format."""
@@ -2258,9 +2258,8 @@ type Query {
 
     """Get a single weather station by it's id or identifier."""
     getStation(id: String, identifier: String): WeatherStation
-}
-
-type StationWithDistance {
+}`, BuiltIn: false},
+	{Name: "../schema.models.graphql", Input: `type StationWithDistance {
     """The distance in meters from the given location to the airport."""
     distance: Float!
 

@@ -138,27 +138,3 @@ type Query {
     """Get a single weather station by it's id or identifier."""
     getStation(id: String, identifier: String): WeatherStation
 }
-
-type StationWithDistance {
-    """The distance in meters from the given location to the airport."""
-    distance: Float!
-
-    """The METAR for the station."""
-    station: WeatherStation!
-}
-
-extend type Airport {
-    """Returns all Runways for this Airport. They can be filtered with the closed parameter."""
-    runways(closed: Boolean): [Runway!]! @goField(forceResolver: true)
-
-    """Returns the closest weather stations to the airport, within the given radius (in km)."""
-    stationsVicinity(first: Int = 1, radius: Float = 50.0): [StationWithDistance!]! @goField(forceResolver: true)
-}
-
-extend type WeatherStation {
-    """Returns the latest METARs for this station sorted by their observation time."""
-    metars(after: Cursor, first: Int, before: Cursor, last: Int): MetarConnection!
-
-    """Returns the latest TAFs for this station sorted by their issued time."""
-    tafs(after: Cursor, first: Int, before: Cursor, last: Int): TafConnection!
-}

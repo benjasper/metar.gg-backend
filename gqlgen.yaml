@@ -1,6 +1,7 @@
 schema:
   - ent.graphql
-  - metar.graphql
+  - graph/schema.queries.graphql
+  - graph/schema.models.graphql
 
 # resolver reports where the resolver implementations go.
 resolver:
