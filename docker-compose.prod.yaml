@@ -18,7 +18,7 @@ services:
       - db_data:/var/lib/mysql
     environment:
         MYSQL_ROOT_PASSWORD: 123
-        MYSQL_DATABASE: metar.gg
+        MYSQL_DATABASE: metargg
 volumes:
   db_data: {}
 
