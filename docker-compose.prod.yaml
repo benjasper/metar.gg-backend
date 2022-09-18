@@ -1,0 +1,28 @@
+version: "3.9"
+services:
+  app:
+    build:
+        context: .
+        dockerfile: Dockerfile
+    expose:
+      - "80"
+    environment:
+      VIRTUAL_HOST: api.metar.gg
+      LETSENCRYPT_HOST: api.metar.gg
+      LETSENCRYPT_EMAIL: api@metar.gg
+  db:
+    image: mysql:8
+    ports:
+      - "3306:3306"
+    volumes:
+      - db_data:/var/lib/mysql
+    environment:
+        MYSQL_ROOT_PASSWORD: 123
+        MYSQL_DATABASE: metar.gg
+volumes:
+  db_data: {}
+
+networks:
+  default:
+    external:
+      name: nginx-proxy
