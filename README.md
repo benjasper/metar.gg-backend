@@ -13,7 +13,7 @@ The hosted version imports airport data every 7 days and weather data every 5 mi
 - Go
 - GraphQL
 - MySQL Database
-- [ent](https://entgo.io/docs/getting-started): Entitity framework for Go
+- [ent](https://entgo.io/docs/getting-started): Entity framework for Go
 - [gqlgen](https://gqlgen.com): GraphQL server library for Go
 - [gin](https://github.com/gin-gonic/gin): Web framework for Go
 - Optional: [Axiom](https://www.axiom.co/) for logging data ingestion
@@ -34,7 +34,7 @@ The GraphQL API is available at `/graphql`. You can use introspection to see wha
 
 ### How to import data
 The server has a few triggers to start the data import from the sources mentioned above.
-Those can be triggered via a HTTP POST requests to:
+Those can be triggered via HTTP POST requests to:
 
 - POST `/import/airports`: Imports airport data
 - POST `/import/weather`: Imports weather data
@@ -42,7 +42,7 @@ Those can be triggered via a HTTP POST requests to:
 
 ❗️Send the requests including the secret (from the `ADMIN_SECRET` env variable) in the `Authorization` header.
 
-In every case, the server will respond with a `204 No content` if the import was successful triggered. You can use some kind of cron service to trigger these endpoints at your desired intervals.
+In every case, the server will respond with a `204 No content` if the import was successfully triggered. You can use some kind of cron service to trigger these endpoints at your desired intervals.
 The airport data is synced, while the weather data is will only be added and not automatically removed. You can use the `/clean` endpoint to remove old weather data.
 
 ## Development 💻
