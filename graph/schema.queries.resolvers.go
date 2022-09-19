@@ -60,7 +60,7 @@ func (r *queryResolver) GetAirports(ctx context.Context, first *int, after *ent.
 	}
 
 	connection, err := r.client.Airport.Query().Where(
-		airport.Or(where...),
+		airport.And(where...),
 	).Order(ent.Asc(airport.FieldName)).Paginate(ctx, after, first, before, last)
 	if err != nil {
 		return nil, err
