@@ -5,6 +5,7 @@ package graph
 
 import (
 	"context"
+	"metar.gg/ent/country"
 
 	"github.com/google/uuid"
 	"metar.gg/ent"
@@ -47,6 +48,7 @@ func (r *queryResolver) GetAirports(ctx context.Context, first *int, after *ent.
 			airport.GpsCodeEqualFold(*search),
 			airport.GpsCodeHasPrefix(*search),
 			airport.MunicipalityContains(*search),
+			airport.HasCountryWith(country.NameContainsFold(*search)),
 			airport.LocalCodeEqualFold(*search),
 			airport.LocalCodeHasPrefix(*search),
 			airport.HasRegionWith(region.NameContainsFold(*search)),
