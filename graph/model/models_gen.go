@@ -3,6 +3,10 @@
 package model
 
 import (
+	"fmt"
+	"io"
+	"strconv"
+
 	"metar.gg/ent"
 )
 
@@ -11,4 +15,215 @@ type StationWithDistance struct {
 	Distance float64 `json:"distance"`
 	// The METAR for the station.
 	Station *ent.WeatherStation `json:"station"`
+}
+
+type LengthUnit string
+
+const (
+	LengthUnitKilometer    LengthUnit = "KILOMETER"
+	LengthUnitMeter        LengthUnit = "METER"
+	LengthUnitStatuteMile  LengthUnit = "STATUTE_MILE"
+	LengthUnitNauticalMile LengthUnit = "NAUTICAL_MILE"
+	LengthUnitFoot         LengthUnit = "FOOT"
+)
+
+var AllLengthUnit = []LengthUnit{
+	LengthUnitKilometer,
+	LengthUnitMeter,
+	LengthUnitStatuteMile,
+	LengthUnitNauticalMile,
+	LengthUnitFoot,
+}
+
+func (e LengthUnit) IsValid() bool {
+	switch e {
+	case LengthUnitKilometer, LengthUnitMeter, LengthUnitStatuteMile, LengthUnitNauticalMile, LengthUnitFoot:
+		return true
+	}
+	return false
+}
+
+func (e LengthUnit) String() string {
+	return string(e)
+}
+
+func (e *LengthUnit) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = LengthUnit(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid LengthUnit", str)
+	}
+	return nil
+}
+
+func (e LengthUnit) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+type PressureUnit string
+
+const (
+	PressureUnitHectopascal   PressureUnit = "HECTOPASCAL"
+	PressureUnitInchOfMercury PressureUnit = "INCH_OF_MERCURY"
+)
+
+var AllPressureUnit = []PressureUnit{
+	PressureUnitHectopascal,
+	PressureUnitInchOfMercury,
+}
+
+func (e PressureUnit) IsValid() bool {
+	switch e {
+	case PressureUnitHectopascal, PressureUnitInchOfMercury:
+		return true
+	}
+	return false
+}
+
+func (e PressureUnit) String() string {
+	return string(e)
+}
+
+func (e *PressureUnit) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = PressureUnit(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid PressureUnit", str)
+	}
+	return nil
+}
+
+func (e PressureUnit) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+type SmallLengthUnit string
+
+const (
+	SmallLengthUnitInch       SmallLengthUnit = "INCH"
+	SmallLengthUnitCentimeter SmallLengthUnit = "CENTIMETER"
+)
+
+var AllSmallLengthUnit = []SmallLengthUnit{
+	SmallLengthUnitInch,
+	SmallLengthUnitCentimeter,
+}
+
+func (e SmallLengthUnit) IsValid() bool {
+	switch e {
+	case SmallLengthUnitInch, SmallLengthUnitCentimeter:
+		return true
+	}
+	return false
+}
+
+func (e SmallLengthUnit) String() string {
+	return string(e)
+}
+
+func (e *SmallLengthUnit) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = SmallLengthUnit(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid SmallLengthUnit", str)
+	}
+	return nil
+}
+
+func (e SmallLengthUnit) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+type SpeedUnit string
+
+const (
+	SpeedUnitKilometerPerHour SpeedUnit = "KILOMETER_PER_HOUR"
+	SpeedUnitKnot             SpeedUnit = "KNOT"
+)
+
+var AllSpeedUnit = []SpeedUnit{
+	SpeedUnitKilometerPerHour,
+	SpeedUnitKnot,
+}
+
+func (e SpeedUnit) IsValid() bool {
+	switch e {
+	case SpeedUnitKilometerPerHour, SpeedUnitKnot:
+		return true
+	}
+	return false
+}
+
+func (e SpeedUnit) String() string {
+	return string(e)
+}
+
+func (e *SpeedUnit) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = SpeedUnit(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid SpeedUnit", str)
+	}
+	return nil
+}
+
+func (e SpeedUnit) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+type TemperatureUnit string
+
+const (
+	TemperatureUnitCelsius    TemperatureUnit = "CELSIUS"
+	TemperatureUnitFahrenheit TemperatureUnit = "FAHRENHEIT"
+)
+
+var AllTemperatureUnit = []TemperatureUnit{
+	TemperatureUnitCelsius,
+	TemperatureUnitFahrenheit,
+}
+
+func (e TemperatureUnit) IsValid() bool {
+	switch e {
+	case TemperatureUnitCelsius, TemperatureUnitFahrenheit:
+		return true
+	}
+	return false
+}
+
+func (e TemperatureUnit) String() string {
+	return string(e)
+}
+
+func (e *TemperatureUnit) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = TemperatureUnit(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid TemperatureUnit", str)
+	}
+	return nil
+}
+
+func (e TemperatureUnit) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
 }

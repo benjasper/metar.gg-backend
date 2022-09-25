@@ -1,6 +1,7 @@
 package schema
 
 import (
+	"entgo.io/contrib/entgql"
 	"entgo.io/ent"
 	"entgo.io/ent/schema/field"
 )
@@ -14,7 +15,7 @@ type SkyCondition struct {
 func (SkyCondition) Fields() []ent.Field {
 	return []ent.Field{
 		field.Enum("sky_cover").NamedValues("Sky Clear", "SKC", "Few", "FEW", "Scattered", "SCT", "Clear", "CLR", "No significant clouds", "NSC", "Broken", "BKN", "Overcast", "OVC", "Overcast X", "OVCX", "Vertical Visibility", "OVX", "Ceiling and Visibility OK", "CAVOK"),
-		field.Int("cloud_base").Optional().Nillable().Comment("Cloud base in feet."),
+		field.Int("cloud_base").Optional().Nillable().Comment("Cloud base in feet.").Annotations(entgql.Skip(entgql.SkipType)),
 		field.Enum("cloud_type").Optional().Nillable().NamedValues("Cumulonimbus", "CB", "Cumulus", "CU", "Towering Cumulus", "TCU").Comment("Cloud type. Only present in TAFs."),
 	}
 }

@@ -13,6 +13,7 @@ import (
 	"github.com/vektah/gqlparser/v2/ast"
 	"metar.gg/ent"
 	"metar.gg/ent/airport"
+	"metar.gg/graph/model"
 )
 
 // NewExecutableSchema creates an ExecutableSchema from the ResolverRoot interface.
@@ -32,7 +33,13 @@ type Config struct {
 
 type ResolverRoot interface {
 	Airport() AirportResolver
+	Forecast() ForecastResolver
+	IcingCondition() IcingConditionResolver
+	Metar() MetarResolver
 	Query() QueryResolver
+	SkyCondition() SkyConditionResolver
+	TemperatureData() TemperatureDataResolver
+	TurbulenceCondition() TurbulenceConditionResolver
 	WeatherStation() WeatherStationResolver
 }
 
@@ -91,7 +98,7 @@ type ComplexityRoot struct {
 	}
 
 	Forecast struct {
-		Altimeter            func(childComplexity int) int
+		Altimeter            func(childComplexity int, unit model.PressureUnit) int
 		ChangeIndicator      func(childComplexity int) int
 		ChangeProbability    func(childComplexity int) int
 		ChangeTime           func(childComplexity int) int
@@ -103,15 +110,15 @@ type ComplexityRoot struct {
 		TemperatureData      func(childComplexity int) int
 		ToTime               func(childComplexity int) int
 		TurbulenceConditions func(childComplexity int) int
-		VisibilityHorizontal func(childComplexity int) int
-		VisibilityVertical   func(childComplexity int) int
+		VisibilityHorizontal func(childComplexity int, unit model.LengthUnit) int
+		VisibilityVertical   func(childComplexity int, unit model.LengthUnit) int
 		Weather              func(childComplexity int) int
 		WindDirection        func(childComplexity int) int
-		WindGust             func(childComplexity int) int
+		WindGust             func(childComplexity int, unit model.SpeedUnit) int
 		WindShearDirection   func(childComplexity int) int
-		WindShearHeight      func(childComplexity int) int
-		WindShearSpeed       func(childComplexity int) int
-		WindSpeed            func(childComplexity int) int
+		WindShearHeight      func(childComplexity int, unit model.LengthUnit) int
+		WindShearSpeed       func(childComplexity int, unit model.SpeedUnit) int
+		WindSpeed            func(childComplexity int, unit model.SpeedUnit) int
 	}
 
 	Frequency struct {
@@ -127,13 +134,13 @@ type ComplexityRoot struct {
 	IcingCondition struct {
 		ID          func(childComplexity int) int
 		Intensity   func(childComplexity int) int
-		MaxAltitude func(childComplexity int) int
-		MinAltitude func(childComplexity int) int
+		MaxAltitude func(childComplexity int, unit model.LengthUnit) int
+		MinAltitude func(childComplexity int, unit model.LengthUnit) int
 	}
 
 	Metar struct {
-		Altimeter                             func(childComplexity int) int
-		Dewpoint                              func(childComplexity int) int
+		Altimeter                             func(childComplexity int, unit model.PressureUnit) int
+		Dewpoint                              func(childComplexity int, unit model.TemperatureUnit) int
 		FlightCategory                        func(childComplexity int) int
 		ID                                    func(childComplexity int) int
 		MaxTemp24                             func(childComplexity int) int
@@ -147,7 +154,7 @@ type ComplexityRoot struct {
 		Precipitation3                        func(childComplexity int) int
 		Precipitation6                        func(childComplexity int) int
 		PresentWeather                        func(childComplexity int) int
-		PressureTendency                      func(childComplexity int) int
+		PressureTendency                      func(childComplexity int, unit model.PressureUnit) int
 		QualityControlAutoStation             func(childComplexity int) int
 		QualityControlCorrected               func(childComplexity int) int
 		QualityControlFreezingRainSensorOff   func(childComplexity int) int
@@ -156,16 +163,16 @@ type ComplexityRoot struct {
 		QualityControlNoSignal                func(childComplexity int) int
 		QualityControlPresentWeatherSensorOff func(childComplexity int) int
 		RawText                               func(childComplexity int) int
-		SeaLevelPressure                      func(childComplexity int) int
+		SeaLevelPressure                      func(childComplexity int, unit model.PressureUnit) int
 		SkyConditions                         func(childComplexity int) int
-		SnowDepth                             func(childComplexity int) int
+		SnowDepth                             func(childComplexity int, unit model.SmallLengthUnit) int
 		Station                               func(childComplexity int) int
-		Temperature                           func(childComplexity int) int
-		VertVis                               func(childComplexity int) int
-		Visibility                            func(childComplexity int) int
+		Temperature                           func(childComplexity int, unit model.TemperatureUnit) int
+		VerticalVisibility                    func(childComplexity int, unit model.LengthUnit) int
+		Visibility                            func(childComplexity int, unit model.LengthUnit) int
 		WindDirection                         func(childComplexity int) int
-		WindGust                              func(childComplexity int) int
-		WindSpeed                             func(childComplexity int) int
+		WindGust                              func(childComplexity int, unit model.SpeedUnit) int
+		WindSpeed                             func(childComplexity int, unit model.SpeedUnit) int
 	}
 
 	MetarConnection struct {
@@ -229,7 +236,7 @@ type ComplexityRoot struct {
 	}
 
 	SkyCondition struct {
-		CloudBase func(childComplexity int) int
+		CloudBase func(childComplexity int, unit model.LengthUnit) int
 		CloudType func(childComplexity int) int
 		ID        func(childComplexity int) int
 		SkyCover  func(childComplexity int) int
@@ -266,17 +273,17 @@ type ComplexityRoot struct {
 
 	TemperatureData struct {
 		ID             func(childComplexity int) int
-		MaxTemperature func(childComplexity int) int
-		MinTemperature func(childComplexity int) int
-		Temperature    func(childComplexity int) int
+		MaxTemperature func(childComplexity int, unit model.TemperatureUnit) int
+		MinTemperature func(childComplexity int, unit model.TemperatureUnit) int
+		Temperature    func(childComplexity int, unit model.TemperatureUnit) int
 		ValidTime      func(childComplexity int) int
 	}
 
 	TurbulenceCondition struct {
 		ID          func(childComplexity int) int
 		Intensity   func(childComplexity int) int
-		MaxAltitude func(childComplexity int) int
-		MinAltitude func(childComplexity int) int
+		MaxAltitude func(childComplexity int, unit model.LengthUnit) int
+		MinAltitude func(childComplexity int, unit model.LengthUnit) int
 	}
 
 	WeatherStation struct {
@@ -598,7 +605,12 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			break
 		}
 
-		return e.complexity.Forecast.Altimeter(childComplexity), true
+		args, err := ec.field_Forecast_altimeter_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Forecast.Altimeter(childComplexity, args["unit"].(model.PressureUnit)), true
 
 	case "Forecast.changeIndicator":
 		if e.complexity.Forecast.ChangeIndicator == nil {
@@ -682,14 +694,24 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			break
 		}
 
-		return e.complexity.Forecast.VisibilityHorizontal(childComplexity), true
+		args, err := ec.field_Forecast_visibilityHorizontal_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Forecast.VisibilityHorizontal(childComplexity, args["unit"].(model.LengthUnit)), true
 
 	case "Forecast.visibilityVertical":
 		if e.complexity.Forecast.VisibilityVertical == nil {
 			break
 		}
 
-		return e.complexity.Forecast.VisibilityVertical(childComplexity), true
+		args, err := ec.field_Forecast_visibilityVertical_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Forecast.VisibilityVertical(childComplexity, args["unit"].(model.LengthUnit)), true
 
 	case "Forecast.weather":
 		if e.complexity.Forecast.Weather == nil {
@@ -710,7 +732,12 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			break
 		}
 
-		return e.complexity.Forecast.WindGust(childComplexity), true
+		args, err := ec.field_Forecast_windGust_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Forecast.WindGust(childComplexity, args["unit"].(model.SpeedUnit)), true
 
 	case "Forecast.windShearDirection":
 		if e.complexity.Forecast.WindShearDirection == nil {
@@ -724,21 +751,36 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			break
 		}
 
-		return e.complexity.Forecast.WindShearHeight(childComplexity), true
+		args, err := ec.field_Forecast_windShearHeight_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Forecast.WindShearHeight(childComplexity, args["unit"].(model.LengthUnit)), true
 
 	case "Forecast.windShearSpeed":
 		if e.complexity.Forecast.WindShearSpeed == nil {
 			break
 		}
 
-		return e.complexity.Forecast.WindShearSpeed(childComplexity), true
+		args, err := ec.field_Forecast_windShearSpeed_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Forecast.WindShearSpeed(childComplexity, args["unit"].(model.SpeedUnit)), true
 
 	case "Forecast.windSpeed":
 		if e.complexity.Forecast.WindSpeed == nil {
 			break
 		}
 
-		return e.complexity.Forecast.WindSpeed(childComplexity), true
+		args, err := ec.field_Forecast_windSpeed_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Forecast.WindSpeed(childComplexity, args["unit"].(model.SpeedUnit)), true
 
 	case "Frequency.airport":
 		if e.complexity.Frequency.Airport == nil {
@@ -808,28 +850,48 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			break
 		}
 
-		return e.complexity.IcingCondition.MaxAltitude(childComplexity), true
+		args, err := ec.field_IcingCondition_maxAltitude_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.IcingCondition.MaxAltitude(childComplexity, args["unit"].(model.LengthUnit)), true
 
 	case "IcingCondition.minAltitude":
 		if e.complexity.IcingCondition.MinAltitude == nil {
 			break
 		}
 
-		return e.complexity.IcingCondition.MinAltitude(childComplexity), true
+		args, err := ec.field_IcingCondition_minAltitude_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.IcingCondition.MinAltitude(childComplexity, args["unit"].(model.LengthUnit)), true
 
 	case "Metar.altimeter":
 		if e.complexity.Metar.Altimeter == nil {
 			break
 		}
 
-		return e.complexity.Metar.Altimeter(childComplexity), true
+		args, err := ec.field_Metar_altimeter_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Metar.Altimeter(childComplexity, args["unit"].(model.PressureUnit)), true
 
 	case "Metar.dewpoint":
 		if e.complexity.Metar.Dewpoint == nil {
 			break
 		}
 
-		return e.complexity.Metar.Dewpoint(childComplexity), true
+		args, err := ec.field_Metar_dewpoint_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Metar.Dewpoint(childComplexity, args["unit"].(model.TemperatureUnit)), true
 
 	case "Metar.flightCategory":
 		if e.complexity.Metar.FlightCategory == nil {
@@ -927,7 +989,12 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			break
 		}
 
-		return e.complexity.Metar.PressureTendency(childComplexity), true
+		args, err := ec.field_Metar_pressureTendency_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Metar.PressureTendency(childComplexity, args["unit"].(model.PressureUnit)), true
 
 	case "Metar.qualityControlAutoStation":
 		if e.complexity.Metar.QualityControlAutoStation == nil {
@@ -990,7 +1057,12 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			break
 		}
 
-		return e.complexity.Metar.SeaLevelPressure(childComplexity), true
+		args, err := ec.field_Metar_seaLevelPressure_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Metar.SeaLevelPressure(childComplexity, args["unit"].(model.PressureUnit)), true
 
 	case "Metar.skyConditions":
 		if e.complexity.Metar.SkyConditions == nil {
@@ -1004,7 +1076,12 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			break
 		}
 
-		return e.complexity.Metar.SnowDepth(childComplexity), true
+		args, err := ec.field_Metar_snowDepth_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Metar.SnowDepth(childComplexity, args["unit"].(model.SmallLengthUnit)), true
 
 	case "Metar.station":
 		if e.complexity.Metar.Station == nil {
@@ -1018,21 +1095,36 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			break
 		}
 
-		return e.complexity.Metar.Temperature(childComplexity), true
+		args, err := ec.field_Metar_temperature_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
 
-	case "Metar.vertVis":
-		if e.complexity.Metar.VertVis == nil {
+		return e.complexity.Metar.Temperature(childComplexity, args["unit"].(model.TemperatureUnit)), true
+
+	case "Metar.verticalVisibility":
+		if e.complexity.Metar.VerticalVisibility == nil {
 			break
 		}
 
-		return e.complexity.Metar.VertVis(childComplexity), true
+		args, err := ec.field_Metar_verticalVisibility_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Metar.VerticalVisibility(childComplexity, args["unit"].(model.LengthUnit)), true
 
 	case "Metar.visibility":
 		if e.complexity.Metar.Visibility == nil {
 			break
 		}
 
-		return e.complexity.Metar.Visibility(childComplexity), true
+		args, err := ec.field_Metar_visibility_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Metar.Visibility(childComplexity, args["unit"].(model.LengthUnit)), true
 
 	case "Metar.windDirection":
 		if e.complexity.Metar.WindDirection == nil {
@@ -1046,14 +1138,24 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			break
 		}
 
-		return e.complexity.Metar.WindGust(childComplexity), true
+		args, err := ec.field_Metar_windGust_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Metar.WindGust(childComplexity, args["unit"].(model.SpeedUnit)), true
 
 	case "Metar.windSpeed":
 		if e.complexity.Metar.WindSpeed == nil {
 			break
 		}
 
-		return e.complexity.Metar.WindSpeed(childComplexity), true
+		args, err := ec.field_Metar_windSpeed_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Metar.WindSpeed(childComplexity, args["unit"].(model.SpeedUnit)), true
 
 	case "MetarConnection.edges":
 		if e.complexity.MetarConnection.Edges == nil {
@@ -1374,7 +1476,12 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			break
 		}
 
-		return e.complexity.SkyCondition.CloudBase(childComplexity), true
+		args, err := ec.field_SkyCondition_cloudBase_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.SkyCondition.CloudBase(childComplexity, args["unit"].(model.LengthUnit)), true
 
 	case "SkyCondition.cloudType":
 		if e.complexity.SkyCondition.CloudType == nil {
@@ -1528,21 +1635,36 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			break
 		}
 
-		return e.complexity.TemperatureData.MaxTemperature(childComplexity), true
+		args, err := ec.field_TemperatureData_maxTemperature_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.TemperatureData.MaxTemperature(childComplexity, args["unit"].(model.TemperatureUnit)), true
 
 	case "TemperatureData.minTemperature":
 		if e.complexity.TemperatureData.MinTemperature == nil {
 			break
 		}
 
-		return e.complexity.TemperatureData.MinTemperature(childComplexity), true
+		args, err := ec.field_TemperatureData_minTemperature_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.TemperatureData.MinTemperature(childComplexity, args["unit"].(model.TemperatureUnit)), true
 
 	case "TemperatureData.temperature":
 		if e.complexity.TemperatureData.Temperature == nil {
 			break
 		}
 
-		return e.complexity.TemperatureData.Temperature(childComplexity), true
+		args, err := ec.field_TemperatureData_temperature_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.TemperatureData.Temperature(childComplexity, args["unit"].(model.TemperatureUnit)), true
 
 	case "TemperatureData.validTime":
 		if e.complexity.TemperatureData.ValidTime == nil {
@@ -1570,14 +1692,24 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			break
 		}
 
-		return e.complexity.TurbulenceCondition.MaxAltitude(childComplexity), true
+		args, err := ec.field_TurbulenceCondition_maxAltitude_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.TurbulenceCondition.MaxAltitude(childComplexity, args["unit"].(model.LengthUnit)), true
 
 	case "TurbulenceCondition.minAltitude":
 		if e.complexity.TurbulenceCondition.MinAltitude == nil {
 			break
 		}
 
-		return e.complexity.TurbulenceCondition.MinAltitude(childComplexity), true
+		args, err := ec.field_TurbulenceCondition_minAltitude_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.TurbulenceCondition.MinAltitude(childComplexity, args["unit"].(model.LengthUnit)), true
 
 	case "WeatherStation.airport":
 		if e.complexity.WeatherStation.Airport == nil {
@@ -1845,22 +1977,8 @@ type Forecast {
   changeProbability: Int
   """The wind direction in degrees."""
   windDirection: Int
-  """The wind speed in knots."""
-  windSpeed: Int
-  """The wind gust in knots."""
-  windGust: Int
-  """The height of the wind shear in feet above ground level."""
-  windShearHeight: Int
   """The wind shear direction in degrees."""
   windShearDirection: Int
-  """The wind shear speed in knots."""
-  windShearSpeed: Int
-  """The visibility in statute miles."""
-  visibilityHorizontal: Float
-  """The vertical visibility in feet."""
-  visibilityVertical: Int
-  """The altimeter in inches of mercury."""
-  altimeter: Float
   """The weather string."""
   weather: String
   """The not decoded string."""
@@ -1897,10 +2015,6 @@ type IcingCondition {
   id: ID!
   """The intensity of the icing."""
   intensity: String!
-  """The minimum altitude in feet that the icing is present."""
-  minAltitude: Int
-  """The maximum altitude in feet that the icing is present."""
-  maxAltitude: Int
 }
 type Metar {
   """The unique identifier of the record."""
@@ -1909,20 +2023,8 @@ type Metar {
   rawText: String!
   """The time the METAR was observed."""
   observationTime: Time!
-  """The temperature in Celsius."""
-  temperature: Float!
-  """The dewpoint in Celsius."""
-  dewpoint: Float!
-  """The wind speed in knots, or 0 if calm."""
-  windSpeed: Int!
-  """The wind gust in knots."""
-  windGust: Int!
   """The wind direction in degrees, or 0 if calm."""
   windDirection: Int!
-  """The visibility in statute miles."""
-  visibility: Float!
-  """The altimeter setting in inches of mercury."""
-  altimeter: Float!
   """The present weather string."""
   presentWeather: String
   flightCategory: MetarFlightCategory
@@ -1940,10 +2042,6 @@ type Metar {
   qualityControlFreezingRainSensorOff: Boolean!
   """Whether Present weather sensor is off."""
   qualityControlPresentWeatherSensorOff: Boolean!
-  """The sea level pressure in hectopascals."""
-  seaLevelPressure: Float
-  """The pressur_6e tendency in hectopascals."""
-  pressureTendency: Float
   """The maximum air temperature in Celsius from the past 6 hours."""
   maxTemp6: Float
   """The minimum air temperature in Celsius from the past 6 hours."""
@@ -1960,10 +2058,6 @@ type Metar {
   precipitation6: Float
   """The precipitation in inches from the past 24 hours. 0.0005 in = trace precipitation."""
   precipitation24: Float
-  """The snow depth in inches."""
-  snowDepth: Float
-  """The vertical visibility in feet."""
-  vertVis: Float
   """The type of METAR."""
   metarType: MetarMetarType!
   station: WeatherStation!
@@ -2052,8 +2146,6 @@ type SkyCondition {
   """The unique identifier of the record."""
   id: ID!
   skyCover: SkyConditionSkyCover!
-  """Cloud base in feet."""
-  cloudBase: Int
   """Cloud type. Only present in TAFs."""
   cloudType: SkyConditionCloudType
 }
@@ -2111,22 +2203,12 @@ type TemperatureData {
   id: ID!
   """The time the temperature data is valid."""
   validTime: Time!
-  """The surface temperature in degrees Celsius."""
-  temperature: Float!
-  """The minimum temperature in degrees Celsius."""
-  minTemperature: Float
-  """The maximum temperature in degrees Celsius."""
-  maxTemperature: Float
 }
 type TurbulenceCondition {
   """The unique identifier of the record."""
   id: ID!
   """The intensity of the turbulence."""
   intensity: String!
-  """The minimum altitude in feet that the turbulence is present."""
-  minAltitude: Int!
-  """The maximum altitude in feet that the turbulence is present."""
-  maxAltitude: Int!
 }
 type WeatherStation {
   """The unique identifier of the record."""
@@ -2306,6 +2388,120 @@ extend type WeatherStation {
 
     """Returns the latest TAFs for this station sorted by their issued time."""
     tafs(after: Cursor, first: Int, before: Cursor, last: Int): TafConnection!
+}`, BuiltIn: false},
+	{Name: "../schema.units.graphql", Input: `enum LengthUnit {
+    KILOMETER
+    METER
+    STATUTE_MILE
+    NAUTICAL_MILE
+    FOOT
+}
+
+enum SmallLengthUnit {
+    INCH
+    CENTIMETER
+}
+
+enum TemperatureUnit {
+    CELSIUS
+    FAHRENHEIT
+}
+
+enum PressureUnit {
+    HECTOPASCAL
+    INCH_OF_MERCURY
+}
+
+enum SpeedUnit {
+    KILOMETER_PER_HOUR
+    KNOT
+}
+
+extend type Metar {
+    """The altimeter in the specified unit."""
+    altimeter(unit: PressureUnit! = HECTOPASCAL): Float! @goField(forceResolver: true)
+
+    """The temperature in the specified unit."""
+    temperature(unit: TemperatureUnit! = CELSIUS): Float! @goField(forceResolver: true)
+
+    """The dew point in the specified unit."""
+    dewpoint(unit: TemperatureUnit! = CELSIUS): Float! @goField(forceResolver: true)
+
+    """The wind speed in the specified unit."""
+    windSpeed(unit: SpeedUnit! = KNOT): Float! @goField(forceResolver: true)
+
+    """Wind gust speed in the specified unit."""
+    windGust(unit: SpeedUnit! = KNOT): Float! @goField(forceResolver: true)
+
+    """The visibility in the specified unit."""
+    visibility(unit: LengthUnit! = KILOMETER): Float! @goField(forceResolver: true)
+
+    """Vertical visibility in the specified unit."""
+    verticalVisibility(unit: LengthUnit! = FOOT): Float @goField(forceResolver: true)
+
+    """Snow depth in the specified unit."""
+    snowDepth(unit: SmallLengthUnit! = CENTIMETER): Float @goField(forceResolver: true)
+
+    """Sea level pressure in the specified unit."""
+    seaLevelPressure(unit: PressureUnit! = HECTOPASCAL): Float @goField(forceResolver: true)
+
+    """Pressure tendency in the specified unit."""
+    pressureTendency(unit: PressureUnit! = HECTOPASCAL): Float @goField(forceResolver: true)
+}
+
+extend type SkyCondition {
+    """The cloud base in the specified unit."""
+    cloudBase(unit: LengthUnit! = FOOT): Float @goField(forceResolver: true)
+}
+
+extend type Forecast {
+    """The altimeter in the specified unit."""
+    altimeter(unit: PressureUnit! = HECTOPASCAL): Float @goField(forceResolver: true)
+
+    """The wind speed in the specified unit."""
+    windSpeed(unit: SpeedUnit! = KNOT): Float @goField(forceResolver: true)
+
+    """Wind gust speed in the specified unit."""
+    windGust(unit: SpeedUnit! = KNOT): Float @goField(forceResolver: true)
+
+    """Visibility horizontal in the specified unit."""
+    visibilityHorizontal(unit: LengthUnit! = FOOT): Float @goField(forceResolver: true)
+
+    """Visibility vertical in the specified unit."""
+    visibilityVertical(unit: LengthUnit! = KILOMETER): Float @goField(forceResolver: true)
+
+    """The height of the wind shear in the specified unit above ground level."""
+    windShearHeight(unit: LengthUnit! = FOOT): Float @goField(forceResolver: true)
+
+    """Wind shear speed in the specified unit."""
+    windShearSpeed(unit: SpeedUnit! = KNOT): Float @goField(forceResolver: true)
+}
+
+extend type TemperatureData {
+    """The temperature in the specified unit."""
+    temperature(unit: TemperatureUnit! = CELSIUS): Float! @goField(forceResolver: true)
+
+    """Min temperature in the specified unit."""
+    minTemperature(unit: TemperatureUnit! = CELSIUS): Float @goField(forceResolver: true)
+
+    """Max temperature in the specified unit."""
+    maxTemperature(unit: TemperatureUnit! = CELSIUS): Float @goField(forceResolver: true)
+}
+
+extend type IcingCondition {
+    """Min altitude in the specified unit."""
+    minAltitude(unit: LengthUnit! = FOOT): Float @goField(forceResolver: true)
+
+    """Max altitude in the specified unit."""
+    maxAltitude(unit: LengthUnit! = FOOT): Float @goField(forceResolver: true)
+}
+
+extend type TurbulenceCondition {
+    """Min altitude in the specified unit."""
+    minAltitude(unit: LengthUnit! = FOOT): Float @goField(forceResolver: true)
+
+    """Max altitude in the specified unit."""
+    maxAltitude(unit: LengthUnit! = FOOT): Float @goField(forceResolver: true)
 }`, BuiltIn: false},
 }
 var parsedSchema = gqlparser.MustLoadSchema(sources...)

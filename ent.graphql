@@ -108,22 +108,8 @@ type Forecast {
   changeProbability: Int
   """The wind direction in degrees."""
   windDirection: Int
-  """The wind speed in knots."""
-  windSpeed: Int
-  """The wind gust in knots."""
-  windGust: Int
-  """The height of the wind shear in feet above ground level."""
-  windShearHeight: Int
   """The wind shear direction in degrees."""
   windShearDirection: Int
-  """The wind shear speed in knots."""
-  windShearSpeed: Int
-  """The visibility in statute miles."""
-  visibilityHorizontal: Float
-  """The vertical visibility in feet."""
-  visibilityVertical: Int
-  """The altimeter in inches of mercury."""
-  altimeter: Float
   """The weather string."""
   weather: String
   """The not decoded string."""
@@ -160,10 +146,6 @@ type IcingCondition {
   id: ID!
   """The intensity of the icing."""
   intensity: String!
-  """The minimum altitude in feet that the icing is present."""
-  minAltitude: Int
-  """The maximum altitude in feet that the icing is present."""
-  maxAltitude: Int
 }
 type Metar {
   """The unique identifier of the record."""
@@ -172,20 +154,8 @@ type Metar {
   rawText: String!
   """The time the METAR was observed."""
   observationTime: Time!
-  """The temperature in Celsius."""
-  temperature: Float!
-  """The dewpoint in Celsius."""
-  dewpoint: Float!
-  """The wind speed in knots, or 0 if calm."""
-  windSpeed: Int!
-  """The wind gust in knots."""
-  windGust: Int!
   """The wind direction in degrees, or 0 if calm."""
   windDirection: Int!
-  """The visibility in statute miles."""
-  visibility: Float!
-  """The altimeter setting in inches of mercury."""
-  altimeter: Float!
   """The present weather string."""
   presentWeather: String
   flightCategory: MetarFlightCategory
@@ -203,10 +173,6 @@ type Metar {
   qualityControlFreezingRainSensorOff: Boolean!
   """Whether Present weather sensor is off."""
   qualityControlPresentWeatherSensorOff: Boolean!
-  """The sea level pressure in hectopascals."""
-  seaLevelPressure: Float
-  """The pressur_6e tendency in hectopascals."""
-  pressureTendency: Float
   """The maximum air temperature in Celsius from the past 6 hours."""
   maxTemp6: Float
   """The minimum air temperature in Celsius from the past 6 hours."""
@@ -223,10 +189,6 @@ type Metar {
   precipitation6: Float
   """The precipitation in inches from the past 24 hours. 0.0005 in = trace precipitation."""
   precipitation24: Float
-  """The snow depth in inches."""
-  snowDepth: Float
-  """The vertical visibility in feet."""
-  vertVis: Float
   """The type of METAR."""
   metarType: MetarMetarType!
   station: WeatherStation!
@@ -315,8 +277,6 @@ type SkyCondition {
   """The unique identifier of the record."""
   id: ID!
   skyCover: SkyConditionSkyCover!
-  """Cloud base in feet."""
-  cloudBase: Int
   """Cloud type. Only present in TAFs."""
   cloudType: SkyConditionCloudType
 }
@@ -374,22 +334,12 @@ type TemperatureData {
   id: ID!
   """The time the temperature data is valid."""
   validTime: Time!
-  """The surface temperature in degrees Celsius."""
-  temperature: Float!
-  """The minimum temperature in degrees Celsius."""
-  minTemperature: Float
-  """The maximum temperature in degrees Celsius."""
-  maxTemperature: Float
 }
 type TurbulenceCondition {
   """The unique identifier of the record."""
   id: ID!
   """The intensity of the turbulence."""
   intensity: String!
-  """The minimum altitude in feet that the turbulence is present."""
-  minAltitude: Int!
-  """The maximum altitude in feet that the turbulence is present."""
-  maxAltitude: Int!
 }
 type WeatherStation {
   """The unique identifier of the record."""

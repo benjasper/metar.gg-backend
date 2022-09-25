@@ -1,6 +1,7 @@
 package schema
 
 import (
+	"entgo.io/contrib/entgql"
 	"entgo.io/ent"
 	"entgo.io/ent/schema/field"
 )
@@ -14,8 +15,8 @@ type IcingCondition struct {
 func (IcingCondition) Fields() []ent.Field {
 	return []ent.Field{
 		field.String("intensity").Comment("The intensity of the icing."),
-		field.Int("min_altitude").Optional().Nillable().Comment("The minimum altitude in feet that the icing is present."),
-		field.Int("max_altitude").Optional().Nillable().Comment("The maximum altitude in feet that the icing is present."),
+		field.Int("min_altitude").Optional().Nillable().Comment("The minimum altitude in feet that the icing is present.").Annotations(entgql.Skip(entgql.SkipType)),
+		field.Int("max_altitude").Optional().Nillable().Comment("The maximum altitude in feet that the icing is present.").Annotations(entgql.Skip(entgql.SkipType)),
 	}
 }
 

@@ -757,20 +757,8 @@ func (ec *executionContext) fieldContext_MetarEdge_node(ctx context.Context, fie
 				return ec.fieldContext_Metar_rawText(ctx, field)
 			case "observationTime":
 				return ec.fieldContext_Metar_observationTime(ctx, field)
-			case "temperature":
-				return ec.fieldContext_Metar_temperature(ctx, field)
-			case "dewpoint":
-				return ec.fieldContext_Metar_dewpoint(ctx, field)
-			case "windSpeed":
-				return ec.fieldContext_Metar_windSpeed(ctx, field)
-			case "windGust":
-				return ec.fieldContext_Metar_windGust(ctx, field)
 			case "windDirection":
 				return ec.fieldContext_Metar_windDirection(ctx, field)
-			case "visibility":
-				return ec.fieldContext_Metar_visibility(ctx, field)
-			case "altimeter":
-				return ec.fieldContext_Metar_altimeter(ctx, field)
 			case "presentWeather":
 				return ec.fieldContext_Metar_presentWeather(ctx, field)
 			case "flightCategory":
@@ -789,10 +777,6 @@ func (ec *executionContext) fieldContext_MetarEdge_node(ctx context.Context, fie
 				return ec.fieldContext_Metar_qualityControlFreezingRainSensorOff(ctx, field)
 			case "qualityControlPresentWeatherSensorOff":
 				return ec.fieldContext_Metar_qualityControlPresentWeatherSensorOff(ctx, field)
-			case "seaLevelPressure":
-				return ec.fieldContext_Metar_seaLevelPressure(ctx, field)
-			case "pressureTendency":
-				return ec.fieldContext_Metar_pressureTendency(ctx, field)
 			case "maxTemp6":
 				return ec.fieldContext_Metar_maxTemp6(ctx, field)
 			case "minTemp6":
@@ -809,16 +793,32 @@ func (ec *executionContext) fieldContext_MetarEdge_node(ctx context.Context, fie
 				return ec.fieldContext_Metar_precipitation6(ctx, field)
 			case "precipitation24":
 				return ec.fieldContext_Metar_precipitation24(ctx, field)
-			case "snowDepth":
-				return ec.fieldContext_Metar_snowDepth(ctx, field)
-			case "vertVis":
-				return ec.fieldContext_Metar_vertVis(ctx, field)
 			case "metarType":
 				return ec.fieldContext_Metar_metarType(ctx, field)
 			case "station":
 				return ec.fieldContext_Metar_station(ctx, field)
 			case "skyConditions":
 				return ec.fieldContext_Metar_skyConditions(ctx, field)
+			case "altimeter":
+				return ec.fieldContext_Metar_altimeter(ctx, field)
+			case "temperature":
+				return ec.fieldContext_Metar_temperature(ctx, field)
+			case "dewpoint":
+				return ec.fieldContext_Metar_dewpoint(ctx, field)
+			case "windSpeed":
+				return ec.fieldContext_Metar_windSpeed(ctx, field)
+			case "windGust":
+				return ec.fieldContext_Metar_windGust(ctx, field)
+			case "visibility":
+				return ec.fieldContext_Metar_visibility(ctx, field)
+			case "verticalVisibility":
+				return ec.fieldContext_Metar_verticalVisibility(ctx, field)
+			case "snowDepth":
+				return ec.fieldContext_Metar_snowDepth(ctx, field)
+			case "seaLevelPressure":
+				return ec.fieldContext_Metar_seaLevelPressure(ctx, field)
+			case "pressureTendency":
+				return ec.fieldContext_Metar_pressureTendency(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Metar", field.Name)
 		},

@@ -1,6 +1,7 @@
 package schema
 
 import (
+	"entgo.io/contrib/entgql"
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/entsql"
 	"entgo.io/ent/schema/edge"
@@ -21,14 +22,14 @@ func (Forecast) Fields() []ent.Field {
 		field.Time("change_time").Optional().Nillable().Comment("The time of the change."),
 		field.Int("change_probability").Optional().Nillable().Comment("The probability of the change."),
 		field.Int("wind_direction").Optional().Nillable().Comment("The wind direction in degrees."),
-		field.Int("wind_speed").Optional().Nillable().Comment("The wind speed in knots."),
-		field.Int("wind_gust").Optional().Nillable().Comment("The wind gust in knots."),
-		field.Int("wind_shear_height").Optional().Nillable().Comment("The height of the wind shear in feet above ground level."),
+		field.Int("wind_speed").Optional().Nillable().Comment("The wind speed in knots.").Annotations(entgql.Skip(entgql.SkipType)),
+		field.Int("wind_gust").Optional().Nillable().Comment("The wind gust in knots.").Annotations(entgql.Skip(entgql.SkipType)),
+		field.Int("wind_shear_height").Optional().Nillable().Comment("The height of the wind shear in feet above ground level.").Annotations(entgql.Skip(entgql.SkipType)),
 		field.Int("wind_shear_direction").Optional().Nillable().Comment("The wind shear direction in degrees."),
-		field.Int("wind_shear_speed").Optional().Nillable().Comment("The wind shear speed in knots."),
-		field.Float("visibility_horizontal").Optional().Nillable().Comment("The visibility in statute miles."),
-		field.Int("visibility_vertical").Optional().Nillable().Comment("The vertical visibility in feet."),
-		field.Float("altimeter").Optional().Nillable().Comment("The altimeter in inches of mercury."),
+		field.Int("wind_shear_speed").Optional().Nillable().Comment("The wind shear speed in knots.").Annotations(entgql.Skip(entgql.SkipType)),
+		field.Float("visibility_horizontal").Optional().Nillable().Comment("The visibility in statute miles.").Annotations(entgql.Skip(entgql.SkipType)),
+		field.Int("visibility_vertical").Optional().Nillable().Comment("The vertical visibility in feet.").Annotations(entgql.Skip(entgql.SkipType)),
+		field.Float("altimeter").Optional().Nillable().Comment("The altimeter in inches of mercury.").Annotations(entgql.Skip(entgql.SkipType)),
 		field.String("weather").Optional().Comment("The weather string."),
 		field.String("not_decoded").Optional().Comment("The not decoded string."),
 	}

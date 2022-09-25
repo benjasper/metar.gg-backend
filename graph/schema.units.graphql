@@ -1,0 +1,114 @@
+enum LengthUnit {
+    KILOMETER
+    METER
+    STATUTE_MILE
+    NAUTICAL_MILE
+    FOOT
+}
+
+enum SmallLengthUnit {
+    INCH
+    CENTIMETER
+}
+
+enum TemperatureUnit {
+    CELSIUS
+    FAHRENHEIT
+}
+
+enum PressureUnit {
+    HECTOPASCAL
+    INCH_OF_MERCURY
+}
+
+enum SpeedUnit {
+    KILOMETER_PER_HOUR
+    KNOT
+}
+
+extend type Metar {
+    """The altimeter in the specified unit."""
+    altimeter(unit: PressureUnit! = HECTOPASCAL): Float! @goField(forceResolver: true)
+
+    """The temperature in the specified unit."""
+    temperature(unit: TemperatureUnit! = CELSIUS): Float! @goField(forceResolver: true)
+
+    """The dew point in the specified unit."""
+    dewpoint(unit: TemperatureUnit! = CELSIUS): Float! @goField(forceResolver: true)
+
+    """The wind speed in the specified unit."""
+    windSpeed(unit: SpeedUnit! = KNOT): Float! @goField(forceResolver: true)
+
+    """Wind gust speed in the specified unit."""
+    windGust(unit: SpeedUnit! = KNOT): Float! @goField(forceResolver: true)
+
+    """The visibility in the specified unit."""
+    visibility(unit: LengthUnit! = KILOMETER): Float! @goField(forceResolver: true)
+
+    """Vertical visibility in the specified unit."""
+    verticalVisibility(unit: LengthUnit! = FOOT): Float @goField(forceResolver: true)
+
+    """Snow depth in the specified unit."""
+    snowDepth(unit: SmallLengthUnit! = CENTIMETER): Float @goField(forceResolver: true)
+
+    """Sea level pressure in the specified unit."""
+    seaLevelPressure(unit: PressureUnit! = HECTOPASCAL): Float @goField(forceResolver: true)
+
+    """Pressure tendency in the specified unit."""
+    pressureTendency(unit: PressureUnit! = HECTOPASCAL): Float @goField(forceResolver: true)
+}
+
+extend type SkyCondition {
+    """The cloud base in the specified unit."""
+    cloudBase(unit: LengthUnit! = FOOT): Float @goField(forceResolver: true)
+}
+
+extend type Forecast {
+    """The altimeter in the specified unit."""
+    altimeter(unit: PressureUnit! = HECTOPASCAL): Float @goField(forceResolver: true)
+
+    """The wind speed in the specified unit."""
+    windSpeed(unit: SpeedUnit! = KNOT): Float @goField(forceResolver: true)
+
+    """Wind gust speed in the specified unit."""
+    windGust(unit: SpeedUnit! = KNOT): Float @goField(forceResolver: true)
+
+    """Visibility horizontal in the specified unit."""
+    visibilityHorizontal(unit: LengthUnit! = FOOT): Float @goField(forceResolver: true)
+
+    """Visibility vertical in the specified unit."""
+    visibilityVertical(unit: LengthUnit! = KILOMETER): Float @goField(forceResolver: true)
+
+    """The height of the wind shear in the specified unit above ground level."""
+    windShearHeight(unit: LengthUnit! = FOOT): Float @goField(forceResolver: true)
+
+    """Wind shear speed in the specified unit."""
+    windShearSpeed(unit: SpeedUnit! = KNOT): Float @goField(forceResolver: true)
+}
+
+extend type TemperatureData {
+    """The temperature in the specified unit."""
+    temperature(unit: TemperatureUnit! = CELSIUS): Float! @goField(forceResolver: true)
+
+    """Min temperature in the specified unit."""
+    minTemperature(unit: TemperatureUnit! = CELSIUS): Float @goField(forceResolver: true)
+
+    """Max temperature in the specified unit."""
+    maxTemperature(unit: TemperatureUnit! = CELSIUS): Float @goField(forceResolver: true)
+}
+
+extend type IcingCondition {
+    """Min altitude in the specified unit."""
+    minAltitude(unit: LengthUnit! = FOOT): Float @goField(forceResolver: true)
+
+    """Max altitude in the specified unit."""
+    maxAltitude(unit: LengthUnit! = FOOT): Float @goField(forceResolver: true)
+}
+
+extend type TurbulenceCondition {
+    """Min altitude in the specified unit."""
+    minAltitude(unit: LengthUnit! = FOOT): Float @goField(forceResolver: true)
+
+    """Max altitude in the specified unit."""
+    maxAltitude(unit: LengthUnit! = FOOT): Float @goField(forceResolver: true)
+}
