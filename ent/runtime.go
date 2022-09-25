@@ -59,6 +59,10 @@ func init() {
 			return nil
 		}
 	}()
+	// airportDescImportance is the schema descriptor for importance field.
+	airportDescImportance := airportFields[4].Descriptor()
+	// airport.DefaultImportance holds the default value on creation for the importance field.
+	airport.DefaultImportance = airportDescImportance.Default.(int)
 	// airportDescID is the schema descriptor for id field.
 	airportDescID := airportMixinFields1[0].Descriptor()
 	// airport.DefaultID holds the default value on creation for the id field.

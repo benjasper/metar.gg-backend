@@ -17,10 +17,11 @@ type Airport struct {
 // Fields of the Airport.
 func (Airport) Fields() []ent.Field {
 	return []ent.Field{
-		field.String("icao_code").Optional().MaxLen(4).NotEmpty().Comment("The four-letter ICAO code of the airport."),
+		field.String("icao_code").Optional().MaxLen(4).NotEmpty().Annotations(entgql.OrderField("ICAO_CODE")).Comment("The four-letter ICAO code of the airport."),
 		field.String("iata_code").Optional().Nillable().Comment("The three-letter IATA code for the airport."),
 		field.String("identifier").Unique().Comment("This will be the ICAO code if available. Otherwise, it will be a local airport code (if no conflict), or if nothing else is available, an internally-generated code starting with the ISO2 country code, followed by a dash and a four-digit number."),
 		field.Enum("type").Values("large_airport", "medium_airport", "small_airport", "closed_airport", "heliport", "seaplane_base").Comment("Type of airport."),
+		field.Int("importance").Default(0).Comment("Importance of the airport.").Annotations(entgql.OrderField("IMPORTANCE")),
 		field.String("name").Comment("The official airport name, including \"Airport\", \"Airstrip\", etc."),
 		field.Float("latitude").Comment("Latitude of the airport in decimal degrees (positive is north)."),
 		field.Float("longitude").Comment("Longitude of the airport in decimal degrees (positive is east)."),

@@ -32,6 +32,8 @@ const (
 	FieldIdentifier = "identifier"
 	// FieldType holds the string denoting the type field in the database.
 	FieldType = "type"
+	// FieldImportance holds the string denoting the importance field in the database.
+	FieldImportance = "importance"
 	// FieldName holds the string denoting the name field in the database.
 	FieldName = "name"
 	// FieldLatitude holds the string denoting the latitude field in the database.
@@ -114,6 +116,7 @@ var Columns = []string{
 	FieldIataCode,
 	FieldIdentifier,
 	FieldType,
+	FieldImportance,
 	FieldName,
 	FieldLatitude,
 	FieldLongitude,
@@ -156,6 +159,8 @@ var (
 	DefaultLastUpdated func() time.Time
 	// IcaoCodeValidator is a validator for the "icao_code" field. It is called by the builders before save.
 	IcaoCodeValidator func(string) error
+	// DefaultImportance holds the default value on creation for the "importance" field.
+	DefaultImportance int
 	// DefaultID holds the default value on creation for the "id" field.
 	DefaultID func() uuid.UUID
 )

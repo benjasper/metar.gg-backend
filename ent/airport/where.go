@@ -131,6 +131,13 @@ func Identifier(v string) predicate.Airport {
 	})
 }
 
+// Importance applies equality check predicate on the "importance" field. It's identical to ImportanceEQ.
+func Importance(v int) predicate.Airport {
+	return predicate.Airport(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldImportance), v))
+	})
+}
+
 // Name applies equality check predicate on the "name" field. It's identical to NameEQ.
 func Name(v string) predicate.Airport {
 	return predicate.Airport(func(s *sql.Selector) {
@@ -800,6 +807,70 @@ func TypeNotIn(vs ...Type) predicate.Airport {
 	}
 	return predicate.Airport(func(s *sql.Selector) {
 		s.Where(sql.NotIn(s.C(FieldType), v...))
+	})
+}
+
+// ImportanceEQ applies the EQ predicate on the "importance" field.
+func ImportanceEQ(v int) predicate.Airport {
+	return predicate.Airport(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldImportance), v))
+	})
+}
+
+// ImportanceNEQ applies the NEQ predicate on the "importance" field.
+func ImportanceNEQ(v int) predicate.Airport {
+	return predicate.Airport(func(s *sql.Selector) {
+		s.Where(sql.NEQ(s.C(FieldImportance), v))
+	})
+}
+
+// ImportanceIn applies the In predicate on the "importance" field.
+func ImportanceIn(vs ...int) predicate.Airport {
+	v := make([]any, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.Airport(func(s *sql.Selector) {
+		s.Where(sql.In(s.C(FieldImportance), v...))
+	})
+}
+
+// ImportanceNotIn applies the NotIn predicate on the "importance" field.
+func ImportanceNotIn(vs ...int) predicate.Airport {
+	v := make([]any, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.Airport(func(s *sql.Selector) {
+		s.Where(sql.NotIn(s.C(FieldImportance), v...))
+	})
+}
+
+// ImportanceGT applies the GT predicate on the "importance" field.
+func ImportanceGT(v int) predicate.Airport {
+	return predicate.Airport(func(s *sql.Selector) {
+		s.Where(sql.GT(s.C(FieldImportance), v))
+	})
+}
+
+// ImportanceGTE applies the GTE predicate on the "importance" field.
+func ImportanceGTE(v int) predicate.Airport {
+	return predicate.Airport(func(s *sql.Selector) {
+		s.Where(sql.GTE(s.C(FieldImportance), v))
+	})
+}
+
+// ImportanceLT applies the LT predicate on the "importance" field.
+func ImportanceLT(v int) predicate.Airport {
+	return predicate.Airport(func(s *sql.Selector) {
+		s.Where(sql.LT(s.C(FieldImportance), v))
+	})
+}
+
+// ImportanceLTE applies the LTE predicate on the "importance" field.
+func ImportanceLTE(v int) predicate.Airport {
+	return predicate.Airport(func(s *sql.Selector) {
+		s.Where(sql.LTE(s.C(FieldImportance), v))
 	})
 }
 

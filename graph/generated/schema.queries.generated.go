@@ -21,7 +21,7 @@ import (
 // region    ************************** generated!.gotpl **************************
 
 type QueryResolver interface {
-	GetAirports(ctx context.Context, first *int, after *ent.Cursor, before *ent.Cursor, last *int, identifier *string, icao *string, iata *string, typeArg *airport.Type, search *string, hasWeather *bool) (*ent.AirportConnection, error)
+	GetAirports(ctx context.Context, first *int, after *ent.Cursor, before *ent.Cursor, last *int, identifier *string, icao *string, iata *string, typeArg *airport.Type, search *string, hasWeather *bool, order []*ent.AirportOrder) (*ent.AirportConnection, error)
 	GetAirport(ctx context.Context, id *string, identifier *string, icao *string, iata *string) (*ent.Airport, error)
 	GetStations(ctx context.Context, first *int, after *ent.Cursor, before *ent.Cursor, last *int, identifier *string) (*ent.WeatherStationConnection, error)
 	GetStation(ctx context.Context, id *string, identifier *string) (*ent.WeatherStation, error)
@@ -181,6 +181,15 @@ func (ec *executionContext) field_Query_getAirports_args(ctx context.Context, ra
 		}
 	}
 	args["hasWeather"] = arg9
+	var arg10 []*ent.AirportOrder
+	if tmp, ok := rawArgs["order"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("order"))
+		arg10, err = ec.unmarshalOAirportOrder2ᚕᚖmetarᚗggᚋentᚐAirportOrderᚄ(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["order"] = arg10
 	return args, nil
 }
 
@@ -468,6 +477,8 @@ func (ec *executionContext) fieldContext_AirportEdge_node(ctx context.Context, f
 				return ec.fieldContext_Airport_identifier(ctx, field)
 			case "type":
 				return ec.fieldContext_Airport_type(ctx, field)
+			case "importance":
+				return ec.fieldContext_Airport_importance(ctx, field)
 			case "name":
 				return ec.fieldContext_Airport_name(ctx, field)
 			case "latitude":
@@ -1043,7 +1054,7 @@ func (ec *executionContext) _Query_getAirports(ctx context.Context, field graphq
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().GetAirports(rctx, fc.Args["first"].(*int), fc.Args["after"].(*ent.Cursor), fc.Args["before"].(*ent.Cursor), fc.Args["last"].(*int), fc.Args["identifier"].(*string), fc.Args["icao"].(*string), fc.Args["iata"].(*string), fc.Args["type"].(*airport.Type), fc.Args["search"].(*string), fc.Args["hasWeather"].(*bool))
+		return ec.resolvers.Query().GetAirports(rctx, fc.Args["first"].(*int), fc.Args["after"].(*ent.Cursor), fc.Args["before"].(*ent.Cursor), fc.Args["last"].(*int), fc.Args["identifier"].(*string), fc.Args["icao"].(*string), fc.Args["iata"].(*string), fc.Args["type"].(*airport.Type), fc.Args["search"].(*string), fc.Args["hasWeather"].(*bool), fc.Args["order"].([]*ent.AirportOrder))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -1142,6 +1153,8 @@ func (ec *executionContext) fieldContext_Query_getAirport(ctx context.Context, f
 				return ec.fieldContext_Airport_identifier(ctx, field)
 			case "type":
 				return ec.fieldContext_Airport_type(ctx, field)
+			case "importance":
+				return ec.fieldContext_Airport_importance(ctx, field)
 			case "name":
 				return ec.fieldContext_Airport_name(ctx, field)
 			case "latitude":

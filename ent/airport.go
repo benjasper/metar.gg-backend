@@ -38,6 +38,8 @@ type Airport struct {
 	Identifier string `json:"identifier,omitempty"`
 	// Type of airport.
 	Type airport.Type `json:"type,omitempty"`
+	// Importance of the airport.
+	Importance int `json:"importance,omitempty"`
 	// The official airport name, including "Airport", "Airstrip", etc.
 	Name string `json:"name,omitempty"`
 	// Latitude of the airport in decimal degrees (positive is north).
@@ -157,7 +159,7 @@ func (*Airport) scanValues(columns []string) ([]any, error) {
 			values[i] = new(sql.NullBool)
 		case airport.FieldLatitude, airport.FieldLongitude:
 			values[i] = new(sql.NullFloat64)
-		case airport.FieldImportID, airport.FieldElevation:
+		case airport.FieldImportID, airport.FieldImportance, airport.FieldElevation:
 			values[i] = new(sql.NullInt64)
 		case airport.FieldHash, airport.FieldIcaoCode, airport.FieldIataCode, airport.FieldIdentifier, airport.FieldType, airport.FieldName, airport.FieldMunicipality, airport.FieldGpsCode, airport.FieldLocalCode, airport.FieldWebsite, airport.FieldWikipedia:
 			values[i] = new(sql.NullString)
@@ -238,6 +240,12 @@ func (a *Airport) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field type", values[i])
 			} else if value.Valid {
 				a.Type = airport.Type(value.String)
+			}
+		case airport.FieldImportance:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field importance", values[i])
+			} else if value.Valid {
+				a.Importance = int(value.Int64)
 			}
 		case airport.FieldName:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -405,6 +413,9 @@ func (a *Airport) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("type=")
 	builder.WriteString(fmt.Sprintf("%v", a.Type))
+	builder.WriteString(", ")
+	builder.WriteString("importance=")
+	builder.WriteString(fmt.Sprintf("%v", a.Importance))
 	builder.WriteString(", ")
 	builder.WriteString("name=")
 	builder.WriteString(a.Name)

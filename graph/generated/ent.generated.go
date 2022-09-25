@@ -471,6 +471,50 @@ func (ec *executionContext) fieldContext_Airport_type(ctx context.Context, field
 	return fc, nil
 }
 
+func (ec *executionContext) _Airport_importance(ctx context.Context, field graphql.CollectedField, obj *ent.Airport) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Airport_importance(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Importance, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int)
+	fc.Result = res
+	return ec.marshalNInt2int(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Airport_importance(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Airport",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Int does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _Airport_name(ctx context.Context, field graphql.CollectedField, obj *ent.Airport) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_Airport_name(ctx, field)
 	if err != nil {
@@ -2909,6 +2953,8 @@ func (ec *executionContext) fieldContext_Frequency_airport(ctx context.Context, 
 				return ec.fieldContext_Airport_identifier(ctx, field)
 			case "type":
 				return ec.fieldContext_Airport_type(ctx, field)
+			case "importance":
+				return ec.fieldContext_Airport_importance(ctx, field)
 			case "name":
 				return ec.fieldContext_Airport_name(ctx, field)
 			case "latitude":
@@ -5845,6 +5891,8 @@ func (ec *executionContext) fieldContext_Runway_airport(ctx context.Context, fie
 				return ec.fieldContext_Airport_identifier(ctx, field)
 			case "type":
 				return ec.fieldContext_Airport_type(ctx, field)
+			case "importance":
+				return ec.fieldContext_Airport_importance(ctx, field)
 			case "name":
 				return ec.fieldContext_Airport_name(ctx, field)
 			case "latitude":
@@ -7213,6 +7261,8 @@ func (ec *executionContext) fieldContext_WeatherStation_airport(ctx context.Cont
 				return ec.fieldContext_Airport_identifier(ctx, field)
 			case "type":
 				return ec.fieldContext_Airport_type(ctx, field)
+			case "importance":
+				return ec.fieldContext_Airport_importance(ctx, field)
 			case "name":
 				return ec.fieldContext_Airport_name(ctx, field)
 			case "latitude":
@@ -7384,6 +7434,46 @@ func (ec *executionContext) fieldContext_WeatherStation_tafs(ctx context.Context
 
 // region    **************************** input.gotpl *****************************
 
+func (ec *executionContext) unmarshalInputAirportOrder(ctx context.Context, obj interface{}) (ent.AirportOrder, error) {
+	var it ent.AirportOrder
+	asMap := map[string]interface{}{}
+	for k, v := range obj.(map[string]interface{}) {
+		asMap[k] = v
+	}
+
+	if _, present := asMap["direction"]; !present {
+		asMap["direction"] = "ASC"
+	}
+
+	fieldsInOrder := [...]string{"direction", "field"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "direction":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("direction"))
+			it.Direction, err = ec.unmarshalNOrderDirection2metarᚗggᚋentᚐOrderDirection(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "field":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("field"))
+			it.Field, err = ec.unmarshalNAirportOrderField2ᚖmetarᚗggᚋentᚐAirportOrderField(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
 func (ec *executionContext) unmarshalInputTafOrder(ctx context.Context, obj interface{}) (ent.TafOrder, error) {
 	var it ent.TafOrder
 	asMap := map[string]interface{}{}
@@ -7481,6 +7571,13 @@ func (ec *executionContext) _Airport(ctx context.Context, sel ast.SelectionSet, 
 		case "type":
 
 			out.Values[i] = ec._Airport_type(ctx, field, obj)
+
+			if out.Values[i] == graphql.Null {
+				atomic.AddUint32(&invalids, 1)
+			}
+		case "importance":
+
+			out.Values[i] = ec._Airport_importance(ctx, field, obj)
 
 			if out.Values[i] == graphql.Null {
 				atomic.AddUint32(&invalids, 1)
@@ -8872,6 +8969,27 @@ func (ec *executionContext) marshalNAirport2ᚖmetarᚗggᚋentᚐAirport(ctx co
 	return ec._Airport(ctx, sel, v)
 }
 
+func (ec *executionContext) unmarshalNAirportOrder2ᚖmetarᚗggᚋentᚐAirportOrder(ctx context.Context, v interface{}) (*ent.AirportOrder, error) {
+	res, err := ec.unmarshalInputAirportOrder(ctx, v)
+	return &res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) unmarshalNAirportOrderField2ᚖmetarᚗggᚋentᚐAirportOrderField(ctx context.Context, v interface{}) (*ent.AirportOrderField, error) {
+	var res = new(ent.AirportOrderField)
+	err := res.UnmarshalGQL(v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalNAirportOrderField2ᚖmetarᚗggᚋentᚐAirportOrderField(ctx context.Context, sel ast.SelectionSet, v *ent.AirportOrderField) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+		}
+		return graphql.Null
+	}
+	return v
+}
+
 func (ec *executionContext) unmarshalNAirportType2metarᚗggᚋentᚋairportᚐType(ctx context.Context, v interface{}) (airport.Type, error) {
 	var res airport.Type
 	err := res.UnmarshalGQL(v)
@@ -9087,6 +9205,26 @@ func (ec *executionContext) marshalOAirport2ᚖmetarᚗggᚋentᚐAirport(ctx co
 		return graphql.Null
 	}
 	return ec._Airport(ctx, sel, v)
+}
+
+func (ec *executionContext) unmarshalOAirportOrder2ᚕᚖmetarᚗggᚋentᚐAirportOrderᚄ(ctx context.Context, v interface{}) ([]*ent.AirportOrder, error) {
+	if v == nil {
+		return nil, nil
+	}
+	var vSlice []interface{}
+	if v != nil {
+		vSlice = graphql.CoerceList(v)
+	}
+	var err error
+	res := make([]*ent.AirportOrder, len(vSlice))
+	for i := range vSlice {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithIndex(i))
+		res[i], err = ec.unmarshalNAirportOrder2ᚖmetarᚗggᚋentᚐAirportOrder(ctx, vSlice[i])
+		if err != nil {
+			return nil, err
+		}
+	}
+	return res, nil
 }
 
 func (ec *executionContext) unmarshalOAirportType2ᚖmetarᚗggᚋentᚋairportᚐType(ctx context.Context, v interface{}) (*airport.Type, error) {

@@ -19,6 +19,7 @@ var (
 		{Name: "iata_code", Type: field.TypeString, Nullable: true},
 		{Name: "identifier", Type: field.TypeString, Unique: true},
 		{Name: "type", Type: field.TypeEnum, Enums: []string{"large_airport", "medium_airport", "small_airport", "closed_airport", "heliport", "seaplane_base"}},
+		{Name: "importance", Type: field.TypeInt, Default: 0},
 		{Name: "name", Type: field.TypeString},
 		{Name: "latitude", Type: field.TypeFloat64},
 		{Name: "longitude", Type: field.TypeFloat64},
@@ -41,13 +42,13 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "airports_countries_airports",
-				Columns:    []*schema.Column{AirportsColumns[20]},
+				Columns:    []*schema.Column{AirportsColumns[21]},
 				RefColumns: []*schema.Column{CountriesColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
 			{
 				Symbol:     "airports_regions_airports",
-				Columns:    []*schema.Column{AirportsColumns[21]},
+				Columns:    []*schema.Column{AirportsColumns[22]},
 				RefColumns: []*schema.Column{RegionsColumns[0]},
 				OnDelete:   schema.SetNull,
 			},

@@ -451,6 +451,63 @@ func (a *AirportQuery) Paginate(
 	return conn, nil
 }
 
+var (
+	// AirportOrderFieldIcaoCode orders Airport by icao_code.
+	AirportOrderFieldIcaoCode = &AirportOrderField{
+		field: airport.FieldIcaoCode,
+		toCursor: func(a *Airport) Cursor {
+			return Cursor{
+				ID:    a.ID,
+				Value: a.IcaoCode,
+			}
+		},
+	}
+	// AirportOrderFieldImportance orders Airport by importance.
+	AirportOrderFieldImportance = &AirportOrderField{
+		field: airport.FieldImportance,
+		toCursor: func(a *Airport) Cursor {
+			return Cursor{
+				ID:    a.ID,
+				Value: a.Importance,
+			}
+		},
+	}
+)
+
+// String implement fmt.Stringer interface.
+func (f AirportOrderField) String() string {
+	var str string
+	switch f.field {
+	case airport.FieldIcaoCode:
+		str = "ICAO_CODE"
+	case airport.FieldImportance:
+		str = "IMPORTANCE"
+	}
+	return str
+}
+
+// MarshalGQL implements graphql.Marshaler interface.
+func (f AirportOrderField) MarshalGQL(w io.Writer) {
+	io.WriteString(w, strconv.Quote(f.String()))
+}
+
+// UnmarshalGQL implements graphql.Unmarshaler interface.
+func (f *AirportOrderField) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("AirportOrderField %T must be a string", v)
+	}
+	switch str {
+	case "ICAO_CODE":
+		*f = *AirportOrderFieldIcaoCode
+	case "IMPORTANCE":
+		*f = *AirportOrderFieldImportance
+	default:
+		return fmt.Errorf("%s is not a valid AirportOrderField", str)
+	}
+	return nil
+}
+
 // AirportOrderField defines the ordering field of Airport.
 type AirportOrderField struct {
 	field    string

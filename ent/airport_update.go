@@ -134,6 +134,27 @@ func (au *AirportUpdate) SetType(a airport.Type) *AirportUpdate {
 	return au
 }
 
+// SetImportance sets the "importance" field.
+func (au *AirportUpdate) SetImportance(i int) *AirportUpdate {
+	au.mutation.ResetImportance()
+	au.mutation.SetImportance(i)
+	return au
+}
+
+// SetNillableImportance sets the "importance" field if the given value is not nil.
+func (au *AirportUpdate) SetNillableImportance(i *int) *AirportUpdate {
+	if i != nil {
+		au.SetImportance(*i)
+	}
+	return au
+}
+
+// AddImportance adds i to the "importance" field.
+func (au *AirportUpdate) AddImportance(i int) *AirportUpdate {
+	au.mutation.AddImportance(i)
+	return au
+}
+
 // SetName sets the "name" field.
 func (au *AirportUpdate) SetName(s string) *AirportUpdate {
 	au.mutation.SetName(s)
@@ -631,6 +652,20 @@ func (au *AirportUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Column: airport.FieldType,
 		})
 	}
+	if value, ok := au.mutation.Importance(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt,
+			Value:  value,
+			Column: airport.FieldImportance,
+		})
+	}
+	if value, ok := au.mutation.AddedImportance(); ok {
+		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt,
+			Value:  value,
+			Column: airport.FieldImportance,
+		})
+	}
 	if value, ok := au.mutation.Name(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
@@ -1095,6 +1130,27 @@ func (auo *AirportUpdateOne) SetIdentifier(s string) *AirportUpdateOne {
 // SetType sets the "type" field.
 func (auo *AirportUpdateOne) SetType(a airport.Type) *AirportUpdateOne {
 	auo.mutation.SetType(a)
+	return auo
+}
+
+// SetImportance sets the "importance" field.
+func (auo *AirportUpdateOne) SetImportance(i int) *AirportUpdateOne {
+	auo.mutation.ResetImportance()
+	auo.mutation.SetImportance(i)
+	return auo
+}
+
+// SetNillableImportance sets the "importance" field if the given value is not nil.
+func (auo *AirportUpdateOne) SetNillableImportance(i *int) *AirportUpdateOne {
+	if i != nil {
+		auo.SetImportance(*i)
+	}
+	return auo
+}
+
+// AddImportance adds i to the "importance" field.
+func (auo *AirportUpdateOne) AddImportance(i int) *AirportUpdateOne {
+	auo.mutation.AddImportance(i)
 	return auo
 }
 
@@ -1623,6 +1679,20 @@ func (auo *AirportUpdateOne) sqlSave(ctx context.Context) (_node *Airport, err e
 			Type:   field.TypeEnum,
 			Value:  value,
 			Column: airport.FieldType,
+		})
+	}
+	if value, ok := auo.mutation.Importance(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt,
+			Value:  value,
+			Column: airport.FieldImportance,
+		})
+	}
+	if value, ok := auo.mutation.AddedImportance(); ok {
+		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt,
+			Value:  value,
+			Column: airport.FieldImportance,
 		})
 	}
 	if value, ok := auo.mutation.Name(); ok {

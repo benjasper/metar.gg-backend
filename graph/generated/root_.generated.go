@@ -50,6 +50,7 @@ type ComplexityRoot struct {
 		IcaoCode         func(childComplexity int) int
 		Identifier       func(childComplexity int) int
 		ImportID         func(childComplexity int) int
+		Importance       func(childComplexity int) int
 		Keywords         func(childComplexity int) int
 		LastUpdated      func(childComplexity int) int
 		Latitude         func(childComplexity int) int
@@ -187,7 +188,7 @@ type ComplexityRoot struct {
 
 	Query struct {
 		GetAirport  func(childComplexity int, id *string, identifier *string, icao *string, iata *string) int
-		GetAirports func(childComplexity int, first *int, after *ent.Cursor, before *ent.Cursor, last *int, identifier *string, icao *string, iata *string, typeArg *airport.Type, search *string, hasWeather *bool) int
+		GetAirports func(childComplexity int, first *int, after *ent.Cursor, before *ent.Cursor, last *int, identifier *string, icao *string, iata *string, typeArg *airport.Type, search *string, hasWeather *bool, order []*ent.AirportOrder) int
 		GetStation  func(childComplexity int, id *string, identifier *string) int
 		GetStations func(childComplexity int, first *int, after *ent.Cursor, before *ent.Cursor, last *int, identifier *string) int
 	}
@@ -378,6 +379,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Airport.ImportID(childComplexity), true
+
+	case "Airport.importance":
+		if e.complexity.Airport.Importance == nil {
+			break
+		}
+
+		return e.complexity.Airport.Importance(childComplexity), true
 
 	case "Airport.keywords":
 		if e.complexity.Airport.Keywords == nil {
@@ -1132,7 +1140,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Query.GetAirports(childComplexity, args["first"].(*int), args["after"].(*ent.Cursor), args["before"].(*ent.Cursor), args["last"].(*int), args["identifier"].(*string), args["icao"].(*string), args["iata"].(*string), args["type"].(*airport.Type), args["search"].(*string), args["hasWeather"].(*bool)), true
+		return e.complexity.Query.GetAirports(childComplexity, args["first"].(*int), args["after"].(*ent.Cursor), args["before"].(*ent.Cursor), args["last"].(*int), args["identifier"].(*string), args["icao"].(*string), args["iata"].(*string), args["type"].(*airport.Type), args["search"].(*string), args["hasWeather"].(*bool), args["order"].([]*ent.AirportOrder)), true
 
 	case "Query.getStation":
 		if e.complexity.Query.GetStation == nil {
@@ -1680,6 +1688,7 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 	rc := graphql.GetOperationContext(ctx)
 	ec := executionContext{rc, e}
 	inputUnmarshalMap := graphql.BuildUnmarshalerMap(
+		ec.unmarshalInputAirportOrder,
 		ec.unmarshalInputTafOrder,
 	)
 	first := true
@@ -1743,6 +1752,8 @@ type Airport {
   identifier: String!
   """Type of airport."""
   type: AirportType!
+  """Importance of the airport."""
+  importance: Int!
   """The official airport name, including "Airport", "Airstrip", etc."""
   name: String!
   """Latitude of the airport in decimal degrees (positive is north)."""
@@ -1769,6 +1780,18 @@ type Airport {
   country: Country
   frequencies: [Frequency!]
   station: WeatherStation
+}
+"""Ordering options for Airport connections"""
+input AirportOrder {
+  """The ordering direction."""
+  direction: OrderDirection! = ASC
+  """The field by which to order Airports."""
+  field: AirportOrderField!
+}
+"""Properties by which Airport connections can be ordered."""
+enum AirportOrderField {
+  ICAO_CODE
+  IMPORTANCE
 }
 """AirportType is enum for the field type"""
 enum AirportType @goModel(model: "metar.gg/ent/airport.Type") {
@@ -2240,6 +2263,8 @@ type Query {
 
         """Filter whether the airport provides METARs."""
         hasWeather: Boolean
+
+        order: [AirportOrder!]
     ): AirportConnection!
 
     """Get a single airport by it's id, identifier, icao code or iata code."""

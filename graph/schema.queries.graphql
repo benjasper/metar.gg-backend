@@ -119,6 +119,8 @@ type Query {
 
         """Filter whether the airport provides METARs."""
         hasWeather: Boolean
+
+        order: [AirportOrder!]
     ): AirportConnection!
 
     """Get a single airport by it's id, identifier, icao code or iata code."""

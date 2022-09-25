@@ -15,6 +15,8 @@ type Airport {
   identifier: String!
   """Type of airport."""
   type: AirportType!
+  """Importance of the airport."""
+  importance: Int!
   """The official airport name, including "Airport", "Airstrip", etc."""
   name: String!
   """Latitude of the airport in decimal degrees (positive is north)."""
@@ -41,6 +43,18 @@ type Airport {
   country: Country
   frequencies: [Frequency!]
   station: WeatherStation
+}
+"""Ordering options for Airport connections"""
+input AirportOrder {
+  """The ordering direction."""
+  direction: OrderDirection! = ASC
+  """The field by which to order Airports."""
+  field: AirportOrderField!
+}
+"""Properties by which Airport connections can be ordered."""
+enum AirportOrderField {
+  ICAO_CODE
+  IMPORTANCE
 }
 """AirportType is enum for the field type"""
 enum AirportType @goModel(model: "metar.gg/ent/airport.Type") {

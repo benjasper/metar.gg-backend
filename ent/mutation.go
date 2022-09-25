@@ -67,6 +67,8 @@ type AirportMutation struct {
 	iata_code          *string
 	identifier         *string
 	_type              *airport.Type
+	importance         *int
+	addimportance      *int
 	name               *string
 	latitude           *float64
 	addlatitude        *float64
@@ -535,6 +537,62 @@ func (m *AirportMutation) OldType(ctx context.Context) (v airport.Type, err erro
 // ResetType resets all changes to the "type" field.
 func (m *AirportMutation) ResetType() {
 	m._type = nil
+}
+
+// SetImportance sets the "importance" field.
+func (m *AirportMutation) SetImportance(i int) {
+	m.importance = &i
+	m.addimportance = nil
+}
+
+// Importance returns the value of the "importance" field in the mutation.
+func (m *AirportMutation) Importance() (r int, exists bool) {
+	v := m.importance
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldImportance returns the old "importance" field's value of the Airport entity.
+// If the Airport object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *AirportMutation) OldImportance(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldImportance is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldImportance requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldImportance: %w", err)
+	}
+	return oldValue.Importance, nil
+}
+
+// AddImportance adds i to the "importance" field.
+func (m *AirportMutation) AddImportance(i int) {
+	if m.addimportance != nil {
+		*m.addimportance += i
+	} else {
+		m.addimportance = &i
+	}
+}
+
+// AddedImportance returns the value that was added to the "importance" field in this mutation.
+func (m *AirportMutation) AddedImportance() (r int, exists bool) {
+	v := m.addimportance
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetImportance resets all changes to the "importance" field.
+func (m *AirportMutation) ResetImportance() {
+	m.importance = nil
+	m.addimportance = nil
 }
 
 // SetName sets the "name" field.
@@ -1316,7 +1374,7 @@ func (m *AirportMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *AirportMutation) Fields() []string {
-	fields := make([]string, 0, 19)
+	fields := make([]string, 0, 20)
 	if m.import_id != nil {
 		fields = append(fields, airport.FieldImportID)
 	}
@@ -1340,6 +1398,9 @@ func (m *AirportMutation) Fields() []string {
 	}
 	if m._type != nil {
 		fields = append(fields, airport.FieldType)
+	}
+	if m.importance != nil {
+		fields = append(fields, airport.FieldImportance)
 	}
 	if m.name != nil {
 		fields = append(fields, airport.FieldName)
@@ -1398,6 +1459,8 @@ func (m *AirportMutation) Field(name string) (ent.Value, bool) {
 		return m.Identifier()
 	case airport.FieldType:
 		return m.GetType()
+	case airport.FieldImportance:
+		return m.Importance()
 	case airport.FieldName:
 		return m.Name()
 	case airport.FieldLatitude:
@@ -1445,6 +1508,8 @@ func (m *AirportMutation) OldField(ctx context.Context, name string) (ent.Value,
 		return m.OldIdentifier(ctx)
 	case airport.FieldType:
 		return m.OldType(ctx)
+	case airport.FieldImportance:
+		return m.OldImportance(ctx)
 	case airport.FieldName:
 		return m.OldName(ctx)
 	case airport.FieldLatitude:
@@ -1531,6 +1596,13 @@ func (m *AirportMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetType(v)
+		return nil
+	case airport.FieldImportance:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetImportance(v)
 		return nil
 	case airport.FieldName:
 		v, ok := value.(string)
@@ -1620,6 +1692,9 @@ func (m *AirportMutation) AddedFields() []string {
 	if m.addimport_id != nil {
 		fields = append(fields, airport.FieldImportID)
 	}
+	if m.addimportance != nil {
+		fields = append(fields, airport.FieldImportance)
+	}
 	if m.addlatitude != nil {
 		fields = append(fields, airport.FieldLatitude)
 	}
@@ -1639,6 +1714,8 @@ func (m *AirportMutation) AddedField(name string) (ent.Value, bool) {
 	switch name {
 	case airport.FieldImportID:
 		return m.AddedImportID()
+	case airport.FieldImportance:
+		return m.AddedImportance()
 	case airport.FieldLatitude:
 		return m.AddedLatitude()
 	case airport.FieldLongitude:
@@ -1660,6 +1737,13 @@ func (m *AirportMutation) AddField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.AddImportID(v)
+		return nil
+	case airport.FieldImportance:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddImportance(v)
 		return nil
 	case airport.FieldLatitude:
 		v, ok := value.(float64)
@@ -1783,6 +1867,9 @@ func (m *AirportMutation) ResetField(name string) error {
 		return nil
 	case airport.FieldType:
 		m.ResetType()
+		return nil
+	case airport.FieldImportance:
+		m.ResetImportance()
 		return nil
 	case airport.FieldName:
 		m.ResetName()

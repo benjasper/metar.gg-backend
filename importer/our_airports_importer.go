@@ -224,25 +224,33 @@ func (i *Importer) importAirportLine(ctx context.Context, data []string) error {
 		keywords = strings.Split(data[17], ", ")
 	}
 
+	importance := 0
+
 	airportType := airport.TypeSmallAirport
 	switch data[2] {
-	case airport.TypeSmallAirport.String():
-		airportType = airport.TypeSmallAirport
+	case airport.TypeLargeAirport.String():
+		airportType = airport.TypeLargeAirport
+		importance = 5
 		break
 	case airport.TypeMediumAirport.String():
 		airportType = airport.TypeMediumAirport
+		importance = 4
 		break
-	case airport.TypeLargeAirport.String():
-		airportType = airport.TypeLargeAirport
-		break
-	case airport.TypeSeaplaneBase.String():
-		airportType = airport.TypeSeaplaneBase
+	case airport.TypeSmallAirport.String():
+		airportType = airport.TypeSmallAirport
+		importance = 3
 		break
 	case airport.TypeHeliport.String():
 		airportType = airport.TypeHeliport
+		importance = 2
+		break
+	case airport.TypeSeaplaneBase.String():
+		airportType = airport.TypeSeaplaneBase
+		importance = 1
 		break
 	case airport.TypeClosedAirport.String():
 		airportType = airport.TypeClosedAirport
+		importance = 0
 		break
 	}
 
@@ -290,7 +298,16 @@ func (i *Importer) importAirportLine(ctx context.Context, data []string) error {
 	potentialIcao := strings.Trim(data[1], " ")
 	if len(potentialIcao) == 4 && regexp.MustCompile(`^[a-zA-Z]+$`).MatchString(potentialIcao) {
 		createAirport.SetIcaoCode(strings.ToUpper(potentialIcao))
+
+		importance += 1
 	}
+
+	// If we have an IATA code, increase importance by 1.
+	if data[13] != "" {
+		importance += 1
+	}
+
+	createAirport.SetImportance(importance)
 
 	err = createAirport.OnConflict().
 		UpdateNewValues().Exec(ctx)

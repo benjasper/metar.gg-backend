@@ -109,6 +109,20 @@ func (ac *AirportCreate) SetType(a airport.Type) *AirportCreate {
 	return ac
 }
 
+// SetImportance sets the "importance" field.
+func (ac *AirportCreate) SetImportance(i int) *AirportCreate {
+	ac.mutation.SetImportance(i)
+	return ac
+}
+
+// SetNillableImportance sets the "importance" field if the given value is not nil.
+func (ac *AirportCreate) SetNillableImportance(i *int) *AirportCreate {
+	if i != nil {
+		ac.SetImportance(*i)
+	}
+	return ac
+}
+
 // SetName sets the "name" field.
 func (ac *AirportCreate) SetName(s string) *AirportCreate {
 	ac.mutation.SetName(s)
@@ -409,6 +423,10 @@ func (ac *AirportCreate) defaults() {
 		v := airport.DefaultLastUpdated()
 		ac.mutation.SetLastUpdated(v)
 	}
+	if _, ok := ac.mutation.Importance(); !ok {
+		v := airport.DefaultImportance
+		ac.mutation.SetImportance(v)
+	}
 	if _, ok := ac.mutation.ID(); !ok {
 		v := airport.DefaultID()
 		ac.mutation.SetID(v)
@@ -444,6 +462,9 @@ func (ac *AirportCreate) check() error {
 		if err := airport.TypeValidator(v); err != nil {
 			return &ValidationError{Name: "type", err: fmt.Errorf(`ent: validator failed for field "Airport.type": %w`, err)}
 		}
+	}
+	if _, ok := ac.mutation.Importance(); !ok {
+		return &ValidationError{Name: "importance", err: errors.New(`ent: missing required field "Airport.importance"`)}
 	}
 	if _, ok := ac.mutation.Name(); !ok {
 		return &ValidationError{Name: "name", err: errors.New(`ent: missing required field "Airport.name"`)}
@@ -560,6 +581,14 @@ func (ac *AirportCreate) createSpec() (*Airport, *sqlgraph.CreateSpec) {
 			Column: airport.FieldType,
 		})
 		_node.Type = value
+	}
+	if value, ok := ac.mutation.Importance(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt,
+			Value:  value,
+			Column: airport.FieldImportance,
+		})
+		_node.Importance = value
 	}
 	if value, ok := ac.mutation.Name(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
@@ -909,6 +938,24 @@ func (u *AirportUpsert) SetType(v airport.Type) *AirportUpsert {
 // UpdateType sets the "type" field to the value that was provided on create.
 func (u *AirportUpsert) UpdateType() *AirportUpsert {
 	u.SetExcluded(airport.FieldType)
+	return u
+}
+
+// SetImportance sets the "importance" field.
+func (u *AirportUpsert) SetImportance(v int) *AirportUpsert {
+	u.Set(airport.FieldImportance, v)
+	return u
+}
+
+// UpdateImportance sets the "importance" field to the value that was provided on create.
+func (u *AirportUpsert) UpdateImportance() *AirportUpsert {
+	u.SetExcluded(airport.FieldImportance)
+	return u
+}
+
+// AddImportance adds v to the "importance" field.
+func (u *AirportUpsert) AddImportance(v int) *AirportUpsert {
+	u.Add(airport.FieldImportance, v)
 	return u
 }
 
@@ -1276,6 +1323,27 @@ func (u *AirportUpsertOne) SetType(v airport.Type) *AirportUpsertOne {
 func (u *AirportUpsertOne) UpdateType() *AirportUpsertOne {
 	return u.Update(func(s *AirportUpsert) {
 		s.UpdateType()
+	})
+}
+
+// SetImportance sets the "importance" field.
+func (u *AirportUpsertOne) SetImportance(v int) *AirportUpsertOne {
+	return u.Update(func(s *AirportUpsert) {
+		s.SetImportance(v)
+	})
+}
+
+// AddImportance adds v to the "importance" field.
+func (u *AirportUpsertOne) AddImportance(v int) *AirportUpsertOne {
+	return u.Update(func(s *AirportUpsert) {
+		s.AddImportance(v)
+	})
+}
+
+// UpdateImportance sets the "importance" field to the value that was provided on create.
+func (u *AirportUpsertOne) UpdateImportance() *AirportUpsertOne {
+	return u.Update(func(s *AirportUpsert) {
+		s.UpdateImportance()
 	})
 }
 
@@ -1837,6 +1905,27 @@ func (u *AirportUpsertBulk) SetType(v airport.Type) *AirportUpsertBulk {
 func (u *AirportUpsertBulk) UpdateType() *AirportUpsertBulk {
 	return u.Update(func(s *AirportUpsert) {
 		s.UpdateType()
+	})
+}
+
+// SetImportance sets the "importance" field.
+func (u *AirportUpsertBulk) SetImportance(v int) *AirportUpsertBulk {
+	return u.Update(func(s *AirportUpsert) {
+		s.SetImportance(v)
+	})
+}
+
+// AddImportance adds v to the "importance" field.
+func (u *AirportUpsertBulk) AddImportance(v int) *AirportUpsertBulk {
+	return u.Update(func(s *AirportUpsert) {
+		s.AddImportance(v)
+	})
+}
+
+// UpdateImportance sets the "importance" field to the value that was provided on create.
+func (u *AirportUpsertBulk) UpdateImportance() *AirportUpsertBulk {
+	return u.Update(func(s *AirportUpsert) {
+		s.UpdateImportance()
 	})
 }
 
