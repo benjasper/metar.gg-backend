@@ -45,7 +45,7 @@ func (r *queryResolver) GetAirports(ctx context.Context, first *int, after *ent.
 			airport.IcaoCodeContainsFold(*search),
 			airport.IataCodeEqualFold(*search),
 			airport.IataCodeContainsFold(*search),
-			airport.MunicipalityContains(*search),
+			airport.MunicipalityContainsFold(*search),
 			airport.HasCountryWith(country.NameContainsFold(*search)),
 			airport.LocalCodeEqualFold(*search),
 			airport.LocalCodeContainsFold(*search),
