@@ -39,7 +39,7 @@ func (i *NoaaWeatherImporter) ImportMetars(url string, ctx context.Context) erro
 
 	i.stats.Start()
 
-	filepath := "metars.xml"
+	filepath := fmt.Sprintf("metars-%s.xml", time.Now().Format("2006-01-02-15-04-05"))
 	err := utils.DownloadFile(url, filepath)
 	if err != nil {
 		return err
@@ -108,7 +108,7 @@ func (i *NoaaWeatherImporter) ImportTafs(url string, ctx context.Context) error 
 
 	i.stats.Start()
 
-	filepath := "taf.xml"
+	filepath := fmt.Sprintf("taf-%s.xml", time.Now().Format("2006-01-02-15-04-05"))
 	err := utils.DownloadFile(url, filepath)
 	if err != nil {
 		return err
