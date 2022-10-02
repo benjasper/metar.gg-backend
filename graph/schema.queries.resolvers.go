@@ -54,9 +54,9 @@ func (r *queryResolver) GetAirports(ctx context.Context, first *int, after *ent.
 	}
 
 	if hasWeather != nil && *hasWeather {
-		where = append(where, airport.HasStation())
+		where = append(where, airport.HasStationWith(weatherstation.HasMetars()))
 	} else if hasWeather != nil && !*hasWeather {
-		where = append(where, airport.Not(airport.HasStation()))
+		where = append(where, airport.Not(airport.HasStationWith(weatherstation.HasMetars())))
 	}
 
 	airportPaginateOptions := []ent.AirportPaginateOption{

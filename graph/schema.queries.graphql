@@ -117,7 +117,7 @@ type Query {
         """Search the airport by its name, ICAO, IATA, GPS code, municipality, local code and keywords."""
         search: String,
 
-        """Filter whether the airport provides METARs."""
+        """Filter whether the airport provides METARs and has recent ones."""
         hasWeather: Boolean
 
         order: [AirportOrder!]
