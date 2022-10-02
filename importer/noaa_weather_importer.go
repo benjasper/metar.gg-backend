@@ -231,7 +231,7 @@ func (i *NoaaWeatherImporter) importMetar(x *XmlMetar, ctx context.Context) erro
 	if lastMetar != nil && lastMetar.NextImportTimePrediction != nil && *lastMetar.NextImportTimePrediction != (time.Time{}) {
 		// Calculate difference between last prediction and actual import time
 		diff := x.ObservationTime.Sub(*lastMetar.NextImportTimePrediction)
-		i.logger.CustomEvent(fmt.Sprintf("Import time prediction diff: %s", diff.String()), "import_time_prediction_diff", map[string]interface{}{
+		i.logger.CustomEvent(fmt.Sprintf("Import time prediction diff"), "import_time_prediction_diff", map[string]interface{}{
 			"station_id": x.StationId,
 			"diff":       diff.String(),
 			"prediction": lastMetar.NextImportTimePrediction.String(),
@@ -241,7 +241,7 @@ func (i *NoaaWeatherImporter) importMetar(x *XmlMetar, ctx context.Context) erro
 
 	// Log time difference between import and observation time
 	diff := now.Sub(x.ObservationTime)
-	i.logger.CustomEvent(fmt.Sprintf("Import observation time diff: %s", diff.String()), "import_observation_time_diff", map[string]interface{}{
+	i.logger.CustomEvent(fmt.Sprintf("Import observation time diff"), "import_observation_time_diff", map[string]interface{}{
 		"station_id":  x.StationId,
 		"diff":        diff.String(),
 		"import":      now.String(),

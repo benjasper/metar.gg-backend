@@ -141,6 +141,10 @@ func (l *Logger) messageToAxiomEvent(message *Message) {
 		"time":    message.Time,
 	}
 
+	for s, i := range message.Data {
+		event[s] = i
+	}
+
 	// Append to the message store
 	l.storeMutex.Lock()
 	l.eventStore = append(l.eventStore, event)
