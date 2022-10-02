@@ -17,6 +17,7 @@ require (
 	github.com/mitchellh/mapstructure v1.5.0
 	github.com/ringsaturn/tzf v0.8.1
 	github.com/ringsaturn/tzf-rel v0.0.2021-c3
+	github.com/sajari/regression v1.0.1
 	github.com/segmentio/fasthash v1.0.3
 	github.com/vektah/gqlparser/v2 v2.5.0
 	github.com/vmihailenco/msgpack/v5 v5.3.4
@@ -64,6 +65,7 @@ require (
 	golang.org/x/sys v0.0.0-20220909162455-aba9fc2a8ff2 // indirect
 	golang.org/x/text v0.3.7 // indirect
 	golang.org/x/tools v0.1.13-0.20220819182638-587a15310bdd // indirect
+	gonum.org/v1/gonum v0.12.0 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )

@@ -210,6 +210,8 @@ func (i *NoaaWeatherImporter) importMetar(x *XmlMetar, ctx context.Context) erro
 		flightCategory = metar.FlightCategoryLIFR
 	}
 
+	now := time.Now()
+
 	if x.MetarType == "" {
 		i.logger.Error(fmt.Sprintf("Empty metar type for station %s \n", x.StationId))
 		return nil
@@ -220,9 +222,41 @@ func (i *NoaaWeatherImporter) importMetar(x *XmlMetar, ctx context.Context) erro
 		metarType = metar.MetarTypeSPECI
 	}
 
+	// Check accuracy of last prediction
+	lastMetar, err := i.db.Metar.Query().Where(metar.HasStationWith(weatherstation.StationID(x.StationId))).Order(ent.Desc(metar.FieldObservationTime)).First(ctx)
+	if err != nil {
+		// No last metar found
+	}
+
+	if lastMetar != nil && lastMetar.NextImportTimePrediction != nil && *lastMetar.NextImportTimePrediction != (time.Time{}) {
+		// Calculate difference between last prediction and actual import time
+		diff := x.ObservationTime.Sub(*lastMetar.NextImportTimePrediction)
+		i.logger.CustomEvent(fmt.Sprintf("Import time prediction diff: %s", diff.String()), "import_time_prediction_diff", map[string]interface{}{
+			"station_id": x.StationId,
+			"diff":       diff.String(),
+			"prediction": lastMetar.NextImportTimePrediction.String(),
+			"actual":     x.ObservationTime.String(),
+		})
+	}
+
+	// Log time difference between import and observation time
+	diff := now.Sub(x.ObservationTime)
+	i.logger.CustomEvent(fmt.Sprintf("Import observation time diff: %s", diff.String()), "import_observation_time_diff", map[string]interface{}{
+		"station_id":  x.StationId,
+		"diff":        diff.String(),
+		"import":      now.String(),
+		"observation": x.ObservationTime.String(),
+	})
+
+	prediction, err := i.MakeNextImportPrediction(ctx, s.StationID)
+	if err != nil {
+		// Ignore error, because it could be that we don't have enough data for a prediction
+	}
+
 	t := transaction.Metar.Create().
 		SetStation(s).
 		SetRawText(x.RawText).
+		SetImportTime(now).
 		SetObservationTime(x.ObservationTime).
 		SetTemperature(utils.Nillable(x.TempC)).
 		SetDewpoint(utils.Nillable(x.DewpointC)).
@@ -252,6 +286,7 @@ func (i *NoaaWeatherImporter) importMetar(x *XmlMetar, ctx context.Context) erro
 		SetNillablePrecipitation24(x.Precip24HrIn).
 		SetNillableSnowDepth(x.SnowIn).
 		SetNillableVertVis(x.VertVisFt).
+		SetNillableNextImportTimePrediction(prediction).
 		SetMetarType(metarType).
 		SetHash(hash)
 

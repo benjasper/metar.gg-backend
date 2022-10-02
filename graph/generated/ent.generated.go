@@ -3896,6 +3896,47 @@ func (ec *executionContext) fieldContext_Metar_importTime(ctx context.Context, f
 	return fc, nil
 }
 
+func (ec *executionContext) _Metar_nextImportTimePrediction(ctx context.Context, field graphql.CollectedField, obj *ent.Metar) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Metar_nextImportTimePrediction(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.NextImportTimePrediction, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*time.Time)
+	fc.Result = res
+	return ec.marshalOTime2ᚖtimeᚐTime(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Metar_nextImportTimePrediction(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Metar",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Time does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _Metar_windDirection(ctx context.Context, field graphql.CollectedField, obj *ent.Metar) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_Metar_windDirection(ctx, field)
 	if err != nil {
@@ -9101,6 +9142,10 @@ func (ec *executionContext) _Metar(ctx context.Context, sel ast.SelectionSet, ob
 			if out.Values[i] == graphql.Null {
 				atomic.AddUint32(&invalids, 1)
 			}
+		case "nextImportTimePrediction":
+
+			out.Values[i] = ec._Metar_nextImportTimePrediction(ctx, field, obj)
+
 		case "windDirection":
 
 			out.Values[i] = ec._Metar_windDirection(ctx, field, obj)

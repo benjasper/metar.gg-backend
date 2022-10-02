@@ -761,6 +761,8 @@ func (ec *executionContext) fieldContext_MetarEdge_node(ctx context.Context, fie
 				return ec.fieldContext_Metar_observationTime(ctx, field)
 			case "importTime":
 				return ec.fieldContext_Metar_importTime(ctx, field)
+			case "nextImportTimePrediction":
+				return ec.fieldContext_Metar_nextImportTimePrediction(ctx, field)
 			case "windDirection":
 				return ec.fieldContext_Metar_windDirection(ctx, field)
 			case "presentWeather":

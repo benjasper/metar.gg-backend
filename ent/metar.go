@@ -25,6 +25,8 @@ type Metar struct {
 	ObservationTime time.Time `json:"observation_time,omitempty"`
 	// The time the METAR was imported.
 	ImportTime time.Time `json:"import_time,omitempty"`
+	// The time the METAR is expected to be imported/available next.
+	NextImportTimePrediction *time.Time `json:"next_import_time_prediction,omitempty"`
 	// The temperature in Celsius.
 	Temperature float64 `json:"temperature,omitempty"`
 	// The dewpoint in Celsius.
@@ -141,7 +143,7 @@ func (*Metar) scanValues(columns []string) ([]any, error) {
 			values[i] = new(sql.NullInt64)
 		case metar.FieldRawText, metar.FieldPresentWeather, metar.FieldFlightCategory, metar.FieldMetarType, metar.FieldHash:
 			values[i] = new(sql.NullString)
-		case metar.FieldObservationTime, metar.FieldImportTime:
+		case metar.FieldObservationTime, metar.FieldImportTime, metar.FieldNextImportTimePrediction:
 			values[i] = new(sql.NullTime)
 		case metar.FieldID:
 			values[i] = new(uuid.UUID)
@@ -185,6 +187,13 @@ func (m *Metar) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field import_time", values[i])
 			} else if value.Valid {
 				m.ImportTime = value.Time
+			}
+		case metar.FieldNextImportTimePrediction:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field next_import_time_prediction", values[i])
+			} else if value.Valid {
+				m.NextImportTimePrediction = new(time.Time)
+				*m.NextImportTimePrediction = value.Time
 			}
 		case metar.FieldTemperature:
 			if value, ok := values[i].(*sql.NullFloat64); !ok {
@@ -434,6 +443,11 @@ func (m *Metar) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("import_time=")
 	builder.WriteString(m.ImportTime.Format(time.ANSIC))
+	builder.WriteString(", ")
+	if v := m.NextImportTimePrediction; v != nil {
+		builder.WriteString("next_import_time_prediction=")
+		builder.WriteString(v.Format(time.ANSIC))
+	}
 	builder.WriteString(", ")
 	builder.WriteString("temperature=")
 	builder.WriteString(fmt.Sprintf("%v", m.Temperature))

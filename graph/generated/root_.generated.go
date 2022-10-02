@@ -150,6 +150,7 @@ type ComplexityRoot struct {
 		MetarType                             func(childComplexity int) int
 		MinTemp24                             func(childComplexity int) int
 		MinTemp6                              func(childComplexity int) int
+		NextImportTimePrediction              func(childComplexity int) int
 		ObservationTime                       func(childComplexity int) int
 		Precipitation                         func(childComplexity int) int
 		Precipitation24                       func(childComplexity int) int
@@ -958,6 +959,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Metar.MinTemp6(childComplexity), true
+
+	case "Metar.nextImportTimePrediction":
+		if e.complexity.Metar.NextImportTimePrediction == nil {
+			break
+		}
+
+		return e.complexity.Metar.NextImportTimePrediction(childComplexity), true
 
 	case "Metar.observationTime":
 		if e.complexity.Metar.ObservationTime == nil {
@@ -2051,6 +2059,8 @@ type Metar {
   observationTime: Time!
   """The time the METAR was imported."""
   importTime: Time!
+  """The time the METAR is expected to be imported/available next."""
+  nextImportTimePrediction: Time
   """The wind direction in degrees, or 0 if calm."""
   windDirection: Int!
   """The present weather string."""

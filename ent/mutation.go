@@ -6427,6 +6427,7 @@ type MetarMutation struct {
 	raw_text                                   *string
 	observation_time                           *time.Time
 	import_time                                *time.Time
+	next_import_time_prediction                *time.Time
 	temperature                                *float64
 	addtemperature                             *float64
 	dewpoint                                   *float64
@@ -6697,6 +6698,55 @@ func (m *MetarMutation) OldImportTime(ctx context.Context) (v time.Time, err err
 // ResetImportTime resets all changes to the "import_time" field.
 func (m *MetarMutation) ResetImportTime() {
 	m.import_time = nil
+}
+
+// SetNextImportTimePrediction sets the "next_import_time_prediction" field.
+func (m *MetarMutation) SetNextImportTimePrediction(t time.Time) {
+	m.next_import_time_prediction = &t
+}
+
+// NextImportTimePrediction returns the value of the "next_import_time_prediction" field in the mutation.
+func (m *MetarMutation) NextImportTimePrediction() (r time.Time, exists bool) {
+	v := m.next_import_time_prediction
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldNextImportTimePrediction returns the old "next_import_time_prediction" field's value of the Metar entity.
+// If the Metar object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *MetarMutation) OldNextImportTimePrediction(ctx context.Context) (v *time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldNextImportTimePrediction is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldNextImportTimePrediction requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldNextImportTimePrediction: %w", err)
+	}
+	return oldValue.NextImportTimePrediction, nil
+}
+
+// ClearNextImportTimePrediction clears the value of the "next_import_time_prediction" field.
+func (m *MetarMutation) ClearNextImportTimePrediction() {
+	m.next_import_time_prediction = nil
+	m.clearedFields[metar.FieldNextImportTimePrediction] = struct{}{}
+}
+
+// NextImportTimePredictionCleared returns if the "next_import_time_prediction" field was cleared in this mutation.
+func (m *MetarMutation) NextImportTimePredictionCleared() bool {
+	_, ok := m.clearedFields[metar.FieldNextImportTimePrediction]
+	return ok
+}
+
+// ResetNextImportTimePrediction resets all changes to the "next_import_time_prediction" field.
+func (m *MetarMutation) ResetNextImportTimePrediction() {
+	m.next_import_time_prediction = nil
+	delete(m.clearedFields, metar.FieldNextImportTimePrediction)
 }
 
 // SetTemperature sets the "temperature" field.
@@ -8478,7 +8528,7 @@ func (m *MetarMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *MetarMutation) Fields() []string {
-	fields := make([]string, 0, 33)
+	fields := make([]string, 0, 34)
 	if m.raw_text != nil {
 		fields = append(fields, metar.FieldRawText)
 	}
@@ -8487,6 +8537,9 @@ func (m *MetarMutation) Fields() []string {
 	}
 	if m.import_time != nil {
 		fields = append(fields, metar.FieldImportTime)
+	}
+	if m.next_import_time_prediction != nil {
+		fields = append(fields, metar.FieldNextImportTimePrediction)
 	}
 	if m.temperature != nil {
 		fields = append(fields, metar.FieldTemperature)
@@ -8592,6 +8645,8 @@ func (m *MetarMutation) Field(name string) (ent.Value, bool) {
 		return m.ObservationTime()
 	case metar.FieldImportTime:
 		return m.ImportTime()
+	case metar.FieldNextImportTimePrediction:
+		return m.NextImportTimePrediction()
 	case metar.FieldTemperature:
 		return m.Temperature()
 	case metar.FieldDewpoint:
@@ -8667,6 +8722,8 @@ func (m *MetarMutation) OldField(ctx context.Context, name string) (ent.Value, e
 		return m.OldObservationTime(ctx)
 	case metar.FieldImportTime:
 		return m.OldImportTime(ctx)
+	case metar.FieldNextImportTimePrediction:
+		return m.OldNextImportTimePrediction(ctx)
 	case metar.FieldTemperature:
 		return m.OldTemperature(ctx)
 	case metar.FieldDewpoint:
@@ -8756,6 +8813,13 @@ func (m *MetarMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetImportTime(v)
+		return nil
+	case metar.FieldNextImportTimePrediction:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetNextImportTimePrediction(v)
 		return nil
 	case metar.FieldTemperature:
 		v, ok := value.(float64)
@@ -9228,6 +9292,9 @@ func (m *MetarMutation) AddField(name string, value ent.Value) error {
 // mutation.
 func (m *MetarMutation) ClearedFields() []string {
 	var fields []string
+	if m.FieldCleared(metar.FieldNextImportTimePrediction) {
+		fields = append(fields, metar.FieldNextImportTimePrediction)
+	}
 	if m.FieldCleared(metar.FieldPresentWeather) {
 		fields = append(fields, metar.FieldPresentWeather)
 	}
@@ -9287,6 +9354,9 @@ func (m *MetarMutation) FieldCleared(name string) bool {
 // error if the field is not defined in the schema.
 func (m *MetarMutation) ClearField(name string) error {
 	switch name {
+	case metar.FieldNextImportTimePrediction:
+		m.ClearNextImportTimePrediction()
+		return nil
 	case metar.FieldPresentWeather:
 		m.ClearPresentWeather()
 		return nil
@@ -9348,6 +9418,9 @@ func (m *MetarMutation) ResetField(name string) error {
 		return nil
 	case metar.FieldImportTime:
 		m.ResetImportTime()
+		return nil
+	case metar.FieldNextImportTimePrediction:
+		m.ResetNextImportTimePrediction()
 		return nil
 	case metar.FieldTemperature:
 		m.ResetTemperature()

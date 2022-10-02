@@ -21,6 +21,7 @@ func (Metar) Fields() []ent.Field {
 		field.Text("raw_text").Comment("The raw METAR text."),
 		field.Time("observation_time").Comment("The time the METAR was observed."),
 		field.Time("import_time").Comment("The time the METAR was imported.").Default(time.Now),
+		field.Time("next_import_time_prediction").Optional().Nillable().Comment("The time the METAR is expected to be imported/available next."),
 		field.Float("temperature").Comment("The temperature in Celsius.").Annotations(entgql.Skip(entgql.SkipType)),
 		field.Float("dewpoint").Comment("The dewpoint in Celsius.").Annotations(entgql.Skip(entgql.SkipType)),
 		field.Int("wind_speed").Comment("The wind speed in knots, or 0 if calm.").Annotations(entgql.Skip(entgql.SkipType)),

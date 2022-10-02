@@ -214,6 +214,7 @@ var (
 		{Name: "raw_text", Type: field.TypeString, Size: 2147483647},
 		{Name: "observation_time", Type: field.TypeTime},
 		{Name: "import_time", Type: field.TypeTime},
+		{Name: "next_import_time_prediction", Type: field.TypeTime, Nullable: true},
 		{Name: "temperature", Type: field.TypeFloat64},
 		{Name: "dewpoint", Type: field.TypeFloat64},
 		{Name: "wind_speed", Type: field.TypeInt},
@@ -254,7 +255,7 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "metars_weather_stations_metars",
-				Columns:    []*schema.Column{MetarsColumns[34]},
+				Columns:    []*schema.Column{MetarsColumns[35]},
 				RefColumns: []*schema.Column{WeatherStationsColumns[0]},
 				OnDelete:   schema.NoAction,
 			},
@@ -268,7 +269,7 @@ var (
 			{
 				Name:    "metar_hash",
 				Unique:  false,
-				Columns: []*schema.Column{MetarsColumns[33]},
+				Columns: []*schema.Column{MetarsColumns[34]},
 			},
 		},
 	}

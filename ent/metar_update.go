@@ -58,6 +58,26 @@ func (mu *MetarUpdate) SetNillableImportTime(t *time.Time) *MetarUpdate {
 	return mu
 }
 
+// SetNextImportTimePrediction sets the "next_import_time_prediction" field.
+func (mu *MetarUpdate) SetNextImportTimePrediction(t time.Time) *MetarUpdate {
+	mu.mutation.SetNextImportTimePrediction(t)
+	return mu
+}
+
+// SetNillableNextImportTimePrediction sets the "next_import_time_prediction" field if the given value is not nil.
+func (mu *MetarUpdate) SetNillableNextImportTimePrediction(t *time.Time) *MetarUpdate {
+	if t != nil {
+		mu.SetNextImportTimePrediction(*t)
+	}
+	return mu
+}
+
+// ClearNextImportTimePrediction clears the value of the "next_import_time_prediction" field.
+func (mu *MetarUpdate) ClearNextImportTimePrediction() *MetarUpdate {
+	mu.mutation.ClearNextImportTimePrediction()
+	return mu
+}
+
 // SetTemperature sets the "temperature" field.
 func (mu *MetarUpdate) SetTemperature(f float64) *MetarUpdate {
 	mu.mutation.ResetTemperature()
@@ -762,6 +782,19 @@ func (mu *MetarUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Column: metar.FieldImportTime,
 		})
 	}
+	if value, ok := mu.mutation.NextImportTimePrediction(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeTime,
+			Value:  value,
+			Column: metar.FieldNextImportTimePrediction,
+		})
+	}
+	if mu.mutation.NextImportTimePredictionCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeTime,
+			Column: metar.FieldNextImportTimePrediction,
+		})
+	}
 	if value, ok := mu.mutation.Temperature(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeFloat64,
@@ -1328,6 +1361,26 @@ func (muo *MetarUpdateOne) SetNillableImportTime(t *time.Time) *MetarUpdateOne {
 	if t != nil {
 		muo.SetImportTime(*t)
 	}
+	return muo
+}
+
+// SetNextImportTimePrediction sets the "next_import_time_prediction" field.
+func (muo *MetarUpdateOne) SetNextImportTimePrediction(t time.Time) *MetarUpdateOne {
+	muo.mutation.SetNextImportTimePrediction(t)
+	return muo
+}
+
+// SetNillableNextImportTimePrediction sets the "next_import_time_prediction" field if the given value is not nil.
+func (muo *MetarUpdateOne) SetNillableNextImportTimePrediction(t *time.Time) *MetarUpdateOne {
+	if t != nil {
+		muo.SetNextImportTimePrediction(*t)
+	}
+	return muo
+}
+
+// ClearNextImportTimePrediction clears the value of the "next_import_time_prediction" field.
+func (muo *MetarUpdateOne) ClearNextImportTimePrediction() *MetarUpdateOne {
+	muo.mutation.ClearNextImportTimePrediction()
 	return muo
 }
 
@@ -2063,6 +2116,19 @@ func (muo *MetarUpdateOne) sqlSave(ctx context.Context) (_node *Metar, err error
 			Type:   field.TypeTime,
 			Value:  value,
 			Column: metar.FieldImportTime,
+		})
+	}
+	if value, ok := muo.mutation.NextImportTimePrediction(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeTime,
+			Value:  value,
+			Column: metar.FieldNextImportTimePrediction,
+		})
+	}
+	if muo.mutation.NextImportTimePredictionCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeTime,
+			Column: metar.FieldNextImportTimePrediction,
 		})
 	}
 	if value, ok := muo.mutation.Temperature(); ok {

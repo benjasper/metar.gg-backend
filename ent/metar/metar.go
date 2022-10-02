@@ -22,6 +22,8 @@ const (
 	FieldObservationTime = "observation_time"
 	// FieldImportTime holds the string denoting the import_time field in the database.
 	FieldImportTime = "import_time"
+	// FieldNextImportTimePrediction holds the string denoting the next_import_time_prediction field in the database.
+	FieldNextImportTimePrediction = "next_import_time_prediction"
 	// FieldTemperature holds the string denoting the temperature field in the database.
 	FieldTemperature = "temperature"
 	// FieldDewpoint holds the string denoting the dewpoint field in the database.
@@ -110,6 +112,7 @@ var Columns = []string{
 	FieldRawText,
 	FieldObservationTime,
 	FieldImportTime,
+	FieldNextImportTimePrediction,
 	FieldTemperature,
 	FieldDewpoint,
 	FieldWindSpeed,

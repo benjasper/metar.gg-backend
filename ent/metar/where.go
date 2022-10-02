@@ -103,6 +103,13 @@ func ImportTime(v time.Time) predicate.Metar {
 	})
 }
 
+// NextImportTimePrediction applies equality check predicate on the "next_import_time_prediction" field. It's identical to NextImportTimePredictionEQ.
+func NextImportTimePrediction(v time.Time) predicate.Metar {
+	return predicate.Metar(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldNextImportTimePrediction), v))
+	})
+}
+
 // Temperature applies equality check predicate on the "temperature" field. It's identical to TemperatureEQ.
 func Temperature(v float64) predicate.Metar {
 	return predicate.Metar(func(s *sql.Selector) {
@@ -523,6 +530,84 @@ func ImportTimeLT(v time.Time) predicate.Metar {
 func ImportTimeLTE(v time.Time) predicate.Metar {
 	return predicate.Metar(func(s *sql.Selector) {
 		s.Where(sql.LTE(s.C(FieldImportTime), v))
+	})
+}
+
+// NextImportTimePredictionEQ applies the EQ predicate on the "next_import_time_prediction" field.
+func NextImportTimePredictionEQ(v time.Time) predicate.Metar {
+	return predicate.Metar(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldNextImportTimePrediction), v))
+	})
+}
+
+// NextImportTimePredictionNEQ applies the NEQ predicate on the "next_import_time_prediction" field.
+func NextImportTimePredictionNEQ(v time.Time) predicate.Metar {
+	return predicate.Metar(func(s *sql.Selector) {
+		s.Where(sql.NEQ(s.C(FieldNextImportTimePrediction), v))
+	})
+}
+
+// NextImportTimePredictionIn applies the In predicate on the "next_import_time_prediction" field.
+func NextImportTimePredictionIn(vs ...time.Time) predicate.Metar {
+	v := make([]any, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.Metar(func(s *sql.Selector) {
+		s.Where(sql.In(s.C(FieldNextImportTimePrediction), v...))
+	})
+}
+
+// NextImportTimePredictionNotIn applies the NotIn predicate on the "next_import_time_prediction" field.
+func NextImportTimePredictionNotIn(vs ...time.Time) predicate.Metar {
+	v := make([]any, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.Metar(func(s *sql.Selector) {
+		s.Where(sql.NotIn(s.C(FieldNextImportTimePrediction), v...))
+	})
+}
+
+// NextImportTimePredictionGT applies the GT predicate on the "next_import_time_prediction" field.
+func NextImportTimePredictionGT(v time.Time) predicate.Metar {
+	return predicate.Metar(func(s *sql.Selector) {
+		s.Where(sql.GT(s.C(FieldNextImportTimePrediction), v))
+	})
+}
+
+// NextImportTimePredictionGTE applies the GTE predicate on the "next_import_time_prediction" field.
+func NextImportTimePredictionGTE(v time.Time) predicate.Metar {
+	return predicate.Metar(func(s *sql.Selector) {
+		s.Where(sql.GTE(s.C(FieldNextImportTimePrediction), v))
+	})
+}
+
+// NextImportTimePredictionLT applies the LT predicate on the "next_import_time_prediction" field.
+func NextImportTimePredictionLT(v time.Time) predicate.Metar {
+	return predicate.Metar(func(s *sql.Selector) {
+		s.Where(sql.LT(s.C(FieldNextImportTimePrediction), v))
+	})
+}
+
+// NextImportTimePredictionLTE applies the LTE predicate on the "next_import_time_prediction" field.
+func NextImportTimePredictionLTE(v time.Time) predicate.Metar {
+	return predicate.Metar(func(s *sql.Selector) {
+		s.Where(sql.LTE(s.C(FieldNextImportTimePrediction), v))
+	})
+}
+
+// NextImportTimePredictionIsNil applies the IsNil predicate on the "next_import_time_prediction" field.
+func NextImportTimePredictionIsNil() predicate.Metar {
+	return predicate.Metar(func(s *sql.Selector) {
+		s.Where(sql.IsNull(s.C(FieldNextImportTimePrediction)))
+	})
+}
+
+// NextImportTimePredictionNotNil applies the NotNil predicate on the "next_import_time_prediction" field.
+func NextImportTimePredictionNotNil() predicate.Metar {
+	return predicate.Metar(func(s *sql.Selector) {
+		s.Where(sql.NotNull(s.C(FieldNextImportTimePrediction)))
 	})
 }
 

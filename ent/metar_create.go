@@ -52,6 +52,20 @@ func (mc *MetarCreate) SetNillableImportTime(t *time.Time) *MetarCreate {
 	return mc
 }
 
+// SetNextImportTimePrediction sets the "next_import_time_prediction" field.
+func (mc *MetarCreate) SetNextImportTimePrediction(t time.Time) *MetarCreate {
+	mc.mutation.SetNextImportTimePrediction(t)
+	return mc
+}
+
+// SetNillableNextImportTimePrediction sets the "next_import_time_prediction" field if the given value is not nil.
+func (mc *MetarCreate) SetNillableNextImportTimePrediction(t *time.Time) *MetarCreate {
+	if t != nil {
+		mc.SetNextImportTimePrediction(*t)
+	}
+	return mc
+}
+
 // SetTemperature sets the "temperature" field.
 func (mc *MetarCreate) SetTemperature(f float64) *MetarCreate {
 	mc.mutation.SetTemperature(f)
@@ -609,6 +623,14 @@ func (mc *MetarCreate) createSpec() (*Metar, *sqlgraph.CreateSpec) {
 		})
 		_node.ImportTime = value
 	}
+	if value, ok := mc.mutation.NextImportTimePrediction(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeTime,
+			Value:  value,
+			Column: metar.FieldNextImportTimePrediction,
+		})
+		_node.NextImportTimePrediction = &value
+	}
 	if value, ok := mc.mutation.Temperature(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
 			Type:   field.TypeFloat64,
@@ -973,6 +995,24 @@ func (u *MetarUpsert) SetImportTime(v time.Time) *MetarUpsert {
 // UpdateImportTime sets the "import_time" field to the value that was provided on create.
 func (u *MetarUpsert) UpdateImportTime() *MetarUpsert {
 	u.SetExcluded(metar.FieldImportTime)
+	return u
+}
+
+// SetNextImportTimePrediction sets the "next_import_time_prediction" field.
+func (u *MetarUpsert) SetNextImportTimePrediction(v time.Time) *MetarUpsert {
+	u.Set(metar.FieldNextImportTimePrediction, v)
+	return u
+}
+
+// UpdateNextImportTimePrediction sets the "next_import_time_prediction" field to the value that was provided on create.
+func (u *MetarUpsert) UpdateNextImportTimePrediction() *MetarUpsert {
+	u.SetExcluded(metar.FieldNextImportTimePrediction)
+	return u
+}
+
+// ClearNextImportTimePrediction clears the value of the "next_import_time_prediction" field.
+func (u *MetarUpsert) ClearNextImportTimePrediction() *MetarUpsert {
+	u.SetNull(metar.FieldNextImportTimePrediction)
 	return u
 }
 
@@ -1627,6 +1667,27 @@ func (u *MetarUpsertOne) SetImportTime(v time.Time) *MetarUpsertOne {
 func (u *MetarUpsertOne) UpdateImportTime() *MetarUpsertOne {
 	return u.Update(func(s *MetarUpsert) {
 		s.UpdateImportTime()
+	})
+}
+
+// SetNextImportTimePrediction sets the "next_import_time_prediction" field.
+func (u *MetarUpsertOne) SetNextImportTimePrediction(v time.Time) *MetarUpsertOne {
+	return u.Update(func(s *MetarUpsert) {
+		s.SetNextImportTimePrediction(v)
+	})
+}
+
+// UpdateNextImportTimePrediction sets the "next_import_time_prediction" field to the value that was provided on create.
+func (u *MetarUpsertOne) UpdateNextImportTimePrediction() *MetarUpsertOne {
+	return u.Update(func(s *MetarUpsert) {
+		s.UpdateNextImportTimePrediction()
+	})
+}
+
+// ClearNextImportTimePrediction clears the value of the "next_import_time_prediction" field.
+func (u *MetarUpsertOne) ClearNextImportTimePrediction() *MetarUpsertOne {
+	return u.Update(func(s *MetarUpsert) {
+		s.ClearNextImportTimePrediction()
 	})
 }
 
@@ -2538,6 +2599,27 @@ func (u *MetarUpsertBulk) SetImportTime(v time.Time) *MetarUpsertBulk {
 func (u *MetarUpsertBulk) UpdateImportTime() *MetarUpsertBulk {
 	return u.Update(func(s *MetarUpsert) {
 		s.UpdateImportTime()
+	})
+}
+
+// SetNextImportTimePrediction sets the "next_import_time_prediction" field.
+func (u *MetarUpsertBulk) SetNextImportTimePrediction(v time.Time) *MetarUpsertBulk {
+	return u.Update(func(s *MetarUpsert) {
+		s.SetNextImportTimePrediction(v)
+	})
+}
+
+// UpdateNextImportTimePrediction sets the "next_import_time_prediction" field to the value that was provided on create.
+func (u *MetarUpsertBulk) UpdateNextImportTimePrediction() *MetarUpsertBulk {
+	return u.Update(func(s *MetarUpsert) {
+		s.UpdateNextImportTimePrediction()
+	})
+}
+
+// ClearNextImportTimePrediction clears the value of the "next_import_time_prediction" field.
+func (u *MetarUpsertBulk) ClearNextImportTimePrediction() *MetarUpsertBulk {
+	return u.Update(func(s *MetarUpsert) {
+		s.ClearNextImportTimePrediction()
 	})
 }
 

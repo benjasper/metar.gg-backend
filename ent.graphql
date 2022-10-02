@@ -158,6 +158,8 @@ type Metar {
   observationTime: Time!
   """The time the METAR was imported."""
   importTime: Time!
+  """The time the METAR is expected to be imported/available next."""
+  nextImportTimePrediction: Time
   """The wind direction in degrees, or 0 if calm."""
   windDirection: Int!
   """The present weather string."""
