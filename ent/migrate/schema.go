@@ -23,6 +23,7 @@ var (
 		{Name: "name", Type: field.TypeString},
 		{Name: "latitude", Type: field.TypeFloat64},
 		{Name: "longitude", Type: field.TypeFloat64},
+		{Name: "timezone", Type: field.TypeString, Nullable: true},
 		{Name: "elevation", Type: field.TypeInt, Nullable: true},
 		{Name: "municipality", Type: field.TypeString, Nullable: true},
 		{Name: "scheduled_service", Type: field.TypeBool},
@@ -42,13 +43,13 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "airports_countries_airports",
-				Columns:    []*schema.Column{AirportsColumns[21]},
+				Columns:    []*schema.Column{AirportsColumns[22]},
 				RefColumns: []*schema.Column{CountriesColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
 			{
 				Symbol:     "airports_regions_airports",
-				Columns:    []*schema.Column{AirportsColumns[22]},
+				Columns:    []*schema.Column{AirportsColumns[23]},
 				RefColumns: []*schema.Column{RegionsColumns[0]},
 				OnDelete:   schema.SetNull,
 			},

@@ -74,6 +74,7 @@ type AirportMutation struct {
 	addlatitude        *float64
 	longitude          *float64
 	addlongitude       *float64
+	timezone           *string
 	elevation          *int
 	addelevation       *int
 	municipality       *string
@@ -743,6 +744,55 @@ func (m *AirportMutation) ResetLongitude() {
 	m.addlongitude = nil
 }
 
+// SetTimezone sets the "timezone" field.
+func (m *AirportMutation) SetTimezone(s string) {
+	m.timezone = &s
+}
+
+// Timezone returns the value of the "timezone" field in the mutation.
+func (m *AirportMutation) Timezone() (r string, exists bool) {
+	v := m.timezone
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldTimezone returns the old "timezone" field's value of the Airport entity.
+// If the Airport object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *AirportMutation) OldTimezone(ctx context.Context) (v *string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldTimezone is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldTimezone requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldTimezone: %w", err)
+	}
+	return oldValue.Timezone, nil
+}
+
+// ClearTimezone clears the value of the "timezone" field.
+func (m *AirportMutation) ClearTimezone() {
+	m.timezone = nil
+	m.clearedFields[airport.FieldTimezone] = struct{}{}
+}
+
+// TimezoneCleared returns if the "timezone" field was cleared in this mutation.
+func (m *AirportMutation) TimezoneCleared() bool {
+	_, ok := m.clearedFields[airport.FieldTimezone]
+	return ok
+}
+
+// ResetTimezone resets all changes to the "timezone" field.
+func (m *AirportMutation) ResetTimezone() {
+	m.timezone = nil
+	delete(m.clearedFields, airport.FieldTimezone)
+}
+
 // SetElevation sets the "elevation" field.
 func (m *AirportMutation) SetElevation(i int) {
 	m.elevation = &i
@@ -1374,7 +1424,7 @@ func (m *AirportMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *AirportMutation) Fields() []string {
-	fields := make([]string, 0, 20)
+	fields := make([]string, 0, 21)
 	if m.import_id != nil {
 		fields = append(fields, airport.FieldImportID)
 	}
@@ -1410,6 +1460,9 @@ func (m *AirportMutation) Fields() []string {
 	}
 	if m.longitude != nil {
 		fields = append(fields, airport.FieldLongitude)
+	}
+	if m.timezone != nil {
+		fields = append(fields, airport.FieldTimezone)
 	}
 	if m.elevation != nil {
 		fields = append(fields, airport.FieldElevation)
@@ -1467,6 +1520,8 @@ func (m *AirportMutation) Field(name string) (ent.Value, bool) {
 		return m.Latitude()
 	case airport.FieldLongitude:
 		return m.Longitude()
+	case airport.FieldTimezone:
+		return m.Timezone()
 	case airport.FieldElevation:
 		return m.Elevation()
 	case airport.FieldMunicipality:
@@ -1516,6 +1571,8 @@ func (m *AirportMutation) OldField(ctx context.Context, name string) (ent.Value,
 		return m.OldLatitude(ctx)
 	case airport.FieldLongitude:
 		return m.OldLongitude(ctx)
+	case airport.FieldTimezone:
+		return m.OldTimezone(ctx)
 	case airport.FieldElevation:
 		return m.OldElevation(ctx)
 	case airport.FieldMunicipality:
@@ -1624,6 +1681,13 @@ func (m *AirportMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetLongitude(v)
+		return nil
+	case airport.FieldTimezone:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetTimezone(v)
 		return nil
 	case airport.FieldElevation:
 		v, ok := value.(int)
@@ -1780,6 +1844,9 @@ func (m *AirportMutation) ClearedFields() []string {
 	if m.FieldCleared(airport.FieldIataCode) {
 		fields = append(fields, airport.FieldIataCode)
 	}
+	if m.FieldCleared(airport.FieldTimezone) {
+		fields = append(fields, airport.FieldTimezone)
+	}
 	if m.FieldCleared(airport.FieldElevation) {
 		fields = append(fields, airport.FieldElevation)
 	}
@@ -1817,6 +1884,9 @@ func (m *AirportMutation) ClearField(name string) error {
 		return nil
 	case airport.FieldIataCode:
 		m.ClearIataCode()
+		return nil
+	case airport.FieldTimezone:
+		m.ClearTimezone()
 		return nil
 	case airport.FieldElevation:
 		m.ClearElevation()
@@ -1879,6 +1949,9 @@ func (m *AirportMutation) ResetField(name string) error {
 		return nil
 	case airport.FieldLongitude:
 		m.ResetLongitude()
+		return nil
+	case airport.FieldTimezone:
+		m.ResetTimezone()
 		return nil
 	case airport.FieldElevation:
 		m.ResetElevation()

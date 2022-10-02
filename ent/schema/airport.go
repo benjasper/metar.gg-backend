@@ -25,6 +25,7 @@ func (Airport) Fields() []ent.Field {
 		field.String("name").Comment("The official airport name, including \"Airport\", \"Airstrip\", etc."),
 		field.Float("latitude").Comment("Latitude of the airport in decimal degrees (positive is north)."),
 		field.Float("longitude").Comment("Longitude of the airport in decimal degrees (positive is east)."),
+		field.String("timezone").Optional().Nillable().Comment("The timezone of the airport."),
 		field.Int("elevation").Optional().Nillable().Comment("Elevation of the airport, in feet."),
 		field.String("municipality").Optional().Nillable().Comment("The primary municipality that the airport serves (when available). Note that this is not necessarily the municipality where the airport is physically located."),
 		field.Bool("scheduled_service").Comment("Whether the airport has scheduled airline service."),

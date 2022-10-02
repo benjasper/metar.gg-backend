@@ -4,8 +4,12 @@ import (
 	"context"
 	"encoding/csv"
 	"fmt"
+	"github.com/ringsaturn/tzf"
+	tzfrel "github.com/ringsaturn/tzf-rel"
+	"github.com/ringsaturn/tzf/pb"
 	"github.com/segmentio/fasthash/fnv1a"
 	"golang.org/x/sync/errgroup"
+	"google.golang.org/protobuf/proto"
 	"io"
 	"metar.gg/ent"
 	"metar.gg/ent/airport"
@@ -24,21 +28,45 @@ import (
 )
 
 type Importer struct {
-	db     *ent.Client
-	logger *logging.Logger
-	stats  *ImportStatistics
+	db             *ent.Client
+	logger         *logging.Logger
+	stats          *ImportStatistics
+	timezoneFinder *tzf.Finder
 }
 
+// NewImporter creates a new importer instance. Make sure to call Cleanup() when done.
 func NewImporter(db *ent.Client, logger *logging.Logger) *Importer {
-	return &Importer{
+	importer := &Importer{
 		db:     db,
 		logger: logger,
 		stats:  NewImportStatistics("", logger),
 	}
+
+	err := importer.initializeTimezoneCache()
+	if err != nil {
+		logger.Fatal(err)
+	}
+
+	return importer
 }
 
 type ImportLineFunction func(ctx context.Context, data []string) error
 type CleanupImportFunction func(ctx context.Context) error
+
+func (i *Importer) initializeTimezoneCache() error {
+	dataFile := tzfrel.FullData
+
+	input := &pb.Timezones{}
+	if err := proto.Unmarshal(dataFile, input); err != nil {
+		panic(err)
+	}
+
+	finder, _ := tzf.NewFinderFromPB(input)
+
+	i.timezoneFinder = finder
+
+	return nil
+}
 
 func (i *Importer) ImportAirports(ctx context.Context, url string) error {
 	i.stats = NewImportStatistics("AIRPORTS", i.logger)
@@ -211,6 +239,17 @@ func (i *Importer) importAirportLine(ctx context.Context, data []string) error {
 	lat, _ := strconv.ParseFloat(data[4], 64)
 	lon, _ := strconv.ParseFloat(data[5], 64)
 
+	tz := ""
+
+	if lat != 0 && lon != 0 {
+		zone := i.timezoneFinder.GetTimezoneName(lon, lat)
+		if zone == "" {
+			i.logger.Warn(fmt.Sprintf("[IMPORT] No timezone found for airport %s with lat: %f and lng: %f", data[1], lat, lon))
+		} else {
+			tz = zone
+		}
+	}
+
 	elevation, _ := strconv.ParseInt(data[6], 10, 64)
 
 	scheduledService := false
@@ -275,6 +314,7 @@ func (i *Importer) importAirportLine(ctx context.Context, data []string) error {
 		SetName(data[3]).
 		SetLatitude(lat).
 		SetLongitude(lon).
+		SetNillableTimezone(utils.NillableString(tz)).
 		SetNillableElevation(utils.NillableWithInput(data[6], int(elevation))).
 		SetNillableMunicipality(utils.NillableString(data[10])).
 		SetScheduledService(scheduledService).

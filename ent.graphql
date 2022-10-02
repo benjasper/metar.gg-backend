@@ -23,6 +23,8 @@ type Airport {
   latitude: Float!
   """Longitude of the airport in decimal degrees (positive is east)."""
   longitude: Float!
+  """The timezone of the airport."""
+  timezone: String
   """Elevation of the airport, in feet."""
   elevation: Int
   """The primary municipality that the airport serves (when available). Note that this is not necessarily the municipality where the airport is physically located."""
