@@ -4,9 +4,12 @@ import (
 	"context"
 	"encoding/csv"
 	"fmt"
-	timezone "github.com/evanoberholster/timezoneLookup/v2"
+	"github.com/ringsaturn/tzf"
+	tzfrel "github.com/ringsaturn/tzf-rel"
+	"github.com/ringsaturn/tzf/pb"
 	"github.com/segmentio/fasthash/fnv1a"
 	"golang.org/x/sync/errgroup"
+	"google.golang.org/protobuf/proto"
 	"io"
 	"metar.gg/ent"
 	"metar.gg/ent/airport"
@@ -24,15 +27,11 @@ import (
 	"time"
 )
 
-var timeZoneCacheLocation = "timezone-2021c.data"
-var timeZoneZipFileLocation = "/tmp/geoJSON-2021c.zip"
-var timeZoneSourceURL = "https://github.com/evansiroky/timezone-boundary-builder/releases/download/2021c/timezones-with-oceans.geojson.zip"
-
 type Importer struct {
-	db     *ent.Client
-	logger *logging.Logger
-	stats  *ImportStatistics
-	tzc    *timezone.Timezonecache
+	db             *ent.Client
+	logger         *logging.Logger
+	stats          *ImportStatistics
+	timezoneFinder *tzf.Finder
 }
 
 // NewImporter creates a new importer instance. Make sure to call Cleanup() when done.
@@ -51,63 +50,20 @@ func NewImporter(db *ent.Client, logger *logging.Logger) *Importer {
 	return importer
 }
 
-func (i *Importer) Cleanup() {
-	i.logger.Info("[IMPORT] Cleaning up...")
-
-	err := i.tzc.Close()
-	if err != nil {
-		i.logger.Error(fmt.Sprintf("[IMPORT] Error closing timezone cache: %s", err))
-	}
-}
-
 type ImportLineFunction func(ctx context.Context, data []string) error
 type CleanupImportFunction func(ctx context.Context) error
 
 func (i *Importer) initializeTimezoneCache() error {
-	// Download timezone data file.
-	var tzc timezone.Timezonecache
+	dataFile := tzfrel.FullData
 
-	// If timezone cache file already exists, use that. Otherwise, download and import it.
-	if _, err := os.Stat(timeZoneCacheLocation); os.IsNotExist(err) {
-		i.logger.Info("[IMPORT] Timezone cache file does not exist. Downloading and importing...")
-
-		var total int
-		err = timezone.ImportZipFile(timeZoneZipFileLocation, timeZoneSourceURL, func(tz timezone.Timezone) error {
-			total += len(tz.Polygons)
-			tzc.AddTimezone(tz)
-			return nil
-		})
-		if err != nil {
-			return err
-		}
-
-		i.logger.Info(fmt.Sprintf("[IMPORT] Timezone cache initialized with %d polygons", total))
-
-		if err = tzc.Save(timeZoneCacheLocation); err != nil {
-			return err
-		}
-	} else {
-		i.logger.Info("[IMPORT] Timezone cache file exists. Loading...")
-
-		// Open timezone cache file.
-		f, err := os.Open(timeZoneCacheLocation)
-		if err != nil {
-			return err
-		}
-
-		defer func(f *os.File) {
-			err := f.Close()
-			if err != nil {
-				i.logger.Error(fmt.Sprintf("[IMPORT] Error closing timezone cache file: %s", err))
-			}
-		}(f)
-
-		if err = tzc.Load(f); err != nil {
-			return err
-		}
+	input := &pb.Timezones{}
+	if err := proto.Unmarshal(dataFile, input); err != nil {
+		panic(err)
 	}
 
-	i.tzc = &tzc
+	finder, _ := tzf.NewFinderFromPB(input)
+
+	i.timezoneFinder = finder
 
 	return nil
 }
@@ -286,13 +242,11 @@ func (i *Importer) importAirportLine(ctx context.Context, data []string) error {
 	tz := ""
 
 	if lat != 0 && lon != 0 {
-		zone, err := i.tzc.Search(lat, lon)
-		if err != nil {
-			i.logger.Warn(fmt.Sprintf("[IMPORT] Error getting timezone for airport %s: %s", data[1], err))
-		} else if zone.Name == "" {
+		zone := i.timezoneFinder.GetTimezoneName(lon, lat)
+		if zone == "" {
 			i.logger.Warn(fmt.Sprintf("[IMPORT] No timezone found for airport %s with lat: %f and lng: %f", data[1], lat, lon))
 		} else {
-			tz = zone.Name
+			tz = zone
 		}
 	}
 
