@@ -140,7 +140,7 @@ func RunWeatherImport(ctx context.Context, db *ent.Client, logger *logging.Logge
 
 func DeleteOldData(ctx context.Context, db *ent.Client, logger *logging.Logger) {
 
-	cutoff := time.Now().Add(-24 * time.Hour)
+	cutoff := time.Now().Add(-24 * time.Hour * time.Duration(environment.Global.WeatherDataRetentionDays))
 	result, err := db.Metar.Delete().Where(metar.ObservationTimeLT(cutoff)).Exec(ctx)
 	if err != nil {
 		logger.Error(fmt.Sprintf("Failed to delete old METARs: %s", err))
@@ -148,9 +148,7 @@ func DeleteOldData(ctx context.Context, db *ent.Client, logger *logging.Logger) 
 
 	logger.Info(fmt.Sprintf("Deleted %d old METARs, observed before %s", result, cutoff.Format(time.RFC1123Z)))
 
-	keepDataFor := time.Duration(environment.Global.WeatherDataRetentionDays)
-
-	cutoff = time.Now().Add(-24 * keepDataFor * time.Hour)
+	cutoff = time.Now().Add(-24 * time.Hour * time.Duration(environment.Global.WeatherDataRetentionDays))
 	result, err = db.Taf.Delete().Where(taf.IssueTimeLT(cutoff)).Exec(ctx)
 	if err != nil {
 		logger.Error(fmt.Sprintf("Failed to delete old TAFs: %s", err))
