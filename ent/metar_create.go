@@ -38,6 +38,20 @@ func (mc *MetarCreate) SetObservationTime(t time.Time) *MetarCreate {
 	return mc
 }
 
+// SetImportTime sets the "import_time" field.
+func (mc *MetarCreate) SetImportTime(t time.Time) *MetarCreate {
+	mc.mutation.SetImportTime(t)
+	return mc
+}
+
+// SetNillableImportTime sets the "import_time" field if the given value is not nil.
+func (mc *MetarCreate) SetNillableImportTime(t *time.Time) *MetarCreate {
+	if t != nil {
+		mc.SetImportTime(*t)
+	}
+	return mc
+}
+
 // SetTemperature sets the "temperature" field.
 func (mc *MetarCreate) SetTemperature(f float64) *MetarCreate {
 	mc.mutation.SetTemperature(f)
@@ -455,6 +469,10 @@ func (mc *MetarCreate) ExecX(ctx context.Context) {
 
 // defaults sets the default values of the builder before save.
 func (mc *MetarCreate) defaults() {
+	if _, ok := mc.mutation.ImportTime(); !ok {
+		v := metar.DefaultImportTime()
+		mc.mutation.SetImportTime(v)
+	}
 	if _, ok := mc.mutation.ID(); !ok {
 		v := metar.DefaultID()
 		mc.mutation.SetID(v)
@@ -468,6 +486,9 @@ func (mc *MetarCreate) check() error {
 	}
 	if _, ok := mc.mutation.ObservationTime(); !ok {
 		return &ValidationError{Name: "observation_time", err: errors.New(`ent: missing required field "Metar.observation_time"`)}
+	}
+	if _, ok := mc.mutation.ImportTime(); !ok {
+		return &ValidationError{Name: "import_time", err: errors.New(`ent: missing required field "Metar.import_time"`)}
 	}
 	if _, ok := mc.mutation.Temperature(); !ok {
 		return &ValidationError{Name: "temperature", err: errors.New(`ent: missing required field "Metar.temperature"`)}
@@ -579,6 +600,14 @@ func (mc *MetarCreate) createSpec() (*Metar, *sqlgraph.CreateSpec) {
 			Column: metar.FieldObservationTime,
 		})
 		_node.ObservationTime = value
+	}
+	if value, ok := mc.mutation.ImportTime(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeTime,
+			Value:  value,
+			Column: metar.FieldImportTime,
+		})
+		_node.ImportTime = value
 	}
 	if value, ok := mc.mutation.Temperature(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
@@ -932,6 +961,18 @@ func (u *MetarUpsert) SetObservationTime(v time.Time) *MetarUpsert {
 // UpdateObservationTime sets the "observation_time" field to the value that was provided on create.
 func (u *MetarUpsert) UpdateObservationTime() *MetarUpsert {
 	u.SetExcluded(metar.FieldObservationTime)
+	return u
+}
+
+// SetImportTime sets the "import_time" field.
+func (u *MetarUpsert) SetImportTime(v time.Time) *MetarUpsert {
+	u.Set(metar.FieldImportTime, v)
+	return u
+}
+
+// UpdateImportTime sets the "import_time" field to the value that was provided on create.
+func (u *MetarUpsert) UpdateImportTime() *MetarUpsert {
+	u.SetExcluded(metar.FieldImportTime)
 	return u
 }
 
@@ -1572,6 +1613,20 @@ func (u *MetarUpsertOne) SetObservationTime(v time.Time) *MetarUpsertOne {
 func (u *MetarUpsertOne) UpdateObservationTime() *MetarUpsertOne {
 	return u.Update(func(s *MetarUpsert) {
 		s.UpdateObservationTime()
+	})
+}
+
+// SetImportTime sets the "import_time" field.
+func (u *MetarUpsertOne) SetImportTime(v time.Time) *MetarUpsertOne {
+	return u.Update(func(s *MetarUpsert) {
+		s.SetImportTime(v)
+	})
+}
+
+// UpdateImportTime sets the "import_time" field to the value that was provided on create.
+func (u *MetarUpsertOne) UpdateImportTime() *MetarUpsertOne {
+	return u.Update(func(s *MetarUpsert) {
+		s.UpdateImportTime()
 	})
 }
 
@@ -2469,6 +2524,20 @@ func (u *MetarUpsertBulk) SetObservationTime(v time.Time) *MetarUpsertBulk {
 func (u *MetarUpsertBulk) UpdateObservationTime() *MetarUpsertBulk {
 	return u.Update(func(s *MetarUpsert) {
 		s.UpdateObservationTime()
+	})
+}
+
+// SetImportTime sets the "import_time" field.
+func (u *MetarUpsertBulk) SetImportTime(v time.Time) *MetarUpsertBulk {
+	return u.Update(func(s *MetarUpsert) {
+		s.SetImportTime(v)
+	})
+}
+
+// UpdateImportTime sets the "import_time" field to the value that was provided on create.
+func (u *MetarUpsertBulk) UpdateImportTime() *MetarUpsertBulk {
+	return u.Update(func(s *MetarUpsert) {
+		s.UpdateImportTime()
 	})
 }
 

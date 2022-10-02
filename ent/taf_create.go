@@ -39,6 +39,20 @@ func (tc *TafCreate) SetIssueTime(t time.Time) *TafCreate {
 	return tc
 }
 
+// SetImportTime sets the "import_time" field.
+func (tc *TafCreate) SetImportTime(t time.Time) *TafCreate {
+	tc.mutation.SetImportTime(t)
+	return tc
+}
+
+// SetNillableImportTime sets the "import_time" field if the given value is not nil.
+func (tc *TafCreate) SetNillableImportTime(t *time.Time) *TafCreate {
+	if t != nil {
+		tc.SetImportTime(*t)
+	}
+	return tc
+}
+
 // SetBulletinTime sets the "bulletin_time" field.
 func (tc *TafCreate) SetBulletinTime(t time.Time) *TafCreate {
 	tc.mutation.SetBulletinTime(t)
@@ -201,6 +215,10 @@ func (tc *TafCreate) ExecX(ctx context.Context) {
 
 // defaults sets the default values of the builder before save.
 func (tc *TafCreate) defaults() {
+	if _, ok := tc.mutation.ImportTime(); !ok {
+		v := taf.DefaultImportTime()
+		tc.mutation.SetImportTime(v)
+	}
 	if _, ok := tc.mutation.ID(); !ok {
 		v := taf.DefaultID()
 		tc.mutation.SetID(v)
@@ -214,6 +232,9 @@ func (tc *TafCreate) check() error {
 	}
 	if _, ok := tc.mutation.IssueTime(); !ok {
 		return &ValidationError{Name: "issue_time", err: errors.New(`ent: missing required field "Taf.issue_time"`)}
+	}
+	if _, ok := tc.mutation.ImportTime(); !ok {
+		return &ValidationError{Name: "import_time", err: errors.New(`ent: missing required field "Taf.import_time"`)}
 	}
 	if _, ok := tc.mutation.BulletinTime(); !ok {
 		return &ValidationError{Name: "bulletin_time", err: errors.New(`ent: missing required field "Taf.bulletin_time"`)}
@@ -285,6 +306,14 @@ func (tc *TafCreate) createSpec() (*Taf, *sqlgraph.CreateSpec) {
 			Column: taf.FieldIssueTime,
 		})
 		_node.IssueTime = value
+	}
+	if value, ok := tc.mutation.ImportTime(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeTime,
+			Value:  value,
+			Column: taf.FieldImportTime,
+		})
+		_node.ImportTime = value
 	}
 	if value, ok := tc.mutation.BulletinTime(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
@@ -460,6 +489,18 @@ func (u *TafUpsert) UpdateIssueTime() *TafUpsert {
 	return u
 }
 
+// SetImportTime sets the "import_time" field.
+func (u *TafUpsert) SetImportTime(v time.Time) *TafUpsert {
+	u.Set(taf.FieldImportTime, v)
+	return u
+}
+
+// UpdateImportTime sets the "import_time" field to the value that was provided on create.
+func (u *TafUpsert) UpdateImportTime() *TafUpsert {
+	u.SetExcluded(taf.FieldImportTime)
+	return u
+}
+
 // SetBulletinTime sets the "bulletin_time" field.
 func (u *TafUpsert) SetBulletinTime(v time.Time) *TafUpsert {
 	u.Set(taf.FieldBulletinTime, v)
@@ -593,6 +634,20 @@ func (u *TafUpsertOne) SetIssueTime(v time.Time) *TafUpsertOne {
 func (u *TafUpsertOne) UpdateIssueTime() *TafUpsertOne {
 	return u.Update(func(s *TafUpsert) {
 		s.UpdateIssueTime()
+	})
+}
+
+// SetImportTime sets the "import_time" field.
+func (u *TafUpsertOne) SetImportTime(v time.Time) *TafUpsertOne {
+	return u.Update(func(s *TafUpsert) {
+		s.SetImportTime(v)
+	})
+}
+
+// UpdateImportTime sets the "import_time" field to the value that was provided on create.
+func (u *TafUpsertOne) UpdateImportTime() *TafUpsertOne {
+	return u.Update(func(s *TafUpsert) {
+		s.UpdateImportTime()
 	})
 }
 
@@ -902,6 +957,20 @@ func (u *TafUpsertBulk) SetIssueTime(v time.Time) *TafUpsertBulk {
 func (u *TafUpsertBulk) UpdateIssueTime() *TafUpsertBulk {
 	return u.Update(func(s *TafUpsert) {
 		s.UpdateIssueTime()
+	})
+}
+
+// SetImportTime sets the "import_time" field.
+func (u *TafUpsertBulk) SetImportTime(v time.Time) *TafUpsertBulk {
+	return u.Update(func(s *TafUpsert) {
+		s.SetImportTime(v)
+	})
+}
+
+// UpdateImportTime sets the "import_time" field to the value that was provided on create.
+func (u *TafUpsertBulk) UpdateImportTime() *TafUpsertBulk {
+	return u.Update(func(s *TafUpsert) {
+		s.UpdateImportTime()
 	})
 }
 

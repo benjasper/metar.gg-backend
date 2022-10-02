@@ -23,6 +23,8 @@ type Taf struct {
 	RawText string `json:"raw_text,omitempty"`
 	// The time the TAF was issued.
 	IssueTime time.Time `json:"issue_time,omitempty"`
+	// The time the TAF was imported.
+	ImportTime time.Time `json:"import_time,omitempty"`
 	// TAF bulletin time.
 	BulletinTime time.Time `json:"bulletin_time,omitempty"`
 	// The start time of the TAF validity period.
@@ -95,7 +97,7 @@ func (*Taf) scanValues(columns []string) ([]any, error) {
 		switch columns[i] {
 		case taf.FieldRawText, taf.FieldRemarks, taf.FieldHash:
 			values[i] = new(sql.NullString)
-		case taf.FieldIssueTime, taf.FieldBulletinTime, taf.FieldValidFromTime, taf.FieldValidToTime:
+		case taf.FieldIssueTime, taf.FieldImportTime, taf.FieldBulletinTime, taf.FieldValidFromTime, taf.FieldValidToTime:
 			values[i] = new(sql.NullTime)
 		case taf.FieldID:
 			values[i] = new(uuid.UUID)
@@ -133,6 +135,12 @@ func (t *Taf) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field issue_time", values[i])
 			} else if value.Valid {
 				t.IssueTime = value.Time
+			}
+		case taf.FieldImportTime:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field import_time", values[i])
+			} else if value.Valid {
+				t.ImportTime = value.Time
 			}
 		case taf.FieldBulletinTime:
 			if value, ok := values[i].(*sql.NullTime); !ok {
@@ -219,6 +227,9 @@ func (t *Taf) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("issue_time=")
 	builder.WriteString(t.IssueTime.Format(time.ANSIC))
+	builder.WriteString(", ")
+	builder.WriteString("import_time=")
+	builder.WriteString(t.ImportTime.Format(time.ANSIC))
 	builder.WriteString(", ")
 	builder.WriteString("bulletin_time=")
 	builder.WriteString(t.BulletinTime.Format(time.ANSIC))

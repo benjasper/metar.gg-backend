@@ -45,6 +45,20 @@ func (tu *TafUpdate) SetIssueTime(t time.Time) *TafUpdate {
 	return tu
 }
 
+// SetImportTime sets the "import_time" field.
+func (tu *TafUpdate) SetImportTime(t time.Time) *TafUpdate {
+	tu.mutation.SetImportTime(t)
+	return tu
+}
+
+// SetNillableImportTime sets the "import_time" field if the given value is not nil.
+func (tu *TafUpdate) SetNillableImportTime(t *time.Time) *TafUpdate {
+	if t != nil {
+		tu.SetImportTime(*t)
+	}
+	return tu
+}
+
 // SetBulletinTime sets the "bulletin_time" field.
 func (tu *TafUpdate) SetBulletinTime(t time.Time) *TafUpdate {
 	tu.mutation.SetBulletinTime(t)
@@ -275,6 +289,13 @@ func (tu *TafUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Column: taf.FieldIssueTime,
 		})
 	}
+	if value, ok := tu.mutation.ImportTime(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeTime,
+			Value:  value,
+			Column: taf.FieldImportTime,
+		})
+	}
 	if value, ok := tu.mutation.BulletinTime(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeTime,
@@ -483,6 +504,20 @@ func (tuo *TafUpdateOne) SetRawText(s string) *TafUpdateOne {
 // SetIssueTime sets the "issue_time" field.
 func (tuo *TafUpdateOne) SetIssueTime(t time.Time) *TafUpdateOne {
 	tuo.mutation.SetIssueTime(t)
+	return tuo
+}
+
+// SetImportTime sets the "import_time" field.
+func (tuo *TafUpdateOne) SetImportTime(t time.Time) *TafUpdateOne {
+	tuo.mutation.SetImportTime(t)
+	return tuo
+}
+
+// SetNillableImportTime sets the "import_time" field if the given value is not nil.
+func (tuo *TafUpdateOne) SetNillableImportTime(t *time.Time) *TafUpdateOne {
+	if t != nil {
+		tuo.SetImportTime(*t)
+	}
 	return tuo
 }
 
@@ -744,6 +779,13 @@ func (tuo *TafUpdateOne) sqlSave(ctx context.Context) (_node *Taf, err error) {
 			Type:   field.TypeTime,
 			Value:  value,
 			Column: taf.FieldIssueTime,
+		})
+	}
+	if value, ok := tuo.mutation.ImportTime(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeTime,
+			Value:  value,
+			Column: taf.FieldImportTime,
 		})
 	}
 	if value, ok := tuo.mutation.BulletinTime(); ok {

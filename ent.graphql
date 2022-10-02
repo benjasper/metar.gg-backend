@@ -156,6 +156,8 @@ type Metar {
   rawText: String!
   """The time the METAR was observed."""
   observationTime: Time!
+  """The time the METAR was imported."""
+  importTime: Time!
   """The wind direction in degrees, or 0 if calm."""
   windDirection: Int!
   """The present weather string."""
@@ -308,6 +310,8 @@ type Taf {
   rawText: String!
   """The time the TAF was issued."""
   issueTime: Time!
+  """The time the TAF was imported."""
+  importTime: Time!
   """TAF bulletin time."""
   bulletinTime: Time!
   """The start time of the TAF validity period."""

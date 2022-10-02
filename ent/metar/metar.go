@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"strconv"
+	"time"
 
 	"github.com/google/uuid"
 )
@@ -19,6 +20,8 @@ const (
 	FieldRawText = "raw_text"
 	// FieldObservationTime holds the string denoting the observation_time field in the database.
 	FieldObservationTime = "observation_time"
+	// FieldImportTime holds the string denoting the import_time field in the database.
+	FieldImportTime = "import_time"
 	// FieldTemperature holds the string denoting the temperature field in the database.
 	FieldTemperature = "temperature"
 	// FieldDewpoint holds the string denoting the dewpoint field in the database.
@@ -106,6 +109,7 @@ var Columns = []string{
 	FieldID,
 	FieldRawText,
 	FieldObservationTime,
+	FieldImportTime,
 	FieldTemperature,
 	FieldDewpoint,
 	FieldWindSpeed,
@@ -160,6 +164,8 @@ func ValidColumn(column string) bool {
 }
 
 var (
+	// DefaultImportTime holds the default value on creation for the "import_time" field.
+	DefaultImportTime func() time.Time
 	// DefaultID holds the default value on creation for the "id" field.
 	DefaultID func() uuid.UUID
 )

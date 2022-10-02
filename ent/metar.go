@@ -23,6 +23,8 @@ type Metar struct {
 	RawText string `json:"raw_text,omitempty"`
 	// The time the METAR was observed.
 	ObservationTime time.Time `json:"observation_time,omitempty"`
+	// The time the METAR was imported.
+	ImportTime time.Time `json:"import_time,omitempty"`
 	// The temperature in Celsius.
 	Temperature float64 `json:"temperature,omitempty"`
 	// The dewpoint in Celsius.
@@ -57,7 +59,7 @@ type Metar struct {
 	QualityControlPresentWeatherSensorOff bool `json:"quality_control_present_weather_sensor_off,omitempty"`
 	// The sea level pressure in hectopascals.
 	SeaLevelPressure *float64 `json:"sea_level_pressure,omitempty"`
-	// The pressur_6e tendency in hectopascals.
+	// The pressure tendency in hectopascals.
 	PressureTendency *float64 `json:"pressure_tendency,omitempty"`
 	// The maximum air temperature in Celsius from the past 6 hours.
 	MaxTemp6 *float64 `json:"max_temp_6,omitempty"`
@@ -139,7 +141,7 @@ func (*Metar) scanValues(columns []string) ([]any, error) {
 			values[i] = new(sql.NullInt64)
 		case metar.FieldRawText, metar.FieldPresentWeather, metar.FieldFlightCategory, metar.FieldMetarType, metar.FieldHash:
 			values[i] = new(sql.NullString)
-		case metar.FieldObservationTime:
+		case metar.FieldObservationTime, metar.FieldImportTime:
 			values[i] = new(sql.NullTime)
 		case metar.FieldID:
 			values[i] = new(uuid.UUID)
@@ -177,6 +179,12 @@ func (m *Metar) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field observation_time", values[i])
 			} else if value.Valid {
 				m.ObservationTime = value.Time
+			}
+		case metar.FieldImportTime:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field import_time", values[i])
+			} else if value.Valid {
+				m.ImportTime = value.Time
 			}
 		case metar.FieldTemperature:
 			if value, ok := values[i].(*sql.NullFloat64); !ok {
@@ -423,6 +431,9 @@ func (m *Metar) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("observation_time=")
 	builder.WriteString(m.ObservationTime.Format(time.ANSIC))
+	builder.WriteString(", ")
+	builder.WriteString("import_time=")
+	builder.WriteString(m.ImportTime.Format(time.ANSIC))
 	builder.WriteString(", ")
 	builder.WriteString("temperature=")
 	builder.WriteString(fmt.Sprintf("%v", m.Temperature))

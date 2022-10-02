@@ -96,6 +96,13 @@ func ObservationTime(v time.Time) predicate.Metar {
 	})
 }
 
+// ImportTime applies equality check predicate on the "import_time" field. It's identical to ImportTimeEQ.
+func ImportTime(v time.Time) predicate.Metar {
+	return predicate.Metar(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldImportTime), v))
+	})
+}
+
 // Temperature applies equality check predicate on the "temperature" field. It's identical to TemperatureEQ.
 func Temperature(v float64) predicate.Metar {
 	return predicate.Metar(func(s *sql.Selector) {
@@ -452,6 +459,70 @@ func ObservationTimeLT(v time.Time) predicate.Metar {
 func ObservationTimeLTE(v time.Time) predicate.Metar {
 	return predicate.Metar(func(s *sql.Selector) {
 		s.Where(sql.LTE(s.C(FieldObservationTime), v))
+	})
+}
+
+// ImportTimeEQ applies the EQ predicate on the "import_time" field.
+func ImportTimeEQ(v time.Time) predicate.Metar {
+	return predicate.Metar(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldImportTime), v))
+	})
+}
+
+// ImportTimeNEQ applies the NEQ predicate on the "import_time" field.
+func ImportTimeNEQ(v time.Time) predicate.Metar {
+	return predicate.Metar(func(s *sql.Selector) {
+		s.Where(sql.NEQ(s.C(FieldImportTime), v))
+	})
+}
+
+// ImportTimeIn applies the In predicate on the "import_time" field.
+func ImportTimeIn(vs ...time.Time) predicate.Metar {
+	v := make([]any, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.Metar(func(s *sql.Selector) {
+		s.Where(sql.In(s.C(FieldImportTime), v...))
+	})
+}
+
+// ImportTimeNotIn applies the NotIn predicate on the "import_time" field.
+func ImportTimeNotIn(vs ...time.Time) predicate.Metar {
+	v := make([]any, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.Metar(func(s *sql.Selector) {
+		s.Where(sql.NotIn(s.C(FieldImportTime), v...))
+	})
+}
+
+// ImportTimeGT applies the GT predicate on the "import_time" field.
+func ImportTimeGT(v time.Time) predicate.Metar {
+	return predicate.Metar(func(s *sql.Selector) {
+		s.Where(sql.GT(s.C(FieldImportTime), v))
+	})
+}
+
+// ImportTimeGTE applies the GTE predicate on the "import_time" field.
+func ImportTimeGTE(v time.Time) predicate.Metar {
+	return predicate.Metar(func(s *sql.Selector) {
+		s.Where(sql.GTE(s.C(FieldImportTime), v))
+	})
+}
+
+// ImportTimeLT applies the LT predicate on the "import_time" field.
+func ImportTimeLT(v time.Time) predicate.Metar {
+	return predicate.Metar(func(s *sql.Selector) {
+		s.Where(sql.LT(s.C(FieldImportTime), v))
+	})
+}
+
+// ImportTimeLTE applies the LTE predicate on the "import_time" field.
+func ImportTimeLTE(v time.Time) predicate.Metar {
+	return predicate.Metar(func(s *sql.Selector) {
+		s.Where(sql.LTE(s.C(FieldImportTime), v))
 	})
 }
 
