@@ -70,6 +70,7 @@ type ComplexityRoot struct {
 		ScheduledService func(childComplexity int) int
 		Station          func(childComplexity int) int
 		StationsVicinity func(childComplexity int, first *int, radius *float64) int
+		Timezone         func(childComplexity int) int
 		Type             func(childComplexity int) int
 		Website          func(childComplexity int) int
 		Wikipedia        func(childComplexity int) int
@@ -487,6 +488,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Airport.StationsVicinity(childComplexity, args["first"].(*int), args["radius"].(*float64)), true
+
+	case "Airport.timezone":
+		if e.complexity.Airport.Timezone == nil {
+			break
+		}
+
+		return e.complexity.Airport.Timezone(childComplexity), true
 
 	case "Airport.type":
 		if e.complexity.Airport.Type == nil {
@@ -1892,6 +1900,8 @@ type Airport {
   latitude: Float!
   """Longitude of the airport in decimal degrees (positive is east)."""
   longitude: Float!
+  """The timezone of the airport."""
+  timezone: String
   """Elevation of the airport, in feet."""
   elevation: Int
   """The primary municipality that the airport serves (when available). Note that this is not necessarily the municipality where the airport is physically located."""
@@ -2343,7 +2353,7 @@ type Query {
         """Search the airport by its name, ICAO, IATA, GPS code, municipality, local code and keywords."""
         search: String,
 
-        """Filter whether the airport provides METARs."""
+        """Filter whether the airport provides METARs and has recent ones."""
         hasWeather: Boolean
 
         order: [AirportOrder!]

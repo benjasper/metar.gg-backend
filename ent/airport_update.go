@@ -187,6 +187,26 @@ func (au *AirportUpdate) AddLongitude(f float64) *AirportUpdate {
 	return au
 }
 
+// SetTimezone sets the "timezone" field.
+func (au *AirportUpdate) SetTimezone(s string) *AirportUpdate {
+	au.mutation.SetTimezone(s)
+	return au
+}
+
+// SetNillableTimezone sets the "timezone" field if the given value is not nil.
+func (au *AirportUpdate) SetNillableTimezone(s *string) *AirportUpdate {
+	if s != nil {
+		au.SetTimezone(*s)
+	}
+	return au
+}
+
+// ClearTimezone clears the value of the "timezone" field.
+func (au *AirportUpdate) ClearTimezone() *AirportUpdate {
+	au.mutation.ClearTimezone()
+	return au
+}
+
 // SetElevation sets the "elevation" field.
 func (au *AirportUpdate) SetElevation(i int) *AirportUpdate {
 	au.mutation.ResetElevation()
@@ -701,6 +721,19 @@ func (au *AirportUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Column: airport.FieldLongitude,
 		})
 	}
+	if value, ok := au.mutation.Timezone(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: airport.FieldTimezone,
+		})
+	}
+	if au.mutation.TimezoneCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Column: airport.FieldTimezone,
+		})
+	}
 	if value, ok := au.mutation.Elevation(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeInt,
@@ -1183,6 +1216,26 @@ func (auo *AirportUpdateOne) SetLongitude(f float64) *AirportUpdateOne {
 // AddLongitude adds f to the "longitude" field.
 func (auo *AirportUpdateOne) AddLongitude(f float64) *AirportUpdateOne {
 	auo.mutation.AddLongitude(f)
+	return auo
+}
+
+// SetTimezone sets the "timezone" field.
+func (auo *AirportUpdateOne) SetTimezone(s string) *AirportUpdateOne {
+	auo.mutation.SetTimezone(s)
+	return auo
+}
+
+// SetNillableTimezone sets the "timezone" field if the given value is not nil.
+func (auo *AirportUpdateOne) SetNillableTimezone(s *string) *AirportUpdateOne {
+	if s != nil {
+		auo.SetTimezone(*s)
+	}
+	return auo
+}
+
+// ClearTimezone clears the value of the "timezone" field.
+func (auo *AirportUpdateOne) ClearTimezone() *AirportUpdateOne {
+	auo.mutation.ClearTimezone()
 	return auo
 }
 
@@ -1728,6 +1781,19 @@ func (auo *AirportUpdateOne) sqlSave(ctx context.Context) (_node *Airport, err e
 			Type:   field.TypeFloat64,
 			Value:  value,
 			Column: airport.FieldLongitude,
+		})
+	}
+	if value, ok := auo.mutation.Timezone(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: airport.FieldTimezone,
+		})
+	}
+	if auo.mutation.TimezoneCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Column: airport.FieldTimezone,
 		})
 	}
 	if value, ok := auo.mutation.Elevation(); ok {

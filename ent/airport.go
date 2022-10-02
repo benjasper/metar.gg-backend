@@ -46,6 +46,8 @@ type Airport struct {
 	Latitude float64 `json:"latitude,omitempty"`
 	// Longitude of the airport in decimal degrees (positive is east).
 	Longitude float64 `json:"longitude,omitempty"`
+	// The timezone of the airport.
+	Timezone *string `json:"timezone,omitempty"`
 	// Elevation of the airport, in feet.
 	Elevation *int `json:"elevation,omitempty"`
 	// The primary municipality that the airport serves (when available). Note that this is not necessarily the municipality where the airport is physically located.
@@ -161,7 +163,7 @@ func (*Airport) scanValues(columns []string) ([]any, error) {
 			values[i] = new(sql.NullFloat64)
 		case airport.FieldImportID, airport.FieldImportance, airport.FieldElevation:
 			values[i] = new(sql.NullInt64)
-		case airport.FieldHash, airport.FieldIcaoCode, airport.FieldIataCode, airport.FieldIdentifier, airport.FieldType, airport.FieldName, airport.FieldMunicipality, airport.FieldGpsCode, airport.FieldLocalCode, airport.FieldWebsite, airport.FieldWikipedia:
+		case airport.FieldHash, airport.FieldIcaoCode, airport.FieldIataCode, airport.FieldIdentifier, airport.FieldType, airport.FieldName, airport.FieldTimezone, airport.FieldMunicipality, airport.FieldGpsCode, airport.FieldLocalCode, airport.FieldWebsite, airport.FieldWikipedia:
 			values[i] = new(sql.NullString)
 		case airport.FieldLastUpdated:
 			values[i] = new(sql.NullTime)
@@ -264,6 +266,13 @@ func (a *Airport) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field longitude", values[i])
 			} else if value.Valid {
 				a.Longitude = value.Float64
+			}
+		case airport.FieldTimezone:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field timezone", values[i])
+			} else if value.Valid {
+				a.Timezone = new(string)
+				*a.Timezone = value.String
 			}
 		case airport.FieldElevation:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
@@ -425,6 +434,11 @@ func (a *Airport) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("longitude=")
 	builder.WriteString(fmt.Sprintf("%v", a.Longitude))
+	builder.WriteString(", ")
+	if v := a.Timezone; v != nil {
+		builder.WriteString("timezone=")
+		builder.WriteString(*v)
+	}
 	builder.WriteString(", ")
 	if v := a.Elevation; v != nil {
 		builder.WriteString("elevation=")

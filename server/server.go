@@ -122,6 +122,8 @@ func RunAirportImport(ctx context.Context, db *ent.Client, logger *logging.Logge
 	if err != nil {
 		logger.Error(fmt.Sprintf("[IMPORT] Failed to import frequencies: %s", err))
 	}
+
+	imp.Cleanup()
 }
 
 func RunWeatherImport(ctx context.Context, db *ent.Client, logger *logging.Logger) {

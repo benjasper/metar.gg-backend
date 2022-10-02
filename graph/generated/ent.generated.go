@@ -1059,6 +1059,47 @@ func (ec *executionContext) fieldContext_Airport_longitude(ctx context.Context, 
 	return fc, nil
 }
 
+func (ec *executionContext) _Airport_timezone(ctx context.Context, field graphql.CollectedField, obj *ent.Airport) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Airport_timezone(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Timezone, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*string)
+	fc.Result = res
+	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Airport_timezone(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Airport",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _Airport_elevation(ctx context.Context, field graphql.CollectedField, obj *ent.Airport) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_Airport_elevation(ctx, field)
 	if err != nil {
@@ -3450,6 +3491,8 @@ func (ec *executionContext) fieldContext_Frequency_airport(ctx context.Context, 
 				return ec.fieldContext_Airport_latitude(ctx, field)
 			case "longitude":
 				return ec.fieldContext_Airport_longitude(ctx, field)
+			case "timezone":
+				return ec.fieldContext_Airport_timezone(ctx, field)
 			case "elevation":
 				return ec.fieldContext_Airport_elevation(ctx, field)
 			case "municipality":
@@ -6520,6 +6563,8 @@ func (ec *executionContext) fieldContext_Runway_airport(ctx context.Context, fie
 				return ec.fieldContext_Airport_latitude(ctx, field)
 			case "longitude":
 				return ec.fieldContext_Airport_longitude(ctx, field)
+			case "timezone":
+				return ec.fieldContext_Airport_timezone(ctx, field)
 			case "elevation":
 				return ec.fieldContext_Airport_elevation(ctx, field)
 			case "municipality":
@@ -7950,6 +7995,8 @@ func (ec *executionContext) fieldContext_WeatherStation_airport(ctx context.Cont
 				return ec.fieldContext_Airport_latitude(ctx, field)
 			case "longitude":
 				return ec.fieldContext_Airport_longitude(ctx, field)
+			case "timezone":
+				return ec.fieldContext_Airport_timezone(ctx, field)
 			case "elevation":
 				return ec.fieldContext_Airport_elevation(ctx, field)
 			case "municipality":
@@ -8284,6 +8331,10 @@ func (ec *executionContext) _Airport(ctx context.Context, sel ast.SelectionSet, 
 			if out.Values[i] == graphql.Null {
 				atomic.AddUint32(&invalids, 1)
 			}
+		case "timezone":
+
+			out.Values[i] = ec._Airport_timezone(ctx, field, obj)
+
 		case "elevation":
 
 			out.Values[i] = ec._Airport_elevation(ctx, field, obj)

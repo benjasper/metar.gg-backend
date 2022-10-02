@@ -40,6 +40,8 @@ const (
 	FieldLatitude = "latitude"
 	// FieldLongitude holds the string denoting the longitude field in the database.
 	FieldLongitude = "longitude"
+	// FieldTimezone holds the string denoting the timezone field in the database.
+	FieldTimezone = "timezone"
 	// FieldElevation holds the string denoting the elevation field in the database.
 	FieldElevation = "elevation"
 	// FieldMunicipality holds the string denoting the municipality field in the database.
@@ -120,6 +122,7 @@ var Columns = []string{
 	FieldName,
 	FieldLatitude,
 	FieldLongitude,
+	FieldTimezone,
 	FieldElevation,
 	FieldMunicipality,
 	FieldScheduledService,

@@ -485,6 +485,8 @@ func (ec *executionContext) fieldContext_AirportEdge_node(ctx context.Context, f
 				return ec.fieldContext_Airport_latitude(ctx, field)
 			case "longitude":
 				return ec.fieldContext_Airport_longitude(ctx, field)
+			case "timezone":
+				return ec.fieldContext_Airport_timezone(ctx, field)
 			case "elevation":
 				return ec.fieldContext_Airport_elevation(ctx, field)
 			case "municipality":
@@ -1161,6 +1163,8 @@ func (ec *executionContext) fieldContext_Query_getAirport(ctx context.Context, f
 				return ec.fieldContext_Airport_latitude(ctx, field)
 			case "longitude":
 				return ec.fieldContext_Airport_longitude(ctx, field)
+			case "timezone":
+				return ec.fieldContext_Airport_timezone(ctx, field)
 			case "elevation":
 				return ec.fieldContext_Airport_elevation(ctx, field)
 			case "municipality":

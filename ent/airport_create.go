@@ -141,6 +141,20 @@ func (ac *AirportCreate) SetLongitude(f float64) *AirportCreate {
 	return ac
 }
 
+// SetTimezone sets the "timezone" field.
+func (ac *AirportCreate) SetTimezone(s string) *AirportCreate {
+	ac.mutation.SetTimezone(s)
+	return ac
+}
+
+// SetNillableTimezone sets the "timezone" field if the given value is not nil.
+func (ac *AirportCreate) SetNillableTimezone(s *string) *AirportCreate {
+	if s != nil {
+		ac.SetTimezone(*s)
+	}
+	return ac
+}
+
 // SetElevation sets the "elevation" field.
 func (ac *AirportCreate) SetElevation(i int) *AirportCreate {
 	ac.mutation.SetElevation(i)
@@ -614,6 +628,14 @@ func (ac *AirportCreate) createSpec() (*Airport, *sqlgraph.CreateSpec) {
 		})
 		_node.Longitude = value
 	}
+	if value, ok := ac.mutation.Timezone(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: airport.FieldTimezone,
+		})
+		_node.Timezone = &value
+	}
 	if value, ok := ac.mutation.Elevation(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
 			Type:   field.TypeInt,
@@ -1004,6 +1026,24 @@ func (u *AirportUpsert) UpdateLongitude() *AirportUpsert {
 // AddLongitude adds v to the "longitude" field.
 func (u *AirportUpsert) AddLongitude(v float64) *AirportUpsert {
 	u.Add(airport.FieldLongitude, v)
+	return u
+}
+
+// SetTimezone sets the "timezone" field.
+func (u *AirportUpsert) SetTimezone(v string) *AirportUpsert {
+	u.Set(airport.FieldTimezone, v)
+	return u
+}
+
+// UpdateTimezone sets the "timezone" field to the value that was provided on create.
+func (u *AirportUpsert) UpdateTimezone() *AirportUpsert {
+	u.SetExcluded(airport.FieldTimezone)
+	return u
+}
+
+// ClearTimezone clears the value of the "timezone" field.
+func (u *AirportUpsert) ClearTimezone() *AirportUpsert {
+	u.SetNull(airport.FieldTimezone)
 	return u
 }
 
@@ -1400,6 +1440,27 @@ func (u *AirportUpsertOne) AddLongitude(v float64) *AirportUpsertOne {
 func (u *AirportUpsertOne) UpdateLongitude() *AirportUpsertOne {
 	return u.Update(func(s *AirportUpsert) {
 		s.UpdateLongitude()
+	})
+}
+
+// SetTimezone sets the "timezone" field.
+func (u *AirportUpsertOne) SetTimezone(v string) *AirportUpsertOne {
+	return u.Update(func(s *AirportUpsert) {
+		s.SetTimezone(v)
+	})
+}
+
+// UpdateTimezone sets the "timezone" field to the value that was provided on create.
+func (u *AirportUpsertOne) UpdateTimezone() *AirportUpsertOne {
+	return u.Update(func(s *AirportUpsert) {
+		s.UpdateTimezone()
+	})
+}
+
+// ClearTimezone clears the value of the "timezone" field.
+func (u *AirportUpsertOne) ClearTimezone() *AirportUpsertOne {
+	return u.Update(func(s *AirportUpsert) {
+		s.ClearTimezone()
 	})
 }
 
@@ -1982,6 +2043,27 @@ func (u *AirportUpsertBulk) AddLongitude(v float64) *AirportUpsertBulk {
 func (u *AirportUpsertBulk) UpdateLongitude() *AirportUpsertBulk {
 	return u.Update(func(s *AirportUpsert) {
 		s.UpdateLongitude()
+	})
+}
+
+// SetTimezone sets the "timezone" field.
+func (u *AirportUpsertBulk) SetTimezone(v string) *AirportUpsertBulk {
+	return u.Update(func(s *AirportUpsert) {
+		s.SetTimezone(v)
+	})
+}
+
+// UpdateTimezone sets the "timezone" field to the value that was provided on create.
+func (u *AirportUpsertBulk) UpdateTimezone() *AirportUpsertBulk {
+	return u.Update(func(s *AirportUpsert) {
+		s.UpdateTimezone()
+	})
+}
+
+// ClearTimezone clears the value of the "timezone" field.
+func (u *AirportUpsertBulk) ClearTimezone() *AirportUpsertBulk {
+	return u.Update(func(s *AirportUpsert) {
+		s.ClearTimezone()
 	})
 }
 

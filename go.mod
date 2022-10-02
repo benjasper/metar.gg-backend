@@ -8,6 +8,7 @@ require (
 	github.com/99designs/gqlgen v0.17.16
 	github.com/axiomhq/axiom-go v0.11.0
 	github.com/cnf/structhash v0.0.0-20201127153200-e1b16c1ebc08
+	github.com/evanoberholster/timezoneLookup/v2 v2.0.0
 	github.com/gin-contrib/cors v1.4.0
 	github.com/gin-gonic/gin v1.8.1
 	github.com/go-sql-driver/mysql v1.6.0
@@ -17,7 +18,7 @@ require (
 	github.com/mitchellh/mapstructure v1.5.0
 	github.com/segmentio/fasthash v1.0.3
 	github.com/vektah/gqlparser/v2 v2.5.0
-	github.com/vmihailenco/msgpack/v5 v5.0.0-beta.9
+	github.com/vmihailenco/msgpack/v5 v5.3.4
 	golang.org/x/sync v0.0.0-20220819030929-7fc1605a5dde
 )
 
@@ -50,7 +51,7 @@ require (
 	github.com/pelletier/go-toml/v2 v2.0.5 // indirect
 	github.com/rogpeppe/go-internal v1.8.1 // indirect
 	github.com/ugorji/go/codec v1.2.7 // indirect
-	github.com/vmihailenco/tagparser v0.1.2 // indirect
+	github.com/vmihailenco/tagparser/v2 v2.0.0 // indirect
 	github.com/zclconf/go-cty v1.8.0 // indirect
 	golang.org/x/crypto v0.0.0-20220829220503-c86fa9a7ed90 // indirect
 	golang.org/x/mod v0.6.0-dev.0.20220419223038-86c51ed26bb4 // indirect

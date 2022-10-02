@@ -159,6 +159,13 @@ func Longitude(v float64) predicate.Airport {
 	})
 }
 
+// Timezone applies equality check predicate on the "timezone" field. It's identical to TimezoneEQ.
+func Timezone(v string) predicate.Airport {
+	return predicate.Airport(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldTimezone), v))
+	})
+}
+
 // Elevation applies equality check predicate on the "elevation" field. It's identical to ElevationEQ.
 func Elevation(v int) predicate.Airport {
 	return predicate.Airport(func(s *sql.Selector) {
@@ -1098,6 +1105,119 @@ func LongitudeLT(v float64) predicate.Airport {
 func LongitudeLTE(v float64) predicate.Airport {
 	return predicate.Airport(func(s *sql.Selector) {
 		s.Where(sql.LTE(s.C(FieldLongitude), v))
+	})
+}
+
+// TimezoneEQ applies the EQ predicate on the "timezone" field.
+func TimezoneEQ(v string) predicate.Airport {
+	return predicate.Airport(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldTimezone), v))
+	})
+}
+
+// TimezoneNEQ applies the NEQ predicate on the "timezone" field.
+func TimezoneNEQ(v string) predicate.Airport {
+	return predicate.Airport(func(s *sql.Selector) {
+		s.Where(sql.NEQ(s.C(FieldTimezone), v))
+	})
+}
+
+// TimezoneIn applies the In predicate on the "timezone" field.
+func TimezoneIn(vs ...string) predicate.Airport {
+	v := make([]any, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.Airport(func(s *sql.Selector) {
+		s.Where(sql.In(s.C(FieldTimezone), v...))
+	})
+}
+
+// TimezoneNotIn applies the NotIn predicate on the "timezone" field.
+func TimezoneNotIn(vs ...string) predicate.Airport {
+	v := make([]any, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.Airport(func(s *sql.Selector) {
+		s.Where(sql.NotIn(s.C(FieldTimezone), v...))
+	})
+}
+
+// TimezoneGT applies the GT predicate on the "timezone" field.
+func TimezoneGT(v string) predicate.Airport {
+	return predicate.Airport(func(s *sql.Selector) {
+		s.Where(sql.GT(s.C(FieldTimezone), v))
+	})
+}
+
+// TimezoneGTE applies the GTE predicate on the "timezone" field.
+func TimezoneGTE(v string) predicate.Airport {
+	return predicate.Airport(func(s *sql.Selector) {
+		s.Where(sql.GTE(s.C(FieldTimezone), v))
+	})
+}
+
+// TimezoneLT applies the LT predicate on the "timezone" field.
+func TimezoneLT(v string) predicate.Airport {
+	return predicate.Airport(func(s *sql.Selector) {
+		s.Where(sql.LT(s.C(FieldTimezone), v))
+	})
+}
+
+// TimezoneLTE applies the LTE predicate on the "timezone" field.
+func TimezoneLTE(v string) predicate.Airport {
+	return predicate.Airport(func(s *sql.Selector) {
+		s.Where(sql.LTE(s.C(FieldTimezone), v))
+	})
+}
+
+// TimezoneContains applies the Contains predicate on the "timezone" field.
+func TimezoneContains(v string) predicate.Airport {
+	return predicate.Airport(func(s *sql.Selector) {
+		s.Where(sql.Contains(s.C(FieldTimezone), v))
+	})
+}
+
+// TimezoneHasPrefix applies the HasPrefix predicate on the "timezone" field.
+func TimezoneHasPrefix(v string) predicate.Airport {
+	return predicate.Airport(func(s *sql.Selector) {
+		s.Where(sql.HasPrefix(s.C(FieldTimezone), v))
+	})
+}
+
+// TimezoneHasSuffix applies the HasSuffix predicate on the "timezone" field.
+func TimezoneHasSuffix(v string) predicate.Airport {
+	return predicate.Airport(func(s *sql.Selector) {
+		s.Where(sql.HasSuffix(s.C(FieldTimezone), v))
+	})
+}
+
+// TimezoneIsNil applies the IsNil predicate on the "timezone" field.
+func TimezoneIsNil() predicate.Airport {
+	return predicate.Airport(func(s *sql.Selector) {
+		s.Where(sql.IsNull(s.C(FieldTimezone)))
+	})
+}
+
+// TimezoneNotNil applies the NotNil predicate on the "timezone" field.
+func TimezoneNotNil() predicate.Airport {
+	return predicate.Airport(func(s *sql.Selector) {
+		s.Where(sql.NotNull(s.C(FieldTimezone)))
+	})
+}
+
+// TimezoneEqualFold applies the EqualFold predicate on the "timezone" field.
+func TimezoneEqualFold(v string) predicate.Airport {
+	return predicate.Airport(func(s *sql.Selector) {
+		s.Where(sql.EqualFold(s.C(FieldTimezone), v))
+	})
+}
+
+// TimezoneContainsFold applies the ContainsFold predicate on the "timezone" field.
+func TimezoneContainsFold(v string) predicate.Airport {
+	return predicate.Airport(func(s *sql.Selector) {
+		s.Where(sql.ContainsFold(s.C(FieldTimezone), v))
 	})
 }
 
