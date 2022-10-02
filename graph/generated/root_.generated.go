@@ -144,6 +144,7 @@ type ComplexityRoot struct {
 		Dewpoint                              func(childComplexity int, unit model.TemperatureUnit) int
 		FlightCategory                        func(childComplexity int) int
 		ID                                    func(childComplexity int) int
+		ImportTime                            func(childComplexity int) int
 		MaxTemp24                             func(childComplexity int) int
 		MaxTemp6                              func(childComplexity int) int
 		MetarType                             func(childComplexity int) int
@@ -252,6 +253,7 @@ type ComplexityRoot struct {
 		BulletinTime  func(childComplexity int) int
 		Forecast      func(childComplexity int) int
 		ID            func(childComplexity int) int
+		ImportTime    func(childComplexity int) int
 		IssueTime     func(childComplexity int) int
 		RawText       func(childComplexity int) int
 		Remarks       func(childComplexity int) int
@@ -915,6 +917,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Metar.ID(childComplexity), true
 
+	case "Metar.importTime":
+		if e.complexity.Metar.ImportTime == nil {
+			break
+		}
+
+		return e.complexity.Metar.ImportTime(childComplexity), true
+
 	case "Metar.maxTemp24":
 		if e.complexity.Metar.MaxTemp24 == nil {
 			break
@@ -1547,6 +1556,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Taf.ID(childComplexity), true
 
+	case "Taf.importTime":
+		if e.complexity.Taf.ImportTime == nil {
+			break
+		}
+
+		return e.complexity.Taf.ImportTime(childComplexity), true
+
 	case "Taf.issueTime":
 		if e.complexity.Taf.IssueTime == nil {
 			break
@@ -2033,6 +2049,8 @@ type Metar {
   rawText: String!
   """The time the METAR was observed."""
   observationTime: Time!
+  """The time the METAR was imported."""
+  importTime: Time!
   """The wind direction in degrees, or 0 if calm."""
   windDirection: Int!
   """The present weather string."""
@@ -2185,6 +2203,8 @@ type Taf {
   rawText: String!
   """The time the TAF was issued."""
   issueTime: Time!
+  """The time the TAF was imported."""
+  importTime: Time!
   """TAF bulletin time."""
   bulletinTime: Time!
   """The start time of the TAF validity period."""

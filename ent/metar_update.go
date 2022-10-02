@@ -44,6 +44,20 @@ func (mu *MetarUpdate) SetObservationTime(t time.Time) *MetarUpdate {
 	return mu
 }
 
+// SetImportTime sets the "import_time" field.
+func (mu *MetarUpdate) SetImportTime(t time.Time) *MetarUpdate {
+	mu.mutation.SetImportTime(t)
+	return mu
+}
+
+// SetNillableImportTime sets the "import_time" field if the given value is not nil.
+func (mu *MetarUpdate) SetNillableImportTime(t *time.Time) *MetarUpdate {
+	if t != nil {
+		mu.SetImportTime(*t)
+	}
+	return mu
+}
+
 // SetTemperature sets the "temperature" field.
 func (mu *MetarUpdate) SetTemperature(f float64) *MetarUpdate {
 	mu.mutation.ResetTemperature()
@@ -741,6 +755,13 @@ func (mu *MetarUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Column: metar.FieldObservationTime,
 		})
 	}
+	if value, ok := mu.mutation.ImportTime(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeTime,
+			Value:  value,
+			Column: metar.FieldImportTime,
+		})
+	}
 	if value, ok := mu.mutation.Temperature(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeFloat64,
@@ -1293,6 +1314,20 @@ func (muo *MetarUpdateOne) SetRawText(s string) *MetarUpdateOne {
 // SetObservationTime sets the "observation_time" field.
 func (muo *MetarUpdateOne) SetObservationTime(t time.Time) *MetarUpdateOne {
 	muo.mutation.SetObservationTime(t)
+	return muo
+}
+
+// SetImportTime sets the "import_time" field.
+func (muo *MetarUpdateOne) SetImportTime(t time.Time) *MetarUpdateOne {
+	muo.mutation.SetImportTime(t)
+	return muo
+}
+
+// SetNillableImportTime sets the "import_time" field if the given value is not nil.
+func (muo *MetarUpdateOne) SetNillableImportTime(t *time.Time) *MetarUpdateOne {
+	if t != nil {
+		muo.SetImportTime(*t)
+	}
 	return muo
 }
 
@@ -2021,6 +2056,13 @@ func (muo *MetarUpdateOne) sqlSave(ctx context.Context) (_node *Metar, err error
 			Type:   field.TypeTime,
 			Value:  value,
 			Column: metar.FieldObservationTime,
+		})
+	}
+	if value, ok := muo.mutation.ImportTime(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeTime,
+			Value:  value,
+			Column: metar.FieldImportTime,
 		})
 	}
 	if value, ok := muo.mutation.Temperature(); ok {

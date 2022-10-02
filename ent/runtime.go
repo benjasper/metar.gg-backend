@@ -128,6 +128,10 @@ func init() {
 	_ = metarMixinFields0
 	metarFields := schema.Metar{}.Fields()
 	_ = metarFields
+	// metarDescImportTime is the schema descriptor for import_time field.
+	metarDescImportTime := metarFields[2].Descriptor()
+	// metar.DefaultImportTime holds the default value on creation for the import_time field.
+	metar.DefaultImportTime = metarDescImportTime.Default.(func() time.Time)
 	// metarDescID is the schema descriptor for id field.
 	metarDescID := metarMixinFields0[0].Descriptor()
 	// metar.DefaultID holds the default value on creation for the id field.
@@ -184,6 +188,10 @@ func init() {
 	_ = tafMixinFields0
 	tafFields := schema.Taf{}.Fields()
 	_ = tafFields
+	// tafDescImportTime is the schema descriptor for import_time field.
+	tafDescImportTime := tafFields[2].Descriptor()
+	// taf.DefaultImportTime holds the default value on creation for the import_time field.
+	taf.DefaultImportTime = tafDescImportTime.Default.(func() time.Time)
 	// tafDescID is the schema descriptor for id field.
 	tafDescID := tafMixinFields0[0].Descriptor()
 	// taf.DefaultID holds the default value on creation for the id field.

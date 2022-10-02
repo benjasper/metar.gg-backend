@@ -759,6 +759,8 @@ func (ec *executionContext) fieldContext_MetarEdge_node(ctx context.Context, fie
 				return ec.fieldContext_Metar_rawText(ctx, field)
 			case "observationTime":
 				return ec.fieldContext_Metar_observationTime(ctx, field)
+			case "importTime":
+				return ec.fieldContext_Metar_importTime(ctx, field)
 			case "windDirection":
 				return ec.fieldContext_Metar_windDirection(ctx, field)
 			case "presentWeather":
@@ -1666,6 +1668,8 @@ func (ec *executionContext) fieldContext_TafEdge_node(ctx context.Context, field
 				return ec.fieldContext_Taf_rawText(ctx, field)
 			case "issueTime":
 				return ec.fieldContext_Taf_issueTime(ctx, field)
+			case "importTime":
+				return ec.fieldContext_Taf_importTime(ctx, field)
 			case "bulletinTime":
 				return ec.fieldContext_Taf_bulletinTime(ctx, field)
 			case "validFromTime":

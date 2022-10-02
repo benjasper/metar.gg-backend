@@ -7,6 +7,7 @@ import (
 	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
 	"entgo.io/ent/schema/index"
+	"time"
 )
 
 // Metar holds the schema definition for the Metar entity.
@@ -19,6 +20,7 @@ func (Metar) Fields() []ent.Field {
 	return []ent.Field{
 		field.Text("raw_text").Comment("The raw METAR text."),
 		field.Time("observation_time").Comment("The time the METAR was observed."),
+		field.Time("import_time").Comment("The time the METAR was imported.").Default(time.Now),
 		field.Float("temperature").Comment("The temperature in Celsius.").Annotations(entgql.Skip(entgql.SkipType)),
 		field.Float("dewpoint").Comment("The dewpoint in Celsius.").Annotations(entgql.Skip(entgql.SkipType)),
 		field.Int("wind_speed").Comment("The wind speed in knots, or 0 if calm.").Annotations(entgql.Skip(entgql.SkipType)),
@@ -36,7 +38,7 @@ func (Metar) Fields() []ent.Field {
 		field.Bool("quality_control_freezing_rain_sensor_off").Comment("Whether Freezing rain sensor is off."),
 		field.Bool("quality_control_present_weather_sensor_off").Comment("Whether Present weather sensor is off."),
 		field.Float("sea_level_pressure").Optional().Nillable().Comment("The sea level pressure in hectopascals.").Annotations(entgql.Skip(entgql.SkipType)),
-		field.Float("pressure_tendency").Optional().Nillable().Comment("The pressur_6e tendency in hectopascals.").Annotations(entgql.Skip(entgql.SkipType)),
+		field.Float("pressure_tendency").Optional().Nillable().Comment("The pressure tendency in hectopascals.").Annotations(entgql.Skip(entgql.SkipType)),
 		field.Float("max_temp_6").Optional().Nillable().Comment("The maximum air temperature in Celsius from the past 6 hours."),
 		field.Float("min_temp_6").Optional().Nillable().Comment("The minimum air temperature in Celsius from the past 6 hours."),
 		field.Float("max_temp_24").Optional().Nillable().Comment("The maximum air temperature in Celsius from the past 24 hours."),

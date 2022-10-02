@@ -3,6 +3,8 @@
 package taf
 
 import (
+	"time"
+
 	"github.com/google/uuid"
 )
 
@@ -15,6 +17,8 @@ const (
 	FieldRawText = "raw_text"
 	// FieldIssueTime holds the string denoting the issue_time field in the database.
 	FieldIssueTime = "issue_time"
+	// FieldImportTime holds the string denoting the import_time field in the database.
+	FieldImportTime = "import_time"
 	// FieldBulletinTime holds the string denoting the bulletin_time field in the database.
 	FieldBulletinTime = "bulletin_time"
 	// FieldValidFromTime holds the string denoting the valid_from_time field in the database.
@@ -61,6 +65,7 @@ var Columns = []string{
 	FieldID,
 	FieldRawText,
 	FieldIssueTime,
+	FieldImportTime,
 	FieldBulletinTime,
 	FieldValidFromTime,
 	FieldValidToTime,
@@ -90,6 +95,8 @@ func ValidColumn(column string) bool {
 }
 
 var (
+	// DefaultImportTime holds the default value on creation for the "import_time" field.
+	DefaultImportTime func() time.Time
 	// DefaultID holds the default value on creation for the "id" field.
 	DefaultID func() uuid.UUID
 )

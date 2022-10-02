@@ -6426,6 +6426,7 @@ type MetarMutation struct {
 	id                                         *uuid.UUID
 	raw_text                                   *string
 	observation_time                           *time.Time
+	import_time                                *time.Time
 	temperature                                *float64
 	addtemperature                             *float64
 	dewpoint                                   *float64
@@ -6660,6 +6661,42 @@ func (m *MetarMutation) OldObservationTime(ctx context.Context) (v time.Time, er
 // ResetObservationTime resets all changes to the "observation_time" field.
 func (m *MetarMutation) ResetObservationTime() {
 	m.observation_time = nil
+}
+
+// SetImportTime sets the "import_time" field.
+func (m *MetarMutation) SetImportTime(t time.Time) {
+	m.import_time = &t
+}
+
+// ImportTime returns the value of the "import_time" field in the mutation.
+func (m *MetarMutation) ImportTime() (r time.Time, exists bool) {
+	v := m.import_time
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldImportTime returns the old "import_time" field's value of the Metar entity.
+// If the Metar object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *MetarMutation) OldImportTime(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldImportTime is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldImportTime requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldImportTime: %w", err)
+	}
+	return oldValue.ImportTime, nil
+}
+
+// ResetImportTime resets all changes to the "import_time" field.
+func (m *MetarMutation) ResetImportTime() {
+	m.import_time = nil
 }
 
 // SetTemperature sets the "temperature" field.
@@ -8441,12 +8478,15 @@ func (m *MetarMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *MetarMutation) Fields() []string {
-	fields := make([]string, 0, 32)
+	fields := make([]string, 0, 33)
 	if m.raw_text != nil {
 		fields = append(fields, metar.FieldRawText)
 	}
 	if m.observation_time != nil {
 		fields = append(fields, metar.FieldObservationTime)
+	}
+	if m.import_time != nil {
+		fields = append(fields, metar.FieldImportTime)
 	}
 	if m.temperature != nil {
 		fields = append(fields, metar.FieldTemperature)
@@ -8550,6 +8590,8 @@ func (m *MetarMutation) Field(name string) (ent.Value, bool) {
 		return m.RawText()
 	case metar.FieldObservationTime:
 		return m.ObservationTime()
+	case metar.FieldImportTime:
+		return m.ImportTime()
 	case metar.FieldTemperature:
 		return m.Temperature()
 	case metar.FieldDewpoint:
@@ -8623,6 +8665,8 @@ func (m *MetarMutation) OldField(ctx context.Context, name string) (ent.Value, e
 		return m.OldRawText(ctx)
 	case metar.FieldObservationTime:
 		return m.OldObservationTime(ctx)
+	case metar.FieldImportTime:
+		return m.OldImportTime(ctx)
 	case metar.FieldTemperature:
 		return m.OldTemperature(ctx)
 	case metar.FieldDewpoint:
@@ -8705,6 +8749,13 @@ func (m *MetarMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetObservationTime(v)
+		return nil
+	case metar.FieldImportTime:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetImportTime(v)
 		return nil
 	case metar.FieldTemperature:
 		v, ok := value.(float64)
@@ -9294,6 +9345,9 @@ func (m *MetarMutation) ResetField(name string) error {
 		return nil
 	case metar.FieldObservationTime:
 		m.ResetObservationTime()
+		return nil
+	case metar.FieldImportTime:
+		m.ResetImportTime()
 		return nil
 	case metar.FieldTemperature:
 		m.ResetTemperature()
@@ -12998,6 +13052,7 @@ type TafMutation struct {
 	id                    *uuid.UUID
 	raw_text              *string
 	issue_time            *time.Time
+	import_time           *time.Time
 	bulletin_time         *time.Time
 	valid_from_time       *time.Time
 	valid_to_time         *time.Time
@@ -13191,6 +13246,42 @@ func (m *TafMutation) OldIssueTime(ctx context.Context) (v time.Time, err error)
 // ResetIssueTime resets all changes to the "issue_time" field.
 func (m *TafMutation) ResetIssueTime() {
 	m.issue_time = nil
+}
+
+// SetImportTime sets the "import_time" field.
+func (m *TafMutation) SetImportTime(t time.Time) {
+	m.import_time = &t
+}
+
+// ImportTime returns the value of the "import_time" field in the mutation.
+func (m *TafMutation) ImportTime() (r time.Time, exists bool) {
+	v := m.import_time
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldImportTime returns the old "import_time" field's value of the Taf entity.
+// If the Taf object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *TafMutation) OldImportTime(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldImportTime is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldImportTime requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldImportTime: %w", err)
+	}
+	return oldValue.ImportTime, nil
+}
+
+// ResetImportTime resets all changes to the "import_time" field.
+func (m *TafMutation) ResetImportTime() {
+	m.import_time = nil
 }
 
 // SetBulletinTime sets the "bulletin_time" field.
@@ -13539,12 +13630,15 @@ func (m *TafMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *TafMutation) Fields() []string {
-	fields := make([]string, 0, 7)
+	fields := make([]string, 0, 8)
 	if m.raw_text != nil {
 		fields = append(fields, taf.FieldRawText)
 	}
 	if m.issue_time != nil {
 		fields = append(fields, taf.FieldIssueTime)
+	}
+	if m.import_time != nil {
+		fields = append(fields, taf.FieldImportTime)
 	}
 	if m.bulletin_time != nil {
 		fields = append(fields, taf.FieldBulletinTime)
@@ -13573,6 +13667,8 @@ func (m *TafMutation) Field(name string) (ent.Value, bool) {
 		return m.RawText()
 	case taf.FieldIssueTime:
 		return m.IssueTime()
+	case taf.FieldImportTime:
+		return m.ImportTime()
 	case taf.FieldBulletinTime:
 		return m.BulletinTime()
 	case taf.FieldValidFromTime:
@@ -13596,6 +13692,8 @@ func (m *TafMutation) OldField(ctx context.Context, name string) (ent.Value, err
 		return m.OldRawText(ctx)
 	case taf.FieldIssueTime:
 		return m.OldIssueTime(ctx)
+	case taf.FieldImportTime:
+		return m.OldImportTime(ctx)
 	case taf.FieldBulletinTime:
 		return m.OldBulletinTime(ctx)
 	case taf.FieldValidFromTime:
@@ -13628,6 +13726,13 @@ func (m *TafMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetIssueTime(v)
+		return nil
+	case taf.FieldImportTime:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetImportTime(v)
 		return nil
 	case taf.FieldBulletinTime:
 		v, ok := value.(time.Time)
@@ -13718,6 +13823,9 @@ func (m *TafMutation) ResetField(name string) error {
 		return nil
 	case taf.FieldIssueTime:
 		m.ResetIssueTime()
+		return nil
+	case taf.FieldImportTime:
+		m.ResetImportTime()
 		return nil
 	case taf.FieldBulletinTime:
 		m.ResetBulletinTime()

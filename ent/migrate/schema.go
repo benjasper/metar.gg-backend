@@ -213,6 +213,7 @@ var (
 		{Name: "id", Type: field.TypeUUID},
 		{Name: "raw_text", Type: field.TypeString, Size: 2147483647},
 		{Name: "observation_time", Type: field.TypeTime},
+		{Name: "import_time", Type: field.TypeTime},
 		{Name: "temperature", Type: field.TypeFloat64},
 		{Name: "dewpoint", Type: field.TypeFloat64},
 		{Name: "wind_speed", Type: field.TypeInt},
@@ -253,7 +254,7 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "metars_weather_stations_metars",
-				Columns:    []*schema.Column{MetarsColumns[33]},
+				Columns:    []*schema.Column{MetarsColumns[34]},
 				RefColumns: []*schema.Column{WeatherStationsColumns[0]},
 				OnDelete:   schema.NoAction,
 			},
@@ -267,7 +268,7 @@ var (
 			{
 				Name:    "metar_hash",
 				Unique:  false,
-				Columns: []*schema.Column{MetarsColumns[32]},
+				Columns: []*schema.Column{MetarsColumns[33]},
 			},
 		},
 	}
@@ -395,6 +396,7 @@ var (
 		{Name: "id", Type: field.TypeUUID},
 		{Name: "raw_text", Type: field.TypeString, Size: 2147483647},
 		{Name: "issue_time", Type: field.TypeTime},
+		{Name: "import_time", Type: field.TypeTime},
 		{Name: "bulletin_time", Type: field.TypeTime},
 		{Name: "valid_from_time", Type: field.TypeTime},
 		{Name: "valid_to_time", Type: field.TypeTime},
@@ -410,7 +412,7 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "tafs_weather_stations_tafs",
-				Columns:    []*schema.Column{TafsColumns[8]},
+				Columns:    []*schema.Column{TafsColumns[9]},
 				RefColumns: []*schema.Column{WeatherStationsColumns[0]},
 				OnDelete:   schema.NoAction,
 			},
