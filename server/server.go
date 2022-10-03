@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/99designs/gqlgen/graphql/handler/extension"
+	"github.com/cenkalti/backoff/v4"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"metar.gg/ent"
@@ -126,13 +127,25 @@ func RunAirportImport(ctx context.Context, db *ent.Client, logger *logging.Logge
 
 func RunWeatherImport(ctx context.Context, db *ent.Client, logger *logging.Logger) {
 	metarImporter := importer.NewNoaaWeatherImporter(db, logger)
-	err := metarImporter.ImportMetars("https://www.aviationweather.gov/adds/dataserver_current/current/metars.cache.xml", ctx)
+
+	b := backoff.NewExponentialBackOff()
+	b.MaxElapsedTime = 5 * time.Minute
+
+	err := backoff.Retry(func() error {
+		err := metarImporter.ImportMetars("https://www.aviationweather.gov/adds/dataserver_current/current/metars.cache.xml", ctx)
+		return err
+	}, b)
 	if err != nil {
 		logger.Error(fmt.Sprintf("[IMPORT] Failed to import METARs: %s", err))
 	}
 
-	tafImporter := importer.NewNoaaWeatherImporter(db, logger)
-	err = tafImporter.ImportTafs("https://www.aviationweather.gov/adds/dataserver_current/current/tafs.cache.xml", ctx)
+	b.Reset()
+
+	err = backoff.Retry(func() error {
+		tafImporter := importer.NewNoaaWeatherImporter(db, logger)
+		err = tafImporter.ImportTafs("https://www.aviationweather.gov/adds/dataserver_current/current/tafs.cache.xml", ctx)
+		return err
+	}, b)
 	if err != nil {
 		logger.Error(fmt.Sprintf("[IMPORT] Failed to import TAFs: %s", err))
 	}
