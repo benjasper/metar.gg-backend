@@ -43,7 +43,7 @@ func NewLogger() *Logger {
 		go func() {
 			for {
 				time.Sleep(10 * time.Second)
-				loggerObject.uploadLog()
+				go loggerObject.uploadLog()
 			}
 		}()
 	}
@@ -151,7 +151,7 @@ func (l *Logger) messageToAxiomEvent(message *Message) {
 
 	// If the store is too big, upload it
 	if len(l.eventStore) >= 999 {
-		l.uploadLog()
+		go l.uploadLog()
 	}
 
 	l.storeMutex.Unlock()
