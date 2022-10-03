@@ -98,7 +98,7 @@ func (i *NoaaWeatherImporter) ImportMetars(url string, ctx context.Context) erro
 	}
 
 	// Delete file
-	//err = os.Remove(filepath)
+	err = os.Remove(filepath)
 	if err != nil {
 		return err
 	}
@@ -242,10 +242,11 @@ func (i *NoaaWeatherImporter) importMetar(x *XmlMetar, ctx context.Context) erro
 		// Calculate difference between last prediction and actual import time
 		diff := x.ObservationTime.Sub(*lastMetar.NextImportTimePrediction)
 		i.logger.CustomEvent(fmt.Sprintf("Import time prediction diff"), "import_time_prediction_diff", map[string]interface{}{
-			"station_id": x.StationId,
-			"diff":       diff.String(),
-			"prediction": lastMetar.NextImportTimePrediction.String(),
-			"actual":     x.ObservationTime.String(),
+			"station_id":  x.StationId,
+			"diff":        diff.String(),
+			"diff_in_min": diff.Minutes(),
+			"prediction":  lastMetar.NextImportTimePrediction.String(),
+			"actual":      x.ObservationTime.String(),
 		})
 	}
 
@@ -254,6 +255,7 @@ func (i *NoaaWeatherImporter) importMetar(x *XmlMetar, ctx context.Context) erro
 	i.logger.CustomEvent(fmt.Sprintf("Import observation time diff"), "import_observation_time_diff", map[string]interface{}{
 		"station_id":  x.StationId,
 		"diff":        diff.String(),
+		"diff_in_min": diff.Minutes(),
 		"import":      now.String(),
 		"observation": x.ObservationTime.String(),
 	})
