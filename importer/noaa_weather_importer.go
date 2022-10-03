@@ -63,6 +63,10 @@ func (i *NoaaWeatherImporter) ImportMetars(url string, ctx context.Context) erro
 	for {
 		token, err := decoder.Token()
 		if err != nil {
+			if err.Error() != "EOF" {
+				i.logger.Error(fmt.Sprintf("[IMPORT] Failed to parse TAFs: %s", err))
+			}
+
 			break
 		}
 
@@ -76,7 +80,8 @@ func (i *NoaaWeatherImporter) ImportMetars(url string, ctx context.Context) erro
 				var xmlMetar XmlMetar
 				err = decoder.DecodeElement(&xmlMetar, &se)
 				if err != nil {
-					return err
+					i.logger.Error(fmt.Sprintf("[IMPORT] Failed to parse METAR at %v: %s", se, err))
+					continue
 				}
 
 				i.stats.AddTotal()
@@ -93,7 +98,7 @@ func (i *NoaaWeatherImporter) ImportMetars(url string, ctx context.Context) erro
 	}
 
 	// Delete file
-	err = os.Remove(filepath)
+	//err = os.Remove(filepath)
 	if err != nil {
 		return err
 	}
@@ -132,6 +137,10 @@ func (i *NoaaWeatherImporter) ImportTafs(url string, ctx context.Context) error 
 	for {
 		token, err := decoder.Token()
 		if err != nil {
+			if err.Error() != "EOF" {
+				i.logger.Error(fmt.Sprintf("[IMPORT] Failed to parse TAFs: %s", err))
+			}
+
 			break
 		}
 
@@ -145,7 +154,8 @@ func (i *NoaaWeatherImporter) ImportTafs(url string, ctx context.Context) error 
 				var xmlTaf XmlTaf
 				err = decoder.DecodeElement(&xmlTaf, &se)
 				if err != nil {
-					return err
+					i.logger.Error(fmt.Sprintf("[IMPORT] Failed to parse TAF at %v: %s", se, err))
+					continue
 				}
 
 				i.stats.AddTotal()
