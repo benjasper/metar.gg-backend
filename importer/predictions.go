@@ -9,14 +9,14 @@ import (
 	"time"
 )
 
-func (i *NoaaWeatherImporter) MakeNextImportPrediction(ctx context.Context, stationID string) (*time.Time, error) {
+func (i *NoaaWeatherImporter) MakeNextImportPrediction(ctx context.Context, stationID string, currentImportTime *time.Time) (*time.Time, error) {
 	r := new(regression.Regression)
 
 	r.SetObserved("Delta since last observation time")
 	r.SetVar(0, "Sequence number")
 
 	// Add some data points.
-	result, err := i.db.Metar.Query().Select(metar.FieldObservationTime).Where(metar.HasStationWith(weatherstation.StationID(stationID)), metar.ObservationTimeGT(time.Now().Add(time.Hour*-6))).Order(ent.Asc(metar.FieldObservationTime)).All(ctx)
+	result, err := i.db.Metar.Query().Select(metar.FieldImportTime).Where(metar.HasStationWith(weatherstation.StationID(stationID)), metar.ImportTimeGT(time.Now().Add(time.Hour*-4))).Order(ent.Asc(metar.FieldImportTime)).All(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -26,7 +26,7 @@ func (i *NoaaWeatherImporter) MakeNextImportPrediction(ctx context.Context, stat
 	}
 
 	// Add the current time as the last observation time, because the newest one isn't persisted yet
-	result = append(result, &ent.Metar{ObservationTime: time.Now()})
+	result = append(result, &ent.Metar{ImportTime: *currentImportTime})
 
 	sequenceNumber := 0
 
@@ -35,7 +35,7 @@ func (i *NoaaWeatherImporter) MakeNextImportPrediction(ctx context.Context, stat
 			continue
 		}
 
-		delta := m.ObservationTime.Sub(result[i-1].ObservationTime)
+		delta := m.ImportTime.Sub(result[i-1].ImportTime)
 
 		r.Train(regression.DataPoint(float64(delta), []float64{float64(sequenceNumber)}))
 		sequenceNumber++
@@ -53,7 +53,7 @@ func (i *NoaaWeatherImporter) MakeNextImportPrediction(ctx context.Context, stat
 	}
 
 	// Add the prediction to the last import time.
-	nextObservationTime := result[len(result)-1].ObservationTime.Add(time.Duration(prediction))
+	nextImportTime := result[len(result)-1].ImportTime.Add(time.Duration(prediction))
 
-	return &nextObservationTime, nil
+	return &nextImportTime, nil
 }
