@@ -10,6 +10,18 @@ It imports airport data from [OurAirports.com](https://github.com/davidmegginson
 You can either host it yourself or use the hosted version of this API available at [rapidapi.com](https://rapidapi.com/benjasper/api/aviation-weather-and-airport-data).
 The hosted version imports airport data every 7 days and weather data every 5 minutes, and retains the weather data for 7 days.
 
+### Features ✨
+- Imports Airports, METARs and TAFs
+  - Hashing, for duplicate detection
+  - Syncs all Airport Data and removes old ones
+  - Timezone data for airports
+- GraphQL API
+  - Unit Conversion API
+  - Airport vicinity search
+  - Next METAR Time Prediction
+  - Search API
+  - Pagination
+
 ## Tech 🛠
 
 - Go
