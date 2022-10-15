@@ -2,58 +2,39 @@ package importer
 
 import (
 	"context"
-	"github.com/sajari/regression"
+	"fmt"
 	"metar.gg/ent"
 	"metar.gg/ent/metar"
 	"metar.gg/ent/weatherstation"
 	"time"
 )
 
-func (i *NoaaWeatherImporter) MakeNextImportPrediction(ctx context.Context, stationID string, currentImportTime *time.Time) (*time.Time, error) {
-	r := new(regression.Regression)
+func (i *NoaaWeatherImporter) MakeNextImportPrediction(ctx context.Context, stationID string, currentImportTime *time.Time, currentObservationTime *time.Time) (*time.Time, error) {
 
-	r.SetObserved("Delta since last observation time")
-	r.SetVar(0, "Sequence number")
+	// Query the last metar for this station
+	m, err := i.db.Metar.Query().
+		Where(
+			metar.HasStationWith(weatherstation.StationID(stationID)),
+		).
+		Order(ent.Desc(metar.FieldImportTime)).First(ctx)
 
-	// Add some data points.
-	result, err := i.db.Metar.Query().Select(metar.FieldImportTime).Where(metar.HasStationWith(weatherstation.StationID(stationID)), metar.ImportTimeGT(time.Now().Add(time.Hour*-4))).Order(ent.Asc(metar.FieldImportTime)).All(ctx)
 	if err != nil {
 		return nil, err
 	}
 
-	if len(result) < 2 {
-		return nil, nil
+	importTimeDifference := currentImportTime.Sub(m.ImportTime)
+	if importTimeDifference.Abs() > time.Hour*12 {
+		return nil, fmt.Errorf("last import for station %s was %s ago, which is more than 12 hours", stationID, importTimeDifference.String())
 	}
 
-	// Add the current time as the last observation time, because the newest one isn't persisted yet
-	result = append(result, &ent.Metar{ImportTime: *currentImportTime})
-
-	sequenceNumber := 0
-
-	for i, m := range result {
-		if i == 0 {
-			continue
-		}
-
-		delta := m.ImportTime.Sub(result[i-1].ImportTime)
-
-		r.Train(regression.DataPoint(float64(delta), []float64{float64(sequenceNumber)}))
-		sequenceNumber++
+	observationTimeDifference := currentObservationTime.Sub(m.ObservationTime)
+	if observationTimeDifference.Abs() > time.Hour*12 {
+		return nil, fmt.Errorf("last observation for station %s was %s ago, which is more than 12 hours", stationID, observationTimeDifference.String())
 	}
 
-	err = r.Run()
-	if err != nil {
-		return nil, err
-	}
+	averageDifference := (importTimeDifference + observationTimeDifference) / 2
 
-	// Make a prediction for the next import.
-	prediction, err := r.Predict([]float64{float64(sequenceNumber + 1)})
-	if err != nil {
-		return nil, err
-	}
-
-	// Add the prediction to the last import time.
-	nextImportTime := result[len(result)-1].ImportTime.Add(time.Duration(prediction))
+	nextImportTime := currentImportTime.Add(averageDifference)
 
 	return &nextImportTime, nil
 }

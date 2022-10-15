@@ -7,6 +7,7 @@ require (
 	entgo.io/ent v0.11.3-0.20220830071904-3b1b75b9d7a9
 	github.com/99designs/gqlgen v0.17.16
 	github.com/axiomhq/axiom-go v0.11.0
+	github.com/cenkalti/backoff/v4 v4.1.3
 	github.com/cnf/structhash v0.0.0-20201127153200-e1b16c1ebc08
 	github.com/gin-contrib/cors v1.4.0
 	github.com/gin-gonic/gin v1.8.1
@@ -17,7 +18,6 @@ require (
 	github.com/mitchellh/mapstructure v1.5.0
 	github.com/ringsaturn/tzf v0.8.1
 	github.com/ringsaturn/tzf-rel v0.0.2021-c3
-	github.com/sajari/regression v1.0.1
 	github.com/segmentio/fasthash v1.0.3
 	github.com/vektah/gqlparser/v2 v2.5.0
 	github.com/vmihailenco/msgpack/v5 v5.3.4
@@ -30,7 +30,6 @@ require (
 	github.com/agext/levenshtein v1.2.1 // indirect
 	github.com/agnivade/levenshtein v1.1.1 // indirect
 	github.com/apparentlymart/go-textseg/v13 v13.0.0 // indirect
-	github.com/cenkalti/backoff/v4 v4.1.3 // indirect
 	github.com/gin-contrib/sse v0.1.0 // indirect
 	github.com/go-openapi/inflect v0.19.0 // indirect
 	github.com/go-playground/locales v0.14.0 // indirect
@@ -65,7 +64,6 @@ require (
 	golang.org/x/sys v0.0.0-20220909162455-aba9fc2a8ff2 // indirect
 	golang.org/x/text v0.3.7 // indirect
 	golang.org/x/tools v0.1.13-0.20220819182638-587a15310bdd // indirect
-	gonum.org/v1/gonum v0.12.0 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )

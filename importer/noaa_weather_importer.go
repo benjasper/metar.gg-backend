@@ -260,9 +260,10 @@ func (i *NoaaWeatherImporter) importMetar(x *XmlMetar, ctx context.Context) erro
 		"observation": x.ObservationTime.String(),
 	})
 
-	prediction, err := i.MakeNextImportPrediction(ctx, s.StationID, &importTime)
+	prediction, err := i.MakeNextImportPrediction(ctx, s.StationID, &importTime, &x.ObservationTime)
 	if err != nil {
 		// Ignore error, because it could be that we don't have enough data for a prediction
+		i.logger.Warn(fmt.Sprintf("Failed to make next import prediction: %s", err))
 	}
 
 	t := transaction.Metar.Create().
