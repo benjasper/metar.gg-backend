@@ -16,8 +16,11 @@ import (
 	"metar.gg/importer"
 	"metar.gg/logging"
 	"net/http"
+	"sync"
 	"time"
 )
+
+var weatherImportMutex = &sync.Mutex{}
 
 type Server struct {
 }
@@ -126,6 +129,14 @@ func RunAirportImport(ctx context.Context, db *ent.Client, logger *logging.Logge
 }
 
 func RunWeatherImport(ctx context.Context, db *ent.Client, logger *logging.Logger) {
+	// We use try lock here, because we don't want to queue up multiple imports
+	if !weatherImportMutex.TryLock() {
+		logger.Warn("[IMPORT] Weather import already running")
+		return
+	}
+
+	defer weatherImportMutex.Unlock()
+
 	metarImporter := importer.NewNoaaWeatherImporter(db, logger)
 
 	b := backoff.NewExponentialBackOff()
