@@ -58,38 +58,27 @@ func (i *NoaaWeatherImporter) ImportMetars(url string, ctx context.Context) erro
 
 	wg.SetLimit(environment.Global.MaxConcurrentImports)
 
+	xmlMetarResponse := XmlMetarResponse{}
+
 	// Parse xml file
-	decoder := xml.NewDecoder(f)
-	for {
-		token, err := decoder.Token()
-		if err != nil {
-			if err.Error() != "EOF" {
-				i.logger.Error(fmt.Sprintf("[IMPORT] Failed to parse TAFs: %s", err))
-			}
+	fileContent, err := os.ReadFile(filepath)
+	if err != nil {
+		return err
+	}
 
-			break
-		}
+	err = xml.Unmarshal(fileContent, &xmlMetarResponse)
+	if err != nil {
+		i.logger.Error(fmt.Sprintf("[IMPORT] Failed to parse METARs: %s", err))
+		return err
+	}
 
-		switch se := token.(type) {
+	for _, xmlMetar := range xmlMetarResponse.Data.METAR {
+		xmlMetar := xmlMetar
 
-		// We have the start of an element.
-		// However, we have the complete token in t
-		case xml.StartElement:
-			switch se.Name.Local {
-			case "METAR":
-				var xmlMetar XmlMetar
-				err = decoder.DecodeElement(&xmlMetar, &se)
-				if err != nil {
-					i.logger.Error(fmt.Sprintf("[IMPORT] Failed to parse METAR at %v: %s", se, err))
-					continue
-				}
-
-				i.stats.AddTotal()
-				wg.Go(func() error {
-					return i.importMetar(&xmlMetar, ctx)
-				})
-			}
-		}
+		i.stats.AddTotal()
+		wg.Go(func() error {
+			return i.importMetar(&xmlMetar, ctx)
+		})
 	}
 
 	err = wg.Wait()
@@ -132,38 +121,27 @@ func (i *NoaaWeatherImporter) ImportTafs(url string, ctx context.Context) error 
 
 	wg.SetLimit(environment.Global.MaxConcurrentImports)
 
+	xmlTafResponse := XmlTafResponse{}
+
 	// Parse xml file
-	decoder := xml.NewDecoder(f)
-	for {
-		token, err := decoder.Token()
-		if err != nil {
-			if err.Error() != "EOF" {
-				i.logger.Error(fmt.Sprintf("[IMPORT] Failed to parse TAFs: %s", err))
-			}
+	fileContent, err := os.ReadFile(filepath)
+	if err != nil {
+		return err
+	}
 
-			break
-		}
+	err = xml.Unmarshal(fileContent, &xmlTafResponse)
+	if err != nil {
+		i.logger.Error(fmt.Sprintf("[IMPORT] Failed to parse TAFs: %s", err))
+		return err
+	}
 
-		switch se := token.(type) {
+	for _, xmlTaf := range xmlTafResponse.Data.TAF {
+		xmlTaf := xmlTaf
 
-		// We have the start of an element.
-		// However, we have the complete token in t
-		case xml.StartElement:
-			switch se.Name.Local {
-			case "TAF":
-				var xmlTaf XmlTaf
-				err = decoder.DecodeElement(&xmlTaf, &se)
-				if err != nil {
-					i.logger.Error(fmt.Sprintf("[IMPORT] Failed to parse TAF at %v: %s", se, err))
-					continue
-				}
-
-				i.stats.AddTotal()
-				wg.Go(func() error {
-					return i.importTaf(&xmlTaf, ctx)
-				})
-			}
-		}
+		i.stats.AddTotal()
+		wg.Go(func() error {
+			return i.importTaf(&xmlTaf, ctx)
+		})
 	}
 
 	err = wg.Wait()

@@ -75,7 +75,10 @@ func (s *Server) Run() error {
 		}
 
 		go func() {
-			s.RunWeatherImport(context.Background())
+			ctx, cancel := context.WithTimeout(context.Background(), 10*time.Minute)
+			defer cancel()
+
+			s.RunWeatherImport(ctx)
 		}()
 
 		c.Status(http.StatusNoContent)
@@ -87,7 +90,10 @@ func (s *Server) Run() error {
 		}
 
 		go func() {
-			s.RunAirportImport(context.Background())
+			ctx, cancel := context.WithTimeout(context.Background(), 10*time.Minute)
+			defer cancel()
+
+			s.RunAirportImport(ctx)
 		}()
 
 		c.Status(http.StatusNoContent)

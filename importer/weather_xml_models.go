@@ -1,6 +1,7 @@
 package importer
 
 import (
+	"encoding/xml"
 	"fmt"
 	"github.com/cnf/structhash"
 	"time"
@@ -56,6 +57,32 @@ type XmlMetar struct {
 
 func (x *XmlMetar) Hash() string {
 	return fmt.Sprintf("%x", structhash.Md5(x, 1))
+}
+
+type XmlMetarResponse struct {
+	XMLName                   xml.Name `xml:"response"`
+	Text                      string   `xml:",chardata"`
+	Xsd                       string   `xml:"xsd,attr"`
+	Xsi                       string   `xml:"xsi,attr"`
+	Version                   string   `xml:"version,attr"`
+	NoNamespaceSchemaLocation string   `xml:"noNamespaceSchemaLocation,attr"`
+	RequestIndex              string   `xml:"request_index"`
+	DataSource                struct {
+		Text string `xml:",chardata"`
+		Name string `xml:"name,attr"`
+	} `xml:"data_source"`
+	Request struct {
+		Text string `xml:",chardata"`
+		Type string `xml:"type,attr"`
+	} `xml:"request"`
+	Errors      string `xml:"errors"`
+	Warnings    string `xml:"warnings"`
+	TimeTakenMs string `xml:"time_taken_ms"`
+	Data        struct {
+		Text       string     `xml:",chardata"`
+		NumResults string     `xml:"num_results,attr"`
+		METAR      []XmlMetar `xml:"METAR"`
+	} `xml:"data"`
 }
 
 type XmlTaf struct {
@@ -116,4 +143,30 @@ type XmlTemperature struct {
 	SurfaceTempC float64   `xml:"sfc_temp_c"`
 	MaxTempC     *float64  `xml:"max_temp_c"`
 	MinTempC     *float64  `xml:"min_temp_c"`
+}
+
+type XmlTafResponse struct {
+	XMLName                   xml.Name `xml:"response"`
+	Text                      string   `xml:",chardata"`
+	Xsd                       string   `xml:"xsd,attr"`
+	Xsi                       string   `xml:"xsi,attr"`
+	Version                   string   `xml:"version,attr"`
+	NoNamespaceSchemaLocation string   `xml:"noNamespaceSchemaLocation,attr"`
+	RequestIndex              string   `xml:"request_index"`
+	DataSource                struct {
+		Text string `xml:",chardata"`
+		Name string `xml:"name,attr"`
+	} `xml:"data_source"`
+	Request struct {
+		Text string `xml:",chardata"`
+		Type string `xml:"type,attr"`
+	} `xml:"request"`
+	Errors      string `xml:"errors"`
+	Warnings    string `xml:"warnings"`
+	TimeTakenMs string `xml:"time_taken_ms"`
+	Data        struct {
+		Text       string   `xml:",chardata"`
+		NumResults string   `xml:"num_results,attr"`
+		TAF        []XmlTaf `xml:"TAF"`
+	} `xml:"data"`
 }
