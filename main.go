@@ -52,7 +52,7 @@ func main() {
 }
 
 func RunServer(db *ent.Client, logger *logging.Logger) error {
-	err := server.NewServer().Run(db, logger)
+	err := server.NewServer(db, logger).Run()
 	if err != nil {
 		return err
 	}
