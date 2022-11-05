@@ -257,6 +257,8 @@ func (s *Server) generateSitemap(c *gin.Context) *stm.Sitemap {
 		return nil
 	}
 
+	s.logger.Info(fmt.Sprintf("[SITEMAP] Generating sitemap for %d airports", airportsCount))
+
 	for i := 0; i < airportsCount; i += 100 {
 		airportsPage, err := s.db.Airport.Query().
 			Select(airport.FieldIdentifier, airport.FieldImportance).
@@ -278,6 +280,8 @@ func (s *Server) generateSitemap(c *gin.Context) *stm.Sitemap {
 			priority := float64(a.Importance) / maxImportance
 			sm.Add(stm.URL{{"loc", fmt.Sprintf(environment.Global.SitemapAirportsPath, a.Identifier)}, {"changefreq", "always"}, {"priority", fmt.Sprintf("%.1f", priority)}, {"lastmod", a.Edges.Station.Edges.Metars[0].ObservationTime}})
 		}
+
+		s.logger.Info(fmt.Sprintf("[SITEMAP] Generated sitemap for %d airports", i+len(airportsPage)))
 	}
 
 	if environment.Global.SitemapAdditionalUrls != "" {
@@ -288,6 +292,8 @@ func (s *Server) generateSitemap(c *gin.Context) *stm.Sitemap {
 	}
 
 	sm.Add(stm.URL{{"loc", environment.Global.SitemapBase}, {"changefreq", "always"}, {"priority", "1.0"}})
+
+	s.logger.Info(fmt.Sprintf("[SITEMAP] Sitemap generation completed"))
 
 	return sm
 }
