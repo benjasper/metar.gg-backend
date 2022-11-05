@@ -17,6 +17,10 @@ type Environment struct {
 	AxiomDataset                string `mapstructure:"AXIOM_DATASET"`
 	WeatherDataRetentionDays    int    `mapstructure:"WEATHER_DATA_RETENTION_DAYS"`
 	GraphQLQueryComplexityLimit int    `mapstructure:"GRAPHQL_QUERY_COMPLEXITY_LIMIT"`
+
+	SitemapBase           string `mapstructure:"SITEMAP_BASE"`
+	SitemapAirportsPath   string `mapstructure:"SITEMAP_AIRPORTS_PATH"`
+	SitemapAdditionalUrls string `mapstructure:"SITEMAP_ADDITIONAL_URLS"`
 }
 
 var Global Environment

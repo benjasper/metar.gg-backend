@@ -15,6 +15,7 @@ The hosted version imports airport data every 7 days and weather data every 5 mi
   - Hashing, for duplicate detection
   - Syncs all Airport Data and removes old ones
   - Timezone data for airports
+  - Generate a sitemap for all airports with a weather station
 - GraphQL API
   - Unit Conversion API
   - Airport vicinity search
