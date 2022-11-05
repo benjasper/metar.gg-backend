@@ -226,7 +226,7 @@ func (s *Server) respondWithSitemap(c *gin.Context) {
 }
 
 func (s *Server) generateSitemap(c *gin.Context) *stm.Sitemap {
-	sm := stm.NewSitemap(1)
+	sm := stm.NewSitemap(environment.Global.MaxConcurrentImports)
 
 	sm.SetDefaultHost(environment.Global.SitemapBase)
 
