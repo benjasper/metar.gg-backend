@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/axiomhq/axiom-go/axiom"
+	"github.com/cenkalti/backoff/v4"
 	"log"
 	"metar.gg/environment"
 	"strings"
@@ -169,15 +170,26 @@ func (l *Logger) uploadLog() {
 
 	log.Printf("Uploading %d log events to Axiom\n", storeSize)
 
-	// Ingest ⚡
-	res, err := l.axiomClient.Datasets.IngestEvents(context.Background(), environment.Global.AxiomDataset, axiom.IngestOptions{}, l.eventStore...)
-	if err != nil {
-		l.Fatal(err)
-	}
+	b := backoff.NewExponentialBackOff()
+	b.MaxElapsedTime = 5 * time.Minute
 
-	// Make sure everything went smoothly.
-	for _, fail := range res.Failures {
-		l.Error(fail.Error)
+	//Ingest with backoff
+	err := backoff.Retry(func() error {
+		res, err := l.axiomClient.Datasets.IngestEvents(context.Background(), environment.Global.AxiomDataset, axiom.IngestOptions{}, l.eventStore...)
+		if err != nil {
+			l.Error(fmt.Sprintf("Error ingesting events: %s", err))
+		}
+
+		// Make sure everything went smoothly.
+		for _, fail := range res.Failures {
+			l.Error(fail.Error)
+		}
+
+		return err
+	}, b)
+	if err != nil {
+		l.Error(fmt.Sprintf("Error uploading log events to Axiom: %s", err.Error()))
+		return
 	}
 
 	// Clear the store
