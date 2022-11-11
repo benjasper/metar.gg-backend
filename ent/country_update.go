@@ -10,6 +10,7 @@ import (
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
+	"entgo.io/ent/dialect/sql/sqljson"
 	"entgo.io/ent/schema/field"
 	"github.com/google/uuid"
 	"metar.gg/ent/airport"
@@ -99,6 +100,12 @@ func (cu *CountryUpdate) SetWikipediaLink(s string) *CountryUpdate {
 // SetKeywords sets the "keywords" field.
 func (cu *CountryUpdate) SetKeywords(s []string) *CountryUpdate {
 	cu.mutation.SetKeywords(s)
+	return cu
+}
+
+// AppendKeywords appends s to the "keywords" field.
+func (cu *CountryUpdate) AppendKeywords(s []string) *CountryUpdate {
+	cu.mutation.AppendKeywords(s)
 	return cu
 }
 
@@ -238,66 +245,35 @@ func (cu *CountryUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 	}
 	if value, ok := cu.mutation.ImportID(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Value:  value,
-			Column: country.FieldImportID,
-		})
+		_spec.SetField(country.FieldImportID, field.TypeInt, value)
 	}
 	if value, ok := cu.mutation.AddedImportID(); ok {
-		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Value:  value,
-			Column: country.FieldImportID,
-		})
+		_spec.AddField(country.FieldImportID, field.TypeInt, value)
 	}
 	if value, ok := cu.mutation.Hash(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: country.FieldHash,
-		})
+		_spec.SetField(country.FieldHash, field.TypeString, value)
 	}
 	if value, ok := cu.mutation.ImportFlag(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeBool,
-			Value:  value,
-			Column: country.FieldImportFlag,
-		})
+		_spec.SetField(country.FieldImportFlag, field.TypeBool, value)
 	}
 	if value, ok := cu.mutation.LastUpdated(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Value:  value,
-			Column: country.FieldLastUpdated,
-		})
+		_spec.SetField(country.FieldLastUpdated, field.TypeTime, value)
 	}
 	if value, ok := cu.mutation.Name(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: country.FieldName,
-		})
+		_spec.SetField(country.FieldName, field.TypeString, value)
 	}
 	if value, ok := cu.mutation.Continent(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeEnum,
-			Value:  value,
-			Column: country.FieldContinent,
-		})
+		_spec.SetField(country.FieldContinent, field.TypeEnum, value)
 	}
 	if value, ok := cu.mutation.WikipediaLink(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: country.FieldWikipediaLink,
-		})
+		_spec.SetField(country.FieldWikipediaLink, field.TypeString, value)
 	}
 	if value, ok := cu.mutation.Keywords(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeJSON,
-			Value:  value,
-			Column: country.FieldKeywords,
+		_spec.SetField(country.FieldKeywords, field.TypeJSON, value)
+	}
+	if value, ok := cu.mutation.AppendedKeywords(); ok {
+		_spec.AddModifier(func(u *sql.UpdateBuilder) {
+			sqljson.Append(u, country.FieldKeywords, value)
 		})
 	}
 	if cu.mutation.AirportsCleared() {
@@ -354,7 +330,7 @@ func (cu *CountryUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	_spec.Modifiers = cu.modifiers
+	_spec.AddModifiers(cu.modifiers...)
 	if n, err = sqlgraph.UpdateNodes(ctx, cu.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{country.Label}
@@ -443,6 +419,12 @@ func (cuo *CountryUpdateOne) SetWikipediaLink(s string) *CountryUpdateOne {
 // SetKeywords sets the "keywords" field.
 func (cuo *CountryUpdateOne) SetKeywords(s []string) *CountryUpdateOne {
 	cuo.mutation.SetKeywords(s)
+	return cuo
+}
+
+// AppendKeywords appends s to the "keywords" field.
+func (cuo *CountryUpdateOne) AppendKeywords(s []string) *CountryUpdateOne {
+	cuo.mutation.AppendKeywords(s)
 	return cuo
 }
 
@@ -612,66 +594,35 @@ func (cuo *CountryUpdateOne) sqlSave(ctx context.Context) (_node *Country, err e
 		}
 	}
 	if value, ok := cuo.mutation.ImportID(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Value:  value,
-			Column: country.FieldImportID,
-		})
+		_spec.SetField(country.FieldImportID, field.TypeInt, value)
 	}
 	if value, ok := cuo.mutation.AddedImportID(); ok {
-		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Value:  value,
-			Column: country.FieldImportID,
-		})
+		_spec.AddField(country.FieldImportID, field.TypeInt, value)
 	}
 	if value, ok := cuo.mutation.Hash(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: country.FieldHash,
-		})
+		_spec.SetField(country.FieldHash, field.TypeString, value)
 	}
 	if value, ok := cuo.mutation.ImportFlag(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeBool,
-			Value:  value,
-			Column: country.FieldImportFlag,
-		})
+		_spec.SetField(country.FieldImportFlag, field.TypeBool, value)
 	}
 	if value, ok := cuo.mutation.LastUpdated(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Value:  value,
-			Column: country.FieldLastUpdated,
-		})
+		_spec.SetField(country.FieldLastUpdated, field.TypeTime, value)
 	}
 	if value, ok := cuo.mutation.Name(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: country.FieldName,
-		})
+		_spec.SetField(country.FieldName, field.TypeString, value)
 	}
 	if value, ok := cuo.mutation.Continent(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeEnum,
-			Value:  value,
-			Column: country.FieldContinent,
-		})
+		_spec.SetField(country.FieldContinent, field.TypeEnum, value)
 	}
 	if value, ok := cuo.mutation.WikipediaLink(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: country.FieldWikipediaLink,
-		})
+		_spec.SetField(country.FieldWikipediaLink, field.TypeString, value)
 	}
 	if value, ok := cuo.mutation.Keywords(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeJSON,
-			Value:  value,
-			Column: country.FieldKeywords,
+		_spec.SetField(country.FieldKeywords, field.TypeJSON, value)
+	}
+	if value, ok := cuo.mutation.AppendedKeywords(); ok {
+		_spec.AddModifier(func(u *sql.UpdateBuilder) {
+			sqljson.Append(u, country.FieldKeywords, value)
 		})
 	}
 	if cuo.mutation.AirportsCleared() {
@@ -728,7 +679,7 @@ func (cuo *CountryUpdateOne) sqlSave(ctx context.Context) (_node *Country, err e
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	_spec.Modifiers = cuo.modifiers
+	_spec.AddModifiers(cuo.modifiers...)
 	_node = &Country{config: cuo.config}
 	_spec.Assign = _node.assignValues
 	_spec.ScanValues = _node.scanValues

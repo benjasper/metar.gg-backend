@@ -282,75 +282,39 @@ func (rc *RegionCreate) createSpec() (*Region, *sqlgraph.CreateSpec) {
 		_spec.ID.Value = &id
 	}
 	if value, ok := rc.mutation.ImportID(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Value:  value,
-			Column: region.FieldImportID,
-		})
+		_spec.SetField(region.FieldImportID, field.TypeInt, value)
 		_node.ImportID = value
 	}
 	if value, ok := rc.mutation.Hash(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: region.FieldHash,
-		})
+		_spec.SetField(region.FieldHash, field.TypeString, value)
 		_node.Hash = value
 	}
 	if value, ok := rc.mutation.ImportFlag(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeBool,
-			Value:  value,
-			Column: region.FieldImportFlag,
-		})
+		_spec.SetField(region.FieldImportFlag, field.TypeBool, value)
 		_node.ImportFlag = value
 	}
 	if value, ok := rc.mutation.LastUpdated(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Value:  value,
-			Column: region.FieldLastUpdated,
-		})
+		_spec.SetField(region.FieldLastUpdated, field.TypeTime, value)
 		_node.LastUpdated = value
 	}
 	if value, ok := rc.mutation.Code(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: region.FieldCode,
-		})
+		_spec.SetField(region.FieldCode, field.TypeString, value)
 		_node.Code = value
 	}
 	if value, ok := rc.mutation.LocalCode(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: region.FieldLocalCode,
-		})
+		_spec.SetField(region.FieldLocalCode, field.TypeString, value)
 		_node.LocalCode = value
 	}
 	if value, ok := rc.mutation.Name(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: region.FieldName,
-		})
+		_spec.SetField(region.FieldName, field.TypeString, value)
 		_node.Name = value
 	}
 	if value, ok := rc.mutation.WikipediaLink(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: region.FieldWikipediaLink,
-		})
+		_spec.SetField(region.FieldWikipediaLink, field.TypeString, value)
 		_node.WikipediaLink = value
 	}
 	if value, ok := rc.mutation.Keywords(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeJSON,
-			Value:  value,
-			Column: region.FieldKeywords,
-		})
+		_spec.SetField(region.FieldKeywords, field.TypeJSON, value)
 		_node.Keywords = value
 	}
 	if nodes := rc.mutation.AirportsIDs(); len(nodes) > 0 {

@@ -299,6 +299,11 @@ func (tcq *TurbulenceConditionQuery) Select(fields ...string) *TurbulenceConditi
 	return selbuild
 }
 
+// Aggregate returns a TurbulenceConditionSelect configured with the given aggregations.
+func (tcq *TurbulenceConditionQuery) Aggregate(fns ...AggregateFunc) *TurbulenceConditionSelect {
+	return tcq.Select().Aggregate(fns...)
+}
+
 func (tcq *TurbulenceConditionQuery) prepareQuery(ctx context.Context) error {
 	for _, f := range tcq.fields {
 		if !turbulencecondition.ValidColumn(f) {
@@ -365,11 +370,14 @@ func (tcq *TurbulenceConditionQuery) sqlCount(ctx context.Context) (int, error) 
 }
 
 func (tcq *TurbulenceConditionQuery) sqlExist(ctx context.Context) (bool, error) {
-	n, err := tcq.sqlCount(ctx)
-	if err != nil {
+	switch _, err := tcq.FirstID(ctx); {
+	case IsNotFound(err):
+		return false, nil
+	case err != nil:
 		return false, fmt.Errorf("ent: check existence: %w", err)
+	default:
+		return true, nil
 	}
-	return n > 0, nil
 }
 
 func (tcq *TurbulenceConditionQuery) querySpec() *sqlgraph.QuerySpec {
@@ -513,8 +521,6 @@ func (tcgb *TurbulenceConditionGroupBy) sqlQuery() *sql.Selector {
 	for _, fn := range tcgb.fns {
 		aggregation = append(aggregation, fn(selector))
 	}
-	// If no columns were selected in a custom aggregation function, the default
-	// selection is the fields used for "group-by", and the aggregation functions.
 	if len(selector.SelectedColumns()) == 0 {
 		columns := make([]string, 0, len(tcgb.fields)+len(tcgb.fns))
 		for _, f := range tcgb.fields {
@@ -534,6 +540,12 @@ type TurbulenceConditionSelect struct {
 	sql *sql.Selector
 }
 
+// Aggregate adds the given aggregation functions to the selector query.
+func (tcs *TurbulenceConditionSelect) Aggregate(fns ...AggregateFunc) *TurbulenceConditionSelect {
+	tcs.fns = append(tcs.fns, fns...)
+	return tcs
+}
+
 // Scan applies the selector query and scans the result into the given value.
 func (tcs *TurbulenceConditionSelect) Scan(ctx context.Context, v any) error {
 	if err := tcs.prepareQuery(ctx); err != nil {
@@ -544,6 +556,16 @@ func (tcs *TurbulenceConditionSelect) Scan(ctx context.Context, v any) error {
 }
 
 func (tcs *TurbulenceConditionSelect) sqlScan(ctx context.Context, v any) error {
+	aggregation := make([]string, 0, len(tcs.fns))
+	for _, fn := range tcs.fns {
+		aggregation = append(aggregation, fn(tcs.sql))
+	}
+	switch n := len(*tcs.selector.flds); {
+	case n == 0 && len(aggregation) > 0:
+		tcs.sql.Select(aggregation...)
+	case n != 0 && len(aggregation) > 0:
+		tcs.sql.AppendSelect(aggregation...)
+	}
 	rows := &sql.Rows{}
 	query, args := tcs.sql.Query()
 	if err := tcs.driver.Query(ctx, query, args, rows); err != nil {

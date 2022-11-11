@@ -299,6 +299,11 @@ func (icq *IcingConditionQuery) Select(fields ...string) *IcingConditionSelect {
 	return selbuild
 }
 
+// Aggregate returns a IcingConditionSelect configured with the given aggregations.
+func (icq *IcingConditionQuery) Aggregate(fns ...AggregateFunc) *IcingConditionSelect {
+	return icq.Select().Aggregate(fns...)
+}
+
 func (icq *IcingConditionQuery) prepareQuery(ctx context.Context) error {
 	for _, f := range icq.fields {
 		if !icingcondition.ValidColumn(f) {
@@ -365,11 +370,14 @@ func (icq *IcingConditionQuery) sqlCount(ctx context.Context) (int, error) {
 }
 
 func (icq *IcingConditionQuery) sqlExist(ctx context.Context) (bool, error) {
-	n, err := icq.sqlCount(ctx)
-	if err != nil {
+	switch _, err := icq.FirstID(ctx); {
+	case IsNotFound(err):
+		return false, nil
+	case err != nil:
 		return false, fmt.Errorf("ent: check existence: %w", err)
+	default:
+		return true, nil
 	}
-	return n > 0, nil
 }
 
 func (icq *IcingConditionQuery) querySpec() *sqlgraph.QuerySpec {
@@ -513,8 +521,6 @@ func (icgb *IcingConditionGroupBy) sqlQuery() *sql.Selector {
 	for _, fn := range icgb.fns {
 		aggregation = append(aggregation, fn(selector))
 	}
-	// If no columns were selected in a custom aggregation function, the default
-	// selection is the fields used for "group-by", and the aggregation functions.
 	if len(selector.SelectedColumns()) == 0 {
 		columns := make([]string, 0, len(icgb.fields)+len(icgb.fns))
 		for _, f := range icgb.fields {
@@ -534,6 +540,12 @@ type IcingConditionSelect struct {
 	sql *sql.Selector
 }
 
+// Aggregate adds the given aggregation functions to the selector query.
+func (ics *IcingConditionSelect) Aggregate(fns ...AggregateFunc) *IcingConditionSelect {
+	ics.fns = append(ics.fns, fns...)
+	return ics
+}
+
 // Scan applies the selector query and scans the result into the given value.
 func (ics *IcingConditionSelect) Scan(ctx context.Context, v any) error {
 	if err := ics.prepareQuery(ctx); err != nil {
@@ -544,6 +556,16 @@ func (ics *IcingConditionSelect) Scan(ctx context.Context, v any) error {
 }
 
 func (ics *IcingConditionSelect) sqlScan(ctx context.Context, v any) error {
+	aggregation := make([]string, 0, len(ics.fns))
+	for _, fn := range ics.fns {
+		aggregation = append(aggregation, fn(ics.sql))
+	}
+	switch n := len(*ics.selector.flds); {
+	case n == 0 && len(aggregation) > 0:
+		ics.sql.Select(aggregation...)
+	case n != 0 && len(aggregation) > 0:
+		ics.sql.AppendSelect(aggregation...)
+	}
 	rows := &sql.Rows{}
 	query, args := ics.sql.Query()
 	if err := ics.driver.Query(ctx, query, args, rows); err != nil {

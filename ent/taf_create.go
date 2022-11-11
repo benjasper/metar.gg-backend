@@ -292,67 +292,35 @@ func (tc *TafCreate) createSpec() (*Taf, *sqlgraph.CreateSpec) {
 		_spec.ID.Value = &id
 	}
 	if value, ok := tc.mutation.RawText(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: taf.FieldRawText,
-		})
+		_spec.SetField(taf.FieldRawText, field.TypeString, value)
 		_node.RawText = value
 	}
 	if value, ok := tc.mutation.IssueTime(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Value:  value,
-			Column: taf.FieldIssueTime,
-		})
+		_spec.SetField(taf.FieldIssueTime, field.TypeTime, value)
 		_node.IssueTime = value
 	}
 	if value, ok := tc.mutation.ImportTime(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Value:  value,
-			Column: taf.FieldImportTime,
-		})
+		_spec.SetField(taf.FieldImportTime, field.TypeTime, value)
 		_node.ImportTime = value
 	}
 	if value, ok := tc.mutation.BulletinTime(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Value:  value,
-			Column: taf.FieldBulletinTime,
-		})
+		_spec.SetField(taf.FieldBulletinTime, field.TypeTime, value)
 		_node.BulletinTime = value
 	}
 	if value, ok := tc.mutation.ValidFromTime(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Value:  value,
-			Column: taf.FieldValidFromTime,
-		})
+		_spec.SetField(taf.FieldValidFromTime, field.TypeTime, value)
 		_node.ValidFromTime = value
 	}
 	if value, ok := tc.mutation.ValidToTime(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Value:  value,
-			Column: taf.FieldValidToTime,
-		})
+		_spec.SetField(taf.FieldValidToTime, field.TypeTime, value)
 		_node.ValidToTime = value
 	}
 	if value, ok := tc.mutation.Remarks(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: taf.FieldRemarks,
-		})
+		_spec.SetField(taf.FieldRemarks, field.TypeString, value)
 		_node.Remarks = value
 	}
 	if value, ok := tc.mutation.Hash(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: taf.FieldHash,
-		})
+		_spec.SetField(taf.FieldHash, field.TypeString, value)
 		_node.Hash = value
 	}
 	if nodes := tc.mutation.StationIDs(); len(nodes) > 0 {

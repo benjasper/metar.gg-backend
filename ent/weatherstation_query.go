@@ -410,6 +410,11 @@ func (wsq *WeatherStationQuery) Select(fields ...string) *WeatherStationSelect {
 	return selbuild
 }
 
+// Aggregate returns a WeatherStationSelect configured with the given aggregations.
+func (wsq *WeatherStationQuery) Aggregate(fns ...AggregateFunc) *WeatherStationSelect {
+	return wsq.Select().Aggregate(fns...)
+}
+
 func (wsq *WeatherStationQuery) prepareQuery(ctx context.Context) error {
 	for _, f := range wsq.fields {
 		if !weatherstation.ValidColumn(f) {
@@ -611,11 +616,14 @@ func (wsq *WeatherStationQuery) sqlCount(ctx context.Context) (int, error) {
 }
 
 func (wsq *WeatherStationQuery) sqlExist(ctx context.Context) (bool, error) {
-	n, err := wsq.sqlCount(ctx)
-	if err != nil {
+	switch _, err := wsq.FirstID(ctx); {
+	case IsNotFound(err):
+		return false, nil
+	case err != nil:
 		return false, fmt.Errorf("ent: check existence: %w", err)
+	default:
+		return true, nil
 	}
-	return n > 0, nil
 }
 
 func (wsq *WeatherStationQuery) querySpec() *sqlgraph.QuerySpec {
@@ -787,8 +795,6 @@ func (wsgb *WeatherStationGroupBy) sqlQuery() *sql.Selector {
 	for _, fn := range wsgb.fns {
 		aggregation = append(aggregation, fn(selector))
 	}
-	// If no columns were selected in a custom aggregation function, the default
-	// selection is the fields used for "group-by", and the aggregation functions.
 	if len(selector.SelectedColumns()) == 0 {
 		columns := make([]string, 0, len(wsgb.fields)+len(wsgb.fns))
 		for _, f := range wsgb.fields {
@@ -808,6 +814,12 @@ type WeatherStationSelect struct {
 	sql *sql.Selector
 }
 
+// Aggregate adds the given aggregation functions to the selector query.
+func (wss *WeatherStationSelect) Aggregate(fns ...AggregateFunc) *WeatherStationSelect {
+	wss.fns = append(wss.fns, fns...)
+	return wss
+}
+
 // Scan applies the selector query and scans the result into the given value.
 func (wss *WeatherStationSelect) Scan(ctx context.Context, v any) error {
 	if err := wss.prepareQuery(ctx); err != nil {
@@ -818,6 +830,16 @@ func (wss *WeatherStationSelect) Scan(ctx context.Context, v any) error {
 }
 
 func (wss *WeatherStationSelect) sqlScan(ctx context.Context, v any) error {
+	aggregation := make([]string, 0, len(wss.fns))
+	for _, fn := range wss.fns {
+		aggregation = append(aggregation, fn(wss.sql))
+	}
+	switch n := len(*wss.selector.flds); {
+	case n == 0 && len(aggregation) > 0:
+		wss.sql.Select(aggregation...)
+	case n != 0 && len(aggregation) > 0:
+		wss.sql.AppendSelect(aggregation...)
+	}
 	rows := &sql.Rows{}
 	query, args := wss.sql.Query()
 	if err := wss.driver.Query(ctx, query, args, rows); err != nil {

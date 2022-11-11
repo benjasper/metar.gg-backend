@@ -187,27 +187,15 @@ func (tcc *TurbulenceConditionCreate) createSpec() (*TurbulenceCondition, *sqlgr
 		_spec.ID.Value = &id
 	}
 	if value, ok := tcc.mutation.Intensity(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: turbulencecondition.FieldIntensity,
-		})
+		_spec.SetField(turbulencecondition.FieldIntensity, field.TypeString, value)
 		_node.Intensity = value
 	}
 	if value, ok := tcc.mutation.MinAltitude(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Value:  value,
-			Column: turbulencecondition.FieldMinAltitude,
-		})
+		_spec.SetField(turbulencecondition.FieldMinAltitude, field.TypeInt, value)
 		_node.MinAltitude = value
 	}
 	if value, ok := tcc.mutation.MaxAltitude(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Value:  value,
-			Column: turbulencecondition.FieldMaxAltitude,
-		})
+		_spec.SetField(turbulencecondition.FieldMaxAltitude, field.TypeInt, value)
 		_node.MaxAltitude = value
 	}
 	return _node, _spec

@@ -264,7 +264,7 @@ func (c *AirportClient) DeleteOne(a *Airport) *AirportDeleteOne {
 	return c.DeleteOneID(a.ID)
 }
 
-// DeleteOne returns a builder for deleting the given entity by its id.
+// DeleteOneID returns a builder for deleting the given entity by its id.
 func (c *AirportClient) DeleteOneID(id uuid.UUID) *AirportDeleteOne {
 	builder := c.Delete().Where(airport.ID(id))
 	builder.mutation.id = &id
@@ -296,7 +296,7 @@ func (c *AirportClient) GetX(ctx context.Context, id uuid.UUID) *Airport {
 // QueryRegion queries the region edge of a Airport.
 func (c *AirportClient) QueryRegion(a *Airport) *RegionQuery {
 	query := &RegionQuery{config: c.config}
-	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := a.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(airport.Table, airport.FieldID, id),
@@ -312,7 +312,7 @@ func (c *AirportClient) QueryRegion(a *Airport) *RegionQuery {
 // QueryCountry queries the country edge of a Airport.
 func (c *AirportClient) QueryCountry(a *Airport) *CountryQuery {
 	query := &CountryQuery{config: c.config}
-	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := a.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(airport.Table, airport.FieldID, id),
@@ -328,7 +328,7 @@ func (c *AirportClient) QueryCountry(a *Airport) *CountryQuery {
 // QueryRunways queries the runways edge of a Airport.
 func (c *AirportClient) QueryRunways(a *Airport) *RunwayQuery {
 	query := &RunwayQuery{config: c.config}
-	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := a.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(airport.Table, airport.FieldID, id),
@@ -344,7 +344,7 @@ func (c *AirportClient) QueryRunways(a *Airport) *RunwayQuery {
 // QueryFrequencies queries the frequencies edge of a Airport.
 func (c *AirportClient) QueryFrequencies(a *Airport) *FrequencyQuery {
 	query := &FrequencyQuery{config: c.config}
-	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := a.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(airport.Table, airport.FieldID, id),
@@ -360,7 +360,7 @@ func (c *AirportClient) QueryFrequencies(a *Airport) *FrequencyQuery {
 // QueryStation queries the station edge of a Airport.
 func (c *AirportClient) QueryStation(a *Airport) *WeatherStationQuery {
 	query := &WeatherStationQuery{config: c.config}
-	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := a.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(airport.Table, airport.FieldID, id),
@@ -434,7 +434,7 @@ func (c *CountryClient) DeleteOne(co *Country) *CountryDeleteOne {
 	return c.DeleteOneID(co.ID)
 }
 
-// DeleteOne returns a builder for deleting the given entity by its id.
+// DeleteOneID returns a builder for deleting the given entity by its id.
 func (c *CountryClient) DeleteOneID(id uuid.UUID) *CountryDeleteOne {
 	builder := c.Delete().Where(country.ID(id))
 	builder.mutation.id = &id
@@ -466,7 +466,7 @@ func (c *CountryClient) GetX(ctx context.Context, id uuid.UUID) *Country {
 // QueryAirports queries the airports edge of a Country.
 func (c *CountryClient) QueryAirports(co *Country) *AirportQuery {
 	query := &AirportQuery{config: c.config}
-	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := co.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(country.Table, country.FieldID, id),
@@ -540,7 +540,7 @@ func (c *ForecastClient) DeleteOne(f *Forecast) *ForecastDeleteOne {
 	return c.DeleteOneID(f.ID)
 }
 
-// DeleteOne returns a builder for deleting the given entity by its id.
+// DeleteOneID returns a builder for deleting the given entity by its id.
 func (c *ForecastClient) DeleteOneID(id uuid.UUID) *ForecastDeleteOne {
 	builder := c.Delete().Where(forecast.ID(id))
 	builder.mutation.id = &id
@@ -572,7 +572,7 @@ func (c *ForecastClient) GetX(ctx context.Context, id uuid.UUID) *Forecast {
 // QuerySkyConditions queries the sky_conditions edge of a Forecast.
 func (c *ForecastClient) QuerySkyConditions(f *Forecast) *SkyConditionQuery {
 	query := &SkyConditionQuery{config: c.config}
-	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := f.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(forecast.Table, forecast.FieldID, id),
@@ -588,7 +588,7 @@ func (c *ForecastClient) QuerySkyConditions(f *Forecast) *SkyConditionQuery {
 // QueryTurbulenceConditions queries the turbulence_conditions edge of a Forecast.
 func (c *ForecastClient) QueryTurbulenceConditions(f *Forecast) *TurbulenceConditionQuery {
 	query := &TurbulenceConditionQuery{config: c.config}
-	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := f.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(forecast.Table, forecast.FieldID, id),
@@ -604,7 +604,7 @@ func (c *ForecastClient) QueryTurbulenceConditions(f *Forecast) *TurbulenceCondi
 // QueryIcingConditions queries the icing_conditions edge of a Forecast.
 func (c *ForecastClient) QueryIcingConditions(f *Forecast) *IcingConditionQuery {
 	query := &IcingConditionQuery{config: c.config}
-	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := f.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(forecast.Table, forecast.FieldID, id),
@@ -620,7 +620,7 @@ func (c *ForecastClient) QueryIcingConditions(f *Forecast) *IcingConditionQuery 
 // QueryTemperatureData queries the temperature_data edge of a Forecast.
 func (c *ForecastClient) QueryTemperatureData(f *Forecast) *TemperatureDataQuery {
 	query := &TemperatureDataQuery{config: c.config}
-	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := f.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(forecast.Table, forecast.FieldID, id),
@@ -694,7 +694,7 @@ func (c *FrequencyClient) DeleteOne(f *Frequency) *FrequencyDeleteOne {
 	return c.DeleteOneID(f.ID)
 }
 
-// DeleteOne returns a builder for deleting the given entity by its id.
+// DeleteOneID returns a builder for deleting the given entity by its id.
 func (c *FrequencyClient) DeleteOneID(id uuid.UUID) *FrequencyDeleteOne {
 	builder := c.Delete().Where(frequency.ID(id))
 	builder.mutation.id = &id
@@ -726,7 +726,7 @@ func (c *FrequencyClient) GetX(ctx context.Context, id uuid.UUID) *Frequency {
 // QueryAirport queries the airport edge of a Frequency.
 func (c *FrequencyClient) QueryAirport(f *Frequency) *AirportQuery {
 	query := &AirportQuery{config: c.config}
-	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := f.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(frequency.Table, frequency.FieldID, id),
@@ -800,7 +800,7 @@ func (c *IcingConditionClient) DeleteOne(ic *IcingCondition) *IcingConditionDele
 	return c.DeleteOneID(ic.ID)
 }
 
-// DeleteOne returns a builder for deleting the given entity by its id.
+// DeleteOneID returns a builder for deleting the given entity by its id.
 func (c *IcingConditionClient) DeleteOneID(id uuid.UUID) *IcingConditionDeleteOne {
 	builder := c.Delete().Where(icingcondition.ID(id))
 	builder.mutation.id = &id
@@ -890,7 +890,7 @@ func (c *MetarClient) DeleteOne(m *Metar) *MetarDeleteOne {
 	return c.DeleteOneID(m.ID)
 }
 
-// DeleteOne returns a builder for deleting the given entity by its id.
+// DeleteOneID returns a builder for deleting the given entity by its id.
 func (c *MetarClient) DeleteOneID(id uuid.UUID) *MetarDeleteOne {
 	builder := c.Delete().Where(metar.ID(id))
 	builder.mutation.id = &id
@@ -922,7 +922,7 @@ func (c *MetarClient) GetX(ctx context.Context, id uuid.UUID) *Metar {
 // QueryStation queries the station edge of a Metar.
 func (c *MetarClient) QueryStation(m *Metar) *WeatherStationQuery {
 	query := &WeatherStationQuery{config: c.config}
-	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := m.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(metar.Table, metar.FieldID, id),
@@ -938,7 +938,7 @@ func (c *MetarClient) QueryStation(m *Metar) *WeatherStationQuery {
 // QuerySkyConditions queries the sky_conditions edge of a Metar.
 func (c *MetarClient) QuerySkyConditions(m *Metar) *SkyConditionQuery {
 	query := &SkyConditionQuery{config: c.config}
-	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := m.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(metar.Table, metar.FieldID, id),
@@ -1012,7 +1012,7 @@ func (c *RegionClient) DeleteOne(r *Region) *RegionDeleteOne {
 	return c.DeleteOneID(r.ID)
 }
 
-// DeleteOne returns a builder for deleting the given entity by its id.
+// DeleteOneID returns a builder for deleting the given entity by its id.
 func (c *RegionClient) DeleteOneID(id uuid.UUID) *RegionDeleteOne {
 	builder := c.Delete().Where(region.ID(id))
 	builder.mutation.id = &id
@@ -1044,7 +1044,7 @@ func (c *RegionClient) GetX(ctx context.Context, id uuid.UUID) *Region {
 // QueryAirports queries the airports edge of a Region.
 func (c *RegionClient) QueryAirports(r *Region) *AirportQuery {
 	query := &AirportQuery{config: c.config}
-	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := r.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(region.Table, region.FieldID, id),
@@ -1118,7 +1118,7 @@ func (c *RunwayClient) DeleteOne(r *Runway) *RunwayDeleteOne {
 	return c.DeleteOneID(r.ID)
 }
 
-// DeleteOne returns a builder for deleting the given entity by its id.
+// DeleteOneID returns a builder for deleting the given entity by its id.
 func (c *RunwayClient) DeleteOneID(id uuid.UUID) *RunwayDeleteOne {
 	builder := c.Delete().Where(runway.ID(id))
 	builder.mutation.id = &id
@@ -1150,7 +1150,7 @@ func (c *RunwayClient) GetX(ctx context.Context, id uuid.UUID) *Runway {
 // QueryAirport queries the airport edge of a Runway.
 func (c *RunwayClient) QueryAirport(r *Runway) *AirportQuery {
 	query := &AirportQuery{config: c.config}
-	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := r.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(runway.Table, runway.FieldID, id),
@@ -1224,7 +1224,7 @@ func (c *SkyConditionClient) DeleteOne(sc *SkyCondition) *SkyConditionDeleteOne 
 	return c.DeleteOneID(sc.ID)
 }
 
-// DeleteOne returns a builder for deleting the given entity by its id.
+// DeleteOneID returns a builder for deleting the given entity by its id.
 func (c *SkyConditionClient) DeleteOneID(id uuid.UUID) *SkyConditionDeleteOne {
 	builder := c.Delete().Where(skycondition.ID(id))
 	builder.mutation.id = &id
@@ -1314,7 +1314,7 @@ func (c *TafClient) DeleteOne(t *Taf) *TafDeleteOne {
 	return c.DeleteOneID(t.ID)
 }
 
-// DeleteOne returns a builder for deleting the given entity by its id.
+// DeleteOneID returns a builder for deleting the given entity by its id.
 func (c *TafClient) DeleteOneID(id uuid.UUID) *TafDeleteOne {
 	builder := c.Delete().Where(taf.ID(id))
 	builder.mutation.id = &id
@@ -1346,7 +1346,7 @@ func (c *TafClient) GetX(ctx context.Context, id uuid.UUID) *Taf {
 // QueryStation queries the station edge of a Taf.
 func (c *TafClient) QueryStation(t *Taf) *WeatherStationQuery {
 	query := &WeatherStationQuery{config: c.config}
-	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := t.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(taf.Table, taf.FieldID, id),
@@ -1362,7 +1362,7 @@ func (c *TafClient) QueryStation(t *Taf) *WeatherStationQuery {
 // QuerySkyConditions queries the sky_conditions edge of a Taf.
 func (c *TafClient) QuerySkyConditions(t *Taf) *SkyConditionQuery {
 	query := &SkyConditionQuery{config: c.config}
-	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := t.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(taf.Table, taf.FieldID, id),
@@ -1378,7 +1378,7 @@ func (c *TafClient) QuerySkyConditions(t *Taf) *SkyConditionQuery {
 // QueryForecast queries the forecast edge of a Taf.
 func (c *TafClient) QueryForecast(t *Taf) *ForecastQuery {
 	query := &ForecastQuery{config: c.config}
-	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := t.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(taf.Table, taf.FieldID, id),
@@ -1452,7 +1452,7 @@ func (c *TemperatureDataClient) DeleteOne(td *TemperatureData) *TemperatureDataD
 	return c.DeleteOneID(td.ID)
 }
 
-// DeleteOne returns a builder for deleting the given entity by its id.
+// DeleteOneID returns a builder for deleting the given entity by its id.
 func (c *TemperatureDataClient) DeleteOneID(id uuid.UUID) *TemperatureDataDeleteOne {
 	builder := c.Delete().Where(temperaturedata.ID(id))
 	builder.mutation.id = &id
@@ -1542,7 +1542,7 @@ func (c *TurbulenceConditionClient) DeleteOne(tc *TurbulenceCondition) *Turbulen
 	return c.DeleteOneID(tc.ID)
 }
 
-// DeleteOne returns a builder for deleting the given entity by its id.
+// DeleteOneID returns a builder for deleting the given entity by its id.
 func (c *TurbulenceConditionClient) DeleteOneID(id uuid.UUID) *TurbulenceConditionDeleteOne {
 	builder := c.Delete().Where(turbulencecondition.ID(id))
 	builder.mutation.id = &id
@@ -1632,7 +1632,7 @@ func (c *WeatherStationClient) DeleteOne(ws *WeatherStation) *WeatherStationDele
 	return c.DeleteOneID(ws.ID)
 }
 
-// DeleteOne returns a builder for deleting the given entity by its id.
+// DeleteOneID returns a builder for deleting the given entity by its id.
 func (c *WeatherStationClient) DeleteOneID(id uuid.UUID) *WeatherStationDeleteOne {
 	builder := c.Delete().Where(weatherstation.ID(id))
 	builder.mutation.id = &id
@@ -1664,7 +1664,7 @@ func (c *WeatherStationClient) GetX(ctx context.Context, id uuid.UUID) *WeatherS
 // QueryAirport queries the airport edge of a WeatherStation.
 func (c *WeatherStationClient) QueryAirport(ws *WeatherStation) *AirportQuery {
 	query := &AirportQuery{config: c.config}
-	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := ws.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(weatherstation.Table, weatherstation.FieldID, id),
@@ -1680,7 +1680,7 @@ func (c *WeatherStationClient) QueryAirport(ws *WeatherStation) *AirportQuery {
 // QueryMetars queries the metars edge of a WeatherStation.
 func (c *WeatherStationClient) QueryMetars(ws *WeatherStation) *MetarQuery {
 	query := &MetarQuery{config: c.config}
-	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := ws.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(weatherstation.Table, weatherstation.FieldID, id),
@@ -1696,7 +1696,7 @@ func (c *WeatherStationClient) QueryMetars(ws *WeatherStation) *MetarQuery {
 // QueryTafs queries the tafs edge of a WeatherStation.
 func (c *WeatherStationClient) QueryTafs(ws *WeatherStation) *TafQuery {
 	query := &TafQuery{config: c.config}
-	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := ws.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(weatherstation.Table, weatherstation.FieldID, id),

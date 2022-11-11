@@ -144,41 +144,21 @@ func (tcu *TurbulenceConditionUpdate) sqlSave(ctx context.Context) (n int, err e
 		}
 	}
 	if value, ok := tcu.mutation.Intensity(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: turbulencecondition.FieldIntensity,
-		})
+		_spec.SetField(turbulencecondition.FieldIntensity, field.TypeString, value)
 	}
 	if value, ok := tcu.mutation.MinAltitude(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Value:  value,
-			Column: turbulencecondition.FieldMinAltitude,
-		})
+		_spec.SetField(turbulencecondition.FieldMinAltitude, field.TypeInt, value)
 	}
 	if value, ok := tcu.mutation.AddedMinAltitude(); ok {
-		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Value:  value,
-			Column: turbulencecondition.FieldMinAltitude,
-		})
+		_spec.AddField(turbulencecondition.FieldMinAltitude, field.TypeInt, value)
 	}
 	if value, ok := tcu.mutation.MaxAltitude(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Value:  value,
-			Column: turbulencecondition.FieldMaxAltitude,
-		})
+		_spec.SetField(turbulencecondition.FieldMaxAltitude, field.TypeInt, value)
 	}
 	if value, ok := tcu.mutation.AddedMaxAltitude(); ok {
-		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Value:  value,
-			Column: turbulencecondition.FieldMaxAltitude,
-		})
+		_spec.AddField(turbulencecondition.FieldMaxAltitude, field.TypeInt, value)
 	}
-	_spec.Modifiers = tcu.modifiers
+	_spec.AddModifiers(tcu.modifiers...)
 	if n, err = sqlgraph.UpdateNodes(ctx, tcu.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{turbulencecondition.Label}
@@ -345,41 +325,21 @@ func (tcuo *TurbulenceConditionUpdateOne) sqlSave(ctx context.Context) (_node *T
 		}
 	}
 	if value, ok := tcuo.mutation.Intensity(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: turbulencecondition.FieldIntensity,
-		})
+		_spec.SetField(turbulencecondition.FieldIntensity, field.TypeString, value)
 	}
 	if value, ok := tcuo.mutation.MinAltitude(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Value:  value,
-			Column: turbulencecondition.FieldMinAltitude,
-		})
+		_spec.SetField(turbulencecondition.FieldMinAltitude, field.TypeInt, value)
 	}
 	if value, ok := tcuo.mutation.AddedMinAltitude(); ok {
-		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Value:  value,
-			Column: turbulencecondition.FieldMinAltitude,
-		})
+		_spec.AddField(turbulencecondition.FieldMinAltitude, field.TypeInt, value)
 	}
 	if value, ok := tcuo.mutation.MaxAltitude(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Value:  value,
-			Column: turbulencecondition.FieldMaxAltitude,
-		})
+		_spec.SetField(turbulencecondition.FieldMaxAltitude, field.TypeInt, value)
 	}
 	if value, ok := tcuo.mutation.AddedMaxAltitude(); ok {
-		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Value:  value,
-			Column: turbulencecondition.FieldMaxAltitude,
-		})
+		_spec.AddField(turbulencecondition.FieldMaxAltitude, field.TypeInt, value)
 	}
-	_spec.Modifiers = tcuo.modifiers
+	_spec.AddModifiers(tcuo.modifiers...)
 	_node = &TurbulenceCondition{config: tcuo.config}
 	_spec.Assign = _node.assignValues
 	_spec.ScanValues = _node.scanValues

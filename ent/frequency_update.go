@@ -212,67 +212,31 @@ func (fu *FrequencyUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 	}
 	if value, ok := fu.mutation.ImportID(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Value:  value,
-			Column: frequency.FieldImportID,
-		})
+		_spec.SetField(frequency.FieldImportID, field.TypeInt, value)
 	}
 	if value, ok := fu.mutation.AddedImportID(); ok {
-		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Value:  value,
-			Column: frequency.FieldImportID,
-		})
+		_spec.AddField(frequency.FieldImportID, field.TypeInt, value)
 	}
 	if value, ok := fu.mutation.Hash(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: frequency.FieldHash,
-		})
+		_spec.SetField(frequency.FieldHash, field.TypeString, value)
 	}
 	if value, ok := fu.mutation.ImportFlag(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeBool,
-			Value:  value,
-			Column: frequency.FieldImportFlag,
-		})
+		_spec.SetField(frequency.FieldImportFlag, field.TypeBool, value)
 	}
 	if value, ok := fu.mutation.LastUpdated(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Value:  value,
-			Column: frequency.FieldLastUpdated,
-		})
+		_spec.SetField(frequency.FieldLastUpdated, field.TypeTime, value)
 	}
 	if value, ok := fu.mutation.GetType(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: frequency.FieldType,
-		})
+		_spec.SetField(frequency.FieldType, field.TypeString, value)
 	}
 	if value, ok := fu.mutation.Description(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: frequency.FieldDescription,
-		})
+		_spec.SetField(frequency.FieldDescription, field.TypeString, value)
 	}
 	if value, ok := fu.mutation.Frequency(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeFloat64,
-			Value:  value,
-			Column: frequency.FieldFrequency,
-		})
+		_spec.SetField(frequency.FieldFrequency, field.TypeFloat64, value)
 	}
 	if value, ok := fu.mutation.AddedFrequency(); ok {
-		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
-			Type:   field.TypeFloat64,
-			Value:  value,
-			Column: frequency.FieldFrequency,
-		})
+		_spec.AddField(frequency.FieldFrequency, field.TypeFloat64, value)
 	}
 	if fu.mutation.AirportCleared() {
 		edge := &sqlgraph.EdgeSpec{
@@ -309,7 +273,7 @@ func (fu *FrequencyUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	_spec.Modifiers = fu.modifiers
+	_spec.AddModifiers(fu.modifiers...)
 	if n, err = sqlgraph.UpdateNodes(ctx, fu.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{frequency.Label}
@@ -541,67 +505,31 @@ func (fuo *FrequencyUpdateOne) sqlSave(ctx context.Context) (_node *Frequency, e
 		}
 	}
 	if value, ok := fuo.mutation.ImportID(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Value:  value,
-			Column: frequency.FieldImportID,
-		})
+		_spec.SetField(frequency.FieldImportID, field.TypeInt, value)
 	}
 	if value, ok := fuo.mutation.AddedImportID(); ok {
-		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Value:  value,
-			Column: frequency.FieldImportID,
-		})
+		_spec.AddField(frequency.FieldImportID, field.TypeInt, value)
 	}
 	if value, ok := fuo.mutation.Hash(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: frequency.FieldHash,
-		})
+		_spec.SetField(frequency.FieldHash, field.TypeString, value)
 	}
 	if value, ok := fuo.mutation.ImportFlag(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeBool,
-			Value:  value,
-			Column: frequency.FieldImportFlag,
-		})
+		_spec.SetField(frequency.FieldImportFlag, field.TypeBool, value)
 	}
 	if value, ok := fuo.mutation.LastUpdated(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Value:  value,
-			Column: frequency.FieldLastUpdated,
-		})
+		_spec.SetField(frequency.FieldLastUpdated, field.TypeTime, value)
 	}
 	if value, ok := fuo.mutation.GetType(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: frequency.FieldType,
-		})
+		_spec.SetField(frequency.FieldType, field.TypeString, value)
 	}
 	if value, ok := fuo.mutation.Description(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: frequency.FieldDescription,
-		})
+		_spec.SetField(frequency.FieldDescription, field.TypeString, value)
 	}
 	if value, ok := fuo.mutation.Frequency(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeFloat64,
-			Value:  value,
-			Column: frequency.FieldFrequency,
-		})
+		_spec.SetField(frequency.FieldFrequency, field.TypeFloat64, value)
 	}
 	if value, ok := fuo.mutation.AddedFrequency(); ok {
-		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
-			Type:   field.TypeFloat64,
-			Value:  value,
-			Column: frequency.FieldFrequency,
-		})
+		_spec.AddField(frequency.FieldFrequency, field.TypeFloat64, value)
 	}
 	if fuo.mutation.AirportCleared() {
 		edge := &sqlgraph.EdgeSpec{
@@ -638,7 +566,7 @@ func (fuo *FrequencyUpdateOne) sqlSave(ctx context.Context) (_node *Frequency, e
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	_spec.Modifiers = fuo.modifiers
+	_spec.AddModifiers(fuo.modifiers...)
 	_node = &Frequency{config: fuo.config}
 	_spec.Assign = _node.assignValues
 	_spec.ScanValues = _node.scanValues

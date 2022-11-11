@@ -207,35 +207,19 @@ func (tdc *TemperatureDataCreate) createSpec() (*TemperatureData, *sqlgraph.Crea
 		_spec.ID.Value = &id
 	}
 	if value, ok := tdc.mutation.ValidTime(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Value:  value,
-			Column: temperaturedata.FieldValidTime,
-		})
+		_spec.SetField(temperaturedata.FieldValidTime, field.TypeTime, value)
 		_node.ValidTime = value
 	}
 	if value, ok := tdc.mutation.Temperature(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeFloat64,
-			Value:  value,
-			Column: temperaturedata.FieldTemperature,
-		})
+		_spec.SetField(temperaturedata.FieldTemperature, field.TypeFloat64, value)
 		_node.Temperature = value
 	}
 	if value, ok := tdc.mutation.MinTemperature(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeFloat64,
-			Value:  value,
-			Column: temperaturedata.FieldMinTemperature,
-		})
+		_spec.SetField(temperaturedata.FieldMinTemperature, field.TypeFloat64, value)
 		_node.MinTemperature = &value
 	}
 	if value, ok := tdc.mutation.MaxTemperature(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeFloat64,
-			Value:  value,
-			Column: temperaturedata.FieldMaxTemperature,
-		})
+		_spec.SetField(temperaturedata.FieldMaxTemperature, field.TypeFloat64, value)
 		_node.MaxTemperature = &value
 	}
 	return _node, _spec

@@ -299,6 +299,11 @@ func (tdq *TemperatureDataQuery) Select(fields ...string) *TemperatureDataSelect
 	return selbuild
 }
 
+// Aggregate returns a TemperatureDataSelect configured with the given aggregations.
+func (tdq *TemperatureDataQuery) Aggregate(fns ...AggregateFunc) *TemperatureDataSelect {
+	return tdq.Select().Aggregate(fns...)
+}
+
 func (tdq *TemperatureDataQuery) prepareQuery(ctx context.Context) error {
 	for _, f := range tdq.fields {
 		if !temperaturedata.ValidColumn(f) {
@@ -365,11 +370,14 @@ func (tdq *TemperatureDataQuery) sqlCount(ctx context.Context) (int, error) {
 }
 
 func (tdq *TemperatureDataQuery) sqlExist(ctx context.Context) (bool, error) {
-	n, err := tdq.sqlCount(ctx)
-	if err != nil {
+	switch _, err := tdq.FirstID(ctx); {
+	case IsNotFound(err):
+		return false, nil
+	case err != nil:
 		return false, fmt.Errorf("ent: check existence: %w", err)
+	default:
+		return true, nil
 	}
-	return n > 0, nil
 }
 
 func (tdq *TemperatureDataQuery) querySpec() *sqlgraph.QuerySpec {
@@ -513,8 +521,6 @@ func (tdgb *TemperatureDataGroupBy) sqlQuery() *sql.Selector {
 	for _, fn := range tdgb.fns {
 		aggregation = append(aggregation, fn(selector))
 	}
-	// If no columns were selected in a custom aggregation function, the default
-	// selection is the fields used for "group-by", and the aggregation functions.
 	if len(selector.SelectedColumns()) == 0 {
 		columns := make([]string, 0, len(tdgb.fields)+len(tdgb.fns))
 		for _, f := range tdgb.fields {
@@ -534,6 +540,12 @@ type TemperatureDataSelect struct {
 	sql *sql.Selector
 }
 
+// Aggregate adds the given aggregation functions to the selector query.
+func (tds *TemperatureDataSelect) Aggregate(fns ...AggregateFunc) *TemperatureDataSelect {
+	tds.fns = append(tds.fns, fns...)
+	return tds
+}
+
 // Scan applies the selector query and scans the result into the given value.
 func (tds *TemperatureDataSelect) Scan(ctx context.Context, v any) error {
 	if err := tds.prepareQuery(ctx); err != nil {
@@ -544,6 +556,16 @@ func (tds *TemperatureDataSelect) Scan(ctx context.Context, v any) error {
 }
 
 func (tds *TemperatureDataSelect) sqlScan(ctx context.Context, v any) error {
+	aggregation := make([]string, 0, len(tds.fns))
+	for _, fn := range tds.fns {
+		aggregation = append(aggregation, fn(tds.sql))
+	}
+	switch n := len(*tds.selector.flds); {
+	case n == 0 && len(aggregation) > 0:
+		tds.sql.Select(aggregation...)
+	case n != 0 && len(aggregation) > 0:
+		tds.sql.AppendSelect(aggregation...)
+	}
 	rows := &sql.Rows{}
 	query, args := tds.sql.Query()
 	if err := tds.driver.Query(ctx, query, args, rows); err != nil {

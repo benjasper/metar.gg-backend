@@ -10,6 +10,7 @@ import (
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
+	"entgo.io/ent/dialect/sql/sqljson"
 	"entgo.io/ent/schema/field"
 	"github.com/google/uuid"
 	"metar.gg/ent/airport"
@@ -346,6 +347,12 @@ func (au *AirportUpdate) SetKeywords(s []string) *AirportUpdate {
 	return au
 }
 
+// AppendKeywords appends s to the "keywords" field.
+func (au *AirportUpdate) AppendKeywords(s []string) *AirportUpdate {
+	au.mutation.AppendKeywords(s)
+	return au
+}
+
 // SetRegionID sets the "region" edge to the Region entity by ID.
 func (au *AirportUpdate) SetRegionID(id uuid.UUID) *AirportUpdate {
 	au.mutation.SetRegionID(id)
@@ -598,239 +605,113 @@ func (au *AirportUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 	}
 	if value, ok := au.mutation.ImportID(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Value:  value,
-			Column: airport.FieldImportID,
-		})
+		_spec.SetField(airport.FieldImportID, field.TypeInt, value)
 	}
 	if value, ok := au.mutation.AddedImportID(); ok {
-		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Value:  value,
-			Column: airport.FieldImportID,
-		})
+		_spec.AddField(airport.FieldImportID, field.TypeInt, value)
 	}
 	if value, ok := au.mutation.Hash(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: airport.FieldHash,
-		})
+		_spec.SetField(airport.FieldHash, field.TypeString, value)
 	}
 	if value, ok := au.mutation.ImportFlag(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeBool,
-			Value:  value,
-			Column: airport.FieldImportFlag,
-		})
+		_spec.SetField(airport.FieldImportFlag, field.TypeBool, value)
 	}
 	if value, ok := au.mutation.LastUpdated(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Value:  value,
-			Column: airport.FieldLastUpdated,
-		})
+		_spec.SetField(airport.FieldLastUpdated, field.TypeTime, value)
 	}
 	if value, ok := au.mutation.IcaoCode(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: airport.FieldIcaoCode,
-		})
+		_spec.SetField(airport.FieldIcaoCode, field.TypeString, value)
 	}
 	if au.mutation.IcaoCodeCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Column: airport.FieldIcaoCode,
-		})
+		_spec.ClearField(airport.FieldIcaoCode, field.TypeString)
 	}
 	if value, ok := au.mutation.IataCode(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: airport.FieldIataCode,
-		})
+		_spec.SetField(airport.FieldIataCode, field.TypeString, value)
 	}
 	if au.mutation.IataCodeCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Column: airport.FieldIataCode,
-		})
+		_spec.ClearField(airport.FieldIataCode, field.TypeString)
 	}
 	if value, ok := au.mutation.Identifier(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: airport.FieldIdentifier,
-		})
+		_spec.SetField(airport.FieldIdentifier, field.TypeString, value)
 	}
 	if value, ok := au.mutation.GetType(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeEnum,
-			Value:  value,
-			Column: airport.FieldType,
-		})
+		_spec.SetField(airport.FieldType, field.TypeEnum, value)
 	}
 	if value, ok := au.mutation.Importance(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Value:  value,
-			Column: airport.FieldImportance,
-		})
+		_spec.SetField(airport.FieldImportance, field.TypeInt, value)
 	}
 	if value, ok := au.mutation.AddedImportance(); ok {
-		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Value:  value,
-			Column: airport.FieldImportance,
-		})
+		_spec.AddField(airport.FieldImportance, field.TypeInt, value)
 	}
 	if value, ok := au.mutation.Name(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: airport.FieldName,
-		})
+		_spec.SetField(airport.FieldName, field.TypeString, value)
 	}
 	if value, ok := au.mutation.Latitude(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeFloat64,
-			Value:  value,
-			Column: airport.FieldLatitude,
-		})
+		_spec.SetField(airport.FieldLatitude, field.TypeFloat64, value)
 	}
 	if value, ok := au.mutation.AddedLatitude(); ok {
-		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
-			Type:   field.TypeFloat64,
-			Value:  value,
-			Column: airport.FieldLatitude,
-		})
+		_spec.AddField(airport.FieldLatitude, field.TypeFloat64, value)
 	}
 	if value, ok := au.mutation.Longitude(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeFloat64,
-			Value:  value,
-			Column: airport.FieldLongitude,
-		})
+		_spec.SetField(airport.FieldLongitude, field.TypeFloat64, value)
 	}
 	if value, ok := au.mutation.AddedLongitude(); ok {
-		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
-			Type:   field.TypeFloat64,
-			Value:  value,
-			Column: airport.FieldLongitude,
-		})
+		_spec.AddField(airport.FieldLongitude, field.TypeFloat64, value)
 	}
 	if value, ok := au.mutation.Timezone(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: airport.FieldTimezone,
-		})
+		_spec.SetField(airport.FieldTimezone, field.TypeString, value)
 	}
 	if au.mutation.TimezoneCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Column: airport.FieldTimezone,
-		})
+		_spec.ClearField(airport.FieldTimezone, field.TypeString)
 	}
 	if value, ok := au.mutation.Elevation(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Value:  value,
-			Column: airport.FieldElevation,
-		})
+		_spec.SetField(airport.FieldElevation, field.TypeInt, value)
 	}
 	if value, ok := au.mutation.AddedElevation(); ok {
-		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Value:  value,
-			Column: airport.FieldElevation,
-		})
+		_spec.AddField(airport.FieldElevation, field.TypeInt, value)
 	}
 	if au.mutation.ElevationCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Column: airport.FieldElevation,
-		})
+		_spec.ClearField(airport.FieldElevation, field.TypeInt)
 	}
 	if value, ok := au.mutation.Municipality(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: airport.FieldMunicipality,
-		})
+		_spec.SetField(airport.FieldMunicipality, field.TypeString, value)
 	}
 	if au.mutation.MunicipalityCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Column: airport.FieldMunicipality,
-		})
+		_spec.ClearField(airport.FieldMunicipality, field.TypeString)
 	}
 	if value, ok := au.mutation.ScheduledService(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeBool,
-			Value:  value,
-			Column: airport.FieldScheduledService,
-		})
+		_spec.SetField(airport.FieldScheduledService, field.TypeBool, value)
 	}
 	if value, ok := au.mutation.GpsCode(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: airport.FieldGpsCode,
-		})
+		_spec.SetField(airport.FieldGpsCode, field.TypeString, value)
 	}
 	if au.mutation.GpsCodeCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Column: airport.FieldGpsCode,
-		})
+		_spec.ClearField(airport.FieldGpsCode, field.TypeString)
 	}
 	if value, ok := au.mutation.LocalCode(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: airport.FieldLocalCode,
-		})
+		_spec.SetField(airport.FieldLocalCode, field.TypeString, value)
 	}
 	if au.mutation.LocalCodeCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Column: airport.FieldLocalCode,
-		})
+		_spec.ClearField(airport.FieldLocalCode, field.TypeString)
 	}
 	if value, ok := au.mutation.Website(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: airport.FieldWebsite,
-		})
+		_spec.SetField(airport.FieldWebsite, field.TypeString, value)
 	}
 	if au.mutation.WebsiteCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Column: airport.FieldWebsite,
-		})
+		_spec.ClearField(airport.FieldWebsite, field.TypeString)
 	}
 	if value, ok := au.mutation.Wikipedia(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: airport.FieldWikipedia,
-		})
+		_spec.SetField(airport.FieldWikipedia, field.TypeString, value)
 	}
 	if au.mutation.WikipediaCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Column: airport.FieldWikipedia,
-		})
+		_spec.ClearField(airport.FieldWikipedia, field.TypeString)
 	}
 	if value, ok := au.mutation.Keywords(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeJSON,
-			Value:  value,
-			Column: airport.FieldKeywords,
+		_spec.SetField(airport.FieldKeywords, field.TypeJSON, value)
+	}
+	if value, ok := au.mutation.AppendedKeywords(); ok {
+		_spec.AddModifier(func(u *sql.UpdateBuilder) {
+			sqljson.Append(u, airport.FieldKeywords, value)
 		})
 	}
 	if au.mutation.RegionCleared() {
@@ -1046,7 +927,7 @@ func (au *AirportUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	_spec.Modifiers = au.modifiers
+	_spec.AddModifiers(au.modifiers...)
 	if n, err = sqlgraph.UpdateNodes(ctx, au.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{airport.Label}
@@ -1378,6 +1259,12 @@ func (auo *AirportUpdateOne) SetKeywords(s []string) *AirportUpdateOne {
 	return auo
 }
 
+// AppendKeywords appends s to the "keywords" field.
+func (auo *AirportUpdateOne) AppendKeywords(s []string) *AirportUpdateOne {
+	auo.mutation.AppendKeywords(s)
+	return auo
+}
+
 // SetRegionID sets the "region" edge to the Region entity by ID.
 func (auo *AirportUpdateOne) SetRegionID(id uuid.UUID) *AirportUpdateOne {
 	auo.mutation.SetRegionID(id)
@@ -1660,239 +1547,113 @@ func (auo *AirportUpdateOne) sqlSave(ctx context.Context) (_node *Airport, err e
 		}
 	}
 	if value, ok := auo.mutation.ImportID(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Value:  value,
-			Column: airport.FieldImportID,
-		})
+		_spec.SetField(airport.FieldImportID, field.TypeInt, value)
 	}
 	if value, ok := auo.mutation.AddedImportID(); ok {
-		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Value:  value,
-			Column: airport.FieldImportID,
-		})
+		_spec.AddField(airport.FieldImportID, field.TypeInt, value)
 	}
 	if value, ok := auo.mutation.Hash(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: airport.FieldHash,
-		})
+		_spec.SetField(airport.FieldHash, field.TypeString, value)
 	}
 	if value, ok := auo.mutation.ImportFlag(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeBool,
-			Value:  value,
-			Column: airport.FieldImportFlag,
-		})
+		_spec.SetField(airport.FieldImportFlag, field.TypeBool, value)
 	}
 	if value, ok := auo.mutation.LastUpdated(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Value:  value,
-			Column: airport.FieldLastUpdated,
-		})
+		_spec.SetField(airport.FieldLastUpdated, field.TypeTime, value)
 	}
 	if value, ok := auo.mutation.IcaoCode(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: airport.FieldIcaoCode,
-		})
+		_spec.SetField(airport.FieldIcaoCode, field.TypeString, value)
 	}
 	if auo.mutation.IcaoCodeCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Column: airport.FieldIcaoCode,
-		})
+		_spec.ClearField(airport.FieldIcaoCode, field.TypeString)
 	}
 	if value, ok := auo.mutation.IataCode(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: airport.FieldIataCode,
-		})
+		_spec.SetField(airport.FieldIataCode, field.TypeString, value)
 	}
 	if auo.mutation.IataCodeCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Column: airport.FieldIataCode,
-		})
+		_spec.ClearField(airport.FieldIataCode, field.TypeString)
 	}
 	if value, ok := auo.mutation.Identifier(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: airport.FieldIdentifier,
-		})
+		_spec.SetField(airport.FieldIdentifier, field.TypeString, value)
 	}
 	if value, ok := auo.mutation.GetType(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeEnum,
-			Value:  value,
-			Column: airport.FieldType,
-		})
+		_spec.SetField(airport.FieldType, field.TypeEnum, value)
 	}
 	if value, ok := auo.mutation.Importance(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Value:  value,
-			Column: airport.FieldImportance,
-		})
+		_spec.SetField(airport.FieldImportance, field.TypeInt, value)
 	}
 	if value, ok := auo.mutation.AddedImportance(); ok {
-		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Value:  value,
-			Column: airport.FieldImportance,
-		})
+		_spec.AddField(airport.FieldImportance, field.TypeInt, value)
 	}
 	if value, ok := auo.mutation.Name(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: airport.FieldName,
-		})
+		_spec.SetField(airport.FieldName, field.TypeString, value)
 	}
 	if value, ok := auo.mutation.Latitude(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeFloat64,
-			Value:  value,
-			Column: airport.FieldLatitude,
-		})
+		_spec.SetField(airport.FieldLatitude, field.TypeFloat64, value)
 	}
 	if value, ok := auo.mutation.AddedLatitude(); ok {
-		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
-			Type:   field.TypeFloat64,
-			Value:  value,
-			Column: airport.FieldLatitude,
-		})
+		_spec.AddField(airport.FieldLatitude, field.TypeFloat64, value)
 	}
 	if value, ok := auo.mutation.Longitude(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeFloat64,
-			Value:  value,
-			Column: airport.FieldLongitude,
-		})
+		_spec.SetField(airport.FieldLongitude, field.TypeFloat64, value)
 	}
 	if value, ok := auo.mutation.AddedLongitude(); ok {
-		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
-			Type:   field.TypeFloat64,
-			Value:  value,
-			Column: airport.FieldLongitude,
-		})
+		_spec.AddField(airport.FieldLongitude, field.TypeFloat64, value)
 	}
 	if value, ok := auo.mutation.Timezone(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: airport.FieldTimezone,
-		})
+		_spec.SetField(airport.FieldTimezone, field.TypeString, value)
 	}
 	if auo.mutation.TimezoneCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Column: airport.FieldTimezone,
-		})
+		_spec.ClearField(airport.FieldTimezone, field.TypeString)
 	}
 	if value, ok := auo.mutation.Elevation(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Value:  value,
-			Column: airport.FieldElevation,
-		})
+		_spec.SetField(airport.FieldElevation, field.TypeInt, value)
 	}
 	if value, ok := auo.mutation.AddedElevation(); ok {
-		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Value:  value,
-			Column: airport.FieldElevation,
-		})
+		_spec.AddField(airport.FieldElevation, field.TypeInt, value)
 	}
 	if auo.mutation.ElevationCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Column: airport.FieldElevation,
-		})
+		_spec.ClearField(airport.FieldElevation, field.TypeInt)
 	}
 	if value, ok := auo.mutation.Municipality(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: airport.FieldMunicipality,
-		})
+		_spec.SetField(airport.FieldMunicipality, field.TypeString, value)
 	}
 	if auo.mutation.MunicipalityCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Column: airport.FieldMunicipality,
-		})
+		_spec.ClearField(airport.FieldMunicipality, field.TypeString)
 	}
 	if value, ok := auo.mutation.ScheduledService(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeBool,
-			Value:  value,
-			Column: airport.FieldScheduledService,
-		})
+		_spec.SetField(airport.FieldScheduledService, field.TypeBool, value)
 	}
 	if value, ok := auo.mutation.GpsCode(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: airport.FieldGpsCode,
-		})
+		_spec.SetField(airport.FieldGpsCode, field.TypeString, value)
 	}
 	if auo.mutation.GpsCodeCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Column: airport.FieldGpsCode,
-		})
+		_spec.ClearField(airport.FieldGpsCode, field.TypeString)
 	}
 	if value, ok := auo.mutation.LocalCode(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: airport.FieldLocalCode,
-		})
+		_spec.SetField(airport.FieldLocalCode, field.TypeString, value)
 	}
 	if auo.mutation.LocalCodeCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Column: airport.FieldLocalCode,
-		})
+		_spec.ClearField(airport.FieldLocalCode, field.TypeString)
 	}
 	if value, ok := auo.mutation.Website(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: airport.FieldWebsite,
-		})
+		_spec.SetField(airport.FieldWebsite, field.TypeString, value)
 	}
 	if auo.mutation.WebsiteCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Column: airport.FieldWebsite,
-		})
+		_spec.ClearField(airport.FieldWebsite, field.TypeString)
 	}
 	if value, ok := auo.mutation.Wikipedia(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: airport.FieldWikipedia,
-		})
+		_spec.SetField(airport.FieldWikipedia, field.TypeString, value)
 	}
 	if auo.mutation.WikipediaCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Column: airport.FieldWikipedia,
-		})
+		_spec.ClearField(airport.FieldWikipedia, field.TypeString)
 	}
 	if value, ok := auo.mutation.Keywords(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeJSON,
-			Value:  value,
-			Column: airport.FieldKeywords,
+		_spec.SetField(airport.FieldKeywords, field.TypeJSON, value)
+	}
+	if value, ok := auo.mutation.AppendedKeywords(); ok {
+		_spec.AddModifier(func(u *sql.UpdateBuilder) {
+			sqljson.Append(u, airport.FieldKeywords, value)
 		})
 	}
 	if auo.mutation.RegionCleared() {
@@ -2108,7 +1869,7 @@ func (auo *AirportUpdateOne) sqlSave(ctx context.Context) (_node *Airport, err e
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	_spec.Modifiers = auo.modifiers
+	_spec.AddModifiers(auo.modifiers...)
 	_node = &Airport{config: auo.config}
 	_spec.Assign = _node.assignValues
 	_spec.ScanValues = _node.scanValues

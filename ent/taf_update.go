@@ -276,60 +276,28 @@ func (tu *TafUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 	}
 	if value, ok := tu.mutation.RawText(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: taf.FieldRawText,
-		})
+		_spec.SetField(taf.FieldRawText, field.TypeString, value)
 	}
 	if value, ok := tu.mutation.IssueTime(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Value:  value,
-			Column: taf.FieldIssueTime,
-		})
+		_spec.SetField(taf.FieldIssueTime, field.TypeTime, value)
 	}
 	if value, ok := tu.mutation.ImportTime(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Value:  value,
-			Column: taf.FieldImportTime,
-		})
+		_spec.SetField(taf.FieldImportTime, field.TypeTime, value)
 	}
 	if value, ok := tu.mutation.BulletinTime(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Value:  value,
-			Column: taf.FieldBulletinTime,
-		})
+		_spec.SetField(taf.FieldBulletinTime, field.TypeTime, value)
 	}
 	if value, ok := tu.mutation.ValidFromTime(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Value:  value,
-			Column: taf.FieldValidFromTime,
-		})
+		_spec.SetField(taf.FieldValidFromTime, field.TypeTime, value)
 	}
 	if value, ok := tu.mutation.ValidToTime(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Value:  value,
-			Column: taf.FieldValidToTime,
-		})
+		_spec.SetField(taf.FieldValidToTime, field.TypeTime, value)
 	}
 	if value, ok := tu.mutation.Remarks(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: taf.FieldRemarks,
-		})
+		_spec.SetField(taf.FieldRemarks, field.TypeString, value)
 	}
 	if value, ok := tu.mutation.Hash(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: taf.FieldHash,
-		})
+		_spec.SetField(taf.FieldHash, field.TypeString, value)
 	}
 	if tu.mutation.StationCleared() {
 		edge := &sqlgraph.EdgeSpec{
@@ -474,7 +442,7 @@ func (tu *TafUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	_spec.Modifiers = tu.modifiers
+	_spec.AddModifiers(tu.modifiers...)
 	if n, err = sqlgraph.UpdateNodes(ctx, tu.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{taf.Label}
@@ -768,60 +736,28 @@ func (tuo *TafUpdateOne) sqlSave(ctx context.Context) (_node *Taf, err error) {
 		}
 	}
 	if value, ok := tuo.mutation.RawText(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: taf.FieldRawText,
-		})
+		_spec.SetField(taf.FieldRawText, field.TypeString, value)
 	}
 	if value, ok := tuo.mutation.IssueTime(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Value:  value,
-			Column: taf.FieldIssueTime,
-		})
+		_spec.SetField(taf.FieldIssueTime, field.TypeTime, value)
 	}
 	if value, ok := tuo.mutation.ImportTime(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Value:  value,
-			Column: taf.FieldImportTime,
-		})
+		_spec.SetField(taf.FieldImportTime, field.TypeTime, value)
 	}
 	if value, ok := tuo.mutation.BulletinTime(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Value:  value,
-			Column: taf.FieldBulletinTime,
-		})
+		_spec.SetField(taf.FieldBulletinTime, field.TypeTime, value)
 	}
 	if value, ok := tuo.mutation.ValidFromTime(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Value:  value,
-			Column: taf.FieldValidFromTime,
-		})
+		_spec.SetField(taf.FieldValidFromTime, field.TypeTime, value)
 	}
 	if value, ok := tuo.mutation.ValidToTime(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Value:  value,
-			Column: taf.FieldValidToTime,
-		})
+		_spec.SetField(taf.FieldValidToTime, field.TypeTime, value)
 	}
 	if value, ok := tuo.mutation.Remarks(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: taf.FieldRemarks,
-		})
+		_spec.SetField(taf.FieldRemarks, field.TypeString, value)
 	}
 	if value, ok := tuo.mutation.Hash(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: taf.FieldHash,
-		})
+		_spec.SetField(taf.FieldHash, field.TypeString, value)
 	}
 	if tuo.mutation.StationCleared() {
 		edge := &sqlgraph.EdgeSpec{
@@ -966,7 +902,7 @@ func (tuo *TafUpdateOne) sqlSave(ctx context.Context) (_node *Taf, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	_spec.Modifiers = tuo.modifiers
+	_spec.AddModifiers(tuo.modifiers...)
 	_node = &Taf{config: tuo.config}
 	_spec.Assign = _node.assignValues
 	_spec.ScanValues = _node.scanValues

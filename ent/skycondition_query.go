@@ -299,6 +299,11 @@ func (scq *SkyConditionQuery) Select(fields ...string) *SkyConditionSelect {
 	return selbuild
 }
 
+// Aggregate returns a SkyConditionSelect configured with the given aggregations.
+func (scq *SkyConditionQuery) Aggregate(fns ...AggregateFunc) *SkyConditionSelect {
+	return scq.Select().Aggregate(fns...)
+}
+
 func (scq *SkyConditionQuery) prepareQuery(ctx context.Context) error {
 	for _, f := range scq.fields {
 		if !skycondition.ValidColumn(f) {
@@ -365,11 +370,14 @@ func (scq *SkyConditionQuery) sqlCount(ctx context.Context) (int, error) {
 }
 
 func (scq *SkyConditionQuery) sqlExist(ctx context.Context) (bool, error) {
-	n, err := scq.sqlCount(ctx)
-	if err != nil {
+	switch _, err := scq.FirstID(ctx); {
+	case IsNotFound(err):
+		return false, nil
+	case err != nil:
 		return false, fmt.Errorf("ent: check existence: %w", err)
+	default:
+		return true, nil
 	}
-	return n > 0, nil
 }
 
 func (scq *SkyConditionQuery) querySpec() *sqlgraph.QuerySpec {
@@ -513,8 +521,6 @@ func (scgb *SkyConditionGroupBy) sqlQuery() *sql.Selector {
 	for _, fn := range scgb.fns {
 		aggregation = append(aggregation, fn(selector))
 	}
-	// If no columns were selected in a custom aggregation function, the default
-	// selection is the fields used for "group-by", and the aggregation functions.
 	if len(selector.SelectedColumns()) == 0 {
 		columns := make([]string, 0, len(scgb.fields)+len(scgb.fns))
 		for _, f := range scgb.fields {
@@ -534,6 +540,12 @@ type SkyConditionSelect struct {
 	sql *sql.Selector
 }
 
+// Aggregate adds the given aggregation functions to the selector query.
+func (scs *SkyConditionSelect) Aggregate(fns ...AggregateFunc) *SkyConditionSelect {
+	scs.fns = append(scs.fns, fns...)
+	return scs
+}
+
 // Scan applies the selector query and scans the result into the given value.
 func (scs *SkyConditionSelect) Scan(ctx context.Context, v any) error {
 	if err := scs.prepareQuery(ctx); err != nil {
@@ -544,6 +556,16 @@ func (scs *SkyConditionSelect) Scan(ctx context.Context, v any) error {
 }
 
 func (scs *SkyConditionSelect) sqlScan(ctx context.Context, v any) error {
+	aggregation := make([]string, 0, len(scs.fns))
+	for _, fn := range scs.fns {
+		aggregation = append(aggregation, fn(scs.sql))
+	}
+	switch n := len(*scs.selector.flds); {
+	case n == 0 && len(aggregation) > 0:
+		scs.sql.Select(aggregation...)
+	case n != 0 && len(aggregation) > 0:
+		scs.sql.AppendSelect(aggregation...)
+	}
 	rows := &sql.Rows{}
 	query, args := scs.sql.Query()
 	if err := scs.driver.Query(ctx, query, args, rows); err != nil {

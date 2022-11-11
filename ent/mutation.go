@@ -84,6 +84,7 @@ type AirportMutation struct {
 	website            *string
 	wikipedia          *string
 	keywords           *[]string
+	appendkeywords     []string
 	clearedFields      map[string]struct{}
 	region             *uuid.UUID
 	clearedregion      bool
@@ -1147,6 +1148,7 @@ func (m *AirportMutation) ResetWikipedia() {
 // SetKeywords sets the "keywords" field.
 func (m *AirportMutation) SetKeywords(s []string) {
 	m.keywords = &s
+	m.appendkeywords = nil
 }
 
 // Keywords returns the value of the "keywords" field in the mutation.
@@ -1175,9 +1177,23 @@ func (m *AirportMutation) OldKeywords(ctx context.Context) (v []string, err erro
 	return oldValue.Keywords, nil
 }
 
+// AppendKeywords adds s to the "keywords" field.
+func (m *AirportMutation) AppendKeywords(s []string) {
+	m.appendkeywords = append(m.appendkeywords, s...)
+}
+
+// AppendedKeywords returns the list of values that were appended to the "keywords" field in this mutation.
+func (m *AirportMutation) AppendedKeywords() ([]string, bool) {
+	if len(m.appendkeywords) == 0 {
+		return nil, false
+	}
+	return m.appendkeywords, true
+}
+
 // ResetKeywords resets all changes to the "keywords" field.
 func (m *AirportMutation) ResetKeywords() {
 	m.keywords = nil
+	m.appendkeywords = nil
 }
 
 // SetRegionID sets the "region" edge to the Region entity by id.
@@ -2161,6 +2177,7 @@ type CountryMutation struct {
 	continent       *country.Continent
 	wikipedia_link  *string
 	keywords        *[]string
+	appendkeywords  []string
 	clearedFields   map[string]struct{}
 	airports        map[uuid.UUID]struct{}
 	removedairports map[uuid.UUID]struct{}
@@ -2585,6 +2602,7 @@ func (m *CountryMutation) ResetWikipediaLink() {
 // SetKeywords sets the "keywords" field.
 func (m *CountryMutation) SetKeywords(s []string) {
 	m.keywords = &s
+	m.appendkeywords = nil
 }
 
 // Keywords returns the value of the "keywords" field in the mutation.
@@ -2613,9 +2631,23 @@ func (m *CountryMutation) OldKeywords(ctx context.Context) (v []string, err erro
 	return oldValue.Keywords, nil
 }
 
+// AppendKeywords adds s to the "keywords" field.
+func (m *CountryMutation) AppendKeywords(s []string) {
+	m.appendkeywords = append(m.appendkeywords, s...)
+}
+
+// AppendedKeywords returns the list of values that were appended to the "keywords" field in this mutation.
+func (m *CountryMutation) AppendedKeywords() ([]string, bool) {
+	if len(m.appendkeywords) == 0 {
+		return nil, false
+	}
+	return m.appendkeywords, true
+}
+
 // ResetKeywords resets all changes to the "keywords" field.
 func (m *CountryMutation) ResetKeywords() {
 	m.keywords = nil
+	m.appendkeywords = nil
 }
 
 // AddAirportIDs adds the "airports" edge to the Airport entity by ids.
@@ -9634,6 +9666,7 @@ type RegionMutation struct {
 	name            *string
 	wikipedia_link  *string
 	keywords        *[]string
+	appendkeywords  []string
 	clearedFields   map[string]struct{}
 	airports        map[uuid.UUID]struct{}
 	removedairports map[uuid.UUID]struct{}
@@ -10058,6 +10091,7 @@ func (m *RegionMutation) ResetWikipediaLink() {
 // SetKeywords sets the "keywords" field.
 func (m *RegionMutation) SetKeywords(s []string) {
 	m.keywords = &s
+	m.appendkeywords = nil
 }
 
 // Keywords returns the value of the "keywords" field in the mutation.
@@ -10086,9 +10120,23 @@ func (m *RegionMutation) OldKeywords(ctx context.Context) (v []string, err error
 	return oldValue.Keywords, nil
 }
 
+// AppendKeywords adds s to the "keywords" field.
+func (m *RegionMutation) AppendKeywords(s []string) {
+	m.appendkeywords = append(m.appendkeywords, s...)
+}
+
+// AppendedKeywords returns the list of values that were appended to the "keywords" field in this mutation.
+func (m *RegionMutation) AppendedKeywords() ([]string, bool) {
+	if len(m.appendkeywords) == 0 {
+		return nil, false
+	}
+	return m.appendkeywords, true
+}
+
 // ResetKeywords resets all changes to the "keywords" field.
 func (m *RegionMutation) ResetKeywords() {
 	m.keywords = nil
+	m.appendkeywords = nil
 }
 
 // AddAirportIDs adds the "airports" edge to the Airport entity by ids.

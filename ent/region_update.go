@@ -10,6 +10,7 @@ import (
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
+	"entgo.io/ent/dialect/sql/sqljson"
 	"entgo.io/ent/schema/field"
 	"github.com/google/uuid"
 	"metar.gg/ent/airport"
@@ -105,6 +106,12 @@ func (ru *RegionUpdate) SetWikipediaLink(s string) *RegionUpdate {
 // SetKeywords sets the "keywords" field.
 func (ru *RegionUpdate) SetKeywords(s []string) *RegionUpdate {
 	ru.mutation.SetKeywords(s)
+	return ru
+}
+
+// AppendKeywords appends s to the "keywords" field.
+func (ru *RegionUpdate) AppendKeywords(s []string) *RegionUpdate {
+	ru.mutation.AppendKeywords(s)
 	return ru
 }
 
@@ -228,73 +235,38 @@ func (ru *RegionUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 	}
 	if value, ok := ru.mutation.ImportID(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Value:  value,
-			Column: region.FieldImportID,
-		})
+		_spec.SetField(region.FieldImportID, field.TypeInt, value)
 	}
 	if value, ok := ru.mutation.AddedImportID(); ok {
-		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Value:  value,
-			Column: region.FieldImportID,
-		})
+		_spec.AddField(region.FieldImportID, field.TypeInt, value)
 	}
 	if value, ok := ru.mutation.Hash(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: region.FieldHash,
-		})
+		_spec.SetField(region.FieldHash, field.TypeString, value)
 	}
 	if value, ok := ru.mutation.ImportFlag(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeBool,
-			Value:  value,
-			Column: region.FieldImportFlag,
-		})
+		_spec.SetField(region.FieldImportFlag, field.TypeBool, value)
 	}
 	if value, ok := ru.mutation.LastUpdated(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Value:  value,
-			Column: region.FieldLastUpdated,
-		})
+		_spec.SetField(region.FieldLastUpdated, field.TypeTime, value)
 	}
 	if value, ok := ru.mutation.Code(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: region.FieldCode,
-		})
+		_spec.SetField(region.FieldCode, field.TypeString, value)
 	}
 	if value, ok := ru.mutation.LocalCode(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: region.FieldLocalCode,
-		})
+		_spec.SetField(region.FieldLocalCode, field.TypeString, value)
 	}
 	if value, ok := ru.mutation.Name(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: region.FieldName,
-		})
+		_spec.SetField(region.FieldName, field.TypeString, value)
 	}
 	if value, ok := ru.mutation.WikipediaLink(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: region.FieldWikipediaLink,
-		})
+		_spec.SetField(region.FieldWikipediaLink, field.TypeString, value)
 	}
 	if value, ok := ru.mutation.Keywords(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeJSON,
-			Value:  value,
-			Column: region.FieldKeywords,
+		_spec.SetField(region.FieldKeywords, field.TypeJSON, value)
+	}
+	if value, ok := ru.mutation.AppendedKeywords(); ok {
+		_spec.AddModifier(func(u *sql.UpdateBuilder) {
+			sqljson.Append(u, region.FieldKeywords, value)
 		})
 	}
 	if ru.mutation.AirportsCleared() {
@@ -351,7 +323,7 @@ func (ru *RegionUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	_spec.Modifiers = ru.modifiers
+	_spec.AddModifiers(ru.modifiers...)
 	if n, err = sqlgraph.UpdateNodes(ctx, ru.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{region.Label}
@@ -446,6 +418,12 @@ func (ruo *RegionUpdateOne) SetWikipediaLink(s string) *RegionUpdateOne {
 // SetKeywords sets the "keywords" field.
 func (ruo *RegionUpdateOne) SetKeywords(s []string) *RegionUpdateOne {
 	ruo.mutation.SetKeywords(s)
+	return ruo
+}
+
+// AppendKeywords appends s to the "keywords" field.
+func (ruo *RegionUpdateOne) AppendKeywords(s []string) *RegionUpdateOne {
+	ruo.mutation.AppendKeywords(s)
 	return ruo
 }
 
@@ -599,73 +577,38 @@ func (ruo *RegionUpdateOne) sqlSave(ctx context.Context) (_node *Region, err err
 		}
 	}
 	if value, ok := ruo.mutation.ImportID(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Value:  value,
-			Column: region.FieldImportID,
-		})
+		_spec.SetField(region.FieldImportID, field.TypeInt, value)
 	}
 	if value, ok := ruo.mutation.AddedImportID(); ok {
-		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Value:  value,
-			Column: region.FieldImportID,
-		})
+		_spec.AddField(region.FieldImportID, field.TypeInt, value)
 	}
 	if value, ok := ruo.mutation.Hash(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: region.FieldHash,
-		})
+		_spec.SetField(region.FieldHash, field.TypeString, value)
 	}
 	if value, ok := ruo.mutation.ImportFlag(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeBool,
-			Value:  value,
-			Column: region.FieldImportFlag,
-		})
+		_spec.SetField(region.FieldImportFlag, field.TypeBool, value)
 	}
 	if value, ok := ruo.mutation.LastUpdated(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Value:  value,
-			Column: region.FieldLastUpdated,
-		})
+		_spec.SetField(region.FieldLastUpdated, field.TypeTime, value)
 	}
 	if value, ok := ruo.mutation.Code(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: region.FieldCode,
-		})
+		_spec.SetField(region.FieldCode, field.TypeString, value)
 	}
 	if value, ok := ruo.mutation.LocalCode(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: region.FieldLocalCode,
-		})
+		_spec.SetField(region.FieldLocalCode, field.TypeString, value)
 	}
 	if value, ok := ruo.mutation.Name(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: region.FieldName,
-		})
+		_spec.SetField(region.FieldName, field.TypeString, value)
 	}
 	if value, ok := ruo.mutation.WikipediaLink(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: region.FieldWikipediaLink,
-		})
+		_spec.SetField(region.FieldWikipediaLink, field.TypeString, value)
 	}
 	if value, ok := ruo.mutation.Keywords(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeJSON,
-			Value:  value,
-			Column: region.FieldKeywords,
+		_spec.SetField(region.FieldKeywords, field.TypeJSON, value)
+	}
+	if value, ok := ruo.mutation.AppendedKeywords(); ok {
+		_spec.AddModifier(func(u *sql.UpdateBuilder) {
+			sqljson.Append(u, region.FieldKeywords, value)
 		})
 	}
 	if ruo.mutation.AirportsCleared() {
@@ -722,7 +665,7 @@ func (ruo *RegionUpdateOne) sqlSave(ctx context.Context) (_node *Region, err err
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	_spec.Modifiers = ruo.modifiers
+	_spec.AddModifiers(ruo.modifiers...)
 	_node = &Region{config: ruo.config}
 	_spec.Assign = _node.assignValues
 	_spec.ScanValues = _node.scanValues

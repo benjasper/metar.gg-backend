@@ -300,71 +300,34 @@ func (wsu *WeatherStationUpdate) sqlSave(ctx context.Context) (n int, err error)
 		}
 	}
 	if value, ok := wsu.mutation.Latitude(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeFloat64,
-			Value:  value,
-			Column: weatherstation.FieldLatitude,
-		})
+		_spec.SetField(weatherstation.FieldLatitude, field.TypeFloat64, value)
 	}
 	if value, ok := wsu.mutation.AddedLatitude(); ok {
-		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
-			Type:   field.TypeFloat64,
-			Value:  value,
-			Column: weatherstation.FieldLatitude,
-		})
+		_spec.AddField(weatherstation.FieldLatitude, field.TypeFloat64, value)
 	}
 	if wsu.mutation.LatitudeCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeFloat64,
-			Column: weatherstation.FieldLatitude,
-		})
+		_spec.ClearField(weatherstation.FieldLatitude, field.TypeFloat64)
 	}
 	if value, ok := wsu.mutation.Longitude(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeFloat64,
-			Value:  value,
-			Column: weatherstation.FieldLongitude,
-		})
+		_spec.SetField(weatherstation.FieldLongitude, field.TypeFloat64, value)
 	}
 	if value, ok := wsu.mutation.AddedLongitude(); ok {
-		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
-			Type:   field.TypeFloat64,
-			Value:  value,
-			Column: weatherstation.FieldLongitude,
-		})
+		_spec.AddField(weatherstation.FieldLongitude, field.TypeFloat64, value)
 	}
 	if wsu.mutation.LongitudeCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeFloat64,
-			Column: weatherstation.FieldLongitude,
-		})
+		_spec.ClearField(weatherstation.FieldLongitude, field.TypeFloat64)
 	}
 	if value, ok := wsu.mutation.Elevation(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeFloat64,
-			Value:  value,
-			Column: weatherstation.FieldElevation,
-		})
+		_spec.SetField(weatherstation.FieldElevation, field.TypeFloat64, value)
 	}
 	if value, ok := wsu.mutation.AddedElevation(); ok {
-		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
-			Type:   field.TypeFloat64,
-			Value:  value,
-			Column: weatherstation.FieldElevation,
-		})
+		_spec.AddField(weatherstation.FieldElevation, field.TypeFloat64, value)
 	}
 	if wsu.mutation.ElevationCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeFloat64,
-			Column: weatherstation.FieldElevation,
-		})
+		_spec.ClearField(weatherstation.FieldElevation, field.TypeFloat64)
 	}
 	if value, ok := wsu.mutation.Hash(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: weatherstation.FieldHash,
-		})
+		_spec.SetField(weatherstation.FieldHash, field.TypeString, value)
 	}
 	if wsu.mutation.AirportCleared() {
 		edge := &sqlgraph.EdgeSpec{
@@ -509,7 +472,7 @@ func (wsu *WeatherStationUpdate) sqlSave(ctx context.Context) (n int, err error)
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	_spec.Modifiers = wsu.modifiers
+	_spec.AddModifiers(wsu.modifiers...)
 	if n, err = sqlgraph.UpdateNodes(ctx, wsu.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{weatherstation.Label}
@@ -828,71 +791,34 @@ func (wsuo *WeatherStationUpdateOne) sqlSave(ctx context.Context) (_node *Weathe
 		}
 	}
 	if value, ok := wsuo.mutation.Latitude(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeFloat64,
-			Value:  value,
-			Column: weatherstation.FieldLatitude,
-		})
+		_spec.SetField(weatherstation.FieldLatitude, field.TypeFloat64, value)
 	}
 	if value, ok := wsuo.mutation.AddedLatitude(); ok {
-		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
-			Type:   field.TypeFloat64,
-			Value:  value,
-			Column: weatherstation.FieldLatitude,
-		})
+		_spec.AddField(weatherstation.FieldLatitude, field.TypeFloat64, value)
 	}
 	if wsuo.mutation.LatitudeCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeFloat64,
-			Column: weatherstation.FieldLatitude,
-		})
+		_spec.ClearField(weatherstation.FieldLatitude, field.TypeFloat64)
 	}
 	if value, ok := wsuo.mutation.Longitude(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeFloat64,
-			Value:  value,
-			Column: weatherstation.FieldLongitude,
-		})
+		_spec.SetField(weatherstation.FieldLongitude, field.TypeFloat64, value)
 	}
 	if value, ok := wsuo.mutation.AddedLongitude(); ok {
-		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
-			Type:   field.TypeFloat64,
-			Value:  value,
-			Column: weatherstation.FieldLongitude,
-		})
+		_spec.AddField(weatherstation.FieldLongitude, field.TypeFloat64, value)
 	}
 	if wsuo.mutation.LongitudeCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeFloat64,
-			Column: weatherstation.FieldLongitude,
-		})
+		_spec.ClearField(weatherstation.FieldLongitude, field.TypeFloat64)
 	}
 	if value, ok := wsuo.mutation.Elevation(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeFloat64,
-			Value:  value,
-			Column: weatherstation.FieldElevation,
-		})
+		_spec.SetField(weatherstation.FieldElevation, field.TypeFloat64, value)
 	}
 	if value, ok := wsuo.mutation.AddedElevation(); ok {
-		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
-			Type:   field.TypeFloat64,
-			Value:  value,
-			Column: weatherstation.FieldElevation,
-		})
+		_spec.AddField(weatherstation.FieldElevation, field.TypeFloat64, value)
 	}
 	if wsuo.mutation.ElevationCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeFloat64,
-			Column: weatherstation.FieldElevation,
-		})
+		_spec.ClearField(weatherstation.FieldElevation, field.TypeFloat64)
 	}
 	if value, ok := wsuo.mutation.Hash(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: weatherstation.FieldHash,
-		})
+		_spec.SetField(weatherstation.FieldHash, field.TypeString, value)
 	}
 	if wsuo.mutation.AirportCleared() {
 		edge := &sqlgraph.EdgeSpec{
@@ -1037,7 +963,7 @@ func (wsuo *WeatherStationUpdateOne) sqlSave(ctx context.Context) (_node *Weathe
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	_spec.Modifiers = wsuo.modifiers
+	_spec.AddModifiers(wsuo.modifiers...)
 	_node = &WeatherStation{config: wsuo.config}
 	_spec.Assign = _node.assignValues
 	_spec.ScanValues = _node.scanValues

@@ -762,471 +762,211 @@ func (mu *MetarUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 	}
 	if value, ok := mu.mutation.RawText(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: metar.FieldRawText,
-		})
+		_spec.SetField(metar.FieldRawText, field.TypeString, value)
 	}
 	if value, ok := mu.mutation.ObservationTime(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Value:  value,
-			Column: metar.FieldObservationTime,
-		})
+		_spec.SetField(metar.FieldObservationTime, field.TypeTime, value)
 	}
 	if value, ok := mu.mutation.ImportTime(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Value:  value,
-			Column: metar.FieldImportTime,
-		})
+		_spec.SetField(metar.FieldImportTime, field.TypeTime, value)
 	}
 	if value, ok := mu.mutation.NextImportTimePrediction(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Value:  value,
-			Column: metar.FieldNextImportTimePrediction,
-		})
+		_spec.SetField(metar.FieldNextImportTimePrediction, field.TypeTime, value)
 	}
 	if mu.mutation.NextImportTimePredictionCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Column: metar.FieldNextImportTimePrediction,
-		})
+		_spec.ClearField(metar.FieldNextImportTimePrediction, field.TypeTime)
 	}
 	if value, ok := mu.mutation.Temperature(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeFloat64,
-			Value:  value,
-			Column: metar.FieldTemperature,
-		})
+		_spec.SetField(metar.FieldTemperature, field.TypeFloat64, value)
 	}
 	if value, ok := mu.mutation.AddedTemperature(); ok {
-		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
-			Type:   field.TypeFloat64,
-			Value:  value,
-			Column: metar.FieldTemperature,
-		})
+		_spec.AddField(metar.FieldTemperature, field.TypeFloat64, value)
 	}
 	if value, ok := mu.mutation.Dewpoint(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeFloat64,
-			Value:  value,
-			Column: metar.FieldDewpoint,
-		})
+		_spec.SetField(metar.FieldDewpoint, field.TypeFloat64, value)
 	}
 	if value, ok := mu.mutation.AddedDewpoint(); ok {
-		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
-			Type:   field.TypeFloat64,
-			Value:  value,
-			Column: metar.FieldDewpoint,
-		})
+		_spec.AddField(metar.FieldDewpoint, field.TypeFloat64, value)
 	}
 	if value, ok := mu.mutation.WindSpeed(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Value:  value,
-			Column: metar.FieldWindSpeed,
-		})
+		_spec.SetField(metar.FieldWindSpeed, field.TypeInt, value)
 	}
 	if value, ok := mu.mutation.AddedWindSpeed(); ok {
-		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Value:  value,
-			Column: metar.FieldWindSpeed,
-		})
+		_spec.AddField(metar.FieldWindSpeed, field.TypeInt, value)
 	}
 	if value, ok := mu.mutation.WindGust(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Value:  value,
-			Column: metar.FieldWindGust,
-		})
+		_spec.SetField(metar.FieldWindGust, field.TypeInt, value)
 	}
 	if value, ok := mu.mutation.AddedWindGust(); ok {
-		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Value:  value,
-			Column: metar.FieldWindGust,
-		})
+		_spec.AddField(metar.FieldWindGust, field.TypeInt, value)
 	}
 	if value, ok := mu.mutation.WindDirection(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Value:  value,
-			Column: metar.FieldWindDirection,
-		})
+		_spec.SetField(metar.FieldWindDirection, field.TypeInt, value)
 	}
 	if value, ok := mu.mutation.AddedWindDirection(); ok {
-		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Value:  value,
-			Column: metar.FieldWindDirection,
-		})
+		_spec.AddField(metar.FieldWindDirection, field.TypeInt, value)
 	}
 	if value, ok := mu.mutation.Visibility(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeFloat64,
-			Value:  value,
-			Column: metar.FieldVisibility,
-		})
+		_spec.SetField(metar.FieldVisibility, field.TypeFloat64, value)
 	}
 	if value, ok := mu.mutation.AddedVisibility(); ok {
-		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
-			Type:   field.TypeFloat64,
-			Value:  value,
-			Column: metar.FieldVisibility,
-		})
+		_spec.AddField(metar.FieldVisibility, field.TypeFloat64, value)
 	}
 	if value, ok := mu.mutation.Altimeter(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeFloat64,
-			Value:  value,
-			Column: metar.FieldAltimeter,
-		})
+		_spec.SetField(metar.FieldAltimeter, field.TypeFloat64, value)
 	}
 	if value, ok := mu.mutation.AddedAltimeter(); ok {
-		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
-			Type:   field.TypeFloat64,
-			Value:  value,
-			Column: metar.FieldAltimeter,
-		})
+		_spec.AddField(metar.FieldAltimeter, field.TypeFloat64, value)
 	}
 	if value, ok := mu.mutation.PresentWeather(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: metar.FieldPresentWeather,
-		})
+		_spec.SetField(metar.FieldPresentWeather, field.TypeString, value)
 	}
 	if mu.mutation.PresentWeatherCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Column: metar.FieldPresentWeather,
-		})
+		_spec.ClearField(metar.FieldPresentWeather, field.TypeString)
 	}
 	if value, ok := mu.mutation.FlightCategory(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeEnum,
-			Value:  value,
-			Column: metar.FieldFlightCategory,
-		})
+		_spec.SetField(metar.FieldFlightCategory, field.TypeEnum, value)
 	}
 	if mu.mutation.FlightCategoryCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeEnum,
-			Column: metar.FieldFlightCategory,
-		})
+		_spec.ClearField(metar.FieldFlightCategory, field.TypeEnum)
 	}
 	if value, ok := mu.mutation.QualityControlCorrected(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeBool,
-			Value:  value,
-			Column: metar.FieldQualityControlCorrected,
-		})
+		_spec.SetField(metar.FieldQualityControlCorrected, field.TypeBool, value)
 	}
 	if mu.mutation.QualityControlCorrectedCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeBool,
-			Column: metar.FieldQualityControlCorrected,
-		})
+		_spec.ClearField(metar.FieldQualityControlCorrected, field.TypeBool)
 	}
 	if value, ok := mu.mutation.QualityControlAutoStation(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeBool,
-			Value:  value,
-			Column: metar.FieldQualityControlAutoStation,
-		})
+		_spec.SetField(metar.FieldQualityControlAutoStation, field.TypeBool, value)
 	}
 	if value, ok := mu.mutation.QualityControlMaintenanceIndicatorOn(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeBool,
-			Value:  value,
-			Column: metar.FieldQualityControlMaintenanceIndicatorOn,
-		})
+		_spec.SetField(metar.FieldQualityControlMaintenanceIndicatorOn, field.TypeBool, value)
 	}
 	if value, ok := mu.mutation.QualityControlNoSignal(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeBool,
-			Value:  value,
-			Column: metar.FieldQualityControlNoSignal,
-		})
+		_spec.SetField(metar.FieldQualityControlNoSignal, field.TypeBool, value)
 	}
 	if value, ok := mu.mutation.QualityControlLightningSensorOff(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeBool,
-			Value:  value,
-			Column: metar.FieldQualityControlLightningSensorOff,
-		})
+		_spec.SetField(metar.FieldQualityControlLightningSensorOff, field.TypeBool, value)
 	}
 	if value, ok := mu.mutation.QualityControlFreezingRainSensorOff(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeBool,
-			Value:  value,
-			Column: metar.FieldQualityControlFreezingRainSensorOff,
-		})
+		_spec.SetField(metar.FieldQualityControlFreezingRainSensorOff, field.TypeBool, value)
 	}
 	if value, ok := mu.mutation.QualityControlPresentWeatherSensorOff(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeBool,
-			Value:  value,
-			Column: metar.FieldQualityControlPresentWeatherSensorOff,
-		})
+		_spec.SetField(metar.FieldQualityControlPresentWeatherSensorOff, field.TypeBool, value)
 	}
 	if value, ok := mu.mutation.SeaLevelPressure(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeFloat64,
-			Value:  value,
-			Column: metar.FieldSeaLevelPressure,
-		})
+		_spec.SetField(metar.FieldSeaLevelPressure, field.TypeFloat64, value)
 	}
 	if value, ok := mu.mutation.AddedSeaLevelPressure(); ok {
-		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
-			Type:   field.TypeFloat64,
-			Value:  value,
-			Column: metar.FieldSeaLevelPressure,
-		})
+		_spec.AddField(metar.FieldSeaLevelPressure, field.TypeFloat64, value)
 	}
 	if mu.mutation.SeaLevelPressureCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeFloat64,
-			Column: metar.FieldSeaLevelPressure,
-		})
+		_spec.ClearField(metar.FieldSeaLevelPressure, field.TypeFloat64)
 	}
 	if value, ok := mu.mutation.PressureTendency(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeFloat64,
-			Value:  value,
-			Column: metar.FieldPressureTendency,
-		})
+		_spec.SetField(metar.FieldPressureTendency, field.TypeFloat64, value)
 	}
 	if value, ok := mu.mutation.AddedPressureTendency(); ok {
-		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
-			Type:   field.TypeFloat64,
-			Value:  value,
-			Column: metar.FieldPressureTendency,
-		})
+		_spec.AddField(metar.FieldPressureTendency, field.TypeFloat64, value)
 	}
 	if mu.mutation.PressureTendencyCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeFloat64,
-			Column: metar.FieldPressureTendency,
-		})
+		_spec.ClearField(metar.FieldPressureTendency, field.TypeFloat64)
 	}
 	if value, ok := mu.mutation.MaxTemp6(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeFloat64,
-			Value:  value,
-			Column: metar.FieldMaxTemp6,
-		})
+		_spec.SetField(metar.FieldMaxTemp6, field.TypeFloat64, value)
 	}
 	if value, ok := mu.mutation.AddedMaxTemp6(); ok {
-		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
-			Type:   field.TypeFloat64,
-			Value:  value,
-			Column: metar.FieldMaxTemp6,
-		})
+		_spec.AddField(metar.FieldMaxTemp6, field.TypeFloat64, value)
 	}
 	if mu.mutation.MaxTemp6Cleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeFloat64,
-			Column: metar.FieldMaxTemp6,
-		})
+		_spec.ClearField(metar.FieldMaxTemp6, field.TypeFloat64)
 	}
 	if value, ok := mu.mutation.MinTemp6(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeFloat64,
-			Value:  value,
-			Column: metar.FieldMinTemp6,
-		})
+		_spec.SetField(metar.FieldMinTemp6, field.TypeFloat64, value)
 	}
 	if value, ok := mu.mutation.AddedMinTemp6(); ok {
-		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
-			Type:   field.TypeFloat64,
-			Value:  value,
-			Column: metar.FieldMinTemp6,
-		})
+		_spec.AddField(metar.FieldMinTemp6, field.TypeFloat64, value)
 	}
 	if mu.mutation.MinTemp6Cleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeFloat64,
-			Column: metar.FieldMinTemp6,
-		})
+		_spec.ClearField(metar.FieldMinTemp6, field.TypeFloat64)
 	}
 	if value, ok := mu.mutation.MaxTemp24(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeFloat64,
-			Value:  value,
-			Column: metar.FieldMaxTemp24,
-		})
+		_spec.SetField(metar.FieldMaxTemp24, field.TypeFloat64, value)
 	}
 	if value, ok := mu.mutation.AddedMaxTemp24(); ok {
-		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
-			Type:   field.TypeFloat64,
-			Value:  value,
-			Column: metar.FieldMaxTemp24,
-		})
+		_spec.AddField(metar.FieldMaxTemp24, field.TypeFloat64, value)
 	}
 	if mu.mutation.MaxTemp24Cleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeFloat64,
-			Column: metar.FieldMaxTemp24,
-		})
+		_spec.ClearField(metar.FieldMaxTemp24, field.TypeFloat64)
 	}
 	if value, ok := mu.mutation.MinTemp24(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeFloat64,
-			Value:  value,
-			Column: metar.FieldMinTemp24,
-		})
+		_spec.SetField(metar.FieldMinTemp24, field.TypeFloat64, value)
 	}
 	if value, ok := mu.mutation.AddedMinTemp24(); ok {
-		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
-			Type:   field.TypeFloat64,
-			Value:  value,
-			Column: metar.FieldMinTemp24,
-		})
+		_spec.AddField(metar.FieldMinTemp24, field.TypeFloat64, value)
 	}
 	if mu.mutation.MinTemp24Cleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeFloat64,
-			Column: metar.FieldMinTemp24,
-		})
+		_spec.ClearField(metar.FieldMinTemp24, field.TypeFloat64)
 	}
 	if value, ok := mu.mutation.Precipitation(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeFloat64,
-			Value:  value,
-			Column: metar.FieldPrecipitation,
-		})
+		_spec.SetField(metar.FieldPrecipitation, field.TypeFloat64, value)
 	}
 	if value, ok := mu.mutation.AddedPrecipitation(); ok {
-		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
-			Type:   field.TypeFloat64,
-			Value:  value,
-			Column: metar.FieldPrecipitation,
-		})
+		_spec.AddField(metar.FieldPrecipitation, field.TypeFloat64, value)
 	}
 	if mu.mutation.PrecipitationCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeFloat64,
-			Column: metar.FieldPrecipitation,
-		})
+		_spec.ClearField(metar.FieldPrecipitation, field.TypeFloat64)
 	}
 	if value, ok := mu.mutation.Precipitation3(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeFloat64,
-			Value:  value,
-			Column: metar.FieldPrecipitation3,
-		})
+		_spec.SetField(metar.FieldPrecipitation3, field.TypeFloat64, value)
 	}
 	if value, ok := mu.mutation.AddedPrecipitation3(); ok {
-		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
-			Type:   field.TypeFloat64,
-			Value:  value,
-			Column: metar.FieldPrecipitation3,
-		})
+		_spec.AddField(metar.FieldPrecipitation3, field.TypeFloat64, value)
 	}
 	if mu.mutation.Precipitation3Cleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeFloat64,
-			Column: metar.FieldPrecipitation3,
-		})
+		_spec.ClearField(metar.FieldPrecipitation3, field.TypeFloat64)
 	}
 	if value, ok := mu.mutation.Precipitation6(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeFloat64,
-			Value:  value,
-			Column: metar.FieldPrecipitation6,
-		})
+		_spec.SetField(metar.FieldPrecipitation6, field.TypeFloat64, value)
 	}
 	if value, ok := mu.mutation.AddedPrecipitation6(); ok {
-		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
-			Type:   field.TypeFloat64,
-			Value:  value,
-			Column: metar.FieldPrecipitation6,
-		})
+		_spec.AddField(metar.FieldPrecipitation6, field.TypeFloat64, value)
 	}
 	if mu.mutation.Precipitation6Cleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeFloat64,
-			Column: metar.FieldPrecipitation6,
-		})
+		_spec.ClearField(metar.FieldPrecipitation6, field.TypeFloat64)
 	}
 	if value, ok := mu.mutation.Precipitation24(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeFloat64,
-			Value:  value,
-			Column: metar.FieldPrecipitation24,
-		})
+		_spec.SetField(metar.FieldPrecipitation24, field.TypeFloat64, value)
 	}
 	if value, ok := mu.mutation.AddedPrecipitation24(); ok {
-		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
-			Type:   field.TypeFloat64,
-			Value:  value,
-			Column: metar.FieldPrecipitation24,
-		})
+		_spec.AddField(metar.FieldPrecipitation24, field.TypeFloat64, value)
 	}
 	if mu.mutation.Precipitation24Cleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeFloat64,
-			Column: metar.FieldPrecipitation24,
-		})
+		_spec.ClearField(metar.FieldPrecipitation24, field.TypeFloat64)
 	}
 	if value, ok := mu.mutation.SnowDepth(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeFloat64,
-			Value:  value,
-			Column: metar.FieldSnowDepth,
-		})
+		_spec.SetField(metar.FieldSnowDepth, field.TypeFloat64, value)
 	}
 	if value, ok := mu.mutation.AddedSnowDepth(); ok {
-		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
-			Type:   field.TypeFloat64,
-			Value:  value,
-			Column: metar.FieldSnowDepth,
-		})
+		_spec.AddField(metar.FieldSnowDepth, field.TypeFloat64, value)
 	}
 	if mu.mutation.SnowDepthCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeFloat64,
-			Column: metar.FieldSnowDepth,
-		})
+		_spec.ClearField(metar.FieldSnowDepth, field.TypeFloat64)
 	}
 	if value, ok := mu.mutation.VertVis(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeFloat64,
-			Value:  value,
-			Column: metar.FieldVertVis,
-		})
+		_spec.SetField(metar.FieldVertVis, field.TypeFloat64, value)
 	}
 	if value, ok := mu.mutation.AddedVertVis(); ok {
-		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
-			Type:   field.TypeFloat64,
-			Value:  value,
-			Column: metar.FieldVertVis,
-		})
+		_spec.AddField(metar.FieldVertVis, field.TypeFloat64, value)
 	}
 	if mu.mutation.VertVisCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeFloat64,
-			Column: metar.FieldVertVis,
-		})
+		_spec.ClearField(metar.FieldVertVis, field.TypeFloat64)
 	}
 	if value, ok := mu.mutation.MetarType(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeEnum,
-			Value:  value,
-			Column: metar.FieldMetarType,
-		})
+		_spec.SetField(metar.FieldMetarType, field.TypeEnum, value)
 	}
 	if value, ok := mu.mutation.Hash(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: metar.FieldHash,
-		})
+		_spec.SetField(metar.FieldHash, field.TypeString, value)
 	}
 	if mu.mutation.StationCleared() {
 		edge := &sqlgraph.EdgeSpec{
@@ -1317,7 +1057,7 @@ func (mu *MetarUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	_spec.Modifiers = mu.modifiers
+	_spec.AddModifiers(mu.modifiers...)
 	if n, err = sqlgraph.UpdateNodes(ctx, mu.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{metar.Label}
@@ -2098,471 +1838,211 @@ func (muo *MetarUpdateOne) sqlSave(ctx context.Context) (_node *Metar, err error
 		}
 	}
 	if value, ok := muo.mutation.RawText(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: metar.FieldRawText,
-		})
+		_spec.SetField(metar.FieldRawText, field.TypeString, value)
 	}
 	if value, ok := muo.mutation.ObservationTime(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Value:  value,
-			Column: metar.FieldObservationTime,
-		})
+		_spec.SetField(metar.FieldObservationTime, field.TypeTime, value)
 	}
 	if value, ok := muo.mutation.ImportTime(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Value:  value,
-			Column: metar.FieldImportTime,
-		})
+		_spec.SetField(metar.FieldImportTime, field.TypeTime, value)
 	}
 	if value, ok := muo.mutation.NextImportTimePrediction(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Value:  value,
-			Column: metar.FieldNextImportTimePrediction,
-		})
+		_spec.SetField(metar.FieldNextImportTimePrediction, field.TypeTime, value)
 	}
 	if muo.mutation.NextImportTimePredictionCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Column: metar.FieldNextImportTimePrediction,
-		})
+		_spec.ClearField(metar.FieldNextImportTimePrediction, field.TypeTime)
 	}
 	if value, ok := muo.mutation.Temperature(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeFloat64,
-			Value:  value,
-			Column: metar.FieldTemperature,
-		})
+		_spec.SetField(metar.FieldTemperature, field.TypeFloat64, value)
 	}
 	if value, ok := muo.mutation.AddedTemperature(); ok {
-		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
-			Type:   field.TypeFloat64,
-			Value:  value,
-			Column: metar.FieldTemperature,
-		})
+		_spec.AddField(metar.FieldTemperature, field.TypeFloat64, value)
 	}
 	if value, ok := muo.mutation.Dewpoint(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeFloat64,
-			Value:  value,
-			Column: metar.FieldDewpoint,
-		})
+		_spec.SetField(metar.FieldDewpoint, field.TypeFloat64, value)
 	}
 	if value, ok := muo.mutation.AddedDewpoint(); ok {
-		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
-			Type:   field.TypeFloat64,
-			Value:  value,
-			Column: metar.FieldDewpoint,
-		})
+		_spec.AddField(metar.FieldDewpoint, field.TypeFloat64, value)
 	}
 	if value, ok := muo.mutation.WindSpeed(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Value:  value,
-			Column: metar.FieldWindSpeed,
-		})
+		_spec.SetField(metar.FieldWindSpeed, field.TypeInt, value)
 	}
 	if value, ok := muo.mutation.AddedWindSpeed(); ok {
-		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Value:  value,
-			Column: metar.FieldWindSpeed,
-		})
+		_spec.AddField(metar.FieldWindSpeed, field.TypeInt, value)
 	}
 	if value, ok := muo.mutation.WindGust(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Value:  value,
-			Column: metar.FieldWindGust,
-		})
+		_spec.SetField(metar.FieldWindGust, field.TypeInt, value)
 	}
 	if value, ok := muo.mutation.AddedWindGust(); ok {
-		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Value:  value,
-			Column: metar.FieldWindGust,
-		})
+		_spec.AddField(metar.FieldWindGust, field.TypeInt, value)
 	}
 	if value, ok := muo.mutation.WindDirection(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Value:  value,
-			Column: metar.FieldWindDirection,
-		})
+		_spec.SetField(metar.FieldWindDirection, field.TypeInt, value)
 	}
 	if value, ok := muo.mutation.AddedWindDirection(); ok {
-		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Value:  value,
-			Column: metar.FieldWindDirection,
-		})
+		_spec.AddField(metar.FieldWindDirection, field.TypeInt, value)
 	}
 	if value, ok := muo.mutation.Visibility(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeFloat64,
-			Value:  value,
-			Column: metar.FieldVisibility,
-		})
+		_spec.SetField(metar.FieldVisibility, field.TypeFloat64, value)
 	}
 	if value, ok := muo.mutation.AddedVisibility(); ok {
-		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
-			Type:   field.TypeFloat64,
-			Value:  value,
-			Column: metar.FieldVisibility,
-		})
+		_spec.AddField(metar.FieldVisibility, field.TypeFloat64, value)
 	}
 	if value, ok := muo.mutation.Altimeter(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeFloat64,
-			Value:  value,
-			Column: metar.FieldAltimeter,
-		})
+		_spec.SetField(metar.FieldAltimeter, field.TypeFloat64, value)
 	}
 	if value, ok := muo.mutation.AddedAltimeter(); ok {
-		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
-			Type:   field.TypeFloat64,
-			Value:  value,
-			Column: metar.FieldAltimeter,
-		})
+		_spec.AddField(metar.FieldAltimeter, field.TypeFloat64, value)
 	}
 	if value, ok := muo.mutation.PresentWeather(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: metar.FieldPresentWeather,
-		})
+		_spec.SetField(metar.FieldPresentWeather, field.TypeString, value)
 	}
 	if muo.mutation.PresentWeatherCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Column: metar.FieldPresentWeather,
-		})
+		_spec.ClearField(metar.FieldPresentWeather, field.TypeString)
 	}
 	if value, ok := muo.mutation.FlightCategory(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeEnum,
-			Value:  value,
-			Column: metar.FieldFlightCategory,
-		})
+		_spec.SetField(metar.FieldFlightCategory, field.TypeEnum, value)
 	}
 	if muo.mutation.FlightCategoryCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeEnum,
-			Column: metar.FieldFlightCategory,
-		})
+		_spec.ClearField(metar.FieldFlightCategory, field.TypeEnum)
 	}
 	if value, ok := muo.mutation.QualityControlCorrected(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeBool,
-			Value:  value,
-			Column: metar.FieldQualityControlCorrected,
-		})
+		_spec.SetField(metar.FieldQualityControlCorrected, field.TypeBool, value)
 	}
 	if muo.mutation.QualityControlCorrectedCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeBool,
-			Column: metar.FieldQualityControlCorrected,
-		})
+		_spec.ClearField(metar.FieldQualityControlCorrected, field.TypeBool)
 	}
 	if value, ok := muo.mutation.QualityControlAutoStation(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeBool,
-			Value:  value,
-			Column: metar.FieldQualityControlAutoStation,
-		})
+		_spec.SetField(metar.FieldQualityControlAutoStation, field.TypeBool, value)
 	}
 	if value, ok := muo.mutation.QualityControlMaintenanceIndicatorOn(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeBool,
-			Value:  value,
-			Column: metar.FieldQualityControlMaintenanceIndicatorOn,
-		})
+		_spec.SetField(metar.FieldQualityControlMaintenanceIndicatorOn, field.TypeBool, value)
 	}
 	if value, ok := muo.mutation.QualityControlNoSignal(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeBool,
-			Value:  value,
-			Column: metar.FieldQualityControlNoSignal,
-		})
+		_spec.SetField(metar.FieldQualityControlNoSignal, field.TypeBool, value)
 	}
 	if value, ok := muo.mutation.QualityControlLightningSensorOff(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeBool,
-			Value:  value,
-			Column: metar.FieldQualityControlLightningSensorOff,
-		})
+		_spec.SetField(metar.FieldQualityControlLightningSensorOff, field.TypeBool, value)
 	}
 	if value, ok := muo.mutation.QualityControlFreezingRainSensorOff(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeBool,
-			Value:  value,
-			Column: metar.FieldQualityControlFreezingRainSensorOff,
-		})
+		_spec.SetField(metar.FieldQualityControlFreezingRainSensorOff, field.TypeBool, value)
 	}
 	if value, ok := muo.mutation.QualityControlPresentWeatherSensorOff(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeBool,
-			Value:  value,
-			Column: metar.FieldQualityControlPresentWeatherSensorOff,
-		})
+		_spec.SetField(metar.FieldQualityControlPresentWeatherSensorOff, field.TypeBool, value)
 	}
 	if value, ok := muo.mutation.SeaLevelPressure(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeFloat64,
-			Value:  value,
-			Column: metar.FieldSeaLevelPressure,
-		})
+		_spec.SetField(metar.FieldSeaLevelPressure, field.TypeFloat64, value)
 	}
 	if value, ok := muo.mutation.AddedSeaLevelPressure(); ok {
-		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
-			Type:   field.TypeFloat64,
-			Value:  value,
-			Column: metar.FieldSeaLevelPressure,
-		})
+		_spec.AddField(metar.FieldSeaLevelPressure, field.TypeFloat64, value)
 	}
 	if muo.mutation.SeaLevelPressureCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeFloat64,
-			Column: metar.FieldSeaLevelPressure,
-		})
+		_spec.ClearField(metar.FieldSeaLevelPressure, field.TypeFloat64)
 	}
 	if value, ok := muo.mutation.PressureTendency(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeFloat64,
-			Value:  value,
-			Column: metar.FieldPressureTendency,
-		})
+		_spec.SetField(metar.FieldPressureTendency, field.TypeFloat64, value)
 	}
 	if value, ok := muo.mutation.AddedPressureTendency(); ok {
-		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
-			Type:   field.TypeFloat64,
-			Value:  value,
-			Column: metar.FieldPressureTendency,
-		})
+		_spec.AddField(metar.FieldPressureTendency, field.TypeFloat64, value)
 	}
 	if muo.mutation.PressureTendencyCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeFloat64,
-			Column: metar.FieldPressureTendency,
-		})
+		_spec.ClearField(metar.FieldPressureTendency, field.TypeFloat64)
 	}
 	if value, ok := muo.mutation.MaxTemp6(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeFloat64,
-			Value:  value,
-			Column: metar.FieldMaxTemp6,
-		})
+		_spec.SetField(metar.FieldMaxTemp6, field.TypeFloat64, value)
 	}
 	if value, ok := muo.mutation.AddedMaxTemp6(); ok {
-		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
-			Type:   field.TypeFloat64,
-			Value:  value,
-			Column: metar.FieldMaxTemp6,
-		})
+		_spec.AddField(metar.FieldMaxTemp6, field.TypeFloat64, value)
 	}
 	if muo.mutation.MaxTemp6Cleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeFloat64,
-			Column: metar.FieldMaxTemp6,
-		})
+		_spec.ClearField(metar.FieldMaxTemp6, field.TypeFloat64)
 	}
 	if value, ok := muo.mutation.MinTemp6(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeFloat64,
-			Value:  value,
-			Column: metar.FieldMinTemp6,
-		})
+		_spec.SetField(metar.FieldMinTemp6, field.TypeFloat64, value)
 	}
 	if value, ok := muo.mutation.AddedMinTemp6(); ok {
-		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
-			Type:   field.TypeFloat64,
-			Value:  value,
-			Column: metar.FieldMinTemp6,
-		})
+		_spec.AddField(metar.FieldMinTemp6, field.TypeFloat64, value)
 	}
 	if muo.mutation.MinTemp6Cleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeFloat64,
-			Column: metar.FieldMinTemp6,
-		})
+		_spec.ClearField(metar.FieldMinTemp6, field.TypeFloat64)
 	}
 	if value, ok := muo.mutation.MaxTemp24(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeFloat64,
-			Value:  value,
-			Column: metar.FieldMaxTemp24,
-		})
+		_spec.SetField(metar.FieldMaxTemp24, field.TypeFloat64, value)
 	}
 	if value, ok := muo.mutation.AddedMaxTemp24(); ok {
-		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
-			Type:   field.TypeFloat64,
-			Value:  value,
-			Column: metar.FieldMaxTemp24,
-		})
+		_spec.AddField(metar.FieldMaxTemp24, field.TypeFloat64, value)
 	}
 	if muo.mutation.MaxTemp24Cleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeFloat64,
-			Column: metar.FieldMaxTemp24,
-		})
+		_spec.ClearField(metar.FieldMaxTemp24, field.TypeFloat64)
 	}
 	if value, ok := muo.mutation.MinTemp24(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeFloat64,
-			Value:  value,
-			Column: metar.FieldMinTemp24,
-		})
+		_spec.SetField(metar.FieldMinTemp24, field.TypeFloat64, value)
 	}
 	if value, ok := muo.mutation.AddedMinTemp24(); ok {
-		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
-			Type:   field.TypeFloat64,
-			Value:  value,
-			Column: metar.FieldMinTemp24,
-		})
+		_spec.AddField(metar.FieldMinTemp24, field.TypeFloat64, value)
 	}
 	if muo.mutation.MinTemp24Cleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeFloat64,
-			Column: metar.FieldMinTemp24,
-		})
+		_spec.ClearField(metar.FieldMinTemp24, field.TypeFloat64)
 	}
 	if value, ok := muo.mutation.Precipitation(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeFloat64,
-			Value:  value,
-			Column: metar.FieldPrecipitation,
-		})
+		_spec.SetField(metar.FieldPrecipitation, field.TypeFloat64, value)
 	}
 	if value, ok := muo.mutation.AddedPrecipitation(); ok {
-		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
-			Type:   field.TypeFloat64,
-			Value:  value,
-			Column: metar.FieldPrecipitation,
-		})
+		_spec.AddField(metar.FieldPrecipitation, field.TypeFloat64, value)
 	}
 	if muo.mutation.PrecipitationCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeFloat64,
-			Column: metar.FieldPrecipitation,
-		})
+		_spec.ClearField(metar.FieldPrecipitation, field.TypeFloat64)
 	}
 	if value, ok := muo.mutation.Precipitation3(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeFloat64,
-			Value:  value,
-			Column: metar.FieldPrecipitation3,
-		})
+		_spec.SetField(metar.FieldPrecipitation3, field.TypeFloat64, value)
 	}
 	if value, ok := muo.mutation.AddedPrecipitation3(); ok {
-		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
-			Type:   field.TypeFloat64,
-			Value:  value,
-			Column: metar.FieldPrecipitation3,
-		})
+		_spec.AddField(metar.FieldPrecipitation3, field.TypeFloat64, value)
 	}
 	if muo.mutation.Precipitation3Cleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeFloat64,
-			Column: metar.FieldPrecipitation3,
-		})
+		_spec.ClearField(metar.FieldPrecipitation3, field.TypeFloat64)
 	}
 	if value, ok := muo.mutation.Precipitation6(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeFloat64,
-			Value:  value,
-			Column: metar.FieldPrecipitation6,
-		})
+		_spec.SetField(metar.FieldPrecipitation6, field.TypeFloat64, value)
 	}
 	if value, ok := muo.mutation.AddedPrecipitation6(); ok {
-		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
-			Type:   field.TypeFloat64,
-			Value:  value,
-			Column: metar.FieldPrecipitation6,
-		})
+		_spec.AddField(metar.FieldPrecipitation6, field.TypeFloat64, value)
 	}
 	if muo.mutation.Precipitation6Cleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeFloat64,
-			Column: metar.FieldPrecipitation6,
-		})
+		_spec.ClearField(metar.FieldPrecipitation6, field.TypeFloat64)
 	}
 	if value, ok := muo.mutation.Precipitation24(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeFloat64,
-			Value:  value,
-			Column: metar.FieldPrecipitation24,
-		})
+		_spec.SetField(metar.FieldPrecipitation24, field.TypeFloat64, value)
 	}
 	if value, ok := muo.mutation.AddedPrecipitation24(); ok {
-		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
-			Type:   field.TypeFloat64,
-			Value:  value,
-			Column: metar.FieldPrecipitation24,
-		})
+		_spec.AddField(metar.FieldPrecipitation24, field.TypeFloat64, value)
 	}
 	if muo.mutation.Precipitation24Cleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeFloat64,
-			Column: metar.FieldPrecipitation24,
-		})
+		_spec.ClearField(metar.FieldPrecipitation24, field.TypeFloat64)
 	}
 	if value, ok := muo.mutation.SnowDepth(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeFloat64,
-			Value:  value,
-			Column: metar.FieldSnowDepth,
-		})
+		_spec.SetField(metar.FieldSnowDepth, field.TypeFloat64, value)
 	}
 	if value, ok := muo.mutation.AddedSnowDepth(); ok {
-		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
-			Type:   field.TypeFloat64,
-			Value:  value,
-			Column: metar.FieldSnowDepth,
-		})
+		_spec.AddField(metar.FieldSnowDepth, field.TypeFloat64, value)
 	}
 	if muo.mutation.SnowDepthCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeFloat64,
-			Column: metar.FieldSnowDepth,
-		})
+		_spec.ClearField(metar.FieldSnowDepth, field.TypeFloat64)
 	}
 	if value, ok := muo.mutation.VertVis(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeFloat64,
-			Value:  value,
-			Column: metar.FieldVertVis,
-		})
+		_spec.SetField(metar.FieldVertVis, field.TypeFloat64, value)
 	}
 	if value, ok := muo.mutation.AddedVertVis(); ok {
-		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
-			Type:   field.TypeFloat64,
-			Value:  value,
-			Column: metar.FieldVertVis,
-		})
+		_spec.AddField(metar.FieldVertVis, field.TypeFloat64, value)
 	}
 	if muo.mutation.VertVisCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeFloat64,
-			Column: metar.FieldVertVis,
-		})
+		_spec.ClearField(metar.FieldVertVis, field.TypeFloat64)
 	}
 	if value, ok := muo.mutation.MetarType(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeEnum,
-			Value:  value,
-			Column: metar.FieldMetarType,
-		})
+		_spec.SetField(metar.FieldMetarType, field.TypeEnum, value)
 	}
 	if value, ok := muo.mutation.Hash(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: metar.FieldHash,
-		})
+		_spec.SetField(metar.FieldHash, field.TypeString, value)
 	}
 	if muo.mutation.StationCleared() {
 		edge := &sqlgraph.EdgeSpec{
@@ -2653,7 +2133,7 @@ func (muo *MetarUpdateOne) sqlSave(ctx context.Context) (_node *Metar, err error
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	_spec.Modifiers = muo.modifiers
+	_spec.AddModifiers(muo.modifiers...)
 	_node = &Metar{config: muo.config}
 	_spec.Assign = _node.assignValues
 	_spec.ScanValues = _node.scanValues

@@ -640,270 +640,124 @@ func (fu *ForecastUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 	}
 	if value, ok := fu.mutation.FromTime(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Value:  value,
-			Column: forecast.FieldFromTime,
-		})
+		_spec.SetField(forecast.FieldFromTime, field.TypeTime, value)
 	}
 	if value, ok := fu.mutation.ToTime(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Value:  value,
-			Column: forecast.FieldToTime,
-		})
+		_spec.SetField(forecast.FieldToTime, field.TypeTime, value)
 	}
 	if value, ok := fu.mutation.ChangeIndicator(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeEnum,
-			Value:  value,
-			Column: forecast.FieldChangeIndicator,
-		})
+		_spec.SetField(forecast.FieldChangeIndicator, field.TypeEnum, value)
 	}
 	if fu.mutation.ChangeIndicatorCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeEnum,
-			Column: forecast.FieldChangeIndicator,
-		})
+		_spec.ClearField(forecast.FieldChangeIndicator, field.TypeEnum)
 	}
 	if value, ok := fu.mutation.ChangeTime(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Value:  value,
-			Column: forecast.FieldChangeTime,
-		})
+		_spec.SetField(forecast.FieldChangeTime, field.TypeTime, value)
 	}
 	if fu.mutation.ChangeTimeCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Column: forecast.FieldChangeTime,
-		})
+		_spec.ClearField(forecast.FieldChangeTime, field.TypeTime)
 	}
 	if value, ok := fu.mutation.ChangeProbability(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Value:  value,
-			Column: forecast.FieldChangeProbability,
-		})
+		_spec.SetField(forecast.FieldChangeProbability, field.TypeInt, value)
 	}
 	if value, ok := fu.mutation.AddedChangeProbability(); ok {
-		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Value:  value,
-			Column: forecast.FieldChangeProbability,
-		})
+		_spec.AddField(forecast.FieldChangeProbability, field.TypeInt, value)
 	}
 	if fu.mutation.ChangeProbabilityCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Column: forecast.FieldChangeProbability,
-		})
+		_spec.ClearField(forecast.FieldChangeProbability, field.TypeInt)
 	}
 	if value, ok := fu.mutation.WindDirection(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Value:  value,
-			Column: forecast.FieldWindDirection,
-		})
+		_spec.SetField(forecast.FieldWindDirection, field.TypeInt, value)
 	}
 	if value, ok := fu.mutation.AddedWindDirection(); ok {
-		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Value:  value,
-			Column: forecast.FieldWindDirection,
-		})
+		_spec.AddField(forecast.FieldWindDirection, field.TypeInt, value)
 	}
 	if fu.mutation.WindDirectionCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Column: forecast.FieldWindDirection,
-		})
+		_spec.ClearField(forecast.FieldWindDirection, field.TypeInt)
 	}
 	if value, ok := fu.mutation.WindSpeed(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Value:  value,
-			Column: forecast.FieldWindSpeed,
-		})
+		_spec.SetField(forecast.FieldWindSpeed, field.TypeInt, value)
 	}
 	if value, ok := fu.mutation.AddedWindSpeed(); ok {
-		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Value:  value,
-			Column: forecast.FieldWindSpeed,
-		})
+		_spec.AddField(forecast.FieldWindSpeed, field.TypeInt, value)
 	}
 	if fu.mutation.WindSpeedCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Column: forecast.FieldWindSpeed,
-		})
+		_spec.ClearField(forecast.FieldWindSpeed, field.TypeInt)
 	}
 	if value, ok := fu.mutation.WindGust(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Value:  value,
-			Column: forecast.FieldWindGust,
-		})
+		_spec.SetField(forecast.FieldWindGust, field.TypeInt, value)
 	}
 	if value, ok := fu.mutation.AddedWindGust(); ok {
-		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Value:  value,
-			Column: forecast.FieldWindGust,
-		})
+		_spec.AddField(forecast.FieldWindGust, field.TypeInt, value)
 	}
 	if fu.mutation.WindGustCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Column: forecast.FieldWindGust,
-		})
+		_spec.ClearField(forecast.FieldWindGust, field.TypeInt)
 	}
 	if value, ok := fu.mutation.WindShearHeight(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Value:  value,
-			Column: forecast.FieldWindShearHeight,
-		})
+		_spec.SetField(forecast.FieldWindShearHeight, field.TypeInt, value)
 	}
 	if value, ok := fu.mutation.AddedWindShearHeight(); ok {
-		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Value:  value,
-			Column: forecast.FieldWindShearHeight,
-		})
+		_spec.AddField(forecast.FieldWindShearHeight, field.TypeInt, value)
 	}
 	if fu.mutation.WindShearHeightCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Column: forecast.FieldWindShearHeight,
-		})
+		_spec.ClearField(forecast.FieldWindShearHeight, field.TypeInt)
 	}
 	if value, ok := fu.mutation.WindShearDirection(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Value:  value,
-			Column: forecast.FieldWindShearDirection,
-		})
+		_spec.SetField(forecast.FieldWindShearDirection, field.TypeInt, value)
 	}
 	if value, ok := fu.mutation.AddedWindShearDirection(); ok {
-		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Value:  value,
-			Column: forecast.FieldWindShearDirection,
-		})
+		_spec.AddField(forecast.FieldWindShearDirection, field.TypeInt, value)
 	}
 	if fu.mutation.WindShearDirectionCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Column: forecast.FieldWindShearDirection,
-		})
+		_spec.ClearField(forecast.FieldWindShearDirection, field.TypeInt)
 	}
 	if value, ok := fu.mutation.WindShearSpeed(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Value:  value,
-			Column: forecast.FieldWindShearSpeed,
-		})
+		_spec.SetField(forecast.FieldWindShearSpeed, field.TypeInt, value)
 	}
 	if value, ok := fu.mutation.AddedWindShearSpeed(); ok {
-		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Value:  value,
-			Column: forecast.FieldWindShearSpeed,
-		})
+		_spec.AddField(forecast.FieldWindShearSpeed, field.TypeInt, value)
 	}
 	if fu.mutation.WindShearSpeedCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Column: forecast.FieldWindShearSpeed,
-		})
+		_spec.ClearField(forecast.FieldWindShearSpeed, field.TypeInt)
 	}
 	if value, ok := fu.mutation.VisibilityHorizontal(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeFloat64,
-			Value:  value,
-			Column: forecast.FieldVisibilityHorizontal,
-		})
+		_spec.SetField(forecast.FieldVisibilityHorizontal, field.TypeFloat64, value)
 	}
 	if value, ok := fu.mutation.AddedVisibilityHorizontal(); ok {
-		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
-			Type:   field.TypeFloat64,
-			Value:  value,
-			Column: forecast.FieldVisibilityHorizontal,
-		})
+		_spec.AddField(forecast.FieldVisibilityHorizontal, field.TypeFloat64, value)
 	}
 	if fu.mutation.VisibilityHorizontalCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeFloat64,
-			Column: forecast.FieldVisibilityHorizontal,
-		})
+		_spec.ClearField(forecast.FieldVisibilityHorizontal, field.TypeFloat64)
 	}
 	if value, ok := fu.mutation.VisibilityVertical(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Value:  value,
-			Column: forecast.FieldVisibilityVertical,
-		})
+		_spec.SetField(forecast.FieldVisibilityVertical, field.TypeInt, value)
 	}
 	if value, ok := fu.mutation.AddedVisibilityVertical(); ok {
-		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Value:  value,
-			Column: forecast.FieldVisibilityVertical,
-		})
+		_spec.AddField(forecast.FieldVisibilityVertical, field.TypeInt, value)
 	}
 	if fu.mutation.VisibilityVerticalCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Column: forecast.FieldVisibilityVertical,
-		})
+		_spec.ClearField(forecast.FieldVisibilityVertical, field.TypeInt)
 	}
 	if value, ok := fu.mutation.Altimeter(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeFloat64,
-			Value:  value,
-			Column: forecast.FieldAltimeter,
-		})
+		_spec.SetField(forecast.FieldAltimeter, field.TypeFloat64, value)
 	}
 	if value, ok := fu.mutation.AddedAltimeter(); ok {
-		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
-			Type:   field.TypeFloat64,
-			Value:  value,
-			Column: forecast.FieldAltimeter,
-		})
+		_spec.AddField(forecast.FieldAltimeter, field.TypeFloat64, value)
 	}
 	if fu.mutation.AltimeterCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeFloat64,
-			Column: forecast.FieldAltimeter,
-		})
+		_spec.ClearField(forecast.FieldAltimeter, field.TypeFloat64)
 	}
 	if value, ok := fu.mutation.Weather(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: forecast.FieldWeather,
-		})
+		_spec.SetField(forecast.FieldWeather, field.TypeString, value)
 	}
 	if fu.mutation.WeatherCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Column: forecast.FieldWeather,
-		})
+		_spec.ClearField(forecast.FieldWeather, field.TypeString)
 	}
 	if value, ok := fu.mutation.NotDecoded(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: forecast.FieldNotDecoded,
-		})
+		_spec.SetField(forecast.FieldNotDecoded, field.TypeString, value)
 	}
 	if fu.mutation.NotDecodedCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Column: forecast.FieldNotDecoded,
-		})
+		_spec.ClearField(forecast.FieldNotDecoded, field.TypeString)
 	}
 	if fu.mutation.SkyConditionsCleared() {
 		edge := &sqlgraph.EdgeSpec{
@@ -1121,7 +975,7 @@ func (fu *ForecastUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	_spec.Modifiers = fu.modifiers
+	_spec.AddModifiers(fu.modifiers...)
 	if n, err = sqlgraph.UpdateNodes(ctx, fu.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{forecast.Label}
@@ -1778,270 +1632,124 @@ func (fuo *ForecastUpdateOne) sqlSave(ctx context.Context) (_node *Forecast, err
 		}
 	}
 	if value, ok := fuo.mutation.FromTime(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Value:  value,
-			Column: forecast.FieldFromTime,
-		})
+		_spec.SetField(forecast.FieldFromTime, field.TypeTime, value)
 	}
 	if value, ok := fuo.mutation.ToTime(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Value:  value,
-			Column: forecast.FieldToTime,
-		})
+		_spec.SetField(forecast.FieldToTime, field.TypeTime, value)
 	}
 	if value, ok := fuo.mutation.ChangeIndicator(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeEnum,
-			Value:  value,
-			Column: forecast.FieldChangeIndicator,
-		})
+		_spec.SetField(forecast.FieldChangeIndicator, field.TypeEnum, value)
 	}
 	if fuo.mutation.ChangeIndicatorCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeEnum,
-			Column: forecast.FieldChangeIndicator,
-		})
+		_spec.ClearField(forecast.FieldChangeIndicator, field.TypeEnum)
 	}
 	if value, ok := fuo.mutation.ChangeTime(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Value:  value,
-			Column: forecast.FieldChangeTime,
-		})
+		_spec.SetField(forecast.FieldChangeTime, field.TypeTime, value)
 	}
 	if fuo.mutation.ChangeTimeCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Column: forecast.FieldChangeTime,
-		})
+		_spec.ClearField(forecast.FieldChangeTime, field.TypeTime)
 	}
 	if value, ok := fuo.mutation.ChangeProbability(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Value:  value,
-			Column: forecast.FieldChangeProbability,
-		})
+		_spec.SetField(forecast.FieldChangeProbability, field.TypeInt, value)
 	}
 	if value, ok := fuo.mutation.AddedChangeProbability(); ok {
-		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Value:  value,
-			Column: forecast.FieldChangeProbability,
-		})
+		_spec.AddField(forecast.FieldChangeProbability, field.TypeInt, value)
 	}
 	if fuo.mutation.ChangeProbabilityCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Column: forecast.FieldChangeProbability,
-		})
+		_spec.ClearField(forecast.FieldChangeProbability, field.TypeInt)
 	}
 	if value, ok := fuo.mutation.WindDirection(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Value:  value,
-			Column: forecast.FieldWindDirection,
-		})
+		_spec.SetField(forecast.FieldWindDirection, field.TypeInt, value)
 	}
 	if value, ok := fuo.mutation.AddedWindDirection(); ok {
-		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Value:  value,
-			Column: forecast.FieldWindDirection,
-		})
+		_spec.AddField(forecast.FieldWindDirection, field.TypeInt, value)
 	}
 	if fuo.mutation.WindDirectionCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Column: forecast.FieldWindDirection,
-		})
+		_spec.ClearField(forecast.FieldWindDirection, field.TypeInt)
 	}
 	if value, ok := fuo.mutation.WindSpeed(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Value:  value,
-			Column: forecast.FieldWindSpeed,
-		})
+		_spec.SetField(forecast.FieldWindSpeed, field.TypeInt, value)
 	}
 	if value, ok := fuo.mutation.AddedWindSpeed(); ok {
-		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Value:  value,
-			Column: forecast.FieldWindSpeed,
-		})
+		_spec.AddField(forecast.FieldWindSpeed, field.TypeInt, value)
 	}
 	if fuo.mutation.WindSpeedCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Column: forecast.FieldWindSpeed,
-		})
+		_spec.ClearField(forecast.FieldWindSpeed, field.TypeInt)
 	}
 	if value, ok := fuo.mutation.WindGust(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Value:  value,
-			Column: forecast.FieldWindGust,
-		})
+		_spec.SetField(forecast.FieldWindGust, field.TypeInt, value)
 	}
 	if value, ok := fuo.mutation.AddedWindGust(); ok {
-		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Value:  value,
-			Column: forecast.FieldWindGust,
-		})
+		_spec.AddField(forecast.FieldWindGust, field.TypeInt, value)
 	}
 	if fuo.mutation.WindGustCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Column: forecast.FieldWindGust,
-		})
+		_spec.ClearField(forecast.FieldWindGust, field.TypeInt)
 	}
 	if value, ok := fuo.mutation.WindShearHeight(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Value:  value,
-			Column: forecast.FieldWindShearHeight,
-		})
+		_spec.SetField(forecast.FieldWindShearHeight, field.TypeInt, value)
 	}
 	if value, ok := fuo.mutation.AddedWindShearHeight(); ok {
-		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Value:  value,
-			Column: forecast.FieldWindShearHeight,
-		})
+		_spec.AddField(forecast.FieldWindShearHeight, field.TypeInt, value)
 	}
 	if fuo.mutation.WindShearHeightCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Column: forecast.FieldWindShearHeight,
-		})
+		_spec.ClearField(forecast.FieldWindShearHeight, field.TypeInt)
 	}
 	if value, ok := fuo.mutation.WindShearDirection(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Value:  value,
-			Column: forecast.FieldWindShearDirection,
-		})
+		_spec.SetField(forecast.FieldWindShearDirection, field.TypeInt, value)
 	}
 	if value, ok := fuo.mutation.AddedWindShearDirection(); ok {
-		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Value:  value,
-			Column: forecast.FieldWindShearDirection,
-		})
+		_spec.AddField(forecast.FieldWindShearDirection, field.TypeInt, value)
 	}
 	if fuo.mutation.WindShearDirectionCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Column: forecast.FieldWindShearDirection,
-		})
+		_spec.ClearField(forecast.FieldWindShearDirection, field.TypeInt)
 	}
 	if value, ok := fuo.mutation.WindShearSpeed(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Value:  value,
-			Column: forecast.FieldWindShearSpeed,
-		})
+		_spec.SetField(forecast.FieldWindShearSpeed, field.TypeInt, value)
 	}
 	if value, ok := fuo.mutation.AddedWindShearSpeed(); ok {
-		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Value:  value,
-			Column: forecast.FieldWindShearSpeed,
-		})
+		_spec.AddField(forecast.FieldWindShearSpeed, field.TypeInt, value)
 	}
 	if fuo.mutation.WindShearSpeedCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Column: forecast.FieldWindShearSpeed,
-		})
+		_spec.ClearField(forecast.FieldWindShearSpeed, field.TypeInt)
 	}
 	if value, ok := fuo.mutation.VisibilityHorizontal(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeFloat64,
-			Value:  value,
-			Column: forecast.FieldVisibilityHorizontal,
-		})
+		_spec.SetField(forecast.FieldVisibilityHorizontal, field.TypeFloat64, value)
 	}
 	if value, ok := fuo.mutation.AddedVisibilityHorizontal(); ok {
-		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
-			Type:   field.TypeFloat64,
-			Value:  value,
-			Column: forecast.FieldVisibilityHorizontal,
-		})
+		_spec.AddField(forecast.FieldVisibilityHorizontal, field.TypeFloat64, value)
 	}
 	if fuo.mutation.VisibilityHorizontalCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeFloat64,
-			Column: forecast.FieldVisibilityHorizontal,
-		})
+		_spec.ClearField(forecast.FieldVisibilityHorizontal, field.TypeFloat64)
 	}
 	if value, ok := fuo.mutation.VisibilityVertical(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Value:  value,
-			Column: forecast.FieldVisibilityVertical,
-		})
+		_spec.SetField(forecast.FieldVisibilityVertical, field.TypeInt, value)
 	}
 	if value, ok := fuo.mutation.AddedVisibilityVertical(); ok {
-		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Value:  value,
-			Column: forecast.FieldVisibilityVertical,
-		})
+		_spec.AddField(forecast.FieldVisibilityVertical, field.TypeInt, value)
 	}
 	if fuo.mutation.VisibilityVerticalCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Column: forecast.FieldVisibilityVertical,
-		})
+		_spec.ClearField(forecast.FieldVisibilityVertical, field.TypeInt)
 	}
 	if value, ok := fuo.mutation.Altimeter(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeFloat64,
-			Value:  value,
-			Column: forecast.FieldAltimeter,
-		})
+		_spec.SetField(forecast.FieldAltimeter, field.TypeFloat64, value)
 	}
 	if value, ok := fuo.mutation.AddedAltimeter(); ok {
-		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
-			Type:   field.TypeFloat64,
-			Value:  value,
-			Column: forecast.FieldAltimeter,
-		})
+		_spec.AddField(forecast.FieldAltimeter, field.TypeFloat64, value)
 	}
 	if fuo.mutation.AltimeterCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeFloat64,
-			Column: forecast.FieldAltimeter,
-		})
+		_spec.ClearField(forecast.FieldAltimeter, field.TypeFloat64)
 	}
 	if value, ok := fuo.mutation.Weather(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: forecast.FieldWeather,
-		})
+		_spec.SetField(forecast.FieldWeather, field.TypeString, value)
 	}
 	if fuo.mutation.WeatherCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Column: forecast.FieldWeather,
-		})
+		_spec.ClearField(forecast.FieldWeather, field.TypeString)
 	}
 	if value, ok := fuo.mutation.NotDecoded(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: forecast.FieldNotDecoded,
-		})
+		_spec.SetField(forecast.FieldNotDecoded, field.TypeString, value)
 	}
 	if fuo.mutation.NotDecodedCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Column: forecast.FieldNotDecoded,
-		})
+		_spec.ClearField(forecast.FieldNotDecoded, field.TypeString)
 	}
 	if fuo.mutation.SkyConditionsCleared() {
 		edge := &sqlgraph.EdgeSpec{
@@ -2259,7 +1967,7 @@ func (fuo *ForecastUpdateOne) sqlSave(ctx context.Context) (_node *Forecast, err
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	_spec.Modifiers = fuo.modifiers
+	_spec.AddModifiers(fuo.modifiers...)
 	_node = &Forecast{config: fuo.config}
 	_spec.Assign = _node.assignValues
 	_spec.ScanValues = _node.scanValues

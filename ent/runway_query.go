@@ -335,6 +335,11 @@ func (rq *RunwayQuery) Select(fields ...string) *RunwaySelect {
 	return selbuild
 }
 
+// Aggregate returns a RunwaySelect configured with the given aggregations.
+func (rq *RunwayQuery) Aggregate(fns ...AggregateFunc) *RunwaySelect {
+	return rq.Select().Aggregate(fns...)
+}
+
 func (rq *RunwayQuery) prepareQuery(ctx context.Context) error {
 	for _, f := range rq.fields {
 		if !runway.ValidColumn(f) {
@@ -444,11 +449,14 @@ func (rq *RunwayQuery) sqlCount(ctx context.Context) (int, error) {
 }
 
 func (rq *RunwayQuery) sqlExist(ctx context.Context) (bool, error) {
-	n, err := rq.sqlCount(ctx)
-	if err != nil {
+	switch _, err := rq.FirstID(ctx); {
+	case IsNotFound(err):
+		return false, nil
+	case err != nil:
 		return false, fmt.Errorf("ent: check existence: %w", err)
+	default:
+		return true, nil
 	}
-	return n > 0, nil
 }
 
 func (rq *RunwayQuery) querySpec() *sqlgraph.QuerySpec {
@@ -592,8 +600,6 @@ func (rgb *RunwayGroupBy) sqlQuery() *sql.Selector {
 	for _, fn := range rgb.fns {
 		aggregation = append(aggregation, fn(selector))
 	}
-	// If no columns were selected in a custom aggregation function, the default
-	// selection is the fields used for "group-by", and the aggregation functions.
 	if len(selector.SelectedColumns()) == 0 {
 		columns := make([]string, 0, len(rgb.fields)+len(rgb.fns))
 		for _, f := range rgb.fields {
@@ -613,6 +619,12 @@ type RunwaySelect struct {
 	sql *sql.Selector
 }
 
+// Aggregate adds the given aggregation functions to the selector query.
+func (rs *RunwaySelect) Aggregate(fns ...AggregateFunc) *RunwaySelect {
+	rs.fns = append(rs.fns, fns...)
+	return rs
+}
+
 // Scan applies the selector query and scans the result into the given value.
 func (rs *RunwaySelect) Scan(ctx context.Context, v any) error {
 	if err := rs.prepareQuery(ctx); err != nil {
@@ -623,6 +635,16 @@ func (rs *RunwaySelect) Scan(ctx context.Context, v any) error {
 }
 
 func (rs *RunwaySelect) sqlScan(ctx context.Context, v any) error {
+	aggregation := make([]string, 0, len(rs.fns))
+	for _, fn := range rs.fns {
+		aggregation = append(aggregation, fn(rs.sql))
+	}
+	switch n := len(*rs.selector.flds); {
+	case n == 0 && len(aggregation) > 0:
+		rs.sql.Select(aggregation...)
+	case n != 0 && len(aggregation) > 0:
+		rs.sql.AppendSelect(aggregation...)
+	}
 	rows := &sql.Rows{}
 	query, args := rs.sql.Query()
 	if err := rs.driver.Query(ctx, query, args, rows); err != nil {

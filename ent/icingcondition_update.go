@@ -172,53 +172,27 @@ func (icu *IcingConditionUpdate) sqlSave(ctx context.Context) (n int, err error)
 		}
 	}
 	if value, ok := icu.mutation.Intensity(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: icingcondition.FieldIntensity,
-		})
+		_spec.SetField(icingcondition.FieldIntensity, field.TypeString, value)
 	}
 	if value, ok := icu.mutation.MinAltitude(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Value:  value,
-			Column: icingcondition.FieldMinAltitude,
-		})
+		_spec.SetField(icingcondition.FieldMinAltitude, field.TypeInt, value)
 	}
 	if value, ok := icu.mutation.AddedMinAltitude(); ok {
-		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Value:  value,
-			Column: icingcondition.FieldMinAltitude,
-		})
+		_spec.AddField(icingcondition.FieldMinAltitude, field.TypeInt, value)
 	}
 	if icu.mutation.MinAltitudeCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Column: icingcondition.FieldMinAltitude,
-		})
+		_spec.ClearField(icingcondition.FieldMinAltitude, field.TypeInt)
 	}
 	if value, ok := icu.mutation.MaxAltitude(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Value:  value,
-			Column: icingcondition.FieldMaxAltitude,
-		})
+		_spec.SetField(icingcondition.FieldMaxAltitude, field.TypeInt, value)
 	}
 	if value, ok := icu.mutation.AddedMaxAltitude(); ok {
-		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Value:  value,
-			Column: icingcondition.FieldMaxAltitude,
-		})
+		_spec.AddField(icingcondition.FieldMaxAltitude, field.TypeInt, value)
 	}
 	if icu.mutation.MaxAltitudeCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Column: icingcondition.FieldMaxAltitude,
-		})
+		_spec.ClearField(icingcondition.FieldMaxAltitude, field.TypeInt)
 	}
-	_spec.Modifiers = icu.modifiers
+	_spec.AddModifiers(icu.modifiers...)
 	if n, err = sqlgraph.UpdateNodes(ctx, icu.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{icingcondition.Label}
@@ -413,53 +387,27 @@ func (icuo *IcingConditionUpdateOne) sqlSave(ctx context.Context) (_node *IcingC
 		}
 	}
 	if value, ok := icuo.mutation.Intensity(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: icingcondition.FieldIntensity,
-		})
+		_spec.SetField(icingcondition.FieldIntensity, field.TypeString, value)
 	}
 	if value, ok := icuo.mutation.MinAltitude(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Value:  value,
-			Column: icingcondition.FieldMinAltitude,
-		})
+		_spec.SetField(icingcondition.FieldMinAltitude, field.TypeInt, value)
 	}
 	if value, ok := icuo.mutation.AddedMinAltitude(); ok {
-		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Value:  value,
-			Column: icingcondition.FieldMinAltitude,
-		})
+		_spec.AddField(icingcondition.FieldMinAltitude, field.TypeInt, value)
 	}
 	if icuo.mutation.MinAltitudeCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Column: icingcondition.FieldMinAltitude,
-		})
+		_spec.ClearField(icingcondition.FieldMinAltitude, field.TypeInt)
 	}
 	if value, ok := icuo.mutation.MaxAltitude(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Value:  value,
-			Column: icingcondition.FieldMaxAltitude,
-		})
+		_spec.SetField(icingcondition.FieldMaxAltitude, field.TypeInt, value)
 	}
 	if value, ok := icuo.mutation.AddedMaxAltitude(); ok {
-		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Value:  value,
-			Column: icingcondition.FieldMaxAltitude,
-		})
+		_spec.AddField(icingcondition.FieldMaxAltitude, field.TypeInt, value)
 	}
 	if icuo.mutation.MaxAltitudeCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Column: icingcondition.FieldMaxAltitude,
-		})
+		_spec.ClearField(icingcondition.FieldMaxAltitude, field.TypeInt)
 	}
-	_spec.Modifiers = icuo.modifiers
+	_spec.AddModifiers(icuo.modifiers...)
 	_node = &IcingCondition{config: icuo.config}
 	_spec.Assign = _node.assignValues
 	_spec.ScanValues = _node.scanValues

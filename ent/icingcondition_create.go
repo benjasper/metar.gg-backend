@@ -197,27 +197,15 @@ func (icc *IcingConditionCreate) createSpec() (*IcingCondition, *sqlgraph.Create
 		_spec.ID.Value = &id
 	}
 	if value, ok := icc.mutation.Intensity(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: icingcondition.FieldIntensity,
-		})
+		_spec.SetField(icingcondition.FieldIntensity, field.TypeString, value)
 		_node.Intensity = value
 	}
 	if value, ok := icc.mutation.MinAltitude(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Value:  value,
-			Column: icingcondition.FieldMinAltitude,
-		})
+		_spec.SetField(icingcondition.FieldMinAltitude, field.TypeInt, value)
 		_node.MinAltitude = &value
 	}
 	if value, ok := icc.mutation.MaxAltitude(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Value:  value,
-			Column: icingcondition.FieldMaxAltitude,
-		})
+		_spec.SetField(icingcondition.FieldMaxAltitude, field.TypeInt, value)
 		_node.MaxAltitude = &value
 	}
 	return _node, _spec

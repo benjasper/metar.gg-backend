@@ -444,131 +444,67 @@ func (fc *ForecastCreate) createSpec() (*Forecast, *sqlgraph.CreateSpec) {
 		_spec.ID.Value = &id
 	}
 	if value, ok := fc.mutation.FromTime(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Value:  value,
-			Column: forecast.FieldFromTime,
-		})
+		_spec.SetField(forecast.FieldFromTime, field.TypeTime, value)
 		_node.FromTime = value
 	}
 	if value, ok := fc.mutation.ToTime(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Value:  value,
-			Column: forecast.FieldToTime,
-		})
+		_spec.SetField(forecast.FieldToTime, field.TypeTime, value)
 		_node.ToTime = value
 	}
 	if value, ok := fc.mutation.ChangeIndicator(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeEnum,
-			Value:  value,
-			Column: forecast.FieldChangeIndicator,
-		})
+		_spec.SetField(forecast.FieldChangeIndicator, field.TypeEnum, value)
 		_node.ChangeIndicator = &value
 	}
 	if value, ok := fc.mutation.ChangeTime(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Value:  value,
-			Column: forecast.FieldChangeTime,
-		})
+		_spec.SetField(forecast.FieldChangeTime, field.TypeTime, value)
 		_node.ChangeTime = &value
 	}
 	if value, ok := fc.mutation.ChangeProbability(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Value:  value,
-			Column: forecast.FieldChangeProbability,
-		})
+		_spec.SetField(forecast.FieldChangeProbability, field.TypeInt, value)
 		_node.ChangeProbability = &value
 	}
 	if value, ok := fc.mutation.WindDirection(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Value:  value,
-			Column: forecast.FieldWindDirection,
-		})
+		_spec.SetField(forecast.FieldWindDirection, field.TypeInt, value)
 		_node.WindDirection = &value
 	}
 	if value, ok := fc.mutation.WindSpeed(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Value:  value,
-			Column: forecast.FieldWindSpeed,
-		})
+		_spec.SetField(forecast.FieldWindSpeed, field.TypeInt, value)
 		_node.WindSpeed = &value
 	}
 	if value, ok := fc.mutation.WindGust(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Value:  value,
-			Column: forecast.FieldWindGust,
-		})
+		_spec.SetField(forecast.FieldWindGust, field.TypeInt, value)
 		_node.WindGust = &value
 	}
 	if value, ok := fc.mutation.WindShearHeight(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Value:  value,
-			Column: forecast.FieldWindShearHeight,
-		})
+		_spec.SetField(forecast.FieldWindShearHeight, field.TypeInt, value)
 		_node.WindShearHeight = &value
 	}
 	if value, ok := fc.mutation.WindShearDirection(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Value:  value,
-			Column: forecast.FieldWindShearDirection,
-		})
+		_spec.SetField(forecast.FieldWindShearDirection, field.TypeInt, value)
 		_node.WindShearDirection = &value
 	}
 	if value, ok := fc.mutation.WindShearSpeed(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Value:  value,
-			Column: forecast.FieldWindShearSpeed,
-		})
+		_spec.SetField(forecast.FieldWindShearSpeed, field.TypeInt, value)
 		_node.WindShearSpeed = &value
 	}
 	if value, ok := fc.mutation.VisibilityHorizontal(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeFloat64,
-			Value:  value,
-			Column: forecast.FieldVisibilityHorizontal,
-		})
+		_spec.SetField(forecast.FieldVisibilityHorizontal, field.TypeFloat64, value)
 		_node.VisibilityHorizontal = &value
 	}
 	if value, ok := fc.mutation.VisibilityVertical(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Value:  value,
-			Column: forecast.FieldVisibilityVertical,
-		})
+		_spec.SetField(forecast.FieldVisibilityVertical, field.TypeInt, value)
 		_node.VisibilityVertical = &value
 	}
 	if value, ok := fc.mutation.Altimeter(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeFloat64,
-			Value:  value,
-			Column: forecast.FieldAltimeter,
-		})
+		_spec.SetField(forecast.FieldAltimeter, field.TypeFloat64, value)
 		_node.Altimeter = &value
 	}
 	if value, ok := fc.mutation.Weather(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: forecast.FieldWeather,
-		})
+		_spec.SetField(forecast.FieldWeather, field.TypeString, value)
 		_node.Weather = value
 	}
 	if value, ok := fc.mutation.NotDecoded(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: forecast.FieldNotDecoded,
-		})
+		_spec.SetField(forecast.FieldNotDecoded, field.TypeString, value)
 		_node.NotDecoded = value
 	}
 	if nodes := fc.mutation.SkyConditionsIDs(); len(nodes) > 0 {

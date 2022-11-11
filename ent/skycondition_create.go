@@ -207,27 +207,15 @@ func (scc *SkyConditionCreate) createSpec() (*SkyCondition, *sqlgraph.CreateSpec
 		_spec.ID.Value = &id
 	}
 	if value, ok := scc.mutation.SkyCover(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeEnum,
-			Value:  value,
-			Column: skycondition.FieldSkyCover,
-		})
+		_spec.SetField(skycondition.FieldSkyCover, field.TypeEnum, value)
 		_node.SkyCover = value
 	}
 	if value, ok := scc.mutation.CloudBase(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Value:  value,
-			Column: skycondition.FieldCloudBase,
-		})
+		_spec.SetField(skycondition.FieldCloudBase, field.TypeInt, value)
 		_node.CloudBase = &value
 	}
 	if value, ok := scc.mutation.CloudType(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeEnum,
-			Value:  value,
-			Column: skycondition.FieldCloudType,
-		})
+		_spec.SetField(skycondition.FieldCloudType, field.TypeEnum, value)
 		_node.CloudType = &value
 	}
 	return _node, _spec

@@ -186,46 +186,24 @@ func (scu *SkyConditionUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 	}
 	if value, ok := scu.mutation.SkyCover(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeEnum,
-			Value:  value,
-			Column: skycondition.FieldSkyCover,
-		})
+		_spec.SetField(skycondition.FieldSkyCover, field.TypeEnum, value)
 	}
 	if value, ok := scu.mutation.CloudBase(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Value:  value,
-			Column: skycondition.FieldCloudBase,
-		})
+		_spec.SetField(skycondition.FieldCloudBase, field.TypeInt, value)
 	}
 	if value, ok := scu.mutation.AddedCloudBase(); ok {
-		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Value:  value,
-			Column: skycondition.FieldCloudBase,
-		})
+		_spec.AddField(skycondition.FieldCloudBase, field.TypeInt, value)
 	}
 	if scu.mutation.CloudBaseCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Column: skycondition.FieldCloudBase,
-		})
+		_spec.ClearField(skycondition.FieldCloudBase, field.TypeInt)
 	}
 	if value, ok := scu.mutation.CloudType(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeEnum,
-			Value:  value,
-			Column: skycondition.FieldCloudType,
-		})
+		_spec.SetField(skycondition.FieldCloudType, field.TypeEnum, value)
 	}
 	if scu.mutation.CloudTypeCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeEnum,
-			Column: skycondition.FieldCloudType,
-		})
+		_spec.ClearField(skycondition.FieldCloudType, field.TypeEnum)
 	}
-	_spec.Modifiers = scu.modifiers
+	_spec.AddModifiers(scu.modifiers...)
 	if n, err = sqlgraph.UpdateNodes(ctx, scu.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{skycondition.Label}
@@ -434,46 +412,24 @@ func (scuo *SkyConditionUpdateOne) sqlSave(ctx context.Context) (_node *SkyCondi
 		}
 	}
 	if value, ok := scuo.mutation.SkyCover(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeEnum,
-			Value:  value,
-			Column: skycondition.FieldSkyCover,
-		})
+		_spec.SetField(skycondition.FieldSkyCover, field.TypeEnum, value)
 	}
 	if value, ok := scuo.mutation.CloudBase(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Value:  value,
-			Column: skycondition.FieldCloudBase,
-		})
+		_spec.SetField(skycondition.FieldCloudBase, field.TypeInt, value)
 	}
 	if value, ok := scuo.mutation.AddedCloudBase(); ok {
-		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Value:  value,
-			Column: skycondition.FieldCloudBase,
-		})
+		_spec.AddField(skycondition.FieldCloudBase, field.TypeInt, value)
 	}
 	if scuo.mutation.CloudBaseCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Column: skycondition.FieldCloudBase,
-		})
+		_spec.ClearField(skycondition.FieldCloudBase, field.TypeInt)
 	}
 	if value, ok := scuo.mutation.CloudType(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeEnum,
-			Value:  value,
-			Column: skycondition.FieldCloudType,
-		})
+		_spec.SetField(skycondition.FieldCloudType, field.TypeEnum, value)
 	}
 	if scuo.mutation.CloudTypeCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeEnum,
-			Column: skycondition.FieldCloudType,
-		})
+		_spec.ClearField(skycondition.FieldCloudType, field.TypeEnum)
 	}
-	_spec.Modifiers = scuo.modifiers
+	_spec.AddModifiers(scuo.modifiers...)
 	_node = &SkyCondition{config: scuo.config}
 	_spec.Assign = _node.assignValues
 	_spec.ScanValues = _node.scanValues

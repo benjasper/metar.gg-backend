@@ -186,67 +186,33 @@ func (tdu *TemperatureDataUpdate) sqlSave(ctx context.Context) (n int, err error
 		}
 	}
 	if value, ok := tdu.mutation.ValidTime(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Value:  value,
-			Column: temperaturedata.FieldValidTime,
-		})
+		_spec.SetField(temperaturedata.FieldValidTime, field.TypeTime, value)
 	}
 	if value, ok := tdu.mutation.Temperature(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeFloat64,
-			Value:  value,
-			Column: temperaturedata.FieldTemperature,
-		})
+		_spec.SetField(temperaturedata.FieldTemperature, field.TypeFloat64, value)
 	}
 	if value, ok := tdu.mutation.AddedTemperature(); ok {
-		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
-			Type:   field.TypeFloat64,
-			Value:  value,
-			Column: temperaturedata.FieldTemperature,
-		})
+		_spec.AddField(temperaturedata.FieldTemperature, field.TypeFloat64, value)
 	}
 	if value, ok := tdu.mutation.MinTemperature(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeFloat64,
-			Value:  value,
-			Column: temperaturedata.FieldMinTemperature,
-		})
+		_spec.SetField(temperaturedata.FieldMinTemperature, field.TypeFloat64, value)
 	}
 	if value, ok := tdu.mutation.AddedMinTemperature(); ok {
-		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
-			Type:   field.TypeFloat64,
-			Value:  value,
-			Column: temperaturedata.FieldMinTemperature,
-		})
+		_spec.AddField(temperaturedata.FieldMinTemperature, field.TypeFloat64, value)
 	}
 	if tdu.mutation.MinTemperatureCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeFloat64,
-			Column: temperaturedata.FieldMinTemperature,
-		})
+		_spec.ClearField(temperaturedata.FieldMinTemperature, field.TypeFloat64)
 	}
 	if value, ok := tdu.mutation.MaxTemperature(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeFloat64,
-			Value:  value,
-			Column: temperaturedata.FieldMaxTemperature,
-		})
+		_spec.SetField(temperaturedata.FieldMaxTemperature, field.TypeFloat64, value)
 	}
 	if value, ok := tdu.mutation.AddedMaxTemperature(); ok {
-		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
-			Type:   field.TypeFloat64,
-			Value:  value,
-			Column: temperaturedata.FieldMaxTemperature,
-		})
+		_spec.AddField(temperaturedata.FieldMaxTemperature, field.TypeFloat64, value)
 	}
 	if tdu.mutation.MaxTemperatureCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeFloat64,
-			Column: temperaturedata.FieldMaxTemperature,
-		})
+		_spec.ClearField(temperaturedata.FieldMaxTemperature, field.TypeFloat64)
 	}
-	_spec.Modifiers = tdu.modifiers
+	_spec.AddModifiers(tdu.modifiers...)
 	if n, err = sqlgraph.UpdateNodes(ctx, tdu.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{temperaturedata.Label}
@@ -454,67 +420,33 @@ func (tduo *TemperatureDataUpdateOne) sqlSave(ctx context.Context) (_node *Tempe
 		}
 	}
 	if value, ok := tduo.mutation.ValidTime(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Value:  value,
-			Column: temperaturedata.FieldValidTime,
-		})
+		_spec.SetField(temperaturedata.FieldValidTime, field.TypeTime, value)
 	}
 	if value, ok := tduo.mutation.Temperature(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeFloat64,
-			Value:  value,
-			Column: temperaturedata.FieldTemperature,
-		})
+		_spec.SetField(temperaturedata.FieldTemperature, field.TypeFloat64, value)
 	}
 	if value, ok := tduo.mutation.AddedTemperature(); ok {
-		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
-			Type:   field.TypeFloat64,
-			Value:  value,
-			Column: temperaturedata.FieldTemperature,
-		})
+		_spec.AddField(temperaturedata.FieldTemperature, field.TypeFloat64, value)
 	}
 	if value, ok := tduo.mutation.MinTemperature(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeFloat64,
-			Value:  value,
-			Column: temperaturedata.FieldMinTemperature,
-		})
+		_spec.SetField(temperaturedata.FieldMinTemperature, field.TypeFloat64, value)
 	}
 	if value, ok := tduo.mutation.AddedMinTemperature(); ok {
-		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
-			Type:   field.TypeFloat64,
-			Value:  value,
-			Column: temperaturedata.FieldMinTemperature,
-		})
+		_spec.AddField(temperaturedata.FieldMinTemperature, field.TypeFloat64, value)
 	}
 	if tduo.mutation.MinTemperatureCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeFloat64,
-			Column: temperaturedata.FieldMinTemperature,
-		})
+		_spec.ClearField(temperaturedata.FieldMinTemperature, field.TypeFloat64)
 	}
 	if value, ok := tduo.mutation.MaxTemperature(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeFloat64,
-			Value:  value,
-			Column: temperaturedata.FieldMaxTemperature,
-		})
+		_spec.SetField(temperaturedata.FieldMaxTemperature, field.TypeFloat64, value)
 	}
 	if value, ok := tduo.mutation.AddedMaxTemperature(); ok {
-		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
-			Type:   field.TypeFloat64,
-			Value:  value,
-			Column: temperaturedata.FieldMaxTemperature,
-		})
+		_spec.AddField(temperaturedata.FieldMaxTemperature, field.TypeFloat64, value)
 	}
 	if tduo.mutation.MaxTemperatureCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeFloat64,
-			Column: temperaturedata.FieldMaxTemperature,
-		})
+		_spec.ClearField(temperaturedata.FieldMaxTemperature, field.TypeFloat64)
 	}
-	_spec.Modifiers = tduo.modifiers
+	_spec.AddModifiers(tduo.modifiers...)
 	_node = &TemperatureData{config: tduo.config}
 	_spec.Assign = _node.assignValues
 	_spec.ScanValues = _node.scanValues

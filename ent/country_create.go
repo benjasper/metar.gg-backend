@@ -287,75 +287,39 @@ func (cc *CountryCreate) createSpec() (*Country, *sqlgraph.CreateSpec) {
 		_spec.ID.Value = &id
 	}
 	if value, ok := cc.mutation.ImportID(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Value:  value,
-			Column: country.FieldImportID,
-		})
+		_spec.SetField(country.FieldImportID, field.TypeInt, value)
 		_node.ImportID = value
 	}
 	if value, ok := cc.mutation.Hash(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: country.FieldHash,
-		})
+		_spec.SetField(country.FieldHash, field.TypeString, value)
 		_node.Hash = value
 	}
 	if value, ok := cc.mutation.ImportFlag(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeBool,
-			Value:  value,
-			Column: country.FieldImportFlag,
-		})
+		_spec.SetField(country.FieldImportFlag, field.TypeBool, value)
 		_node.ImportFlag = value
 	}
 	if value, ok := cc.mutation.LastUpdated(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Value:  value,
-			Column: country.FieldLastUpdated,
-		})
+		_spec.SetField(country.FieldLastUpdated, field.TypeTime, value)
 		_node.LastUpdated = value
 	}
 	if value, ok := cc.mutation.Code(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: country.FieldCode,
-		})
+		_spec.SetField(country.FieldCode, field.TypeString, value)
 		_node.Code = value
 	}
 	if value, ok := cc.mutation.Name(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: country.FieldName,
-		})
+		_spec.SetField(country.FieldName, field.TypeString, value)
 		_node.Name = value
 	}
 	if value, ok := cc.mutation.Continent(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeEnum,
-			Value:  value,
-			Column: country.FieldContinent,
-		})
+		_spec.SetField(country.FieldContinent, field.TypeEnum, value)
 		_node.Continent = value
 	}
 	if value, ok := cc.mutation.WikipediaLink(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: country.FieldWikipediaLink,
-		})
+		_spec.SetField(country.FieldWikipediaLink, field.TypeString, value)
 		_node.WikipediaLink = value
 	}
 	if value, ok := cc.mutation.Keywords(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeJSON,
-			Value:  value,
-			Column: country.FieldKeywords,
-		})
+		_spec.SetField(country.FieldKeywords, field.TypeJSON, value)
 		_node.Keywords = value
 	}
 	if nodes := cc.mutation.AirportsIDs(); len(nodes) > 0 {

@@ -272,43 +272,23 @@ func (wsc *WeatherStationCreate) createSpec() (*WeatherStation, *sqlgraph.Create
 		_spec.ID.Value = &id
 	}
 	if value, ok := wsc.mutation.StationID(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: weatherstation.FieldStationID,
-		})
+		_spec.SetField(weatherstation.FieldStationID, field.TypeString, value)
 		_node.StationID = value
 	}
 	if value, ok := wsc.mutation.Latitude(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeFloat64,
-			Value:  value,
-			Column: weatherstation.FieldLatitude,
-		})
+		_spec.SetField(weatherstation.FieldLatitude, field.TypeFloat64, value)
 		_node.Latitude = &value
 	}
 	if value, ok := wsc.mutation.Longitude(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeFloat64,
-			Value:  value,
-			Column: weatherstation.FieldLongitude,
-		})
+		_spec.SetField(weatherstation.FieldLongitude, field.TypeFloat64, value)
 		_node.Longitude = &value
 	}
 	if value, ok := wsc.mutation.Elevation(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeFloat64,
-			Value:  value,
-			Column: weatherstation.FieldElevation,
-		})
+		_spec.SetField(weatherstation.FieldElevation, field.TypeFloat64, value)
 		_node.Elevation = &value
 	}
 	if value, ok := wsc.mutation.Hash(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: weatherstation.FieldHash,
-		})
+		_spec.SetField(weatherstation.FieldHash, field.TypeString, value)
 		_node.Hash = value
 	}
 	if nodes := wsc.mutation.AirportIDs(); len(nodes) > 0 {

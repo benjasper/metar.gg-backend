@@ -533,171 +533,87 @@ func (ac *AirportCreate) createSpec() (*Airport, *sqlgraph.CreateSpec) {
 		_spec.ID.Value = &id
 	}
 	if value, ok := ac.mutation.ImportID(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Value:  value,
-			Column: airport.FieldImportID,
-		})
+		_spec.SetField(airport.FieldImportID, field.TypeInt, value)
 		_node.ImportID = value
 	}
 	if value, ok := ac.mutation.Hash(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: airport.FieldHash,
-		})
+		_spec.SetField(airport.FieldHash, field.TypeString, value)
 		_node.Hash = value
 	}
 	if value, ok := ac.mutation.ImportFlag(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeBool,
-			Value:  value,
-			Column: airport.FieldImportFlag,
-		})
+		_spec.SetField(airport.FieldImportFlag, field.TypeBool, value)
 		_node.ImportFlag = value
 	}
 	if value, ok := ac.mutation.LastUpdated(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Value:  value,
-			Column: airport.FieldLastUpdated,
-		})
+		_spec.SetField(airport.FieldLastUpdated, field.TypeTime, value)
 		_node.LastUpdated = value
 	}
 	if value, ok := ac.mutation.IcaoCode(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: airport.FieldIcaoCode,
-		})
+		_spec.SetField(airport.FieldIcaoCode, field.TypeString, value)
 		_node.IcaoCode = value
 	}
 	if value, ok := ac.mutation.IataCode(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: airport.FieldIataCode,
-		})
+		_spec.SetField(airport.FieldIataCode, field.TypeString, value)
 		_node.IataCode = &value
 	}
 	if value, ok := ac.mutation.Identifier(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: airport.FieldIdentifier,
-		})
+		_spec.SetField(airport.FieldIdentifier, field.TypeString, value)
 		_node.Identifier = value
 	}
 	if value, ok := ac.mutation.GetType(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeEnum,
-			Value:  value,
-			Column: airport.FieldType,
-		})
+		_spec.SetField(airport.FieldType, field.TypeEnum, value)
 		_node.Type = value
 	}
 	if value, ok := ac.mutation.Importance(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Value:  value,
-			Column: airport.FieldImportance,
-		})
+		_spec.SetField(airport.FieldImportance, field.TypeInt, value)
 		_node.Importance = value
 	}
 	if value, ok := ac.mutation.Name(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: airport.FieldName,
-		})
+		_spec.SetField(airport.FieldName, field.TypeString, value)
 		_node.Name = value
 	}
 	if value, ok := ac.mutation.Latitude(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeFloat64,
-			Value:  value,
-			Column: airport.FieldLatitude,
-		})
+		_spec.SetField(airport.FieldLatitude, field.TypeFloat64, value)
 		_node.Latitude = value
 	}
 	if value, ok := ac.mutation.Longitude(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeFloat64,
-			Value:  value,
-			Column: airport.FieldLongitude,
-		})
+		_spec.SetField(airport.FieldLongitude, field.TypeFloat64, value)
 		_node.Longitude = value
 	}
 	if value, ok := ac.mutation.Timezone(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: airport.FieldTimezone,
-		})
+		_spec.SetField(airport.FieldTimezone, field.TypeString, value)
 		_node.Timezone = &value
 	}
 	if value, ok := ac.mutation.Elevation(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Value:  value,
-			Column: airport.FieldElevation,
-		})
+		_spec.SetField(airport.FieldElevation, field.TypeInt, value)
 		_node.Elevation = &value
 	}
 	if value, ok := ac.mutation.Municipality(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: airport.FieldMunicipality,
-		})
+		_spec.SetField(airport.FieldMunicipality, field.TypeString, value)
 		_node.Municipality = &value
 	}
 	if value, ok := ac.mutation.ScheduledService(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeBool,
-			Value:  value,
-			Column: airport.FieldScheduledService,
-		})
+		_spec.SetField(airport.FieldScheduledService, field.TypeBool, value)
 		_node.ScheduledService = value
 	}
 	if value, ok := ac.mutation.GpsCode(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: airport.FieldGpsCode,
-		})
+		_spec.SetField(airport.FieldGpsCode, field.TypeString, value)
 		_node.GpsCode = &value
 	}
 	if value, ok := ac.mutation.LocalCode(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: airport.FieldLocalCode,
-		})
+		_spec.SetField(airport.FieldLocalCode, field.TypeString, value)
 		_node.LocalCode = &value
 	}
 	if value, ok := ac.mutation.Website(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: airport.FieldWebsite,
-		})
+		_spec.SetField(airport.FieldWebsite, field.TypeString, value)
 		_node.Website = &value
 	}
 	if value, ok := ac.mutation.Wikipedia(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: airport.FieldWikipedia,
-		})
+		_spec.SetField(airport.FieldWikipedia, field.TypeString, value)
 		_node.Wikipedia = &value
 	}
 	if value, ok := ac.mutation.Keywords(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeJSON,
-			Value:  value,
-			Column: airport.FieldKeywords,
-		})
+		_spec.SetField(airport.FieldKeywords, field.TypeJSON, value)
 		_node.Keywords = value
 	}
 	if nodes := ac.mutation.RegionIDs(); len(nodes) > 0 {

@@ -268,59 +268,31 @@ func (fc *FrequencyCreate) createSpec() (*Frequency, *sqlgraph.CreateSpec) {
 		_spec.ID.Value = &id
 	}
 	if value, ok := fc.mutation.ImportID(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Value:  value,
-			Column: frequency.FieldImportID,
-		})
+		_spec.SetField(frequency.FieldImportID, field.TypeInt, value)
 		_node.ImportID = value
 	}
 	if value, ok := fc.mutation.Hash(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: frequency.FieldHash,
-		})
+		_spec.SetField(frequency.FieldHash, field.TypeString, value)
 		_node.Hash = value
 	}
 	if value, ok := fc.mutation.ImportFlag(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeBool,
-			Value:  value,
-			Column: frequency.FieldImportFlag,
-		})
+		_spec.SetField(frequency.FieldImportFlag, field.TypeBool, value)
 		_node.ImportFlag = value
 	}
 	if value, ok := fc.mutation.LastUpdated(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Value:  value,
-			Column: frequency.FieldLastUpdated,
-		})
+		_spec.SetField(frequency.FieldLastUpdated, field.TypeTime, value)
 		_node.LastUpdated = value
 	}
 	if value, ok := fc.mutation.GetType(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: frequency.FieldType,
-		})
+		_spec.SetField(frequency.FieldType, field.TypeString, value)
 		_node.Type = value
 	}
 	if value, ok := fc.mutation.Description(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: frequency.FieldDescription,
-		})
+		_spec.SetField(frequency.FieldDescription, field.TypeString, value)
 		_node.Description = value
 	}
 	if value, ok := fc.mutation.Frequency(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeFloat64,
-			Value:  value,
-			Column: frequency.FieldFrequency,
-		})
+		_spec.SetField(frequency.FieldFrequency, field.TypeFloat64, value)
 		_node.Frequency = value
 	}
 	if nodes := fc.mutation.AirportIDs(); len(nodes) > 0 {

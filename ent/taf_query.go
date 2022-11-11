@@ -410,6 +410,11 @@ func (tq *TafQuery) Select(fields ...string) *TafSelect {
 	return selbuild
 }
 
+// Aggregate returns a TafSelect configured with the given aggregations.
+func (tq *TafQuery) Aggregate(fns ...AggregateFunc) *TafSelect {
+	return tq.Select().Aggregate(fns...)
+}
+
 func (tq *TafQuery) prepareQuery(ctx context.Context) error {
 	for _, f := range tq.fields {
 		if !taf.ValidColumn(f) {
@@ -611,11 +616,14 @@ func (tq *TafQuery) sqlCount(ctx context.Context) (int, error) {
 }
 
 func (tq *TafQuery) sqlExist(ctx context.Context) (bool, error) {
-	n, err := tq.sqlCount(ctx)
-	if err != nil {
+	switch _, err := tq.FirstID(ctx); {
+	case IsNotFound(err):
+		return false, nil
+	case err != nil:
 		return false, fmt.Errorf("ent: check existence: %w", err)
+	default:
+		return true, nil
 	}
-	return n > 0, nil
 }
 
 func (tq *TafQuery) querySpec() *sqlgraph.QuerySpec {
@@ -787,8 +795,6 @@ func (tgb *TafGroupBy) sqlQuery() *sql.Selector {
 	for _, fn := range tgb.fns {
 		aggregation = append(aggregation, fn(selector))
 	}
-	// If no columns were selected in a custom aggregation function, the default
-	// selection is the fields used for "group-by", and the aggregation functions.
 	if len(selector.SelectedColumns()) == 0 {
 		columns := make([]string, 0, len(tgb.fields)+len(tgb.fns))
 		for _, f := range tgb.fields {
@@ -808,6 +814,12 @@ type TafSelect struct {
 	sql *sql.Selector
 }
 
+// Aggregate adds the given aggregation functions to the selector query.
+func (ts *TafSelect) Aggregate(fns ...AggregateFunc) *TafSelect {
+	ts.fns = append(ts.fns, fns...)
+	return ts
+}
+
 // Scan applies the selector query and scans the result into the given value.
 func (ts *TafSelect) Scan(ctx context.Context, v any) error {
 	if err := ts.prepareQuery(ctx); err != nil {
@@ -818,6 +830,16 @@ func (ts *TafSelect) Scan(ctx context.Context, v any) error {
 }
 
 func (ts *TafSelect) sqlScan(ctx context.Context, v any) error {
+	aggregation := make([]string, 0, len(ts.fns))
+	for _, fn := range ts.fns {
+		aggregation = append(aggregation, fn(ts.sql))
+	}
+	switch n := len(*ts.selector.flds); {
+	case n == 0 && len(aggregation) > 0:
+		ts.sql.Select(aggregation...)
+	case n != 0 && len(aggregation) > 0:
+		ts.sql.AppendSelect(aggregation...)
+	}
 	rows := &sql.Rows{}
 	query, args := ts.sql.Query()
 	if err := ts.driver.Query(ctx, query, args, rows); err != nil {

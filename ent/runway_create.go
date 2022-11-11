@@ -449,171 +449,87 @@ func (rc *RunwayCreate) createSpec() (*Runway, *sqlgraph.CreateSpec) {
 		_spec.ID.Value = &id
 	}
 	if value, ok := rc.mutation.ImportID(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Value:  value,
-			Column: runway.FieldImportID,
-		})
+		_spec.SetField(runway.FieldImportID, field.TypeInt, value)
 		_node.ImportID = value
 	}
 	if value, ok := rc.mutation.Hash(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: runway.FieldHash,
-		})
+		_spec.SetField(runway.FieldHash, field.TypeString, value)
 		_node.Hash = value
 	}
 	if value, ok := rc.mutation.ImportFlag(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeBool,
-			Value:  value,
-			Column: runway.FieldImportFlag,
-		})
+		_spec.SetField(runway.FieldImportFlag, field.TypeBool, value)
 		_node.ImportFlag = value
 	}
 	if value, ok := rc.mutation.LastUpdated(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Value:  value,
-			Column: runway.FieldLastUpdated,
-		})
+		_spec.SetField(runway.FieldLastUpdated, field.TypeTime, value)
 		_node.LastUpdated = value
 	}
 	if value, ok := rc.mutation.Length(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Value:  value,
-			Column: runway.FieldLength,
-		})
+		_spec.SetField(runway.FieldLength, field.TypeInt, value)
 		_node.Length = value
 	}
 	if value, ok := rc.mutation.Width(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Value:  value,
-			Column: runway.FieldWidth,
-		})
+		_spec.SetField(runway.FieldWidth, field.TypeInt, value)
 		_node.Width = value
 	}
 	if value, ok := rc.mutation.Surface(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: runway.FieldSurface,
-		})
+		_spec.SetField(runway.FieldSurface, field.TypeString, value)
 		_node.Surface = &value
 	}
 	if value, ok := rc.mutation.Lighted(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeBool,
-			Value:  value,
-			Column: runway.FieldLighted,
-		})
+		_spec.SetField(runway.FieldLighted, field.TypeBool, value)
 		_node.Lighted = value
 	}
 	if value, ok := rc.mutation.Closed(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeBool,
-			Value:  value,
-			Column: runway.FieldClosed,
-		})
+		_spec.SetField(runway.FieldClosed, field.TypeBool, value)
 		_node.Closed = value
 	}
 	if value, ok := rc.mutation.LowRunwayIdentifier(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: runway.FieldLowRunwayIdentifier,
-		})
+		_spec.SetField(runway.FieldLowRunwayIdentifier, field.TypeString, value)
 		_node.LowRunwayIdentifier = value
 	}
 	if value, ok := rc.mutation.LowRunwayLatitude(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeFloat64,
-			Value:  value,
-			Column: runway.FieldLowRunwayLatitude,
-		})
+		_spec.SetField(runway.FieldLowRunwayLatitude, field.TypeFloat64, value)
 		_node.LowRunwayLatitude = &value
 	}
 	if value, ok := rc.mutation.LowRunwayLongitude(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeFloat64,
-			Value:  value,
-			Column: runway.FieldLowRunwayLongitude,
-		})
+		_spec.SetField(runway.FieldLowRunwayLongitude, field.TypeFloat64, value)
 		_node.LowRunwayLongitude = &value
 	}
 	if value, ok := rc.mutation.LowRunwayElevation(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Value:  value,
-			Column: runway.FieldLowRunwayElevation,
-		})
+		_spec.SetField(runway.FieldLowRunwayElevation, field.TypeInt, value)
 		_node.LowRunwayElevation = &value
 	}
 	if value, ok := rc.mutation.LowRunwayHeading(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeFloat64,
-			Value:  value,
-			Column: runway.FieldLowRunwayHeading,
-		})
+		_spec.SetField(runway.FieldLowRunwayHeading, field.TypeFloat64, value)
 		_node.LowRunwayHeading = &value
 	}
 	if value, ok := rc.mutation.LowRunwayDisplacedThreshold(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Value:  value,
-			Column: runway.FieldLowRunwayDisplacedThreshold,
-		})
+		_spec.SetField(runway.FieldLowRunwayDisplacedThreshold, field.TypeInt, value)
 		_node.LowRunwayDisplacedThreshold = &value
 	}
 	if value, ok := rc.mutation.HighRunwayIdentifier(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: runway.FieldHighRunwayIdentifier,
-		})
+		_spec.SetField(runway.FieldHighRunwayIdentifier, field.TypeString, value)
 		_node.HighRunwayIdentifier = value
 	}
 	if value, ok := rc.mutation.HighRunwayLatitude(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeFloat64,
-			Value:  value,
-			Column: runway.FieldHighRunwayLatitude,
-		})
+		_spec.SetField(runway.FieldHighRunwayLatitude, field.TypeFloat64, value)
 		_node.HighRunwayLatitude = &value
 	}
 	if value, ok := rc.mutation.HighRunwayLongitude(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeFloat64,
-			Value:  value,
-			Column: runway.FieldHighRunwayLongitude,
-		})
+		_spec.SetField(runway.FieldHighRunwayLongitude, field.TypeFloat64, value)
 		_node.HighRunwayLongitude = &value
 	}
 	if value, ok := rc.mutation.HighRunwayElevation(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Value:  value,
-			Column: runway.FieldHighRunwayElevation,
-		})
+		_spec.SetField(runway.FieldHighRunwayElevation, field.TypeInt, value)
 		_node.HighRunwayElevation = &value
 	}
 	if value, ok := rc.mutation.HighRunwayHeading(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeFloat64,
-			Value:  value,
-			Column: runway.FieldHighRunwayHeading,
-		})
+		_spec.SetField(runway.FieldHighRunwayHeading, field.TypeFloat64, value)
 		_node.HighRunwayHeading = &value
 	}
 	if value, ok := rc.mutation.HighRunwayDisplacedThreshold(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Value:  value,
-			Column: runway.FieldHighRunwayDisplacedThreshold,
-		})
+		_spec.SetField(runway.FieldHighRunwayDisplacedThreshold, field.TypeInt, value)
 		_node.HighRunwayDisplacedThreshold = &value
 	}
 	if nodes := rc.mutation.AirportIDs(); len(nodes) > 0 {
