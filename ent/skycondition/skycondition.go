@@ -38,7 +38,6 @@ var Columns = []string{
 var ForeignKeys = []string{
 	"forecast_sky_conditions",
 	"metar_sky_conditions",
-	"taf_sky_conditions",
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).

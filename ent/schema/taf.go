@@ -33,9 +33,6 @@ func (Taf) Fields() []ent.Field {
 func (Taf) Edges() []ent.Edge {
 	return []ent.Edge{
 		edge.From("station", WeatherStation.Type).Ref("tafs").Unique().Required().Comment("The station that issued this taf."),
-		edge.To("sky_conditions", SkyCondition.Type).Comment("The sky conditions.").Annotations(entsql.Annotation{
-			OnDelete: entsql.Cascade,
-		}),
 		edge.To("forecast", Forecast.Type).Comment("The forecasts").Annotations(
 			entsql.Annotation{
 				OnDelete: entsql.Cascade,

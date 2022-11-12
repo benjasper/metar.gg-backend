@@ -14,7 +14,6 @@ import (
 	"github.com/google/uuid"
 	"metar.gg/ent/forecast"
 	"metar.gg/ent/predicate"
-	"metar.gg/ent/skycondition"
 	"metar.gg/ent/taf"
 	"metar.gg/ent/weatherstation"
 )
@@ -22,20 +21,18 @@ import (
 // TafQuery is the builder for querying Taf entities.
 type TafQuery struct {
 	config
-	limit                  *int
-	offset                 *int
-	unique                 *bool
-	order                  []OrderFunc
-	fields                 []string
-	predicates             []predicate.Taf
-	withStation            *WeatherStationQuery
-	withSkyConditions      *SkyConditionQuery
-	withForecast           *ForecastQuery
-	withFKs                bool
-	loadTotal              []func(context.Context, []*Taf) error
-	modifiers              []func(*sql.Selector)
-	withNamedSkyConditions map[string]*SkyConditionQuery
-	withNamedForecast      map[string]*ForecastQuery
+	limit             *int
+	offset            *int
+	unique            *bool
+	order             []OrderFunc
+	fields            []string
+	predicates        []predicate.Taf
+	withStation       *WeatherStationQuery
+	withForecast      *ForecastQuery
+	withFKs           bool
+	loadTotal         []func(context.Context, []*Taf) error
+	modifiers         []func(*sql.Selector)
+	withNamedForecast map[string]*ForecastQuery
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -87,28 +84,6 @@ func (tq *TafQuery) QueryStation() *WeatherStationQuery {
 			sqlgraph.From(taf.Table, taf.FieldID, selector),
 			sqlgraph.To(weatherstation.Table, weatherstation.FieldID),
 			sqlgraph.Edge(sqlgraph.M2O, true, taf.StationTable, taf.StationColumn),
-		)
-		fromU = sqlgraph.SetNeighbors(tq.driver.Dialect(), step)
-		return fromU, nil
-	}
-	return query
-}
-
-// QuerySkyConditions chains the current query on the "sky_conditions" edge.
-func (tq *TafQuery) QuerySkyConditions() *SkyConditionQuery {
-	query := &SkyConditionQuery{config: tq.config}
-	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
-		if err := tq.prepareQuery(ctx); err != nil {
-			return nil, err
-		}
-		selector := tq.sqlQuery(ctx)
-		if err := selector.Err(); err != nil {
-			return nil, err
-		}
-		step := sqlgraph.NewStep(
-			sqlgraph.From(taf.Table, taf.FieldID, selector),
-			sqlgraph.To(skycondition.Table, skycondition.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, taf.SkyConditionsTable, taf.SkyConditionsColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(tq.driver.Dialect(), step)
 		return fromU, nil
@@ -314,14 +289,13 @@ func (tq *TafQuery) Clone() *TafQuery {
 		return nil
 	}
 	return &TafQuery{
-		config:            tq.config,
-		limit:             tq.limit,
-		offset:            tq.offset,
-		order:             append([]OrderFunc{}, tq.order...),
-		predicates:        append([]predicate.Taf{}, tq.predicates...),
-		withStation:       tq.withStation.Clone(),
-		withSkyConditions: tq.withSkyConditions.Clone(),
-		withForecast:      tq.withForecast.Clone(),
+		config:       tq.config,
+		limit:        tq.limit,
+		offset:       tq.offset,
+		order:        append([]OrderFunc{}, tq.order...),
+		predicates:   append([]predicate.Taf{}, tq.predicates...),
+		withStation:  tq.withStation.Clone(),
+		withForecast: tq.withForecast.Clone(),
 		// clone intermediate query.
 		sql:    tq.sql.Clone(),
 		path:   tq.path,
@@ -337,17 +311,6 @@ func (tq *TafQuery) WithStation(opts ...func(*WeatherStationQuery)) *TafQuery {
 		opt(query)
 	}
 	tq.withStation = query
-	return tq
-}
-
-// WithSkyConditions tells the query-builder to eager-load the nodes that are connected to
-// the "sky_conditions" edge. The optional arguments are used to configure the query builder of the edge.
-func (tq *TafQuery) WithSkyConditions(opts ...func(*SkyConditionQuery)) *TafQuery {
-	query := &SkyConditionQuery{config: tq.config}
-	for _, opt := range opts {
-		opt(query)
-	}
-	tq.withSkyConditions = query
 	return tq
 }
 
@@ -436,9 +399,8 @@ func (tq *TafQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Taf, err
 		nodes       = []*Taf{}
 		withFKs     = tq.withFKs
 		_spec       = tq.querySpec()
-		loadedTypes = [3]bool{
+		loadedTypes = [2]bool{
 			tq.withStation != nil,
-			tq.withSkyConditions != nil,
 			tq.withForecast != nil,
 		}
 	)
@@ -475,24 +437,10 @@ func (tq *TafQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Taf, err
 			return nil, err
 		}
 	}
-	if query := tq.withSkyConditions; query != nil {
-		if err := tq.loadSkyConditions(ctx, query, nodes,
-			func(n *Taf) { n.Edges.SkyConditions = []*SkyCondition{} },
-			func(n *Taf, e *SkyCondition) { n.Edges.SkyConditions = append(n.Edges.SkyConditions, e) }); err != nil {
-			return nil, err
-		}
-	}
 	if query := tq.withForecast; query != nil {
 		if err := tq.loadForecast(ctx, query, nodes,
 			func(n *Taf) { n.Edges.Forecast = []*Forecast{} },
 			func(n *Taf, e *Forecast) { n.Edges.Forecast = append(n.Edges.Forecast, e) }); err != nil {
-			return nil, err
-		}
-	}
-	for name, query := range tq.withNamedSkyConditions {
-		if err := tq.loadSkyConditions(ctx, query, nodes,
-			func(n *Taf) { n.appendNamedSkyConditions(name) },
-			func(n *Taf, e *SkyCondition) { n.appendNamedSkyConditions(name, e) }); err != nil {
 			return nil, err
 		}
 	}
@@ -537,37 +485,6 @@ func (tq *TafQuery) loadStation(ctx context.Context, query *WeatherStationQuery,
 		for i := range nodes {
 			assign(nodes[i], n)
 		}
-	}
-	return nil
-}
-func (tq *TafQuery) loadSkyConditions(ctx context.Context, query *SkyConditionQuery, nodes []*Taf, init func(*Taf), assign func(*Taf, *SkyCondition)) error {
-	fks := make([]driver.Value, 0, len(nodes))
-	nodeids := make(map[uuid.UUID]*Taf)
-	for i := range nodes {
-		fks = append(fks, nodes[i].ID)
-		nodeids[nodes[i].ID] = nodes[i]
-		if init != nil {
-			init(nodes[i])
-		}
-	}
-	query.withFKs = true
-	query.Where(predicate.SkyCondition(func(s *sql.Selector) {
-		s.Where(sql.InValues(taf.SkyConditionsColumn, fks...))
-	}))
-	neighbors, err := query.All(ctx)
-	if err != nil {
-		return err
-	}
-	for _, n := range neighbors {
-		fk := n.taf_sky_conditions
-		if fk == nil {
-			return fmt.Errorf(`foreign-key "taf_sky_conditions" is nil for node %v`, n.ID)
-		}
-		node, ok := nodeids[*fk]
-		if !ok {
-			return fmt.Errorf(`unexpected foreign-key "taf_sky_conditions" returned %v for node %v`, *fk, n.ID)
-		}
-		assign(node, n)
 	}
 	return nil
 }
@@ -713,20 +630,6 @@ func (tq *TafQuery) sqlQuery(ctx context.Context) *sql.Selector {
 func (tq *TafQuery) Modify(modifiers ...func(s *sql.Selector)) *TafSelect {
 	tq.modifiers = append(tq.modifiers, modifiers...)
 	return tq.Select()
-}
-
-// WithNamedSkyConditions tells the query-builder to eager-load the nodes that are connected to the "sky_conditions"
-// edge with the given name. The optional arguments are used to configure the query builder of the edge.
-func (tq *TafQuery) WithNamedSkyConditions(name string, opts ...func(*SkyConditionQuery)) *TafQuery {
-	query := &SkyConditionQuery{config: tq.config}
-	for _, opt := range opts {
-		opt(query)
-	}
-	if tq.withNamedSkyConditions == nil {
-		tq.withNamedSkyConditions = make(map[string]*SkyConditionQuery)
-	}
-	tq.withNamedSkyConditions[name] = query
-	return tq
 }
 
 // WithNamedForecast tells the query-builder to eager-load the nodes that are connected to the "forecast"

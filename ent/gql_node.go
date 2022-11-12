@@ -1013,7 +1013,7 @@ func (t *Taf) Node(ctx context.Context) (node *Node, err error) {
 		ID:     t.ID,
 		Type:   "Taf",
 		Fields: make([]*Field, 7),
-		Edges:  make([]*Edge, 3),
+		Edges:  make([]*Edge, 2),
 	}
 	var buf []byte
 	if buf, err = json.Marshal(t.RawText); err != nil {
@@ -1083,22 +1083,12 @@ func (t *Taf) Node(ctx context.Context) (node *Node, err error) {
 		return nil, err
 	}
 	node.Edges[1] = &Edge{
-		Type: "SkyCondition",
-		Name: "sky_conditions",
-	}
-	err = t.QuerySkyConditions().
-		Select(skycondition.FieldID).
-		Scan(ctx, &node.Edges[1].IDs)
-	if err != nil {
-		return nil, err
-	}
-	node.Edges[2] = &Edge{
 		Type: "Forecast",
 		Name: "forecast",
 	}
 	err = t.QueryForecast().
 		Select(forecast.FieldID).
-		Scan(ctx, &node.Edges[2].IDs)
+		Scan(ctx, &node.Edges[1].IDs)
 	if err != nil {
 		return nil, err
 	}

@@ -45,18 +45,15 @@ type Taf struct {
 type TafEdges struct {
 	// The station that issued this taf.
 	Station *WeatherStation `json:"station,omitempty"`
-	// The sky conditions.
-	SkyConditions []*SkyCondition `json:"sky_conditions,omitempty"`
 	// The forecasts
 	Forecast []*Forecast `json:"forecast,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [3]bool
+	loadedTypes [2]bool
 	// totalCount holds the count of the edges above.
-	totalCount [3]map[string]int
+	totalCount [2]map[string]int
 
-	namedSkyConditions map[string][]*SkyCondition
-	namedForecast      map[string][]*Forecast
+	namedForecast map[string][]*Forecast
 }
 
 // StationOrErr returns the Station value or an error if the edge
@@ -72,19 +69,10 @@ func (e TafEdges) StationOrErr() (*WeatherStation, error) {
 	return nil, &NotLoadedError{edge: "station"}
 }
 
-// SkyConditionsOrErr returns the SkyConditions value or an error if the edge
-// was not loaded in eager-loading.
-func (e TafEdges) SkyConditionsOrErr() ([]*SkyCondition, error) {
-	if e.loadedTypes[1] {
-		return e.SkyConditions, nil
-	}
-	return nil, &NotLoadedError{edge: "sky_conditions"}
-}
-
 // ForecastOrErr returns the Forecast value or an error if the edge
 // was not loaded in eager-loading.
 func (e TafEdges) ForecastOrErr() ([]*Forecast, error) {
-	if e.loadedTypes[2] {
+	if e.loadedTypes[1] {
 		return e.Forecast, nil
 	}
 	return nil, &NotLoadedError{edge: "forecast"}
@@ -189,11 +177,6 @@ func (t *Taf) QueryStation() *WeatherStationQuery {
 	return (&TafClient{config: t.config}).QueryStation(t)
 }
 
-// QuerySkyConditions queries the "sky_conditions" edge of the Taf entity.
-func (t *Taf) QuerySkyConditions() *SkyConditionQuery {
-	return (&TafClient{config: t.config}).QuerySkyConditions(t)
-}
-
 // QueryForecast queries the "forecast" edge of the Taf entity.
 func (t *Taf) QueryForecast() *ForecastQuery {
 	return (&TafClient{config: t.config}).QueryForecast(t)
@@ -247,30 +230,6 @@ func (t *Taf) String() string {
 	builder.WriteString(t.Hash)
 	builder.WriteByte(')')
 	return builder.String()
-}
-
-// NamedSkyConditions returns the SkyConditions named value or an error if the edge was not
-// loaded in eager-loading with this name.
-func (t *Taf) NamedSkyConditions(name string) ([]*SkyCondition, error) {
-	if t.Edges.namedSkyConditions == nil {
-		return nil, &NotLoadedError{edge: name}
-	}
-	nodes, ok := t.Edges.namedSkyConditions[name]
-	if !ok {
-		return nil, &NotLoadedError{edge: name}
-	}
-	return nodes, nil
-}
-
-func (t *Taf) appendNamedSkyConditions(name string, edges ...*SkyCondition) {
-	if t.Edges.namedSkyConditions == nil {
-		t.Edges.namedSkyConditions = make(map[string][]*SkyCondition)
-	}
-	if len(edges) == 0 {
-		t.Edges.namedSkyConditions[name] = []*SkyCondition{}
-	} else {
-		t.Edges.namedSkyConditions[name] = append(t.Edges.namedSkyConditions[name], edges...)
-	}
 }
 
 // NamedForecast returns the Forecast named value or an error if the edge was not

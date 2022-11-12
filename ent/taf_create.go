@@ -14,7 +14,6 @@ import (
 	"entgo.io/ent/schema/field"
 	"github.com/google/uuid"
 	"metar.gg/ent/forecast"
-	"metar.gg/ent/skycondition"
 	"metar.gg/ent/taf"
 	"metar.gg/ent/weatherstation"
 )
@@ -106,21 +105,6 @@ func (tc *TafCreate) SetStationID(id uuid.UUID) *TafCreate {
 // SetStation sets the "station" edge to the WeatherStation entity.
 func (tc *TafCreate) SetStation(w *WeatherStation) *TafCreate {
 	return tc.SetStationID(w.ID)
-}
-
-// AddSkyConditionIDs adds the "sky_conditions" edge to the SkyCondition entity by IDs.
-func (tc *TafCreate) AddSkyConditionIDs(ids ...uuid.UUID) *TafCreate {
-	tc.mutation.AddSkyConditionIDs(ids...)
-	return tc
-}
-
-// AddSkyConditions adds the "sky_conditions" edges to the SkyCondition entity.
-func (tc *TafCreate) AddSkyConditions(s ...*SkyCondition) *TafCreate {
-	ids := make([]uuid.UUID, len(s))
-	for i := range s {
-		ids[i] = s[i].ID
-	}
-	return tc.AddSkyConditionIDs(ids...)
 }
 
 // AddForecastIDs adds the "forecast" edge to the Forecast entity by IDs.
@@ -341,25 +325,6 @@ func (tc *TafCreate) createSpec() (*Taf, *sqlgraph.CreateSpec) {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_node.weather_station_tafs = &nodes[0]
-		_spec.Edges = append(_spec.Edges, edge)
-	}
-	if nodes := tc.mutation.SkyConditionsIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   taf.SkyConditionsTable,
-			Columns: []string{taf.SkyConditionsColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: skycondition.FieldID,
-				},
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	if nodes := tc.mutation.ForecastIDs(); len(nodes) > 0 {

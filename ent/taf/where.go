@@ -783,34 +783,6 @@ func HasStationWith(preds ...predicate.WeatherStation) predicate.Taf {
 	})
 }
 
-// HasSkyConditions applies the HasEdge predicate on the "sky_conditions" edge.
-func HasSkyConditions() predicate.Taf {
-	return predicate.Taf(func(s *sql.Selector) {
-		step := sqlgraph.NewStep(
-			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(SkyConditionsTable, FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, SkyConditionsTable, SkyConditionsColumn),
-		)
-		sqlgraph.HasNeighbors(s, step)
-	})
-}
-
-// HasSkyConditionsWith applies the HasEdge predicate on the "sky_conditions" edge with a given conditions (other predicates).
-func HasSkyConditionsWith(preds ...predicate.SkyCondition) predicate.Taf {
-	return predicate.Taf(func(s *sql.Selector) {
-		step := sqlgraph.NewStep(
-			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(SkyConditionsInverseTable, FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, SkyConditionsTable, SkyConditionsColumn),
-		)
-		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
-			for _, p := range preds {
-				p(s)
-			}
-		})
-	})
-}
-
 // HasForecast applies the HasEdge predicate on the "forecast" edge.
 func HasForecast() predicate.Taf {
 	return predicate.Taf(func(s *sql.Selector) {

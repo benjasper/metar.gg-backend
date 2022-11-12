@@ -258,7 +258,6 @@ type ComplexityRoot struct {
 		IssueTime     func(childComplexity int) int
 		RawText       func(childComplexity int) int
 		Remarks       func(childComplexity int) int
-		SkyConditions func(childComplexity int) int
 		Station       func(childComplexity int) int
 		ValidFromTime func(childComplexity int) int
 		ValidToTime   func(childComplexity int) int
@@ -1592,13 +1591,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Taf.Remarks(childComplexity), true
 
-	case "Taf.skyConditions":
-		if e.complexity.Taf.SkyConditions == nil {
-			break
-		}
-
-		return e.complexity.Taf.SkyConditions(childComplexity), true
-
 	case "Taf.station":
 		if e.complexity.Taf.Station == nil {
 			break
@@ -2224,7 +2216,6 @@ type Taf {
   """Remarks."""
   remarks: String!
   station: WeatherStation!
-  skyConditions: [SkyCondition!]
   forecast: [Forecast!]
 }
 """Ordering options for Taf connections"""

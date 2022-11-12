@@ -112,14 +112,6 @@ func (t *Taf) Station(ctx context.Context) (*WeatherStation, error) {
 	return result, err
 }
 
-func (t *Taf) SkyConditions(ctx context.Context) ([]*SkyCondition, error) {
-	result, err := t.NamedSkyConditions(graphql.GetFieldContext(ctx).Field.Alias)
-	if IsNotLoaded(err) {
-		result, err = t.QuerySkyConditions().All(ctx)
-	}
-	return result, err
-}
-
 func (t *Taf) Forecast(ctx context.Context) ([]*Forecast, error) {
 	result, err := t.NamedForecast(graphql.GetFieldContext(ctx).Field.Alias)
 	if IsNotLoaded(err) {

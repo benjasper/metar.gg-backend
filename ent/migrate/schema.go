@@ -364,7 +364,6 @@ var (
 		{Name: "cloud_type", Type: field.TypeEnum, Nullable: true, Enums: []string{"CB", "CU", "TCU"}},
 		{Name: "forecast_sky_conditions", Type: field.TypeUUID, Nullable: true},
 		{Name: "metar_sky_conditions", Type: field.TypeUUID, Nullable: true},
-		{Name: "taf_sky_conditions", Type: field.TypeUUID, Nullable: true},
 	}
 	// SkyConditionsTable holds the schema information for the "sky_conditions" table.
 	SkyConditionsTable = &schema.Table{
@@ -382,12 +381,6 @@ var (
 				Symbol:     "sky_conditions_metars_sky_conditions",
 				Columns:    []*schema.Column{SkyConditionsColumns[5]},
 				RefColumns: []*schema.Column{MetarsColumns[0]},
-				OnDelete:   schema.Cascade,
-			},
-			{
-				Symbol:     "sky_conditions_tafs_sky_conditions",
-				Columns:    []*schema.Column{SkyConditionsColumns[6]},
-				RefColumns: []*schema.Column{TafsColumns[0]},
 				OnDelete:   schema.Cascade,
 			},
 		},
@@ -545,7 +538,6 @@ func init() {
 	RunwaysTable.ForeignKeys[0].RefTable = AirportsTable
 	SkyConditionsTable.ForeignKeys[0].RefTable = ForecastsTable
 	SkyConditionsTable.ForeignKeys[1].RefTable = MetarsTable
-	SkyConditionsTable.ForeignKeys[2].RefTable = TafsTable
 	TafsTable.ForeignKeys[0].RefTable = WeatherStationsTable
 	TemperatureDataTable.ForeignKeys[0].RefTable = ForecastsTable
 	TurbulenceConditionsTable.ForeignKeys[0].RefTable = ForecastsTable

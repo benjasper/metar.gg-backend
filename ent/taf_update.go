@@ -14,7 +14,6 @@ import (
 	"github.com/google/uuid"
 	"metar.gg/ent/forecast"
 	"metar.gg/ent/predicate"
-	"metar.gg/ent/skycondition"
 	"metar.gg/ent/taf"
 	"metar.gg/ent/weatherstation"
 )
@@ -100,21 +99,6 @@ func (tu *TafUpdate) SetStation(w *WeatherStation) *TafUpdate {
 	return tu.SetStationID(w.ID)
 }
 
-// AddSkyConditionIDs adds the "sky_conditions" edge to the SkyCondition entity by IDs.
-func (tu *TafUpdate) AddSkyConditionIDs(ids ...uuid.UUID) *TafUpdate {
-	tu.mutation.AddSkyConditionIDs(ids...)
-	return tu
-}
-
-// AddSkyConditions adds the "sky_conditions" edges to the SkyCondition entity.
-func (tu *TafUpdate) AddSkyConditions(s ...*SkyCondition) *TafUpdate {
-	ids := make([]uuid.UUID, len(s))
-	for i := range s {
-		ids[i] = s[i].ID
-	}
-	return tu.AddSkyConditionIDs(ids...)
-}
-
 // AddForecastIDs adds the "forecast" edge to the Forecast entity by IDs.
 func (tu *TafUpdate) AddForecastIDs(ids ...uuid.UUID) *TafUpdate {
 	tu.mutation.AddForecastIDs(ids...)
@@ -139,27 +123,6 @@ func (tu *TafUpdate) Mutation() *TafMutation {
 func (tu *TafUpdate) ClearStation() *TafUpdate {
 	tu.mutation.ClearStation()
 	return tu
-}
-
-// ClearSkyConditions clears all "sky_conditions" edges to the SkyCondition entity.
-func (tu *TafUpdate) ClearSkyConditions() *TafUpdate {
-	tu.mutation.ClearSkyConditions()
-	return tu
-}
-
-// RemoveSkyConditionIDs removes the "sky_conditions" edge to SkyCondition entities by IDs.
-func (tu *TafUpdate) RemoveSkyConditionIDs(ids ...uuid.UUID) *TafUpdate {
-	tu.mutation.RemoveSkyConditionIDs(ids...)
-	return tu
-}
-
-// RemoveSkyConditions removes "sky_conditions" edges to SkyCondition entities.
-func (tu *TafUpdate) RemoveSkyConditions(s ...*SkyCondition) *TafUpdate {
-	ids := make([]uuid.UUID, len(s))
-	for i := range s {
-		ids[i] = s[i].ID
-	}
-	return tu.RemoveSkyConditionIDs(ids...)
 }
 
 // ClearForecast clears all "forecast" edges to the Forecast entity.
@@ -334,60 +297,6 @@ func (tu *TafUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if tu.mutation.SkyConditionsCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   taf.SkyConditionsTable,
-			Columns: []string{taf.SkyConditionsColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: skycondition.FieldID,
-				},
-			},
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := tu.mutation.RemovedSkyConditionsIDs(); len(nodes) > 0 && !tu.mutation.SkyConditionsCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   taf.SkyConditionsTable,
-			Columns: []string{taf.SkyConditionsColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: skycondition.FieldID,
-				},
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := tu.mutation.SkyConditionsIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   taf.SkyConditionsTable,
-			Columns: []string{taf.SkyConditionsColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: skycondition.FieldID,
-				},
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Add = append(_spec.Edges.Add, edge)
-	}
 	if tu.mutation.ForecastCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
@@ -530,21 +439,6 @@ func (tuo *TafUpdateOne) SetStation(w *WeatherStation) *TafUpdateOne {
 	return tuo.SetStationID(w.ID)
 }
 
-// AddSkyConditionIDs adds the "sky_conditions" edge to the SkyCondition entity by IDs.
-func (tuo *TafUpdateOne) AddSkyConditionIDs(ids ...uuid.UUID) *TafUpdateOne {
-	tuo.mutation.AddSkyConditionIDs(ids...)
-	return tuo
-}
-
-// AddSkyConditions adds the "sky_conditions" edges to the SkyCondition entity.
-func (tuo *TafUpdateOne) AddSkyConditions(s ...*SkyCondition) *TafUpdateOne {
-	ids := make([]uuid.UUID, len(s))
-	for i := range s {
-		ids[i] = s[i].ID
-	}
-	return tuo.AddSkyConditionIDs(ids...)
-}
-
 // AddForecastIDs adds the "forecast" edge to the Forecast entity by IDs.
 func (tuo *TafUpdateOne) AddForecastIDs(ids ...uuid.UUID) *TafUpdateOne {
 	tuo.mutation.AddForecastIDs(ids...)
@@ -569,27 +463,6 @@ func (tuo *TafUpdateOne) Mutation() *TafMutation {
 func (tuo *TafUpdateOne) ClearStation() *TafUpdateOne {
 	tuo.mutation.ClearStation()
 	return tuo
-}
-
-// ClearSkyConditions clears all "sky_conditions" edges to the SkyCondition entity.
-func (tuo *TafUpdateOne) ClearSkyConditions() *TafUpdateOne {
-	tuo.mutation.ClearSkyConditions()
-	return tuo
-}
-
-// RemoveSkyConditionIDs removes the "sky_conditions" edge to SkyCondition entities by IDs.
-func (tuo *TafUpdateOne) RemoveSkyConditionIDs(ids ...uuid.UUID) *TafUpdateOne {
-	tuo.mutation.RemoveSkyConditionIDs(ids...)
-	return tuo
-}
-
-// RemoveSkyConditions removes "sky_conditions" edges to SkyCondition entities.
-func (tuo *TafUpdateOne) RemoveSkyConditions(s ...*SkyCondition) *TafUpdateOne {
-	ids := make([]uuid.UUID, len(s))
-	for i := range s {
-		ids[i] = s[i].ID
-	}
-	return tuo.RemoveSkyConditionIDs(ids...)
 }
 
 // ClearForecast clears all "forecast" edges to the Forecast entity.
@@ -786,60 +659,6 @@ func (tuo *TafUpdateOne) sqlSave(ctx context.Context) (_node *Taf, err error) {
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeUUID,
 					Column: weatherstation.FieldID,
-				},
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Add = append(_spec.Edges.Add, edge)
-	}
-	if tuo.mutation.SkyConditionsCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   taf.SkyConditionsTable,
-			Columns: []string{taf.SkyConditionsColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: skycondition.FieldID,
-				},
-			},
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := tuo.mutation.RemovedSkyConditionsIDs(); len(nodes) > 0 && !tuo.mutation.SkyConditionsCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   taf.SkyConditionsTable,
-			Columns: []string{taf.SkyConditionsColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: skycondition.FieldID,
-				},
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := tuo.mutation.SkyConditionsIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   taf.SkyConditionsTable,
-			Columns: []string{taf.SkyConditionsColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: skycondition.FieldID,
 				},
 			},
 		}

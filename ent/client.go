@@ -1359,22 +1359,6 @@ func (c *TafClient) QueryStation(t *Taf) *WeatherStationQuery {
 	return query
 }
 
-// QuerySkyConditions queries the sky_conditions edge of a Taf.
-func (c *TafClient) QuerySkyConditions(t *Taf) *SkyConditionQuery {
-	query := &SkyConditionQuery{config: c.config}
-	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
-		id := t.ID
-		step := sqlgraph.NewStep(
-			sqlgraph.From(taf.Table, taf.FieldID, id),
-			sqlgraph.To(skycondition.Table, skycondition.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, taf.SkyConditionsTable, taf.SkyConditionsColumn),
-		)
-		fromV = sqlgraph.Neighbors(t.driver.Dialect(), step)
-		return fromV, nil
-	}
-	return query
-}
-
 // QueryForecast queries the forecast edge of a Taf.
 func (c *TafClient) QueryForecast(t *Taf) *ForecastQuery {
 	query := &ForecastQuery{config: c.config}

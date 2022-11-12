@@ -323,7 +323,6 @@ type Taf {
   """Remarks."""
   remarks: String!
   station: WeatherStation!
-  skyConditions: [SkyCondition!]
   forecast: [Forecast!]
 }
 """Ordering options for Taf connections"""

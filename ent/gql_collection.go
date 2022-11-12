@@ -596,18 +596,6 @@ func (t *TafQuery) collectField(ctx context.Context, op *graphql.OperationContex
 				return err
 			}
 			t.withStation = query
-		case "skyConditions", "sky_conditions":
-			var (
-				alias = field.Alias
-				path  = append(path, alias)
-				query = &SkyConditionQuery{config: t.config}
-			)
-			if err := query.collectField(ctx, op, field, path, satisfies...); err != nil {
-				return err
-			}
-			t.WithNamedSkyConditions(alias, func(wq *SkyConditionQuery) {
-				*wq = *query
-			})
 		case "forecast":
 			var (
 				alias = field.Alias

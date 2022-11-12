@@ -25,7 +25,6 @@ type SkyCondition struct {
 	CloudType               *skycondition.CloudType `json:"cloud_type,omitempty"`
 	forecast_sky_conditions *uuid.UUID
 	metar_sky_conditions    *uuid.UUID
-	taf_sky_conditions      *uuid.UUID
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -42,8 +41,6 @@ func (*SkyCondition) scanValues(columns []string) ([]any, error) {
 		case skycondition.ForeignKeys[0]: // forecast_sky_conditions
 			values[i] = &sql.NullScanner{S: new(uuid.UUID)}
 		case skycondition.ForeignKeys[1]: // metar_sky_conditions
-			values[i] = &sql.NullScanner{S: new(uuid.UUID)}
-		case skycondition.ForeignKeys[2]: // taf_sky_conditions
 			values[i] = &sql.NullScanner{S: new(uuid.UUID)}
 		default:
 			return nil, fmt.Errorf("unexpected column %q for type SkyCondition", columns[i])
@@ -99,13 +96,6 @@ func (sc *SkyCondition) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				sc.metar_sky_conditions = new(uuid.UUID)
 				*sc.metar_sky_conditions = *value.S.(*uuid.UUID)
-			}
-		case skycondition.ForeignKeys[2]:
-			if value, ok := values[i].(*sql.NullScanner); !ok {
-				return fmt.Errorf("unexpected type %T for field taf_sky_conditions", values[i])
-			} else if value.Valid {
-				sc.taf_sky_conditions = new(uuid.UUID)
-				*sc.taf_sky_conditions = *value.S.(*uuid.UUID)
 			}
 		}
 	}

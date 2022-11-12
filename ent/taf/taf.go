@@ -31,8 +31,6 @@ const (
 	FieldHash = "hash"
 	// EdgeStation holds the string denoting the station edge name in mutations.
 	EdgeStation = "station"
-	// EdgeSkyConditions holds the string denoting the sky_conditions edge name in mutations.
-	EdgeSkyConditions = "sky_conditions"
 	// EdgeForecast holds the string denoting the forecast edge name in mutations.
 	EdgeForecast = "forecast"
 	// Table holds the table name of the taf in the database.
@@ -44,13 +42,6 @@ const (
 	StationInverseTable = "weather_stations"
 	// StationColumn is the table column denoting the station relation/edge.
 	StationColumn = "weather_station_tafs"
-	// SkyConditionsTable is the table that holds the sky_conditions relation/edge.
-	SkyConditionsTable = "sky_conditions"
-	// SkyConditionsInverseTable is the table name for the SkyCondition entity.
-	// It exists in this package in order to avoid circular dependency with the "skycondition" package.
-	SkyConditionsInverseTable = "sky_conditions"
-	// SkyConditionsColumn is the table column denoting the sky_conditions relation/edge.
-	SkyConditionsColumn = "taf_sky_conditions"
 	// ForecastTable is the table that holds the forecast relation/edge.
 	ForecastTable = "forecasts"
 	// ForecastInverseTable is the table name for the Forecast entity.

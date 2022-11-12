@@ -13168,29 +13168,26 @@ func (m *SkyConditionMutation) ResetEdge(name string) error {
 // TafMutation represents an operation that mutates the Taf nodes in the graph.
 type TafMutation struct {
 	config
-	op                    Op
-	typ                   string
-	id                    *uuid.UUID
-	raw_text              *string
-	issue_time            *time.Time
-	import_time           *time.Time
-	bulletin_time         *time.Time
-	valid_from_time       *time.Time
-	valid_to_time         *time.Time
-	remarks               *string
-	hash                  *string
-	clearedFields         map[string]struct{}
-	station               *uuid.UUID
-	clearedstation        bool
-	sky_conditions        map[uuid.UUID]struct{}
-	removedsky_conditions map[uuid.UUID]struct{}
-	clearedsky_conditions bool
-	forecast              map[uuid.UUID]struct{}
-	removedforecast       map[uuid.UUID]struct{}
-	clearedforecast       bool
-	done                  bool
-	oldValue              func(context.Context) (*Taf, error)
-	predicates            []predicate.Taf
+	op              Op
+	typ             string
+	id              *uuid.UUID
+	raw_text        *string
+	issue_time      *time.Time
+	import_time     *time.Time
+	bulletin_time   *time.Time
+	valid_from_time *time.Time
+	valid_to_time   *time.Time
+	remarks         *string
+	hash            *string
+	clearedFields   map[string]struct{}
+	station         *uuid.UUID
+	clearedstation  bool
+	forecast        map[uuid.UUID]struct{}
+	removedforecast map[uuid.UUID]struct{}
+	clearedforecast bool
+	done            bool
+	oldValue        func(context.Context) (*Taf, error)
+	predicates      []predicate.Taf
 }
 
 var _ ent.Mutation = (*TafMutation)(nil)
@@ -13624,60 +13621,6 @@ func (m *TafMutation) ResetStation() {
 	m.clearedstation = false
 }
 
-// AddSkyConditionIDs adds the "sky_conditions" edge to the SkyCondition entity by ids.
-func (m *TafMutation) AddSkyConditionIDs(ids ...uuid.UUID) {
-	if m.sky_conditions == nil {
-		m.sky_conditions = make(map[uuid.UUID]struct{})
-	}
-	for i := range ids {
-		m.sky_conditions[ids[i]] = struct{}{}
-	}
-}
-
-// ClearSkyConditions clears the "sky_conditions" edge to the SkyCondition entity.
-func (m *TafMutation) ClearSkyConditions() {
-	m.clearedsky_conditions = true
-}
-
-// SkyConditionsCleared reports if the "sky_conditions" edge to the SkyCondition entity was cleared.
-func (m *TafMutation) SkyConditionsCleared() bool {
-	return m.clearedsky_conditions
-}
-
-// RemoveSkyConditionIDs removes the "sky_conditions" edge to the SkyCondition entity by IDs.
-func (m *TafMutation) RemoveSkyConditionIDs(ids ...uuid.UUID) {
-	if m.removedsky_conditions == nil {
-		m.removedsky_conditions = make(map[uuid.UUID]struct{})
-	}
-	for i := range ids {
-		delete(m.sky_conditions, ids[i])
-		m.removedsky_conditions[ids[i]] = struct{}{}
-	}
-}
-
-// RemovedSkyConditions returns the removed IDs of the "sky_conditions" edge to the SkyCondition entity.
-func (m *TafMutation) RemovedSkyConditionsIDs() (ids []uuid.UUID) {
-	for id := range m.removedsky_conditions {
-		ids = append(ids, id)
-	}
-	return
-}
-
-// SkyConditionsIDs returns the "sky_conditions" edge IDs in the mutation.
-func (m *TafMutation) SkyConditionsIDs() (ids []uuid.UUID) {
-	for id := range m.sky_conditions {
-		ids = append(ids, id)
-	}
-	return
-}
-
-// ResetSkyConditions resets all changes to the "sky_conditions" edge.
-func (m *TafMutation) ResetSkyConditions() {
-	m.sky_conditions = nil
-	m.clearedsky_conditions = false
-	m.removedsky_conditions = nil
-}
-
 // AddForecastIDs adds the "forecast" edge to the Forecast entity by ids.
 func (m *TafMutation) AddForecastIDs(ids ...uuid.UUID) {
 	if m.forecast == nil {
@@ -13969,12 +13912,9 @@ func (m *TafMutation) ResetField(name string) error {
 
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *TafMutation) AddedEdges() []string {
-	edges := make([]string, 0, 3)
+	edges := make([]string, 0, 2)
 	if m.station != nil {
 		edges = append(edges, taf.EdgeStation)
-	}
-	if m.sky_conditions != nil {
-		edges = append(edges, taf.EdgeSkyConditions)
 	}
 	if m.forecast != nil {
 		edges = append(edges, taf.EdgeForecast)
@@ -13990,12 +13930,6 @@ func (m *TafMutation) AddedIDs(name string) []ent.Value {
 		if id := m.station; id != nil {
 			return []ent.Value{*id}
 		}
-	case taf.EdgeSkyConditions:
-		ids := make([]ent.Value, 0, len(m.sky_conditions))
-		for id := range m.sky_conditions {
-			ids = append(ids, id)
-		}
-		return ids
 	case taf.EdgeForecast:
 		ids := make([]ent.Value, 0, len(m.forecast))
 		for id := range m.forecast {
@@ -14008,10 +13942,7 @@ func (m *TafMutation) AddedIDs(name string) []ent.Value {
 
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *TafMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 3)
-	if m.removedsky_conditions != nil {
-		edges = append(edges, taf.EdgeSkyConditions)
-	}
+	edges := make([]string, 0, 2)
 	if m.removedforecast != nil {
 		edges = append(edges, taf.EdgeForecast)
 	}
@@ -14022,12 +13953,6 @@ func (m *TafMutation) RemovedEdges() []string {
 // the given name in this mutation.
 func (m *TafMutation) RemovedIDs(name string) []ent.Value {
 	switch name {
-	case taf.EdgeSkyConditions:
-		ids := make([]ent.Value, 0, len(m.removedsky_conditions))
-		for id := range m.removedsky_conditions {
-			ids = append(ids, id)
-		}
-		return ids
 	case taf.EdgeForecast:
 		ids := make([]ent.Value, 0, len(m.removedforecast))
 		for id := range m.removedforecast {
@@ -14040,12 +13965,9 @@ func (m *TafMutation) RemovedIDs(name string) []ent.Value {
 
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *TafMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 3)
+	edges := make([]string, 0, 2)
 	if m.clearedstation {
 		edges = append(edges, taf.EdgeStation)
-	}
-	if m.clearedsky_conditions {
-		edges = append(edges, taf.EdgeSkyConditions)
 	}
 	if m.clearedforecast {
 		edges = append(edges, taf.EdgeForecast)
@@ -14059,8 +13981,6 @@ func (m *TafMutation) EdgeCleared(name string) bool {
 	switch name {
 	case taf.EdgeStation:
 		return m.clearedstation
-	case taf.EdgeSkyConditions:
-		return m.clearedsky_conditions
 	case taf.EdgeForecast:
 		return m.clearedforecast
 	}
@@ -14084,9 +14004,6 @@ func (m *TafMutation) ResetEdge(name string) error {
 	switch name {
 	case taf.EdgeStation:
 		m.ResetStation()
-		return nil
-	case taf.EdgeSkyConditions:
-		m.ResetSkyConditions()
 		return nil
 	case taf.EdgeForecast:
 		m.ResetForecast()

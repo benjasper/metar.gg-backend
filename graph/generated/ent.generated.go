@@ -7280,57 +7280,6 @@ func (ec *executionContext) fieldContext_Taf_station(ctx context.Context, field 
 	return fc, nil
 }
 
-func (ec *executionContext) _Taf_skyConditions(ctx context.Context, field graphql.CollectedField, obj *ent.Taf) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Taf_skyConditions(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.SkyConditions(ctx)
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		return graphql.Null
-	}
-	res := resTmp.([]*ent.SkyCondition)
-	fc.Result = res
-	return ec.marshalOSkyCondition2ᚕᚖmetarᚗggᚋentᚐSkyConditionᚄ(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_Taf_skyConditions(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Taf",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "id":
-				return ec.fieldContext_SkyCondition_id(ctx, field)
-			case "skyCover":
-				return ec.fieldContext_SkyCondition_skyCover(ctx, field)
-			case "cloudType":
-				return ec.fieldContext_SkyCondition_cloudType(ctx, field)
-			case "cloudBase":
-				return ec.fieldContext_SkyCondition_cloudBase(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type SkyCondition", field.Name)
-		},
-	}
-	return fc, nil
-}
-
 func (ec *executionContext) _Taf_forecast(ctx context.Context, field graphql.CollectedField, obj *ent.Taf) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_Taf_forecast(ctx, field)
 	if err != nil {
@@ -9839,23 +9788,6 @@ func (ec *executionContext) _Taf(ctx context.Context, sel ast.SelectionSet, obj 
 				if res == graphql.Null {
 					atomic.AddUint32(&invalids, 1)
 				}
-				return res
-			}
-
-			out.Concurrently(i, func() graphql.Marshaler {
-				return innerFunc(ctx)
-
-			})
-		case "skyConditions":
-			field := field
-
-			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
-				defer func() {
-					if r := recover(); r != nil {
-						ec.Error(ctx, ec.Recover(ctx, r))
-					}
-				}()
-				res = ec._Taf_skyConditions(ctx, field, obj)
 				return res
 			}
 

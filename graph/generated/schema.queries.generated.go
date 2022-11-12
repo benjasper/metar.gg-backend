@@ -1682,8 +1682,6 @@ func (ec *executionContext) fieldContext_TafEdge_node(ctx context.Context, field
 				return ec.fieldContext_Taf_remarks(ctx, field)
 			case "station":
 				return ec.fieldContext_Taf_station(ctx, field)
-			case "skyConditions":
-				return ec.fieldContext_Taf_skyConditions(ctx, field)
 			case "forecast":
 				return ec.fieldContext_Taf_forecast(ctx, field)
 			}
