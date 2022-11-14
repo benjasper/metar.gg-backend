@@ -253,7 +253,7 @@ func (i *Importer) importAirportLine(ctx context.Context, data []string) error {
 	elevation, _ := strconv.ParseInt(data[6], 10, 64)
 
 	scheduledService := false
-	if data[9] == "yes" {
+	if data[11] == "yes" {
 		scheduledService = true
 	}
 
