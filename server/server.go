@@ -111,6 +111,18 @@ func (s *Server) Run() error {
 		c.Status(http.StatusNoContent)
 	})
 
+	r.POST("/sitemap", func(c *gin.Context) {
+		if !isAuthorized(c.Writer, c.Request) {
+			return
+		}
+
+		go func() {
+			s.generateSitemap(context.Background())
+		}()
+
+		c.Status(http.StatusNoContent)
+	})
+
 	r.GET("/sitemap.xml", s.respondWithSitemap)
 
 	s.logger.Info("Starting server on port " + port)
@@ -219,19 +231,24 @@ func (s *Server) respondWithSitemap(c *gin.Context) {
 		return
 	}
 
-	if s.sitemap == nil || s.sitemapLastUpdated.Before(time.Now().Add(-24*time.Hour)) {
-		s.sitemap = s.generateSitemap(c)
-		s.sitemapLastUpdated = time.Now()
-	}
+	sm := s.generateSitemap(c)
 
-	_, err := c.Writer.Write(s.sitemap.XMLContent())
+	_, err := c.Writer.Write(sm.XMLContent())
 	if err != nil {
 		s.logger.Error(fmt.Sprintf("Error while generating sitemap: %s", err.Error()))
 		return
 	}
 }
 
-func (s *Server) generateSitemap(c *gin.Context) *stm.Sitemap {
+func (s *Server) generateSitemap(ctx context.Context) *stm.Sitemap {
+	// Cache the sitemap for 24 hours
+	if s.sitemap != nil && s.sitemapLastUpdated.After(time.Now().Add(-24*time.Hour)) {
+		return s.sitemap
+	}
+
+	start := time.Now()
+	s.logger.Info("Generating sitemap...")
+
 	sm := stm.NewSitemap(environment.Global.MaxConcurrentImports)
 
 	sm.SetDefaultHost(environment.Global.SitemapBase)
@@ -241,7 +258,7 @@ func (s *Server) generateSitemap(c *gin.Context) *stm.Sitemap {
 	sm.Create()
 
 	// Query an airport with maximum importance
-	maxImportantAirport, err := s.db.Airport.Query().Where(airport.HasStationWith(weatherstation.HasMetars())).Order(ent.Desc(airport.FieldImportance)).Select(airport.FieldImportance).First(c.Request.Context())
+	maxImportantAirport, err := s.db.Airport.Query().Where(airport.HasStationWith(weatherstation.HasMetars())).Order(ent.Desc(airport.FieldImportance)).Select(airport.FieldImportance).First(ctx)
 	if err != nil {
 		s.logger.Error(fmt.Sprintf("Error while generating sitemap: %s", err.Error()))
 		return nil
@@ -257,7 +274,7 @@ func (s *Server) generateSitemap(c *gin.Context) *stm.Sitemap {
 				q.Order(ent.Desc(metar.FieldObservationTime))
 			})
 		},
-		).Count(c.Request.Context())
+		).Count(ctx)
 	if err != nil {
 		s.logger.Error(fmt.Sprintf("Error while generating sitemap: %s", err.Error()))
 		return nil
@@ -265,7 +282,9 @@ func (s *Server) generateSitemap(c *gin.Context) *stm.Sitemap {
 
 	s.logger.Info(fmt.Sprintf("[SITEMAP] Generating sitemap for %d airports", airportsCount))
 
-	for i := 0; i < airportsCount; i += 100 {
+	pageSize := 250
+
+	for i := 0; i < airportsCount; i += pageSize {
 		airportsPage, err := s.db.Airport.Query().
 			Select(airport.FieldIdentifier, airport.FieldImportance).
 			Where(airport.HasStationWith(weatherstation.HasMetars())).
@@ -276,7 +295,7 @@ func (s *Server) generateSitemap(c *gin.Context) *stm.Sitemap {
 					q.Order(ent.Desc(metar.FieldObservationTime))
 				})
 			},
-			).Offset(i).Limit(100).All(c.Request.Context())
+			).Offset(i).Limit(pageSize).All(ctx)
 		if err != nil {
 			s.logger.Error(fmt.Sprintf("Error while generating sitemap: %s", err.Error()))
 			return nil
@@ -300,6 +319,11 @@ func (s *Server) generateSitemap(c *gin.Context) *stm.Sitemap {
 	sm.Add(stm.URL{{"loc", environment.Global.SitemapBase}, {"changefreq", "always"}, {"priority", "1.0"}})
 
 	s.logger.Info(fmt.Sprintf("[SITEMAP] Sitemap generation completed"))
+
+	s.sitemap = sm
+	s.sitemapLastUpdated = time.Now()
+
+	s.logger.Info(fmt.Sprintf("Sitemap generated in %s", time.Since(start)))
 
 	return sm
 }
