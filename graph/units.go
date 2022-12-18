@@ -1,7 +1,6 @@
 package graph
 
 import (
-	"math"
 	"metar.gg/graph/model"
 )
 
@@ -21,14 +20,14 @@ func PressureFromInchesOfMercuryToUnit(value float64, unit model.PressureUnit) f
 		return value
 	default:
 		// Hectopascals
-		return math.Round(value * 33.8637526)
+		return value * 33.8637526
 	}
 }
 
 func PressureFromHectopascalsToUnit(value float64, unit model.PressureUnit) float64 {
 	switch unit {
 	case model.PressureUnitInchOfMercury:
-		return math.Round(value / 33.8637526)
+		return value / 33.8637526
 	default:
 		// Hectopascals
 		return value
