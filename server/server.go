@@ -301,6 +301,11 @@ func (s *Server) generateSitemap(ctx context.Context) *stm.Sitemap {
 			return nil
 		}
 
+		if ctx.Err() != nil {
+			s.logger.Error(fmt.Sprintf("Error while generating sitemap: %s", ctx.Err().Error()))
+			return nil
+		}
+
 		for _, a := range airportsPage {
 			priority := float64(a.Importance) / maxImportance
 			sm.Add(stm.URL{{"loc", fmt.Sprintf(environment.Global.SitemapAirportsPath, a.Identifier)}, {"changefreq", "always"}, {"priority", fmt.Sprintf("%.1f", priority)}, {"lastmod", a.Edges.Station.Edges.Metars[0].ObservationTime}})
