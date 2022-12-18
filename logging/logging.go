@@ -181,8 +181,10 @@ func (l *Logger) uploadLog() {
 		}
 
 		// Make sure everything went smoothly.
-		for _, fail := range res.Failures {
-			l.Error(fail.Error)
+		if res != nil {
+			for _, fail := range res.Failures {
+				l.Error(fail.Error)
+			}
 		}
 
 		return err
