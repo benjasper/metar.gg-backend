@@ -242,7 +242,7 @@ func (s *Server) respondWithSitemap(c *gin.Context) {
 
 func (s *Server) generateSitemap(ctx context.Context) *stm.Sitemap {
 	// Cache the sitemap for 24 hours
-	if s.sitemap != nil && s.sitemapLastUpdated.After(time.Now().Add(-24*time.Hour)) {
+	if s.sitemap != nil && time.Now().Before(s.sitemapLastUpdated.Add(24*time.Hour)) {
 		return s.sitemap
 	}
 
