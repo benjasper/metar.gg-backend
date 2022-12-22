@@ -21,6 +21,9 @@ func (r *Resolver) IcingCondition() generated.IcingConditionResolver {
 // Metar returns generated.MetarResolver implementation.
 func (r *Resolver) Metar() generated.MetarResolver { return &metarResolver{r} }
 
+// Runway returns generated.RunwayResolver implementation.
+func (r *Resolver) Runway() generated.RunwayResolver { return &runwayResolver{r} }
+
 // SkyCondition returns generated.SkyConditionResolver implementation.
 func (r *Resolver) SkyCondition() generated.SkyConditionResolver { return &skyConditionResolver{r} }
 
@@ -43,6 +46,7 @@ type airportResolver struct{ *Resolver }
 type forecastResolver struct{ *Resolver }
 type icingConditionResolver struct{ *Resolver }
 type metarResolver struct{ *Resolver }
+type runwayResolver struct{ *Resolver }
 type skyConditionResolver struct{ *Resolver }
 type temperatureDataResolver struct{ *Resolver }
 type turbulenceConditionResolver struct{ *Resolver }

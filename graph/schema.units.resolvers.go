@@ -5,7 +5,6 @@ package graph
 
 import (
 	"context"
-
 	"metar.gg/ent"
 	"metar.gg/graph/model"
 )
@@ -181,6 +180,28 @@ func (r *metarResolver) PressureTendency(ctx context.Context, obj *ent.Metar, un
 	pressure := PressureFromHectopascalsToUnit(*obj.PressureTendency, unit)
 
 	return &pressure, nil
+}
+
+// Length is the resolver for the length field.
+func (r *runwayResolver) Length(ctx context.Context, obj *ent.Runway, unit model.LengthUnit) (*float64, error) {
+	if obj.Length == 0 {
+		return nil, nil
+	}
+
+	length := LengthFromFeetToUnit(float64(obj.Length), unit)
+
+	return &length, nil
+}
+
+// Width is the resolver for the width field.
+func (r *runwayResolver) Width(ctx context.Context, obj *ent.Runway, unit model.LengthUnit) (*float64, error) {
+	if obj.Length == 0 {
+		return nil, nil
+	}
+
+	width := LengthFromFeetToUnit(float64(obj.Width), unit)
+
+	return &width, nil
 }
 
 // CloudBase is the resolver for the cloudBase field.

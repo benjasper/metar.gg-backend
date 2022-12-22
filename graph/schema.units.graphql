@@ -112,3 +112,11 @@ extend type TurbulenceCondition {
     """Max altitude in the specified unit."""
     maxAltitude(unit: LengthUnit! = FOOT): Float @goField(forceResolver: true)
 }
+
+extend type Runway {
+    """The length of the runway in the specified unit."""
+    length(unit: LengthUnit! = FOOT): Float @goField(forceResolver: true)
+
+    """The width of the runway in the specified unit."""
+    width(unit: LengthUnit! = FOOT): Float @goField(forceResolver: true)
+}

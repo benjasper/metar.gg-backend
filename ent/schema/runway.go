@@ -1,6 +1,7 @@
 package schema
 
 import (
+	"entgo.io/contrib/entgql"
 	"entgo.io/ent"
 	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
@@ -14,8 +15,8 @@ type Runway struct {
 // Fields of the Runway.
 func (Runway) Fields() []ent.Field {
 	return []ent.Field{
-		field.Int("length").Comment("Length of the runway in feet."),
-		field.Int("width").Comment("Width of the runway surface in feet."),
+		field.Int("length").Comment("Length of the runway in feet.").Annotations(entgql.Skip()),
+		field.Int("width").Comment("Width of the runway surface in feet.").Annotations(entgql.Skip()),
 		field.String("surface").Optional().Nillable().Comment("Code for the runway surface type. This is not yet a controlled vocabulary, but probably will be soon. Some common values include \"ASP\" (asphalt), \"TURF\" (turf), \"CON\" (concrete), \"GRS\" (grass), \"GRE\" (gravel), \"WATER\" (water), and \"UNK\" (unknown)."),
 		field.Bool("lighted").Comment("Whether the runway is lighted at night or not."),
 		field.Bool("closed").Comment("Whether the runway is currently closed or not."),

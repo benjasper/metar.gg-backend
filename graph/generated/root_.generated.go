@@ -37,6 +37,7 @@ type ResolverRoot interface {
 	IcingCondition() IcingConditionResolver
 	Metar() MetarResolver
 	Query() QueryResolver
+	Runway() RunwayResolver
 	SkyCondition() SkyConditionResolver
 	TemperatureData() TemperatureDataResolver
 	TurbulenceCondition() TurbulenceConditionResolver
@@ -226,7 +227,7 @@ type ComplexityRoot struct {
 		ID                           func(childComplexity int) int
 		ImportID                     func(childComplexity int) int
 		LastUpdated                  func(childComplexity int) int
-		Length                       func(childComplexity int) int
+		Length                       func(childComplexity int, unit model.LengthUnit) int
 		Lighted                      func(childComplexity int) int
 		LowRunwayDisplacedThreshold  func(childComplexity int) int
 		LowRunwayElevation           func(childComplexity int) int
@@ -235,7 +236,7 @@ type ComplexityRoot struct {
 		LowRunwayLatitude            func(childComplexity int) int
 		LowRunwayLongitude           func(childComplexity int) int
 		Surface                      func(childComplexity int) int
-		Width                        func(childComplexity int) int
+		Width                        func(childComplexity int, unit model.LengthUnit) int
 	}
 
 	SkyCondition struct {
@@ -1430,7 +1431,12 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			break
 		}
 
-		return e.complexity.Runway.Length(childComplexity), true
+		args, err := ec.field_Runway_length_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Runway.Length(childComplexity, args["unit"].(model.LengthUnit)), true
 
 	case "Runway.lighted":
 		if e.complexity.Runway.Lighted == nil {
@@ -1493,7 +1499,12 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			break
 		}
 
-		return e.complexity.Runway.Width(childComplexity), true
+		args, err := ec.field_Runway_width_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Runway.Width(childComplexity, args["unit"].(model.LengthUnit)), true
 
 	case "SkyCondition.cloudBase":
 		if e.complexity.SkyCondition.CloudBase == nil {
@@ -2136,10 +2147,6 @@ type Runway {
   importID: Int!
   """The last time the record was updated/created."""
   lastUpdated: Time!
-  """Length of the runway in feet."""
-  length: Int!
-  """Width of the runway surface in feet."""
-  width: Int!
   """Code for the runway surface type. This is not yet a controlled vocabulary, but probably will be soon. Some common values include "ASP" (asphalt), "TURF" (turf), "CON" (concrete), "GRS" (grass), "GRE" (gravel), "WATER" (water), and "UNK" (unknown)."""
   surface: String
   """Whether the runway is lighted at night or not."""
@@ -2533,6 +2540,14 @@ extend type TurbulenceCondition {
 
     """Max altitude in the specified unit."""
     maxAltitude(unit: LengthUnit! = FOOT): Float @goField(forceResolver: true)
+}
+
+extend type Runway {
+    """The length of the runway in the specified unit."""
+    length(unit: LengthUnit! = FOOT): Float @goField(forceResolver: true)
+
+    """The width of the runway in the specified unit."""
+    width(unit: LengthUnit! = FOOT): Float @goField(forceResolver: true)
 }`, BuiltIn: false},
 }
 var parsedSchema = gqlparser.MustLoadSchema(sources...)
