@@ -57,6 +57,9 @@ func (Airport) Edges() []ent.Edge {
 func (Airport) Indexes() []ent.Index {
 	return []ent.Index{
 		index.Fields("identifier"),
+		index.Fields("name"),
+		index.Fields("municipality"),
+		index.Fields("local_code"),
 		index.Fields("icao_code"),
 		index.Fields("iata_code"),
 	}

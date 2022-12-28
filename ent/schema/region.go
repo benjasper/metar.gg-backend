@@ -5,6 +5,7 @@ import (
 	"entgo.io/ent"
 	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
+	"entgo.io/ent/schema/index"
 )
 
 // Region holds the schema definition for the Region entity.
@@ -35,5 +36,12 @@ func (Region) Mixin() []ent.Mixin {
 	return []ent.Mixin{
 		IDMixin{},
 		ImportMixin{},
+	}
+}
+
+// Indexes of the Region.
+func (Region) Indexes() []ent.Index {
+	return []ent.Index{
+		index.Fields("name"),
 	}
 }

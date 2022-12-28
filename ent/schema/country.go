@@ -5,6 +5,7 @@ import (
 	"entgo.io/ent"
 	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
+	"entgo.io/ent/schema/index"
 )
 
 // Country holds the schema definition for the Country entity.
@@ -35,5 +36,12 @@ func (Country) Mixin() []ent.Mixin {
 	return []ent.Mixin{
 		IDMixin{},
 		ImportMixin{},
+	}
+}
+
+// Indexes of the Country.
+func (Country) Indexes() []ent.Index {
+	return []ent.Index{
+		index.Fields("name"),
 	}
 }

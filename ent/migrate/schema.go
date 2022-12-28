@@ -71,6 +71,21 @@ var (
 				Columns: []*schema.Column{AirportsColumns[7]},
 			},
 			{
+				Name:    "airport_name",
+				Unique:  false,
+				Columns: []*schema.Column{AirportsColumns[10]},
+			},
+			{
+				Name:    "airport_municipality",
+				Unique:  false,
+				Columns: []*schema.Column{AirportsColumns[15]},
+			},
+			{
+				Name:    "airport_local_code",
+				Unique:  false,
+				Columns: []*schema.Column{AirportsColumns[18]},
+			},
+			{
 				Name:    "airport_icao_code",
 				Unique:  false,
 				Columns: []*schema.Column{AirportsColumns[5]},
@@ -110,6 +125,11 @@ var (
 				Name:    "country_import_id",
 				Unique:  false,
 				Columns: []*schema.Column{CountriesColumns[1]},
+			},
+			{
+				Name:    "country_name",
+				Unique:  false,
+				Columns: []*schema.Column{CountriesColumns[6]},
 			},
 		},
 	}
@@ -301,6 +321,11 @@ var (
 				Name:    "region_import_id",
 				Unique:  false,
 				Columns: []*schema.Column{RegionsColumns[1]},
+			},
+			{
+				Name:    "region_name",
+				Unique:  false,
+				Columns: []*schema.Column{RegionsColumns[7]},
 			},
 		},
 	}
