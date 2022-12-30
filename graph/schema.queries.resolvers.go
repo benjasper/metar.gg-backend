@@ -40,6 +40,7 @@ func (r *queryResolver) GetAirports(ctx context.Context, first *int, after *ent.
 	if search != nil {
 		// Search the airport by its name, ICAO, IATA, GPS code, municipality, local code and keywords.
 		where = append(where, airport.Or(
+			airport.IdentifierContainsFold(*search),
 			airport.NameContainsFold(*search),
 			airport.IcaoCodeEqualFold(*search),
 			airport.IcaoCodeContainsFold(*search),
