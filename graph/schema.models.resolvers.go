@@ -6,6 +6,7 @@ package graph
 import (
 	"context"
 	"fmt"
+	"metar.gg/ent/airport"
 
 	"entgo.io/ent/dialect/sql"
 	"github.com/google/uuid"
@@ -46,6 +47,7 @@ func (r *airportResolver) StationsVicinity(ctx context.Context, obj *ent.Airport
 
 	err := r.client.WeatherStation.Query().Where(
 		weatherstation.LatitudeLTE(maxLat), weatherstation.LatitudeGTE(minLat), weatherstation.LongitudeLTE(maxLon), weatherstation.LongitudeGTE(minLon),
+		weatherstation.HasAirportWith(airport.IdentifierNEQ(obj.Identifier)),
 	).Modify(func(s *sql.Selector) {
 		s.AppendSelect(fmt.Sprintf("%s as distance", geoSQLQuery))
 		s.Where(sql.ExprP(fmt.Sprintf("%s < %f", geoSQLQuery, *radius)))
