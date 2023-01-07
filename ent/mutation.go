@@ -6799,7 +6799,7 @@ func (m *MetarMutation) Temperature() (r float64, exists bool) {
 // OldTemperature returns the old "temperature" field's value of the Metar entity.
 // If the Metar object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *MetarMutation) OldTemperature(ctx context.Context) (v float64, err error) {
+func (m *MetarMutation) OldTemperature(ctx context.Context) (v *float64, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, errors.New("OldTemperature is only allowed on UpdateOne operations")
 	}
@@ -6831,10 +6831,24 @@ func (m *MetarMutation) AddedTemperature() (r float64, exists bool) {
 	return *v, true
 }
 
+// ClearTemperature clears the value of the "temperature" field.
+func (m *MetarMutation) ClearTemperature() {
+	m.temperature = nil
+	m.addtemperature = nil
+	m.clearedFields[metar.FieldTemperature] = struct{}{}
+}
+
+// TemperatureCleared returns if the "temperature" field was cleared in this mutation.
+func (m *MetarMutation) TemperatureCleared() bool {
+	_, ok := m.clearedFields[metar.FieldTemperature]
+	return ok
+}
+
 // ResetTemperature resets all changes to the "temperature" field.
 func (m *MetarMutation) ResetTemperature() {
 	m.temperature = nil
 	m.addtemperature = nil
+	delete(m.clearedFields, metar.FieldTemperature)
 }
 
 // SetDewpoint sets the "dewpoint" field.
@@ -6855,7 +6869,7 @@ func (m *MetarMutation) Dewpoint() (r float64, exists bool) {
 // OldDewpoint returns the old "dewpoint" field's value of the Metar entity.
 // If the Metar object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *MetarMutation) OldDewpoint(ctx context.Context) (v float64, err error) {
+func (m *MetarMutation) OldDewpoint(ctx context.Context) (v *float64, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, errors.New("OldDewpoint is only allowed on UpdateOne operations")
 	}
@@ -6887,10 +6901,24 @@ func (m *MetarMutation) AddedDewpoint() (r float64, exists bool) {
 	return *v, true
 }
 
+// ClearDewpoint clears the value of the "dewpoint" field.
+func (m *MetarMutation) ClearDewpoint() {
+	m.dewpoint = nil
+	m.adddewpoint = nil
+	m.clearedFields[metar.FieldDewpoint] = struct{}{}
+}
+
+// DewpointCleared returns if the "dewpoint" field was cleared in this mutation.
+func (m *MetarMutation) DewpointCleared() bool {
+	_, ok := m.clearedFields[metar.FieldDewpoint]
+	return ok
+}
+
 // ResetDewpoint resets all changes to the "dewpoint" field.
 func (m *MetarMutation) ResetDewpoint() {
 	m.dewpoint = nil
 	m.adddewpoint = nil
+	delete(m.clearedFields, metar.FieldDewpoint)
 }
 
 // SetWindSpeed sets the "wind_speed" field.
@@ -6911,7 +6939,7 @@ func (m *MetarMutation) WindSpeed() (r int, exists bool) {
 // OldWindSpeed returns the old "wind_speed" field's value of the Metar entity.
 // If the Metar object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *MetarMutation) OldWindSpeed(ctx context.Context) (v int, err error) {
+func (m *MetarMutation) OldWindSpeed(ctx context.Context) (v *int, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, errors.New("OldWindSpeed is only allowed on UpdateOne operations")
 	}
@@ -6943,10 +6971,24 @@ func (m *MetarMutation) AddedWindSpeed() (r int, exists bool) {
 	return *v, true
 }
 
+// ClearWindSpeed clears the value of the "wind_speed" field.
+func (m *MetarMutation) ClearWindSpeed() {
+	m.wind_speed = nil
+	m.addwind_speed = nil
+	m.clearedFields[metar.FieldWindSpeed] = struct{}{}
+}
+
+// WindSpeedCleared returns if the "wind_speed" field was cleared in this mutation.
+func (m *MetarMutation) WindSpeedCleared() bool {
+	_, ok := m.clearedFields[metar.FieldWindSpeed]
+	return ok
+}
+
 // ResetWindSpeed resets all changes to the "wind_speed" field.
 func (m *MetarMutation) ResetWindSpeed() {
 	m.wind_speed = nil
 	m.addwind_speed = nil
+	delete(m.clearedFields, metar.FieldWindSpeed)
 }
 
 // SetWindGust sets the "wind_gust" field.
@@ -6967,7 +7009,7 @@ func (m *MetarMutation) WindGust() (r int, exists bool) {
 // OldWindGust returns the old "wind_gust" field's value of the Metar entity.
 // If the Metar object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *MetarMutation) OldWindGust(ctx context.Context) (v int, err error) {
+func (m *MetarMutation) OldWindGust(ctx context.Context) (v *int, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, errors.New("OldWindGust is only allowed on UpdateOne operations")
 	}
@@ -6999,10 +7041,24 @@ func (m *MetarMutation) AddedWindGust() (r int, exists bool) {
 	return *v, true
 }
 
+// ClearWindGust clears the value of the "wind_gust" field.
+func (m *MetarMutation) ClearWindGust() {
+	m.wind_gust = nil
+	m.addwind_gust = nil
+	m.clearedFields[metar.FieldWindGust] = struct{}{}
+}
+
+// WindGustCleared returns if the "wind_gust" field was cleared in this mutation.
+func (m *MetarMutation) WindGustCleared() bool {
+	_, ok := m.clearedFields[metar.FieldWindGust]
+	return ok
+}
+
 // ResetWindGust resets all changes to the "wind_gust" field.
 func (m *MetarMutation) ResetWindGust() {
 	m.wind_gust = nil
 	m.addwind_gust = nil
+	delete(m.clearedFields, metar.FieldWindGust)
 }
 
 // SetWindDirection sets the "wind_direction" field.
@@ -7023,7 +7079,7 @@ func (m *MetarMutation) WindDirection() (r int, exists bool) {
 // OldWindDirection returns the old "wind_direction" field's value of the Metar entity.
 // If the Metar object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *MetarMutation) OldWindDirection(ctx context.Context) (v int, err error) {
+func (m *MetarMutation) OldWindDirection(ctx context.Context) (v *int, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, errors.New("OldWindDirection is only allowed on UpdateOne operations")
 	}
@@ -7055,10 +7111,24 @@ func (m *MetarMutation) AddedWindDirection() (r int, exists bool) {
 	return *v, true
 }
 
+// ClearWindDirection clears the value of the "wind_direction" field.
+func (m *MetarMutation) ClearWindDirection() {
+	m.wind_direction = nil
+	m.addwind_direction = nil
+	m.clearedFields[metar.FieldWindDirection] = struct{}{}
+}
+
+// WindDirectionCleared returns if the "wind_direction" field was cleared in this mutation.
+func (m *MetarMutation) WindDirectionCleared() bool {
+	_, ok := m.clearedFields[metar.FieldWindDirection]
+	return ok
+}
+
 // ResetWindDirection resets all changes to the "wind_direction" field.
 func (m *MetarMutation) ResetWindDirection() {
 	m.wind_direction = nil
 	m.addwind_direction = nil
+	delete(m.clearedFields, metar.FieldWindDirection)
 }
 
 // SetVisibility sets the "visibility" field.
@@ -7079,7 +7149,7 @@ func (m *MetarMutation) Visibility() (r float64, exists bool) {
 // OldVisibility returns the old "visibility" field's value of the Metar entity.
 // If the Metar object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *MetarMutation) OldVisibility(ctx context.Context) (v float64, err error) {
+func (m *MetarMutation) OldVisibility(ctx context.Context) (v *float64, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, errors.New("OldVisibility is only allowed on UpdateOne operations")
 	}
@@ -7111,10 +7181,24 @@ func (m *MetarMutation) AddedVisibility() (r float64, exists bool) {
 	return *v, true
 }
 
+// ClearVisibility clears the value of the "visibility" field.
+func (m *MetarMutation) ClearVisibility() {
+	m.visibility = nil
+	m.addvisibility = nil
+	m.clearedFields[metar.FieldVisibility] = struct{}{}
+}
+
+// VisibilityCleared returns if the "visibility" field was cleared in this mutation.
+func (m *MetarMutation) VisibilityCleared() bool {
+	_, ok := m.clearedFields[metar.FieldVisibility]
+	return ok
+}
+
 // ResetVisibility resets all changes to the "visibility" field.
 func (m *MetarMutation) ResetVisibility() {
 	m.visibility = nil
 	m.addvisibility = nil
+	delete(m.clearedFields, metar.FieldVisibility)
 }
 
 // SetAltimeter sets the "altimeter" field.
@@ -7135,7 +7219,7 @@ func (m *MetarMutation) Altimeter() (r float64, exists bool) {
 // OldAltimeter returns the old "altimeter" field's value of the Metar entity.
 // If the Metar object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *MetarMutation) OldAltimeter(ctx context.Context) (v float64, err error) {
+func (m *MetarMutation) OldAltimeter(ctx context.Context) (v *float64, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, errors.New("OldAltimeter is only allowed on UpdateOne operations")
 	}
@@ -7167,10 +7251,24 @@ func (m *MetarMutation) AddedAltimeter() (r float64, exists bool) {
 	return *v, true
 }
 
+// ClearAltimeter clears the value of the "altimeter" field.
+func (m *MetarMutation) ClearAltimeter() {
+	m.altimeter = nil
+	m.addaltimeter = nil
+	m.clearedFields[metar.FieldAltimeter] = struct{}{}
+}
+
+// AltimeterCleared returns if the "altimeter" field was cleared in this mutation.
+func (m *MetarMutation) AltimeterCleared() bool {
+	_, ok := m.clearedFields[metar.FieldAltimeter]
+	return ok
+}
+
 // ResetAltimeter resets all changes to the "altimeter" field.
 func (m *MetarMutation) ResetAltimeter() {
 	m.altimeter = nil
 	m.addaltimeter = nil
+	delete(m.clearedFields, metar.FieldAltimeter)
 }
 
 // SetPresentWeather sets the "present_weather" field.
@@ -9327,6 +9425,27 @@ func (m *MetarMutation) ClearedFields() []string {
 	if m.FieldCleared(metar.FieldNextImportTimePrediction) {
 		fields = append(fields, metar.FieldNextImportTimePrediction)
 	}
+	if m.FieldCleared(metar.FieldTemperature) {
+		fields = append(fields, metar.FieldTemperature)
+	}
+	if m.FieldCleared(metar.FieldDewpoint) {
+		fields = append(fields, metar.FieldDewpoint)
+	}
+	if m.FieldCleared(metar.FieldWindSpeed) {
+		fields = append(fields, metar.FieldWindSpeed)
+	}
+	if m.FieldCleared(metar.FieldWindGust) {
+		fields = append(fields, metar.FieldWindGust)
+	}
+	if m.FieldCleared(metar.FieldWindDirection) {
+		fields = append(fields, metar.FieldWindDirection)
+	}
+	if m.FieldCleared(metar.FieldVisibility) {
+		fields = append(fields, metar.FieldVisibility)
+	}
+	if m.FieldCleared(metar.FieldAltimeter) {
+		fields = append(fields, metar.FieldAltimeter)
+	}
 	if m.FieldCleared(metar.FieldPresentWeather) {
 		fields = append(fields, metar.FieldPresentWeather)
 	}
@@ -9388,6 +9507,27 @@ func (m *MetarMutation) ClearField(name string) error {
 	switch name {
 	case metar.FieldNextImportTimePrediction:
 		m.ClearNextImportTimePrediction()
+		return nil
+	case metar.FieldTemperature:
+		m.ClearTemperature()
+		return nil
+	case metar.FieldDewpoint:
+		m.ClearDewpoint()
+		return nil
+	case metar.FieldWindSpeed:
+		m.ClearWindSpeed()
+		return nil
+	case metar.FieldWindGust:
+		m.ClearWindGust()
+		return nil
+	case metar.FieldWindDirection:
+		m.ClearWindDirection()
+		return nil
+	case metar.FieldVisibility:
+		m.ClearVisibility()
+		return nil
+	case metar.FieldAltimeter:
+		m.ClearAltimeter()
 		return nil
 	case metar.FieldPresentWeather:
 		m.ClearPresentWeather()

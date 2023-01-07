@@ -43,12 +43,12 @@ type IcingConditionResolver interface {
 	MaxAltitude(ctx context.Context, obj *ent.IcingCondition, unit model.LengthUnit) (*float64, error)
 }
 type MetarResolver interface {
-	Altimeter(ctx context.Context, obj *ent.Metar, unit model.PressureUnit) (float64, error)
-	Temperature(ctx context.Context, obj *ent.Metar, unit model.TemperatureUnit) (float64, error)
-	Dewpoint(ctx context.Context, obj *ent.Metar, unit model.TemperatureUnit) (float64, error)
-	WindSpeed(ctx context.Context, obj *ent.Metar, unit model.SpeedUnit) (float64, error)
-	WindGust(ctx context.Context, obj *ent.Metar, unit model.SpeedUnit) (float64, error)
-	Visibility(ctx context.Context, obj *ent.Metar, unit model.LengthUnit) (float64, error)
+	Altimeter(ctx context.Context, obj *ent.Metar, unit model.PressureUnit) (*float64, error)
+	Temperature(ctx context.Context, obj *ent.Metar, unit model.TemperatureUnit) (*float64, error)
+	Dewpoint(ctx context.Context, obj *ent.Metar, unit model.TemperatureUnit) (*float64, error)
+	WindSpeed(ctx context.Context, obj *ent.Metar, unit model.SpeedUnit) (*float64, error)
+	WindGust(ctx context.Context, obj *ent.Metar, unit model.SpeedUnit) (*float64, error)
+	Visibility(ctx context.Context, obj *ent.Metar, unit model.LengthUnit) (*float64, error)
 	VerticalVisibility(ctx context.Context, obj *ent.Metar, unit model.LengthUnit) (*float64, error)
 	SnowDepth(ctx context.Context, obj *ent.Metar, unit model.SmallLengthUnit) (*float64, error)
 	SeaLevelPressure(ctx context.Context, obj *ent.Metar, unit model.PressureUnit) (*float64, error)
@@ -3992,14 +3992,11 @@ func (ec *executionContext) _Metar_windDirection(ctx context.Context, field grap
 		return graphql.Null
 	}
 	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
 		return graphql.Null
 	}
-	res := resTmp.(int)
+	res := resTmp.(*int)
 	fc.Result = res
-	return ec.marshalNInt2int(ctx, field.Selections, res)
+	return ec.marshalOInt2ᚖint(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Metar_windDirection(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -4908,14 +4905,11 @@ func (ec *executionContext) _Metar_altimeter(ctx context.Context, field graphql.
 		return graphql.Null
 	}
 	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
 		return graphql.Null
 	}
-	res := resTmp.(float64)
+	res := resTmp.(*float64)
 	fc.Result = res
-	return ec.marshalNFloat2float64(ctx, field.Selections, res)
+	return ec.marshalOFloat2ᚖfloat64(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Metar_altimeter(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -4963,14 +4957,11 @@ func (ec *executionContext) _Metar_temperature(ctx context.Context, field graphq
 		return graphql.Null
 	}
 	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
 		return graphql.Null
 	}
-	res := resTmp.(float64)
+	res := resTmp.(*float64)
 	fc.Result = res
-	return ec.marshalNFloat2float64(ctx, field.Selections, res)
+	return ec.marshalOFloat2ᚖfloat64(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Metar_temperature(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -5018,14 +5009,11 @@ func (ec *executionContext) _Metar_dewpoint(ctx context.Context, field graphql.C
 		return graphql.Null
 	}
 	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
 		return graphql.Null
 	}
-	res := resTmp.(float64)
+	res := resTmp.(*float64)
 	fc.Result = res
-	return ec.marshalNFloat2float64(ctx, field.Selections, res)
+	return ec.marshalOFloat2ᚖfloat64(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Metar_dewpoint(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -5073,14 +5061,11 @@ func (ec *executionContext) _Metar_windSpeed(ctx context.Context, field graphql.
 		return graphql.Null
 	}
 	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
 		return graphql.Null
 	}
-	res := resTmp.(float64)
+	res := resTmp.(*float64)
 	fc.Result = res
-	return ec.marshalNFloat2float64(ctx, field.Selections, res)
+	return ec.marshalOFloat2ᚖfloat64(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Metar_windSpeed(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -5128,14 +5113,11 @@ func (ec *executionContext) _Metar_windGust(ctx context.Context, field graphql.C
 		return graphql.Null
 	}
 	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
 		return graphql.Null
 	}
-	res := resTmp.(float64)
+	res := resTmp.(*float64)
 	fc.Result = res
-	return ec.marshalNFloat2float64(ctx, field.Selections, res)
+	return ec.marshalOFloat2ᚖfloat64(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Metar_windGust(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -5183,14 +5165,11 @@ func (ec *executionContext) _Metar_visibility(ctx context.Context, field graphql
 		return graphql.Null
 	}
 	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
 		return graphql.Null
 	}
-	res := resTmp.(float64)
+	res := resTmp.(*float64)
 	fc.Result = res
-	return ec.marshalNFloat2float64(ctx, field.Selections, res)
+	return ec.marshalOFloat2ᚖfloat64(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Metar_visibility(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -9149,9 +9128,6 @@ func (ec *executionContext) _Metar(ctx context.Context, sel ast.SelectionSet, ob
 
 			out.Values[i] = ec._Metar_windDirection(ctx, field, obj)
 
-			if out.Values[i] == graphql.Null {
-				atomic.AddUint32(&invalids, 1)
-			}
 		case "presentWeather":
 
 			out.Values[i] = ec._Metar_presentWeather(ctx, field, obj)
@@ -9292,9 +9268,6 @@ func (ec *executionContext) _Metar(ctx context.Context, sel ast.SelectionSet, ob
 					}
 				}()
 				res = ec._Metar_altimeter(ctx, field, obj)
-				if res == graphql.Null {
-					atomic.AddUint32(&invalids, 1)
-				}
 				return res
 			}
 
@@ -9312,9 +9285,6 @@ func (ec *executionContext) _Metar(ctx context.Context, sel ast.SelectionSet, ob
 					}
 				}()
 				res = ec._Metar_temperature(ctx, field, obj)
-				if res == graphql.Null {
-					atomic.AddUint32(&invalids, 1)
-				}
 				return res
 			}
 
@@ -9332,9 +9302,6 @@ func (ec *executionContext) _Metar(ctx context.Context, sel ast.SelectionSet, ob
 					}
 				}()
 				res = ec._Metar_dewpoint(ctx, field, obj)
-				if res == graphql.Null {
-					atomic.AddUint32(&invalids, 1)
-				}
 				return res
 			}
 
@@ -9352,9 +9319,6 @@ func (ec *executionContext) _Metar(ctx context.Context, sel ast.SelectionSet, ob
 					}
 				}()
 				res = ec._Metar_windSpeed(ctx, field, obj)
-				if res == graphql.Null {
-					atomic.AddUint32(&invalids, 1)
-				}
 				return res
 			}
 
@@ -9372,9 +9336,6 @@ func (ec *executionContext) _Metar(ctx context.Context, sel ast.SelectionSet, ob
 					}
 				}()
 				res = ec._Metar_windGust(ctx, field, obj)
-				if res == graphql.Null {
-					atomic.AddUint32(&invalids, 1)
-				}
 				return res
 			}
 
@@ -9392,9 +9353,6 @@ func (ec *executionContext) _Metar(ctx context.Context, sel ast.SelectionSet, ob
 					}
 				}()
 				res = ec._Metar_visibility(ctx, field, obj)
-				if res == graphql.Null {
-					atomic.AddUint32(&invalids, 1)
-				}
 				return res
 			}
 

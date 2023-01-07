@@ -675,6 +675,20 @@ func TemperatureLTE(v float64) predicate.Metar {
 	})
 }
 
+// TemperatureIsNil applies the IsNil predicate on the "temperature" field.
+func TemperatureIsNil() predicate.Metar {
+	return predicate.Metar(func(s *sql.Selector) {
+		s.Where(sql.IsNull(s.C(FieldTemperature)))
+	})
+}
+
+// TemperatureNotNil applies the NotNil predicate on the "temperature" field.
+func TemperatureNotNil() predicate.Metar {
+	return predicate.Metar(func(s *sql.Selector) {
+		s.Where(sql.NotNull(s.C(FieldTemperature)))
+	})
+}
+
 // DewpointEQ applies the EQ predicate on the "dewpoint" field.
 func DewpointEQ(v float64) predicate.Metar {
 	return predicate.Metar(func(s *sql.Selector) {
@@ -736,6 +750,20 @@ func DewpointLT(v float64) predicate.Metar {
 func DewpointLTE(v float64) predicate.Metar {
 	return predicate.Metar(func(s *sql.Selector) {
 		s.Where(sql.LTE(s.C(FieldDewpoint), v))
+	})
+}
+
+// DewpointIsNil applies the IsNil predicate on the "dewpoint" field.
+func DewpointIsNil() predicate.Metar {
+	return predicate.Metar(func(s *sql.Selector) {
+		s.Where(sql.IsNull(s.C(FieldDewpoint)))
+	})
+}
+
+// DewpointNotNil applies the NotNil predicate on the "dewpoint" field.
+func DewpointNotNil() predicate.Metar {
+	return predicate.Metar(func(s *sql.Selector) {
+		s.Where(sql.NotNull(s.C(FieldDewpoint)))
 	})
 }
 
@@ -803,6 +831,20 @@ func WindSpeedLTE(v int) predicate.Metar {
 	})
 }
 
+// WindSpeedIsNil applies the IsNil predicate on the "wind_speed" field.
+func WindSpeedIsNil() predicate.Metar {
+	return predicate.Metar(func(s *sql.Selector) {
+		s.Where(sql.IsNull(s.C(FieldWindSpeed)))
+	})
+}
+
+// WindSpeedNotNil applies the NotNil predicate on the "wind_speed" field.
+func WindSpeedNotNil() predicate.Metar {
+	return predicate.Metar(func(s *sql.Selector) {
+		s.Where(sql.NotNull(s.C(FieldWindSpeed)))
+	})
+}
+
 // WindGustEQ applies the EQ predicate on the "wind_gust" field.
 func WindGustEQ(v int) predicate.Metar {
 	return predicate.Metar(func(s *sql.Selector) {
@@ -864,6 +906,20 @@ func WindGustLT(v int) predicate.Metar {
 func WindGustLTE(v int) predicate.Metar {
 	return predicate.Metar(func(s *sql.Selector) {
 		s.Where(sql.LTE(s.C(FieldWindGust), v))
+	})
+}
+
+// WindGustIsNil applies the IsNil predicate on the "wind_gust" field.
+func WindGustIsNil() predicate.Metar {
+	return predicate.Metar(func(s *sql.Selector) {
+		s.Where(sql.IsNull(s.C(FieldWindGust)))
+	})
+}
+
+// WindGustNotNil applies the NotNil predicate on the "wind_gust" field.
+func WindGustNotNil() predicate.Metar {
+	return predicate.Metar(func(s *sql.Selector) {
+		s.Where(sql.NotNull(s.C(FieldWindGust)))
 	})
 }
 
@@ -931,6 +987,20 @@ func WindDirectionLTE(v int) predicate.Metar {
 	})
 }
 
+// WindDirectionIsNil applies the IsNil predicate on the "wind_direction" field.
+func WindDirectionIsNil() predicate.Metar {
+	return predicate.Metar(func(s *sql.Selector) {
+		s.Where(sql.IsNull(s.C(FieldWindDirection)))
+	})
+}
+
+// WindDirectionNotNil applies the NotNil predicate on the "wind_direction" field.
+func WindDirectionNotNil() predicate.Metar {
+	return predicate.Metar(func(s *sql.Selector) {
+		s.Where(sql.NotNull(s.C(FieldWindDirection)))
+	})
+}
+
 // VisibilityEQ applies the EQ predicate on the "visibility" field.
 func VisibilityEQ(v float64) predicate.Metar {
 	return predicate.Metar(func(s *sql.Selector) {
@@ -995,6 +1065,20 @@ func VisibilityLTE(v float64) predicate.Metar {
 	})
 }
 
+// VisibilityIsNil applies the IsNil predicate on the "visibility" field.
+func VisibilityIsNil() predicate.Metar {
+	return predicate.Metar(func(s *sql.Selector) {
+		s.Where(sql.IsNull(s.C(FieldVisibility)))
+	})
+}
+
+// VisibilityNotNil applies the NotNil predicate on the "visibility" field.
+func VisibilityNotNil() predicate.Metar {
+	return predicate.Metar(func(s *sql.Selector) {
+		s.Where(sql.NotNull(s.C(FieldVisibility)))
+	})
+}
+
 // AltimeterEQ applies the EQ predicate on the "altimeter" field.
 func AltimeterEQ(v float64) predicate.Metar {
 	return predicate.Metar(func(s *sql.Selector) {
@@ -1056,6 +1140,20 @@ func AltimeterLT(v float64) predicate.Metar {
 func AltimeterLTE(v float64) predicate.Metar {
 	return predicate.Metar(func(s *sql.Selector) {
 		s.Where(sql.LTE(s.C(FieldAltimeter), v))
+	})
+}
+
+// AltimeterIsNil applies the IsNil predicate on the "altimeter" field.
+func AltimeterIsNil() predicate.Metar {
+	return predicate.Metar(func(s *sql.Selector) {
+		s.Where(sql.IsNull(s.C(FieldAltimeter)))
+	})
+}
+
+// AltimeterNotNil applies the NotNil predicate on the "altimeter" field.
+func AltimeterNotNil() predicate.Metar {
+	return predicate.Metar(func(s *sql.Selector) {
+		s.Where(sql.NotNull(s.C(FieldAltimeter)))
 	})
 }
 

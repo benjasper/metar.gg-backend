@@ -110,33 +110,69 @@ func (r *icingConditionResolver) MaxAltitude(ctx context.Context, obj *ent.Icing
 }
 
 // Altimeter is the resolver for the altimeter field.
-func (r *metarResolver) Altimeter(ctx context.Context, obj *ent.Metar, unit model.PressureUnit) (float64, error) {
-	return PressureFromInchesOfMercuryToUnit(obj.Altimeter, unit), nil
+func (r *metarResolver) Altimeter(ctx context.Context, obj *ent.Metar, unit model.PressureUnit) (*float64, error) {
+	if obj.Altimeter == nil {
+		return nil, nil
+	}
+
+	pressure := PressureFromInchesOfMercuryToUnit(*obj.Altimeter, unit)
+
+	return &pressure, nil
 }
 
 // Temperature is the resolver for the temperature field.
-func (r *metarResolver) Temperature(ctx context.Context, obj *ent.Metar, unit model.TemperatureUnit) (float64, error) {
-	return TemperatureFromCelsiusToUnit(obj.Temperature, unit), nil
+func (r *metarResolver) Temperature(ctx context.Context, obj *ent.Metar, unit model.TemperatureUnit) (*float64, error) {
+	if obj.Temperature == nil {
+		return nil, nil
+	}
+
+	temp := TemperatureFromCelsiusToUnit(*obj.Temperature, unit)
+
+	return &temp, nil
 }
 
 // Dewpoint is the resolver for the dewpoint field.
-func (r *metarResolver) Dewpoint(ctx context.Context, obj *ent.Metar, unit model.TemperatureUnit) (float64, error) {
-	return TemperatureFromCelsiusToUnit(obj.Dewpoint, unit), nil
+func (r *metarResolver) Dewpoint(ctx context.Context, obj *ent.Metar, unit model.TemperatureUnit) (*float64, error) {
+	if obj.Dewpoint == nil {
+		return nil, nil
+	}
+
+	temp := TemperatureFromCelsiusToUnit(*obj.Dewpoint, unit)
+
+	return &temp, nil
 }
 
 // WindSpeed is the resolver for the windSpeed field.
-func (r *metarResolver) WindSpeed(ctx context.Context, obj *ent.Metar, unit model.SpeedUnit) (float64, error) {
-	return SpeedFromKnotsToUnit(obj.WindSpeed, unit), nil
+func (r *metarResolver) WindSpeed(ctx context.Context, obj *ent.Metar, unit model.SpeedUnit) (*float64, error) {
+	if obj.WindSpeed == nil {
+		return nil, nil
+	}
+
+	speed := SpeedFromKnotsToUnit(*obj.WindSpeed, unit)
+
+	return &speed, nil
 }
 
 // WindGust is the resolver for the windGust field.
-func (r *metarResolver) WindGust(ctx context.Context, obj *ent.Metar, unit model.SpeedUnit) (float64, error) {
-	return SpeedFromKnotsToUnit(obj.WindGust, unit), nil
+func (r *metarResolver) WindGust(ctx context.Context, obj *ent.Metar, unit model.SpeedUnit) (*float64, error) {
+	if obj.WindGust == nil {
+		return nil, nil
+	}
+
+	speed := SpeedFromKnotsToUnit(*obj.WindGust, unit)
+
+	return &speed, nil
 }
 
 // Visibility is the resolver for the visibility field.
-func (r *metarResolver) Visibility(ctx context.Context, obj *ent.Metar, unit model.LengthUnit) (float64, error) {
-	return LengthFromStatuteMileToUnit(obj.Visibility, unit), nil
+func (r *metarResolver) Visibility(ctx context.Context, obj *ent.Metar, unit model.LengthUnit) (*float64, error) {
+	if obj.Visibility == nil {
+		return nil, nil
+	}
+
+	length := LengthFromStatuteMileToUnit(*obj.Visibility, unit)
+
+	return &length, nil
 }
 
 // VerticalVisibility is the resolver for the verticalVisibility field.

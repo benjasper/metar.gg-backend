@@ -72,9 +72,25 @@ func (mc *MetarCreate) SetTemperature(f float64) *MetarCreate {
 	return mc
 }
 
+// SetNillableTemperature sets the "temperature" field if the given value is not nil.
+func (mc *MetarCreate) SetNillableTemperature(f *float64) *MetarCreate {
+	if f != nil {
+		mc.SetTemperature(*f)
+	}
+	return mc
+}
+
 // SetDewpoint sets the "dewpoint" field.
 func (mc *MetarCreate) SetDewpoint(f float64) *MetarCreate {
 	mc.mutation.SetDewpoint(f)
+	return mc
+}
+
+// SetNillableDewpoint sets the "dewpoint" field if the given value is not nil.
+func (mc *MetarCreate) SetNillableDewpoint(f *float64) *MetarCreate {
+	if f != nil {
+		mc.SetDewpoint(*f)
+	}
 	return mc
 }
 
@@ -84,9 +100,25 @@ func (mc *MetarCreate) SetWindSpeed(i int) *MetarCreate {
 	return mc
 }
 
+// SetNillableWindSpeed sets the "wind_speed" field if the given value is not nil.
+func (mc *MetarCreate) SetNillableWindSpeed(i *int) *MetarCreate {
+	if i != nil {
+		mc.SetWindSpeed(*i)
+	}
+	return mc
+}
+
 // SetWindGust sets the "wind_gust" field.
 func (mc *MetarCreate) SetWindGust(i int) *MetarCreate {
 	mc.mutation.SetWindGust(i)
+	return mc
+}
+
+// SetNillableWindGust sets the "wind_gust" field if the given value is not nil.
+func (mc *MetarCreate) SetNillableWindGust(i *int) *MetarCreate {
+	if i != nil {
+		mc.SetWindGust(*i)
+	}
 	return mc
 }
 
@@ -96,15 +128,39 @@ func (mc *MetarCreate) SetWindDirection(i int) *MetarCreate {
 	return mc
 }
 
+// SetNillableWindDirection sets the "wind_direction" field if the given value is not nil.
+func (mc *MetarCreate) SetNillableWindDirection(i *int) *MetarCreate {
+	if i != nil {
+		mc.SetWindDirection(*i)
+	}
+	return mc
+}
+
 // SetVisibility sets the "visibility" field.
 func (mc *MetarCreate) SetVisibility(f float64) *MetarCreate {
 	mc.mutation.SetVisibility(f)
 	return mc
 }
 
+// SetNillableVisibility sets the "visibility" field if the given value is not nil.
+func (mc *MetarCreate) SetNillableVisibility(f *float64) *MetarCreate {
+	if f != nil {
+		mc.SetVisibility(*f)
+	}
+	return mc
+}
+
 // SetAltimeter sets the "altimeter" field.
 func (mc *MetarCreate) SetAltimeter(f float64) *MetarCreate {
 	mc.mutation.SetAltimeter(f)
+	return mc
+}
+
+// SetNillableAltimeter sets the "altimeter" field if the given value is not nil.
+func (mc *MetarCreate) SetNillableAltimeter(f *float64) *MetarCreate {
+	if f != nil {
+		mc.SetAltimeter(*f)
+	}
 	return mc
 }
 
@@ -504,27 +560,6 @@ func (mc *MetarCreate) check() error {
 	if _, ok := mc.mutation.ImportTime(); !ok {
 		return &ValidationError{Name: "import_time", err: errors.New(`ent: missing required field "Metar.import_time"`)}
 	}
-	if _, ok := mc.mutation.Temperature(); !ok {
-		return &ValidationError{Name: "temperature", err: errors.New(`ent: missing required field "Metar.temperature"`)}
-	}
-	if _, ok := mc.mutation.Dewpoint(); !ok {
-		return &ValidationError{Name: "dewpoint", err: errors.New(`ent: missing required field "Metar.dewpoint"`)}
-	}
-	if _, ok := mc.mutation.WindSpeed(); !ok {
-		return &ValidationError{Name: "wind_speed", err: errors.New(`ent: missing required field "Metar.wind_speed"`)}
-	}
-	if _, ok := mc.mutation.WindGust(); !ok {
-		return &ValidationError{Name: "wind_gust", err: errors.New(`ent: missing required field "Metar.wind_gust"`)}
-	}
-	if _, ok := mc.mutation.WindDirection(); !ok {
-		return &ValidationError{Name: "wind_direction", err: errors.New(`ent: missing required field "Metar.wind_direction"`)}
-	}
-	if _, ok := mc.mutation.Visibility(); !ok {
-		return &ValidationError{Name: "visibility", err: errors.New(`ent: missing required field "Metar.visibility"`)}
-	}
-	if _, ok := mc.mutation.Altimeter(); !ok {
-		return &ValidationError{Name: "altimeter", err: errors.New(`ent: missing required field "Metar.altimeter"`)}
-	}
 	if v, ok := mc.mutation.FlightCategory(); ok {
 		if err := metar.FlightCategoryValidator(v); err != nil {
 			return &ValidationError{Name: "flight_category", err: fmt.Errorf(`ent: validator failed for field "Metar.flight_category": %w`, err)}
@@ -617,31 +652,31 @@ func (mc *MetarCreate) createSpec() (*Metar, *sqlgraph.CreateSpec) {
 	}
 	if value, ok := mc.mutation.Temperature(); ok {
 		_spec.SetField(metar.FieldTemperature, field.TypeFloat64, value)
-		_node.Temperature = value
+		_node.Temperature = &value
 	}
 	if value, ok := mc.mutation.Dewpoint(); ok {
 		_spec.SetField(metar.FieldDewpoint, field.TypeFloat64, value)
-		_node.Dewpoint = value
+		_node.Dewpoint = &value
 	}
 	if value, ok := mc.mutation.WindSpeed(); ok {
 		_spec.SetField(metar.FieldWindSpeed, field.TypeInt, value)
-		_node.WindSpeed = value
+		_node.WindSpeed = &value
 	}
 	if value, ok := mc.mutation.WindGust(); ok {
 		_spec.SetField(metar.FieldWindGust, field.TypeInt, value)
-		_node.WindGust = value
+		_node.WindGust = &value
 	}
 	if value, ok := mc.mutation.WindDirection(); ok {
 		_spec.SetField(metar.FieldWindDirection, field.TypeInt, value)
-		_node.WindDirection = value
+		_node.WindDirection = &value
 	}
 	if value, ok := mc.mutation.Visibility(); ok {
 		_spec.SetField(metar.FieldVisibility, field.TypeFloat64, value)
-		_node.Visibility = value
+		_node.Visibility = &value
 	}
 	if value, ok := mc.mutation.Altimeter(); ok {
 		_spec.SetField(metar.FieldAltimeter, field.TypeFloat64, value)
-		_node.Altimeter = value
+		_node.Altimeter = &value
 	}
 	if value, ok := mc.mutation.PresentWeather(); ok {
 		_spec.SetField(metar.FieldPresentWeather, field.TypeString, value)
@@ -898,6 +933,12 @@ func (u *MetarUpsert) AddTemperature(v float64) *MetarUpsert {
 	return u
 }
 
+// ClearTemperature clears the value of the "temperature" field.
+func (u *MetarUpsert) ClearTemperature() *MetarUpsert {
+	u.SetNull(metar.FieldTemperature)
+	return u
+}
+
 // SetDewpoint sets the "dewpoint" field.
 func (u *MetarUpsert) SetDewpoint(v float64) *MetarUpsert {
 	u.Set(metar.FieldDewpoint, v)
@@ -913,6 +954,12 @@ func (u *MetarUpsert) UpdateDewpoint() *MetarUpsert {
 // AddDewpoint adds v to the "dewpoint" field.
 func (u *MetarUpsert) AddDewpoint(v float64) *MetarUpsert {
 	u.Add(metar.FieldDewpoint, v)
+	return u
+}
+
+// ClearDewpoint clears the value of the "dewpoint" field.
+func (u *MetarUpsert) ClearDewpoint() *MetarUpsert {
+	u.SetNull(metar.FieldDewpoint)
 	return u
 }
 
@@ -934,6 +981,12 @@ func (u *MetarUpsert) AddWindSpeed(v int) *MetarUpsert {
 	return u
 }
 
+// ClearWindSpeed clears the value of the "wind_speed" field.
+func (u *MetarUpsert) ClearWindSpeed() *MetarUpsert {
+	u.SetNull(metar.FieldWindSpeed)
+	return u
+}
+
 // SetWindGust sets the "wind_gust" field.
 func (u *MetarUpsert) SetWindGust(v int) *MetarUpsert {
 	u.Set(metar.FieldWindGust, v)
@@ -949,6 +1002,12 @@ func (u *MetarUpsert) UpdateWindGust() *MetarUpsert {
 // AddWindGust adds v to the "wind_gust" field.
 func (u *MetarUpsert) AddWindGust(v int) *MetarUpsert {
 	u.Add(metar.FieldWindGust, v)
+	return u
+}
+
+// ClearWindGust clears the value of the "wind_gust" field.
+func (u *MetarUpsert) ClearWindGust() *MetarUpsert {
+	u.SetNull(metar.FieldWindGust)
 	return u
 }
 
@@ -970,6 +1029,12 @@ func (u *MetarUpsert) AddWindDirection(v int) *MetarUpsert {
 	return u
 }
 
+// ClearWindDirection clears the value of the "wind_direction" field.
+func (u *MetarUpsert) ClearWindDirection() *MetarUpsert {
+	u.SetNull(metar.FieldWindDirection)
+	return u
+}
+
 // SetVisibility sets the "visibility" field.
 func (u *MetarUpsert) SetVisibility(v float64) *MetarUpsert {
 	u.Set(metar.FieldVisibility, v)
@@ -988,6 +1053,12 @@ func (u *MetarUpsert) AddVisibility(v float64) *MetarUpsert {
 	return u
 }
 
+// ClearVisibility clears the value of the "visibility" field.
+func (u *MetarUpsert) ClearVisibility() *MetarUpsert {
+	u.SetNull(metar.FieldVisibility)
+	return u
+}
+
 // SetAltimeter sets the "altimeter" field.
 func (u *MetarUpsert) SetAltimeter(v float64) *MetarUpsert {
 	u.Set(metar.FieldAltimeter, v)
@@ -1003,6 +1074,12 @@ func (u *MetarUpsert) UpdateAltimeter() *MetarUpsert {
 // AddAltimeter adds v to the "altimeter" field.
 func (u *MetarUpsert) AddAltimeter(v float64) *MetarUpsert {
 	u.Add(metar.FieldAltimeter, v)
+	return u
+}
+
+// ClearAltimeter clears the value of the "altimeter" field.
+func (u *MetarUpsert) ClearAltimeter() *MetarUpsert {
+	u.SetNull(metar.FieldAltimeter)
 	return u
 }
 
@@ -1576,6 +1653,13 @@ func (u *MetarUpsertOne) UpdateTemperature() *MetarUpsertOne {
 	})
 }
 
+// ClearTemperature clears the value of the "temperature" field.
+func (u *MetarUpsertOne) ClearTemperature() *MetarUpsertOne {
+	return u.Update(func(s *MetarUpsert) {
+		s.ClearTemperature()
+	})
+}
+
 // SetDewpoint sets the "dewpoint" field.
 func (u *MetarUpsertOne) SetDewpoint(v float64) *MetarUpsertOne {
 	return u.Update(func(s *MetarUpsert) {
@@ -1594,6 +1678,13 @@ func (u *MetarUpsertOne) AddDewpoint(v float64) *MetarUpsertOne {
 func (u *MetarUpsertOne) UpdateDewpoint() *MetarUpsertOne {
 	return u.Update(func(s *MetarUpsert) {
 		s.UpdateDewpoint()
+	})
+}
+
+// ClearDewpoint clears the value of the "dewpoint" field.
+func (u *MetarUpsertOne) ClearDewpoint() *MetarUpsertOne {
+	return u.Update(func(s *MetarUpsert) {
+		s.ClearDewpoint()
 	})
 }
 
@@ -1618,6 +1709,13 @@ func (u *MetarUpsertOne) UpdateWindSpeed() *MetarUpsertOne {
 	})
 }
 
+// ClearWindSpeed clears the value of the "wind_speed" field.
+func (u *MetarUpsertOne) ClearWindSpeed() *MetarUpsertOne {
+	return u.Update(func(s *MetarUpsert) {
+		s.ClearWindSpeed()
+	})
+}
+
 // SetWindGust sets the "wind_gust" field.
 func (u *MetarUpsertOne) SetWindGust(v int) *MetarUpsertOne {
 	return u.Update(func(s *MetarUpsert) {
@@ -1636,6 +1734,13 @@ func (u *MetarUpsertOne) AddWindGust(v int) *MetarUpsertOne {
 func (u *MetarUpsertOne) UpdateWindGust() *MetarUpsertOne {
 	return u.Update(func(s *MetarUpsert) {
 		s.UpdateWindGust()
+	})
+}
+
+// ClearWindGust clears the value of the "wind_gust" field.
+func (u *MetarUpsertOne) ClearWindGust() *MetarUpsertOne {
+	return u.Update(func(s *MetarUpsert) {
+		s.ClearWindGust()
 	})
 }
 
@@ -1660,6 +1765,13 @@ func (u *MetarUpsertOne) UpdateWindDirection() *MetarUpsertOne {
 	})
 }
 
+// ClearWindDirection clears the value of the "wind_direction" field.
+func (u *MetarUpsertOne) ClearWindDirection() *MetarUpsertOne {
+	return u.Update(func(s *MetarUpsert) {
+		s.ClearWindDirection()
+	})
+}
+
 // SetVisibility sets the "visibility" field.
 func (u *MetarUpsertOne) SetVisibility(v float64) *MetarUpsertOne {
 	return u.Update(func(s *MetarUpsert) {
@@ -1681,6 +1793,13 @@ func (u *MetarUpsertOne) UpdateVisibility() *MetarUpsertOne {
 	})
 }
 
+// ClearVisibility clears the value of the "visibility" field.
+func (u *MetarUpsertOne) ClearVisibility() *MetarUpsertOne {
+	return u.Update(func(s *MetarUpsert) {
+		s.ClearVisibility()
+	})
+}
+
 // SetAltimeter sets the "altimeter" field.
 func (u *MetarUpsertOne) SetAltimeter(v float64) *MetarUpsertOne {
 	return u.Update(func(s *MetarUpsert) {
@@ -1699,6 +1818,13 @@ func (u *MetarUpsertOne) AddAltimeter(v float64) *MetarUpsertOne {
 func (u *MetarUpsertOne) UpdateAltimeter() *MetarUpsertOne {
 	return u.Update(func(s *MetarUpsert) {
 		s.UpdateAltimeter()
+	})
+}
+
+// ClearAltimeter clears the value of the "altimeter" field.
+func (u *MetarUpsertOne) ClearAltimeter() *MetarUpsertOne {
+	return u.Update(func(s *MetarUpsert) {
+		s.ClearAltimeter()
 	})
 }
 
@@ -2508,6 +2634,13 @@ func (u *MetarUpsertBulk) UpdateTemperature() *MetarUpsertBulk {
 	})
 }
 
+// ClearTemperature clears the value of the "temperature" field.
+func (u *MetarUpsertBulk) ClearTemperature() *MetarUpsertBulk {
+	return u.Update(func(s *MetarUpsert) {
+		s.ClearTemperature()
+	})
+}
+
 // SetDewpoint sets the "dewpoint" field.
 func (u *MetarUpsertBulk) SetDewpoint(v float64) *MetarUpsertBulk {
 	return u.Update(func(s *MetarUpsert) {
@@ -2526,6 +2659,13 @@ func (u *MetarUpsertBulk) AddDewpoint(v float64) *MetarUpsertBulk {
 func (u *MetarUpsertBulk) UpdateDewpoint() *MetarUpsertBulk {
 	return u.Update(func(s *MetarUpsert) {
 		s.UpdateDewpoint()
+	})
+}
+
+// ClearDewpoint clears the value of the "dewpoint" field.
+func (u *MetarUpsertBulk) ClearDewpoint() *MetarUpsertBulk {
+	return u.Update(func(s *MetarUpsert) {
+		s.ClearDewpoint()
 	})
 }
 
@@ -2550,6 +2690,13 @@ func (u *MetarUpsertBulk) UpdateWindSpeed() *MetarUpsertBulk {
 	})
 }
 
+// ClearWindSpeed clears the value of the "wind_speed" field.
+func (u *MetarUpsertBulk) ClearWindSpeed() *MetarUpsertBulk {
+	return u.Update(func(s *MetarUpsert) {
+		s.ClearWindSpeed()
+	})
+}
+
 // SetWindGust sets the "wind_gust" field.
 func (u *MetarUpsertBulk) SetWindGust(v int) *MetarUpsertBulk {
 	return u.Update(func(s *MetarUpsert) {
@@ -2568,6 +2715,13 @@ func (u *MetarUpsertBulk) AddWindGust(v int) *MetarUpsertBulk {
 func (u *MetarUpsertBulk) UpdateWindGust() *MetarUpsertBulk {
 	return u.Update(func(s *MetarUpsert) {
 		s.UpdateWindGust()
+	})
+}
+
+// ClearWindGust clears the value of the "wind_gust" field.
+func (u *MetarUpsertBulk) ClearWindGust() *MetarUpsertBulk {
+	return u.Update(func(s *MetarUpsert) {
+		s.ClearWindGust()
 	})
 }
 
@@ -2592,6 +2746,13 @@ func (u *MetarUpsertBulk) UpdateWindDirection() *MetarUpsertBulk {
 	})
 }
 
+// ClearWindDirection clears the value of the "wind_direction" field.
+func (u *MetarUpsertBulk) ClearWindDirection() *MetarUpsertBulk {
+	return u.Update(func(s *MetarUpsert) {
+		s.ClearWindDirection()
+	})
+}
+
 // SetVisibility sets the "visibility" field.
 func (u *MetarUpsertBulk) SetVisibility(v float64) *MetarUpsertBulk {
 	return u.Update(func(s *MetarUpsert) {
@@ -2613,6 +2774,13 @@ func (u *MetarUpsertBulk) UpdateVisibility() *MetarUpsertBulk {
 	})
 }
 
+// ClearVisibility clears the value of the "visibility" field.
+func (u *MetarUpsertBulk) ClearVisibility() *MetarUpsertBulk {
+	return u.Update(func(s *MetarUpsert) {
+		s.ClearVisibility()
+	})
+}
+
 // SetAltimeter sets the "altimeter" field.
 func (u *MetarUpsertBulk) SetAltimeter(v float64) *MetarUpsertBulk {
 	return u.Update(func(s *MetarUpsert) {
@@ -2631,6 +2799,13 @@ func (u *MetarUpsertBulk) AddAltimeter(v float64) *MetarUpsertBulk {
 func (u *MetarUpsertBulk) UpdateAltimeter() *MetarUpsertBulk {
 	return u.Update(func(s *MetarUpsert) {
 		s.UpdateAltimeter()
+	})
+}
+
+// ClearAltimeter clears the value of the "altimeter" field.
+func (u *MetarUpsertBulk) ClearAltimeter() *MetarUpsertBulk {
+	return u.Update(func(s *MetarUpsert) {
+		s.ClearAltimeter()
 	})
 }
 

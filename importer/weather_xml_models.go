@@ -39,7 +39,7 @@ type XmlMetar struct {
 	QualityControlFlags       XmlQualityControlFlags `xml:"quality_control_flags"`
 	WxString                  *string                `xml:"wx_string"`
 	SkyCondition              []XmlSkyCondition      `xml:"sky_condition"`
-	FlightCategory            string                 `xml:"flight_category"`
+	FlightCategory            *string                `xml:"flight_category"`
 	ThreeHrPressureTendencyMb *float64               `xml:"three_hr_pressure_tendency_mb"`
 	MaxTempC                  *float64               `xml:"maxT_c"`
 	MinTempC                  *float64               `xml:"minT_c"`

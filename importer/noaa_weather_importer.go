@@ -186,16 +186,26 @@ func (i *NoaaWeatherImporter) importMetar(x *XmlMetar, ctx context.Context) erro
 		return err
 	}
 
-	var flightCategory metar.FlightCategory
-	switch x.FlightCategory {
-	case "VFR":
-		flightCategory = metar.FlightCategoryVFR
-	case "MVFR":
-		flightCategory = metar.FlightCategoryMVFR
-	case "IFR":
-		flightCategory = metar.FlightCategoryIFR
-	case "LIFR":
-		flightCategory = metar.FlightCategoryLIFR
+	var flightCategory *metar.FlightCategory
+	if x.FlightCategory != nil {
+		flightCategoryXml := *x.FlightCategory
+
+		var f metar.FlightCategory
+
+		switch flightCategoryXml {
+		case "VFR":
+			f = metar.FlightCategoryVFR
+		case "MVFR":
+			f = metar.FlightCategoryMVFR
+		case "IFR":
+			f = metar.FlightCategoryIFR
+		case "LIFR":
+			f = metar.FlightCategoryLIFR
+		}
+
+		if f != "" {
+			flightCategory = &f
+		}
 	}
 
 	importTime := time.Now()
@@ -249,14 +259,14 @@ func (i *NoaaWeatherImporter) importMetar(x *XmlMetar, ctx context.Context) erro
 		SetRawText(x.RawText).
 		SetImportTime(importTime).
 		SetObservationTime(x.ObservationTime).
-		SetTemperature(utils.Nillable(x.TempC)).
-		SetDewpoint(utils.Nillable(x.DewpointC)).
-		SetWindDirection(utils.Nillable(x.WindDirDegrees)).
-		SetWindSpeed(utils.Nillable(x.WindSpeedKt)).
-		SetWindGust(utils.Nillable(x.WindGustKt)).
+		SetNillableTemperature(x.TempC).
+		SetNillableDewpoint(x.DewpointC).
+		SetNillableWindDirection(x.WindDirDegrees).
+		SetNillableWindSpeed(x.WindSpeedKt).
+		SetNillableWindGust(x.WindGustKt).
 		SetVisibility(utils.Nillable(x.VisibilityStatuteMi)).
-		SetAltimeter(utils.Nillable(x.AltimeterInHg)).
-		SetSeaLevelPressure(utils.Nillable(x.SeaLevelPressureMb)).
+		SetNillableAltimeter(x.AltimeterInHg).
+		SetNillableSeaLevelPressure(x.SeaLevelPressureMb).
 		SetQualityControlAutoStation(x.QualityControlFlags.Auto).
 		SetQualityControlCorrected(x.QualityControlFlags.Corrected).
 		SetQualityControlMaintenanceIndicatorOn(x.QualityControlFlags.MaintenanceIndicatorOn).
@@ -265,8 +275,8 @@ func (i *NoaaWeatherImporter) importMetar(x *XmlMetar, ctx context.Context) erro
 		SetQualityControlFreezingRainSensorOff(x.QualityControlFlags.FreezingRainSensorOff).
 		SetQualityControlPresentWeatherSensorOff(x.QualityControlFlags.PresentWeatherSensorOff).
 		SetNillablePresentWeather(x.WxString).
-		SetNillableFlightCategory(utils.NillableWithInput(x.FlightCategory, flightCategory)).
-		SetPressureTendency(utils.Nillable(x.ThreeHrPressureTendencyMb)).
+		SetNillableFlightCategory(flightCategory).
+		SetNillablePressureTendency(x.ThreeHrPressureTendencyMb).
 		SetNillableMaxTemp6(x.MaxTempC).
 		SetNillableMinTemp6(x.MinTempC).
 		SetNillableMaxTemp24(x.MaxTemp24HrC).

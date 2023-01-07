@@ -2065,7 +2065,7 @@ type Metar {
   """The time the METAR is expected to be imported/available next."""
   nextImportTimePrediction: Time
   """The wind direction in degrees, or 0 if calm."""
-  windDirection: Int!
+  windDirection: Int
   """The present weather string."""
   presentWeather: String
   flightCategory: MetarFlightCategory
@@ -2457,22 +2457,22 @@ enum SpeedUnit {
 
 extend type Metar {
     """The altimeter in the specified unit."""
-    altimeter(unit: PressureUnit! = HECTOPASCAL): Float! @goField(forceResolver: true)
+    altimeter(unit: PressureUnit! = HECTOPASCAL): Float @goField(forceResolver: true)
 
     """The temperature in the specified unit."""
-    temperature(unit: TemperatureUnit! = CELSIUS): Float! @goField(forceResolver: true)
+    temperature(unit: TemperatureUnit! = CELSIUS): Float @goField(forceResolver: true)
 
     """The dew point in the specified unit."""
-    dewpoint(unit: TemperatureUnit! = CELSIUS): Float! @goField(forceResolver: true)
+    dewpoint(unit: TemperatureUnit! = CELSIUS): Float @goField(forceResolver: true)
 
     """The wind speed in the specified unit."""
-    windSpeed(unit: SpeedUnit! = KNOT): Float! @goField(forceResolver: true)
+    windSpeed(unit: SpeedUnit! = KNOT): Float @goField(forceResolver: true)
 
     """Wind gust speed in the specified unit."""
-    windGust(unit: SpeedUnit! = KNOT): Float! @goField(forceResolver: true)
+    windGust(unit: SpeedUnit! = KNOT): Float @goField(forceResolver: true)
 
     """The visibility in the specified unit."""
-    visibility(unit: LengthUnit! = KILOMETER): Float! @goField(forceResolver: true)
+    visibility(unit: LengthUnit! = KILOMETER): Float @goField(forceResolver: true)
 
     """Vertical visibility in the specified unit."""
     verticalVisibility(unit: LengthUnit! = FOOT): Float @goField(forceResolver: true)

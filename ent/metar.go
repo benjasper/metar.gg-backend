@@ -28,19 +28,19 @@ type Metar struct {
 	// The time the METAR is expected to be imported/available next.
 	NextImportTimePrediction *time.Time `json:"next_import_time_prediction,omitempty"`
 	// The temperature in Celsius.
-	Temperature float64 `json:"temperature,omitempty"`
+	Temperature *float64 `json:"temperature,omitempty"`
 	// The dewpoint in Celsius.
-	Dewpoint float64 `json:"dewpoint,omitempty"`
+	Dewpoint *float64 `json:"dewpoint,omitempty"`
 	// The wind speed in knots, or 0 if calm.
-	WindSpeed int `json:"wind_speed,omitempty"`
+	WindSpeed *int `json:"wind_speed,omitempty"`
 	// The wind gust in knots.
-	WindGust int `json:"wind_gust,omitempty"`
+	WindGust *int `json:"wind_gust,omitempty"`
 	// The wind direction in degrees, or 0 if calm.
-	WindDirection int `json:"wind_direction,omitempty"`
+	WindDirection *int `json:"wind_direction,omitempty"`
 	// The visibility in statute miles.
-	Visibility float64 `json:"visibility,omitempty"`
+	Visibility *float64 `json:"visibility,omitempty"`
 	// The altimeter setting in inches of mercury.
-	Altimeter float64 `json:"altimeter,omitempty"`
+	Altimeter *float64 `json:"altimeter,omitempty"`
 	// The present weather string.
 	PresentWeather *string `json:"present_weather,omitempty"`
 	// FlightCategory holds the value of the "flight_category" field.
@@ -199,43 +199,50 @@ func (m *Metar) assignValues(columns []string, values []any) error {
 			if value, ok := values[i].(*sql.NullFloat64); !ok {
 				return fmt.Errorf("unexpected type %T for field temperature", values[i])
 			} else if value.Valid {
-				m.Temperature = value.Float64
+				m.Temperature = new(float64)
+				*m.Temperature = value.Float64
 			}
 		case metar.FieldDewpoint:
 			if value, ok := values[i].(*sql.NullFloat64); !ok {
 				return fmt.Errorf("unexpected type %T for field dewpoint", values[i])
 			} else if value.Valid {
-				m.Dewpoint = value.Float64
+				m.Dewpoint = new(float64)
+				*m.Dewpoint = value.Float64
 			}
 		case metar.FieldWindSpeed:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for field wind_speed", values[i])
 			} else if value.Valid {
-				m.WindSpeed = int(value.Int64)
+				m.WindSpeed = new(int)
+				*m.WindSpeed = int(value.Int64)
 			}
 		case metar.FieldWindGust:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for field wind_gust", values[i])
 			} else if value.Valid {
-				m.WindGust = int(value.Int64)
+				m.WindGust = new(int)
+				*m.WindGust = int(value.Int64)
 			}
 		case metar.FieldWindDirection:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for field wind_direction", values[i])
 			} else if value.Valid {
-				m.WindDirection = int(value.Int64)
+				m.WindDirection = new(int)
+				*m.WindDirection = int(value.Int64)
 			}
 		case metar.FieldVisibility:
 			if value, ok := values[i].(*sql.NullFloat64); !ok {
 				return fmt.Errorf("unexpected type %T for field visibility", values[i])
 			} else if value.Valid {
-				m.Visibility = value.Float64
+				m.Visibility = new(float64)
+				*m.Visibility = value.Float64
 			}
 		case metar.FieldAltimeter:
 			if value, ok := values[i].(*sql.NullFloat64); !ok {
 				return fmt.Errorf("unexpected type %T for field altimeter", values[i])
 			} else if value.Valid {
-				m.Altimeter = value.Float64
+				m.Altimeter = new(float64)
+				*m.Altimeter = value.Float64
 			}
 		case metar.FieldPresentWeather:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -449,26 +456,40 @@ func (m *Metar) String() string {
 		builder.WriteString(v.Format(time.ANSIC))
 	}
 	builder.WriteString(", ")
-	builder.WriteString("temperature=")
-	builder.WriteString(fmt.Sprintf("%v", m.Temperature))
+	if v := m.Temperature; v != nil {
+		builder.WriteString("temperature=")
+		builder.WriteString(fmt.Sprintf("%v", *v))
+	}
 	builder.WriteString(", ")
-	builder.WriteString("dewpoint=")
-	builder.WriteString(fmt.Sprintf("%v", m.Dewpoint))
+	if v := m.Dewpoint; v != nil {
+		builder.WriteString("dewpoint=")
+		builder.WriteString(fmt.Sprintf("%v", *v))
+	}
 	builder.WriteString(", ")
-	builder.WriteString("wind_speed=")
-	builder.WriteString(fmt.Sprintf("%v", m.WindSpeed))
+	if v := m.WindSpeed; v != nil {
+		builder.WriteString("wind_speed=")
+		builder.WriteString(fmt.Sprintf("%v", *v))
+	}
 	builder.WriteString(", ")
-	builder.WriteString("wind_gust=")
-	builder.WriteString(fmt.Sprintf("%v", m.WindGust))
+	if v := m.WindGust; v != nil {
+		builder.WriteString("wind_gust=")
+		builder.WriteString(fmt.Sprintf("%v", *v))
+	}
 	builder.WriteString(", ")
-	builder.WriteString("wind_direction=")
-	builder.WriteString(fmt.Sprintf("%v", m.WindDirection))
+	if v := m.WindDirection; v != nil {
+		builder.WriteString("wind_direction=")
+		builder.WriteString(fmt.Sprintf("%v", *v))
+	}
 	builder.WriteString(", ")
-	builder.WriteString("visibility=")
-	builder.WriteString(fmt.Sprintf("%v", m.Visibility))
+	if v := m.Visibility; v != nil {
+		builder.WriteString("visibility=")
+		builder.WriteString(fmt.Sprintf("%v", *v))
+	}
 	builder.WriteString(", ")
-	builder.WriteString("altimeter=")
-	builder.WriteString(fmt.Sprintf("%v", m.Altimeter))
+	if v := m.Altimeter; v != nil {
+		builder.WriteString("altimeter=")
+		builder.WriteString(fmt.Sprintf("%v", *v))
+	}
 	builder.WriteString(", ")
 	if v := m.PresentWeather; v != nil {
 		builder.WriteString("present_weather=")

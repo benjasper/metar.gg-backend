@@ -85,9 +85,23 @@ func (mu *MetarUpdate) SetTemperature(f float64) *MetarUpdate {
 	return mu
 }
 
+// SetNillableTemperature sets the "temperature" field if the given value is not nil.
+func (mu *MetarUpdate) SetNillableTemperature(f *float64) *MetarUpdate {
+	if f != nil {
+		mu.SetTemperature(*f)
+	}
+	return mu
+}
+
 // AddTemperature adds f to the "temperature" field.
 func (mu *MetarUpdate) AddTemperature(f float64) *MetarUpdate {
 	mu.mutation.AddTemperature(f)
+	return mu
+}
+
+// ClearTemperature clears the value of the "temperature" field.
+func (mu *MetarUpdate) ClearTemperature() *MetarUpdate {
+	mu.mutation.ClearTemperature()
 	return mu
 }
 
@@ -98,9 +112,23 @@ func (mu *MetarUpdate) SetDewpoint(f float64) *MetarUpdate {
 	return mu
 }
 
+// SetNillableDewpoint sets the "dewpoint" field if the given value is not nil.
+func (mu *MetarUpdate) SetNillableDewpoint(f *float64) *MetarUpdate {
+	if f != nil {
+		mu.SetDewpoint(*f)
+	}
+	return mu
+}
+
 // AddDewpoint adds f to the "dewpoint" field.
 func (mu *MetarUpdate) AddDewpoint(f float64) *MetarUpdate {
 	mu.mutation.AddDewpoint(f)
+	return mu
+}
+
+// ClearDewpoint clears the value of the "dewpoint" field.
+func (mu *MetarUpdate) ClearDewpoint() *MetarUpdate {
+	mu.mutation.ClearDewpoint()
 	return mu
 }
 
@@ -111,9 +139,23 @@ func (mu *MetarUpdate) SetWindSpeed(i int) *MetarUpdate {
 	return mu
 }
 
+// SetNillableWindSpeed sets the "wind_speed" field if the given value is not nil.
+func (mu *MetarUpdate) SetNillableWindSpeed(i *int) *MetarUpdate {
+	if i != nil {
+		mu.SetWindSpeed(*i)
+	}
+	return mu
+}
+
 // AddWindSpeed adds i to the "wind_speed" field.
 func (mu *MetarUpdate) AddWindSpeed(i int) *MetarUpdate {
 	mu.mutation.AddWindSpeed(i)
+	return mu
+}
+
+// ClearWindSpeed clears the value of the "wind_speed" field.
+func (mu *MetarUpdate) ClearWindSpeed() *MetarUpdate {
+	mu.mutation.ClearWindSpeed()
 	return mu
 }
 
@@ -124,9 +166,23 @@ func (mu *MetarUpdate) SetWindGust(i int) *MetarUpdate {
 	return mu
 }
 
+// SetNillableWindGust sets the "wind_gust" field if the given value is not nil.
+func (mu *MetarUpdate) SetNillableWindGust(i *int) *MetarUpdate {
+	if i != nil {
+		mu.SetWindGust(*i)
+	}
+	return mu
+}
+
 // AddWindGust adds i to the "wind_gust" field.
 func (mu *MetarUpdate) AddWindGust(i int) *MetarUpdate {
 	mu.mutation.AddWindGust(i)
+	return mu
+}
+
+// ClearWindGust clears the value of the "wind_gust" field.
+func (mu *MetarUpdate) ClearWindGust() *MetarUpdate {
+	mu.mutation.ClearWindGust()
 	return mu
 }
 
@@ -137,9 +193,23 @@ func (mu *MetarUpdate) SetWindDirection(i int) *MetarUpdate {
 	return mu
 }
 
+// SetNillableWindDirection sets the "wind_direction" field if the given value is not nil.
+func (mu *MetarUpdate) SetNillableWindDirection(i *int) *MetarUpdate {
+	if i != nil {
+		mu.SetWindDirection(*i)
+	}
+	return mu
+}
+
 // AddWindDirection adds i to the "wind_direction" field.
 func (mu *MetarUpdate) AddWindDirection(i int) *MetarUpdate {
 	mu.mutation.AddWindDirection(i)
+	return mu
+}
+
+// ClearWindDirection clears the value of the "wind_direction" field.
+func (mu *MetarUpdate) ClearWindDirection() *MetarUpdate {
+	mu.mutation.ClearWindDirection()
 	return mu
 }
 
@@ -150,9 +220,23 @@ func (mu *MetarUpdate) SetVisibility(f float64) *MetarUpdate {
 	return mu
 }
 
+// SetNillableVisibility sets the "visibility" field if the given value is not nil.
+func (mu *MetarUpdate) SetNillableVisibility(f *float64) *MetarUpdate {
+	if f != nil {
+		mu.SetVisibility(*f)
+	}
+	return mu
+}
+
 // AddVisibility adds f to the "visibility" field.
 func (mu *MetarUpdate) AddVisibility(f float64) *MetarUpdate {
 	mu.mutation.AddVisibility(f)
+	return mu
+}
+
+// ClearVisibility clears the value of the "visibility" field.
+func (mu *MetarUpdate) ClearVisibility() *MetarUpdate {
+	mu.mutation.ClearVisibility()
 	return mu
 }
 
@@ -163,9 +247,23 @@ func (mu *MetarUpdate) SetAltimeter(f float64) *MetarUpdate {
 	return mu
 }
 
+// SetNillableAltimeter sets the "altimeter" field if the given value is not nil.
+func (mu *MetarUpdate) SetNillableAltimeter(f *float64) *MetarUpdate {
+	if f != nil {
+		mu.SetAltimeter(*f)
+	}
+	return mu
+}
+
 // AddAltimeter adds f to the "altimeter" field.
 func (mu *MetarUpdate) AddAltimeter(f float64) *MetarUpdate {
 	mu.mutation.AddAltimeter(f)
+	return mu
+}
+
+// ClearAltimeter clears the value of the "altimeter" field.
+func (mu *MetarUpdate) ClearAltimeter() *MetarUpdate {
+	mu.mutation.ClearAltimeter()
 	return mu
 }
 
@@ -782,11 +880,17 @@ func (mu *MetarUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if value, ok := mu.mutation.AddedTemperature(); ok {
 		_spec.AddField(metar.FieldTemperature, field.TypeFloat64, value)
 	}
+	if mu.mutation.TemperatureCleared() {
+		_spec.ClearField(metar.FieldTemperature, field.TypeFloat64)
+	}
 	if value, ok := mu.mutation.Dewpoint(); ok {
 		_spec.SetField(metar.FieldDewpoint, field.TypeFloat64, value)
 	}
 	if value, ok := mu.mutation.AddedDewpoint(); ok {
 		_spec.AddField(metar.FieldDewpoint, field.TypeFloat64, value)
+	}
+	if mu.mutation.DewpointCleared() {
+		_spec.ClearField(metar.FieldDewpoint, field.TypeFloat64)
 	}
 	if value, ok := mu.mutation.WindSpeed(); ok {
 		_spec.SetField(metar.FieldWindSpeed, field.TypeInt, value)
@@ -794,11 +898,17 @@ func (mu *MetarUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if value, ok := mu.mutation.AddedWindSpeed(); ok {
 		_spec.AddField(metar.FieldWindSpeed, field.TypeInt, value)
 	}
+	if mu.mutation.WindSpeedCleared() {
+		_spec.ClearField(metar.FieldWindSpeed, field.TypeInt)
+	}
 	if value, ok := mu.mutation.WindGust(); ok {
 		_spec.SetField(metar.FieldWindGust, field.TypeInt, value)
 	}
 	if value, ok := mu.mutation.AddedWindGust(); ok {
 		_spec.AddField(metar.FieldWindGust, field.TypeInt, value)
+	}
+	if mu.mutation.WindGustCleared() {
+		_spec.ClearField(metar.FieldWindGust, field.TypeInt)
 	}
 	if value, ok := mu.mutation.WindDirection(); ok {
 		_spec.SetField(metar.FieldWindDirection, field.TypeInt, value)
@@ -806,17 +916,26 @@ func (mu *MetarUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if value, ok := mu.mutation.AddedWindDirection(); ok {
 		_spec.AddField(metar.FieldWindDirection, field.TypeInt, value)
 	}
+	if mu.mutation.WindDirectionCleared() {
+		_spec.ClearField(metar.FieldWindDirection, field.TypeInt)
+	}
 	if value, ok := mu.mutation.Visibility(); ok {
 		_spec.SetField(metar.FieldVisibility, field.TypeFloat64, value)
 	}
 	if value, ok := mu.mutation.AddedVisibility(); ok {
 		_spec.AddField(metar.FieldVisibility, field.TypeFloat64, value)
 	}
+	if mu.mutation.VisibilityCleared() {
+		_spec.ClearField(metar.FieldVisibility, field.TypeFloat64)
+	}
 	if value, ok := mu.mutation.Altimeter(); ok {
 		_spec.SetField(metar.FieldAltimeter, field.TypeFloat64, value)
 	}
 	if value, ok := mu.mutation.AddedAltimeter(); ok {
 		_spec.AddField(metar.FieldAltimeter, field.TypeFloat64, value)
+	}
+	if mu.mutation.AltimeterCleared() {
+		_spec.ClearField(metar.FieldAltimeter, field.TypeFloat64)
 	}
 	if value, ok := mu.mutation.PresentWeather(); ok {
 		_spec.SetField(metar.FieldPresentWeather, field.TypeString, value)
@@ -1131,9 +1250,23 @@ func (muo *MetarUpdateOne) SetTemperature(f float64) *MetarUpdateOne {
 	return muo
 }
 
+// SetNillableTemperature sets the "temperature" field if the given value is not nil.
+func (muo *MetarUpdateOne) SetNillableTemperature(f *float64) *MetarUpdateOne {
+	if f != nil {
+		muo.SetTemperature(*f)
+	}
+	return muo
+}
+
 // AddTemperature adds f to the "temperature" field.
 func (muo *MetarUpdateOne) AddTemperature(f float64) *MetarUpdateOne {
 	muo.mutation.AddTemperature(f)
+	return muo
+}
+
+// ClearTemperature clears the value of the "temperature" field.
+func (muo *MetarUpdateOne) ClearTemperature() *MetarUpdateOne {
+	muo.mutation.ClearTemperature()
 	return muo
 }
 
@@ -1144,9 +1277,23 @@ func (muo *MetarUpdateOne) SetDewpoint(f float64) *MetarUpdateOne {
 	return muo
 }
 
+// SetNillableDewpoint sets the "dewpoint" field if the given value is not nil.
+func (muo *MetarUpdateOne) SetNillableDewpoint(f *float64) *MetarUpdateOne {
+	if f != nil {
+		muo.SetDewpoint(*f)
+	}
+	return muo
+}
+
 // AddDewpoint adds f to the "dewpoint" field.
 func (muo *MetarUpdateOne) AddDewpoint(f float64) *MetarUpdateOne {
 	muo.mutation.AddDewpoint(f)
+	return muo
+}
+
+// ClearDewpoint clears the value of the "dewpoint" field.
+func (muo *MetarUpdateOne) ClearDewpoint() *MetarUpdateOne {
+	muo.mutation.ClearDewpoint()
 	return muo
 }
 
@@ -1157,9 +1304,23 @@ func (muo *MetarUpdateOne) SetWindSpeed(i int) *MetarUpdateOne {
 	return muo
 }
 
+// SetNillableWindSpeed sets the "wind_speed" field if the given value is not nil.
+func (muo *MetarUpdateOne) SetNillableWindSpeed(i *int) *MetarUpdateOne {
+	if i != nil {
+		muo.SetWindSpeed(*i)
+	}
+	return muo
+}
+
 // AddWindSpeed adds i to the "wind_speed" field.
 func (muo *MetarUpdateOne) AddWindSpeed(i int) *MetarUpdateOne {
 	muo.mutation.AddWindSpeed(i)
+	return muo
+}
+
+// ClearWindSpeed clears the value of the "wind_speed" field.
+func (muo *MetarUpdateOne) ClearWindSpeed() *MetarUpdateOne {
+	muo.mutation.ClearWindSpeed()
 	return muo
 }
 
@@ -1170,9 +1331,23 @@ func (muo *MetarUpdateOne) SetWindGust(i int) *MetarUpdateOne {
 	return muo
 }
 
+// SetNillableWindGust sets the "wind_gust" field if the given value is not nil.
+func (muo *MetarUpdateOne) SetNillableWindGust(i *int) *MetarUpdateOne {
+	if i != nil {
+		muo.SetWindGust(*i)
+	}
+	return muo
+}
+
 // AddWindGust adds i to the "wind_gust" field.
 func (muo *MetarUpdateOne) AddWindGust(i int) *MetarUpdateOne {
 	muo.mutation.AddWindGust(i)
+	return muo
+}
+
+// ClearWindGust clears the value of the "wind_gust" field.
+func (muo *MetarUpdateOne) ClearWindGust() *MetarUpdateOne {
+	muo.mutation.ClearWindGust()
 	return muo
 }
 
@@ -1183,9 +1358,23 @@ func (muo *MetarUpdateOne) SetWindDirection(i int) *MetarUpdateOne {
 	return muo
 }
 
+// SetNillableWindDirection sets the "wind_direction" field if the given value is not nil.
+func (muo *MetarUpdateOne) SetNillableWindDirection(i *int) *MetarUpdateOne {
+	if i != nil {
+		muo.SetWindDirection(*i)
+	}
+	return muo
+}
+
 // AddWindDirection adds i to the "wind_direction" field.
 func (muo *MetarUpdateOne) AddWindDirection(i int) *MetarUpdateOne {
 	muo.mutation.AddWindDirection(i)
+	return muo
+}
+
+// ClearWindDirection clears the value of the "wind_direction" field.
+func (muo *MetarUpdateOne) ClearWindDirection() *MetarUpdateOne {
+	muo.mutation.ClearWindDirection()
 	return muo
 }
 
@@ -1196,9 +1385,23 @@ func (muo *MetarUpdateOne) SetVisibility(f float64) *MetarUpdateOne {
 	return muo
 }
 
+// SetNillableVisibility sets the "visibility" field if the given value is not nil.
+func (muo *MetarUpdateOne) SetNillableVisibility(f *float64) *MetarUpdateOne {
+	if f != nil {
+		muo.SetVisibility(*f)
+	}
+	return muo
+}
+
 // AddVisibility adds f to the "visibility" field.
 func (muo *MetarUpdateOne) AddVisibility(f float64) *MetarUpdateOne {
 	muo.mutation.AddVisibility(f)
+	return muo
+}
+
+// ClearVisibility clears the value of the "visibility" field.
+func (muo *MetarUpdateOne) ClearVisibility() *MetarUpdateOne {
+	muo.mutation.ClearVisibility()
 	return muo
 }
 
@@ -1209,9 +1412,23 @@ func (muo *MetarUpdateOne) SetAltimeter(f float64) *MetarUpdateOne {
 	return muo
 }
 
+// SetNillableAltimeter sets the "altimeter" field if the given value is not nil.
+func (muo *MetarUpdateOne) SetNillableAltimeter(f *float64) *MetarUpdateOne {
+	if f != nil {
+		muo.SetAltimeter(*f)
+	}
+	return muo
+}
+
 // AddAltimeter adds f to the "altimeter" field.
 func (muo *MetarUpdateOne) AddAltimeter(f float64) *MetarUpdateOne {
 	muo.mutation.AddAltimeter(f)
+	return muo
+}
+
+// ClearAltimeter clears the value of the "altimeter" field.
+func (muo *MetarUpdateOne) ClearAltimeter() *MetarUpdateOne {
+	muo.mutation.ClearAltimeter()
 	return muo
 }
 
@@ -1858,11 +2075,17 @@ func (muo *MetarUpdateOne) sqlSave(ctx context.Context) (_node *Metar, err error
 	if value, ok := muo.mutation.AddedTemperature(); ok {
 		_spec.AddField(metar.FieldTemperature, field.TypeFloat64, value)
 	}
+	if muo.mutation.TemperatureCleared() {
+		_spec.ClearField(metar.FieldTemperature, field.TypeFloat64)
+	}
 	if value, ok := muo.mutation.Dewpoint(); ok {
 		_spec.SetField(metar.FieldDewpoint, field.TypeFloat64, value)
 	}
 	if value, ok := muo.mutation.AddedDewpoint(); ok {
 		_spec.AddField(metar.FieldDewpoint, field.TypeFloat64, value)
+	}
+	if muo.mutation.DewpointCleared() {
+		_spec.ClearField(metar.FieldDewpoint, field.TypeFloat64)
 	}
 	if value, ok := muo.mutation.WindSpeed(); ok {
 		_spec.SetField(metar.FieldWindSpeed, field.TypeInt, value)
@@ -1870,11 +2093,17 @@ func (muo *MetarUpdateOne) sqlSave(ctx context.Context) (_node *Metar, err error
 	if value, ok := muo.mutation.AddedWindSpeed(); ok {
 		_spec.AddField(metar.FieldWindSpeed, field.TypeInt, value)
 	}
+	if muo.mutation.WindSpeedCleared() {
+		_spec.ClearField(metar.FieldWindSpeed, field.TypeInt)
+	}
 	if value, ok := muo.mutation.WindGust(); ok {
 		_spec.SetField(metar.FieldWindGust, field.TypeInt, value)
 	}
 	if value, ok := muo.mutation.AddedWindGust(); ok {
 		_spec.AddField(metar.FieldWindGust, field.TypeInt, value)
+	}
+	if muo.mutation.WindGustCleared() {
+		_spec.ClearField(metar.FieldWindGust, field.TypeInt)
 	}
 	if value, ok := muo.mutation.WindDirection(); ok {
 		_spec.SetField(metar.FieldWindDirection, field.TypeInt, value)
@@ -1882,17 +2111,26 @@ func (muo *MetarUpdateOne) sqlSave(ctx context.Context) (_node *Metar, err error
 	if value, ok := muo.mutation.AddedWindDirection(); ok {
 		_spec.AddField(metar.FieldWindDirection, field.TypeInt, value)
 	}
+	if muo.mutation.WindDirectionCleared() {
+		_spec.ClearField(metar.FieldWindDirection, field.TypeInt)
+	}
 	if value, ok := muo.mutation.Visibility(); ok {
 		_spec.SetField(metar.FieldVisibility, field.TypeFloat64, value)
 	}
 	if value, ok := muo.mutation.AddedVisibility(); ok {
 		_spec.AddField(metar.FieldVisibility, field.TypeFloat64, value)
 	}
+	if muo.mutation.VisibilityCleared() {
+		_spec.ClearField(metar.FieldVisibility, field.TypeFloat64)
+	}
 	if value, ok := muo.mutation.Altimeter(); ok {
 		_spec.SetField(metar.FieldAltimeter, field.TypeFloat64, value)
 	}
 	if value, ok := muo.mutation.AddedAltimeter(); ok {
 		_spec.AddField(metar.FieldAltimeter, field.TypeFloat64, value)
+	}
+	if muo.mutation.AltimeterCleared() {
+		_spec.ClearField(metar.FieldAltimeter, field.TypeFloat64)
 	}
 	if value, ok := muo.mutation.PresentWeather(); ok {
 		_spec.SetField(metar.FieldPresentWeather, field.TypeString, value)

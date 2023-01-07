@@ -6,11 +6,11 @@ package graph
 import (
 	"context"
 	"fmt"
-	"metar.gg/ent/airport"
 
 	"entgo.io/ent/dialect/sql"
 	"github.com/google/uuid"
 	"metar.gg/ent"
+	"metar.gg/ent/airport"
 	"metar.gg/ent/metar"
 	"metar.gg/ent/predicate"
 	"metar.gg/ent/runway"
