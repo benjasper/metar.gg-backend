@@ -135,34 +135,7 @@ func (fu *FrequencyUpdate) ClearAirport() *FrequencyUpdate {
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (fu *FrequencyUpdate) Save(ctx context.Context) (int, error) {
-	var (
-		err      error
-		affected int
-	)
-	if len(fu.hooks) == 0 {
-		affected, err = fu.sqlSave(ctx)
-	} else {
-		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
-			mutation, ok := m.(*FrequencyMutation)
-			if !ok {
-				return nil, fmt.Errorf("unexpected mutation type %T", m)
-			}
-			fu.mutation = mutation
-			affected, err = fu.sqlSave(ctx)
-			mutation.done = true
-			return affected, err
-		})
-		for i := len(fu.hooks) - 1; i >= 0; i-- {
-			if fu.hooks[i] == nil {
-				return 0, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
-			}
-			mut = fu.hooks[i](mut)
-		}
-		if _, err := mut.Mutate(ctx, fu.mutation); err != nil {
-			return 0, err
-		}
-	}
-	return affected, err
+	return withHooks[int, FrequencyMutation](ctx, fu.sqlSave, fu.mutation, fu.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -194,16 +167,7 @@ func (fu *FrequencyUpdate) Modify(modifiers ...func(u *sql.UpdateBuilder)) *Freq
 }
 
 func (fu *FrequencyUpdate) sqlSave(ctx context.Context) (n int, err error) {
-	_spec := &sqlgraph.UpdateSpec{
-		Node: &sqlgraph.NodeSpec{
-			Table:   frequency.Table,
-			Columns: frequency.Columns,
-			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeUUID,
-				Column: frequency.FieldID,
-			},
-		},
-	}
+	_spec := sqlgraph.NewUpdateSpec(frequency.Table, frequency.Columns, sqlgraph.NewFieldSpec(frequency.FieldID, field.TypeUUID))
 	if ps := fu.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
@@ -282,6 +246,7 @@ func (fu *FrequencyUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		return 0, err
 	}
+	fu.mutation.done = true
 	return n, nil
 }
 
@@ -396,6 +361,12 @@ func (fuo *FrequencyUpdateOne) ClearAirport() *FrequencyUpdateOne {
 	return fuo
 }
 
+// Where appends a list predicates to the FrequencyUpdate builder.
+func (fuo *FrequencyUpdateOne) Where(ps ...predicate.Frequency) *FrequencyUpdateOne {
+	fuo.mutation.Where(ps...)
+	return fuo
+}
+
 // Select allows selecting one or more fields (columns) of the returned entity.
 // The default is selecting all fields defined in the entity schema.
 func (fuo *FrequencyUpdateOne) Select(field string, fields ...string) *FrequencyUpdateOne {
@@ -405,40 +376,7 @@ func (fuo *FrequencyUpdateOne) Select(field string, fields ...string) *Frequency
 
 // Save executes the query and returns the updated Frequency entity.
 func (fuo *FrequencyUpdateOne) Save(ctx context.Context) (*Frequency, error) {
-	var (
-		err  error
-		node *Frequency
-	)
-	if len(fuo.hooks) == 0 {
-		node, err = fuo.sqlSave(ctx)
-	} else {
-		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
-			mutation, ok := m.(*FrequencyMutation)
-			if !ok {
-				return nil, fmt.Errorf("unexpected mutation type %T", m)
-			}
-			fuo.mutation = mutation
-			node, err = fuo.sqlSave(ctx)
-			mutation.done = true
-			return node, err
-		})
-		for i := len(fuo.hooks) - 1; i >= 0; i-- {
-			if fuo.hooks[i] == nil {
-				return nil, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
-			}
-			mut = fuo.hooks[i](mut)
-		}
-		v, err := mut.Mutate(ctx, fuo.mutation)
-		if err != nil {
-			return nil, err
-		}
-		nv, ok := v.(*Frequency)
-		if !ok {
-			return nil, fmt.Errorf("unexpected node type %T returned from FrequencyMutation", v)
-		}
-		node = nv
-	}
-	return node, err
+	return withHooks[*Frequency, FrequencyMutation](ctx, fuo.sqlSave, fuo.mutation, fuo.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -470,16 +408,7 @@ func (fuo *FrequencyUpdateOne) Modify(modifiers ...func(u *sql.UpdateBuilder)) *
 }
 
 func (fuo *FrequencyUpdateOne) sqlSave(ctx context.Context) (_node *Frequency, err error) {
-	_spec := &sqlgraph.UpdateSpec{
-		Node: &sqlgraph.NodeSpec{
-			Table:   frequency.Table,
-			Columns: frequency.Columns,
-			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeUUID,
-				Column: frequency.FieldID,
-			},
-		},
-	}
+	_spec := sqlgraph.NewUpdateSpec(frequency.Table, frequency.Columns, sqlgraph.NewFieldSpec(frequency.FieldID, field.TypeUUID))
 	id, ok := fuo.mutation.ID()
 	if !ok {
 		return nil, &ValidationError{Name: "id", err: errors.New(`ent: missing "Frequency.id" for update`)}
@@ -578,5 +507,6 @@ func (fuo *FrequencyUpdateOne) sqlSave(ctx context.Context) (_node *Frequency, e
 		}
 		return nil, err
 	}
+	fuo.mutation.done = true
 	return _node, nil
 }

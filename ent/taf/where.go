@@ -13,746 +13,482 @@ import (
 
 // ID filters vertices based on their ID field.
 func ID(id uuid.UUID) predicate.Taf {
-	return predicate.Taf(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldID), id))
-	})
+	return predicate.Taf(sql.FieldEQ(FieldID, id))
 }
 
 // IDEQ applies the EQ predicate on the ID field.
 func IDEQ(id uuid.UUID) predicate.Taf {
-	return predicate.Taf(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldID), id))
-	})
+	return predicate.Taf(sql.FieldEQ(FieldID, id))
 }
 
 // IDNEQ applies the NEQ predicate on the ID field.
 func IDNEQ(id uuid.UUID) predicate.Taf {
-	return predicate.Taf(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldID), id))
-	})
+	return predicate.Taf(sql.FieldNEQ(FieldID, id))
 }
 
 // IDIn applies the In predicate on the ID field.
 func IDIn(ids ...uuid.UUID) predicate.Taf {
-	return predicate.Taf(func(s *sql.Selector) {
-		v := make([]any, len(ids))
-		for i := range v {
-			v[i] = ids[i]
-		}
-		s.Where(sql.In(s.C(FieldID), v...))
-	})
+	return predicate.Taf(sql.FieldIn(FieldID, ids...))
 }
 
 // IDNotIn applies the NotIn predicate on the ID field.
 func IDNotIn(ids ...uuid.UUID) predicate.Taf {
-	return predicate.Taf(func(s *sql.Selector) {
-		v := make([]any, len(ids))
-		for i := range v {
-			v[i] = ids[i]
-		}
-		s.Where(sql.NotIn(s.C(FieldID), v...))
-	})
+	return predicate.Taf(sql.FieldNotIn(FieldID, ids...))
 }
 
 // IDGT applies the GT predicate on the ID field.
 func IDGT(id uuid.UUID) predicate.Taf {
-	return predicate.Taf(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldID), id))
-	})
+	return predicate.Taf(sql.FieldGT(FieldID, id))
 }
 
 // IDGTE applies the GTE predicate on the ID field.
 func IDGTE(id uuid.UUID) predicate.Taf {
-	return predicate.Taf(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldID), id))
-	})
+	return predicate.Taf(sql.FieldGTE(FieldID, id))
 }
 
 // IDLT applies the LT predicate on the ID field.
 func IDLT(id uuid.UUID) predicate.Taf {
-	return predicate.Taf(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldID), id))
-	})
+	return predicate.Taf(sql.FieldLT(FieldID, id))
 }
 
 // IDLTE applies the LTE predicate on the ID field.
 func IDLTE(id uuid.UUID) predicate.Taf {
-	return predicate.Taf(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldID), id))
-	})
+	return predicate.Taf(sql.FieldLTE(FieldID, id))
 }
 
 // RawText applies equality check predicate on the "raw_text" field. It's identical to RawTextEQ.
 func RawText(v string) predicate.Taf {
-	return predicate.Taf(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldRawText), v))
-	})
+	return predicate.Taf(sql.FieldEQ(FieldRawText, v))
 }
 
 // IssueTime applies equality check predicate on the "issue_time" field. It's identical to IssueTimeEQ.
 func IssueTime(v time.Time) predicate.Taf {
-	return predicate.Taf(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldIssueTime), v))
-	})
+	return predicate.Taf(sql.FieldEQ(FieldIssueTime, v))
 }
 
 // ImportTime applies equality check predicate on the "import_time" field. It's identical to ImportTimeEQ.
 func ImportTime(v time.Time) predicate.Taf {
-	return predicate.Taf(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldImportTime), v))
-	})
+	return predicate.Taf(sql.FieldEQ(FieldImportTime, v))
 }
 
 // BulletinTime applies equality check predicate on the "bulletin_time" field. It's identical to BulletinTimeEQ.
 func BulletinTime(v time.Time) predicate.Taf {
-	return predicate.Taf(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldBulletinTime), v))
-	})
+	return predicate.Taf(sql.FieldEQ(FieldBulletinTime, v))
 }
 
 // ValidFromTime applies equality check predicate on the "valid_from_time" field. It's identical to ValidFromTimeEQ.
 func ValidFromTime(v time.Time) predicate.Taf {
-	return predicate.Taf(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldValidFromTime), v))
-	})
+	return predicate.Taf(sql.FieldEQ(FieldValidFromTime, v))
 }
 
 // ValidToTime applies equality check predicate on the "valid_to_time" field. It's identical to ValidToTimeEQ.
 func ValidToTime(v time.Time) predicate.Taf {
-	return predicate.Taf(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldValidToTime), v))
-	})
+	return predicate.Taf(sql.FieldEQ(FieldValidToTime, v))
 }
 
 // Remarks applies equality check predicate on the "remarks" field. It's identical to RemarksEQ.
 func Remarks(v string) predicate.Taf {
-	return predicate.Taf(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldRemarks), v))
-	})
+	return predicate.Taf(sql.FieldEQ(FieldRemarks, v))
 }
 
 // Hash applies equality check predicate on the "hash" field. It's identical to HashEQ.
 func Hash(v string) predicate.Taf {
-	return predicate.Taf(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldHash), v))
-	})
+	return predicate.Taf(sql.FieldEQ(FieldHash, v))
 }
 
 // RawTextEQ applies the EQ predicate on the "raw_text" field.
 func RawTextEQ(v string) predicate.Taf {
-	return predicate.Taf(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldRawText), v))
-	})
+	return predicate.Taf(sql.FieldEQ(FieldRawText, v))
 }
 
 // RawTextNEQ applies the NEQ predicate on the "raw_text" field.
 func RawTextNEQ(v string) predicate.Taf {
-	return predicate.Taf(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldRawText), v))
-	})
+	return predicate.Taf(sql.FieldNEQ(FieldRawText, v))
 }
 
 // RawTextIn applies the In predicate on the "raw_text" field.
 func RawTextIn(vs ...string) predicate.Taf {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Taf(func(s *sql.Selector) {
-		s.Where(sql.In(s.C(FieldRawText), v...))
-	})
+	return predicate.Taf(sql.FieldIn(FieldRawText, vs...))
 }
 
 // RawTextNotIn applies the NotIn predicate on the "raw_text" field.
 func RawTextNotIn(vs ...string) predicate.Taf {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Taf(func(s *sql.Selector) {
-		s.Where(sql.NotIn(s.C(FieldRawText), v...))
-	})
+	return predicate.Taf(sql.FieldNotIn(FieldRawText, vs...))
 }
 
 // RawTextGT applies the GT predicate on the "raw_text" field.
 func RawTextGT(v string) predicate.Taf {
-	return predicate.Taf(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldRawText), v))
-	})
+	return predicate.Taf(sql.FieldGT(FieldRawText, v))
 }
 
 // RawTextGTE applies the GTE predicate on the "raw_text" field.
 func RawTextGTE(v string) predicate.Taf {
-	return predicate.Taf(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldRawText), v))
-	})
+	return predicate.Taf(sql.FieldGTE(FieldRawText, v))
 }
 
 // RawTextLT applies the LT predicate on the "raw_text" field.
 func RawTextLT(v string) predicate.Taf {
-	return predicate.Taf(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldRawText), v))
-	})
+	return predicate.Taf(sql.FieldLT(FieldRawText, v))
 }
 
 // RawTextLTE applies the LTE predicate on the "raw_text" field.
 func RawTextLTE(v string) predicate.Taf {
-	return predicate.Taf(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldRawText), v))
-	})
+	return predicate.Taf(sql.FieldLTE(FieldRawText, v))
 }
 
 // RawTextContains applies the Contains predicate on the "raw_text" field.
 func RawTextContains(v string) predicate.Taf {
-	return predicate.Taf(func(s *sql.Selector) {
-		s.Where(sql.Contains(s.C(FieldRawText), v))
-	})
+	return predicate.Taf(sql.FieldContains(FieldRawText, v))
 }
 
 // RawTextHasPrefix applies the HasPrefix predicate on the "raw_text" field.
 func RawTextHasPrefix(v string) predicate.Taf {
-	return predicate.Taf(func(s *sql.Selector) {
-		s.Where(sql.HasPrefix(s.C(FieldRawText), v))
-	})
+	return predicate.Taf(sql.FieldHasPrefix(FieldRawText, v))
 }
 
 // RawTextHasSuffix applies the HasSuffix predicate on the "raw_text" field.
 func RawTextHasSuffix(v string) predicate.Taf {
-	return predicate.Taf(func(s *sql.Selector) {
-		s.Where(sql.HasSuffix(s.C(FieldRawText), v))
-	})
+	return predicate.Taf(sql.FieldHasSuffix(FieldRawText, v))
 }
 
 // RawTextEqualFold applies the EqualFold predicate on the "raw_text" field.
 func RawTextEqualFold(v string) predicate.Taf {
-	return predicate.Taf(func(s *sql.Selector) {
-		s.Where(sql.EqualFold(s.C(FieldRawText), v))
-	})
+	return predicate.Taf(sql.FieldEqualFold(FieldRawText, v))
 }
 
 // RawTextContainsFold applies the ContainsFold predicate on the "raw_text" field.
 func RawTextContainsFold(v string) predicate.Taf {
-	return predicate.Taf(func(s *sql.Selector) {
-		s.Where(sql.ContainsFold(s.C(FieldRawText), v))
-	})
+	return predicate.Taf(sql.FieldContainsFold(FieldRawText, v))
 }
 
 // IssueTimeEQ applies the EQ predicate on the "issue_time" field.
 func IssueTimeEQ(v time.Time) predicate.Taf {
-	return predicate.Taf(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldIssueTime), v))
-	})
+	return predicate.Taf(sql.FieldEQ(FieldIssueTime, v))
 }
 
 // IssueTimeNEQ applies the NEQ predicate on the "issue_time" field.
 func IssueTimeNEQ(v time.Time) predicate.Taf {
-	return predicate.Taf(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldIssueTime), v))
-	})
+	return predicate.Taf(sql.FieldNEQ(FieldIssueTime, v))
 }
 
 // IssueTimeIn applies the In predicate on the "issue_time" field.
 func IssueTimeIn(vs ...time.Time) predicate.Taf {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Taf(func(s *sql.Selector) {
-		s.Where(sql.In(s.C(FieldIssueTime), v...))
-	})
+	return predicate.Taf(sql.FieldIn(FieldIssueTime, vs...))
 }
 
 // IssueTimeNotIn applies the NotIn predicate on the "issue_time" field.
 func IssueTimeNotIn(vs ...time.Time) predicate.Taf {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Taf(func(s *sql.Selector) {
-		s.Where(sql.NotIn(s.C(FieldIssueTime), v...))
-	})
+	return predicate.Taf(sql.FieldNotIn(FieldIssueTime, vs...))
 }
 
 // IssueTimeGT applies the GT predicate on the "issue_time" field.
 func IssueTimeGT(v time.Time) predicate.Taf {
-	return predicate.Taf(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldIssueTime), v))
-	})
+	return predicate.Taf(sql.FieldGT(FieldIssueTime, v))
 }
 
 // IssueTimeGTE applies the GTE predicate on the "issue_time" field.
 func IssueTimeGTE(v time.Time) predicate.Taf {
-	return predicate.Taf(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldIssueTime), v))
-	})
+	return predicate.Taf(sql.FieldGTE(FieldIssueTime, v))
 }
 
 // IssueTimeLT applies the LT predicate on the "issue_time" field.
 func IssueTimeLT(v time.Time) predicate.Taf {
-	return predicate.Taf(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldIssueTime), v))
-	})
+	return predicate.Taf(sql.FieldLT(FieldIssueTime, v))
 }
 
 // IssueTimeLTE applies the LTE predicate on the "issue_time" field.
 func IssueTimeLTE(v time.Time) predicate.Taf {
-	return predicate.Taf(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldIssueTime), v))
-	})
+	return predicate.Taf(sql.FieldLTE(FieldIssueTime, v))
 }
 
 // ImportTimeEQ applies the EQ predicate on the "import_time" field.
 func ImportTimeEQ(v time.Time) predicate.Taf {
-	return predicate.Taf(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldImportTime), v))
-	})
+	return predicate.Taf(sql.FieldEQ(FieldImportTime, v))
 }
 
 // ImportTimeNEQ applies the NEQ predicate on the "import_time" field.
 func ImportTimeNEQ(v time.Time) predicate.Taf {
-	return predicate.Taf(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldImportTime), v))
-	})
+	return predicate.Taf(sql.FieldNEQ(FieldImportTime, v))
 }
 
 // ImportTimeIn applies the In predicate on the "import_time" field.
 func ImportTimeIn(vs ...time.Time) predicate.Taf {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Taf(func(s *sql.Selector) {
-		s.Where(sql.In(s.C(FieldImportTime), v...))
-	})
+	return predicate.Taf(sql.FieldIn(FieldImportTime, vs...))
 }
 
 // ImportTimeNotIn applies the NotIn predicate on the "import_time" field.
 func ImportTimeNotIn(vs ...time.Time) predicate.Taf {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Taf(func(s *sql.Selector) {
-		s.Where(sql.NotIn(s.C(FieldImportTime), v...))
-	})
+	return predicate.Taf(sql.FieldNotIn(FieldImportTime, vs...))
 }
 
 // ImportTimeGT applies the GT predicate on the "import_time" field.
 func ImportTimeGT(v time.Time) predicate.Taf {
-	return predicate.Taf(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldImportTime), v))
-	})
+	return predicate.Taf(sql.FieldGT(FieldImportTime, v))
 }
 
 // ImportTimeGTE applies the GTE predicate on the "import_time" field.
 func ImportTimeGTE(v time.Time) predicate.Taf {
-	return predicate.Taf(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldImportTime), v))
-	})
+	return predicate.Taf(sql.FieldGTE(FieldImportTime, v))
 }
 
 // ImportTimeLT applies the LT predicate on the "import_time" field.
 func ImportTimeLT(v time.Time) predicate.Taf {
-	return predicate.Taf(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldImportTime), v))
-	})
+	return predicate.Taf(sql.FieldLT(FieldImportTime, v))
 }
 
 // ImportTimeLTE applies the LTE predicate on the "import_time" field.
 func ImportTimeLTE(v time.Time) predicate.Taf {
-	return predicate.Taf(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldImportTime), v))
-	})
+	return predicate.Taf(sql.FieldLTE(FieldImportTime, v))
 }
 
 // BulletinTimeEQ applies the EQ predicate on the "bulletin_time" field.
 func BulletinTimeEQ(v time.Time) predicate.Taf {
-	return predicate.Taf(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldBulletinTime), v))
-	})
+	return predicate.Taf(sql.FieldEQ(FieldBulletinTime, v))
 }
 
 // BulletinTimeNEQ applies the NEQ predicate on the "bulletin_time" field.
 func BulletinTimeNEQ(v time.Time) predicate.Taf {
-	return predicate.Taf(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldBulletinTime), v))
-	})
+	return predicate.Taf(sql.FieldNEQ(FieldBulletinTime, v))
 }
 
 // BulletinTimeIn applies the In predicate on the "bulletin_time" field.
 func BulletinTimeIn(vs ...time.Time) predicate.Taf {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Taf(func(s *sql.Selector) {
-		s.Where(sql.In(s.C(FieldBulletinTime), v...))
-	})
+	return predicate.Taf(sql.FieldIn(FieldBulletinTime, vs...))
 }
 
 // BulletinTimeNotIn applies the NotIn predicate on the "bulletin_time" field.
 func BulletinTimeNotIn(vs ...time.Time) predicate.Taf {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Taf(func(s *sql.Selector) {
-		s.Where(sql.NotIn(s.C(FieldBulletinTime), v...))
-	})
+	return predicate.Taf(sql.FieldNotIn(FieldBulletinTime, vs...))
 }
 
 // BulletinTimeGT applies the GT predicate on the "bulletin_time" field.
 func BulletinTimeGT(v time.Time) predicate.Taf {
-	return predicate.Taf(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldBulletinTime), v))
-	})
+	return predicate.Taf(sql.FieldGT(FieldBulletinTime, v))
 }
 
 // BulletinTimeGTE applies the GTE predicate on the "bulletin_time" field.
 func BulletinTimeGTE(v time.Time) predicate.Taf {
-	return predicate.Taf(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldBulletinTime), v))
-	})
+	return predicate.Taf(sql.FieldGTE(FieldBulletinTime, v))
 }
 
 // BulletinTimeLT applies the LT predicate on the "bulletin_time" field.
 func BulletinTimeLT(v time.Time) predicate.Taf {
-	return predicate.Taf(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldBulletinTime), v))
-	})
+	return predicate.Taf(sql.FieldLT(FieldBulletinTime, v))
 }
 
 // BulletinTimeLTE applies the LTE predicate on the "bulletin_time" field.
 func BulletinTimeLTE(v time.Time) predicate.Taf {
-	return predicate.Taf(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldBulletinTime), v))
-	})
+	return predicate.Taf(sql.FieldLTE(FieldBulletinTime, v))
 }
 
 // ValidFromTimeEQ applies the EQ predicate on the "valid_from_time" field.
 func ValidFromTimeEQ(v time.Time) predicate.Taf {
-	return predicate.Taf(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldValidFromTime), v))
-	})
+	return predicate.Taf(sql.FieldEQ(FieldValidFromTime, v))
 }
 
 // ValidFromTimeNEQ applies the NEQ predicate on the "valid_from_time" field.
 func ValidFromTimeNEQ(v time.Time) predicate.Taf {
-	return predicate.Taf(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldValidFromTime), v))
-	})
+	return predicate.Taf(sql.FieldNEQ(FieldValidFromTime, v))
 }
 
 // ValidFromTimeIn applies the In predicate on the "valid_from_time" field.
 func ValidFromTimeIn(vs ...time.Time) predicate.Taf {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Taf(func(s *sql.Selector) {
-		s.Where(sql.In(s.C(FieldValidFromTime), v...))
-	})
+	return predicate.Taf(sql.FieldIn(FieldValidFromTime, vs...))
 }
 
 // ValidFromTimeNotIn applies the NotIn predicate on the "valid_from_time" field.
 func ValidFromTimeNotIn(vs ...time.Time) predicate.Taf {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Taf(func(s *sql.Selector) {
-		s.Where(sql.NotIn(s.C(FieldValidFromTime), v...))
-	})
+	return predicate.Taf(sql.FieldNotIn(FieldValidFromTime, vs...))
 }
 
 // ValidFromTimeGT applies the GT predicate on the "valid_from_time" field.
 func ValidFromTimeGT(v time.Time) predicate.Taf {
-	return predicate.Taf(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldValidFromTime), v))
-	})
+	return predicate.Taf(sql.FieldGT(FieldValidFromTime, v))
 }
 
 // ValidFromTimeGTE applies the GTE predicate on the "valid_from_time" field.
 func ValidFromTimeGTE(v time.Time) predicate.Taf {
-	return predicate.Taf(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldValidFromTime), v))
-	})
+	return predicate.Taf(sql.FieldGTE(FieldValidFromTime, v))
 }
 
 // ValidFromTimeLT applies the LT predicate on the "valid_from_time" field.
 func ValidFromTimeLT(v time.Time) predicate.Taf {
-	return predicate.Taf(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldValidFromTime), v))
-	})
+	return predicate.Taf(sql.FieldLT(FieldValidFromTime, v))
 }
 
 // ValidFromTimeLTE applies the LTE predicate on the "valid_from_time" field.
 func ValidFromTimeLTE(v time.Time) predicate.Taf {
-	return predicate.Taf(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldValidFromTime), v))
-	})
+	return predicate.Taf(sql.FieldLTE(FieldValidFromTime, v))
 }
 
 // ValidToTimeEQ applies the EQ predicate on the "valid_to_time" field.
 func ValidToTimeEQ(v time.Time) predicate.Taf {
-	return predicate.Taf(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldValidToTime), v))
-	})
+	return predicate.Taf(sql.FieldEQ(FieldValidToTime, v))
 }
 
 // ValidToTimeNEQ applies the NEQ predicate on the "valid_to_time" field.
 func ValidToTimeNEQ(v time.Time) predicate.Taf {
-	return predicate.Taf(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldValidToTime), v))
-	})
+	return predicate.Taf(sql.FieldNEQ(FieldValidToTime, v))
 }
 
 // ValidToTimeIn applies the In predicate on the "valid_to_time" field.
 func ValidToTimeIn(vs ...time.Time) predicate.Taf {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Taf(func(s *sql.Selector) {
-		s.Where(sql.In(s.C(FieldValidToTime), v...))
-	})
+	return predicate.Taf(sql.FieldIn(FieldValidToTime, vs...))
 }
 
 // ValidToTimeNotIn applies the NotIn predicate on the "valid_to_time" field.
 func ValidToTimeNotIn(vs ...time.Time) predicate.Taf {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Taf(func(s *sql.Selector) {
-		s.Where(sql.NotIn(s.C(FieldValidToTime), v...))
-	})
+	return predicate.Taf(sql.FieldNotIn(FieldValidToTime, vs...))
 }
 
 // ValidToTimeGT applies the GT predicate on the "valid_to_time" field.
 func ValidToTimeGT(v time.Time) predicate.Taf {
-	return predicate.Taf(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldValidToTime), v))
-	})
+	return predicate.Taf(sql.FieldGT(FieldValidToTime, v))
 }
 
 // ValidToTimeGTE applies the GTE predicate on the "valid_to_time" field.
 func ValidToTimeGTE(v time.Time) predicate.Taf {
-	return predicate.Taf(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldValidToTime), v))
-	})
+	return predicate.Taf(sql.FieldGTE(FieldValidToTime, v))
 }
 
 // ValidToTimeLT applies the LT predicate on the "valid_to_time" field.
 func ValidToTimeLT(v time.Time) predicate.Taf {
-	return predicate.Taf(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldValidToTime), v))
-	})
+	return predicate.Taf(sql.FieldLT(FieldValidToTime, v))
 }
 
 // ValidToTimeLTE applies the LTE predicate on the "valid_to_time" field.
 func ValidToTimeLTE(v time.Time) predicate.Taf {
-	return predicate.Taf(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldValidToTime), v))
-	})
+	return predicate.Taf(sql.FieldLTE(FieldValidToTime, v))
 }
 
 // RemarksEQ applies the EQ predicate on the "remarks" field.
 func RemarksEQ(v string) predicate.Taf {
-	return predicate.Taf(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldRemarks), v))
-	})
+	return predicate.Taf(sql.FieldEQ(FieldRemarks, v))
 }
 
 // RemarksNEQ applies the NEQ predicate on the "remarks" field.
 func RemarksNEQ(v string) predicate.Taf {
-	return predicate.Taf(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldRemarks), v))
-	})
+	return predicate.Taf(sql.FieldNEQ(FieldRemarks, v))
 }
 
 // RemarksIn applies the In predicate on the "remarks" field.
 func RemarksIn(vs ...string) predicate.Taf {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Taf(func(s *sql.Selector) {
-		s.Where(sql.In(s.C(FieldRemarks), v...))
-	})
+	return predicate.Taf(sql.FieldIn(FieldRemarks, vs...))
 }
 
 // RemarksNotIn applies the NotIn predicate on the "remarks" field.
 func RemarksNotIn(vs ...string) predicate.Taf {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Taf(func(s *sql.Selector) {
-		s.Where(sql.NotIn(s.C(FieldRemarks), v...))
-	})
+	return predicate.Taf(sql.FieldNotIn(FieldRemarks, vs...))
 }
 
 // RemarksGT applies the GT predicate on the "remarks" field.
 func RemarksGT(v string) predicate.Taf {
-	return predicate.Taf(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldRemarks), v))
-	})
+	return predicate.Taf(sql.FieldGT(FieldRemarks, v))
 }
 
 // RemarksGTE applies the GTE predicate on the "remarks" field.
 func RemarksGTE(v string) predicate.Taf {
-	return predicate.Taf(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldRemarks), v))
-	})
+	return predicate.Taf(sql.FieldGTE(FieldRemarks, v))
 }
 
 // RemarksLT applies the LT predicate on the "remarks" field.
 func RemarksLT(v string) predicate.Taf {
-	return predicate.Taf(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldRemarks), v))
-	})
+	return predicate.Taf(sql.FieldLT(FieldRemarks, v))
 }
 
 // RemarksLTE applies the LTE predicate on the "remarks" field.
 func RemarksLTE(v string) predicate.Taf {
-	return predicate.Taf(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldRemarks), v))
-	})
+	return predicate.Taf(sql.FieldLTE(FieldRemarks, v))
 }
 
 // RemarksContains applies the Contains predicate on the "remarks" field.
 func RemarksContains(v string) predicate.Taf {
-	return predicate.Taf(func(s *sql.Selector) {
-		s.Where(sql.Contains(s.C(FieldRemarks), v))
-	})
+	return predicate.Taf(sql.FieldContains(FieldRemarks, v))
 }
 
 // RemarksHasPrefix applies the HasPrefix predicate on the "remarks" field.
 func RemarksHasPrefix(v string) predicate.Taf {
-	return predicate.Taf(func(s *sql.Selector) {
-		s.Where(sql.HasPrefix(s.C(FieldRemarks), v))
-	})
+	return predicate.Taf(sql.FieldHasPrefix(FieldRemarks, v))
 }
 
 // RemarksHasSuffix applies the HasSuffix predicate on the "remarks" field.
 func RemarksHasSuffix(v string) predicate.Taf {
-	return predicate.Taf(func(s *sql.Selector) {
-		s.Where(sql.HasSuffix(s.C(FieldRemarks), v))
-	})
+	return predicate.Taf(sql.FieldHasSuffix(FieldRemarks, v))
 }
 
 // RemarksEqualFold applies the EqualFold predicate on the "remarks" field.
 func RemarksEqualFold(v string) predicate.Taf {
-	return predicate.Taf(func(s *sql.Selector) {
-		s.Where(sql.EqualFold(s.C(FieldRemarks), v))
-	})
+	return predicate.Taf(sql.FieldEqualFold(FieldRemarks, v))
 }
 
 // RemarksContainsFold applies the ContainsFold predicate on the "remarks" field.
 func RemarksContainsFold(v string) predicate.Taf {
-	return predicate.Taf(func(s *sql.Selector) {
-		s.Where(sql.ContainsFold(s.C(FieldRemarks), v))
-	})
+	return predicate.Taf(sql.FieldContainsFold(FieldRemarks, v))
 }
 
 // HashEQ applies the EQ predicate on the "hash" field.
 func HashEQ(v string) predicate.Taf {
-	return predicate.Taf(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldHash), v))
-	})
+	return predicate.Taf(sql.FieldEQ(FieldHash, v))
 }
 
 // HashNEQ applies the NEQ predicate on the "hash" field.
 func HashNEQ(v string) predicate.Taf {
-	return predicate.Taf(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldHash), v))
-	})
+	return predicate.Taf(sql.FieldNEQ(FieldHash, v))
 }
 
 // HashIn applies the In predicate on the "hash" field.
 func HashIn(vs ...string) predicate.Taf {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Taf(func(s *sql.Selector) {
-		s.Where(sql.In(s.C(FieldHash), v...))
-	})
+	return predicate.Taf(sql.FieldIn(FieldHash, vs...))
 }
 
 // HashNotIn applies the NotIn predicate on the "hash" field.
 func HashNotIn(vs ...string) predicate.Taf {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Taf(func(s *sql.Selector) {
-		s.Where(sql.NotIn(s.C(FieldHash), v...))
-	})
+	return predicate.Taf(sql.FieldNotIn(FieldHash, vs...))
 }
 
 // HashGT applies the GT predicate on the "hash" field.
 func HashGT(v string) predicate.Taf {
-	return predicate.Taf(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldHash), v))
-	})
+	return predicate.Taf(sql.FieldGT(FieldHash, v))
 }
 
 // HashGTE applies the GTE predicate on the "hash" field.
 func HashGTE(v string) predicate.Taf {
-	return predicate.Taf(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldHash), v))
-	})
+	return predicate.Taf(sql.FieldGTE(FieldHash, v))
 }
 
 // HashLT applies the LT predicate on the "hash" field.
 func HashLT(v string) predicate.Taf {
-	return predicate.Taf(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldHash), v))
-	})
+	return predicate.Taf(sql.FieldLT(FieldHash, v))
 }
 
 // HashLTE applies the LTE predicate on the "hash" field.
 func HashLTE(v string) predicate.Taf {
-	return predicate.Taf(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldHash), v))
-	})
+	return predicate.Taf(sql.FieldLTE(FieldHash, v))
 }
 
 // HashContains applies the Contains predicate on the "hash" field.
 func HashContains(v string) predicate.Taf {
-	return predicate.Taf(func(s *sql.Selector) {
-		s.Where(sql.Contains(s.C(FieldHash), v))
-	})
+	return predicate.Taf(sql.FieldContains(FieldHash, v))
 }
 
 // HashHasPrefix applies the HasPrefix predicate on the "hash" field.
 func HashHasPrefix(v string) predicate.Taf {
-	return predicate.Taf(func(s *sql.Selector) {
-		s.Where(sql.HasPrefix(s.C(FieldHash), v))
-	})
+	return predicate.Taf(sql.FieldHasPrefix(FieldHash, v))
 }
 
 // HashHasSuffix applies the HasSuffix predicate on the "hash" field.
 func HashHasSuffix(v string) predicate.Taf {
-	return predicate.Taf(func(s *sql.Selector) {
-		s.Where(sql.HasSuffix(s.C(FieldHash), v))
-	})
+	return predicate.Taf(sql.FieldHasSuffix(FieldHash, v))
 }
 
 // HashEqualFold applies the EqualFold predicate on the "hash" field.
 func HashEqualFold(v string) predicate.Taf {
-	return predicate.Taf(func(s *sql.Selector) {
-		s.Where(sql.EqualFold(s.C(FieldHash), v))
-	})
+	return predicate.Taf(sql.FieldEqualFold(FieldHash, v))
 }
 
 // HashContainsFold applies the ContainsFold predicate on the "hash" field.
 func HashContainsFold(v string) predicate.Taf {
-	return predicate.Taf(func(s *sql.Selector) {
-		s.Where(sql.ContainsFold(s.C(FieldHash), v))
-	})
+	return predicate.Taf(sql.FieldContainsFold(FieldHash, v))
 }
 
 // HasStation applies the HasEdge predicate on the "station" edge.
@@ -760,7 +496,6 @@ func HasStation() predicate.Taf {
 	return predicate.Taf(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(StationTable, FieldID),
 			sqlgraph.Edge(sqlgraph.M2O, true, StationTable, StationColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)
@@ -788,7 +523,6 @@ func HasForecast() predicate.Taf {
 	return predicate.Taf(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(ForecastTable, FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, false, ForecastTable, ForecastColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)

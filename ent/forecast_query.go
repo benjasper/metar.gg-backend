@@ -23,11 +23,9 @@ import (
 // ForecastQuery is the builder for querying Forecast entities.
 type ForecastQuery struct {
 	config
-	limit                         *int
-	offset                        *int
-	unique                        *bool
+	ctx                           *QueryContext
 	order                         []OrderFunc
-	fields                        []string
+	inters                        []Interceptor
 	predicates                    []predicate.Forecast
 	withSkyConditions             *SkyConditionQuery
 	withTurbulenceConditions      *TurbulenceConditionQuery
@@ -51,26 +49,26 @@ func (fq *ForecastQuery) Where(ps ...predicate.Forecast) *ForecastQuery {
 	return fq
 }
 
-// Limit adds a limit step to the query.
+// Limit the number of records to be returned by this query.
 func (fq *ForecastQuery) Limit(limit int) *ForecastQuery {
-	fq.limit = &limit
+	fq.ctx.Limit = &limit
 	return fq
 }
 
-// Offset adds an offset step to the query.
+// Offset to start from.
 func (fq *ForecastQuery) Offset(offset int) *ForecastQuery {
-	fq.offset = &offset
+	fq.ctx.Offset = &offset
 	return fq
 }
 
 // Unique configures the query builder to filter duplicate records on query.
 // By default, unique is set to true, and can be disabled using this method.
 func (fq *ForecastQuery) Unique(unique bool) *ForecastQuery {
-	fq.unique = &unique
+	fq.ctx.Unique = &unique
 	return fq
 }
 
-// Order adds an order step to the query.
+// Order specifies how the records should be ordered.
 func (fq *ForecastQuery) Order(o ...OrderFunc) *ForecastQuery {
 	fq.order = append(fq.order, o...)
 	return fq
@@ -78,7 +76,7 @@ func (fq *ForecastQuery) Order(o ...OrderFunc) *ForecastQuery {
 
 // QuerySkyConditions chains the current query on the "sky_conditions" edge.
 func (fq *ForecastQuery) QuerySkyConditions() *SkyConditionQuery {
-	query := &SkyConditionQuery{config: fq.config}
+	query := (&SkyConditionClient{config: fq.config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := fq.prepareQuery(ctx); err != nil {
 			return nil, err
@@ -100,7 +98,7 @@ func (fq *ForecastQuery) QuerySkyConditions() *SkyConditionQuery {
 
 // QueryTurbulenceConditions chains the current query on the "turbulence_conditions" edge.
 func (fq *ForecastQuery) QueryTurbulenceConditions() *TurbulenceConditionQuery {
-	query := &TurbulenceConditionQuery{config: fq.config}
+	query := (&TurbulenceConditionClient{config: fq.config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := fq.prepareQuery(ctx); err != nil {
 			return nil, err
@@ -122,7 +120,7 @@ func (fq *ForecastQuery) QueryTurbulenceConditions() *TurbulenceConditionQuery {
 
 // QueryIcingConditions chains the current query on the "icing_conditions" edge.
 func (fq *ForecastQuery) QueryIcingConditions() *IcingConditionQuery {
-	query := &IcingConditionQuery{config: fq.config}
+	query := (&IcingConditionClient{config: fq.config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := fq.prepareQuery(ctx); err != nil {
 			return nil, err
@@ -144,7 +142,7 @@ func (fq *ForecastQuery) QueryIcingConditions() *IcingConditionQuery {
 
 // QueryTemperatureData chains the current query on the "temperature_data" edge.
 func (fq *ForecastQuery) QueryTemperatureData() *TemperatureDataQuery {
-	query := &TemperatureDataQuery{config: fq.config}
+	query := (&TemperatureDataClient{config: fq.config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := fq.prepareQuery(ctx); err != nil {
 			return nil, err
@@ -167,7 +165,7 @@ func (fq *ForecastQuery) QueryTemperatureData() *TemperatureDataQuery {
 // First returns the first Forecast entity from the query.
 // Returns a *NotFoundError when no Forecast was found.
 func (fq *ForecastQuery) First(ctx context.Context) (*Forecast, error) {
-	nodes, err := fq.Limit(1).All(ctx)
+	nodes, err := fq.Limit(1).All(setContextOp(ctx, fq.ctx, "First"))
 	if err != nil {
 		return nil, err
 	}
@@ -190,7 +188,7 @@ func (fq *ForecastQuery) FirstX(ctx context.Context) *Forecast {
 // Returns a *NotFoundError when no Forecast ID was found.
 func (fq *ForecastQuery) FirstID(ctx context.Context) (id uuid.UUID, err error) {
 	var ids []uuid.UUID
-	if ids, err = fq.Limit(1).IDs(ctx); err != nil {
+	if ids, err = fq.Limit(1).IDs(setContextOp(ctx, fq.ctx, "FirstID")); err != nil {
 		return
 	}
 	if len(ids) == 0 {
@@ -213,7 +211,7 @@ func (fq *ForecastQuery) FirstIDX(ctx context.Context) uuid.UUID {
 // Returns a *NotSingularError when more than one Forecast entity is found.
 // Returns a *NotFoundError when no Forecast entities are found.
 func (fq *ForecastQuery) Only(ctx context.Context) (*Forecast, error) {
-	nodes, err := fq.Limit(2).All(ctx)
+	nodes, err := fq.Limit(2).All(setContextOp(ctx, fq.ctx, "Only"))
 	if err != nil {
 		return nil, err
 	}
@@ -241,7 +239,7 @@ func (fq *ForecastQuery) OnlyX(ctx context.Context) *Forecast {
 // Returns a *NotFoundError when no entities are found.
 func (fq *ForecastQuery) OnlyID(ctx context.Context) (id uuid.UUID, err error) {
 	var ids []uuid.UUID
-	if ids, err = fq.Limit(2).IDs(ctx); err != nil {
+	if ids, err = fq.Limit(2).IDs(setContextOp(ctx, fq.ctx, "OnlyID")); err != nil {
 		return
 	}
 	switch len(ids) {
@@ -266,10 +264,12 @@ func (fq *ForecastQuery) OnlyIDX(ctx context.Context) uuid.UUID {
 
 // All executes the query and returns a list of Forecasts.
 func (fq *ForecastQuery) All(ctx context.Context) ([]*Forecast, error) {
+	ctx = setContextOp(ctx, fq.ctx, "All")
 	if err := fq.prepareQuery(ctx); err != nil {
 		return nil, err
 	}
-	return fq.sqlAll(ctx)
+	qr := querierAll[[]*Forecast, *ForecastQuery]()
+	return withInterceptors[[]*Forecast](ctx, fq, qr, fq.inters)
 }
 
 // AllX is like All, but panics if an error occurs.
@@ -282,9 +282,12 @@ func (fq *ForecastQuery) AllX(ctx context.Context) []*Forecast {
 }
 
 // IDs executes the query and returns a list of Forecast IDs.
-func (fq *ForecastQuery) IDs(ctx context.Context) ([]uuid.UUID, error) {
-	var ids []uuid.UUID
-	if err := fq.Select(forecast.FieldID).Scan(ctx, &ids); err != nil {
+func (fq *ForecastQuery) IDs(ctx context.Context) (ids []uuid.UUID, err error) {
+	if fq.ctx.Unique == nil && fq.path != nil {
+		fq.Unique(true)
+	}
+	ctx = setContextOp(ctx, fq.ctx, "IDs")
+	if err = fq.Select(forecast.FieldID).Scan(ctx, &ids); err != nil {
 		return nil, err
 	}
 	return ids, nil
@@ -301,10 +304,11 @@ func (fq *ForecastQuery) IDsX(ctx context.Context) []uuid.UUID {
 
 // Count returns the count of the given query.
 func (fq *ForecastQuery) Count(ctx context.Context) (int, error) {
+	ctx = setContextOp(ctx, fq.ctx, "Count")
 	if err := fq.prepareQuery(ctx); err != nil {
 		return 0, err
 	}
-	return fq.sqlCount(ctx)
+	return withInterceptors[int](ctx, fq, querierCount[*ForecastQuery](), fq.inters)
 }
 
 // CountX is like Count, but panics if an error occurs.
@@ -318,10 +322,15 @@ func (fq *ForecastQuery) CountX(ctx context.Context) int {
 
 // Exist returns true if the query has elements in the graph.
 func (fq *ForecastQuery) Exist(ctx context.Context) (bool, error) {
-	if err := fq.prepareQuery(ctx); err != nil {
-		return false, err
+	ctx = setContextOp(ctx, fq.ctx, "Exist")
+	switch _, err := fq.FirstID(ctx); {
+	case IsNotFound(err):
+		return false, nil
+	case err != nil:
+		return false, fmt.Errorf("ent: check existence: %w", err)
+	default:
+		return true, nil
 	}
-	return fq.sqlExist(ctx)
 }
 
 // ExistX is like Exist, but panics if an error occurs.
@@ -341,25 +350,24 @@ func (fq *ForecastQuery) Clone() *ForecastQuery {
 	}
 	return &ForecastQuery{
 		config:                   fq.config,
-		limit:                    fq.limit,
-		offset:                   fq.offset,
+		ctx:                      fq.ctx.Clone(),
 		order:                    append([]OrderFunc{}, fq.order...),
+		inters:                   append([]Interceptor{}, fq.inters...),
 		predicates:               append([]predicate.Forecast{}, fq.predicates...),
 		withSkyConditions:        fq.withSkyConditions.Clone(),
 		withTurbulenceConditions: fq.withTurbulenceConditions.Clone(),
 		withIcingConditions:      fq.withIcingConditions.Clone(),
 		withTemperatureData:      fq.withTemperatureData.Clone(),
 		// clone intermediate query.
-		sql:    fq.sql.Clone(),
-		path:   fq.path,
-		unique: fq.unique,
+		sql:  fq.sql.Clone(),
+		path: fq.path,
 	}
 }
 
 // WithSkyConditions tells the query-builder to eager-load the nodes that are connected to
 // the "sky_conditions" edge. The optional arguments are used to configure the query builder of the edge.
 func (fq *ForecastQuery) WithSkyConditions(opts ...func(*SkyConditionQuery)) *ForecastQuery {
-	query := &SkyConditionQuery{config: fq.config}
+	query := (&SkyConditionClient{config: fq.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -370,7 +378,7 @@ func (fq *ForecastQuery) WithSkyConditions(opts ...func(*SkyConditionQuery)) *Fo
 // WithTurbulenceConditions tells the query-builder to eager-load the nodes that are connected to
 // the "turbulence_conditions" edge. The optional arguments are used to configure the query builder of the edge.
 func (fq *ForecastQuery) WithTurbulenceConditions(opts ...func(*TurbulenceConditionQuery)) *ForecastQuery {
-	query := &TurbulenceConditionQuery{config: fq.config}
+	query := (&TurbulenceConditionClient{config: fq.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -381,7 +389,7 @@ func (fq *ForecastQuery) WithTurbulenceConditions(opts ...func(*TurbulenceCondit
 // WithIcingConditions tells the query-builder to eager-load the nodes that are connected to
 // the "icing_conditions" edge. The optional arguments are used to configure the query builder of the edge.
 func (fq *ForecastQuery) WithIcingConditions(opts ...func(*IcingConditionQuery)) *ForecastQuery {
-	query := &IcingConditionQuery{config: fq.config}
+	query := (&IcingConditionClient{config: fq.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -392,7 +400,7 @@ func (fq *ForecastQuery) WithIcingConditions(opts ...func(*IcingConditionQuery))
 // WithTemperatureData tells the query-builder to eager-load the nodes that are connected to
 // the "temperature_data" edge. The optional arguments are used to configure the query builder of the edge.
 func (fq *ForecastQuery) WithTemperatureData(opts ...func(*TemperatureDataQuery)) *ForecastQuery {
-	query := &TemperatureDataQuery{config: fq.config}
+	query := (&TemperatureDataClient{config: fq.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -415,16 +423,11 @@ func (fq *ForecastQuery) WithTemperatureData(opts ...func(*TemperatureDataQuery)
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
 func (fq *ForecastQuery) GroupBy(field string, fields ...string) *ForecastGroupBy {
-	grbuild := &ForecastGroupBy{config: fq.config}
-	grbuild.fields = append([]string{field}, fields...)
-	grbuild.path = func(ctx context.Context) (prev *sql.Selector, err error) {
-		if err := fq.prepareQuery(ctx); err != nil {
-			return nil, err
-		}
-		return fq.sqlQuery(ctx), nil
-	}
+	fq.ctx.Fields = append([]string{field}, fields...)
+	grbuild := &ForecastGroupBy{build: fq}
+	grbuild.flds = &fq.ctx.Fields
 	grbuild.label = forecast.Label
-	grbuild.flds, grbuild.scan = &grbuild.fields, grbuild.Scan
+	grbuild.scan = grbuild.Scan
 	return grbuild
 }
 
@@ -441,11 +444,11 @@ func (fq *ForecastQuery) GroupBy(field string, fields ...string) *ForecastGroupB
 //		Select(forecast.FieldFromTime).
 //		Scan(ctx, &v)
 func (fq *ForecastQuery) Select(fields ...string) *ForecastSelect {
-	fq.fields = append(fq.fields, fields...)
-	selbuild := &ForecastSelect{ForecastQuery: fq}
-	selbuild.label = forecast.Label
-	selbuild.flds, selbuild.scan = &fq.fields, selbuild.Scan
-	return selbuild
+	fq.ctx.Fields = append(fq.ctx.Fields, fields...)
+	sbuild := &ForecastSelect{ForecastQuery: fq}
+	sbuild.label = forecast.Label
+	sbuild.flds, sbuild.scan = &fq.ctx.Fields, sbuild.Scan
+	return sbuild
 }
 
 // Aggregate returns a ForecastSelect configured with the given aggregations.
@@ -454,7 +457,17 @@ func (fq *ForecastQuery) Aggregate(fns ...AggregateFunc) *ForecastSelect {
 }
 
 func (fq *ForecastQuery) prepareQuery(ctx context.Context) error {
-	for _, f := range fq.fields {
+	for _, inter := range fq.inters {
+		if inter == nil {
+			return fmt.Errorf("ent: uninitialized interceptor (forgotten import ent/runtime?)")
+		}
+		if trv, ok := inter.(Traverser); ok {
+			if err := trv.Traverse(ctx, fq); err != nil {
+				return err
+			}
+		}
+	}
+	for _, f := range fq.ctx.Fields {
 		if !forecast.ValidColumn(f) {
 			return &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for query", f)}
 		}
@@ -701,41 +714,22 @@ func (fq *ForecastQuery) sqlCount(ctx context.Context) (int, error) {
 	if len(fq.modifiers) > 0 {
 		_spec.Modifiers = fq.modifiers
 	}
-	_spec.Node.Columns = fq.fields
-	if len(fq.fields) > 0 {
-		_spec.Unique = fq.unique != nil && *fq.unique
+	_spec.Node.Columns = fq.ctx.Fields
+	if len(fq.ctx.Fields) > 0 {
+		_spec.Unique = fq.ctx.Unique != nil && *fq.ctx.Unique
 	}
 	return sqlgraph.CountNodes(ctx, fq.driver, _spec)
 }
 
-func (fq *ForecastQuery) sqlExist(ctx context.Context) (bool, error) {
-	switch _, err := fq.FirstID(ctx); {
-	case IsNotFound(err):
-		return false, nil
-	case err != nil:
-		return false, fmt.Errorf("ent: check existence: %w", err)
-	default:
-		return true, nil
-	}
-}
-
 func (fq *ForecastQuery) querySpec() *sqlgraph.QuerySpec {
-	_spec := &sqlgraph.QuerySpec{
-		Node: &sqlgraph.NodeSpec{
-			Table:   forecast.Table,
-			Columns: forecast.Columns,
-			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeUUID,
-				Column: forecast.FieldID,
-			},
-		},
-		From:   fq.sql,
-		Unique: true,
-	}
-	if unique := fq.unique; unique != nil {
+	_spec := sqlgraph.NewQuerySpec(forecast.Table, forecast.Columns, sqlgraph.NewFieldSpec(forecast.FieldID, field.TypeUUID))
+	_spec.From = fq.sql
+	if unique := fq.ctx.Unique; unique != nil {
 		_spec.Unique = *unique
+	} else if fq.path != nil {
+		_spec.Unique = true
 	}
-	if fields := fq.fields; len(fields) > 0 {
+	if fields := fq.ctx.Fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))
 		_spec.Node.Columns = append(_spec.Node.Columns, forecast.FieldID)
 		for i := range fields {
@@ -751,10 +745,10 @@ func (fq *ForecastQuery) querySpec() *sqlgraph.QuerySpec {
 			}
 		}
 	}
-	if limit := fq.limit; limit != nil {
+	if limit := fq.ctx.Limit; limit != nil {
 		_spec.Limit = *limit
 	}
-	if offset := fq.offset; offset != nil {
+	if offset := fq.ctx.Offset; offset != nil {
 		_spec.Offset = *offset
 	}
 	if ps := fq.order; len(ps) > 0 {
@@ -770,7 +764,7 @@ func (fq *ForecastQuery) querySpec() *sqlgraph.QuerySpec {
 func (fq *ForecastQuery) sqlQuery(ctx context.Context) *sql.Selector {
 	builder := sql.Dialect(fq.driver.Dialect())
 	t1 := builder.Table(forecast.Table)
-	columns := fq.fields
+	columns := fq.ctx.Fields
 	if len(columns) == 0 {
 		columns = forecast.Columns
 	}
@@ -779,7 +773,7 @@ func (fq *ForecastQuery) sqlQuery(ctx context.Context) *sql.Selector {
 		selector = fq.sql
 		selector.Select(selector.Columns(columns...)...)
 	}
-	if fq.unique != nil && *fq.unique {
+	if fq.ctx.Unique != nil && *fq.ctx.Unique {
 		selector.Distinct()
 	}
 	for _, m := range fq.modifiers {
@@ -791,12 +785,12 @@ func (fq *ForecastQuery) sqlQuery(ctx context.Context) *sql.Selector {
 	for _, p := range fq.order {
 		p(selector)
 	}
-	if offset := fq.offset; offset != nil {
+	if offset := fq.ctx.Offset; offset != nil {
 		// limit is mandatory for offset clause. We start
 		// with default value, and override it below if needed.
 		selector.Offset(*offset).Limit(math.MaxInt32)
 	}
-	if limit := fq.limit; limit != nil {
+	if limit := fq.ctx.Limit; limit != nil {
 		selector.Limit(*limit)
 	}
 	return selector
@@ -811,7 +805,7 @@ func (fq *ForecastQuery) Modify(modifiers ...func(s *sql.Selector)) *ForecastSel
 // WithNamedSkyConditions tells the query-builder to eager-load the nodes that are connected to the "sky_conditions"
 // edge with the given name. The optional arguments are used to configure the query builder of the edge.
 func (fq *ForecastQuery) WithNamedSkyConditions(name string, opts ...func(*SkyConditionQuery)) *ForecastQuery {
-	query := &SkyConditionQuery{config: fq.config}
+	query := (&SkyConditionClient{config: fq.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -825,7 +819,7 @@ func (fq *ForecastQuery) WithNamedSkyConditions(name string, opts ...func(*SkyCo
 // WithNamedTurbulenceConditions tells the query-builder to eager-load the nodes that are connected to the "turbulence_conditions"
 // edge with the given name. The optional arguments are used to configure the query builder of the edge.
 func (fq *ForecastQuery) WithNamedTurbulenceConditions(name string, opts ...func(*TurbulenceConditionQuery)) *ForecastQuery {
-	query := &TurbulenceConditionQuery{config: fq.config}
+	query := (&TurbulenceConditionClient{config: fq.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -839,7 +833,7 @@ func (fq *ForecastQuery) WithNamedTurbulenceConditions(name string, opts ...func
 // WithNamedIcingConditions tells the query-builder to eager-load the nodes that are connected to the "icing_conditions"
 // edge with the given name. The optional arguments are used to configure the query builder of the edge.
 func (fq *ForecastQuery) WithNamedIcingConditions(name string, opts ...func(*IcingConditionQuery)) *ForecastQuery {
-	query := &IcingConditionQuery{config: fq.config}
+	query := (&IcingConditionClient{config: fq.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -853,7 +847,7 @@ func (fq *ForecastQuery) WithNamedIcingConditions(name string, opts ...func(*Ici
 // WithNamedTemperatureData tells the query-builder to eager-load the nodes that are connected to the "temperature_data"
 // edge with the given name. The optional arguments are used to configure the query builder of the edge.
 func (fq *ForecastQuery) WithNamedTemperatureData(name string, opts ...func(*TemperatureDataQuery)) *ForecastQuery {
-	query := &TemperatureDataQuery{config: fq.config}
+	query := (&TemperatureDataClient{config: fq.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -866,13 +860,8 @@ func (fq *ForecastQuery) WithNamedTemperatureData(name string, opts ...func(*Tem
 
 // ForecastGroupBy is the group-by builder for Forecast entities.
 type ForecastGroupBy struct {
-	config
 	selector
-	fields []string
-	fns    []AggregateFunc
-	// intermediate query (i.e. traversal path).
-	sql  *sql.Selector
-	path func(context.Context) (*sql.Selector, error)
+	build *ForecastQuery
 }
 
 // Aggregate adds the given aggregation functions to the group-by query.
@@ -881,58 +870,46 @@ func (fgb *ForecastGroupBy) Aggregate(fns ...AggregateFunc) *ForecastGroupBy {
 	return fgb
 }
 
-// Scan applies the group-by query and scans the result into the given value.
+// Scan applies the selector query and scans the result into the given value.
 func (fgb *ForecastGroupBy) Scan(ctx context.Context, v any) error {
-	query, err := fgb.path(ctx)
-	if err != nil {
+	ctx = setContextOp(ctx, fgb.build.ctx, "GroupBy")
+	if err := fgb.build.prepareQuery(ctx); err != nil {
 		return err
 	}
-	fgb.sql = query
-	return fgb.sqlScan(ctx, v)
+	return scanWithInterceptors[*ForecastQuery, *ForecastGroupBy](ctx, fgb.build, fgb, fgb.build.inters, v)
 }
 
-func (fgb *ForecastGroupBy) sqlScan(ctx context.Context, v any) error {
-	for _, f := range fgb.fields {
-		if !forecast.ValidColumn(f) {
-			return &ValidationError{Name: f, err: fmt.Errorf("invalid field %q for group-by", f)}
-		}
+func (fgb *ForecastGroupBy) sqlScan(ctx context.Context, root *ForecastQuery, v any) error {
+	selector := root.sqlQuery(ctx).Select()
+	aggregation := make([]string, 0, len(fgb.fns))
+	for _, fn := range fgb.fns {
+		aggregation = append(aggregation, fn(selector))
 	}
-	selector := fgb.sqlQuery()
+	if len(selector.SelectedColumns()) == 0 {
+		columns := make([]string, 0, len(*fgb.flds)+len(fgb.fns))
+		for _, f := range *fgb.flds {
+			columns = append(columns, selector.C(f))
+		}
+		columns = append(columns, aggregation...)
+		selector.Select(columns...)
+	}
+	selector.GroupBy(selector.Columns(*fgb.flds...)...)
 	if err := selector.Err(); err != nil {
 		return err
 	}
 	rows := &sql.Rows{}
 	query, args := selector.Query()
-	if err := fgb.driver.Query(ctx, query, args, rows); err != nil {
+	if err := fgb.build.driver.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
 	defer rows.Close()
 	return sql.ScanSlice(rows, v)
 }
 
-func (fgb *ForecastGroupBy) sqlQuery() *sql.Selector {
-	selector := fgb.sql.Select()
-	aggregation := make([]string, 0, len(fgb.fns))
-	for _, fn := range fgb.fns {
-		aggregation = append(aggregation, fn(selector))
-	}
-	if len(selector.SelectedColumns()) == 0 {
-		columns := make([]string, 0, len(fgb.fields)+len(fgb.fns))
-		for _, f := range fgb.fields {
-			columns = append(columns, selector.C(f))
-		}
-		columns = append(columns, aggregation...)
-		selector.Select(columns...)
-	}
-	return selector.GroupBy(selector.Columns(fgb.fields...)...)
-}
-
 // ForecastSelect is the builder for selecting fields of Forecast entities.
 type ForecastSelect struct {
 	*ForecastQuery
 	selector
-	// intermediate query (i.e. traversal path).
-	sql *sql.Selector
 }
 
 // Aggregate adds the given aggregation functions to the selector query.
@@ -943,26 +920,27 @@ func (fs *ForecastSelect) Aggregate(fns ...AggregateFunc) *ForecastSelect {
 
 // Scan applies the selector query and scans the result into the given value.
 func (fs *ForecastSelect) Scan(ctx context.Context, v any) error {
+	ctx = setContextOp(ctx, fs.ctx, "Select")
 	if err := fs.prepareQuery(ctx); err != nil {
 		return err
 	}
-	fs.sql = fs.ForecastQuery.sqlQuery(ctx)
-	return fs.sqlScan(ctx, v)
+	return scanWithInterceptors[*ForecastQuery, *ForecastSelect](ctx, fs.ForecastQuery, fs, fs.inters, v)
 }
 
-func (fs *ForecastSelect) sqlScan(ctx context.Context, v any) error {
+func (fs *ForecastSelect) sqlScan(ctx context.Context, root *ForecastQuery, v any) error {
+	selector := root.sqlQuery(ctx)
 	aggregation := make([]string, 0, len(fs.fns))
 	for _, fn := range fs.fns {
-		aggregation = append(aggregation, fn(fs.sql))
+		aggregation = append(aggregation, fn(selector))
 	}
 	switch n := len(*fs.selector.flds); {
 	case n == 0 && len(aggregation) > 0:
-		fs.sql.Select(aggregation...)
+		selector.Select(aggregation...)
 	case n != 0 && len(aggregation) > 0:
-		fs.sql.AppendSelect(aggregation...)
+		selector.AppendSelect(aggregation...)
 	}
 	rows := &sql.Rows{}
-	query, args := fs.sql.Query()
+	query, args := selector.Query()
 	if err := fs.driver.Query(ctx, query, args, rows); err != nil {
 		return err
 	}

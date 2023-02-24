@@ -4,7 +4,6 @@ package ent
 
 import (
 	"context"
-	"fmt"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
@@ -28,34 +27,7 @@ func (wsd *WeatherStationDelete) Where(ps ...predicate.WeatherStation) *WeatherS
 
 // Exec executes the deletion query and returns how many vertices were deleted.
 func (wsd *WeatherStationDelete) Exec(ctx context.Context) (int, error) {
-	var (
-		err      error
-		affected int
-	)
-	if len(wsd.hooks) == 0 {
-		affected, err = wsd.sqlExec(ctx)
-	} else {
-		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
-			mutation, ok := m.(*WeatherStationMutation)
-			if !ok {
-				return nil, fmt.Errorf("unexpected mutation type %T", m)
-			}
-			wsd.mutation = mutation
-			affected, err = wsd.sqlExec(ctx)
-			mutation.done = true
-			return affected, err
-		})
-		for i := len(wsd.hooks) - 1; i >= 0; i-- {
-			if wsd.hooks[i] == nil {
-				return 0, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
-			}
-			mut = wsd.hooks[i](mut)
-		}
-		if _, err := mut.Mutate(ctx, wsd.mutation); err != nil {
-			return 0, err
-		}
-	}
-	return affected, err
+	return withHooks[int, WeatherStationMutation](ctx, wsd.sqlExec, wsd.mutation, wsd.hooks)
 }
 
 // ExecX is like Exec, but panics if an error occurs.
@@ -68,15 +40,7 @@ func (wsd *WeatherStationDelete) ExecX(ctx context.Context) int {
 }
 
 func (wsd *WeatherStationDelete) sqlExec(ctx context.Context) (int, error) {
-	_spec := &sqlgraph.DeleteSpec{
-		Node: &sqlgraph.NodeSpec{
-			Table: weatherstation.Table,
-			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeUUID,
-				Column: weatherstation.FieldID,
-			},
-		},
-	}
+	_spec := sqlgraph.NewDeleteSpec(weatherstation.Table, sqlgraph.NewFieldSpec(weatherstation.FieldID, field.TypeUUID))
 	if ps := wsd.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
@@ -88,12 +52,19 @@ func (wsd *WeatherStationDelete) sqlExec(ctx context.Context) (int, error) {
 	if err != nil && sqlgraph.IsConstraintError(err) {
 		err = &ConstraintError{msg: err.Error(), wrap: err}
 	}
+	wsd.mutation.done = true
 	return affected, err
 }
 
 // WeatherStationDeleteOne is the builder for deleting a single WeatherStation entity.
 type WeatherStationDeleteOne struct {
 	wsd *WeatherStationDelete
+}
+
+// Where appends a list predicates to the WeatherStationDelete builder.
+func (wsdo *WeatherStationDeleteOne) Where(ps ...predicate.WeatherStation) *WeatherStationDeleteOne {
+	wsdo.wsd.mutation.Where(ps...)
+	return wsdo
 }
 
 // Exec executes the deletion query.
@@ -111,5 +82,7 @@ func (wsdo *WeatherStationDeleteOne) Exec(ctx context.Context) error {
 
 // ExecX is like Exec, but panics if an error occurs.
 func (wsdo *WeatherStationDeleteOne) ExecX(ctx context.Context) {
-	wsdo.wsd.ExecX(ctx)
+	if err := wsdo.Exec(ctx); err != nil {
+		panic(err)
+	}
 }

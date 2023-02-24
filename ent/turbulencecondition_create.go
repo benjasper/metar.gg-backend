@@ -62,50 +62,8 @@ func (tcc *TurbulenceConditionCreate) Mutation() *TurbulenceConditionMutation {
 
 // Save creates the TurbulenceCondition in the database.
 func (tcc *TurbulenceConditionCreate) Save(ctx context.Context) (*TurbulenceCondition, error) {
-	var (
-		err  error
-		node *TurbulenceCondition
-	)
 	tcc.defaults()
-	if len(tcc.hooks) == 0 {
-		if err = tcc.check(); err != nil {
-			return nil, err
-		}
-		node, err = tcc.sqlSave(ctx)
-	} else {
-		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
-			mutation, ok := m.(*TurbulenceConditionMutation)
-			if !ok {
-				return nil, fmt.Errorf("unexpected mutation type %T", m)
-			}
-			if err = tcc.check(); err != nil {
-				return nil, err
-			}
-			tcc.mutation = mutation
-			if node, err = tcc.sqlSave(ctx); err != nil {
-				return nil, err
-			}
-			mutation.id = &node.ID
-			mutation.done = true
-			return node, err
-		})
-		for i := len(tcc.hooks) - 1; i >= 0; i-- {
-			if tcc.hooks[i] == nil {
-				return nil, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
-			}
-			mut = tcc.hooks[i](mut)
-		}
-		v, err := mut.Mutate(ctx, tcc.mutation)
-		if err != nil {
-			return nil, err
-		}
-		nv, ok := v.(*TurbulenceCondition)
-		if !ok {
-			return nil, fmt.Errorf("unexpected node type %T returned from TurbulenceConditionMutation", v)
-		}
-		node = nv
-	}
-	return node, err
+	return withHooks[*TurbulenceCondition, TurbulenceConditionMutation](ctx, tcc.sqlSave, tcc.mutation, tcc.hooks)
 }
 
 // SaveX calls Save and panics if Save returns an error.
@@ -153,6 +111,9 @@ func (tcc *TurbulenceConditionCreate) check() error {
 }
 
 func (tcc *TurbulenceConditionCreate) sqlSave(ctx context.Context) (*TurbulenceCondition, error) {
+	if err := tcc.check(); err != nil {
+		return nil, err
+	}
 	_node, _spec := tcc.createSpec()
 	if err := sqlgraph.CreateNode(ctx, tcc.driver, _spec); err != nil {
 		if sqlgraph.IsConstraintError(err) {
@@ -167,19 +128,15 @@ func (tcc *TurbulenceConditionCreate) sqlSave(ctx context.Context) (*TurbulenceC
 			return nil, err
 		}
 	}
+	tcc.mutation.id = &_node.ID
+	tcc.mutation.done = true
 	return _node, nil
 }
 
 func (tcc *TurbulenceConditionCreate) createSpec() (*TurbulenceCondition, *sqlgraph.CreateSpec) {
 	var (
 		_node = &TurbulenceCondition{config: tcc.config}
-		_spec = &sqlgraph.CreateSpec{
-			Table: turbulencecondition.Table,
-			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeUUID,
-				Column: turbulencecondition.FieldID,
-			},
-		}
+		_spec = sqlgraph.NewCreateSpec(turbulencecondition.Table, sqlgraph.NewFieldSpec(turbulencecondition.FieldID, field.TypeUUID))
 	)
 	_spec.OnConflict = tcc.conflict
 	if id, ok := tcc.mutation.ID(); ok {

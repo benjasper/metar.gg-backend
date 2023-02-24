@@ -21,11 +21,9 @@ import (
 // TafQuery is the builder for querying Taf entities.
 type TafQuery struct {
 	config
-	limit             *int
-	offset            *int
-	unique            *bool
+	ctx               *QueryContext
 	order             []OrderFunc
-	fields            []string
+	inters            []Interceptor
 	predicates        []predicate.Taf
 	withStation       *WeatherStationQuery
 	withForecast      *ForecastQuery
@@ -44,26 +42,26 @@ func (tq *TafQuery) Where(ps ...predicate.Taf) *TafQuery {
 	return tq
 }
 
-// Limit adds a limit step to the query.
+// Limit the number of records to be returned by this query.
 func (tq *TafQuery) Limit(limit int) *TafQuery {
-	tq.limit = &limit
+	tq.ctx.Limit = &limit
 	return tq
 }
 
-// Offset adds an offset step to the query.
+// Offset to start from.
 func (tq *TafQuery) Offset(offset int) *TafQuery {
-	tq.offset = &offset
+	tq.ctx.Offset = &offset
 	return tq
 }
 
 // Unique configures the query builder to filter duplicate records on query.
 // By default, unique is set to true, and can be disabled using this method.
 func (tq *TafQuery) Unique(unique bool) *TafQuery {
-	tq.unique = &unique
+	tq.ctx.Unique = &unique
 	return tq
 }
 
-// Order adds an order step to the query.
+// Order specifies how the records should be ordered.
 func (tq *TafQuery) Order(o ...OrderFunc) *TafQuery {
 	tq.order = append(tq.order, o...)
 	return tq
@@ -71,7 +69,7 @@ func (tq *TafQuery) Order(o ...OrderFunc) *TafQuery {
 
 // QueryStation chains the current query on the "station" edge.
 func (tq *TafQuery) QueryStation() *WeatherStationQuery {
-	query := &WeatherStationQuery{config: tq.config}
+	query := (&WeatherStationClient{config: tq.config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := tq.prepareQuery(ctx); err != nil {
 			return nil, err
@@ -93,7 +91,7 @@ func (tq *TafQuery) QueryStation() *WeatherStationQuery {
 
 // QueryForecast chains the current query on the "forecast" edge.
 func (tq *TafQuery) QueryForecast() *ForecastQuery {
-	query := &ForecastQuery{config: tq.config}
+	query := (&ForecastClient{config: tq.config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := tq.prepareQuery(ctx); err != nil {
 			return nil, err
@@ -116,7 +114,7 @@ func (tq *TafQuery) QueryForecast() *ForecastQuery {
 // First returns the first Taf entity from the query.
 // Returns a *NotFoundError when no Taf was found.
 func (tq *TafQuery) First(ctx context.Context) (*Taf, error) {
-	nodes, err := tq.Limit(1).All(ctx)
+	nodes, err := tq.Limit(1).All(setContextOp(ctx, tq.ctx, "First"))
 	if err != nil {
 		return nil, err
 	}
@@ -139,7 +137,7 @@ func (tq *TafQuery) FirstX(ctx context.Context) *Taf {
 // Returns a *NotFoundError when no Taf ID was found.
 func (tq *TafQuery) FirstID(ctx context.Context) (id uuid.UUID, err error) {
 	var ids []uuid.UUID
-	if ids, err = tq.Limit(1).IDs(ctx); err != nil {
+	if ids, err = tq.Limit(1).IDs(setContextOp(ctx, tq.ctx, "FirstID")); err != nil {
 		return
 	}
 	if len(ids) == 0 {
@@ -162,7 +160,7 @@ func (tq *TafQuery) FirstIDX(ctx context.Context) uuid.UUID {
 // Returns a *NotSingularError when more than one Taf entity is found.
 // Returns a *NotFoundError when no Taf entities are found.
 func (tq *TafQuery) Only(ctx context.Context) (*Taf, error) {
-	nodes, err := tq.Limit(2).All(ctx)
+	nodes, err := tq.Limit(2).All(setContextOp(ctx, tq.ctx, "Only"))
 	if err != nil {
 		return nil, err
 	}
@@ -190,7 +188,7 @@ func (tq *TafQuery) OnlyX(ctx context.Context) *Taf {
 // Returns a *NotFoundError when no entities are found.
 func (tq *TafQuery) OnlyID(ctx context.Context) (id uuid.UUID, err error) {
 	var ids []uuid.UUID
-	if ids, err = tq.Limit(2).IDs(ctx); err != nil {
+	if ids, err = tq.Limit(2).IDs(setContextOp(ctx, tq.ctx, "OnlyID")); err != nil {
 		return
 	}
 	switch len(ids) {
@@ -215,10 +213,12 @@ func (tq *TafQuery) OnlyIDX(ctx context.Context) uuid.UUID {
 
 // All executes the query and returns a list of Tafs.
 func (tq *TafQuery) All(ctx context.Context) ([]*Taf, error) {
+	ctx = setContextOp(ctx, tq.ctx, "All")
 	if err := tq.prepareQuery(ctx); err != nil {
 		return nil, err
 	}
-	return tq.sqlAll(ctx)
+	qr := querierAll[[]*Taf, *TafQuery]()
+	return withInterceptors[[]*Taf](ctx, tq, qr, tq.inters)
 }
 
 // AllX is like All, but panics if an error occurs.
@@ -231,9 +231,12 @@ func (tq *TafQuery) AllX(ctx context.Context) []*Taf {
 }
 
 // IDs executes the query and returns a list of Taf IDs.
-func (tq *TafQuery) IDs(ctx context.Context) ([]uuid.UUID, error) {
-	var ids []uuid.UUID
-	if err := tq.Select(taf.FieldID).Scan(ctx, &ids); err != nil {
+func (tq *TafQuery) IDs(ctx context.Context) (ids []uuid.UUID, err error) {
+	if tq.ctx.Unique == nil && tq.path != nil {
+		tq.Unique(true)
+	}
+	ctx = setContextOp(ctx, tq.ctx, "IDs")
+	if err = tq.Select(taf.FieldID).Scan(ctx, &ids); err != nil {
 		return nil, err
 	}
 	return ids, nil
@@ -250,10 +253,11 @@ func (tq *TafQuery) IDsX(ctx context.Context) []uuid.UUID {
 
 // Count returns the count of the given query.
 func (tq *TafQuery) Count(ctx context.Context) (int, error) {
+	ctx = setContextOp(ctx, tq.ctx, "Count")
 	if err := tq.prepareQuery(ctx); err != nil {
 		return 0, err
 	}
-	return tq.sqlCount(ctx)
+	return withInterceptors[int](ctx, tq, querierCount[*TafQuery](), tq.inters)
 }
 
 // CountX is like Count, but panics if an error occurs.
@@ -267,10 +271,15 @@ func (tq *TafQuery) CountX(ctx context.Context) int {
 
 // Exist returns true if the query has elements in the graph.
 func (tq *TafQuery) Exist(ctx context.Context) (bool, error) {
-	if err := tq.prepareQuery(ctx); err != nil {
-		return false, err
+	ctx = setContextOp(ctx, tq.ctx, "Exist")
+	switch _, err := tq.FirstID(ctx); {
+	case IsNotFound(err):
+		return false, nil
+	case err != nil:
+		return false, fmt.Errorf("ent: check existence: %w", err)
+	default:
+		return true, nil
 	}
-	return tq.sqlExist(ctx)
 }
 
 // ExistX is like Exist, but panics if an error occurs.
@@ -290,23 +299,22 @@ func (tq *TafQuery) Clone() *TafQuery {
 	}
 	return &TafQuery{
 		config:       tq.config,
-		limit:        tq.limit,
-		offset:       tq.offset,
+		ctx:          tq.ctx.Clone(),
 		order:        append([]OrderFunc{}, tq.order...),
+		inters:       append([]Interceptor{}, tq.inters...),
 		predicates:   append([]predicate.Taf{}, tq.predicates...),
 		withStation:  tq.withStation.Clone(),
 		withForecast: tq.withForecast.Clone(),
 		// clone intermediate query.
-		sql:    tq.sql.Clone(),
-		path:   tq.path,
-		unique: tq.unique,
+		sql:  tq.sql.Clone(),
+		path: tq.path,
 	}
 }
 
 // WithStation tells the query-builder to eager-load the nodes that are connected to
 // the "station" edge. The optional arguments are used to configure the query builder of the edge.
 func (tq *TafQuery) WithStation(opts ...func(*WeatherStationQuery)) *TafQuery {
-	query := &WeatherStationQuery{config: tq.config}
+	query := (&WeatherStationClient{config: tq.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -317,7 +325,7 @@ func (tq *TafQuery) WithStation(opts ...func(*WeatherStationQuery)) *TafQuery {
 // WithForecast tells the query-builder to eager-load the nodes that are connected to
 // the "forecast" edge. The optional arguments are used to configure the query builder of the edge.
 func (tq *TafQuery) WithForecast(opts ...func(*ForecastQuery)) *TafQuery {
-	query := &ForecastQuery{config: tq.config}
+	query := (&ForecastClient{config: tq.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -340,16 +348,11 @@ func (tq *TafQuery) WithForecast(opts ...func(*ForecastQuery)) *TafQuery {
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
 func (tq *TafQuery) GroupBy(field string, fields ...string) *TafGroupBy {
-	grbuild := &TafGroupBy{config: tq.config}
-	grbuild.fields = append([]string{field}, fields...)
-	grbuild.path = func(ctx context.Context) (prev *sql.Selector, err error) {
-		if err := tq.prepareQuery(ctx); err != nil {
-			return nil, err
-		}
-		return tq.sqlQuery(ctx), nil
-	}
+	tq.ctx.Fields = append([]string{field}, fields...)
+	grbuild := &TafGroupBy{build: tq}
+	grbuild.flds = &tq.ctx.Fields
 	grbuild.label = taf.Label
-	grbuild.flds, grbuild.scan = &grbuild.fields, grbuild.Scan
+	grbuild.scan = grbuild.Scan
 	return grbuild
 }
 
@@ -366,11 +369,11 @@ func (tq *TafQuery) GroupBy(field string, fields ...string) *TafGroupBy {
 //		Select(taf.FieldRawText).
 //		Scan(ctx, &v)
 func (tq *TafQuery) Select(fields ...string) *TafSelect {
-	tq.fields = append(tq.fields, fields...)
-	selbuild := &TafSelect{TafQuery: tq}
-	selbuild.label = taf.Label
-	selbuild.flds, selbuild.scan = &tq.fields, selbuild.Scan
-	return selbuild
+	tq.ctx.Fields = append(tq.ctx.Fields, fields...)
+	sbuild := &TafSelect{TafQuery: tq}
+	sbuild.label = taf.Label
+	sbuild.flds, sbuild.scan = &tq.ctx.Fields, sbuild.Scan
+	return sbuild
 }
 
 // Aggregate returns a TafSelect configured with the given aggregations.
@@ -379,7 +382,17 @@ func (tq *TafQuery) Aggregate(fns ...AggregateFunc) *TafSelect {
 }
 
 func (tq *TafQuery) prepareQuery(ctx context.Context) error {
-	for _, f := range tq.fields {
+	for _, inter := range tq.inters {
+		if inter == nil {
+			return fmt.Errorf("ent: uninitialized interceptor (forgotten import ent/runtime?)")
+		}
+		if trv, ok := inter.(Traverser); ok {
+			if err := trv.Traverse(ctx, tq); err != nil {
+				return err
+			}
+		}
+	}
+	for _, f := range tq.ctx.Fields {
 		if !taf.ValidColumn(f) {
 			return &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for query", f)}
 		}
@@ -472,6 +485,9 @@ func (tq *TafQuery) loadStation(ctx context.Context, query *WeatherStationQuery,
 		}
 		nodeids[fk] = append(nodeids[fk], nodes[i])
 	}
+	if len(ids) == 0 {
+		return nil
+	}
 	query.Where(weatherstation.IDIn(ids...))
 	neighbors, err := query.All(ctx)
 	if err != nil {
@@ -525,41 +541,22 @@ func (tq *TafQuery) sqlCount(ctx context.Context) (int, error) {
 	if len(tq.modifiers) > 0 {
 		_spec.Modifiers = tq.modifiers
 	}
-	_spec.Node.Columns = tq.fields
-	if len(tq.fields) > 0 {
-		_spec.Unique = tq.unique != nil && *tq.unique
+	_spec.Node.Columns = tq.ctx.Fields
+	if len(tq.ctx.Fields) > 0 {
+		_spec.Unique = tq.ctx.Unique != nil && *tq.ctx.Unique
 	}
 	return sqlgraph.CountNodes(ctx, tq.driver, _spec)
 }
 
-func (tq *TafQuery) sqlExist(ctx context.Context) (bool, error) {
-	switch _, err := tq.FirstID(ctx); {
-	case IsNotFound(err):
-		return false, nil
-	case err != nil:
-		return false, fmt.Errorf("ent: check existence: %w", err)
-	default:
-		return true, nil
-	}
-}
-
 func (tq *TafQuery) querySpec() *sqlgraph.QuerySpec {
-	_spec := &sqlgraph.QuerySpec{
-		Node: &sqlgraph.NodeSpec{
-			Table:   taf.Table,
-			Columns: taf.Columns,
-			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeUUID,
-				Column: taf.FieldID,
-			},
-		},
-		From:   tq.sql,
-		Unique: true,
-	}
-	if unique := tq.unique; unique != nil {
+	_spec := sqlgraph.NewQuerySpec(taf.Table, taf.Columns, sqlgraph.NewFieldSpec(taf.FieldID, field.TypeUUID))
+	_spec.From = tq.sql
+	if unique := tq.ctx.Unique; unique != nil {
 		_spec.Unique = *unique
+	} else if tq.path != nil {
+		_spec.Unique = true
 	}
-	if fields := tq.fields; len(fields) > 0 {
+	if fields := tq.ctx.Fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))
 		_spec.Node.Columns = append(_spec.Node.Columns, taf.FieldID)
 		for i := range fields {
@@ -575,10 +572,10 @@ func (tq *TafQuery) querySpec() *sqlgraph.QuerySpec {
 			}
 		}
 	}
-	if limit := tq.limit; limit != nil {
+	if limit := tq.ctx.Limit; limit != nil {
 		_spec.Limit = *limit
 	}
-	if offset := tq.offset; offset != nil {
+	if offset := tq.ctx.Offset; offset != nil {
 		_spec.Offset = *offset
 	}
 	if ps := tq.order; len(ps) > 0 {
@@ -594,7 +591,7 @@ func (tq *TafQuery) querySpec() *sqlgraph.QuerySpec {
 func (tq *TafQuery) sqlQuery(ctx context.Context) *sql.Selector {
 	builder := sql.Dialect(tq.driver.Dialect())
 	t1 := builder.Table(taf.Table)
-	columns := tq.fields
+	columns := tq.ctx.Fields
 	if len(columns) == 0 {
 		columns = taf.Columns
 	}
@@ -603,7 +600,7 @@ func (tq *TafQuery) sqlQuery(ctx context.Context) *sql.Selector {
 		selector = tq.sql
 		selector.Select(selector.Columns(columns...)...)
 	}
-	if tq.unique != nil && *tq.unique {
+	if tq.ctx.Unique != nil && *tq.ctx.Unique {
 		selector.Distinct()
 	}
 	for _, m := range tq.modifiers {
@@ -615,12 +612,12 @@ func (tq *TafQuery) sqlQuery(ctx context.Context) *sql.Selector {
 	for _, p := range tq.order {
 		p(selector)
 	}
-	if offset := tq.offset; offset != nil {
+	if offset := tq.ctx.Offset; offset != nil {
 		// limit is mandatory for offset clause. We start
 		// with default value, and override it below if needed.
 		selector.Offset(*offset).Limit(math.MaxInt32)
 	}
-	if limit := tq.limit; limit != nil {
+	if limit := tq.ctx.Limit; limit != nil {
 		selector.Limit(*limit)
 	}
 	return selector
@@ -635,7 +632,7 @@ func (tq *TafQuery) Modify(modifiers ...func(s *sql.Selector)) *TafSelect {
 // WithNamedForecast tells the query-builder to eager-load the nodes that are connected to the "forecast"
 // edge with the given name. The optional arguments are used to configure the query builder of the edge.
 func (tq *TafQuery) WithNamedForecast(name string, opts ...func(*ForecastQuery)) *TafQuery {
-	query := &ForecastQuery{config: tq.config}
+	query := (&ForecastClient{config: tq.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -648,13 +645,8 @@ func (tq *TafQuery) WithNamedForecast(name string, opts ...func(*ForecastQuery))
 
 // TafGroupBy is the group-by builder for Taf entities.
 type TafGroupBy struct {
-	config
 	selector
-	fields []string
-	fns    []AggregateFunc
-	// intermediate query (i.e. traversal path).
-	sql  *sql.Selector
-	path func(context.Context) (*sql.Selector, error)
+	build *TafQuery
 }
 
 // Aggregate adds the given aggregation functions to the group-by query.
@@ -663,58 +655,46 @@ func (tgb *TafGroupBy) Aggregate(fns ...AggregateFunc) *TafGroupBy {
 	return tgb
 }
 
-// Scan applies the group-by query and scans the result into the given value.
+// Scan applies the selector query and scans the result into the given value.
 func (tgb *TafGroupBy) Scan(ctx context.Context, v any) error {
-	query, err := tgb.path(ctx)
-	if err != nil {
+	ctx = setContextOp(ctx, tgb.build.ctx, "GroupBy")
+	if err := tgb.build.prepareQuery(ctx); err != nil {
 		return err
 	}
-	tgb.sql = query
-	return tgb.sqlScan(ctx, v)
+	return scanWithInterceptors[*TafQuery, *TafGroupBy](ctx, tgb.build, tgb, tgb.build.inters, v)
 }
 
-func (tgb *TafGroupBy) sqlScan(ctx context.Context, v any) error {
-	for _, f := range tgb.fields {
-		if !taf.ValidColumn(f) {
-			return &ValidationError{Name: f, err: fmt.Errorf("invalid field %q for group-by", f)}
-		}
+func (tgb *TafGroupBy) sqlScan(ctx context.Context, root *TafQuery, v any) error {
+	selector := root.sqlQuery(ctx).Select()
+	aggregation := make([]string, 0, len(tgb.fns))
+	for _, fn := range tgb.fns {
+		aggregation = append(aggregation, fn(selector))
 	}
-	selector := tgb.sqlQuery()
+	if len(selector.SelectedColumns()) == 0 {
+		columns := make([]string, 0, len(*tgb.flds)+len(tgb.fns))
+		for _, f := range *tgb.flds {
+			columns = append(columns, selector.C(f))
+		}
+		columns = append(columns, aggregation...)
+		selector.Select(columns...)
+	}
+	selector.GroupBy(selector.Columns(*tgb.flds...)...)
 	if err := selector.Err(); err != nil {
 		return err
 	}
 	rows := &sql.Rows{}
 	query, args := selector.Query()
-	if err := tgb.driver.Query(ctx, query, args, rows); err != nil {
+	if err := tgb.build.driver.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
 	defer rows.Close()
 	return sql.ScanSlice(rows, v)
 }
 
-func (tgb *TafGroupBy) sqlQuery() *sql.Selector {
-	selector := tgb.sql.Select()
-	aggregation := make([]string, 0, len(tgb.fns))
-	for _, fn := range tgb.fns {
-		aggregation = append(aggregation, fn(selector))
-	}
-	if len(selector.SelectedColumns()) == 0 {
-		columns := make([]string, 0, len(tgb.fields)+len(tgb.fns))
-		for _, f := range tgb.fields {
-			columns = append(columns, selector.C(f))
-		}
-		columns = append(columns, aggregation...)
-		selector.Select(columns...)
-	}
-	return selector.GroupBy(selector.Columns(tgb.fields...)...)
-}
-
 // TafSelect is the builder for selecting fields of Taf entities.
 type TafSelect struct {
 	*TafQuery
 	selector
-	// intermediate query (i.e. traversal path).
-	sql *sql.Selector
 }
 
 // Aggregate adds the given aggregation functions to the selector query.
@@ -725,26 +705,27 @@ func (ts *TafSelect) Aggregate(fns ...AggregateFunc) *TafSelect {
 
 // Scan applies the selector query and scans the result into the given value.
 func (ts *TafSelect) Scan(ctx context.Context, v any) error {
+	ctx = setContextOp(ctx, ts.ctx, "Select")
 	if err := ts.prepareQuery(ctx); err != nil {
 		return err
 	}
-	ts.sql = ts.TafQuery.sqlQuery(ctx)
-	return ts.sqlScan(ctx, v)
+	return scanWithInterceptors[*TafQuery, *TafSelect](ctx, ts.TafQuery, ts, ts.inters, v)
 }
 
-func (ts *TafSelect) sqlScan(ctx context.Context, v any) error {
+func (ts *TafSelect) sqlScan(ctx context.Context, root *TafQuery, v any) error {
+	selector := root.sqlQuery(ctx)
 	aggregation := make([]string, 0, len(ts.fns))
 	for _, fn := range ts.fns {
-		aggregation = append(aggregation, fn(ts.sql))
+		aggregation = append(aggregation, fn(selector))
 	}
 	switch n := len(*ts.selector.flds); {
 	case n == 0 && len(aggregation) > 0:
-		ts.sql.Select(aggregation...)
+		selector.Select(aggregation...)
 	case n != 0 && len(aggregation) > 0:
-		ts.sql.AppendSelect(aggregation...)
+		selector.AppendSelect(aggregation...)
 	}
 	rows := &sql.Rows{}
-	query, args := ts.sql.Query()
+	query, args := selector.Query()
 	if err := ts.driver.Query(ctx, query, args, rows); err != nil {
 		return err
 	}

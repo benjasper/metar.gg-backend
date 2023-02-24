@@ -13,2494 +13,1622 @@ import (
 
 // ID filters vertices based on their ID field.
 func ID(id uuid.UUID) predicate.Metar {
-	return predicate.Metar(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldID), id))
-	})
+	return predicate.Metar(sql.FieldEQ(FieldID, id))
 }
 
 // IDEQ applies the EQ predicate on the ID field.
 func IDEQ(id uuid.UUID) predicate.Metar {
-	return predicate.Metar(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldID), id))
-	})
+	return predicate.Metar(sql.FieldEQ(FieldID, id))
 }
 
 // IDNEQ applies the NEQ predicate on the ID field.
 func IDNEQ(id uuid.UUID) predicate.Metar {
-	return predicate.Metar(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldID), id))
-	})
+	return predicate.Metar(sql.FieldNEQ(FieldID, id))
 }
 
 // IDIn applies the In predicate on the ID field.
 func IDIn(ids ...uuid.UUID) predicate.Metar {
-	return predicate.Metar(func(s *sql.Selector) {
-		v := make([]any, len(ids))
-		for i := range v {
-			v[i] = ids[i]
-		}
-		s.Where(sql.In(s.C(FieldID), v...))
-	})
+	return predicate.Metar(sql.FieldIn(FieldID, ids...))
 }
 
 // IDNotIn applies the NotIn predicate on the ID field.
 func IDNotIn(ids ...uuid.UUID) predicate.Metar {
-	return predicate.Metar(func(s *sql.Selector) {
-		v := make([]any, len(ids))
-		for i := range v {
-			v[i] = ids[i]
-		}
-		s.Where(sql.NotIn(s.C(FieldID), v...))
-	})
+	return predicate.Metar(sql.FieldNotIn(FieldID, ids...))
 }
 
 // IDGT applies the GT predicate on the ID field.
 func IDGT(id uuid.UUID) predicate.Metar {
-	return predicate.Metar(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldID), id))
-	})
+	return predicate.Metar(sql.FieldGT(FieldID, id))
 }
 
 // IDGTE applies the GTE predicate on the ID field.
 func IDGTE(id uuid.UUID) predicate.Metar {
-	return predicate.Metar(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldID), id))
-	})
+	return predicate.Metar(sql.FieldGTE(FieldID, id))
 }
 
 // IDLT applies the LT predicate on the ID field.
 func IDLT(id uuid.UUID) predicate.Metar {
-	return predicate.Metar(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldID), id))
-	})
+	return predicate.Metar(sql.FieldLT(FieldID, id))
 }
 
 // IDLTE applies the LTE predicate on the ID field.
 func IDLTE(id uuid.UUID) predicate.Metar {
-	return predicate.Metar(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldID), id))
-	})
+	return predicate.Metar(sql.FieldLTE(FieldID, id))
 }
 
 // RawText applies equality check predicate on the "raw_text" field. It's identical to RawTextEQ.
 func RawText(v string) predicate.Metar {
-	return predicate.Metar(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldRawText), v))
-	})
+	return predicate.Metar(sql.FieldEQ(FieldRawText, v))
 }
 
 // ObservationTime applies equality check predicate on the "observation_time" field. It's identical to ObservationTimeEQ.
 func ObservationTime(v time.Time) predicate.Metar {
-	return predicate.Metar(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldObservationTime), v))
-	})
+	return predicate.Metar(sql.FieldEQ(FieldObservationTime, v))
 }
 
 // ImportTime applies equality check predicate on the "import_time" field. It's identical to ImportTimeEQ.
 func ImportTime(v time.Time) predicate.Metar {
-	return predicate.Metar(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldImportTime), v))
-	})
+	return predicate.Metar(sql.FieldEQ(FieldImportTime, v))
 }
 
 // NextImportTimePrediction applies equality check predicate on the "next_import_time_prediction" field. It's identical to NextImportTimePredictionEQ.
 func NextImportTimePrediction(v time.Time) predicate.Metar {
-	return predicate.Metar(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldNextImportTimePrediction), v))
-	})
+	return predicate.Metar(sql.FieldEQ(FieldNextImportTimePrediction, v))
 }
 
 // Temperature applies equality check predicate on the "temperature" field. It's identical to TemperatureEQ.
 func Temperature(v float64) predicate.Metar {
-	return predicate.Metar(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldTemperature), v))
-	})
+	return predicate.Metar(sql.FieldEQ(FieldTemperature, v))
 }
 
 // Dewpoint applies equality check predicate on the "dewpoint" field. It's identical to DewpointEQ.
 func Dewpoint(v float64) predicate.Metar {
-	return predicate.Metar(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldDewpoint), v))
-	})
+	return predicate.Metar(sql.FieldEQ(FieldDewpoint, v))
 }
 
 // WindSpeed applies equality check predicate on the "wind_speed" field. It's identical to WindSpeedEQ.
 func WindSpeed(v int) predicate.Metar {
-	return predicate.Metar(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldWindSpeed), v))
-	})
+	return predicate.Metar(sql.FieldEQ(FieldWindSpeed, v))
 }
 
 // WindGust applies equality check predicate on the "wind_gust" field. It's identical to WindGustEQ.
 func WindGust(v int) predicate.Metar {
-	return predicate.Metar(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldWindGust), v))
-	})
+	return predicate.Metar(sql.FieldEQ(FieldWindGust, v))
 }
 
 // WindDirection applies equality check predicate on the "wind_direction" field. It's identical to WindDirectionEQ.
 func WindDirection(v int) predicate.Metar {
-	return predicate.Metar(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldWindDirection), v))
-	})
+	return predicate.Metar(sql.FieldEQ(FieldWindDirection, v))
 }
 
 // Visibility applies equality check predicate on the "visibility" field. It's identical to VisibilityEQ.
 func Visibility(v float64) predicate.Metar {
-	return predicate.Metar(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldVisibility), v))
-	})
+	return predicate.Metar(sql.FieldEQ(FieldVisibility, v))
 }
 
 // Altimeter applies equality check predicate on the "altimeter" field. It's identical to AltimeterEQ.
 func Altimeter(v float64) predicate.Metar {
-	return predicate.Metar(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldAltimeter), v))
-	})
+	return predicate.Metar(sql.FieldEQ(FieldAltimeter, v))
 }
 
 // PresentWeather applies equality check predicate on the "present_weather" field. It's identical to PresentWeatherEQ.
 func PresentWeather(v string) predicate.Metar {
-	return predicate.Metar(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldPresentWeather), v))
-	})
+	return predicate.Metar(sql.FieldEQ(FieldPresentWeather, v))
 }
 
 // QualityControlCorrected applies equality check predicate on the "quality_control_corrected" field. It's identical to QualityControlCorrectedEQ.
 func QualityControlCorrected(v bool) predicate.Metar {
-	return predicate.Metar(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldQualityControlCorrected), v))
-	})
+	return predicate.Metar(sql.FieldEQ(FieldQualityControlCorrected, v))
 }
 
 // QualityControlAutoStation applies equality check predicate on the "quality_control_auto_station" field. It's identical to QualityControlAutoStationEQ.
 func QualityControlAutoStation(v bool) predicate.Metar {
-	return predicate.Metar(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldQualityControlAutoStation), v))
-	})
+	return predicate.Metar(sql.FieldEQ(FieldQualityControlAutoStation, v))
 }
 
 // QualityControlMaintenanceIndicatorOn applies equality check predicate on the "quality_control_maintenance_indicator_on" field. It's identical to QualityControlMaintenanceIndicatorOnEQ.
 func QualityControlMaintenanceIndicatorOn(v bool) predicate.Metar {
-	return predicate.Metar(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldQualityControlMaintenanceIndicatorOn), v))
-	})
+	return predicate.Metar(sql.FieldEQ(FieldQualityControlMaintenanceIndicatorOn, v))
 }
 
 // QualityControlNoSignal applies equality check predicate on the "quality_control_no_signal" field. It's identical to QualityControlNoSignalEQ.
 func QualityControlNoSignal(v bool) predicate.Metar {
-	return predicate.Metar(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldQualityControlNoSignal), v))
-	})
+	return predicate.Metar(sql.FieldEQ(FieldQualityControlNoSignal, v))
 }
 
 // QualityControlLightningSensorOff applies equality check predicate on the "quality_control_lightning_sensor_off" field. It's identical to QualityControlLightningSensorOffEQ.
 func QualityControlLightningSensorOff(v bool) predicate.Metar {
-	return predicate.Metar(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldQualityControlLightningSensorOff), v))
-	})
+	return predicate.Metar(sql.FieldEQ(FieldQualityControlLightningSensorOff, v))
 }
 
 // QualityControlFreezingRainSensorOff applies equality check predicate on the "quality_control_freezing_rain_sensor_off" field. It's identical to QualityControlFreezingRainSensorOffEQ.
 func QualityControlFreezingRainSensorOff(v bool) predicate.Metar {
-	return predicate.Metar(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldQualityControlFreezingRainSensorOff), v))
-	})
+	return predicate.Metar(sql.FieldEQ(FieldQualityControlFreezingRainSensorOff, v))
 }
 
 // QualityControlPresentWeatherSensorOff applies equality check predicate on the "quality_control_present_weather_sensor_off" field. It's identical to QualityControlPresentWeatherSensorOffEQ.
 func QualityControlPresentWeatherSensorOff(v bool) predicate.Metar {
-	return predicate.Metar(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldQualityControlPresentWeatherSensorOff), v))
-	})
+	return predicate.Metar(sql.FieldEQ(FieldQualityControlPresentWeatherSensorOff, v))
 }
 
 // SeaLevelPressure applies equality check predicate on the "sea_level_pressure" field. It's identical to SeaLevelPressureEQ.
 func SeaLevelPressure(v float64) predicate.Metar {
-	return predicate.Metar(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldSeaLevelPressure), v))
-	})
+	return predicate.Metar(sql.FieldEQ(FieldSeaLevelPressure, v))
 }
 
 // PressureTendency applies equality check predicate on the "pressure_tendency" field. It's identical to PressureTendencyEQ.
 func PressureTendency(v float64) predicate.Metar {
-	return predicate.Metar(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldPressureTendency), v))
-	})
+	return predicate.Metar(sql.FieldEQ(FieldPressureTendency, v))
 }
 
 // MaxTemp6 applies equality check predicate on the "max_temp_6" field. It's identical to MaxTemp6EQ.
 func MaxTemp6(v float64) predicate.Metar {
-	return predicate.Metar(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldMaxTemp6), v))
-	})
+	return predicate.Metar(sql.FieldEQ(FieldMaxTemp6, v))
 }
 
 // MinTemp6 applies equality check predicate on the "min_temp_6" field. It's identical to MinTemp6EQ.
 func MinTemp6(v float64) predicate.Metar {
-	return predicate.Metar(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldMinTemp6), v))
-	})
+	return predicate.Metar(sql.FieldEQ(FieldMinTemp6, v))
 }
 
 // MaxTemp24 applies equality check predicate on the "max_temp_24" field. It's identical to MaxTemp24EQ.
 func MaxTemp24(v float64) predicate.Metar {
-	return predicate.Metar(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldMaxTemp24), v))
-	})
+	return predicate.Metar(sql.FieldEQ(FieldMaxTemp24, v))
 }
 
 // MinTemp24 applies equality check predicate on the "min_temp_24" field. It's identical to MinTemp24EQ.
 func MinTemp24(v float64) predicate.Metar {
-	return predicate.Metar(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldMinTemp24), v))
-	})
+	return predicate.Metar(sql.FieldEQ(FieldMinTemp24, v))
 }
 
 // Precipitation applies equality check predicate on the "precipitation" field. It's identical to PrecipitationEQ.
 func Precipitation(v float64) predicate.Metar {
-	return predicate.Metar(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldPrecipitation), v))
-	})
+	return predicate.Metar(sql.FieldEQ(FieldPrecipitation, v))
 }
 
 // Precipitation3 applies equality check predicate on the "precipitation_3" field. It's identical to Precipitation3EQ.
 func Precipitation3(v float64) predicate.Metar {
-	return predicate.Metar(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldPrecipitation3), v))
-	})
+	return predicate.Metar(sql.FieldEQ(FieldPrecipitation3, v))
 }
 
 // Precipitation6 applies equality check predicate on the "precipitation_6" field. It's identical to Precipitation6EQ.
 func Precipitation6(v float64) predicate.Metar {
-	return predicate.Metar(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldPrecipitation6), v))
-	})
+	return predicate.Metar(sql.FieldEQ(FieldPrecipitation6, v))
 }
 
 // Precipitation24 applies equality check predicate on the "precipitation_24" field. It's identical to Precipitation24EQ.
 func Precipitation24(v float64) predicate.Metar {
-	return predicate.Metar(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldPrecipitation24), v))
-	})
+	return predicate.Metar(sql.FieldEQ(FieldPrecipitation24, v))
 }
 
 // SnowDepth applies equality check predicate on the "snow_depth" field. It's identical to SnowDepthEQ.
 func SnowDepth(v float64) predicate.Metar {
-	return predicate.Metar(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldSnowDepth), v))
-	})
+	return predicate.Metar(sql.FieldEQ(FieldSnowDepth, v))
 }
 
 // VertVis applies equality check predicate on the "vert_vis" field. It's identical to VertVisEQ.
 func VertVis(v float64) predicate.Metar {
-	return predicate.Metar(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldVertVis), v))
-	})
+	return predicate.Metar(sql.FieldEQ(FieldVertVis, v))
 }
 
 // Hash applies equality check predicate on the "hash" field. It's identical to HashEQ.
 func Hash(v string) predicate.Metar {
-	return predicate.Metar(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldHash), v))
-	})
+	return predicate.Metar(sql.FieldEQ(FieldHash, v))
 }
 
 // RawTextEQ applies the EQ predicate on the "raw_text" field.
 func RawTextEQ(v string) predicate.Metar {
-	return predicate.Metar(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldRawText), v))
-	})
+	return predicate.Metar(sql.FieldEQ(FieldRawText, v))
 }
 
 // RawTextNEQ applies the NEQ predicate on the "raw_text" field.
 func RawTextNEQ(v string) predicate.Metar {
-	return predicate.Metar(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldRawText), v))
-	})
+	return predicate.Metar(sql.FieldNEQ(FieldRawText, v))
 }
 
 // RawTextIn applies the In predicate on the "raw_text" field.
 func RawTextIn(vs ...string) predicate.Metar {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Metar(func(s *sql.Selector) {
-		s.Where(sql.In(s.C(FieldRawText), v...))
-	})
+	return predicate.Metar(sql.FieldIn(FieldRawText, vs...))
 }
 
 // RawTextNotIn applies the NotIn predicate on the "raw_text" field.
 func RawTextNotIn(vs ...string) predicate.Metar {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Metar(func(s *sql.Selector) {
-		s.Where(sql.NotIn(s.C(FieldRawText), v...))
-	})
+	return predicate.Metar(sql.FieldNotIn(FieldRawText, vs...))
 }
 
 // RawTextGT applies the GT predicate on the "raw_text" field.
 func RawTextGT(v string) predicate.Metar {
-	return predicate.Metar(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldRawText), v))
-	})
+	return predicate.Metar(sql.FieldGT(FieldRawText, v))
 }
 
 // RawTextGTE applies the GTE predicate on the "raw_text" field.
 func RawTextGTE(v string) predicate.Metar {
-	return predicate.Metar(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldRawText), v))
-	})
+	return predicate.Metar(sql.FieldGTE(FieldRawText, v))
 }
 
 // RawTextLT applies the LT predicate on the "raw_text" field.
 func RawTextLT(v string) predicate.Metar {
-	return predicate.Metar(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldRawText), v))
-	})
+	return predicate.Metar(sql.FieldLT(FieldRawText, v))
 }
 
 // RawTextLTE applies the LTE predicate on the "raw_text" field.
 func RawTextLTE(v string) predicate.Metar {
-	return predicate.Metar(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldRawText), v))
-	})
+	return predicate.Metar(sql.FieldLTE(FieldRawText, v))
 }
 
 // RawTextContains applies the Contains predicate on the "raw_text" field.
 func RawTextContains(v string) predicate.Metar {
-	return predicate.Metar(func(s *sql.Selector) {
-		s.Where(sql.Contains(s.C(FieldRawText), v))
-	})
+	return predicate.Metar(sql.FieldContains(FieldRawText, v))
 }
 
 // RawTextHasPrefix applies the HasPrefix predicate on the "raw_text" field.
 func RawTextHasPrefix(v string) predicate.Metar {
-	return predicate.Metar(func(s *sql.Selector) {
-		s.Where(sql.HasPrefix(s.C(FieldRawText), v))
-	})
+	return predicate.Metar(sql.FieldHasPrefix(FieldRawText, v))
 }
 
 // RawTextHasSuffix applies the HasSuffix predicate on the "raw_text" field.
 func RawTextHasSuffix(v string) predicate.Metar {
-	return predicate.Metar(func(s *sql.Selector) {
-		s.Where(sql.HasSuffix(s.C(FieldRawText), v))
-	})
+	return predicate.Metar(sql.FieldHasSuffix(FieldRawText, v))
 }
 
 // RawTextEqualFold applies the EqualFold predicate on the "raw_text" field.
 func RawTextEqualFold(v string) predicate.Metar {
-	return predicate.Metar(func(s *sql.Selector) {
-		s.Where(sql.EqualFold(s.C(FieldRawText), v))
-	})
+	return predicate.Metar(sql.FieldEqualFold(FieldRawText, v))
 }
 
 // RawTextContainsFold applies the ContainsFold predicate on the "raw_text" field.
 func RawTextContainsFold(v string) predicate.Metar {
-	return predicate.Metar(func(s *sql.Selector) {
-		s.Where(sql.ContainsFold(s.C(FieldRawText), v))
-	})
+	return predicate.Metar(sql.FieldContainsFold(FieldRawText, v))
 }
 
 // ObservationTimeEQ applies the EQ predicate on the "observation_time" field.
 func ObservationTimeEQ(v time.Time) predicate.Metar {
-	return predicate.Metar(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldObservationTime), v))
-	})
+	return predicate.Metar(sql.FieldEQ(FieldObservationTime, v))
 }
 
 // ObservationTimeNEQ applies the NEQ predicate on the "observation_time" field.
 func ObservationTimeNEQ(v time.Time) predicate.Metar {
-	return predicate.Metar(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldObservationTime), v))
-	})
+	return predicate.Metar(sql.FieldNEQ(FieldObservationTime, v))
 }
 
 // ObservationTimeIn applies the In predicate on the "observation_time" field.
 func ObservationTimeIn(vs ...time.Time) predicate.Metar {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Metar(func(s *sql.Selector) {
-		s.Where(sql.In(s.C(FieldObservationTime), v...))
-	})
+	return predicate.Metar(sql.FieldIn(FieldObservationTime, vs...))
 }
 
 // ObservationTimeNotIn applies the NotIn predicate on the "observation_time" field.
 func ObservationTimeNotIn(vs ...time.Time) predicate.Metar {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Metar(func(s *sql.Selector) {
-		s.Where(sql.NotIn(s.C(FieldObservationTime), v...))
-	})
+	return predicate.Metar(sql.FieldNotIn(FieldObservationTime, vs...))
 }
 
 // ObservationTimeGT applies the GT predicate on the "observation_time" field.
 func ObservationTimeGT(v time.Time) predicate.Metar {
-	return predicate.Metar(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldObservationTime), v))
-	})
+	return predicate.Metar(sql.FieldGT(FieldObservationTime, v))
 }
 
 // ObservationTimeGTE applies the GTE predicate on the "observation_time" field.
 func ObservationTimeGTE(v time.Time) predicate.Metar {
-	return predicate.Metar(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldObservationTime), v))
-	})
+	return predicate.Metar(sql.FieldGTE(FieldObservationTime, v))
 }
 
 // ObservationTimeLT applies the LT predicate on the "observation_time" field.
 func ObservationTimeLT(v time.Time) predicate.Metar {
-	return predicate.Metar(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldObservationTime), v))
-	})
+	return predicate.Metar(sql.FieldLT(FieldObservationTime, v))
 }
 
 // ObservationTimeLTE applies the LTE predicate on the "observation_time" field.
 func ObservationTimeLTE(v time.Time) predicate.Metar {
-	return predicate.Metar(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldObservationTime), v))
-	})
+	return predicate.Metar(sql.FieldLTE(FieldObservationTime, v))
 }
 
 // ImportTimeEQ applies the EQ predicate on the "import_time" field.
 func ImportTimeEQ(v time.Time) predicate.Metar {
-	return predicate.Metar(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldImportTime), v))
-	})
+	return predicate.Metar(sql.FieldEQ(FieldImportTime, v))
 }
 
 // ImportTimeNEQ applies the NEQ predicate on the "import_time" field.
 func ImportTimeNEQ(v time.Time) predicate.Metar {
-	return predicate.Metar(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldImportTime), v))
-	})
+	return predicate.Metar(sql.FieldNEQ(FieldImportTime, v))
 }
 
 // ImportTimeIn applies the In predicate on the "import_time" field.
 func ImportTimeIn(vs ...time.Time) predicate.Metar {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Metar(func(s *sql.Selector) {
-		s.Where(sql.In(s.C(FieldImportTime), v...))
-	})
+	return predicate.Metar(sql.FieldIn(FieldImportTime, vs...))
 }
 
 // ImportTimeNotIn applies the NotIn predicate on the "import_time" field.
 func ImportTimeNotIn(vs ...time.Time) predicate.Metar {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Metar(func(s *sql.Selector) {
-		s.Where(sql.NotIn(s.C(FieldImportTime), v...))
-	})
+	return predicate.Metar(sql.FieldNotIn(FieldImportTime, vs...))
 }
 
 // ImportTimeGT applies the GT predicate on the "import_time" field.
 func ImportTimeGT(v time.Time) predicate.Metar {
-	return predicate.Metar(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldImportTime), v))
-	})
+	return predicate.Metar(sql.FieldGT(FieldImportTime, v))
 }
 
 // ImportTimeGTE applies the GTE predicate on the "import_time" field.
 func ImportTimeGTE(v time.Time) predicate.Metar {
-	return predicate.Metar(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldImportTime), v))
-	})
+	return predicate.Metar(sql.FieldGTE(FieldImportTime, v))
 }
 
 // ImportTimeLT applies the LT predicate on the "import_time" field.
 func ImportTimeLT(v time.Time) predicate.Metar {
-	return predicate.Metar(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldImportTime), v))
-	})
+	return predicate.Metar(sql.FieldLT(FieldImportTime, v))
 }
 
 // ImportTimeLTE applies the LTE predicate on the "import_time" field.
 func ImportTimeLTE(v time.Time) predicate.Metar {
-	return predicate.Metar(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldImportTime), v))
-	})
+	return predicate.Metar(sql.FieldLTE(FieldImportTime, v))
 }
 
 // NextImportTimePredictionEQ applies the EQ predicate on the "next_import_time_prediction" field.
 func NextImportTimePredictionEQ(v time.Time) predicate.Metar {
-	return predicate.Metar(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldNextImportTimePrediction), v))
-	})
+	return predicate.Metar(sql.FieldEQ(FieldNextImportTimePrediction, v))
 }
 
 // NextImportTimePredictionNEQ applies the NEQ predicate on the "next_import_time_prediction" field.
 func NextImportTimePredictionNEQ(v time.Time) predicate.Metar {
-	return predicate.Metar(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldNextImportTimePrediction), v))
-	})
+	return predicate.Metar(sql.FieldNEQ(FieldNextImportTimePrediction, v))
 }
 
 // NextImportTimePredictionIn applies the In predicate on the "next_import_time_prediction" field.
 func NextImportTimePredictionIn(vs ...time.Time) predicate.Metar {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Metar(func(s *sql.Selector) {
-		s.Where(sql.In(s.C(FieldNextImportTimePrediction), v...))
-	})
+	return predicate.Metar(sql.FieldIn(FieldNextImportTimePrediction, vs...))
 }
 
 // NextImportTimePredictionNotIn applies the NotIn predicate on the "next_import_time_prediction" field.
 func NextImportTimePredictionNotIn(vs ...time.Time) predicate.Metar {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Metar(func(s *sql.Selector) {
-		s.Where(sql.NotIn(s.C(FieldNextImportTimePrediction), v...))
-	})
+	return predicate.Metar(sql.FieldNotIn(FieldNextImportTimePrediction, vs...))
 }
 
 // NextImportTimePredictionGT applies the GT predicate on the "next_import_time_prediction" field.
 func NextImportTimePredictionGT(v time.Time) predicate.Metar {
-	return predicate.Metar(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldNextImportTimePrediction), v))
-	})
+	return predicate.Metar(sql.FieldGT(FieldNextImportTimePrediction, v))
 }
 
 // NextImportTimePredictionGTE applies the GTE predicate on the "next_import_time_prediction" field.
 func NextImportTimePredictionGTE(v time.Time) predicate.Metar {
-	return predicate.Metar(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldNextImportTimePrediction), v))
-	})
+	return predicate.Metar(sql.FieldGTE(FieldNextImportTimePrediction, v))
 }
 
 // NextImportTimePredictionLT applies the LT predicate on the "next_import_time_prediction" field.
 func NextImportTimePredictionLT(v time.Time) predicate.Metar {
-	return predicate.Metar(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldNextImportTimePrediction), v))
-	})
+	return predicate.Metar(sql.FieldLT(FieldNextImportTimePrediction, v))
 }
 
 // NextImportTimePredictionLTE applies the LTE predicate on the "next_import_time_prediction" field.
 func NextImportTimePredictionLTE(v time.Time) predicate.Metar {
-	return predicate.Metar(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldNextImportTimePrediction), v))
-	})
+	return predicate.Metar(sql.FieldLTE(FieldNextImportTimePrediction, v))
 }
 
 // NextImportTimePredictionIsNil applies the IsNil predicate on the "next_import_time_prediction" field.
 func NextImportTimePredictionIsNil() predicate.Metar {
-	return predicate.Metar(func(s *sql.Selector) {
-		s.Where(sql.IsNull(s.C(FieldNextImportTimePrediction)))
-	})
+	return predicate.Metar(sql.FieldIsNull(FieldNextImportTimePrediction))
 }
 
 // NextImportTimePredictionNotNil applies the NotNil predicate on the "next_import_time_prediction" field.
 func NextImportTimePredictionNotNil() predicate.Metar {
-	return predicate.Metar(func(s *sql.Selector) {
-		s.Where(sql.NotNull(s.C(FieldNextImportTimePrediction)))
-	})
+	return predicate.Metar(sql.FieldNotNull(FieldNextImportTimePrediction))
 }
 
 // TemperatureEQ applies the EQ predicate on the "temperature" field.
 func TemperatureEQ(v float64) predicate.Metar {
-	return predicate.Metar(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldTemperature), v))
-	})
+	return predicate.Metar(sql.FieldEQ(FieldTemperature, v))
 }
 
 // TemperatureNEQ applies the NEQ predicate on the "temperature" field.
 func TemperatureNEQ(v float64) predicate.Metar {
-	return predicate.Metar(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldTemperature), v))
-	})
+	return predicate.Metar(sql.FieldNEQ(FieldTemperature, v))
 }
 
 // TemperatureIn applies the In predicate on the "temperature" field.
 func TemperatureIn(vs ...float64) predicate.Metar {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Metar(func(s *sql.Selector) {
-		s.Where(sql.In(s.C(FieldTemperature), v...))
-	})
+	return predicate.Metar(sql.FieldIn(FieldTemperature, vs...))
 }
 
 // TemperatureNotIn applies the NotIn predicate on the "temperature" field.
 func TemperatureNotIn(vs ...float64) predicate.Metar {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Metar(func(s *sql.Selector) {
-		s.Where(sql.NotIn(s.C(FieldTemperature), v...))
-	})
+	return predicate.Metar(sql.FieldNotIn(FieldTemperature, vs...))
 }
 
 // TemperatureGT applies the GT predicate on the "temperature" field.
 func TemperatureGT(v float64) predicate.Metar {
-	return predicate.Metar(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldTemperature), v))
-	})
+	return predicate.Metar(sql.FieldGT(FieldTemperature, v))
 }
 
 // TemperatureGTE applies the GTE predicate on the "temperature" field.
 func TemperatureGTE(v float64) predicate.Metar {
-	return predicate.Metar(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldTemperature), v))
-	})
+	return predicate.Metar(sql.FieldGTE(FieldTemperature, v))
 }
 
 // TemperatureLT applies the LT predicate on the "temperature" field.
 func TemperatureLT(v float64) predicate.Metar {
-	return predicate.Metar(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldTemperature), v))
-	})
+	return predicate.Metar(sql.FieldLT(FieldTemperature, v))
 }
 
 // TemperatureLTE applies the LTE predicate on the "temperature" field.
 func TemperatureLTE(v float64) predicate.Metar {
-	return predicate.Metar(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldTemperature), v))
-	})
+	return predicate.Metar(sql.FieldLTE(FieldTemperature, v))
 }
 
 // TemperatureIsNil applies the IsNil predicate on the "temperature" field.
 func TemperatureIsNil() predicate.Metar {
-	return predicate.Metar(func(s *sql.Selector) {
-		s.Where(sql.IsNull(s.C(FieldTemperature)))
-	})
+	return predicate.Metar(sql.FieldIsNull(FieldTemperature))
 }
 
 // TemperatureNotNil applies the NotNil predicate on the "temperature" field.
 func TemperatureNotNil() predicate.Metar {
-	return predicate.Metar(func(s *sql.Selector) {
-		s.Where(sql.NotNull(s.C(FieldTemperature)))
-	})
+	return predicate.Metar(sql.FieldNotNull(FieldTemperature))
 }
 
 // DewpointEQ applies the EQ predicate on the "dewpoint" field.
 func DewpointEQ(v float64) predicate.Metar {
-	return predicate.Metar(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldDewpoint), v))
-	})
+	return predicate.Metar(sql.FieldEQ(FieldDewpoint, v))
 }
 
 // DewpointNEQ applies the NEQ predicate on the "dewpoint" field.
 func DewpointNEQ(v float64) predicate.Metar {
-	return predicate.Metar(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldDewpoint), v))
-	})
+	return predicate.Metar(sql.FieldNEQ(FieldDewpoint, v))
 }
 
 // DewpointIn applies the In predicate on the "dewpoint" field.
 func DewpointIn(vs ...float64) predicate.Metar {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Metar(func(s *sql.Selector) {
-		s.Where(sql.In(s.C(FieldDewpoint), v...))
-	})
+	return predicate.Metar(sql.FieldIn(FieldDewpoint, vs...))
 }
 
 // DewpointNotIn applies the NotIn predicate on the "dewpoint" field.
 func DewpointNotIn(vs ...float64) predicate.Metar {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Metar(func(s *sql.Selector) {
-		s.Where(sql.NotIn(s.C(FieldDewpoint), v...))
-	})
+	return predicate.Metar(sql.FieldNotIn(FieldDewpoint, vs...))
 }
 
 // DewpointGT applies the GT predicate on the "dewpoint" field.
 func DewpointGT(v float64) predicate.Metar {
-	return predicate.Metar(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldDewpoint), v))
-	})
+	return predicate.Metar(sql.FieldGT(FieldDewpoint, v))
 }
 
 // DewpointGTE applies the GTE predicate on the "dewpoint" field.
 func DewpointGTE(v float64) predicate.Metar {
-	return predicate.Metar(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldDewpoint), v))
-	})
+	return predicate.Metar(sql.FieldGTE(FieldDewpoint, v))
 }
 
 // DewpointLT applies the LT predicate on the "dewpoint" field.
 func DewpointLT(v float64) predicate.Metar {
-	return predicate.Metar(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldDewpoint), v))
-	})
+	return predicate.Metar(sql.FieldLT(FieldDewpoint, v))
 }
 
 // DewpointLTE applies the LTE predicate on the "dewpoint" field.
 func DewpointLTE(v float64) predicate.Metar {
-	return predicate.Metar(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldDewpoint), v))
-	})
+	return predicate.Metar(sql.FieldLTE(FieldDewpoint, v))
 }
 
 // DewpointIsNil applies the IsNil predicate on the "dewpoint" field.
 func DewpointIsNil() predicate.Metar {
-	return predicate.Metar(func(s *sql.Selector) {
-		s.Where(sql.IsNull(s.C(FieldDewpoint)))
-	})
+	return predicate.Metar(sql.FieldIsNull(FieldDewpoint))
 }
 
 // DewpointNotNil applies the NotNil predicate on the "dewpoint" field.
 func DewpointNotNil() predicate.Metar {
-	return predicate.Metar(func(s *sql.Selector) {
-		s.Where(sql.NotNull(s.C(FieldDewpoint)))
-	})
+	return predicate.Metar(sql.FieldNotNull(FieldDewpoint))
 }
 
 // WindSpeedEQ applies the EQ predicate on the "wind_speed" field.
 func WindSpeedEQ(v int) predicate.Metar {
-	return predicate.Metar(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldWindSpeed), v))
-	})
+	return predicate.Metar(sql.FieldEQ(FieldWindSpeed, v))
 }
 
 // WindSpeedNEQ applies the NEQ predicate on the "wind_speed" field.
 func WindSpeedNEQ(v int) predicate.Metar {
-	return predicate.Metar(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldWindSpeed), v))
-	})
+	return predicate.Metar(sql.FieldNEQ(FieldWindSpeed, v))
 }
 
 // WindSpeedIn applies the In predicate on the "wind_speed" field.
 func WindSpeedIn(vs ...int) predicate.Metar {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Metar(func(s *sql.Selector) {
-		s.Where(sql.In(s.C(FieldWindSpeed), v...))
-	})
+	return predicate.Metar(sql.FieldIn(FieldWindSpeed, vs...))
 }
 
 // WindSpeedNotIn applies the NotIn predicate on the "wind_speed" field.
 func WindSpeedNotIn(vs ...int) predicate.Metar {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Metar(func(s *sql.Selector) {
-		s.Where(sql.NotIn(s.C(FieldWindSpeed), v...))
-	})
+	return predicate.Metar(sql.FieldNotIn(FieldWindSpeed, vs...))
 }
 
 // WindSpeedGT applies the GT predicate on the "wind_speed" field.
 func WindSpeedGT(v int) predicate.Metar {
-	return predicate.Metar(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldWindSpeed), v))
-	})
+	return predicate.Metar(sql.FieldGT(FieldWindSpeed, v))
 }
 
 // WindSpeedGTE applies the GTE predicate on the "wind_speed" field.
 func WindSpeedGTE(v int) predicate.Metar {
-	return predicate.Metar(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldWindSpeed), v))
-	})
+	return predicate.Metar(sql.FieldGTE(FieldWindSpeed, v))
 }
 
 // WindSpeedLT applies the LT predicate on the "wind_speed" field.
 func WindSpeedLT(v int) predicate.Metar {
-	return predicate.Metar(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldWindSpeed), v))
-	})
+	return predicate.Metar(sql.FieldLT(FieldWindSpeed, v))
 }
 
 // WindSpeedLTE applies the LTE predicate on the "wind_speed" field.
 func WindSpeedLTE(v int) predicate.Metar {
-	return predicate.Metar(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldWindSpeed), v))
-	})
+	return predicate.Metar(sql.FieldLTE(FieldWindSpeed, v))
 }
 
 // WindSpeedIsNil applies the IsNil predicate on the "wind_speed" field.
 func WindSpeedIsNil() predicate.Metar {
-	return predicate.Metar(func(s *sql.Selector) {
-		s.Where(sql.IsNull(s.C(FieldWindSpeed)))
-	})
+	return predicate.Metar(sql.FieldIsNull(FieldWindSpeed))
 }
 
 // WindSpeedNotNil applies the NotNil predicate on the "wind_speed" field.
 func WindSpeedNotNil() predicate.Metar {
-	return predicate.Metar(func(s *sql.Selector) {
-		s.Where(sql.NotNull(s.C(FieldWindSpeed)))
-	})
+	return predicate.Metar(sql.FieldNotNull(FieldWindSpeed))
 }
 
 // WindGustEQ applies the EQ predicate on the "wind_gust" field.
 func WindGustEQ(v int) predicate.Metar {
-	return predicate.Metar(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldWindGust), v))
-	})
+	return predicate.Metar(sql.FieldEQ(FieldWindGust, v))
 }
 
 // WindGustNEQ applies the NEQ predicate on the "wind_gust" field.
 func WindGustNEQ(v int) predicate.Metar {
-	return predicate.Metar(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldWindGust), v))
-	})
+	return predicate.Metar(sql.FieldNEQ(FieldWindGust, v))
 }
 
 // WindGustIn applies the In predicate on the "wind_gust" field.
 func WindGustIn(vs ...int) predicate.Metar {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Metar(func(s *sql.Selector) {
-		s.Where(sql.In(s.C(FieldWindGust), v...))
-	})
+	return predicate.Metar(sql.FieldIn(FieldWindGust, vs...))
 }
 
 // WindGustNotIn applies the NotIn predicate on the "wind_gust" field.
 func WindGustNotIn(vs ...int) predicate.Metar {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Metar(func(s *sql.Selector) {
-		s.Where(sql.NotIn(s.C(FieldWindGust), v...))
-	})
+	return predicate.Metar(sql.FieldNotIn(FieldWindGust, vs...))
 }
 
 // WindGustGT applies the GT predicate on the "wind_gust" field.
 func WindGustGT(v int) predicate.Metar {
-	return predicate.Metar(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldWindGust), v))
-	})
+	return predicate.Metar(sql.FieldGT(FieldWindGust, v))
 }
 
 // WindGustGTE applies the GTE predicate on the "wind_gust" field.
 func WindGustGTE(v int) predicate.Metar {
-	return predicate.Metar(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldWindGust), v))
-	})
+	return predicate.Metar(sql.FieldGTE(FieldWindGust, v))
 }
 
 // WindGustLT applies the LT predicate on the "wind_gust" field.
 func WindGustLT(v int) predicate.Metar {
-	return predicate.Metar(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldWindGust), v))
-	})
+	return predicate.Metar(sql.FieldLT(FieldWindGust, v))
 }
 
 // WindGustLTE applies the LTE predicate on the "wind_gust" field.
 func WindGustLTE(v int) predicate.Metar {
-	return predicate.Metar(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldWindGust), v))
-	})
+	return predicate.Metar(sql.FieldLTE(FieldWindGust, v))
 }
 
 // WindGustIsNil applies the IsNil predicate on the "wind_gust" field.
 func WindGustIsNil() predicate.Metar {
-	return predicate.Metar(func(s *sql.Selector) {
-		s.Where(sql.IsNull(s.C(FieldWindGust)))
-	})
+	return predicate.Metar(sql.FieldIsNull(FieldWindGust))
 }
 
 // WindGustNotNil applies the NotNil predicate on the "wind_gust" field.
 func WindGustNotNil() predicate.Metar {
-	return predicate.Metar(func(s *sql.Selector) {
-		s.Where(sql.NotNull(s.C(FieldWindGust)))
-	})
+	return predicate.Metar(sql.FieldNotNull(FieldWindGust))
 }
 
 // WindDirectionEQ applies the EQ predicate on the "wind_direction" field.
 func WindDirectionEQ(v int) predicate.Metar {
-	return predicate.Metar(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldWindDirection), v))
-	})
+	return predicate.Metar(sql.FieldEQ(FieldWindDirection, v))
 }
 
 // WindDirectionNEQ applies the NEQ predicate on the "wind_direction" field.
 func WindDirectionNEQ(v int) predicate.Metar {
-	return predicate.Metar(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldWindDirection), v))
-	})
+	return predicate.Metar(sql.FieldNEQ(FieldWindDirection, v))
 }
 
 // WindDirectionIn applies the In predicate on the "wind_direction" field.
 func WindDirectionIn(vs ...int) predicate.Metar {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Metar(func(s *sql.Selector) {
-		s.Where(sql.In(s.C(FieldWindDirection), v...))
-	})
+	return predicate.Metar(sql.FieldIn(FieldWindDirection, vs...))
 }
 
 // WindDirectionNotIn applies the NotIn predicate on the "wind_direction" field.
 func WindDirectionNotIn(vs ...int) predicate.Metar {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Metar(func(s *sql.Selector) {
-		s.Where(sql.NotIn(s.C(FieldWindDirection), v...))
-	})
+	return predicate.Metar(sql.FieldNotIn(FieldWindDirection, vs...))
 }
 
 // WindDirectionGT applies the GT predicate on the "wind_direction" field.
 func WindDirectionGT(v int) predicate.Metar {
-	return predicate.Metar(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldWindDirection), v))
-	})
+	return predicate.Metar(sql.FieldGT(FieldWindDirection, v))
 }
 
 // WindDirectionGTE applies the GTE predicate on the "wind_direction" field.
 func WindDirectionGTE(v int) predicate.Metar {
-	return predicate.Metar(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldWindDirection), v))
-	})
+	return predicate.Metar(sql.FieldGTE(FieldWindDirection, v))
 }
 
 // WindDirectionLT applies the LT predicate on the "wind_direction" field.
 func WindDirectionLT(v int) predicate.Metar {
-	return predicate.Metar(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldWindDirection), v))
-	})
+	return predicate.Metar(sql.FieldLT(FieldWindDirection, v))
 }
 
 // WindDirectionLTE applies the LTE predicate on the "wind_direction" field.
 func WindDirectionLTE(v int) predicate.Metar {
-	return predicate.Metar(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldWindDirection), v))
-	})
+	return predicate.Metar(sql.FieldLTE(FieldWindDirection, v))
 }
 
 // WindDirectionIsNil applies the IsNil predicate on the "wind_direction" field.
 func WindDirectionIsNil() predicate.Metar {
-	return predicate.Metar(func(s *sql.Selector) {
-		s.Where(sql.IsNull(s.C(FieldWindDirection)))
-	})
+	return predicate.Metar(sql.FieldIsNull(FieldWindDirection))
 }
 
 // WindDirectionNotNil applies the NotNil predicate on the "wind_direction" field.
 func WindDirectionNotNil() predicate.Metar {
-	return predicate.Metar(func(s *sql.Selector) {
-		s.Where(sql.NotNull(s.C(FieldWindDirection)))
-	})
+	return predicate.Metar(sql.FieldNotNull(FieldWindDirection))
 }
 
 // VisibilityEQ applies the EQ predicate on the "visibility" field.
 func VisibilityEQ(v float64) predicate.Metar {
-	return predicate.Metar(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldVisibility), v))
-	})
+	return predicate.Metar(sql.FieldEQ(FieldVisibility, v))
 }
 
 // VisibilityNEQ applies the NEQ predicate on the "visibility" field.
 func VisibilityNEQ(v float64) predicate.Metar {
-	return predicate.Metar(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldVisibility), v))
-	})
+	return predicate.Metar(sql.FieldNEQ(FieldVisibility, v))
 }
 
 // VisibilityIn applies the In predicate on the "visibility" field.
 func VisibilityIn(vs ...float64) predicate.Metar {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Metar(func(s *sql.Selector) {
-		s.Where(sql.In(s.C(FieldVisibility), v...))
-	})
+	return predicate.Metar(sql.FieldIn(FieldVisibility, vs...))
 }
 
 // VisibilityNotIn applies the NotIn predicate on the "visibility" field.
 func VisibilityNotIn(vs ...float64) predicate.Metar {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Metar(func(s *sql.Selector) {
-		s.Where(sql.NotIn(s.C(FieldVisibility), v...))
-	})
+	return predicate.Metar(sql.FieldNotIn(FieldVisibility, vs...))
 }
 
 // VisibilityGT applies the GT predicate on the "visibility" field.
 func VisibilityGT(v float64) predicate.Metar {
-	return predicate.Metar(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldVisibility), v))
-	})
+	return predicate.Metar(sql.FieldGT(FieldVisibility, v))
 }
 
 // VisibilityGTE applies the GTE predicate on the "visibility" field.
 func VisibilityGTE(v float64) predicate.Metar {
-	return predicate.Metar(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldVisibility), v))
-	})
+	return predicate.Metar(sql.FieldGTE(FieldVisibility, v))
 }
 
 // VisibilityLT applies the LT predicate on the "visibility" field.
 func VisibilityLT(v float64) predicate.Metar {
-	return predicate.Metar(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldVisibility), v))
-	})
+	return predicate.Metar(sql.FieldLT(FieldVisibility, v))
 }
 
 // VisibilityLTE applies the LTE predicate on the "visibility" field.
 func VisibilityLTE(v float64) predicate.Metar {
-	return predicate.Metar(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldVisibility), v))
-	})
+	return predicate.Metar(sql.FieldLTE(FieldVisibility, v))
 }
 
 // VisibilityIsNil applies the IsNil predicate on the "visibility" field.
 func VisibilityIsNil() predicate.Metar {
-	return predicate.Metar(func(s *sql.Selector) {
-		s.Where(sql.IsNull(s.C(FieldVisibility)))
-	})
+	return predicate.Metar(sql.FieldIsNull(FieldVisibility))
 }
 
 // VisibilityNotNil applies the NotNil predicate on the "visibility" field.
 func VisibilityNotNil() predicate.Metar {
-	return predicate.Metar(func(s *sql.Selector) {
-		s.Where(sql.NotNull(s.C(FieldVisibility)))
-	})
+	return predicate.Metar(sql.FieldNotNull(FieldVisibility))
 }
 
 // AltimeterEQ applies the EQ predicate on the "altimeter" field.
 func AltimeterEQ(v float64) predicate.Metar {
-	return predicate.Metar(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldAltimeter), v))
-	})
+	return predicate.Metar(sql.FieldEQ(FieldAltimeter, v))
 }
 
 // AltimeterNEQ applies the NEQ predicate on the "altimeter" field.
 func AltimeterNEQ(v float64) predicate.Metar {
-	return predicate.Metar(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldAltimeter), v))
-	})
+	return predicate.Metar(sql.FieldNEQ(FieldAltimeter, v))
 }
 
 // AltimeterIn applies the In predicate on the "altimeter" field.
 func AltimeterIn(vs ...float64) predicate.Metar {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Metar(func(s *sql.Selector) {
-		s.Where(sql.In(s.C(FieldAltimeter), v...))
-	})
+	return predicate.Metar(sql.FieldIn(FieldAltimeter, vs...))
 }
 
 // AltimeterNotIn applies the NotIn predicate on the "altimeter" field.
 func AltimeterNotIn(vs ...float64) predicate.Metar {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Metar(func(s *sql.Selector) {
-		s.Where(sql.NotIn(s.C(FieldAltimeter), v...))
-	})
+	return predicate.Metar(sql.FieldNotIn(FieldAltimeter, vs...))
 }
 
 // AltimeterGT applies the GT predicate on the "altimeter" field.
 func AltimeterGT(v float64) predicate.Metar {
-	return predicate.Metar(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldAltimeter), v))
-	})
+	return predicate.Metar(sql.FieldGT(FieldAltimeter, v))
 }
 
 // AltimeterGTE applies the GTE predicate on the "altimeter" field.
 func AltimeterGTE(v float64) predicate.Metar {
-	return predicate.Metar(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldAltimeter), v))
-	})
+	return predicate.Metar(sql.FieldGTE(FieldAltimeter, v))
 }
 
 // AltimeterLT applies the LT predicate on the "altimeter" field.
 func AltimeterLT(v float64) predicate.Metar {
-	return predicate.Metar(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldAltimeter), v))
-	})
+	return predicate.Metar(sql.FieldLT(FieldAltimeter, v))
 }
 
 // AltimeterLTE applies the LTE predicate on the "altimeter" field.
 func AltimeterLTE(v float64) predicate.Metar {
-	return predicate.Metar(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldAltimeter), v))
-	})
+	return predicate.Metar(sql.FieldLTE(FieldAltimeter, v))
 }
 
 // AltimeterIsNil applies the IsNil predicate on the "altimeter" field.
 func AltimeterIsNil() predicate.Metar {
-	return predicate.Metar(func(s *sql.Selector) {
-		s.Where(sql.IsNull(s.C(FieldAltimeter)))
-	})
+	return predicate.Metar(sql.FieldIsNull(FieldAltimeter))
 }
 
 // AltimeterNotNil applies the NotNil predicate on the "altimeter" field.
 func AltimeterNotNil() predicate.Metar {
-	return predicate.Metar(func(s *sql.Selector) {
-		s.Where(sql.NotNull(s.C(FieldAltimeter)))
-	})
+	return predicate.Metar(sql.FieldNotNull(FieldAltimeter))
 }
 
 // PresentWeatherEQ applies the EQ predicate on the "present_weather" field.
 func PresentWeatherEQ(v string) predicate.Metar {
-	return predicate.Metar(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldPresentWeather), v))
-	})
+	return predicate.Metar(sql.FieldEQ(FieldPresentWeather, v))
 }
 
 // PresentWeatherNEQ applies the NEQ predicate on the "present_weather" field.
 func PresentWeatherNEQ(v string) predicate.Metar {
-	return predicate.Metar(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldPresentWeather), v))
-	})
+	return predicate.Metar(sql.FieldNEQ(FieldPresentWeather, v))
 }
 
 // PresentWeatherIn applies the In predicate on the "present_weather" field.
 func PresentWeatherIn(vs ...string) predicate.Metar {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Metar(func(s *sql.Selector) {
-		s.Where(sql.In(s.C(FieldPresentWeather), v...))
-	})
+	return predicate.Metar(sql.FieldIn(FieldPresentWeather, vs...))
 }
 
 // PresentWeatherNotIn applies the NotIn predicate on the "present_weather" field.
 func PresentWeatherNotIn(vs ...string) predicate.Metar {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Metar(func(s *sql.Selector) {
-		s.Where(sql.NotIn(s.C(FieldPresentWeather), v...))
-	})
+	return predicate.Metar(sql.FieldNotIn(FieldPresentWeather, vs...))
 }
 
 // PresentWeatherGT applies the GT predicate on the "present_weather" field.
 func PresentWeatherGT(v string) predicate.Metar {
-	return predicate.Metar(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldPresentWeather), v))
-	})
+	return predicate.Metar(sql.FieldGT(FieldPresentWeather, v))
 }
 
 // PresentWeatherGTE applies the GTE predicate on the "present_weather" field.
 func PresentWeatherGTE(v string) predicate.Metar {
-	return predicate.Metar(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldPresentWeather), v))
-	})
+	return predicate.Metar(sql.FieldGTE(FieldPresentWeather, v))
 }
 
 // PresentWeatherLT applies the LT predicate on the "present_weather" field.
 func PresentWeatherLT(v string) predicate.Metar {
-	return predicate.Metar(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldPresentWeather), v))
-	})
+	return predicate.Metar(sql.FieldLT(FieldPresentWeather, v))
 }
 
 // PresentWeatherLTE applies the LTE predicate on the "present_weather" field.
 func PresentWeatherLTE(v string) predicate.Metar {
-	return predicate.Metar(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldPresentWeather), v))
-	})
+	return predicate.Metar(sql.FieldLTE(FieldPresentWeather, v))
 }
 
 // PresentWeatherContains applies the Contains predicate on the "present_weather" field.
 func PresentWeatherContains(v string) predicate.Metar {
-	return predicate.Metar(func(s *sql.Selector) {
-		s.Where(sql.Contains(s.C(FieldPresentWeather), v))
-	})
+	return predicate.Metar(sql.FieldContains(FieldPresentWeather, v))
 }
 
 // PresentWeatherHasPrefix applies the HasPrefix predicate on the "present_weather" field.
 func PresentWeatherHasPrefix(v string) predicate.Metar {
-	return predicate.Metar(func(s *sql.Selector) {
-		s.Where(sql.HasPrefix(s.C(FieldPresentWeather), v))
-	})
+	return predicate.Metar(sql.FieldHasPrefix(FieldPresentWeather, v))
 }
 
 // PresentWeatherHasSuffix applies the HasSuffix predicate on the "present_weather" field.
 func PresentWeatherHasSuffix(v string) predicate.Metar {
-	return predicate.Metar(func(s *sql.Selector) {
-		s.Where(sql.HasSuffix(s.C(FieldPresentWeather), v))
-	})
+	return predicate.Metar(sql.FieldHasSuffix(FieldPresentWeather, v))
 }
 
 // PresentWeatherIsNil applies the IsNil predicate on the "present_weather" field.
 func PresentWeatherIsNil() predicate.Metar {
-	return predicate.Metar(func(s *sql.Selector) {
-		s.Where(sql.IsNull(s.C(FieldPresentWeather)))
-	})
+	return predicate.Metar(sql.FieldIsNull(FieldPresentWeather))
 }
 
 // PresentWeatherNotNil applies the NotNil predicate on the "present_weather" field.
 func PresentWeatherNotNil() predicate.Metar {
-	return predicate.Metar(func(s *sql.Selector) {
-		s.Where(sql.NotNull(s.C(FieldPresentWeather)))
-	})
+	return predicate.Metar(sql.FieldNotNull(FieldPresentWeather))
 }
 
 // PresentWeatherEqualFold applies the EqualFold predicate on the "present_weather" field.
 func PresentWeatherEqualFold(v string) predicate.Metar {
-	return predicate.Metar(func(s *sql.Selector) {
-		s.Where(sql.EqualFold(s.C(FieldPresentWeather), v))
-	})
+	return predicate.Metar(sql.FieldEqualFold(FieldPresentWeather, v))
 }
 
 // PresentWeatherContainsFold applies the ContainsFold predicate on the "present_weather" field.
 func PresentWeatherContainsFold(v string) predicate.Metar {
-	return predicate.Metar(func(s *sql.Selector) {
-		s.Where(sql.ContainsFold(s.C(FieldPresentWeather), v))
-	})
+	return predicate.Metar(sql.FieldContainsFold(FieldPresentWeather, v))
 }
 
 // FlightCategoryEQ applies the EQ predicate on the "flight_category" field.
 func FlightCategoryEQ(v FlightCategory) predicate.Metar {
-	return predicate.Metar(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldFlightCategory), v))
-	})
+	return predicate.Metar(sql.FieldEQ(FieldFlightCategory, v))
 }
 
 // FlightCategoryNEQ applies the NEQ predicate on the "flight_category" field.
 func FlightCategoryNEQ(v FlightCategory) predicate.Metar {
-	return predicate.Metar(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldFlightCategory), v))
-	})
+	return predicate.Metar(sql.FieldNEQ(FieldFlightCategory, v))
 }
 
 // FlightCategoryIn applies the In predicate on the "flight_category" field.
 func FlightCategoryIn(vs ...FlightCategory) predicate.Metar {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Metar(func(s *sql.Selector) {
-		s.Where(sql.In(s.C(FieldFlightCategory), v...))
-	})
+	return predicate.Metar(sql.FieldIn(FieldFlightCategory, vs...))
 }
 
 // FlightCategoryNotIn applies the NotIn predicate on the "flight_category" field.
 func FlightCategoryNotIn(vs ...FlightCategory) predicate.Metar {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Metar(func(s *sql.Selector) {
-		s.Where(sql.NotIn(s.C(FieldFlightCategory), v...))
-	})
+	return predicate.Metar(sql.FieldNotIn(FieldFlightCategory, vs...))
 }
 
 // FlightCategoryIsNil applies the IsNil predicate on the "flight_category" field.
 func FlightCategoryIsNil() predicate.Metar {
-	return predicate.Metar(func(s *sql.Selector) {
-		s.Where(sql.IsNull(s.C(FieldFlightCategory)))
-	})
+	return predicate.Metar(sql.FieldIsNull(FieldFlightCategory))
 }
 
 // FlightCategoryNotNil applies the NotNil predicate on the "flight_category" field.
 func FlightCategoryNotNil() predicate.Metar {
-	return predicate.Metar(func(s *sql.Selector) {
-		s.Where(sql.NotNull(s.C(FieldFlightCategory)))
-	})
+	return predicate.Metar(sql.FieldNotNull(FieldFlightCategory))
 }
 
 // QualityControlCorrectedEQ applies the EQ predicate on the "quality_control_corrected" field.
 func QualityControlCorrectedEQ(v bool) predicate.Metar {
-	return predicate.Metar(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldQualityControlCorrected), v))
-	})
+	return predicate.Metar(sql.FieldEQ(FieldQualityControlCorrected, v))
 }
 
 // QualityControlCorrectedNEQ applies the NEQ predicate on the "quality_control_corrected" field.
 func QualityControlCorrectedNEQ(v bool) predicate.Metar {
-	return predicate.Metar(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldQualityControlCorrected), v))
-	})
+	return predicate.Metar(sql.FieldNEQ(FieldQualityControlCorrected, v))
 }
 
 // QualityControlCorrectedIsNil applies the IsNil predicate on the "quality_control_corrected" field.
 func QualityControlCorrectedIsNil() predicate.Metar {
-	return predicate.Metar(func(s *sql.Selector) {
-		s.Where(sql.IsNull(s.C(FieldQualityControlCorrected)))
-	})
+	return predicate.Metar(sql.FieldIsNull(FieldQualityControlCorrected))
 }
 
 // QualityControlCorrectedNotNil applies the NotNil predicate on the "quality_control_corrected" field.
 func QualityControlCorrectedNotNil() predicate.Metar {
-	return predicate.Metar(func(s *sql.Selector) {
-		s.Where(sql.NotNull(s.C(FieldQualityControlCorrected)))
-	})
+	return predicate.Metar(sql.FieldNotNull(FieldQualityControlCorrected))
 }
 
 // QualityControlAutoStationEQ applies the EQ predicate on the "quality_control_auto_station" field.
 func QualityControlAutoStationEQ(v bool) predicate.Metar {
-	return predicate.Metar(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldQualityControlAutoStation), v))
-	})
+	return predicate.Metar(sql.FieldEQ(FieldQualityControlAutoStation, v))
 }
 
 // QualityControlAutoStationNEQ applies the NEQ predicate on the "quality_control_auto_station" field.
 func QualityControlAutoStationNEQ(v bool) predicate.Metar {
-	return predicate.Metar(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldQualityControlAutoStation), v))
-	})
+	return predicate.Metar(sql.FieldNEQ(FieldQualityControlAutoStation, v))
 }
 
 // QualityControlMaintenanceIndicatorOnEQ applies the EQ predicate on the "quality_control_maintenance_indicator_on" field.
 func QualityControlMaintenanceIndicatorOnEQ(v bool) predicate.Metar {
-	return predicate.Metar(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldQualityControlMaintenanceIndicatorOn), v))
-	})
+	return predicate.Metar(sql.FieldEQ(FieldQualityControlMaintenanceIndicatorOn, v))
 }
 
 // QualityControlMaintenanceIndicatorOnNEQ applies the NEQ predicate on the "quality_control_maintenance_indicator_on" field.
 func QualityControlMaintenanceIndicatorOnNEQ(v bool) predicate.Metar {
-	return predicate.Metar(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldQualityControlMaintenanceIndicatorOn), v))
-	})
+	return predicate.Metar(sql.FieldNEQ(FieldQualityControlMaintenanceIndicatorOn, v))
 }
 
 // QualityControlNoSignalEQ applies the EQ predicate on the "quality_control_no_signal" field.
 func QualityControlNoSignalEQ(v bool) predicate.Metar {
-	return predicate.Metar(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldQualityControlNoSignal), v))
-	})
+	return predicate.Metar(sql.FieldEQ(FieldQualityControlNoSignal, v))
 }
 
 // QualityControlNoSignalNEQ applies the NEQ predicate on the "quality_control_no_signal" field.
 func QualityControlNoSignalNEQ(v bool) predicate.Metar {
-	return predicate.Metar(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldQualityControlNoSignal), v))
-	})
+	return predicate.Metar(sql.FieldNEQ(FieldQualityControlNoSignal, v))
 }
 
 // QualityControlLightningSensorOffEQ applies the EQ predicate on the "quality_control_lightning_sensor_off" field.
 func QualityControlLightningSensorOffEQ(v bool) predicate.Metar {
-	return predicate.Metar(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldQualityControlLightningSensorOff), v))
-	})
+	return predicate.Metar(sql.FieldEQ(FieldQualityControlLightningSensorOff, v))
 }
 
 // QualityControlLightningSensorOffNEQ applies the NEQ predicate on the "quality_control_lightning_sensor_off" field.
 func QualityControlLightningSensorOffNEQ(v bool) predicate.Metar {
-	return predicate.Metar(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldQualityControlLightningSensorOff), v))
-	})
+	return predicate.Metar(sql.FieldNEQ(FieldQualityControlLightningSensorOff, v))
 }
 
 // QualityControlFreezingRainSensorOffEQ applies the EQ predicate on the "quality_control_freezing_rain_sensor_off" field.
 func QualityControlFreezingRainSensorOffEQ(v bool) predicate.Metar {
-	return predicate.Metar(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldQualityControlFreezingRainSensorOff), v))
-	})
+	return predicate.Metar(sql.FieldEQ(FieldQualityControlFreezingRainSensorOff, v))
 }
 
 // QualityControlFreezingRainSensorOffNEQ applies the NEQ predicate on the "quality_control_freezing_rain_sensor_off" field.
 func QualityControlFreezingRainSensorOffNEQ(v bool) predicate.Metar {
-	return predicate.Metar(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldQualityControlFreezingRainSensorOff), v))
-	})
+	return predicate.Metar(sql.FieldNEQ(FieldQualityControlFreezingRainSensorOff, v))
 }
 
 // QualityControlPresentWeatherSensorOffEQ applies the EQ predicate on the "quality_control_present_weather_sensor_off" field.
 func QualityControlPresentWeatherSensorOffEQ(v bool) predicate.Metar {
-	return predicate.Metar(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldQualityControlPresentWeatherSensorOff), v))
-	})
+	return predicate.Metar(sql.FieldEQ(FieldQualityControlPresentWeatherSensorOff, v))
 }
 
 // QualityControlPresentWeatherSensorOffNEQ applies the NEQ predicate on the "quality_control_present_weather_sensor_off" field.
 func QualityControlPresentWeatherSensorOffNEQ(v bool) predicate.Metar {
-	return predicate.Metar(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldQualityControlPresentWeatherSensorOff), v))
-	})
+	return predicate.Metar(sql.FieldNEQ(FieldQualityControlPresentWeatherSensorOff, v))
 }
 
 // SeaLevelPressureEQ applies the EQ predicate on the "sea_level_pressure" field.
 func SeaLevelPressureEQ(v float64) predicate.Metar {
-	return predicate.Metar(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldSeaLevelPressure), v))
-	})
+	return predicate.Metar(sql.FieldEQ(FieldSeaLevelPressure, v))
 }
 
 // SeaLevelPressureNEQ applies the NEQ predicate on the "sea_level_pressure" field.
 func SeaLevelPressureNEQ(v float64) predicate.Metar {
-	return predicate.Metar(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldSeaLevelPressure), v))
-	})
+	return predicate.Metar(sql.FieldNEQ(FieldSeaLevelPressure, v))
 }
 
 // SeaLevelPressureIn applies the In predicate on the "sea_level_pressure" field.
 func SeaLevelPressureIn(vs ...float64) predicate.Metar {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Metar(func(s *sql.Selector) {
-		s.Where(sql.In(s.C(FieldSeaLevelPressure), v...))
-	})
+	return predicate.Metar(sql.FieldIn(FieldSeaLevelPressure, vs...))
 }
 
 // SeaLevelPressureNotIn applies the NotIn predicate on the "sea_level_pressure" field.
 func SeaLevelPressureNotIn(vs ...float64) predicate.Metar {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Metar(func(s *sql.Selector) {
-		s.Where(sql.NotIn(s.C(FieldSeaLevelPressure), v...))
-	})
+	return predicate.Metar(sql.FieldNotIn(FieldSeaLevelPressure, vs...))
 }
 
 // SeaLevelPressureGT applies the GT predicate on the "sea_level_pressure" field.
 func SeaLevelPressureGT(v float64) predicate.Metar {
-	return predicate.Metar(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldSeaLevelPressure), v))
-	})
+	return predicate.Metar(sql.FieldGT(FieldSeaLevelPressure, v))
 }
 
 // SeaLevelPressureGTE applies the GTE predicate on the "sea_level_pressure" field.
 func SeaLevelPressureGTE(v float64) predicate.Metar {
-	return predicate.Metar(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldSeaLevelPressure), v))
-	})
+	return predicate.Metar(sql.FieldGTE(FieldSeaLevelPressure, v))
 }
 
 // SeaLevelPressureLT applies the LT predicate on the "sea_level_pressure" field.
 func SeaLevelPressureLT(v float64) predicate.Metar {
-	return predicate.Metar(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldSeaLevelPressure), v))
-	})
+	return predicate.Metar(sql.FieldLT(FieldSeaLevelPressure, v))
 }
 
 // SeaLevelPressureLTE applies the LTE predicate on the "sea_level_pressure" field.
 func SeaLevelPressureLTE(v float64) predicate.Metar {
-	return predicate.Metar(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldSeaLevelPressure), v))
-	})
+	return predicate.Metar(sql.FieldLTE(FieldSeaLevelPressure, v))
 }
 
 // SeaLevelPressureIsNil applies the IsNil predicate on the "sea_level_pressure" field.
 func SeaLevelPressureIsNil() predicate.Metar {
-	return predicate.Metar(func(s *sql.Selector) {
-		s.Where(sql.IsNull(s.C(FieldSeaLevelPressure)))
-	})
+	return predicate.Metar(sql.FieldIsNull(FieldSeaLevelPressure))
 }
 
 // SeaLevelPressureNotNil applies the NotNil predicate on the "sea_level_pressure" field.
 func SeaLevelPressureNotNil() predicate.Metar {
-	return predicate.Metar(func(s *sql.Selector) {
-		s.Where(sql.NotNull(s.C(FieldSeaLevelPressure)))
-	})
+	return predicate.Metar(sql.FieldNotNull(FieldSeaLevelPressure))
 }
 
 // PressureTendencyEQ applies the EQ predicate on the "pressure_tendency" field.
 func PressureTendencyEQ(v float64) predicate.Metar {
-	return predicate.Metar(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldPressureTendency), v))
-	})
+	return predicate.Metar(sql.FieldEQ(FieldPressureTendency, v))
 }
 
 // PressureTendencyNEQ applies the NEQ predicate on the "pressure_tendency" field.
 func PressureTendencyNEQ(v float64) predicate.Metar {
-	return predicate.Metar(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldPressureTendency), v))
-	})
+	return predicate.Metar(sql.FieldNEQ(FieldPressureTendency, v))
 }
 
 // PressureTendencyIn applies the In predicate on the "pressure_tendency" field.
 func PressureTendencyIn(vs ...float64) predicate.Metar {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Metar(func(s *sql.Selector) {
-		s.Where(sql.In(s.C(FieldPressureTendency), v...))
-	})
+	return predicate.Metar(sql.FieldIn(FieldPressureTendency, vs...))
 }
 
 // PressureTendencyNotIn applies the NotIn predicate on the "pressure_tendency" field.
 func PressureTendencyNotIn(vs ...float64) predicate.Metar {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Metar(func(s *sql.Selector) {
-		s.Where(sql.NotIn(s.C(FieldPressureTendency), v...))
-	})
+	return predicate.Metar(sql.FieldNotIn(FieldPressureTendency, vs...))
 }
 
 // PressureTendencyGT applies the GT predicate on the "pressure_tendency" field.
 func PressureTendencyGT(v float64) predicate.Metar {
-	return predicate.Metar(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldPressureTendency), v))
-	})
+	return predicate.Metar(sql.FieldGT(FieldPressureTendency, v))
 }
 
 // PressureTendencyGTE applies the GTE predicate on the "pressure_tendency" field.
 func PressureTendencyGTE(v float64) predicate.Metar {
-	return predicate.Metar(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldPressureTendency), v))
-	})
+	return predicate.Metar(sql.FieldGTE(FieldPressureTendency, v))
 }
 
 // PressureTendencyLT applies the LT predicate on the "pressure_tendency" field.
 func PressureTendencyLT(v float64) predicate.Metar {
-	return predicate.Metar(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldPressureTendency), v))
-	})
+	return predicate.Metar(sql.FieldLT(FieldPressureTendency, v))
 }
 
 // PressureTendencyLTE applies the LTE predicate on the "pressure_tendency" field.
 func PressureTendencyLTE(v float64) predicate.Metar {
-	return predicate.Metar(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldPressureTendency), v))
-	})
+	return predicate.Metar(sql.FieldLTE(FieldPressureTendency, v))
 }
 
 // PressureTendencyIsNil applies the IsNil predicate on the "pressure_tendency" field.
 func PressureTendencyIsNil() predicate.Metar {
-	return predicate.Metar(func(s *sql.Selector) {
-		s.Where(sql.IsNull(s.C(FieldPressureTendency)))
-	})
+	return predicate.Metar(sql.FieldIsNull(FieldPressureTendency))
 }
 
 // PressureTendencyNotNil applies the NotNil predicate on the "pressure_tendency" field.
 func PressureTendencyNotNil() predicate.Metar {
-	return predicate.Metar(func(s *sql.Selector) {
-		s.Where(sql.NotNull(s.C(FieldPressureTendency)))
-	})
+	return predicate.Metar(sql.FieldNotNull(FieldPressureTendency))
 }
 
 // MaxTemp6EQ applies the EQ predicate on the "max_temp_6" field.
 func MaxTemp6EQ(v float64) predicate.Metar {
-	return predicate.Metar(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldMaxTemp6), v))
-	})
+	return predicate.Metar(sql.FieldEQ(FieldMaxTemp6, v))
 }
 
 // MaxTemp6NEQ applies the NEQ predicate on the "max_temp_6" field.
 func MaxTemp6NEQ(v float64) predicate.Metar {
-	return predicate.Metar(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldMaxTemp6), v))
-	})
+	return predicate.Metar(sql.FieldNEQ(FieldMaxTemp6, v))
 }
 
 // MaxTemp6In applies the In predicate on the "max_temp_6" field.
 func MaxTemp6In(vs ...float64) predicate.Metar {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Metar(func(s *sql.Selector) {
-		s.Where(sql.In(s.C(FieldMaxTemp6), v...))
-	})
+	return predicate.Metar(sql.FieldIn(FieldMaxTemp6, vs...))
 }
 
 // MaxTemp6NotIn applies the NotIn predicate on the "max_temp_6" field.
 func MaxTemp6NotIn(vs ...float64) predicate.Metar {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Metar(func(s *sql.Selector) {
-		s.Where(sql.NotIn(s.C(FieldMaxTemp6), v...))
-	})
+	return predicate.Metar(sql.FieldNotIn(FieldMaxTemp6, vs...))
 }
 
 // MaxTemp6GT applies the GT predicate on the "max_temp_6" field.
 func MaxTemp6GT(v float64) predicate.Metar {
-	return predicate.Metar(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldMaxTemp6), v))
-	})
+	return predicate.Metar(sql.FieldGT(FieldMaxTemp6, v))
 }
 
 // MaxTemp6GTE applies the GTE predicate on the "max_temp_6" field.
 func MaxTemp6GTE(v float64) predicate.Metar {
-	return predicate.Metar(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldMaxTemp6), v))
-	})
+	return predicate.Metar(sql.FieldGTE(FieldMaxTemp6, v))
 }
 
 // MaxTemp6LT applies the LT predicate on the "max_temp_6" field.
 func MaxTemp6LT(v float64) predicate.Metar {
-	return predicate.Metar(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldMaxTemp6), v))
-	})
+	return predicate.Metar(sql.FieldLT(FieldMaxTemp6, v))
 }
 
 // MaxTemp6LTE applies the LTE predicate on the "max_temp_6" field.
 func MaxTemp6LTE(v float64) predicate.Metar {
-	return predicate.Metar(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldMaxTemp6), v))
-	})
+	return predicate.Metar(sql.FieldLTE(FieldMaxTemp6, v))
 }
 
 // MaxTemp6IsNil applies the IsNil predicate on the "max_temp_6" field.
 func MaxTemp6IsNil() predicate.Metar {
-	return predicate.Metar(func(s *sql.Selector) {
-		s.Where(sql.IsNull(s.C(FieldMaxTemp6)))
-	})
+	return predicate.Metar(sql.FieldIsNull(FieldMaxTemp6))
 }
 
 // MaxTemp6NotNil applies the NotNil predicate on the "max_temp_6" field.
 func MaxTemp6NotNil() predicate.Metar {
-	return predicate.Metar(func(s *sql.Selector) {
-		s.Where(sql.NotNull(s.C(FieldMaxTemp6)))
-	})
+	return predicate.Metar(sql.FieldNotNull(FieldMaxTemp6))
 }
 
 // MinTemp6EQ applies the EQ predicate on the "min_temp_6" field.
 func MinTemp6EQ(v float64) predicate.Metar {
-	return predicate.Metar(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldMinTemp6), v))
-	})
+	return predicate.Metar(sql.FieldEQ(FieldMinTemp6, v))
 }
 
 // MinTemp6NEQ applies the NEQ predicate on the "min_temp_6" field.
 func MinTemp6NEQ(v float64) predicate.Metar {
-	return predicate.Metar(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldMinTemp6), v))
-	})
+	return predicate.Metar(sql.FieldNEQ(FieldMinTemp6, v))
 }
 
 // MinTemp6In applies the In predicate on the "min_temp_6" field.
 func MinTemp6In(vs ...float64) predicate.Metar {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Metar(func(s *sql.Selector) {
-		s.Where(sql.In(s.C(FieldMinTemp6), v...))
-	})
+	return predicate.Metar(sql.FieldIn(FieldMinTemp6, vs...))
 }
 
 // MinTemp6NotIn applies the NotIn predicate on the "min_temp_6" field.
 func MinTemp6NotIn(vs ...float64) predicate.Metar {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Metar(func(s *sql.Selector) {
-		s.Where(sql.NotIn(s.C(FieldMinTemp6), v...))
-	})
+	return predicate.Metar(sql.FieldNotIn(FieldMinTemp6, vs...))
 }
 
 // MinTemp6GT applies the GT predicate on the "min_temp_6" field.
 func MinTemp6GT(v float64) predicate.Metar {
-	return predicate.Metar(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldMinTemp6), v))
-	})
+	return predicate.Metar(sql.FieldGT(FieldMinTemp6, v))
 }
 
 // MinTemp6GTE applies the GTE predicate on the "min_temp_6" field.
 func MinTemp6GTE(v float64) predicate.Metar {
-	return predicate.Metar(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldMinTemp6), v))
-	})
+	return predicate.Metar(sql.FieldGTE(FieldMinTemp6, v))
 }
 
 // MinTemp6LT applies the LT predicate on the "min_temp_6" field.
 func MinTemp6LT(v float64) predicate.Metar {
-	return predicate.Metar(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldMinTemp6), v))
-	})
+	return predicate.Metar(sql.FieldLT(FieldMinTemp6, v))
 }
 
 // MinTemp6LTE applies the LTE predicate on the "min_temp_6" field.
 func MinTemp6LTE(v float64) predicate.Metar {
-	return predicate.Metar(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldMinTemp6), v))
-	})
+	return predicate.Metar(sql.FieldLTE(FieldMinTemp6, v))
 }
 
 // MinTemp6IsNil applies the IsNil predicate on the "min_temp_6" field.
 func MinTemp6IsNil() predicate.Metar {
-	return predicate.Metar(func(s *sql.Selector) {
-		s.Where(sql.IsNull(s.C(FieldMinTemp6)))
-	})
+	return predicate.Metar(sql.FieldIsNull(FieldMinTemp6))
 }
 
 // MinTemp6NotNil applies the NotNil predicate on the "min_temp_6" field.
 func MinTemp6NotNil() predicate.Metar {
-	return predicate.Metar(func(s *sql.Selector) {
-		s.Where(sql.NotNull(s.C(FieldMinTemp6)))
-	})
+	return predicate.Metar(sql.FieldNotNull(FieldMinTemp6))
 }
 
 // MaxTemp24EQ applies the EQ predicate on the "max_temp_24" field.
 func MaxTemp24EQ(v float64) predicate.Metar {
-	return predicate.Metar(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldMaxTemp24), v))
-	})
+	return predicate.Metar(sql.FieldEQ(FieldMaxTemp24, v))
 }
 
 // MaxTemp24NEQ applies the NEQ predicate on the "max_temp_24" field.
 func MaxTemp24NEQ(v float64) predicate.Metar {
-	return predicate.Metar(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldMaxTemp24), v))
-	})
+	return predicate.Metar(sql.FieldNEQ(FieldMaxTemp24, v))
 }
 
 // MaxTemp24In applies the In predicate on the "max_temp_24" field.
 func MaxTemp24In(vs ...float64) predicate.Metar {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Metar(func(s *sql.Selector) {
-		s.Where(sql.In(s.C(FieldMaxTemp24), v...))
-	})
+	return predicate.Metar(sql.FieldIn(FieldMaxTemp24, vs...))
 }
 
 // MaxTemp24NotIn applies the NotIn predicate on the "max_temp_24" field.
 func MaxTemp24NotIn(vs ...float64) predicate.Metar {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Metar(func(s *sql.Selector) {
-		s.Where(sql.NotIn(s.C(FieldMaxTemp24), v...))
-	})
+	return predicate.Metar(sql.FieldNotIn(FieldMaxTemp24, vs...))
 }
 
 // MaxTemp24GT applies the GT predicate on the "max_temp_24" field.
 func MaxTemp24GT(v float64) predicate.Metar {
-	return predicate.Metar(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldMaxTemp24), v))
-	})
+	return predicate.Metar(sql.FieldGT(FieldMaxTemp24, v))
 }
 
 // MaxTemp24GTE applies the GTE predicate on the "max_temp_24" field.
 func MaxTemp24GTE(v float64) predicate.Metar {
-	return predicate.Metar(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldMaxTemp24), v))
-	})
+	return predicate.Metar(sql.FieldGTE(FieldMaxTemp24, v))
 }
 
 // MaxTemp24LT applies the LT predicate on the "max_temp_24" field.
 func MaxTemp24LT(v float64) predicate.Metar {
-	return predicate.Metar(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldMaxTemp24), v))
-	})
+	return predicate.Metar(sql.FieldLT(FieldMaxTemp24, v))
 }
 
 // MaxTemp24LTE applies the LTE predicate on the "max_temp_24" field.
 func MaxTemp24LTE(v float64) predicate.Metar {
-	return predicate.Metar(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldMaxTemp24), v))
-	})
+	return predicate.Metar(sql.FieldLTE(FieldMaxTemp24, v))
 }
 
 // MaxTemp24IsNil applies the IsNil predicate on the "max_temp_24" field.
 func MaxTemp24IsNil() predicate.Metar {
-	return predicate.Metar(func(s *sql.Selector) {
-		s.Where(sql.IsNull(s.C(FieldMaxTemp24)))
-	})
+	return predicate.Metar(sql.FieldIsNull(FieldMaxTemp24))
 }
 
 // MaxTemp24NotNil applies the NotNil predicate on the "max_temp_24" field.
 func MaxTemp24NotNil() predicate.Metar {
-	return predicate.Metar(func(s *sql.Selector) {
-		s.Where(sql.NotNull(s.C(FieldMaxTemp24)))
-	})
+	return predicate.Metar(sql.FieldNotNull(FieldMaxTemp24))
 }
 
 // MinTemp24EQ applies the EQ predicate on the "min_temp_24" field.
 func MinTemp24EQ(v float64) predicate.Metar {
-	return predicate.Metar(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldMinTemp24), v))
-	})
+	return predicate.Metar(sql.FieldEQ(FieldMinTemp24, v))
 }
 
 // MinTemp24NEQ applies the NEQ predicate on the "min_temp_24" field.
 func MinTemp24NEQ(v float64) predicate.Metar {
-	return predicate.Metar(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldMinTemp24), v))
-	})
+	return predicate.Metar(sql.FieldNEQ(FieldMinTemp24, v))
 }
 
 // MinTemp24In applies the In predicate on the "min_temp_24" field.
 func MinTemp24In(vs ...float64) predicate.Metar {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Metar(func(s *sql.Selector) {
-		s.Where(sql.In(s.C(FieldMinTemp24), v...))
-	})
+	return predicate.Metar(sql.FieldIn(FieldMinTemp24, vs...))
 }
 
 // MinTemp24NotIn applies the NotIn predicate on the "min_temp_24" field.
 func MinTemp24NotIn(vs ...float64) predicate.Metar {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Metar(func(s *sql.Selector) {
-		s.Where(sql.NotIn(s.C(FieldMinTemp24), v...))
-	})
+	return predicate.Metar(sql.FieldNotIn(FieldMinTemp24, vs...))
 }
 
 // MinTemp24GT applies the GT predicate on the "min_temp_24" field.
 func MinTemp24GT(v float64) predicate.Metar {
-	return predicate.Metar(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldMinTemp24), v))
-	})
+	return predicate.Metar(sql.FieldGT(FieldMinTemp24, v))
 }
 
 // MinTemp24GTE applies the GTE predicate on the "min_temp_24" field.
 func MinTemp24GTE(v float64) predicate.Metar {
-	return predicate.Metar(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldMinTemp24), v))
-	})
+	return predicate.Metar(sql.FieldGTE(FieldMinTemp24, v))
 }
 
 // MinTemp24LT applies the LT predicate on the "min_temp_24" field.
 func MinTemp24LT(v float64) predicate.Metar {
-	return predicate.Metar(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldMinTemp24), v))
-	})
+	return predicate.Metar(sql.FieldLT(FieldMinTemp24, v))
 }
 
 // MinTemp24LTE applies the LTE predicate on the "min_temp_24" field.
 func MinTemp24LTE(v float64) predicate.Metar {
-	return predicate.Metar(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldMinTemp24), v))
-	})
+	return predicate.Metar(sql.FieldLTE(FieldMinTemp24, v))
 }
 
 // MinTemp24IsNil applies the IsNil predicate on the "min_temp_24" field.
 func MinTemp24IsNil() predicate.Metar {
-	return predicate.Metar(func(s *sql.Selector) {
-		s.Where(sql.IsNull(s.C(FieldMinTemp24)))
-	})
+	return predicate.Metar(sql.FieldIsNull(FieldMinTemp24))
 }
 
 // MinTemp24NotNil applies the NotNil predicate on the "min_temp_24" field.
 func MinTemp24NotNil() predicate.Metar {
-	return predicate.Metar(func(s *sql.Selector) {
-		s.Where(sql.NotNull(s.C(FieldMinTemp24)))
-	})
+	return predicate.Metar(sql.FieldNotNull(FieldMinTemp24))
 }
 
 // PrecipitationEQ applies the EQ predicate on the "precipitation" field.
 func PrecipitationEQ(v float64) predicate.Metar {
-	return predicate.Metar(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldPrecipitation), v))
-	})
+	return predicate.Metar(sql.FieldEQ(FieldPrecipitation, v))
 }
 
 // PrecipitationNEQ applies the NEQ predicate on the "precipitation" field.
 func PrecipitationNEQ(v float64) predicate.Metar {
-	return predicate.Metar(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldPrecipitation), v))
-	})
+	return predicate.Metar(sql.FieldNEQ(FieldPrecipitation, v))
 }
 
 // PrecipitationIn applies the In predicate on the "precipitation" field.
 func PrecipitationIn(vs ...float64) predicate.Metar {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Metar(func(s *sql.Selector) {
-		s.Where(sql.In(s.C(FieldPrecipitation), v...))
-	})
+	return predicate.Metar(sql.FieldIn(FieldPrecipitation, vs...))
 }
 
 // PrecipitationNotIn applies the NotIn predicate on the "precipitation" field.
 func PrecipitationNotIn(vs ...float64) predicate.Metar {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Metar(func(s *sql.Selector) {
-		s.Where(sql.NotIn(s.C(FieldPrecipitation), v...))
-	})
+	return predicate.Metar(sql.FieldNotIn(FieldPrecipitation, vs...))
 }
 
 // PrecipitationGT applies the GT predicate on the "precipitation" field.
 func PrecipitationGT(v float64) predicate.Metar {
-	return predicate.Metar(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldPrecipitation), v))
-	})
+	return predicate.Metar(sql.FieldGT(FieldPrecipitation, v))
 }
 
 // PrecipitationGTE applies the GTE predicate on the "precipitation" field.
 func PrecipitationGTE(v float64) predicate.Metar {
-	return predicate.Metar(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldPrecipitation), v))
-	})
+	return predicate.Metar(sql.FieldGTE(FieldPrecipitation, v))
 }
 
 // PrecipitationLT applies the LT predicate on the "precipitation" field.
 func PrecipitationLT(v float64) predicate.Metar {
-	return predicate.Metar(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldPrecipitation), v))
-	})
+	return predicate.Metar(sql.FieldLT(FieldPrecipitation, v))
 }
 
 // PrecipitationLTE applies the LTE predicate on the "precipitation" field.
 func PrecipitationLTE(v float64) predicate.Metar {
-	return predicate.Metar(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldPrecipitation), v))
-	})
+	return predicate.Metar(sql.FieldLTE(FieldPrecipitation, v))
 }
 
 // PrecipitationIsNil applies the IsNil predicate on the "precipitation" field.
 func PrecipitationIsNil() predicate.Metar {
-	return predicate.Metar(func(s *sql.Selector) {
-		s.Where(sql.IsNull(s.C(FieldPrecipitation)))
-	})
+	return predicate.Metar(sql.FieldIsNull(FieldPrecipitation))
 }
 
 // PrecipitationNotNil applies the NotNil predicate on the "precipitation" field.
 func PrecipitationNotNil() predicate.Metar {
-	return predicate.Metar(func(s *sql.Selector) {
-		s.Where(sql.NotNull(s.C(FieldPrecipitation)))
-	})
+	return predicate.Metar(sql.FieldNotNull(FieldPrecipitation))
 }
 
 // Precipitation3EQ applies the EQ predicate on the "precipitation_3" field.
 func Precipitation3EQ(v float64) predicate.Metar {
-	return predicate.Metar(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldPrecipitation3), v))
-	})
+	return predicate.Metar(sql.FieldEQ(FieldPrecipitation3, v))
 }
 
 // Precipitation3NEQ applies the NEQ predicate on the "precipitation_3" field.
 func Precipitation3NEQ(v float64) predicate.Metar {
-	return predicate.Metar(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldPrecipitation3), v))
-	})
+	return predicate.Metar(sql.FieldNEQ(FieldPrecipitation3, v))
 }
 
 // Precipitation3In applies the In predicate on the "precipitation_3" field.
 func Precipitation3In(vs ...float64) predicate.Metar {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Metar(func(s *sql.Selector) {
-		s.Where(sql.In(s.C(FieldPrecipitation3), v...))
-	})
+	return predicate.Metar(sql.FieldIn(FieldPrecipitation3, vs...))
 }
 
 // Precipitation3NotIn applies the NotIn predicate on the "precipitation_3" field.
 func Precipitation3NotIn(vs ...float64) predicate.Metar {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Metar(func(s *sql.Selector) {
-		s.Where(sql.NotIn(s.C(FieldPrecipitation3), v...))
-	})
+	return predicate.Metar(sql.FieldNotIn(FieldPrecipitation3, vs...))
 }
 
 // Precipitation3GT applies the GT predicate on the "precipitation_3" field.
 func Precipitation3GT(v float64) predicate.Metar {
-	return predicate.Metar(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldPrecipitation3), v))
-	})
+	return predicate.Metar(sql.FieldGT(FieldPrecipitation3, v))
 }
 
 // Precipitation3GTE applies the GTE predicate on the "precipitation_3" field.
 func Precipitation3GTE(v float64) predicate.Metar {
-	return predicate.Metar(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldPrecipitation3), v))
-	})
+	return predicate.Metar(sql.FieldGTE(FieldPrecipitation3, v))
 }
 
 // Precipitation3LT applies the LT predicate on the "precipitation_3" field.
 func Precipitation3LT(v float64) predicate.Metar {
-	return predicate.Metar(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldPrecipitation3), v))
-	})
+	return predicate.Metar(sql.FieldLT(FieldPrecipitation3, v))
 }
 
 // Precipitation3LTE applies the LTE predicate on the "precipitation_3" field.
 func Precipitation3LTE(v float64) predicate.Metar {
-	return predicate.Metar(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldPrecipitation3), v))
-	})
+	return predicate.Metar(sql.FieldLTE(FieldPrecipitation3, v))
 }
 
 // Precipitation3IsNil applies the IsNil predicate on the "precipitation_3" field.
 func Precipitation3IsNil() predicate.Metar {
-	return predicate.Metar(func(s *sql.Selector) {
-		s.Where(sql.IsNull(s.C(FieldPrecipitation3)))
-	})
+	return predicate.Metar(sql.FieldIsNull(FieldPrecipitation3))
 }
 
 // Precipitation3NotNil applies the NotNil predicate on the "precipitation_3" field.
 func Precipitation3NotNil() predicate.Metar {
-	return predicate.Metar(func(s *sql.Selector) {
-		s.Where(sql.NotNull(s.C(FieldPrecipitation3)))
-	})
+	return predicate.Metar(sql.FieldNotNull(FieldPrecipitation3))
 }
 
 // Precipitation6EQ applies the EQ predicate on the "precipitation_6" field.
 func Precipitation6EQ(v float64) predicate.Metar {
-	return predicate.Metar(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldPrecipitation6), v))
-	})
+	return predicate.Metar(sql.FieldEQ(FieldPrecipitation6, v))
 }
 
 // Precipitation6NEQ applies the NEQ predicate on the "precipitation_6" field.
 func Precipitation6NEQ(v float64) predicate.Metar {
-	return predicate.Metar(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldPrecipitation6), v))
-	})
+	return predicate.Metar(sql.FieldNEQ(FieldPrecipitation6, v))
 }
 
 // Precipitation6In applies the In predicate on the "precipitation_6" field.
 func Precipitation6In(vs ...float64) predicate.Metar {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Metar(func(s *sql.Selector) {
-		s.Where(sql.In(s.C(FieldPrecipitation6), v...))
-	})
+	return predicate.Metar(sql.FieldIn(FieldPrecipitation6, vs...))
 }
 
 // Precipitation6NotIn applies the NotIn predicate on the "precipitation_6" field.
 func Precipitation6NotIn(vs ...float64) predicate.Metar {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Metar(func(s *sql.Selector) {
-		s.Where(sql.NotIn(s.C(FieldPrecipitation6), v...))
-	})
+	return predicate.Metar(sql.FieldNotIn(FieldPrecipitation6, vs...))
 }
 
 // Precipitation6GT applies the GT predicate on the "precipitation_6" field.
 func Precipitation6GT(v float64) predicate.Metar {
-	return predicate.Metar(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldPrecipitation6), v))
-	})
+	return predicate.Metar(sql.FieldGT(FieldPrecipitation6, v))
 }
 
 // Precipitation6GTE applies the GTE predicate on the "precipitation_6" field.
 func Precipitation6GTE(v float64) predicate.Metar {
-	return predicate.Metar(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldPrecipitation6), v))
-	})
+	return predicate.Metar(sql.FieldGTE(FieldPrecipitation6, v))
 }
 
 // Precipitation6LT applies the LT predicate on the "precipitation_6" field.
 func Precipitation6LT(v float64) predicate.Metar {
-	return predicate.Metar(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldPrecipitation6), v))
-	})
+	return predicate.Metar(sql.FieldLT(FieldPrecipitation6, v))
 }
 
 // Precipitation6LTE applies the LTE predicate on the "precipitation_6" field.
 func Precipitation6LTE(v float64) predicate.Metar {
-	return predicate.Metar(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldPrecipitation6), v))
-	})
+	return predicate.Metar(sql.FieldLTE(FieldPrecipitation6, v))
 }
 
 // Precipitation6IsNil applies the IsNil predicate on the "precipitation_6" field.
 func Precipitation6IsNil() predicate.Metar {
-	return predicate.Metar(func(s *sql.Selector) {
-		s.Where(sql.IsNull(s.C(FieldPrecipitation6)))
-	})
+	return predicate.Metar(sql.FieldIsNull(FieldPrecipitation6))
 }
 
 // Precipitation6NotNil applies the NotNil predicate on the "precipitation_6" field.
 func Precipitation6NotNil() predicate.Metar {
-	return predicate.Metar(func(s *sql.Selector) {
-		s.Where(sql.NotNull(s.C(FieldPrecipitation6)))
-	})
+	return predicate.Metar(sql.FieldNotNull(FieldPrecipitation6))
 }
 
 // Precipitation24EQ applies the EQ predicate on the "precipitation_24" field.
 func Precipitation24EQ(v float64) predicate.Metar {
-	return predicate.Metar(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldPrecipitation24), v))
-	})
+	return predicate.Metar(sql.FieldEQ(FieldPrecipitation24, v))
 }
 
 // Precipitation24NEQ applies the NEQ predicate on the "precipitation_24" field.
 func Precipitation24NEQ(v float64) predicate.Metar {
-	return predicate.Metar(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldPrecipitation24), v))
-	})
+	return predicate.Metar(sql.FieldNEQ(FieldPrecipitation24, v))
 }
 
 // Precipitation24In applies the In predicate on the "precipitation_24" field.
 func Precipitation24In(vs ...float64) predicate.Metar {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Metar(func(s *sql.Selector) {
-		s.Where(sql.In(s.C(FieldPrecipitation24), v...))
-	})
+	return predicate.Metar(sql.FieldIn(FieldPrecipitation24, vs...))
 }
 
 // Precipitation24NotIn applies the NotIn predicate on the "precipitation_24" field.
 func Precipitation24NotIn(vs ...float64) predicate.Metar {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Metar(func(s *sql.Selector) {
-		s.Where(sql.NotIn(s.C(FieldPrecipitation24), v...))
-	})
+	return predicate.Metar(sql.FieldNotIn(FieldPrecipitation24, vs...))
 }
 
 // Precipitation24GT applies the GT predicate on the "precipitation_24" field.
 func Precipitation24GT(v float64) predicate.Metar {
-	return predicate.Metar(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldPrecipitation24), v))
-	})
+	return predicate.Metar(sql.FieldGT(FieldPrecipitation24, v))
 }
 
 // Precipitation24GTE applies the GTE predicate on the "precipitation_24" field.
 func Precipitation24GTE(v float64) predicate.Metar {
-	return predicate.Metar(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldPrecipitation24), v))
-	})
+	return predicate.Metar(sql.FieldGTE(FieldPrecipitation24, v))
 }
 
 // Precipitation24LT applies the LT predicate on the "precipitation_24" field.
 func Precipitation24LT(v float64) predicate.Metar {
-	return predicate.Metar(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldPrecipitation24), v))
-	})
+	return predicate.Metar(sql.FieldLT(FieldPrecipitation24, v))
 }
 
 // Precipitation24LTE applies the LTE predicate on the "precipitation_24" field.
 func Precipitation24LTE(v float64) predicate.Metar {
-	return predicate.Metar(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldPrecipitation24), v))
-	})
+	return predicate.Metar(sql.FieldLTE(FieldPrecipitation24, v))
 }
 
 // Precipitation24IsNil applies the IsNil predicate on the "precipitation_24" field.
 func Precipitation24IsNil() predicate.Metar {
-	return predicate.Metar(func(s *sql.Selector) {
-		s.Where(sql.IsNull(s.C(FieldPrecipitation24)))
-	})
+	return predicate.Metar(sql.FieldIsNull(FieldPrecipitation24))
 }
 
 // Precipitation24NotNil applies the NotNil predicate on the "precipitation_24" field.
 func Precipitation24NotNil() predicate.Metar {
-	return predicate.Metar(func(s *sql.Selector) {
-		s.Where(sql.NotNull(s.C(FieldPrecipitation24)))
-	})
+	return predicate.Metar(sql.FieldNotNull(FieldPrecipitation24))
 }
 
 // SnowDepthEQ applies the EQ predicate on the "snow_depth" field.
 func SnowDepthEQ(v float64) predicate.Metar {
-	return predicate.Metar(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldSnowDepth), v))
-	})
+	return predicate.Metar(sql.FieldEQ(FieldSnowDepth, v))
 }
 
 // SnowDepthNEQ applies the NEQ predicate on the "snow_depth" field.
 func SnowDepthNEQ(v float64) predicate.Metar {
-	return predicate.Metar(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldSnowDepth), v))
-	})
+	return predicate.Metar(sql.FieldNEQ(FieldSnowDepth, v))
 }
 
 // SnowDepthIn applies the In predicate on the "snow_depth" field.
 func SnowDepthIn(vs ...float64) predicate.Metar {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Metar(func(s *sql.Selector) {
-		s.Where(sql.In(s.C(FieldSnowDepth), v...))
-	})
+	return predicate.Metar(sql.FieldIn(FieldSnowDepth, vs...))
 }
 
 // SnowDepthNotIn applies the NotIn predicate on the "snow_depth" field.
 func SnowDepthNotIn(vs ...float64) predicate.Metar {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Metar(func(s *sql.Selector) {
-		s.Where(sql.NotIn(s.C(FieldSnowDepth), v...))
-	})
+	return predicate.Metar(sql.FieldNotIn(FieldSnowDepth, vs...))
 }
 
 // SnowDepthGT applies the GT predicate on the "snow_depth" field.
 func SnowDepthGT(v float64) predicate.Metar {
-	return predicate.Metar(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldSnowDepth), v))
-	})
+	return predicate.Metar(sql.FieldGT(FieldSnowDepth, v))
 }
 
 // SnowDepthGTE applies the GTE predicate on the "snow_depth" field.
 func SnowDepthGTE(v float64) predicate.Metar {
-	return predicate.Metar(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldSnowDepth), v))
-	})
+	return predicate.Metar(sql.FieldGTE(FieldSnowDepth, v))
 }
 
 // SnowDepthLT applies the LT predicate on the "snow_depth" field.
 func SnowDepthLT(v float64) predicate.Metar {
-	return predicate.Metar(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldSnowDepth), v))
-	})
+	return predicate.Metar(sql.FieldLT(FieldSnowDepth, v))
 }
 
 // SnowDepthLTE applies the LTE predicate on the "snow_depth" field.
 func SnowDepthLTE(v float64) predicate.Metar {
-	return predicate.Metar(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldSnowDepth), v))
-	})
+	return predicate.Metar(sql.FieldLTE(FieldSnowDepth, v))
 }
 
 // SnowDepthIsNil applies the IsNil predicate on the "snow_depth" field.
 func SnowDepthIsNil() predicate.Metar {
-	return predicate.Metar(func(s *sql.Selector) {
-		s.Where(sql.IsNull(s.C(FieldSnowDepth)))
-	})
+	return predicate.Metar(sql.FieldIsNull(FieldSnowDepth))
 }
 
 // SnowDepthNotNil applies the NotNil predicate on the "snow_depth" field.
 func SnowDepthNotNil() predicate.Metar {
-	return predicate.Metar(func(s *sql.Selector) {
-		s.Where(sql.NotNull(s.C(FieldSnowDepth)))
-	})
+	return predicate.Metar(sql.FieldNotNull(FieldSnowDepth))
 }
 
 // VertVisEQ applies the EQ predicate on the "vert_vis" field.
 func VertVisEQ(v float64) predicate.Metar {
-	return predicate.Metar(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldVertVis), v))
-	})
+	return predicate.Metar(sql.FieldEQ(FieldVertVis, v))
 }
 
 // VertVisNEQ applies the NEQ predicate on the "vert_vis" field.
 func VertVisNEQ(v float64) predicate.Metar {
-	return predicate.Metar(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldVertVis), v))
-	})
+	return predicate.Metar(sql.FieldNEQ(FieldVertVis, v))
 }
 
 // VertVisIn applies the In predicate on the "vert_vis" field.
 func VertVisIn(vs ...float64) predicate.Metar {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Metar(func(s *sql.Selector) {
-		s.Where(sql.In(s.C(FieldVertVis), v...))
-	})
+	return predicate.Metar(sql.FieldIn(FieldVertVis, vs...))
 }
 
 // VertVisNotIn applies the NotIn predicate on the "vert_vis" field.
 func VertVisNotIn(vs ...float64) predicate.Metar {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Metar(func(s *sql.Selector) {
-		s.Where(sql.NotIn(s.C(FieldVertVis), v...))
-	})
+	return predicate.Metar(sql.FieldNotIn(FieldVertVis, vs...))
 }
 
 // VertVisGT applies the GT predicate on the "vert_vis" field.
 func VertVisGT(v float64) predicate.Metar {
-	return predicate.Metar(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldVertVis), v))
-	})
+	return predicate.Metar(sql.FieldGT(FieldVertVis, v))
 }
 
 // VertVisGTE applies the GTE predicate on the "vert_vis" field.
 func VertVisGTE(v float64) predicate.Metar {
-	return predicate.Metar(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldVertVis), v))
-	})
+	return predicate.Metar(sql.FieldGTE(FieldVertVis, v))
 }
 
 // VertVisLT applies the LT predicate on the "vert_vis" field.
 func VertVisLT(v float64) predicate.Metar {
-	return predicate.Metar(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldVertVis), v))
-	})
+	return predicate.Metar(sql.FieldLT(FieldVertVis, v))
 }
 
 // VertVisLTE applies the LTE predicate on the "vert_vis" field.
 func VertVisLTE(v float64) predicate.Metar {
-	return predicate.Metar(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldVertVis), v))
-	})
+	return predicate.Metar(sql.FieldLTE(FieldVertVis, v))
 }
 
 // VertVisIsNil applies the IsNil predicate on the "vert_vis" field.
 func VertVisIsNil() predicate.Metar {
-	return predicate.Metar(func(s *sql.Selector) {
-		s.Where(sql.IsNull(s.C(FieldVertVis)))
-	})
+	return predicate.Metar(sql.FieldIsNull(FieldVertVis))
 }
 
 // VertVisNotNil applies the NotNil predicate on the "vert_vis" field.
 func VertVisNotNil() predicate.Metar {
-	return predicate.Metar(func(s *sql.Selector) {
-		s.Where(sql.NotNull(s.C(FieldVertVis)))
-	})
+	return predicate.Metar(sql.FieldNotNull(FieldVertVis))
 }
 
 // MetarTypeEQ applies the EQ predicate on the "metar_type" field.
 func MetarTypeEQ(v MetarType) predicate.Metar {
-	return predicate.Metar(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldMetarType), v))
-	})
+	return predicate.Metar(sql.FieldEQ(FieldMetarType, v))
 }
 
 // MetarTypeNEQ applies the NEQ predicate on the "metar_type" field.
 func MetarTypeNEQ(v MetarType) predicate.Metar {
-	return predicate.Metar(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldMetarType), v))
-	})
+	return predicate.Metar(sql.FieldNEQ(FieldMetarType, v))
 }
 
 // MetarTypeIn applies the In predicate on the "metar_type" field.
 func MetarTypeIn(vs ...MetarType) predicate.Metar {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Metar(func(s *sql.Selector) {
-		s.Where(sql.In(s.C(FieldMetarType), v...))
-	})
+	return predicate.Metar(sql.FieldIn(FieldMetarType, vs...))
 }
 
 // MetarTypeNotIn applies the NotIn predicate on the "metar_type" field.
 func MetarTypeNotIn(vs ...MetarType) predicate.Metar {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Metar(func(s *sql.Selector) {
-		s.Where(sql.NotIn(s.C(FieldMetarType), v...))
-	})
+	return predicate.Metar(sql.FieldNotIn(FieldMetarType, vs...))
 }
 
 // HashEQ applies the EQ predicate on the "hash" field.
 func HashEQ(v string) predicate.Metar {
-	return predicate.Metar(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldHash), v))
-	})
+	return predicate.Metar(sql.FieldEQ(FieldHash, v))
 }
 
 // HashNEQ applies the NEQ predicate on the "hash" field.
 func HashNEQ(v string) predicate.Metar {
-	return predicate.Metar(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldHash), v))
-	})
+	return predicate.Metar(sql.FieldNEQ(FieldHash, v))
 }
 
 // HashIn applies the In predicate on the "hash" field.
 func HashIn(vs ...string) predicate.Metar {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Metar(func(s *sql.Selector) {
-		s.Where(sql.In(s.C(FieldHash), v...))
-	})
+	return predicate.Metar(sql.FieldIn(FieldHash, vs...))
 }
 
 // HashNotIn applies the NotIn predicate on the "hash" field.
 func HashNotIn(vs ...string) predicate.Metar {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Metar(func(s *sql.Selector) {
-		s.Where(sql.NotIn(s.C(FieldHash), v...))
-	})
+	return predicate.Metar(sql.FieldNotIn(FieldHash, vs...))
 }
 
 // HashGT applies the GT predicate on the "hash" field.
 func HashGT(v string) predicate.Metar {
-	return predicate.Metar(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldHash), v))
-	})
+	return predicate.Metar(sql.FieldGT(FieldHash, v))
 }
 
 // HashGTE applies the GTE predicate on the "hash" field.
 func HashGTE(v string) predicate.Metar {
-	return predicate.Metar(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldHash), v))
-	})
+	return predicate.Metar(sql.FieldGTE(FieldHash, v))
 }
 
 // HashLT applies the LT predicate on the "hash" field.
 func HashLT(v string) predicate.Metar {
-	return predicate.Metar(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldHash), v))
-	})
+	return predicate.Metar(sql.FieldLT(FieldHash, v))
 }
 
 // HashLTE applies the LTE predicate on the "hash" field.
 func HashLTE(v string) predicate.Metar {
-	return predicate.Metar(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldHash), v))
-	})
+	return predicate.Metar(sql.FieldLTE(FieldHash, v))
 }
 
 // HashContains applies the Contains predicate on the "hash" field.
 func HashContains(v string) predicate.Metar {
-	return predicate.Metar(func(s *sql.Selector) {
-		s.Where(sql.Contains(s.C(FieldHash), v))
-	})
+	return predicate.Metar(sql.FieldContains(FieldHash, v))
 }
 
 // HashHasPrefix applies the HasPrefix predicate on the "hash" field.
 func HashHasPrefix(v string) predicate.Metar {
-	return predicate.Metar(func(s *sql.Selector) {
-		s.Where(sql.HasPrefix(s.C(FieldHash), v))
-	})
+	return predicate.Metar(sql.FieldHasPrefix(FieldHash, v))
 }
 
 // HashHasSuffix applies the HasSuffix predicate on the "hash" field.
 func HashHasSuffix(v string) predicate.Metar {
-	return predicate.Metar(func(s *sql.Selector) {
-		s.Where(sql.HasSuffix(s.C(FieldHash), v))
-	})
+	return predicate.Metar(sql.FieldHasSuffix(FieldHash, v))
 }
 
 // HashEqualFold applies the EqualFold predicate on the "hash" field.
 func HashEqualFold(v string) predicate.Metar {
-	return predicate.Metar(func(s *sql.Selector) {
-		s.Where(sql.EqualFold(s.C(FieldHash), v))
-	})
+	return predicate.Metar(sql.FieldEqualFold(FieldHash, v))
 }
 
 // HashContainsFold applies the ContainsFold predicate on the "hash" field.
 func HashContainsFold(v string) predicate.Metar {
-	return predicate.Metar(func(s *sql.Selector) {
-		s.Where(sql.ContainsFold(s.C(FieldHash), v))
-	})
+	return predicate.Metar(sql.FieldContainsFold(FieldHash, v))
 }
 
 // HasStation applies the HasEdge predicate on the "station" edge.
@@ -2508,7 +1636,6 @@ func HasStation() predicate.Metar {
 	return predicate.Metar(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(StationTable, FieldID),
 			sqlgraph.Edge(sqlgraph.M2O, true, StationTable, StationColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)
@@ -2536,7 +1663,6 @@ func HasSkyConditions() predicate.Metar {
 	return predicate.Metar(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(SkyConditionsTable, FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, false, SkyConditionsTable, SkyConditionsColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)

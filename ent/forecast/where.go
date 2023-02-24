@@ -13,1440 +13,932 @@ import (
 
 // ID filters vertices based on their ID field.
 func ID(id uuid.UUID) predicate.Forecast {
-	return predicate.Forecast(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldID), id))
-	})
+	return predicate.Forecast(sql.FieldEQ(FieldID, id))
 }
 
 // IDEQ applies the EQ predicate on the ID field.
 func IDEQ(id uuid.UUID) predicate.Forecast {
-	return predicate.Forecast(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldID), id))
-	})
+	return predicate.Forecast(sql.FieldEQ(FieldID, id))
 }
 
 // IDNEQ applies the NEQ predicate on the ID field.
 func IDNEQ(id uuid.UUID) predicate.Forecast {
-	return predicate.Forecast(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldID), id))
-	})
+	return predicate.Forecast(sql.FieldNEQ(FieldID, id))
 }
 
 // IDIn applies the In predicate on the ID field.
 func IDIn(ids ...uuid.UUID) predicate.Forecast {
-	return predicate.Forecast(func(s *sql.Selector) {
-		v := make([]any, len(ids))
-		for i := range v {
-			v[i] = ids[i]
-		}
-		s.Where(sql.In(s.C(FieldID), v...))
-	})
+	return predicate.Forecast(sql.FieldIn(FieldID, ids...))
 }
 
 // IDNotIn applies the NotIn predicate on the ID field.
 func IDNotIn(ids ...uuid.UUID) predicate.Forecast {
-	return predicate.Forecast(func(s *sql.Selector) {
-		v := make([]any, len(ids))
-		for i := range v {
-			v[i] = ids[i]
-		}
-		s.Where(sql.NotIn(s.C(FieldID), v...))
-	})
+	return predicate.Forecast(sql.FieldNotIn(FieldID, ids...))
 }
 
 // IDGT applies the GT predicate on the ID field.
 func IDGT(id uuid.UUID) predicate.Forecast {
-	return predicate.Forecast(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldID), id))
-	})
+	return predicate.Forecast(sql.FieldGT(FieldID, id))
 }
 
 // IDGTE applies the GTE predicate on the ID field.
 func IDGTE(id uuid.UUID) predicate.Forecast {
-	return predicate.Forecast(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldID), id))
-	})
+	return predicate.Forecast(sql.FieldGTE(FieldID, id))
 }
 
 // IDLT applies the LT predicate on the ID field.
 func IDLT(id uuid.UUID) predicate.Forecast {
-	return predicate.Forecast(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldID), id))
-	})
+	return predicate.Forecast(sql.FieldLT(FieldID, id))
 }
 
 // IDLTE applies the LTE predicate on the ID field.
 func IDLTE(id uuid.UUID) predicate.Forecast {
-	return predicate.Forecast(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldID), id))
-	})
+	return predicate.Forecast(sql.FieldLTE(FieldID, id))
 }
 
 // FromTime applies equality check predicate on the "from_time" field. It's identical to FromTimeEQ.
 func FromTime(v time.Time) predicate.Forecast {
-	return predicate.Forecast(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldFromTime), v))
-	})
+	return predicate.Forecast(sql.FieldEQ(FieldFromTime, v))
 }
 
 // ToTime applies equality check predicate on the "to_time" field. It's identical to ToTimeEQ.
 func ToTime(v time.Time) predicate.Forecast {
-	return predicate.Forecast(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldToTime), v))
-	})
+	return predicate.Forecast(sql.FieldEQ(FieldToTime, v))
 }
 
 // ChangeTime applies equality check predicate on the "change_time" field. It's identical to ChangeTimeEQ.
 func ChangeTime(v time.Time) predicate.Forecast {
-	return predicate.Forecast(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldChangeTime), v))
-	})
+	return predicate.Forecast(sql.FieldEQ(FieldChangeTime, v))
 }
 
 // ChangeProbability applies equality check predicate on the "change_probability" field. It's identical to ChangeProbabilityEQ.
 func ChangeProbability(v int) predicate.Forecast {
-	return predicate.Forecast(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldChangeProbability), v))
-	})
+	return predicate.Forecast(sql.FieldEQ(FieldChangeProbability, v))
 }
 
 // WindDirection applies equality check predicate on the "wind_direction" field. It's identical to WindDirectionEQ.
 func WindDirection(v int) predicate.Forecast {
-	return predicate.Forecast(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldWindDirection), v))
-	})
+	return predicate.Forecast(sql.FieldEQ(FieldWindDirection, v))
 }
 
 // WindSpeed applies equality check predicate on the "wind_speed" field. It's identical to WindSpeedEQ.
 func WindSpeed(v int) predicate.Forecast {
-	return predicate.Forecast(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldWindSpeed), v))
-	})
+	return predicate.Forecast(sql.FieldEQ(FieldWindSpeed, v))
 }
 
 // WindGust applies equality check predicate on the "wind_gust" field. It's identical to WindGustEQ.
 func WindGust(v int) predicate.Forecast {
-	return predicate.Forecast(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldWindGust), v))
-	})
+	return predicate.Forecast(sql.FieldEQ(FieldWindGust, v))
 }
 
 // WindShearHeight applies equality check predicate on the "wind_shear_height" field. It's identical to WindShearHeightEQ.
 func WindShearHeight(v int) predicate.Forecast {
-	return predicate.Forecast(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldWindShearHeight), v))
-	})
+	return predicate.Forecast(sql.FieldEQ(FieldWindShearHeight, v))
 }
 
 // WindShearDirection applies equality check predicate on the "wind_shear_direction" field. It's identical to WindShearDirectionEQ.
 func WindShearDirection(v int) predicate.Forecast {
-	return predicate.Forecast(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldWindShearDirection), v))
-	})
+	return predicate.Forecast(sql.FieldEQ(FieldWindShearDirection, v))
 }
 
 // WindShearSpeed applies equality check predicate on the "wind_shear_speed" field. It's identical to WindShearSpeedEQ.
 func WindShearSpeed(v int) predicate.Forecast {
-	return predicate.Forecast(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldWindShearSpeed), v))
-	})
+	return predicate.Forecast(sql.FieldEQ(FieldWindShearSpeed, v))
 }
 
 // VisibilityHorizontal applies equality check predicate on the "visibility_horizontal" field. It's identical to VisibilityHorizontalEQ.
 func VisibilityHorizontal(v float64) predicate.Forecast {
-	return predicate.Forecast(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldVisibilityHorizontal), v))
-	})
+	return predicate.Forecast(sql.FieldEQ(FieldVisibilityHorizontal, v))
 }
 
 // VisibilityVertical applies equality check predicate on the "visibility_vertical" field. It's identical to VisibilityVerticalEQ.
 func VisibilityVertical(v int) predicate.Forecast {
-	return predicate.Forecast(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldVisibilityVertical), v))
-	})
+	return predicate.Forecast(sql.FieldEQ(FieldVisibilityVertical, v))
 }
 
 // Altimeter applies equality check predicate on the "altimeter" field. It's identical to AltimeterEQ.
 func Altimeter(v float64) predicate.Forecast {
-	return predicate.Forecast(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldAltimeter), v))
-	})
+	return predicate.Forecast(sql.FieldEQ(FieldAltimeter, v))
 }
 
 // Weather applies equality check predicate on the "weather" field. It's identical to WeatherEQ.
 func Weather(v string) predicate.Forecast {
-	return predicate.Forecast(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldWeather), v))
-	})
+	return predicate.Forecast(sql.FieldEQ(FieldWeather, v))
 }
 
 // NotDecoded applies equality check predicate on the "not_decoded" field. It's identical to NotDecodedEQ.
 func NotDecoded(v string) predicate.Forecast {
-	return predicate.Forecast(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldNotDecoded), v))
-	})
+	return predicate.Forecast(sql.FieldEQ(FieldNotDecoded, v))
 }
 
 // FromTimeEQ applies the EQ predicate on the "from_time" field.
 func FromTimeEQ(v time.Time) predicate.Forecast {
-	return predicate.Forecast(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldFromTime), v))
-	})
+	return predicate.Forecast(sql.FieldEQ(FieldFromTime, v))
 }
 
 // FromTimeNEQ applies the NEQ predicate on the "from_time" field.
 func FromTimeNEQ(v time.Time) predicate.Forecast {
-	return predicate.Forecast(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldFromTime), v))
-	})
+	return predicate.Forecast(sql.FieldNEQ(FieldFromTime, v))
 }
 
 // FromTimeIn applies the In predicate on the "from_time" field.
 func FromTimeIn(vs ...time.Time) predicate.Forecast {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Forecast(func(s *sql.Selector) {
-		s.Where(sql.In(s.C(FieldFromTime), v...))
-	})
+	return predicate.Forecast(sql.FieldIn(FieldFromTime, vs...))
 }
 
 // FromTimeNotIn applies the NotIn predicate on the "from_time" field.
 func FromTimeNotIn(vs ...time.Time) predicate.Forecast {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Forecast(func(s *sql.Selector) {
-		s.Where(sql.NotIn(s.C(FieldFromTime), v...))
-	})
+	return predicate.Forecast(sql.FieldNotIn(FieldFromTime, vs...))
 }
 
 // FromTimeGT applies the GT predicate on the "from_time" field.
 func FromTimeGT(v time.Time) predicate.Forecast {
-	return predicate.Forecast(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldFromTime), v))
-	})
+	return predicate.Forecast(sql.FieldGT(FieldFromTime, v))
 }
 
 // FromTimeGTE applies the GTE predicate on the "from_time" field.
 func FromTimeGTE(v time.Time) predicate.Forecast {
-	return predicate.Forecast(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldFromTime), v))
-	})
+	return predicate.Forecast(sql.FieldGTE(FieldFromTime, v))
 }
 
 // FromTimeLT applies the LT predicate on the "from_time" field.
 func FromTimeLT(v time.Time) predicate.Forecast {
-	return predicate.Forecast(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldFromTime), v))
-	})
+	return predicate.Forecast(sql.FieldLT(FieldFromTime, v))
 }
 
 // FromTimeLTE applies the LTE predicate on the "from_time" field.
 func FromTimeLTE(v time.Time) predicate.Forecast {
-	return predicate.Forecast(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldFromTime), v))
-	})
+	return predicate.Forecast(sql.FieldLTE(FieldFromTime, v))
 }
 
 // ToTimeEQ applies the EQ predicate on the "to_time" field.
 func ToTimeEQ(v time.Time) predicate.Forecast {
-	return predicate.Forecast(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldToTime), v))
-	})
+	return predicate.Forecast(sql.FieldEQ(FieldToTime, v))
 }
 
 // ToTimeNEQ applies the NEQ predicate on the "to_time" field.
 func ToTimeNEQ(v time.Time) predicate.Forecast {
-	return predicate.Forecast(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldToTime), v))
-	})
+	return predicate.Forecast(sql.FieldNEQ(FieldToTime, v))
 }
 
 // ToTimeIn applies the In predicate on the "to_time" field.
 func ToTimeIn(vs ...time.Time) predicate.Forecast {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Forecast(func(s *sql.Selector) {
-		s.Where(sql.In(s.C(FieldToTime), v...))
-	})
+	return predicate.Forecast(sql.FieldIn(FieldToTime, vs...))
 }
 
 // ToTimeNotIn applies the NotIn predicate on the "to_time" field.
 func ToTimeNotIn(vs ...time.Time) predicate.Forecast {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Forecast(func(s *sql.Selector) {
-		s.Where(sql.NotIn(s.C(FieldToTime), v...))
-	})
+	return predicate.Forecast(sql.FieldNotIn(FieldToTime, vs...))
 }
 
 // ToTimeGT applies the GT predicate on the "to_time" field.
 func ToTimeGT(v time.Time) predicate.Forecast {
-	return predicate.Forecast(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldToTime), v))
-	})
+	return predicate.Forecast(sql.FieldGT(FieldToTime, v))
 }
 
 // ToTimeGTE applies the GTE predicate on the "to_time" field.
 func ToTimeGTE(v time.Time) predicate.Forecast {
-	return predicate.Forecast(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldToTime), v))
-	})
+	return predicate.Forecast(sql.FieldGTE(FieldToTime, v))
 }
 
 // ToTimeLT applies the LT predicate on the "to_time" field.
 func ToTimeLT(v time.Time) predicate.Forecast {
-	return predicate.Forecast(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldToTime), v))
-	})
+	return predicate.Forecast(sql.FieldLT(FieldToTime, v))
 }
 
 // ToTimeLTE applies the LTE predicate on the "to_time" field.
 func ToTimeLTE(v time.Time) predicate.Forecast {
-	return predicate.Forecast(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldToTime), v))
-	})
+	return predicate.Forecast(sql.FieldLTE(FieldToTime, v))
 }
 
 // ChangeIndicatorEQ applies the EQ predicate on the "change_indicator" field.
 func ChangeIndicatorEQ(v ChangeIndicator) predicate.Forecast {
-	return predicate.Forecast(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldChangeIndicator), v))
-	})
+	return predicate.Forecast(sql.FieldEQ(FieldChangeIndicator, v))
 }
 
 // ChangeIndicatorNEQ applies the NEQ predicate on the "change_indicator" field.
 func ChangeIndicatorNEQ(v ChangeIndicator) predicate.Forecast {
-	return predicate.Forecast(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldChangeIndicator), v))
-	})
+	return predicate.Forecast(sql.FieldNEQ(FieldChangeIndicator, v))
 }
 
 // ChangeIndicatorIn applies the In predicate on the "change_indicator" field.
 func ChangeIndicatorIn(vs ...ChangeIndicator) predicate.Forecast {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Forecast(func(s *sql.Selector) {
-		s.Where(sql.In(s.C(FieldChangeIndicator), v...))
-	})
+	return predicate.Forecast(sql.FieldIn(FieldChangeIndicator, vs...))
 }
 
 // ChangeIndicatorNotIn applies the NotIn predicate on the "change_indicator" field.
 func ChangeIndicatorNotIn(vs ...ChangeIndicator) predicate.Forecast {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Forecast(func(s *sql.Selector) {
-		s.Where(sql.NotIn(s.C(FieldChangeIndicator), v...))
-	})
+	return predicate.Forecast(sql.FieldNotIn(FieldChangeIndicator, vs...))
 }
 
 // ChangeIndicatorIsNil applies the IsNil predicate on the "change_indicator" field.
 func ChangeIndicatorIsNil() predicate.Forecast {
-	return predicate.Forecast(func(s *sql.Selector) {
-		s.Where(sql.IsNull(s.C(FieldChangeIndicator)))
-	})
+	return predicate.Forecast(sql.FieldIsNull(FieldChangeIndicator))
 }
 
 // ChangeIndicatorNotNil applies the NotNil predicate on the "change_indicator" field.
 func ChangeIndicatorNotNil() predicate.Forecast {
-	return predicate.Forecast(func(s *sql.Selector) {
-		s.Where(sql.NotNull(s.C(FieldChangeIndicator)))
-	})
+	return predicate.Forecast(sql.FieldNotNull(FieldChangeIndicator))
 }
 
 // ChangeTimeEQ applies the EQ predicate on the "change_time" field.
 func ChangeTimeEQ(v time.Time) predicate.Forecast {
-	return predicate.Forecast(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldChangeTime), v))
-	})
+	return predicate.Forecast(sql.FieldEQ(FieldChangeTime, v))
 }
 
 // ChangeTimeNEQ applies the NEQ predicate on the "change_time" field.
 func ChangeTimeNEQ(v time.Time) predicate.Forecast {
-	return predicate.Forecast(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldChangeTime), v))
-	})
+	return predicate.Forecast(sql.FieldNEQ(FieldChangeTime, v))
 }
 
 // ChangeTimeIn applies the In predicate on the "change_time" field.
 func ChangeTimeIn(vs ...time.Time) predicate.Forecast {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Forecast(func(s *sql.Selector) {
-		s.Where(sql.In(s.C(FieldChangeTime), v...))
-	})
+	return predicate.Forecast(sql.FieldIn(FieldChangeTime, vs...))
 }
 
 // ChangeTimeNotIn applies the NotIn predicate on the "change_time" field.
 func ChangeTimeNotIn(vs ...time.Time) predicate.Forecast {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Forecast(func(s *sql.Selector) {
-		s.Where(sql.NotIn(s.C(FieldChangeTime), v...))
-	})
+	return predicate.Forecast(sql.FieldNotIn(FieldChangeTime, vs...))
 }
 
 // ChangeTimeGT applies the GT predicate on the "change_time" field.
 func ChangeTimeGT(v time.Time) predicate.Forecast {
-	return predicate.Forecast(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldChangeTime), v))
-	})
+	return predicate.Forecast(sql.FieldGT(FieldChangeTime, v))
 }
 
 // ChangeTimeGTE applies the GTE predicate on the "change_time" field.
 func ChangeTimeGTE(v time.Time) predicate.Forecast {
-	return predicate.Forecast(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldChangeTime), v))
-	})
+	return predicate.Forecast(sql.FieldGTE(FieldChangeTime, v))
 }
 
 // ChangeTimeLT applies the LT predicate on the "change_time" field.
 func ChangeTimeLT(v time.Time) predicate.Forecast {
-	return predicate.Forecast(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldChangeTime), v))
-	})
+	return predicate.Forecast(sql.FieldLT(FieldChangeTime, v))
 }
 
 // ChangeTimeLTE applies the LTE predicate on the "change_time" field.
 func ChangeTimeLTE(v time.Time) predicate.Forecast {
-	return predicate.Forecast(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldChangeTime), v))
-	})
+	return predicate.Forecast(sql.FieldLTE(FieldChangeTime, v))
 }
 
 // ChangeTimeIsNil applies the IsNil predicate on the "change_time" field.
 func ChangeTimeIsNil() predicate.Forecast {
-	return predicate.Forecast(func(s *sql.Selector) {
-		s.Where(sql.IsNull(s.C(FieldChangeTime)))
-	})
+	return predicate.Forecast(sql.FieldIsNull(FieldChangeTime))
 }
 
 // ChangeTimeNotNil applies the NotNil predicate on the "change_time" field.
 func ChangeTimeNotNil() predicate.Forecast {
-	return predicate.Forecast(func(s *sql.Selector) {
-		s.Where(sql.NotNull(s.C(FieldChangeTime)))
-	})
+	return predicate.Forecast(sql.FieldNotNull(FieldChangeTime))
 }
 
 // ChangeProbabilityEQ applies the EQ predicate on the "change_probability" field.
 func ChangeProbabilityEQ(v int) predicate.Forecast {
-	return predicate.Forecast(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldChangeProbability), v))
-	})
+	return predicate.Forecast(sql.FieldEQ(FieldChangeProbability, v))
 }
 
 // ChangeProbabilityNEQ applies the NEQ predicate on the "change_probability" field.
 func ChangeProbabilityNEQ(v int) predicate.Forecast {
-	return predicate.Forecast(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldChangeProbability), v))
-	})
+	return predicate.Forecast(sql.FieldNEQ(FieldChangeProbability, v))
 }
 
 // ChangeProbabilityIn applies the In predicate on the "change_probability" field.
 func ChangeProbabilityIn(vs ...int) predicate.Forecast {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Forecast(func(s *sql.Selector) {
-		s.Where(sql.In(s.C(FieldChangeProbability), v...))
-	})
+	return predicate.Forecast(sql.FieldIn(FieldChangeProbability, vs...))
 }
 
 // ChangeProbabilityNotIn applies the NotIn predicate on the "change_probability" field.
 func ChangeProbabilityNotIn(vs ...int) predicate.Forecast {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Forecast(func(s *sql.Selector) {
-		s.Where(sql.NotIn(s.C(FieldChangeProbability), v...))
-	})
+	return predicate.Forecast(sql.FieldNotIn(FieldChangeProbability, vs...))
 }
 
 // ChangeProbabilityGT applies the GT predicate on the "change_probability" field.
 func ChangeProbabilityGT(v int) predicate.Forecast {
-	return predicate.Forecast(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldChangeProbability), v))
-	})
+	return predicate.Forecast(sql.FieldGT(FieldChangeProbability, v))
 }
 
 // ChangeProbabilityGTE applies the GTE predicate on the "change_probability" field.
 func ChangeProbabilityGTE(v int) predicate.Forecast {
-	return predicate.Forecast(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldChangeProbability), v))
-	})
+	return predicate.Forecast(sql.FieldGTE(FieldChangeProbability, v))
 }
 
 // ChangeProbabilityLT applies the LT predicate on the "change_probability" field.
 func ChangeProbabilityLT(v int) predicate.Forecast {
-	return predicate.Forecast(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldChangeProbability), v))
-	})
+	return predicate.Forecast(sql.FieldLT(FieldChangeProbability, v))
 }
 
 // ChangeProbabilityLTE applies the LTE predicate on the "change_probability" field.
 func ChangeProbabilityLTE(v int) predicate.Forecast {
-	return predicate.Forecast(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldChangeProbability), v))
-	})
+	return predicate.Forecast(sql.FieldLTE(FieldChangeProbability, v))
 }
 
 // ChangeProbabilityIsNil applies the IsNil predicate on the "change_probability" field.
 func ChangeProbabilityIsNil() predicate.Forecast {
-	return predicate.Forecast(func(s *sql.Selector) {
-		s.Where(sql.IsNull(s.C(FieldChangeProbability)))
-	})
+	return predicate.Forecast(sql.FieldIsNull(FieldChangeProbability))
 }
 
 // ChangeProbabilityNotNil applies the NotNil predicate on the "change_probability" field.
 func ChangeProbabilityNotNil() predicate.Forecast {
-	return predicate.Forecast(func(s *sql.Selector) {
-		s.Where(sql.NotNull(s.C(FieldChangeProbability)))
-	})
+	return predicate.Forecast(sql.FieldNotNull(FieldChangeProbability))
 }
 
 // WindDirectionEQ applies the EQ predicate on the "wind_direction" field.
 func WindDirectionEQ(v int) predicate.Forecast {
-	return predicate.Forecast(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldWindDirection), v))
-	})
+	return predicate.Forecast(sql.FieldEQ(FieldWindDirection, v))
 }
 
 // WindDirectionNEQ applies the NEQ predicate on the "wind_direction" field.
 func WindDirectionNEQ(v int) predicate.Forecast {
-	return predicate.Forecast(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldWindDirection), v))
-	})
+	return predicate.Forecast(sql.FieldNEQ(FieldWindDirection, v))
 }
 
 // WindDirectionIn applies the In predicate on the "wind_direction" field.
 func WindDirectionIn(vs ...int) predicate.Forecast {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Forecast(func(s *sql.Selector) {
-		s.Where(sql.In(s.C(FieldWindDirection), v...))
-	})
+	return predicate.Forecast(sql.FieldIn(FieldWindDirection, vs...))
 }
 
 // WindDirectionNotIn applies the NotIn predicate on the "wind_direction" field.
 func WindDirectionNotIn(vs ...int) predicate.Forecast {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Forecast(func(s *sql.Selector) {
-		s.Where(sql.NotIn(s.C(FieldWindDirection), v...))
-	})
+	return predicate.Forecast(sql.FieldNotIn(FieldWindDirection, vs...))
 }
 
 // WindDirectionGT applies the GT predicate on the "wind_direction" field.
 func WindDirectionGT(v int) predicate.Forecast {
-	return predicate.Forecast(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldWindDirection), v))
-	})
+	return predicate.Forecast(sql.FieldGT(FieldWindDirection, v))
 }
 
 // WindDirectionGTE applies the GTE predicate on the "wind_direction" field.
 func WindDirectionGTE(v int) predicate.Forecast {
-	return predicate.Forecast(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldWindDirection), v))
-	})
+	return predicate.Forecast(sql.FieldGTE(FieldWindDirection, v))
 }
 
 // WindDirectionLT applies the LT predicate on the "wind_direction" field.
 func WindDirectionLT(v int) predicate.Forecast {
-	return predicate.Forecast(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldWindDirection), v))
-	})
+	return predicate.Forecast(sql.FieldLT(FieldWindDirection, v))
 }
 
 // WindDirectionLTE applies the LTE predicate on the "wind_direction" field.
 func WindDirectionLTE(v int) predicate.Forecast {
-	return predicate.Forecast(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldWindDirection), v))
-	})
+	return predicate.Forecast(sql.FieldLTE(FieldWindDirection, v))
 }
 
 // WindDirectionIsNil applies the IsNil predicate on the "wind_direction" field.
 func WindDirectionIsNil() predicate.Forecast {
-	return predicate.Forecast(func(s *sql.Selector) {
-		s.Where(sql.IsNull(s.C(FieldWindDirection)))
-	})
+	return predicate.Forecast(sql.FieldIsNull(FieldWindDirection))
 }
 
 // WindDirectionNotNil applies the NotNil predicate on the "wind_direction" field.
 func WindDirectionNotNil() predicate.Forecast {
-	return predicate.Forecast(func(s *sql.Selector) {
-		s.Where(sql.NotNull(s.C(FieldWindDirection)))
-	})
+	return predicate.Forecast(sql.FieldNotNull(FieldWindDirection))
 }
 
 // WindSpeedEQ applies the EQ predicate on the "wind_speed" field.
 func WindSpeedEQ(v int) predicate.Forecast {
-	return predicate.Forecast(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldWindSpeed), v))
-	})
+	return predicate.Forecast(sql.FieldEQ(FieldWindSpeed, v))
 }
 
 // WindSpeedNEQ applies the NEQ predicate on the "wind_speed" field.
 func WindSpeedNEQ(v int) predicate.Forecast {
-	return predicate.Forecast(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldWindSpeed), v))
-	})
+	return predicate.Forecast(sql.FieldNEQ(FieldWindSpeed, v))
 }
 
 // WindSpeedIn applies the In predicate on the "wind_speed" field.
 func WindSpeedIn(vs ...int) predicate.Forecast {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Forecast(func(s *sql.Selector) {
-		s.Where(sql.In(s.C(FieldWindSpeed), v...))
-	})
+	return predicate.Forecast(sql.FieldIn(FieldWindSpeed, vs...))
 }
 
 // WindSpeedNotIn applies the NotIn predicate on the "wind_speed" field.
 func WindSpeedNotIn(vs ...int) predicate.Forecast {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Forecast(func(s *sql.Selector) {
-		s.Where(sql.NotIn(s.C(FieldWindSpeed), v...))
-	})
+	return predicate.Forecast(sql.FieldNotIn(FieldWindSpeed, vs...))
 }
 
 // WindSpeedGT applies the GT predicate on the "wind_speed" field.
 func WindSpeedGT(v int) predicate.Forecast {
-	return predicate.Forecast(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldWindSpeed), v))
-	})
+	return predicate.Forecast(sql.FieldGT(FieldWindSpeed, v))
 }
 
 // WindSpeedGTE applies the GTE predicate on the "wind_speed" field.
 func WindSpeedGTE(v int) predicate.Forecast {
-	return predicate.Forecast(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldWindSpeed), v))
-	})
+	return predicate.Forecast(sql.FieldGTE(FieldWindSpeed, v))
 }
 
 // WindSpeedLT applies the LT predicate on the "wind_speed" field.
 func WindSpeedLT(v int) predicate.Forecast {
-	return predicate.Forecast(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldWindSpeed), v))
-	})
+	return predicate.Forecast(sql.FieldLT(FieldWindSpeed, v))
 }
 
 // WindSpeedLTE applies the LTE predicate on the "wind_speed" field.
 func WindSpeedLTE(v int) predicate.Forecast {
-	return predicate.Forecast(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldWindSpeed), v))
-	})
+	return predicate.Forecast(sql.FieldLTE(FieldWindSpeed, v))
 }
 
 // WindSpeedIsNil applies the IsNil predicate on the "wind_speed" field.
 func WindSpeedIsNil() predicate.Forecast {
-	return predicate.Forecast(func(s *sql.Selector) {
-		s.Where(sql.IsNull(s.C(FieldWindSpeed)))
-	})
+	return predicate.Forecast(sql.FieldIsNull(FieldWindSpeed))
 }
 
 // WindSpeedNotNil applies the NotNil predicate on the "wind_speed" field.
 func WindSpeedNotNil() predicate.Forecast {
-	return predicate.Forecast(func(s *sql.Selector) {
-		s.Where(sql.NotNull(s.C(FieldWindSpeed)))
-	})
+	return predicate.Forecast(sql.FieldNotNull(FieldWindSpeed))
 }
 
 // WindGustEQ applies the EQ predicate on the "wind_gust" field.
 func WindGustEQ(v int) predicate.Forecast {
-	return predicate.Forecast(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldWindGust), v))
-	})
+	return predicate.Forecast(sql.FieldEQ(FieldWindGust, v))
 }
 
 // WindGustNEQ applies the NEQ predicate on the "wind_gust" field.
 func WindGustNEQ(v int) predicate.Forecast {
-	return predicate.Forecast(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldWindGust), v))
-	})
+	return predicate.Forecast(sql.FieldNEQ(FieldWindGust, v))
 }
 
 // WindGustIn applies the In predicate on the "wind_gust" field.
 func WindGustIn(vs ...int) predicate.Forecast {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Forecast(func(s *sql.Selector) {
-		s.Where(sql.In(s.C(FieldWindGust), v...))
-	})
+	return predicate.Forecast(sql.FieldIn(FieldWindGust, vs...))
 }
 
 // WindGustNotIn applies the NotIn predicate on the "wind_gust" field.
 func WindGustNotIn(vs ...int) predicate.Forecast {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Forecast(func(s *sql.Selector) {
-		s.Where(sql.NotIn(s.C(FieldWindGust), v...))
-	})
+	return predicate.Forecast(sql.FieldNotIn(FieldWindGust, vs...))
 }
 
 // WindGustGT applies the GT predicate on the "wind_gust" field.
 func WindGustGT(v int) predicate.Forecast {
-	return predicate.Forecast(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldWindGust), v))
-	})
+	return predicate.Forecast(sql.FieldGT(FieldWindGust, v))
 }
 
 // WindGustGTE applies the GTE predicate on the "wind_gust" field.
 func WindGustGTE(v int) predicate.Forecast {
-	return predicate.Forecast(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldWindGust), v))
-	})
+	return predicate.Forecast(sql.FieldGTE(FieldWindGust, v))
 }
 
 // WindGustLT applies the LT predicate on the "wind_gust" field.
 func WindGustLT(v int) predicate.Forecast {
-	return predicate.Forecast(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldWindGust), v))
-	})
+	return predicate.Forecast(sql.FieldLT(FieldWindGust, v))
 }
 
 // WindGustLTE applies the LTE predicate on the "wind_gust" field.
 func WindGustLTE(v int) predicate.Forecast {
-	return predicate.Forecast(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldWindGust), v))
-	})
+	return predicate.Forecast(sql.FieldLTE(FieldWindGust, v))
 }
 
 // WindGustIsNil applies the IsNil predicate on the "wind_gust" field.
 func WindGustIsNil() predicate.Forecast {
-	return predicate.Forecast(func(s *sql.Selector) {
-		s.Where(sql.IsNull(s.C(FieldWindGust)))
-	})
+	return predicate.Forecast(sql.FieldIsNull(FieldWindGust))
 }
 
 // WindGustNotNil applies the NotNil predicate on the "wind_gust" field.
 func WindGustNotNil() predicate.Forecast {
-	return predicate.Forecast(func(s *sql.Selector) {
-		s.Where(sql.NotNull(s.C(FieldWindGust)))
-	})
+	return predicate.Forecast(sql.FieldNotNull(FieldWindGust))
 }
 
 // WindShearHeightEQ applies the EQ predicate on the "wind_shear_height" field.
 func WindShearHeightEQ(v int) predicate.Forecast {
-	return predicate.Forecast(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldWindShearHeight), v))
-	})
+	return predicate.Forecast(sql.FieldEQ(FieldWindShearHeight, v))
 }
 
 // WindShearHeightNEQ applies the NEQ predicate on the "wind_shear_height" field.
 func WindShearHeightNEQ(v int) predicate.Forecast {
-	return predicate.Forecast(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldWindShearHeight), v))
-	})
+	return predicate.Forecast(sql.FieldNEQ(FieldWindShearHeight, v))
 }
 
 // WindShearHeightIn applies the In predicate on the "wind_shear_height" field.
 func WindShearHeightIn(vs ...int) predicate.Forecast {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Forecast(func(s *sql.Selector) {
-		s.Where(sql.In(s.C(FieldWindShearHeight), v...))
-	})
+	return predicate.Forecast(sql.FieldIn(FieldWindShearHeight, vs...))
 }
 
 // WindShearHeightNotIn applies the NotIn predicate on the "wind_shear_height" field.
 func WindShearHeightNotIn(vs ...int) predicate.Forecast {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Forecast(func(s *sql.Selector) {
-		s.Where(sql.NotIn(s.C(FieldWindShearHeight), v...))
-	})
+	return predicate.Forecast(sql.FieldNotIn(FieldWindShearHeight, vs...))
 }
 
 // WindShearHeightGT applies the GT predicate on the "wind_shear_height" field.
 func WindShearHeightGT(v int) predicate.Forecast {
-	return predicate.Forecast(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldWindShearHeight), v))
-	})
+	return predicate.Forecast(sql.FieldGT(FieldWindShearHeight, v))
 }
 
 // WindShearHeightGTE applies the GTE predicate on the "wind_shear_height" field.
 func WindShearHeightGTE(v int) predicate.Forecast {
-	return predicate.Forecast(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldWindShearHeight), v))
-	})
+	return predicate.Forecast(sql.FieldGTE(FieldWindShearHeight, v))
 }
 
 // WindShearHeightLT applies the LT predicate on the "wind_shear_height" field.
 func WindShearHeightLT(v int) predicate.Forecast {
-	return predicate.Forecast(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldWindShearHeight), v))
-	})
+	return predicate.Forecast(sql.FieldLT(FieldWindShearHeight, v))
 }
 
 // WindShearHeightLTE applies the LTE predicate on the "wind_shear_height" field.
 func WindShearHeightLTE(v int) predicate.Forecast {
-	return predicate.Forecast(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldWindShearHeight), v))
-	})
+	return predicate.Forecast(sql.FieldLTE(FieldWindShearHeight, v))
 }
 
 // WindShearHeightIsNil applies the IsNil predicate on the "wind_shear_height" field.
 func WindShearHeightIsNil() predicate.Forecast {
-	return predicate.Forecast(func(s *sql.Selector) {
-		s.Where(sql.IsNull(s.C(FieldWindShearHeight)))
-	})
+	return predicate.Forecast(sql.FieldIsNull(FieldWindShearHeight))
 }
 
 // WindShearHeightNotNil applies the NotNil predicate on the "wind_shear_height" field.
 func WindShearHeightNotNil() predicate.Forecast {
-	return predicate.Forecast(func(s *sql.Selector) {
-		s.Where(sql.NotNull(s.C(FieldWindShearHeight)))
-	})
+	return predicate.Forecast(sql.FieldNotNull(FieldWindShearHeight))
 }
 
 // WindShearDirectionEQ applies the EQ predicate on the "wind_shear_direction" field.
 func WindShearDirectionEQ(v int) predicate.Forecast {
-	return predicate.Forecast(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldWindShearDirection), v))
-	})
+	return predicate.Forecast(sql.FieldEQ(FieldWindShearDirection, v))
 }
 
 // WindShearDirectionNEQ applies the NEQ predicate on the "wind_shear_direction" field.
 func WindShearDirectionNEQ(v int) predicate.Forecast {
-	return predicate.Forecast(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldWindShearDirection), v))
-	})
+	return predicate.Forecast(sql.FieldNEQ(FieldWindShearDirection, v))
 }
 
 // WindShearDirectionIn applies the In predicate on the "wind_shear_direction" field.
 func WindShearDirectionIn(vs ...int) predicate.Forecast {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Forecast(func(s *sql.Selector) {
-		s.Where(sql.In(s.C(FieldWindShearDirection), v...))
-	})
+	return predicate.Forecast(sql.FieldIn(FieldWindShearDirection, vs...))
 }
 
 // WindShearDirectionNotIn applies the NotIn predicate on the "wind_shear_direction" field.
 func WindShearDirectionNotIn(vs ...int) predicate.Forecast {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Forecast(func(s *sql.Selector) {
-		s.Where(sql.NotIn(s.C(FieldWindShearDirection), v...))
-	})
+	return predicate.Forecast(sql.FieldNotIn(FieldWindShearDirection, vs...))
 }
 
 // WindShearDirectionGT applies the GT predicate on the "wind_shear_direction" field.
 func WindShearDirectionGT(v int) predicate.Forecast {
-	return predicate.Forecast(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldWindShearDirection), v))
-	})
+	return predicate.Forecast(sql.FieldGT(FieldWindShearDirection, v))
 }
 
 // WindShearDirectionGTE applies the GTE predicate on the "wind_shear_direction" field.
 func WindShearDirectionGTE(v int) predicate.Forecast {
-	return predicate.Forecast(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldWindShearDirection), v))
-	})
+	return predicate.Forecast(sql.FieldGTE(FieldWindShearDirection, v))
 }
 
 // WindShearDirectionLT applies the LT predicate on the "wind_shear_direction" field.
 func WindShearDirectionLT(v int) predicate.Forecast {
-	return predicate.Forecast(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldWindShearDirection), v))
-	})
+	return predicate.Forecast(sql.FieldLT(FieldWindShearDirection, v))
 }
 
 // WindShearDirectionLTE applies the LTE predicate on the "wind_shear_direction" field.
 func WindShearDirectionLTE(v int) predicate.Forecast {
-	return predicate.Forecast(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldWindShearDirection), v))
-	})
+	return predicate.Forecast(sql.FieldLTE(FieldWindShearDirection, v))
 }
 
 // WindShearDirectionIsNil applies the IsNil predicate on the "wind_shear_direction" field.
 func WindShearDirectionIsNil() predicate.Forecast {
-	return predicate.Forecast(func(s *sql.Selector) {
-		s.Where(sql.IsNull(s.C(FieldWindShearDirection)))
-	})
+	return predicate.Forecast(sql.FieldIsNull(FieldWindShearDirection))
 }
 
 // WindShearDirectionNotNil applies the NotNil predicate on the "wind_shear_direction" field.
 func WindShearDirectionNotNil() predicate.Forecast {
-	return predicate.Forecast(func(s *sql.Selector) {
-		s.Where(sql.NotNull(s.C(FieldWindShearDirection)))
-	})
+	return predicate.Forecast(sql.FieldNotNull(FieldWindShearDirection))
 }
 
 // WindShearSpeedEQ applies the EQ predicate on the "wind_shear_speed" field.
 func WindShearSpeedEQ(v int) predicate.Forecast {
-	return predicate.Forecast(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldWindShearSpeed), v))
-	})
+	return predicate.Forecast(sql.FieldEQ(FieldWindShearSpeed, v))
 }
 
 // WindShearSpeedNEQ applies the NEQ predicate on the "wind_shear_speed" field.
 func WindShearSpeedNEQ(v int) predicate.Forecast {
-	return predicate.Forecast(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldWindShearSpeed), v))
-	})
+	return predicate.Forecast(sql.FieldNEQ(FieldWindShearSpeed, v))
 }
 
 // WindShearSpeedIn applies the In predicate on the "wind_shear_speed" field.
 func WindShearSpeedIn(vs ...int) predicate.Forecast {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Forecast(func(s *sql.Selector) {
-		s.Where(sql.In(s.C(FieldWindShearSpeed), v...))
-	})
+	return predicate.Forecast(sql.FieldIn(FieldWindShearSpeed, vs...))
 }
 
 // WindShearSpeedNotIn applies the NotIn predicate on the "wind_shear_speed" field.
 func WindShearSpeedNotIn(vs ...int) predicate.Forecast {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Forecast(func(s *sql.Selector) {
-		s.Where(sql.NotIn(s.C(FieldWindShearSpeed), v...))
-	})
+	return predicate.Forecast(sql.FieldNotIn(FieldWindShearSpeed, vs...))
 }
 
 // WindShearSpeedGT applies the GT predicate on the "wind_shear_speed" field.
 func WindShearSpeedGT(v int) predicate.Forecast {
-	return predicate.Forecast(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldWindShearSpeed), v))
-	})
+	return predicate.Forecast(sql.FieldGT(FieldWindShearSpeed, v))
 }
 
 // WindShearSpeedGTE applies the GTE predicate on the "wind_shear_speed" field.
 func WindShearSpeedGTE(v int) predicate.Forecast {
-	return predicate.Forecast(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldWindShearSpeed), v))
-	})
+	return predicate.Forecast(sql.FieldGTE(FieldWindShearSpeed, v))
 }
 
 // WindShearSpeedLT applies the LT predicate on the "wind_shear_speed" field.
 func WindShearSpeedLT(v int) predicate.Forecast {
-	return predicate.Forecast(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldWindShearSpeed), v))
-	})
+	return predicate.Forecast(sql.FieldLT(FieldWindShearSpeed, v))
 }
 
 // WindShearSpeedLTE applies the LTE predicate on the "wind_shear_speed" field.
 func WindShearSpeedLTE(v int) predicate.Forecast {
-	return predicate.Forecast(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldWindShearSpeed), v))
-	})
+	return predicate.Forecast(sql.FieldLTE(FieldWindShearSpeed, v))
 }
 
 // WindShearSpeedIsNil applies the IsNil predicate on the "wind_shear_speed" field.
 func WindShearSpeedIsNil() predicate.Forecast {
-	return predicate.Forecast(func(s *sql.Selector) {
-		s.Where(sql.IsNull(s.C(FieldWindShearSpeed)))
-	})
+	return predicate.Forecast(sql.FieldIsNull(FieldWindShearSpeed))
 }
 
 // WindShearSpeedNotNil applies the NotNil predicate on the "wind_shear_speed" field.
 func WindShearSpeedNotNil() predicate.Forecast {
-	return predicate.Forecast(func(s *sql.Selector) {
-		s.Where(sql.NotNull(s.C(FieldWindShearSpeed)))
-	})
+	return predicate.Forecast(sql.FieldNotNull(FieldWindShearSpeed))
 }
 
 // VisibilityHorizontalEQ applies the EQ predicate on the "visibility_horizontal" field.
 func VisibilityHorizontalEQ(v float64) predicate.Forecast {
-	return predicate.Forecast(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldVisibilityHorizontal), v))
-	})
+	return predicate.Forecast(sql.FieldEQ(FieldVisibilityHorizontal, v))
 }
 
 // VisibilityHorizontalNEQ applies the NEQ predicate on the "visibility_horizontal" field.
 func VisibilityHorizontalNEQ(v float64) predicate.Forecast {
-	return predicate.Forecast(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldVisibilityHorizontal), v))
-	})
+	return predicate.Forecast(sql.FieldNEQ(FieldVisibilityHorizontal, v))
 }
 
 // VisibilityHorizontalIn applies the In predicate on the "visibility_horizontal" field.
 func VisibilityHorizontalIn(vs ...float64) predicate.Forecast {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Forecast(func(s *sql.Selector) {
-		s.Where(sql.In(s.C(FieldVisibilityHorizontal), v...))
-	})
+	return predicate.Forecast(sql.FieldIn(FieldVisibilityHorizontal, vs...))
 }
 
 // VisibilityHorizontalNotIn applies the NotIn predicate on the "visibility_horizontal" field.
 func VisibilityHorizontalNotIn(vs ...float64) predicate.Forecast {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Forecast(func(s *sql.Selector) {
-		s.Where(sql.NotIn(s.C(FieldVisibilityHorizontal), v...))
-	})
+	return predicate.Forecast(sql.FieldNotIn(FieldVisibilityHorizontal, vs...))
 }
 
 // VisibilityHorizontalGT applies the GT predicate on the "visibility_horizontal" field.
 func VisibilityHorizontalGT(v float64) predicate.Forecast {
-	return predicate.Forecast(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldVisibilityHorizontal), v))
-	})
+	return predicate.Forecast(sql.FieldGT(FieldVisibilityHorizontal, v))
 }
 
 // VisibilityHorizontalGTE applies the GTE predicate on the "visibility_horizontal" field.
 func VisibilityHorizontalGTE(v float64) predicate.Forecast {
-	return predicate.Forecast(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldVisibilityHorizontal), v))
-	})
+	return predicate.Forecast(sql.FieldGTE(FieldVisibilityHorizontal, v))
 }
 
 // VisibilityHorizontalLT applies the LT predicate on the "visibility_horizontal" field.
 func VisibilityHorizontalLT(v float64) predicate.Forecast {
-	return predicate.Forecast(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldVisibilityHorizontal), v))
-	})
+	return predicate.Forecast(sql.FieldLT(FieldVisibilityHorizontal, v))
 }
 
 // VisibilityHorizontalLTE applies the LTE predicate on the "visibility_horizontal" field.
 func VisibilityHorizontalLTE(v float64) predicate.Forecast {
-	return predicate.Forecast(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldVisibilityHorizontal), v))
-	})
+	return predicate.Forecast(sql.FieldLTE(FieldVisibilityHorizontal, v))
 }
 
 // VisibilityHorizontalIsNil applies the IsNil predicate on the "visibility_horizontal" field.
 func VisibilityHorizontalIsNil() predicate.Forecast {
-	return predicate.Forecast(func(s *sql.Selector) {
-		s.Where(sql.IsNull(s.C(FieldVisibilityHorizontal)))
-	})
+	return predicate.Forecast(sql.FieldIsNull(FieldVisibilityHorizontal))
 }
 
 // VisibilityHorizontalNotNil applies the NotNil predicate on the "visibility_horizontal" field.
 func VisibilityHorizontalNotNil() predicate.Forecast {
-	return predicate.Forecast(func(s *sql.Selector) {
-		s.Where(sql.NotNull(s.C(FieldVisibilityHorizontal)))
-	})
+	return predicate.Forecast(sql.FieldNotNull(FieldVisibilityHorizontal))
 }
 
 // VisibilityVerticalEQ applies the EQ predicate on the "visibility_vertical" field.
 func VisibilityVerticalEQ(v int) predicate.Forecast {
-	return predicate.Forecast(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldVisibilityVertical), v))
-	})
+	return predicate.Forecast(sql.FieldEQ(FieldVisibilityVertical, v))
 }
 
 // VisibilityVerticalNEQ applies the NEQ predicate on the "visibility_vertical" field.
 func VisibilityVerticalNEQ(v int) predicate.Forecast {
-	return predicate.Forecast(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldVisibilityVertical), v))
-	})
+	return predicate.Forecast(sql.FieldNEQ(FieldVisibilityVertical, v))
 }
 
 // VisibilityVerticalIn applies the In predicate on the "visibility_vertical" field.
 func VisibilityVerticalIn(vs ...int) predicate.Forecast {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Forecast(func(s *sql.Selector) {
-		s.Where(sql.In(s.C(FieldVisibilityVertical), v...))
-	})
+	return predicate.Forecast(sql.FieldIn(FieldVisibilityVertical, vs...))
 }
 
 // VisibilityVerticalNotIn applies the NotIn predicate on the "visibility_vertical" field.
 func VisibilityVerticalNotIn(vs ...int) predicate.Forecast {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Forecast(func(s *sql.Selector) {
-		s.Where(sql.NotIn(s.C(FieldVisibilityVertical), v...))
-	})
+	return predicate.Forecast(sql.FieldNotIn(FieldVisibilityVertical, vs...))
 }
 
 // VisibilityVerticalGT applies the GT predicate on the "visibility_vertical" field.
 func VisibilityVerticalGT(v int) predicate.Forecast {
-	return predicate.Forecast(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldVisibilityVertical), v))
-	})
+	return predicate.Forecast(sql.FieldGT(FieldVisibilityVertical, v))
 }
 
 // VisibilityVerticalGTE applies the GTE predicate on the "visibility_vertical" field.
 func VisibilityVerticalGTE(v int) predicate.Forecast {
-	return predicate.Forecast(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldVisibilityVertical), v))
-	})
+	return predicate.Forecast(sql.FieldGTE(FieldVisibilityVertical, v))
 }
 
 // VisibilityVerticalLT applies the LT predicate on the "visibility_vertical" field.
 func VisibilityVerticalLT(v int) predicate.Forecast {
-	return predicate.Forecast(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldVisibilityVertical), v))
-	})
+	return predicate.Forecast(sql.FieldLT(FieldVisibilityVertical, v))
 }
 
 // VisibilityVerticalLTE applies the LTE predicate on the "visibility_vertical" field.
 func VisibilityVerticalLTE(v int) predicate.Forecast {
-	return predicate.Forecast(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldVisibilityVertical), v))
-	})
+	return predicate.Forecast(sql.FieldLTE(FieldVisibilityVertical, v))
 }
 
 // VisibilityVerticalIsNil applies the IsNil predicate on the "visibility_vertical" field.
 func VisibilityVerticalIsNil() predicate.Forecast {
-	return predicate.Forecast(func(s *sql.Selector) {
-		s.Where(sql.IsNull(s.C(FieldVisibilityVertical)))
-	})
+	return predicate.Forecast(sql.FieldIsNull(FieldVisibilityVertical))
 }
 
 // VisibilityVerticalNotNil applies the NotNil predicate on the "visibility_vertical" field.
 func VisibilityVerticalNotNil() predicate.Forecast {
-	return predicate.Forecast(func(s *sql.Selector) {
-		s.Where(sql.NotNull(s.C(FieldVisibilityVertical)))
-	})
+	return predicate.Forecast(sql.FieldNotNull(FieldVisibilityVertical))
 }
 
 // AltimeterEQ applies the EQ predicate on the "altimeter" field.
 func AltimeterEQ(v float64) predicate.Forecast {
-	return predicate.Forecast(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldAltimeter), v))
-	})
+	return predicate.Forecast(sql.FieldEQ(FieldAltimeter, v))
 }
 
 // AltimeterNEQ applies the NEQ predicate on the "altimeter" field.
 func AltimeterNEQ(v float64) predicate.Forecast {
-	return predicate.Forecast(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldAltimeter), v))
-	})
+	return predicate.Forecast(sql.FieldNEQ(FieldAltimeter, v))
 }
 
 // AltimeterIn applies the In predicate on the "altimeter" field.
 func AltimeterIn(vs ...float64) predicate.Forecast {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Forecast(func(s *sql.Selector) {
-		s.Where(sql.In(s.C(FieldAltimeter), v...))
-	})
+	return predicate.Forecast(sql.FieldIn(FieldAltimeter, vs...))
 }
 
 // AltimeterNotIn applies the NotIn predicate on the "altimeter" field.
 func AltimeterNotIn(vs ...float64) predicate.Forecast {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Forecast(func(s *sql.Selector) {
-		s.Where(sql.NotIn(s.C(FieldAltimeter), v...))
-	})
+	return predicate.Forecast(sql.FieldNotIn(FieldAltimeter, vs...))
 }
 
 // AltimeterGT applies the GT predicate on the "altimeter" field.
 func AltimeterGT(v float64) predicate.Forecast {
-	return predicate.Forecast(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldAltimeter), v))
-	})
+	return predicate.Forecast(sql.FieldGT(FieldAltimeter, v))
 }
 
 // AltimeterGTE applies the GTE predicate on the "altimeter" field.
 func AltimeterGTE(v float64) predicate.Forecast {
-	return predicate.Forecast(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldAltimeter), v))
-	})
+	return predicate.Forecast(sql.FieldGTE(FieldAltimeter, v))
 }
 
 // AltimeterLT applies the LT predicate on the "altimeter" field.
 func AltimeterLT(v float64) predicate.Forecast {
-	return predicate.Forecast(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldAltimeter), v))
-	})
+	return predicate.Forecast(sql.FieldLT(FieldAltimeter, v))
 }
 
 // AltimeterLTE applies the LTE predicate on the "altimeter" field.
 func AltimeterLTE(v float64) predicate.Forecast {
-	return predicate.Forecast(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldAltimeter), v))
-	})
+	return predicate.Forecast(sql.FieldLTE(FieldAltimeter, v))
 }
 
 // AltimeterIsNil applies the IsNil predicate on the "altimeter" field.
 func AltimeterIsNil() predicate.Forecast {
-	return predicate.Forecast(func(s *sql.Selector) {
-		s.Where(sql.IsNull(s.C(FieldAltimeter)))
-	})
+	return predicate.Forecast(sql.FieldIsNull(FieldAltimeter))
 }
 
 // AltimeterNotNil applies the NotNil predicate on the "altimeter" field.
 func AltimeterNotNil() predicate.Forecast {
-	return predicate.Forecast(func(s *sql.Selector) {
-		s.Where(sql.NotNull(s.C(FieldAltimeter)))
-	})
+	return predicate.Forecast(sql.FieldNotNull(FieldAltimeter))
 }
 
 // WeatherEQ applies the EQ predicate on the "weather" field.
 func WeatherEQ(v string) predicate.Forecast {
-	return predicate.Forecast(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldWeather), v))
-	})
+	return predicate.Forecast(sql.FieldEQ(FieldWeather, v))
 }
 
 // WeatherNEQ applies the NEQ predicate on the "weather" field.
 func WeatherNEQ(v string) predicate.Forecast {
-	return predicate.Forecast(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldWeather), v))
-	})
+	return predicate.Forecast(sql.FieldNEQ(FieldWeather, v))
 }
 
 // WeatherIn applies the In predicate on the "weather" field.
 func WeatherIn(vs ...string) predicate.Forecast {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Forecast(func(s *sql.Selector) {
-		s.Where(sql.In(s.C(FieldWeather), v...))
-	})
+	return predicate.Forecast(sql.FieldIn(FieldWeather, vs...))
 }
 
 // WeatherNotIn applies the NotIn predicate on the "weather" field.
 func WeatherNotIn(vs ...string) predicate.Forecast {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Forecast(func(s *sql.Selector) {
-		s.Where(sql.NotIn(s.C(FieldWeather), v...))
-	})
+	return predicate.Forecast(sql.FieldNotIn(FieldWeather, vs...))
 }
 
 // WeatherGT applies the GT predicate on the "weather" field.
 func WeatherGT(v string) predicate.Forecast {
-	return predicate.Forecast(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldWeather), v))
-	})
+	return predicate.Forecast(sql.FieldGT(FieldWeather, v))
 }
 
 // WeatherGTE applies the GTE predicate on the "weather" field.
 func WeatherGTE(v string) predicate.Forecast {
-	return predicate.Forecast(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldWeather), v))
-	})
+	return predicate.Forecast(sql.FieldGTE(FieldWeather, v))
 }
 
 // WeatherLT applies the LT predicate on the "weather" field.
 func WeatherLT(v string) predicate.Forecast {
-	return predicate.Forecast(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldWeather), v))
-	})
+	return predicate.Forecast(sql.FieldLT(FieldWeather, v))
 }
 
 // WeatherLTE applies the LTE predicate on the "weather" field.
 func WeatherLTE(v string) predicate.Forecast {
-	return predicate.Forecast(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldWeather), v))
-	})
+	return predicate.Forecast(sql.FieldLTE(FieldWeather, v))
 }
 
 // WeatherContains applies the Contains predicate on the "weather" field.
 func WeatherContains(v string) predicate.Forecast {
-	return predicate.Forecast(func(s *sql.Selector) {
-		s.Where(sql.Contains(s.C(FieldWeather), v))
-	})
+	return predicate.Forecast(sql.FieldContains(FieldWeather, v))
 }
 
 // WeatherHasPrefix applies the HasPrefix predicate on the "weather" field.
 func WeatherHasPrefix(v string) predicate.Forecast {
-	return predicate.Forecast(func(s *sql.Selector) {
-		s.Where(sql.HasPrefix(s.C(FieldWeather), v))
-	})
+	return predicate.Forecast(sql.FieldHasPrefix(FieldWeather, v))
 }
 
 // WeatherHasSuffix applies the HasSuffix predicate on the "weather" field.
 func WeatherHasSuffix(v string) predicate.Forecast {
-	return predicate.Forecast(func(s *sql.Selector) {
-		s.Where(sql.HasSuffix(s.C(FieldWeather), v))
-	})
+	return predicate.Forecast(sql.FieldHasSuffix(FieldWeather, v))
 }
 
 // WeatherIsNil applies the IsNil predicate on the "weather" field.
 func WeatherIsNil() predicate.Forecast {
-	return predicate.Forecast(func(s *sql.Selector) {
-		s.Where(sql.IsNull(s.C(FieldWeather)))
-	})
+	return predicate.Forecast(sql.FieldIsNull(FieldWeather))
 }
 
 // WeatherNotNil applies the NotNil predicate on the "weather" field.
 func WeatherNotNil() predicate.Forecast {
-	return predicate.Forecast(func(s *sql.Selector) {
-		s.Where(sql.NotNull(s.C(FieldWeather)))
-	})
+	return predicate.Forecast(sql.FieldNotNull(FieldWeather))
 }
 
 // WeatherEqualFold applies the EqualFold predicate on the "weather" field.
 func WeatherEqualFold(v string) predicate.Forecast {
-	return predicate.Forecast(func(s *sql.Selector) {
-		s.Where(sql.EqualFold(s.C(FieldWeather), v))
-	})
+	return predicate.Forecast(sql.FieldEqualFold(FieldWeather, v))
 }
 
 // WeatherContainsFold applies the ContainsFold predicate on the "weather" field.
 func WeatherContainsFold(v string) predicate.Forecast {
-	return predicate.Forecast(func(s *sql.Selector) {
-		s.Where(sql.ContainsFold(s.C(FieldWeather), v))
-	})
+	return predicate.Forecast(sql.FieldContainsFold(FieldWeather, v))
 }
 
 // NotDecodedEQ applies the EQ predicate on the "not_decoded" field.
 func NotDecodedEQ(v string) predicate.Forecast {
-	return predicate.Forecast(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldNotDecoded), v))
-	})
+	return predicate.Forecast(sql.FieldEQ(FieldNotDecoded, v))
 }
 
 // NotDecodedNEQ applies the NEQ predicate on the "not_decoded" field.
 func NotDecodedNEQ(v string) predicate.Forecast {
-	return predicate.Forecast(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldNotDecoded), v))
-	})
+	return predicate.Forecast(sql.FieldNEQ(FieldNotDecoded, v))
 }
 
 // NotDecodedIn applies the In predicate on the "not_decoded" field.
 func NotDecodedIn(vs ...string) predicate.Forecast {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Forecast(func(s *sql.Selector) {
-		s.Where(sql.In(s.C(FieldNotDecoded), v...))
-	})
+	return predicate.Forecast(sql.FieldIn(FieldNotDecoded, vs...))
 }
 
 // NotDecodedNotIn applies the NotIn predicate on the "not_decoded" field.
 func NotDecodedNotIn(vs ...string) predicate.Forecast {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Forecast(func(s *sql.Selector) {
-		s.Where(sql.NotIn(s.C(FieldNotDecoded), v...))
-	})
+	return predicate.Forecast(sql.FieldNotIn(FieldNotDecoded, vs...))
 }
 
 // NotDecodedGT applies the GT predicate on the "not_decoded" field.
 func NotDecodedGT(v string) predicate.Forecast {
-	return predicate.Forecast(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldNotDecoded), v))
-	})
+	return predicate.Forecast(sql.FieldGT(FieldNotDecoded, v))
 }
 
 // NotDecodedGTE applies the GTE predicate on the "not_decoded" field.
 func NotDecodedGTE(v string) predicate.Forecast {
-	return predicate.Forecast(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldNotDecoded), v))
-	})
+	return predicate.Forecast(sql.FieldGTE(FieldNotDecoded, v))
 }
 
 // NotDecodedLT applies the LT predicate on the "not_decoded" field.
 func NotDecodedLT(v string) predicate.Forecast {
-	return predicate.Forecast(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldNotDecoded), v))
-	})
+	return predicate.Forecast(sql.FieldLT(FieldNotDecoded, v))
 }
 
 // NotDecodedLTE applies the LTE predicate on the "not_decoded" field.
 func NotDecodedLTE(v string) predicate.Forecast {
-	return predicate.Forecast(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldNotDecoded), v))
-	})
+	return predicate.Forecast(sql.FieldLTE(FieldNotDecoded, v))
 }
 
 // NotDecodedContains applies the Contains predicate on the "not_decoded" field.
 func NotDecodedContains(v string) predicate.Forecast {
-	return predicate.Forecast(func(s *sql.Selector) {
-		s.Where(sql.Contains(s.C(FieldNotDecoded), v))
-	})
+	return predicate.Forecast(sql.FieldContains(FieldNotDecoded, v))
 }
 
 // NotDecodedHasPrefix applies the HasPrefix predicate on the "not_decoded" field.
 func NotDecodedHasPrefix(v string) predicate.Forecast {
-	return predicate.Forecast(func(s *sql.Selector) {
-		s.Where(sql.HasPrefix(s.C(FieldNotDecoded), v))
-	})
+	return predicate.Forecast(sql.FieldHasPrefix(FieldNotDecoded, v))
 }
 
 // NotDecodedHasSuffix applies the HasSuffix predicate on the "not_decoded" field.
 func NotDecodedHasSuffix(v string) predicate.Forecast {
-	return predicate.Forecast(func(s *sql.Selector) {
-		s.Where(sql.HasSuffix(s.C(FieldNotDecoded), v))
-	})
+	return predicate.Forecast(sql.FieldHasSuffix(FieldNotDecoded, v))
 }
 
 // NotDecodedIsNil applies the IsNil predicate on the "not_decoded" field.
 func NotDecodedIsNil() predicate.Forecast {
-	return predicate.Forecast(func(s *sql.Selector) {
-		s.Where(sql.IsNull(s.C(FieldNotDecoded)))
-	})
+	return predicate.Forecast(sql.FieldIsNull(FieldNotDecoded))
 }
 
 // NotDecodedNotNil applies the NotNil predicate on the "not_decoded" field.
 func NotDecodedNotNil() predicate.Forecast {
-	return predicate.Forecast(func(s *sql.Selector) {
-		s.Where(sql.NotNull(s.C(FieldNotDecoded)))
-	})
+	return predicate.Forecast(sql.FieldNotNull(FieldNotDecoded))
 }
 
 // NotDecodedEqualFold applies the EqualFold predicate on the "not_decoded" field.
 func NotDecodedEqualFold(v string) predicate.Forecast {
-	return predicate.Forecast(func(s *sql.Selector) {
-		s.Where(sql.EqualFold(s.C(FieldNotDecoded), v))
-	})
+	return predicate.Forecast(sql.FieldEqualFold(FieldNotDecoded, v))
 }
 
 // NotDecodedContainsFold applies the ContainsFold predicate on the "not_decoded" field.
 func NotDecodedContainsFold(v string) predicate.Forecast {
-	return predicate.Forecast(func(s *sql.Selector) {
-		s.Where(sql.ContainsFold(s.C(FieldNotDecoded), v))
-	})
+	return predicate.Forecast(sql.FieldContainsFold(FieldNotDecoded, v))
 }
 
 // HasSkyConditions applies the HasEdge predicate on the "sky_conditions" edge.
@@ -1454,7 +946,6 @@ func HasSkyConditions() predicate.Forecast {
 	return predicate.Forecast(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(SkyConditionsTable, FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, false, SkyConditionsTable, SkyConditionsColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)
@@ -1482,7 +973,6 @@ func HasTurbulenceConditions() predicate.Forecast {
 	return predicate.Forecast(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(TurbulenceConditionsTable, FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, false, TurbulenceConditionsTable, TurbulenceConditionsColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)
@@ -1510,7 +1000,6 @@ func HasIcingConditions() predicate.Forecast {
 	return predicate.Forecast(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(IcingConditionsTable, FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, false, IcingConditionsTable, IcingConditionsColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)
@@ -1538,7 +1027,6 @@ func HasTemperatureData() predicate.Forecast {
 	return predicate.Forecast(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(TemperatureDataTable, FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, false, TemperatureDataTable, TemperatureDataColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)

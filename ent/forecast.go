@@ -274,29 +274,29 @@ func (f *Forecast) assignValues(columns []string, values []any) error {
 
 // QuerySkyConditions queries the "sky_conditions" edge of the Forecast entity.
 func (f *Forecast) QuerySkyConditions() *SkyConditionQuery {
-	return (&ForecastClient{config: f.config}).QuerySkyConditions(f)
+	return NewForecastClient(f.config).QuerySkyConditions(f)
 }
 
 // QueryTurbulenceConditions queries the "turbulence_conditions" edge of the Forecast entity.
 func (f *Forecast) QueryTurbulenceConditions() *TurbulenceConditionQuery {
-	return (&ForecastClient{config: f.config}).QueryTurbulenceConditions(f)
+	return NewForecastClient(f.config).QueryTurbulenceConditions(f)
 }
 
 // QueryIcingConditions queries the "icing_conditions" edge of the Forecast entity.
 func (f *Forecast) QueryIcingConditions() *IcingConditionQuery {
-	return (&ForecastClient{config: f.config}).QueryIcingConditions(f)
+	return NewForecastClient(f.config).QueryIcingConditions(f)
 }
 
 // QueryTemperatureData queries the "temperature_data" edge of the Forecast entity.
 func (f *Forecast) QueryTemperatureData() *TemperatureDataQuery {
-	return (&ForecastClient{config: f.config}).QueryTemperatureData(f)
+	return NewForecastClient(f.config).QueryTemperatureData(f)
 }
 
 // Update returns a builder for updating this Forecast.
 // Note that you need to call Forecast.Unwrap() before calling this method if this Forecast
 // was returned from a transaction, and the transaction was committed or rolled back.
 func (f *Forecast) Update() *ForecastUpdateOne {
-	return (&ForecastClient{config: f.config}).UpdateOne(f)
+	return NewForecastClient(f.config).UpdateOne(f)
 }
 
 // Unwrap unwraps the Forecast entity that was returned from a transaction after it was closed,
@@ -488,9 +488,3 @@ func (f *Forecast) appendNamedTemperatureData(name string, edges ...*Temperature
 
 // Forecasts is a parsable slice of Forecast.
 type Forecasts []*Forecast
-
-func (f Forecasts) config(cfg config) {
-	for _i := range f {
-		f[_i].config = cfg
-	}
-}

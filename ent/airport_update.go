@@ -507,40 +507,7 @@ func (au *AirportUpdate) ClearStation() *AirportUpdate {
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (au *AirportUpdate) Save(ctx context.Context) (int, error) {
-	var (
-		err      error
-		affected int
-	)
-	if len(au.hooks) == 0 {
-		if err = au.check(); err != nil {
-			return 0, err
-		}
-		affected, err = au.sqlSave(ctx)
-	} else {
-		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
-			mutation, ok := m.(*AirportMutation)
-			if !ok {
-				return nil, fmt.Errorf("unexpected mutation type %T", m)
-			}
-			if err = au.check(); err != nil {
-				return 0, err
-			}
-			au.mutation = mutation
-			affected, err = au.sqlSave(ctx)
-			mutation.done = true
-			return affected, err
-		})
-		for i := len(au.hooks) - 1; i >= 0; i-- {
-			if au.hooks[i] == nil {
-				return 0, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
-			}
-			mut = au.hooks[i](mut)
-		}
-		if _, err := mut.Mutate(ctx, au.mutation); err != nil {
-			return 0, err
-		}
-	}
-	return affected, err
+	return withHooks[int, AirportMutation](ctx, au.sqlSave, au.mutation, au.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -587,16 +554,10 @@ func (au *AirportUpdate) Modify(modifiers ...func(u *sql.UpdateBuilder)) *Airpor
 }
 
 func (au *AirportUpdate) sqlSave(ctx context.Context) (n int, err error) {
-	_spec := &sqlgraph.UpdateSpec{
-		Node: &sqlgraph.NodeSpec{
-			Table:   airport.Table,
-			Columns: airport.Columns,
-			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeUUID,
-				Column: airport.FieldID,
-			},
-		},
+	if err := au.check(); err != nil {
+		return n, err
 	}
+	_spec := sqlgraph.NewUpdateSpec(airport.Table, airport.Columns, sqlgraph.NewFieldSpec(airport.FieldID, field.TypeUUID))
 	if ps := au.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
@@ -936,6 +897,7 @@ func (au *AirportUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		return 0, err
 	}
+	au.mutation.done = true
 	return n, nil
 }
 
@@ -1417,6 +1379,12 @@ func (auo *AirportUpdateOne) ClearStation() *AirportUpdateOne {
 	return auo
 }
 
+// Where appends a list predicates to the AirportUpdate builder.
+func (auo *AirportUpdateOne) Where(ps ...predicate.Airport) *AirportUpdateOne {
+	auo.mutation.Where(ps...)
+	return auo
+}
+
 // Select allows selecting one or more fields (columns) of the returned entity.
 // The default is selecting all fields defined in the entity schema.
 func (auo *AirportUpdateOne) Select(field string, fields ...string) *AirportUpdateOne {
@@ -1426,46 +1394,7 @@ func (auo *AirportUpdateOne) Select(field string, fields ...string) *AirportUpda
 
 // Save executes the query and returns the updated Airport entity.
 func (auo *AirportUpdateOne) Save(ctx context.Context) (*Airport, error) {
-	var (
-		err  error
-		node *Airport
-	)
-	if len(auo.hooks) == 0 {
-		if err = auo.check(); err != nil {
-			return nil, err
-		}
-		node, err = auo.sqlSave(ctx)
-	} else {
-		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
-			mutation, ok := m.(*AirportMutation)
-			if !ok {
-				return nil, fmt.Errorf("unexpected mutation type %T", m)
-			}
-			if err = auo.check(); err != nil {
-				return nil, err
-			}
-			auo.mutation = mutation
-			node, err = auo.sqlSave(ctx)
-			mutation.done = true
-			return node, err
-		})
-		for i := len(auo.hooks) - 1; i >= 0; i-- {
-			if auo.hooks[i] == nil {
-				return nil, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
-			}
-			mut = auo.hooks[i](mut)
-		}
-		v, err := mut.Mutate(ctx, auo.mutation)
-		if err != nil {
-			return nil, err
-		}
-		nv, ok := v.(*Airport)
-		if !ok {
-			return nil, fmt.Errorf("unexpected node type %T returned from AirportMutation", v)
-		}
-		node = nv
-	}
-	return node, err
+	return withHooks[*Airport, AirportMutation](ctx, auo.sqlSave, auo.mutation, auo.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -1512,16 +1441,10 @@ func (auo *AirportUpdateOne) Modify(modifiers ...func(u *sql.UpdateBuilder)) *Ai
 }
 
 func (auo *AirportUpdateOne) sqlSave(ctx context.Context) (_node *Airport, err error) {
-	_spec := &sqlgraph.UpdateSpec{
-		Node: &sqlgraph.NodeSpec{
-			Table:   airport.Table,
-			Columns: airport.Columns,
-			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeUUID,
-				Column: airport.FieldID,
-			},
-		},
+	if err := auo.check(); err != nil {
+		return _node, err
 	}
+	_spec := sqlgraph.NewUpdateSpec(airport.Table, airport.Columns, sqlgraph.NewFieldSpec(airport.FieldID, field.TypeUUID))
 	id, ok := auo.mutation.ID()
 	if !ok {
 		return nil, &ValidationError{Name: "id", err: errors.New(`ent: missing "Airport.id" for update`)}
@@ -1881,5 +1804,6 @@ func (auo *AirportUpdateOne) sqlSave(ctx context.Context) (_node *Airport, err e
 		}
 		return nil, err
 	}
+	auo.mutation.done = true
 	return _node, nil
 }

@@ -18,11 +18,9 @@ import (
 // IcingConditionQuery is the builder for querying IcingCondition entities.
 type IcingConditionQuery struct {
 	config
-	limit      *int
-	offset     *int
-	unique     *bool
+	ctx        *QueryContext
 	order      []OrderFunc
-	fields     []string
+	inters     []Interceptor
 	predicates []predicate.IcingCondition
 	withFKs    bool
 	loadTotal  []func(context.Context, []*IcingCondition) error
@@ -38,26 +36,26 @@ func (icq *IcingConditionQuery) Where(ps ...predicate.IcingCondition) *IcingCond
 	return icq
 }
 
-// Limit adds a limit step to the query.
+// Limit the number of records to be returned by this query.
 func (icq *IcingConditionQuery) Limit(limit int) *IcingConditionQuery {
-	icq.limit = &limit
+	icq.ctx.Limit = &limit
 	return icq
 }
 
-// Offset adds an offset step to the query.
+// Offset to start from.
 func (icq *IcingConditionQuery) Offset(offset int) *IcingConditionQuery {
-	icq.offset = &offset
+	icq.ctx.Offset = &offset
 	return icq
 }
 
 // Unique configures the query builder to filter duplicate records on query.
 // By default, unique is set to true, and can be disabled using this method.
 func (icq *IcingConditionQuery) Unique(unique bool) *IcingConditionQuery {
-	icq.unique = &unique
+	icq.ctx.Unique = &unique
 	return icq
 }
 
-// Order adds an order step to the query.
+// Order specifies how the records should be ordered.
 func (icq *IcingConditionQuery) Order(o ...OrderFunc) *IcingConditionQuery {
 	icq.order = append(icq.order, o...)
 	return icq
@@ -66,7 +64,7 @@ func (icq *IcingConditionQuery) Order(o ...OrderFunc) *IcingConditionQuery {
 // First returns the first IcingCondition entity from the query.
 // Returns a *NotFoundError when no IcingCondition was found.
 func (icq *IcingConditionQuery) First(ctx context.Context) (*IcingCondition, error) {
-	nodes, err := icq.Limit(1).All(ctx)
+	nodes, err := icq.Limit(1).All(setContextOp(ctx, icq.ctx, "First"))
 	if err != nil {
 		return nil, err
 	}
@@ -89,7 +87,7 @@ func (icq *IcingConditionQuery) FirstX(ctx context.Context) *IcingCondition {
 // Returns a *NotFoundError when no IcingCondition ID was found.
 func (icq *IcingConditionQuery) FirstID(ctx context.Context) (id uuid.UUID, err error) {
 	var ids []uuid.UUID
-	if ids, err = icq.Limit(1).IDs(ctx); err != nil {
+	if ids, err = icq.Limit(1).IDs(setContextOp(ctx, icq.ctx, "FirstID")); err != nil {
 		return
 	}
 	if len(ids) == 0 {
@@ -112,7 +110,7 @@ func (icq *IcingConditionQuery) FirstIDX(ctx context.Context) uuid.UUID {
 // Returns a *NotSingularError when more than one IcingCondition entity is found.
 // Returns a *NotFoundError when no IcingCondition entities are found.
 func (icq *IcingConditionQuery) Only(ctx context.Context) (*IcingCondition, error) {
-	nodes, err := icq.Limit(2).All(ctx)
+	nodes, err := icq.Limit(2).All(setContextOp(ctx, icq.ctx, "Only"))
 	if err != nil {
 		return nil, err
 	}
@@ -140,7 +138,7 @@ func (icq *IcingConditionQuery) OnlyX(ctx context.Context) *IcingCondition {
 // Returns a *NotFoundError when no entities are found.
 func (icq *IcingConditionQuery) OnlyID(ctx context.Context) (id uuid.UUID, err error) {
 	var ids []uuid.UUID
-	if ids, err = icq.Limit(2).IDs(ctx); err != nil {
+	if ids, err = icq.Limit(2).IDs(setContextOp(ctx, icq.ctx, "OnlyID")); err != nil {
 		return
 	}
 	switch len(ids) {
@@ -165,10 +163,12 @@ func (icq *IcingConditionQuery) OnlyIDX(ctx context.Context) uuid.UUID {
 
 // All executes the query and returns a list of IcingConditions.
 func (icq *IcingConditionQuery) All(ctx context.Context) ([]*IcingCondition, error) {
+	ctx = setContextOp(ctx, icq.ctx, "All")
 	if err := icq.prepareQuery(ctx); err != nil {
 		return nil, err
 	}
-	return icq.sqlAll(ctx)
+	qr := querierAll[[]*IcingCondition, *IcingConditionQuery]()
+	return withInterceptors[[]*IcingCondition](ctx, icq, qr, icq.inters)
 }
 
 // AllX is like All, but panics if an error occurs.
@@ -181,9 +181,12 @@ func (icq *IcingConditionQuery) AllX(ctx context.Context) []*IcingCondition {
 }
 
 // IDs executes the query and returns a list of IcingCondition IDs.
-func (icq *IcingConditionQuery) IDs(ctx context.Context) ([]uuid.UUID, error) {
-	var ids []uuid.UUID
-	if err := icq.Select(icingcondition.FieldID).Scan(ctx, &ids); err != nil {
+func (icq *IcingConditionQuery) IDs(ctx context.Context) (ids []uuid.UUID, err error) {
+	if icq.ctx.Unique == nil && icq.path != nil {
+		icq.Unique(true)
+	}
+	ctx = setContextOp(ctx, icq.ctx, "IDs")
+	if err = icq.Select(icingcondition.FieldID).Scan(ctx, &ids); err != nil {
 		return nil, err
 	}
 	return ids, nil
@@ -200,10 +203,11 @@ func (icq *IcingConditionQuery) IDsX(ctx context.Context) []uuid.UUID {
 
 // Count returns the count of the given query.
 func (icq *IcingConditionQuery) Count(ctx context.Context) (int, error) {
+	ctx = setContextOp(ctx, icq.ctx, "Count")
 	if err := icq.prepareQuery(ctx); err != nil {
 		return 0, err
 	}
-	return icq.sqlCount(ctx)
+	return withInterceptors[int](ctx, icq, querierCount[*IcingConditionQuery](), icq.inters)
 }
 
 // CountX is like Count, but panics if an error occurs.
@@ -217,10 +221,15 @@ func (icq *IcingConditionQuery) CountX(ctx context.Context) int {
 
 // Exist returns true if the query has elements in the graph.
 func (icq *IcingConditionQuery) Exist(ctx context.Context) (bool, error) {
-	if err := icq.prepareQuery(ctx); err != nil {
-		return false, err
+	ctx = setContextOp(ctx, icq.ctx, "Exist")
+	switch _, err := icq.FirstID(ctx); {
+	case IsNotFound(err):
+		return false, nil
+	case err != nil:
+		return false, fmt.Errorf("ent: check existence: %w", err)
+	default:
+		return true, nil
 	}
-	return icq.sqlExist(ctx)
 }
 
 // ExistX is like Exist, but panics if an error occurs.
@@ -240,14 +249,13 @@ func (icq *IcingConditionQuery) Clone() *IcingConditionQuery {
 	}
 	return &IcingConditionQuery{
 		config:     icq.config,
-		limit:      icq.limit,
-		offset:     icq.offset,
+		ctx:        icq.ctx.Clone(),
 		order:      append([]OrderFunc{}, icq.order...),
+		inters:     append([]Interceptor{}, icq.inters...),
 		predicates: append([]predicate.IcingCondition{}, icq.predicates...),
 		// clone intermediate query.
-		sql:    icq.sql.Clone(),
-		path:   icq.path,
-		unique: icq.unique,
+		sql:  icq.sql.Clone(),
+		path: icq.path,
 	}
 }
 
@@ -266,16 +274,11 @@ func (icq *IcingConditionQuery) Clone() *IcingConditionQuery {
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
 func (icq *IcingConditionQuery) GroupBy(field string, fields ...string) *IcingConditionGroupBy {
-	grbuild := &IcingConditionGroupBy{config: icq.config}
-	grbuild.fields = append([]string{field}, fields...)
-	grbuild.path = func(ctx context.Context) (prev *sql.Selector, err error) {
-		if err := icq.prepareQuery(ctx); err != nil {
-			return nil, err
-		}
-		return icq.sqlQuery(ctx), nil
-	}
+	icq.ctx.Fields = append([]string{field}, fields...)
+	grbuild := &IcingConditionGroupBy{build: icq}
+	grbuild.flds = &icq.ctx.Fields
 	grbuild.label = icingcondition.Label
-	grbuild.flds, grbuild.scan = &grbuild.fields, grbuild.Scan
+	grbuild.scan = grbuild.Scan
 	return grbuild
 }
 
@@ -292,11 +295,11 @@ func (icq *IcingConditionQuery) GroupBy(field string, fields ...string) *IcingCo
 //		Select(icingcondition.FieldIntensity).
 //		Scan(ctx, &v)
 func (icq *IcingConditionQuery) Select(fields ...string) *IcingConditionSelect {
-	icq.fields = append(icq.fields, fields...)
-	selbuild := &IcingConditionSelect{IcingConditionQuery: icq}
-	selbuild.label = icingcondition.Label
-	selbuild.flds, selbuild.scan = &icq.fields, selbuild.Scan
-	return selbuild
+	icq.ctx.Fields = append(icq.ctx.Fields, fields...)
+	sbuild := &IcingConditionSelect{IcingConditionQuery: icq}
+	sbuild.label = icingcondition.Label
+	sbuild.flds, sbuild.scan = &icq.ctx.Fields, sbuild.Scan
+	return sbuild
 }
 
 // Aggregate returns a IcingConditionSelect configured with the given aggregations.
@@ -305,7 +308,17 @@ func (icq *IcingConditionQuery) Aggregate(fns ...AggregateFunc) *IcingConditionS
 }
 
 func (icq *IcingConditionQuery) prepareQuery(ctx context.Context) error {
-	for _, f := range icq.fields {
+	for _, inter := range icq.inters {
+		if inter == nil {
+			return fmt.Errorf("ent: uninitialized interceptor (forgotten import ent/runtime?)")
+		}
+		if trv, ok := inter.(Traverser); ok {
+			if err := trv.Traverse(ctx, icq); err != nil {
+				return err
+			}
+		}
+	}
+	for _, f := range icq.ctx.Fields {
 		if !icingcondition.ValidColumn(f) {
 			return &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for query", f)}
 		}
@@ -362,41 +375,22 @@ func (icq *IcingConditionQuery) sqlCount(ctx context.Context) (int, error) {
 	if len(icq.modifiers) > 0 {
 		_spec.Modifiers = icq.modifiers
 	}
-	_spec.Node.Columns = icq.fields
-	if len(icq.fields) > 0 {
-		_spec.Unique = icq.unique != nil && *icq.unique
+	_spec.Node.Columns = icq.ctx.Fields
+	if len(icq.ctx.Fields) > 0 {
+		_spec.Unique = icq.ctx.Unique != nil && *icq.ctx.Unique
 	}
 	return sqlgraph.CountNodes(ctx, icq.driver, _spec)
 }
 
-func (icq *IcingConditionQuery) sqlExist(ctx context.Context) (bool, error) {
-	switch _, err := icq.FirstID(ctx); {
-	case IsNotFound(err):
-		return false, nil
-	case err != nil:
-		return false, fmt.Errorf("ent: check existence: %w", err)
-	default:
-		return true, nil
-	}
-}
-
 func (icq *IcingConditionQuery) querySpec() *sqlgraph.QuerySpec {
-	_spec := &sqlgraph.QuerySpec{
-		Node: &sqlgraph.NodeSpec{
-			Table:   icingcondition.Table,
-			Columns: icingcondition.Columns,
-			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeUUID,
-				Column: icingcondition.FieldID,
-			},
-		},
-		From:   icq.sql,
-		Unique: true,
-	}
-	if unique := icq.unique; unique != nil {
+	_spec := sqlgraph.NewQuerySpec(icingcondition.Table, icingcondition.Columns, sqlgraph.NewFieldSpec(icingcondition.FieldID, field.TypeUUID))
+	_spec.From = icq.sql
+	if unique := icq.ctx.Unique; unique != nil {
 		_spec.Unique = *unique
+	} else if icq.path != nil {
+		_spec.Unique = true
 	}
-	if fields := icq.fields; len(fields) > 0 {
+	if fields := icq.ctx.Fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))
 		_spec.Node.Columns = append(_spec.Node.Columns, icingcondition.FieldID)
 		for i := range fields {
@@ -412,10 +406,10 @@ func (icq *IcingConditionQuery) querySpec() *sqlgraph.QuerySpec {
 			}
 		}
 	}
-	if limit := icq.limit; limit != nil {
+	if limit := icq.ctx.Limit; limit != nil {
 		_spec.Limit = *limit
 	}
-	if offset := icq.offset; offset != nil {
+	if offset := icq.ctx.Offset; offset != nil {
 		_spec.Offset = *offset
 	}
 	if ps := icq.order; len(ps) > 0 {
@@ -431,7 +425,7 @@ func (icq *IcingConditionQuery) querySpec() *sqlgraph.QuerySpec {
 func (icq *IcingConditionQuery) sqlQuery(ctx context.Context) *sql.Selector {
 	builder := sql.Dialect(icq.driver.Dialect())
 	t1 := builder.Table(icingcondition.Table)
-	columns := icq.fields
+	columns := icq.ctx.Fields
 	if len(columns) == 0 {
 		columns = icingcondition.Columns
 	}
@@ -440,7 +434,7 @@ func (icq *IcingConditionQuery) sqlQuery(ctx context.Context) *sql.Selector {
 		selector = icq.sql
 		selector.Select(selector.Columns(columns...)...)
 	}
-	if icq.unique != nil && *icq.unique {
+	if icq.ctx.Unique != nil && *icq.ctx.Unique {
 		selector.Distinct()
 	}
 	for _, m := range icq.modifiers {
@@ -452,12 +446,12 @@ func (icq *IcingConditionQuery) sqlQuery(ctx context.Context) *sql.Selector {
 	for _, p := range icq.order {
 		p(selector)
 	}
-	if offset := icq.offset; offset != nil {
+	if offset := icq.ctx.Offset; offset != nil {
 		// limit is mandatory for offset clause. We start
 		// with default value, and override it below if needed.
 		selector.Offset(*offset).Limit(math.MaxInt32)
 	}
-	if limit := icq.limit; limit != nil {
+	if limit := icq.ctx.Limit; limit != nil {
 		selector.Limit(*limit)
 	}
 	return selector
@@ -471,13 +465,8 @@ func (icq *IcingConditionQuery) Modify(modifiers ...func(s *sql.Selector)) *Icin
 
 // IcingConditionGroupBy is the group-by builder for IcingCondition entities.
 type IcingConditionGroupBy struct {
-	config
 	selector
-	fields []string
-	fns    []AggregateFunc
-	// intermediate query (i.e. traversal path).
-	sql  *sql.Selector
-	path func(context.Context) (*sql.Selector, error)
+	build *IcingConditionQuery
 }
 
 // Aggregate adds the given aggregation functions to the group-by query.
@@ -486,58 +475,46 @@ func (icgb *IcingConditionGroupBy) Aggregate(fns ...AggregateFunc) *IcingConditi
 	return icgb
 }
 
-// Scan applies the group-by query and scans the result into the given value.
+// Scan applies the selector query and scans the result into the given value.
 func (icgb *IcingConditionGroupBy) Scan(ctx context.Context, v any) error {
-	query, err := icgb.path(ctx)
-	if err != nil {
+	ctx = setContextOp(ctx, icgb.build.ctx, "GroupBy")
+	if err := icgb.build.prepareQuery(ctx); err != nil {
 		return err
 	}
-	icgb.sql = query
-	return icgb.sqlScan(ctx, v)
+	return scanWithInterceptors[*IcingConditionQuery, *IcingConditionGroupBy](ctx, icgb.build, icgb, icgb.build.inters, v)
 }
 
-func (icgb *IcingConditionGroupBy) sqlScan(ctx context.Context, v any) error {
-	for _, f := range icgb.fields {
-		if !icingcondition.ValidColumn(f) {
-			return &ValidationError{Name: f, err: fmt.Errorf("invalid field %q for group-by", f)}
-		}
+func (icgb *IcingConditionGroupBy) sqlScan(ctx context.Context, root *IcingConditionQuery, v any) error {
+	selector := root.sqlQuery(ctx).Select()
+	aggregation := make([]string, 0, len(icgb.fns))
+	for _, fn := range icgb.fns {
+		aggregation = append(aggregation, fn(selector))
 	}
-	selector := icgb.sqlQuery()
+	if len(selector.SelectedColumns()) == 0 {
+		columns := make([]string, 0, len(*icgb.flds)+len(icgb.fns))
+		for _, f := range *icgb.flds {
+			columns = append(columns, selector.C(f))
+		}
+		columns = append(columns, aggregation...)
+		selector.Select(columns...)
+	}
+	selector.GroupBy(selector.Columns(*icgb.flds...)...)
 	if err := selector.Err(); err != nil {
 		return err
 	}
 	rows := &sql.Rows{}
 	query, args := selector.Query()
-	if err := icgb.driver.Query(ctx, query, args, rows); err != nil {
+	if err := icgb.build.driver.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
 	defer rows.Close()
 	return sql.ScanSlice(rows, v)
 }
 
-func (icgb *IcingConditionGroupBy) sqlQuery() *sql.Selector {
-	selector := icgb.sql.Select()
-	aggregation := make([]string, 0, len(icgb.fns))
-	for _, fn := range icgb.fns {
-		aggregation = append(aggregation, fn(selector))
-	}
-	if len(selector.SelectedColumns()) == 0 {
-		columns := make([]string, 0, len(icgb.fields)+len(icgb.fns))
-		for _, f := range icgb.fields {
-			columns = append(columns, selector.C(f))
-		}
-		columns = append(columns, aggregation...)
-		selector.Select(columns...)
-	}
-	return selector.GroupBy(selector.Columns(icgb.fields...)...)
-}
-
 // IcingConditionSelect is the builder for selecting fields of IcingCondition entities.
 type IcingConditionSelect struct {
 	*IcingConditionQuery
 	selector
-	// intermediate query (i.e. traversal path).
-	sql *sql.Selector
 }
 
 // Aggregate adds the given aggregation functions to the selector query.
@@ -548,26 +525,27 @@ func (ics *IcingConditionSelect) Aggregate(fns ...AggregateFunc) *IcingCondition
 
 // Scan applies the selector query and scans the result into the given value.
 func (ics *IcingConditionSelect) Scan(ctx context.Context, v any) error {
+	ctx = setContextOp(ctx, ics.ctx, "Select")
 	if err := ics.prepareQuery(ctx); err != nil {
 		return err
 	}
-	ics.sql = ics.IcingConditionQuery.sqlQuery(ctx)
-	return ics.sqlScan(ctx, v)
+	return scanWithInterceptors[*IcingConditionQuery, *IcingConditionSelect](ctx, ics.IcingConditionQuery, ics, ics.inters, v)
 }
 
-func (ics *IcingConditionSelect) sqlScan(ctx context.Context, v any) error {
+func (ics *IcingConditionSelect) sqlScan(ctx context.Context, root *IcingConditionQuery, v any) error {
+	selector := root.sqlQuery(ctx)
 	aggregation := make([]string, 0, len(ics.fns))
 	for _, fn := range ics.fns {
-		aggregation = append(aggregation, fn(ics.sql))
+		aggregation = append(aggregation, fn(selector))
 	}
 	switch n := len(*ics.selector.flds); {
 	case n == 0 && len(aggregation) > 0:
-		ics.sql.Select(aggregation...)
+		selector.Select(aggregation...)
 	case n != 0 && len(aggregation) > 0:
-		ics.sql.AppendSelect(aggregation...)
+		selector.AppendSelect(aggregation...)
 	}
 	rows := &sql.Rows{}
-	query, args := ics.sql.Query()
+	query, args := selector.Query()
 	if err := ics.driver.Query(ctx, query, args, rows); err != nil {
 		return err
 	}

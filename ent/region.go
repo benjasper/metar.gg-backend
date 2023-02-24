@@ -163,14 +163,14 @@ func (r *Region) assignValues(columns []string, values []any) error {
 
 // QueryAirports queries the "airports" edge of the Region entity.
 func (r *Region) QueryAirports() *AirportQuery {
-	return (&RegionClient{config: r.config}).QueryAirports(r)
+	return NewRegionClient(r.config).QueryAirports(r)
 }
 
 // Update returns a builder for updating this Region.
 // Note that you need to call Region.Unwrap() before calling this method if this Region
 // was returned from a transaction, and the transaction was committed or rolled back.
 func (r *Region) Update() *RegionUpdateOne {
-	return (&RegionClient{config: r.config}).UpdateOne(r)
+	return NewRegionClient(r.config).UpdateOne(r)
 }
 
 // Unwrap unwraps the Region entity that was returned from a transaction after it was closed,
@@ -245,9 +245,3 @@ func (r *Region) appendNamedAirports(name string, edges ...*Airport) {
 
 // Regions is a parsable slice of Region.
 type Regions []*Region
-
-func (r Regions) config(cfg config) {
-	for _i := range r {
-		r[_i].config = cfg
-	}
-}

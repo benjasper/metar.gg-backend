@@ -109,34 +109,7 @@ func (tdu *TemperatureDataUpdate) Mutation() *TemperatureDataMutation {
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (tdu *TemperatureDataUpdate) Save(ctx context.Context) (int, error) {
-	var (
-		err      error
-		affected int
-	)
-	if len(tdu.hooks) == 0 {
-		affected, err = tdu.sqlSave(ctx)
-	} else {
-		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
-			mutation, ok := m.(*TemperatureDataMutation)
-			if !ok {
-				return nil, fmt.Errorf("unexpected mutation type %T", m)
-			}
-			tdu.mutation = mutation
-			affected, err = tdu.sqlSave(ctx)
-			mutation.done = true
-			return affected, err
-		})
-		for i := len(tdu.hooks) - 1; i >= 0; i-- {
-			if tdu.hooks[i] == nil {
-				return 0, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
-			}
-			mut = tdu.hooks[i](mut)
-		}
-		if _, err := mut.Mutate(ctx, tdu.mutation); err != nil {
-			return 0, err
-		}
-	}
-	return affected, err
+	return withHooks[int, TemperatureDataMutation](ctx, tdu.sqlSave, tdu.mutation, tdu.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -168,16 +141,7 @@ func (tdu *TemperatureDataUpdate) Modify(modifiers ...func(u *sql.UpdateBuilder)
 }
 
 func (tdu *TemperatureDataUpdate) sqlSave(ctx context.Context) (n int, err error) {
-	_spec := &sqlgraph.UpdateSpec{
-		Node: &sqlgraph.NodeSpec{
-			Table:   temperaturedata.Table,
-			Columns: temperaturedata.Columns,
-			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeUUID,
-				Column: temperaturedata.FieldID,
-			},
-		},
-	}
+	_spec := sqlgraph.NewUpdateSpec(temperaturedata.Table, temperaturedata.Columns, sqlgraph.NewFieldSpec(temperaturedata.FieldID, field.TypeUUID))
 	if ps := tdu.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
@@ -221,6 +185,7 @@ func (tdu *TemperatureDataUpdate) sqlSave(ctx context.Context) (n int, err error
 		}
 		return 0, err
 	}
+	tdu.mutation.done = true
 	return n, nil
 }
 
@@ -311,6 +276,12 @@ func (tduo *TemperatureDataUpdateOne) Mutation() *TemperatureDataMutation {
 	return tduo.mutation
 }
 
+// Where appends a list predicates to the TemperatureDataUpdate builder.
+func (tduo *TemperatureDataUpdateOne) Where(ps ...predicate.TemperatureData) *TemperatureDataUpdateOne {
+	tduo.mutation.Where(ps...)
+	return tduo
+}
+
 // Select allows selecting one or more fields (columns) of the returned entity.
 // The default is selecting all fields defined in the entity schema.
 func (tduo *TemperatureDataUpdateOne) Select(field string, fields ...string) *TemperatureDataUpdateOne {
@@ -320,40 +291,7 @@ func (tduo *TemperatureDataUpdateOne) Select(field string, fields ...string) *Te
 
 // Save executes the query and returns the updated TemperatureData entity.
 func (tduo *TemperatureDataUpdateOne) Save(ctx context.Context) (*TemperatureData, error) {
-	var (
-		err  error
-		node *TemperatureData
-	)
-	if len(tduo.hooks) == 0 {
-		node, err = tduo.sqlSave(ctx)
-	} else {
-		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
-			mutation, ok := m.(*TemperatureDataMutation)
-			if !ok {
-				return nil, fmt.Errorf("unexpected mutation type %T", m)
-			}
-			tduo.mutation = mutation
-			node, err = tduo.sqlSave(ctx)
-			mutation.done = true
-			return node, err
-		})
-		for i := len(tduo.hooks) - 1; i >= 0; i-- {
-			if tduo.hooks[i] == nil {
-				return nil, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
-			}
-			mut = tduo.hooks[i](mut)
-		}
-		v, err := mut.Mutate(ctx, tduo.mutation)
-		if err != nil {
-			return nil, err
-		}
-		nv, ok := v.(*TemperatureData)
-		if !ok {
-			return nil, fmt.Errorf("unexpected node type %T returned from TemperatureDataMutation", v)
-		}
-		node = nv
-	}
-	return node, err
+	return withHooks[*TemperatureData, TemperatureDataMutation](ctx, tduo.sqlSave, tduo.mutation, tduo.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -385,16 +323,7 @@ func (tduo *TemperatureDataUpdateOne) Modify(modifiers ...func(u *sql.UpdateBuil
 }
 
 func (tduo *TemperatureDataUpdateOne) sqlSave(ctx context.Context) (_node *TemperatureData, err error) {
-	_spec := &sqlgraph.UpdateSpec{
-		Node: &sqlgraph.NodeSpec{
-			Table:   temperaturedata.Table,
-			Columns: temperaturedata.Columns,
-			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeUUID,
-				Column: temperaturedata.FieldID,
-			},
-		},
-	}
+	_spec := sqlgraph.NewUpdateSpec(temperaturedata.Table, temperaturedata.Columns, sqlgraph.NewFieldSpec(temperaturedata.FieldID, field.TypeUUID))
 	id, ok := tduo.mutation.ID()
 	if !ok {
 		return nil, &ValidationError{Name: "id", err: errors.New(`ent: missing "TemperatureData.id" for update`)}
@@ -458,5 +387,6 @@ func (tduo *TemperatureDataUpdateOne) sqlSave(ctx context.Context) (_node *Tempe
 		}
 		return nil, err
 	}
+	tduo.mutation.done = true
 	return _node, nil
 }

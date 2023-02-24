@@ -94,7 +94,7 @@ func (tc *TurbulenceCondition) assignValues(columns []string, values []any) erro
 // Note that you need to call TurbulenceCondition.Unwrap() before calling this method if this TurbulenceCondition
 // was returned from a transaction, and the transaction was committed or rolled back.
 func (tc *TurbulenceCondition) Update() *TurbulenceConditionUpdateOne {
-	return (&TurbulenceConditionClient{config: tc.config}).UpdateOne(tc)
+	return NewTurbulenceConditionClient(tc.config).UpdateOne(tc)
 }
 
 // Unwrap unwraps the TurbulenceCondition entity that was returned from a transaction after it was closed,
@@ -127,9 +127,3 @@ func (tc *TurbulenceCondition) String() string {
 
 // TurbulenceConditions is a parsable slice of TurbulenceCondition.
 type TurbulenceConditions []*TurbulenceCondition
-
-func (tc TurbulenceConditions) config(cfg config) {
-	for _i := range tc {
-		tc[_i].config = cfg
-	}
-}

@@ -85,50 +85,8 @@ func (tdc *TemperatureDataCreate) Mutation() *TemperatureDataMutation {
 
 // Save creates the TemperatureData in the database.
 func (tdc *TemperatureDataCreate) Save(ctx context.Context) (*TemperatureData, error) {
-	var (
-		err  error
-		node *TemperatureData
-	)
 	tdc.defaults()
-	if len(tdc.hooks) == 0 {
-		if err = tdc.check(); err != nil {
-			return nil, err
-		}
-		node, err = tdc.sqlSave(ctx)
-	} else {
-		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
-			mutation, ok := m.(*TemperatureDataMutation)
-			if !ok {
-				return nil, fmt.Errorf("unexpected mutation type %T", m)
-			}
-			if err = tdc.check(); err != nil {
-				return nil, err
-			}
-			tdc.mutation = mutation
-			if node, err = tdc.sqlSave(ctx); err != nil {
-				return nil, err
-			}
-			mutation.id = &node.ID
-			mutation.done = true
-			return node, err
-		})
-		for i := len(tdc.hooks) - 1; i >= 0; i-- {
-			if tdc.hooks[i] == nil {
-				return nil, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
-			}
-			mut = tdc.hooks[i](mut)
-		}
-		v, err := mut.Mutate(ctx, tdc.mutation)
-		if err != nil {
-			return nil, err
-		}
-		nv, ok := v.(*TemperatureData)
-		if !ok {
-			return nil, fmt.Errorf("unexpected node type %T returned from TemperatureDataMutation", v)
-		}
-		node = nv
-	}
-	return node, err
+	return withHooks[*TemperatureData, TemperatureDataMutation](ctx, tdc.sqlSave, tdc.mutation, tdc.hooks)
 }
 
 // SaveX calls Save and panics if Save returns an error.
@@ -173,6 +131,9 @@ func (tdc *TemperatureDataCreate) check() error {
 }
 
 func (tdc *TemperatureDataCreate) sqlSave(ctx context.Context) (*TemperatureData, error) {
+	if err := tdc.check(); err != nil {
+		return nil, err
+	}
 	_node, _spec := tdc.createSpec()
 	if err := sqlgraph.CreateNode(ctx, tdc.driver, _spec); err != nil {
 		if sqlgraph.IsConstraintError(err) {
@@ -187,19 +148,15 @@ func (tdc *TemperatureDataCreate) sqlSave(ctx context.Context) (*TemperatureData
 			return nil, err
 		}
 	}
+	tdc.mutation.id = &_node.ID
+	tdc.mutation.done = true
 	return _node, nil
 }
 
 func (tdc *TemperatureDataCreate) createSpec() (*TemperatureData, *sqlgraph.CreateSpec) {
 	var (
 		_node = &TemperatureData{config: tdc.config}
-		_spec = &sqlgraph.CreateSpec{
-			Table: temperaturedata.Table,
-			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeUUID,
-				Column: temperaturedata.FieldID,
-			},
-		}
+		_spec = sqlgraph.NewCreateSpec(temperaturedata.Table, sqlgraph.NewFieldSpec(temperaturedata.FieldID, field.TypeUUID))
 	)
 	_spec.OnConflict = tdc.conflict
 	if id, ok := tdc.mutation.ID(); ok {

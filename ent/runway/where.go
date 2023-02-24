@@ -13,1708 +13,1112 @@ import (
 
 // ID filters vertices based on their ID field.
 func ID(id uuid.UUID) predicate.Runway {
-	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldID), id))
-	})
+	return predicate.Runway(sql.FieldEQ(FieldID, id))
 }
 
 // IDEQ applies the EQ predicate on the ID field.
 func IDEQ(id uuid.UUID) predicate.Runway {
-	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldID), id))
-	})
+	return predicate.Runway(sql.FieldEQ(FieldID, id))
 }
 
 // IDNEQ applies the NEQ predicate on the ID field.
 func IDNEQ(id uuid.UUID) predicate.Runway {
-	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldID), id))
-	})
+	return predicate.Runway(sql.FieldNEQ(FieldID, id))
 }
 
 // IDIn applies the In predicate on the ID field.
 func IDIn(ids ...uuid.UUID) predicate.Runway {
-	return predicate.Runway(func(s *sql.Selector) {
-		v := make([]any, len(ids))
-		for i := range v {
-			v[i] = ids[i]
-		}
-		s.Where(sql.In(s.C(FieldID), v...))
-	})
+	return predicate.Runway(sql.FieldIn(FieldID, ids...))
 }
 
 // IDNotIn applies the NotIn predicate on the ID field.
 func IDNotIn(ids ...uuid.UUID) predicate.Runway {
-	return predicate.Runway(func(s *sql.Selector) {
-		v := make([]any, len(ids))
-		for i := range v {
-			v[i] = ids[i]
-		}
-		s.Where(sql.NotIn(s.C(FieldID), v...))
-	})
+	return predicate.Runway(sql.FieldNotIn(FieldID, ids...))
 }
 
 // IDGT applies the GT predicate on the ID field.
 func IDGT(id uuid.UUID) predicate.Runway {
-	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldID), id))
-	})
+	return predicate.Runway(sql.FieldGT(FieldID, id))
 }
 
 // IDGTE applies the GTE predicate on the ID field.
 func IDGTE(id uuid.UUID) predicate.Runway {
-	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldID), id))
-	})
+	return predicate.Runway(sql.FieldGTE(FieldID, id))
 }
 
 // IDLT applies the LT predicate on the ID field.
 func IDLT(id uuid.UUID) predicate.Runway {
-	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldID), id))
-	})
+	return predicate.Runway(sql.FieldLT(FieldID, id))
 }
 
 // IDLTE applies the LTE predicate on the ID field.
 func IDLTE(id uuid.UUID) predicate.Runway {
-	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldID), id))
-	})
+	return predicate.Runway(sql.FieldLTE(FieldID, id))
 }
 
 // ImportID applies equality check predicate on the "import_id" field. It's identical to ImportIDEQ.
 func ImportID(v int) predicate.Runway {
-	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldImportID), v))
-	})
+	return predicate.Runway(sql.FieldEQ(FieldImportID, v))
 }
 
 // Hash applies equality check predicate on the "hash" field. It's identical to HashEQ.
 func Hash(v string) predicate.Runway {
-	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldHash), v))
-	})
+	return predicate.Runway(sql.FieldEQ(FieldHash, v))
 }
 
 // ImportFlag applies equality check predicate on the "import_flag" field. It's identical to ImportFlagEQ.
 func ImportFlag(v bool) predicate.Runway {
-	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldImportFlag), v))
-	})
+	return predicate.Runway(sql.FieldEQ(FieldImportFlag, v))
 }
 
 // LastUpdated applies equality check predicate on the "last_updated" field. It's identical to LastUpdatedEQ.
 func LastUpdated(v time.Time) predicate.Runway {
-	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldLastUpdated), v))
-	})
+	return predicate.Runway(sql.FieldEQ(FieldLastUpdated, v))
 }
 
 // Length applies equality check predicate on the "length" field. It's identical to LengthEQ.
 func Length(v int) predicate.Runway {
-	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldLength), v))
-	})
+	return predicate.Runway(sql.FieldEQ(FieldLength, v))
 }
 
 // Width applies equality check predicate on the "width" field. It's identical to WidthEQ.
 func Width(v int) predicate.Runway {
-	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldWidth), v))
-	})
+	return predicate.Runway(sql.FieldEQ(FieldWidth, v))
 }
 
 // Surface applies equality check predicate on the "surface" field. It's identical to SurfaceEQ.
 func Surface(v string) predicate.Runway {
-	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldSurface), v))
-	})
+	return predicate.Runway(sql.FieldEQ(FieldSurface, v))
 }
 
 // Lighted applies equality check predicate on the "lighted" field. It's identical to LightedEQ.
 func Lighted(v bool) predicate.Runway {
-	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldLighted), v))
-	})
+	return predicate.Runway(sql.FieldEQ(FieldLighted, v))
 }
 
 // Closed applies equality check predicate on the "closed" field. It's identical to ClosedEQ.
 func Closed(v bool) predicate.Runway {
-	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldClosed), v))
-	})
+	return predicate.Runway(sql.FieldEQ(FieldClosed, v))
 }
 
 // LowRunwayIdentifier applies equality check predicate on the "low_runway_identifier" field. It's identical to LowRunwayIdentifierEQ.
 func LowRunwayIdentifier(v string) predicate.Runway {
-	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldLowRunwayIdentifier), v))
-	})
+	return predicate.Runway(sql.FieldEQ(FieldLowRunwayIdentifier, v))
 }
 
 // LowRunwayLatitude applies equality check predicate on the "low_runway_latitude" field. It's identical to LowRunwayLatitudeEQ.
 func LowRunwayLatitude(v float64) predicate.Runway {
-	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldLowRunwayLatitude), v))
-	})
+	return predicate.Runway(sql.FieldEQ(FieldLowRunwayLatitude, v))
 }
 
 // LowRunwayLongitude applies equality check predicate on the "low_runway_longitude" field. It's identical to LowRunwayLongitudeEQ.
 func LowRunwayLongitude(v float64) predicate.Runway {
-	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldLowRunwayLongitude), v))
-	})
+	return predicate.Runway(sql.FieldEQ(FieldLowRunwayLongitude, v))
 }
 
 // LowRunwayElevation applies equality check predicate on the "low_runway_elevation" field. It's identical to LowRunwayElevationEQ.
 func LowRunwayElevation(v int) predicate.Runway {
-	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldLowRunwayElevation), v))
-	})
+	return predicate.Runway(sql.FieldEQ(FieldLowRunwayElevation, v))
 }
 
 // LowRunwayHeading applies equality check predicate on the "low_runway_heading" field. It's identical to LowRunwayHeadingEQ.
 func LowRunwayHeading(v float64) predicate.Runway {
-	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldLowRunwayHeading), v))
-	})
+	return predicate.Runway(sql.FieldEQ(FieldLowRunwayHeading, v))
 }
 
 // LowRunwayDisplacedThreshold applies equality check predicate on the "low_runway_displaced_threshold" field. It's identical to LowRunwayDisplacedThresholdEQ.
 func LowRunwayDisplacedThreshold(v int) predicate.Runway {
-	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldLowRunwayDisplacedThreshold), v))
-	})
+	return predicate.Runway(sql.FieldEQ(FieldLowRunwayDisplacedThreshold, v))
 }
 
 // HighRunwayIdentifier applies equality check predicate on the "high_runway_identifier" field. It's identical to HighRunwayIdentifierEQ.
 func HighRunwayIdentifier(v string) predicate.Runway {
-	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldHighRunwayIdentifier), v))
-	})
+	return predicate.Runway(sql.FieldEQ(FieldHighRunwayIdentifier, v))
 }
 
 // HighRunwayLatitude applies equality check predicate on the "high_runway_latitude" field. It's identical to HighRunwayLatitudeEQ.
 func HighRunwayLatitude(v float64) predicate.Runway {
-	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldHighRunwayLatitude), v))
-	})
+	return predicate.Runway(sql.FieldEQ(FieldHighRunwayLatitude, v))
 }
 
 // HighRunwayLongitude applies equality check predicate on the "high_runway_longitude" field. It's identical to HighRunwayLongitudeEQ.
 func HighRunwayLongitude(v float64) predicate.Runway {
-	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldHighRunwayLongitude), v))
-	})
+	return predicate.Runway(sql.FieldEQ(FieldHighRunwayLongitude, v))
 }
 
 // HighRunwayElevation applies equality check predicate on the "high_runway_elevation" field. It's identical to HighRunwayElevationEQ.
 func HighRunwayElevation(v int) predicate.Runway {
-	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldHighRunwayElevation), v))
-	})
+	return predicate.Runway(sql.FieldEQ(FieldHighRunwayElevation, v))
 }
 
 // HighRunwayHeading applies equality check predicate on the "high_runway_heading" field. It's identical to HighRunwayHeadingEQ.
 func HighRunwayHeading(v float64) predicate.Runway {
-	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldHighRunwayHeading), v))
-	})
+	return predicate.Runway(sql.FieldEQ(FieldHighRunwayHeading, v))
 }
 
 // HighRunwayDisplacedThreshold applies equality check predicate on the "high_runway_displaced_threshold" field. It's identical to HighRunwayDisplacedThresholdEQ.
 func HighRunwayDisplacedThreshold(v int) predicate.Runway {
-	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldHighRunwayDisplacedThreshold), v))
-	})
+	return predicate.Runway(sql.FieldEQ(FieldHighRunwayDisplacedThreshold, v))
 }
 
 // ImportIDEQ applies the EQ predicate on the "import_id" field.
 func ImportIDEQ(v int) predicate.Runway {
-	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldImportID), v))
-	})
+	return predicate.Runway(sql.FieldEQ(FieldImportID, v))
 }
 
 // ImportIDNEQ applies the NEQ predicate on the "import_id" field.
 func ImportIDNEQ(v int) predicate.Runway {
-	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldImportID), v))
-	})
+	return predicate.Runway(sql.FieldNEQ(FieldImportID, v))
 }
 
 // ImportIDIn applies the In predicate on the "import_id" field.
 func ImportIDIn(vs ...int) predicate.Runway {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.In(s.C(FieldImportID), v...))
-	})
+	return predicate.Runway(sql.FieldIn(FieldImportID, vs...))
 }
 
 // ImportIDNotIn applies the NotIn predicate on the "import_id" field.
 func ImportIDNotIn(vs ...int) predicate.Runway {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.NotIn(s.C(FieldImportID), v...))
-	})
+	return predicate.Runway(sql.FieldNotIn(FieldImportID, vs...))
 }
 
 // ImportIDGT applies the GT predicate on the "import_id" field.
 func ImportIDGT(v int) predicate.Runway {
-	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldImportID), v))
-	})
+	return predicate.Runway(sql.FieldGT(FieldImportID, v))
 }
 
 // ImportIDGTE applies the GTE predicate on the "import_id" field.
 func ImportIDGTE(v int) predicate.Runway {
-	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldImportID), v))
-	})
+	return predicate.Runway(sql.FieldGTE(FieldImportID, v))
 }
 
 // ImportIDLT applies the LT predicate on the "import_id" field.
 func ImportIDLT(v int) predicate.Runway {
-	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldImportID), v))
-	})
+	return predicate.Runway(sql.FieldLT(FieldImportID, v))
 }
 
 // ImportIDLTE applies the LTE predicate on the "import_id" field.
 func ImportIDLTE(v int) predicate.Runway {
-	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldImportID), v))
-	})
+	return predicate.Runway(sql.FieldLTE(FieldImportID, v))
 }
 
 // HashEQ applies the EQ predicate on the "hash" field.
 func HashEQ(v string) predicate.Runway {
-	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldHash), v))
-	})
+	return predicate.Runway(sql.FieldEQ(FieldHash, v))
 }
 
 // HashNEQ applies the NEQ predicate on the "hash" field.
 func HashNEQ(v string) predicate.Runway {
-	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldHash), v))
-	})
+	return predicate.Runway(sql.FieldNEQ(FieldHash, v))
 }
 
 // HashIn applies the In predicate on the "hash" field.
 func HashIn(vs ...string) predicate.Runway {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.In(s.C(FieldHash), v...))
-	})
+	return predicate.Runway(sql.FieldIn(FieldHash, vs...))
 }
 
 // HashNotIn applies the NotIn predicate on the "hash" field.
 func HashNotIn(vs ...string) predicate.Runway {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.NotIn(s.C(FieldHash), v...))
-	})
+	return predicate.Runway(sql.FieldNotIn(FieldHash, vs...))
 }
 
 // HashGT applies the GT predicate on the "hash" field.
 func HashGT(v string) predicate.Runway {
-	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldHash), v))
-	})
+	return predicate.Runway(sql.FieldGT(FieldHash, v))
 }
 
 // HashGTE applies the GTE predicate on the "hash" field.
 func HashGTE(v string) predicate.Runway {
-	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldHash), v))
-	})
+	return predicate.Runway(sql.FieldGTE(FieldHash, v))
 }
 
 // HashLT applies the LT predicate on the "hash" field.
 func HashLT(v string) predicate.Runway {
-	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldHash), v))
-	})
+	return predicate.Runway(sql.FieldLT(FieldHash, v))
 }
 
 // HashLTE applies the LTE predicate on the "hash" field.
 func HashLTE(v string) predicate.Runway {
-	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldHash), v))
-	})
+	return predicate.Runway(sql.FieldLTE(FieldHash, v))
 }
 
 // HashContains applies the Contains predicate on the "hash" field.
 func HashContains(v string) predicate.Runway {
-	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.Contains(s.C(FieldHash), v))
-	})
+	return predicate.Runway(sql.FieldContains(FieldHash, v))
 }
 
 // HashHasPrefix applies the HasPrefix predicate on the "hash" field.
 func HashHasPrefix(v string) predicate.Runway {
-	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.HasPrefix(s.C(FieldHash), v))
-	})
+	return predicate.Runway(sql.FieldHasPrefix(FieldHash, v))
 }
 
 // HashHasSuffix applies the HasSuffix predicate on the "hash" field.
 func HashHasSuffix(v string) predicate.Runway {
-	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.HasSuffix(s.C(FieldHash), v))
-	})
+	return predicate.Runway(sql.FieldHasSuffix(FieldHash, v))
 }
 
 // HashEqualFold applies the EqualFold predicate on the "hash" field.
 func HashEqualFold(v string) predicate.Runway {
-	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.EqualFold(s.C(FieldHash), v))
-	})
+	return predicate.Runway(sql.FieldEqualFold(FieldHash, v))
 }
 
 // HashContainsFold applies the ContainsFold predicate on the "hash" field.
 func HashContainsFold(v string) predicate.Runway {
-	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.ContainsFold(s.C(FieldHash), v))
-	})
+	return predicate.Runway(sql.FieldContainsFold(FieldHash, v))
 }
 
 // ImportFlagEQ applies the EQ predicate on the "import_flag" field.
 func ImportFlagEQ(v bool) predicate.Runway {
-	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldImportFlag), v))
-	})
+	return predicate.Runway(sql.FieldEQ(FieldImportFlag, v))
 }
 
 // ImportFlagNEQ applies the NEQ predicate on the "import_flag" field.
 func ImportFlagNEQ(v bool) predicate.Runway {
-	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldImportFlag), v))
-	})
+	return predicate.Runway(sql.FieldNEQ(FieldImportFlag, v))
 }
 
 // LastUpdatedEQ applies the EQ predicate on the "last_updated" field.
 func LastUpdatedEQ(v time.Time) predicate.Runway {
-	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldLastUpdated), v))
-	})
+	return predicate.Runway(sql.FieldEQ(FieldLastUpdated, v))
 }
 
 // LastUpdatedNEQ applies the NEQ predicate on the "last_updated" field.
 func LastUpdatedNEQ(v time.Time) predicate.Runway {
-	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldLastUpdated), v))
-	})
+	return predicate.Runway(sql.FieldNEQ(FieldLastUpdated, v))
 }
 
 // LastUpdatedIn applies the In predicate on the "last_updated" field.
 func LastUpdatedIn(vs ...time.Time) predicate.Runway {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.In(s.C(FieldLastUpdated), v...))
-	})
+	return predicate.Runway(sql.FieldIn(FieldLastUpdated, vs...))
 }
 
 // LastUpdatedNotIn applies the NotIn predicate on the "last_updated" field.
 func LastUpdatedNotIn(vs ...time.Time) predicate.Runway {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.NotIn(s.C(FieldLastUpdated), v...))
-	})
+	return predicate.Runway(sql.FieldNotIn(FieldLastUpdated, vs...))
 }
 
 // LastUpdatedGT applies the GT predicate on the "last_updated" field.
 func LastUpdatedGT(v time.Time) predicate.Runway {
-	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldLastUpdated), v))
-	})
+	return predicate.Runway(sql.FieldGT(FieldLastUpdated, v))
 }
 
 // LastUpdatedGTE applies the GTE predicate on the "last_updated" field.
 func LastUpdatedGTE(v time.Time) predicate.Runway {
-	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldLastUpdated), v))
-	})
+	return predicate.Runway(sql.FieldGTE(FieldLastUpdated, v))
 }
 
 // LastUpdatedLT applies the LT predicate on the "last_updated" field.
 func LastUpdatedLT(v time.Time) predicate.Runway {
-	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldLastUpdated), v))
-	})
+	return predicate.Runway(sql.FieldLT(FieldLastUpdated, v))
 }
 
 // LastUpdatedLTE applies the LTE predicate on the "last_updated" field.
 func LastUpdatedLTE(v time.Time) predicate.Runway {
-	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldLastUpdated), v))
-	})
+	return predicate.Runway(sql.FieldLTE(FieldLastUpdated, v))
 }
 
 // LengthEQ applies the EQ predicate on the "length" field.
 func LengthEQ(v int) predicate.Runway {
-	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldLength), v))
-	})
+	return predicate.Runway(sql.FieldEQ(FieldLength, v))
 }
 
 // LengthNEQ applies the NEQ predicate on the "length" field.
 func LengthNEQ(v int) predicate.Runway {
-	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldLength), v))
-	})
+	return predicate.Runway(sql.FieldNEQ(FieldLength, v))
 }
 
 // LengthIn applies the In predicate on the "length" field.
 func LengthIn(vs ...int) predicate.Runway {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.In(s.C(FieldLength), v...))
-	})
+	return predicate.Runway(sql.FieldIn(FieldLength, vs...))
 }
 
 // LengthNotIn applies the NotIn predicate on the "length" field.
 func LengthNotIn(vs ...int) predicate.Runway {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.NotIn(s.C(FieldLength), v...))
-	})
+	return predicate.Runway(sql.FieldNotIn(FieldLength, vs...))
 }
 
 // LengthGT applies the GT predicate on the "length" field.
 func LengthGT(v int) predicate.Runway {
-	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldLength), v))
-	})
+	return predicate.Runway(sql.FieldGT(FieldLength, v))
 }
 
 // LengthGTE applies the GTE predicate on the "length" field.
 func LengthGTE(v int) predicate.Runway {
-	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldLength), v))
-	})
+	return predicate.Runway(sql.FieldGTE(FieldLength, v))
 }
 
 // LengthLT applies the LT predicate on the "length" field.
 func LengthLT(v int) predicate.Runway {
-	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldLength), v))
-	})
+	return predicate.Runway(sql.FieldLT(FieldLength, v))
 }
 
 // LengthLTE applies the LTE predicate on the "length" field.
 func LengthLTE(v int) predicate.Runway {
-	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldLength), v))
-	})
+	return predicate.Runway(sql.FieldLTE(FieldLength, v))
 }
 
 // WidthEQ applies the EQ predicate on the "width" field.
 func WidthEQ(v int) predicate.Runway {
-	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldWidth), v))
-	})
+	return predicate.Runway(sql.FieldEQ(FieldWidth, v))
 }
 
 // WidthNEQ applies the NEQ predicate on the "width" field.
 func WidthNEQ(v int) predicate.Runway {
-	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldWidth), v))
-	})
+	return predicate.Runway(sql.FieldNEQ(FieldWidth, v))
 }
 
 // WidthIn applies the In predicate on the "width" field.
 func WidthIn(vs ...int) predicate.Runway {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.In(s.C(FieldWidth), v...))
-	})
+	return predicate.Runway(sql.FieldIn(FieldWidth, vs...))
 }
 
 // WidthNotIn applies the NotIn predicate on the "width" field.
 func WidthNotIn(vs ...int) predicate.Runway {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.NotIn(s.C(FieldWidth), v...))
-	})
+	return predicate.Runway(sql.FieldNotIn(FieldWidth, vs...))
 }
 
 // WidthGT applies the GT predicate on the "width" field.
 func WidthGT(v int) predicate.Runway {
-	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldWidth), v))
-	})
+	return predicate.Runway(sql.FieldGT(FieldWidth, v))
 }
 
 // WidthGTE applies the GTE predicate on the "width" field.
 func WidthGTE(v int) predicate.Runway {
-	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldWidth), v))
-	})
+	return predicate.Runway(sql.FieldGTE(FieldWidth, v))
 }
 
 // WidthLT applies the LT predicate on the "width" field.
 func WidthLT(v int) predicate.Runway {
-	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldWidth), v))
-	})
+	return predicate.Runway(sql.FieldLT(FieldWidth, v))
 }
 
 // WidthLTE applies the LTE predicate on the "width" field.
 func WidthLTE(v int) predicate.Runway {
-	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldWidth), v))
-	})
+	return predicate.Runway(sql.FieldLTE(FieldWidth, v))
 }
 
 // SurfaceEQ applies the EQ predicate on the "surface" field.
 func SurfaceEQ(v string) predicate.Runway {
-	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldSurface), v))
-	})
+	return predicate.Runway(sql.FieldEQ(FieldSurface, v))
 }
 
 // SurfaceNEQ applies the NEQ predicate on the "surface" field.
 func SurfaceNEQ(v string) predicate.Runway {
-	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldSurface), v))
-	})
+	return predicate.Runway(sql.FieldNEQ(FieldSurface, v))
 }
 
 // SurfaceIn applies the In predicate on the "surface" field.
 func SurfaceIn(vs ...string) predicate.Runway {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.In(s.C(FieldSurface), v...))
-	})
+	return predicate.Runway(sql.FieldIn(FieldSurface, vs...))
 }
 
 // SurfaceNotIn applies the NotIn predicate on the "surface" field.
 func SurfaceNotIn(vs ...string) predicate.Runway {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.NotIn(s.C(FieldSurface), v...))
-	})
+	return predicate.Runway(sql.FieldNotIn(FieldSurface, vs...))
 }
 
 // SurfaceGT applies the GT predicate on the "surface" field.
 func SurfaceGT(v string) predicate.Runway {
-	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldSurface), v))
-	})
+	return predicate.Runway(sql.FieldGT(FieldSurface, v))
 }
 
 // SurfaceGTE applies the GTE predicate on the "surface" field.
 func SurfaceGTE(v string) predicate.Runway {
-	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldSurface), v))
-	})
+	return predicate.Runway(sql.FieldGTE(FieldSurface, v))
 }
 
 // SurfaceLT applies the LT predicate on the "surface" field.
 func SurfaceLT(v string) predicate.Runway {
-	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldSurface), v))
-	})
+	return predicate.Runway(sql.FieldLT(FieldSurface, v))
 }
 
 // SurfaceLTE applies the LTE predicate on the "surface" field.
 func SurfaceLTE(v string) predicate.Runway {
-	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldSurface), v))
-	})
+	return predicate.Runway(sql.FieldLTE(FieldSurface, v))
 }
 
 // SurfaceContains applies the Contains predicate on the "surface" field.
 func SurfaceContains(v string) predicate.Runway {
-	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.Contains(s.C(FieldSurface), v))
-	})
+	return predicate.Runway(sql.FieldContains(FieldSurface, v))
 }
 
 // SurfaceHasPrefix applies the HasPrefix predicate on the "surface" field.
 func SurfaceHasPrefix(v string) predicate.Runway {
-	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.HasPrefix(s.C(FieldSurface), v))
-	})
+	return predicate.Runway(sql.FieldHasPrefix(FieldSurface, v))
 }
 
 // SurfaceHasSuffix applies the HasSuffix predicate on the "surface" field.
 func SurfaceHasSuffix(v string) predicate.Runway {
-	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.HasSuffix(s.C(FieldSurface), v))
-	})
+	return predicate.Runway(sql.FieldHasSuffix(FieldSurface, v))
 }
 
 // SurfaceIsNil applies the IsNil predicate on the "surface" field.
 func SurfaceIsNil() predicate.Runway {
-	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.IsNull(s.C(FieldSurface)))
-	})
+	return predicate.Runway(sql.FieldIsNull(FieldSurface))
 }
 
 // SurfaceNotNil applies the NotNil predicate on the "surface" field.
 func SurfaceNotNil() predicate.Runway {
-	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.NotNull(s.C(FieldSurface)))
-	})
+	return predicate.Runway(sql.FieldNotNull(FieldSurface))
 }
 
 // SurfaceEqualFold applies the EqualFold predicate on the "surface" field.
 func SurfaceEqualFold(v string) predicate.Runway {
-	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.EqualFold(s.C(FieldSurface), v))
-	})
+	return predicate.Runway(sql.FieldEqualFold(FieldSurface, v))
 }
 
 // SurfaceContainsFold applies the ContainsFold predicate on the "surface" field.
 func SurfaceContainsFold(v string) predicate.Runway {
-	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.ContainsFold(s.C(FieldSurface), v))
-	})
+	return predicate.Runway(sql.FieldContainsFold(FieldSurface, v))
 }
 
 // LightedEQ applies the EQ predicate on the "lighted" field.
 func LightedEQ(v bool) predicate.Runway {
-	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldLighted), v))
-	})
+	return predicate.Runway(sql.FieldEQ(FieldLighted, v))
 }
 
 // LightedNEQ applies the NEQ predicate on the "lighted" field.
 func LightedNEQ(v bool) predicate.Runway {
-	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldLighted), v))
-	})
+	return predicate.Runway(sql.FieldNEQ(FieldLighted, v))
 }
 
 // ClosedEQ applies the EQ predicate on the "closed" field.
 func ClosedEQ(v bool) predicate.Runway {
-	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldClosed), v))
-	})
+	return predicate.Runway(sql.FieldEQ(FieldClosed, v))
 }
 
 // ClosedNEQ applies the NEQ predicate on the "closed" field.
 func ClosedNEQ(v bool) predicate.Runway {
-	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldClosed), v))
-	})
+	return predicate.Runway(sql.FieldNEQ(FieldClosed, v))
 }
 
 // LowRunwayIdentifierEQ applies the EQ predicate on the "low_runway_identifier" field.
 func LowRunwayIdentifierEQ(v string) predicate.Runway {
-	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldLowRunwayIdentifier), v))
-	})
+	return predicate.Runway(sql.FieldEQ(FieldLowRunwayIdentifier, v))
 }
 
 // LowRunwayIdentifierNEQ applies the NEQ predicate on the "low_runway_identifier" field.
 func LowRunwayIdentifierNEQ(v string) predicate.Runway {
-	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldLowRunwayIdentifier), v))
-	})
+	return predicate.Runway(sql.FieldNEQ(FieldLowRunwayIdentifier, v))
 }
 
 // LowRunwayIdentifierIn applies the In predicate on the "low_runway_identifier" field.
 func LowRunwayIdentifierIn(vs ...string) predicate.Runway {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.In(s.C(FieldLowRunwayIdentifier), v...))
-	})
+	return predicate.Runway(sql.FieldIn(FieldLowRunwayIdentifier, vs...))
 }
 
 // LowRunwayIdentifierNotIn applies the NotIn predicate on the "low_runway_identifier" field.
 func LowRunwayIdentifierNotIn(vs ...string) predicate.Runway {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.NotIn(s.C(FieldLowRunwayIdentifier), v...))
-	})
+	return predicate.Runway(sql.FieldNotIn(FieldLowRunwayIdentifier, vs...))
 }
 
 // LowRunwayIdentifierGT applies the GT predicate on the "low_runway_identifier" field.
 func LowRunwayIdentifierGT(v string) predicate.Runway {
-	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldLowRunwayIdentifier), v))
-	})
+	return predicate.Runway(sql.FieldGT(FieldLowRunwayIdentifier, v))
 }
 
 // LowRunwayIdentifierGTE applies the GTE predicate on the "low_runway_identifier" field.
 func LowRunwayIdentifierGTE(v string) predicate.Runway {
-	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldLowRunwayIdentifier), v))
-	})
+	return predicate.Runway(sql.FieldGTE(FieldLowRunwayIdentifier, v))
 }
 
 // LowRunwayIdentifierLT applies the LT predicate on the "low_runway_identifier" field.
 func LowRunwayIdentifierLT(v string) predicate.Runway {
-	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldLowRunwayIdentifier), v))
-	})
+	return predicate.Runway(sql.FieldLT(FieldLowRunwayIdentifier, v))
 }
 
 // LowRunwayIdentifierLTE applies the LTE predicate on the "low_runway_identifier" field.
 func LowRunwayIdentifierLTE(v string) predicate.Runway {
-	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldLowRunwayIdentifier), v))
-	})
+	return predicate.Runway(sql.FieldLTE(FieldLowRunwayIdentifier, v))
 }
 
 // LowRunwayIdentifierContains applies the Contains predicate on the "low_runway_identifier" field.
 func LowRunwayIdentifierContains(v string) predicate.Runway {
-	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.Contains(s.C(FieldLowRunwayIdentifier), v))
-	})
+	return predicate.Runway(sql.FieldContains(FieldLowRunwayIdentifier, v))
 }
 
 // LowRunwayIdentifierHasPrefix applies the HasPrefix predicate on the "low_runway_identifier" field.
 func LowRunwayIdentifierHasPrefix(v string) predicate.Runway {
-	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.HasPrefix(s.C(FieldLowRunwayIdentifier), v))
-	})
+	return predicate.Runway(sql.FieldHasPrefix(FieldLowRunwayIdentifier, v))
 }
 
 // LowRunwayIdentifierHasSuffix applies the HasSuffix predicate on the "low_runway_identifier" field.
 func LowRunwayIdentifierHasSuffix(v string) predicate.Runway {
-	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.HasSuffix(s.C(FieldLowRunwayIdentifier), v))
-	})
+	return predicate.Runway(sql.FieldHasSuffix(FieldLowRunwayIdentifier, v))
 }
 
 // LowRunwayIdentifierEqualFold applies the EqualFold predicate on the "low_runway_identifier" field.
 func LowRunwayIdentifierEqualFold(v string) predicate.Runway {
-	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.EqualFold(s.C(FieldLowRunwayIdentifier), v))
-	})
+	return predicate.Runway(sql.FieldEqualFold(FieldLowRunwayIdentifier, v))
 }
 
 // LowRunwayIdentifierContainsFold applies the ContainsFold predicate on the "low_runway_identifier" field.
 func LowRunwayIdentifierContainsFold(v string) predicate.Runway {
-	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.ContainsFold(s.C(FieldLowRunwayIdentifier), v))
-	})
+	return predicate.Runway(sql.FieldContainsFold(FieldLowRunwayIdentifier, v))
 }
 
 // LowRunwayLatitudeEQ applies the EQ predicate on the "low_runway_latitude" field.
 func LowRunwayLatitudeEQ(v float64) predicate.Runway {
-	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldLowRunwayLatitude), v))
-	})
+	return predicate.Runway(sql.FieldEQ(FieldLowRunwayLatitude, v))
 }
 
 // LowRunwayLatitudeNEQ applies the NEQ predicate on the "low_runway_latitude" field.
 func LowRunwayLatitudeNEQ(v float64) predicate.Runway {
-	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldLowRunwayLatitude), v))
-	})
+	return predicate.Runway(sql.FieldNEQ(FieldLowRunwayLatitude, v))
 }
 
 // LowRunwayLatitudeIn applies the In predicate on the "low_runway_latitude" field.
 func LowRunwayLatitudeIn(vs ...float64) predicate.Runway {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.In(s.C(FieldLowRunwayLatitude), v...))
-	})
+	return predicate.Runway(sql.FieldIn(FieldLowRunwayLatitude, vs...))
 }
 
 // LowRunwayLatitudeNotIn applies the NotIn predicate on the "low_runway_latitude" field.
 func LowRunwayLatitudeNotIn(vs ...float64) predicate.Runway {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.NotIn(s.C(FieldLowRunwayLatitude), v...))
-	})
+	return predicate.Runway(sql.FieldNotIn(FieldLowRunwayLatitude, vs...))
 }
 
 // LowRunwayLatitudeGT applies the GT predicate on the "low_runway_latitude" field.
 func LowRunwayLatitudeGT(v float64) predicate.Runway {
-	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldLowRunwayLatitude), v))
-	})
+	return predicate.Runway(sql.FieldGT(FieldLowRunwayLatitude, v))
 }
 
 // LowRunwayLatitudeGTE applies the GTE predicate on the "low_runway_latitude" field.
 func LowRunwayLatitudeGTE(v float64) predicate.Runway {
-	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldLowRunwayLatitude), v))
-	})
+	return predicate.Runway(sql.FieldGTE(FieldLowRunwayLatitude, v))
 }
 
 // LowRunwayLatitudeLT applies the LT predicate on the "low_runway_latitude" field.
 func LowRunwayLatitudeLT(v float64) predicate.Runway {
-	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldLowRunwayLatitude), v))
-	})
+	return predicate.Runway(sql.FieldLT(FieldLowRunwayLatitude, v))
 }
 
 // LowRunwayLatitudeLTE applies the LTE predicate on the "low_runway_latitude" field.
 func LowRunwayLatitudeLTE(v float64) predicate.Runway {
-	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldLowRunwayLatitude), v))
-	})
+	return predicate.Runway(sql.FieldLTE(FieldLowRunwayLatitude, v))
 }
 
 // LowRunwayLatitudeIsNil applies the IsNil predicate on the "low_runway_latitude" field.
 func LowRunwayLatitudeIsNil() predicate.Runway {
-	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.IsNull(s.C(FieldLowRunwayLatitude)))
-	})
+	return predicate.Runway(sql.FieldIsNull(FieldLowRunwayLatitude))
 }
 
 // LowRunwayLatitudeNotNil applies the NotNil predicate on the "low_runway_latitude" field.
 func LowRunwayLatitudeNotNil() predicate.Runway {
-	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.NotNull(s.C(FieldLowRunwayLatitude)))
-	})
+	return predicate.Runway(sql.FieldNotNull(FieldLowRunwayLatitude))
 }
 
 // LowRunwayLongitudeEQ applies the EQ predicate on the "low_runway_longitude" field.
 func LowRunwayLongitudeEQ(v float64) predicate.Runway {
-	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldLowRunwayLongitude), v))
-	})
+	return predicate.Runway(sql.FieldEQ(FieldLowRunwayLongitude, v))
 }
 
 // LowRunwayLongitudeNEQ applies the NEQ predicate on the "low_runway_longitude" field.
 func LowRunwayLongitudeNEQ(v float64) predicate.Runway {
-	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldLowRunwayLongitude), v))
-	})
+	return predicate.Runway(sql.FieldNEQ(FieldLowRunwayLongitude, v))
 }
 
 // LowRunwayLongitudeIn applies the In predicate on the "low_runway_longitude" field.
 func LowRunwayLongitudeIn(vs ...float64) predicate.Runway {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.In(s.C(FieldLowRunwayLongitude), v...))
-	})
+	return predicate.Runway(sql.FieldIn(FieldLowRunwayLongitude, vs...))
 }
 
 // LowRunwayLongitudeNotIn applies the NotIn predicate on the "low_runway_longitude" field.
 func LowRunwayLongitudeNotIn(vs ...float64) predicate.Runway {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.NotIn(s.C(FieldLowRunwayLongitude), v...))
-	})
+	return predicate.Runway(sql.FieldNotIn(FieldLowRunwayLongitude, vs...))
 }
 
 // LowRunwayLongitudeGT applies the GT predicate on the "low_runway_longitude" field.
 func LowRunwayLongitudeGT(v float64) predicate.Runway {
-	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldLowRunwayLongitude), v))
-	})
+	return predicate.Runway(sql.FieldGT(FieldLowRunwayLongitude, v))
 }
 
 // LowRunwayLongitudeGTE applies the GTE predicate on the "low_runway_longitude" field.
 func LowRunwayLongitudeGTE(v float64) predicate.Runway {
-	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldLowRunwayLongitude), v))
-	})
+	return predicate.Runway(sql.FieldGTE(FieldLowRunwayLongitude, v))
 }
 
 // LowRunwayLongitudeLT applies the LT predicate on the "low_runway_longitude" field.
 func LowRunwayLongitudeLT(v float64) predicate.Runway {
-	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldLowRunwayLongitude), v))
-	})
+	return predicate.Runway(sql.FieldLT(FieldLowRunwayLongitude, v))
 }
 
 // LowRunwayLongitudeLTE applies the LTE predicate on the "low_runway_longitude" field.
 func LowRunwayLongitudeLTE(v float64) predicate.Runway {
-	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldLowRunwayLongitude), v))
-	})
+	return predicate.Runway(sql.FieldLTE(FieldLowRunwayLongitude, v))
 }
 
 // LowRunwayLongitudeIsNil applies the IsNil predicate on the "low_runway_longitude" field.
 func LowRunwayLongitudeIsNil() predicate.Runway {
-	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.IsNull(s.C(FieldLowRunwayLongitude)))
-	})
+	return predicate.Runway(sql.FieldIsNull(FieldLowRunwayLongitude))
 }
 
 // LowRunwayLongitudeNotNil applies the NotNil predicate on the "low_runway_longitude" field.
 func LowRunwayLongitudeNotNil() predicate.Runway {
-	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.NotNull(s.C(FieldLowRunwayLongitude)))
-	})
+	return predicate.Runway(sql.FieldNotNull(FieldLowRunwayLongitude))
 }
 
 // LowRunwayElevationEQ applies the EQ predicate on the "low_runway_elevation" field.
 func LowRunwayElevationEQ(v int) predicate.Runway {
-	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldLowRunwayElevation), v))
-	})
+	return predicate.Runway(sql.FieldEQ(FieldLowRunwayElevation, v))
 }
 
 // LowRunwayElevationNEQ applies the NEQ predicate on the "low_runway_elevation" field.
 func LowRunwayElevationNEQ(v int) predicate.Runway {
-	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldLowRunwayElevation), v))
-	})
+	return predicate.Runway(sql.FieldNEQ(FieldLowRunwayElevation, v))
 }
 
 // LowRunwayElevationIn applies the In predicate on the "low_runway_elevation" field.
 func LowRunwayElevationIn(vs ...int) predicate.Runway {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.In(s.C(FieldLowRunwayElevation), v...))
-	})
+	return predicate.Runway(sql.FieldIn(FieldLowRunwayElevation, vs...))
 }
 
 // LowRunwayElevationNotIn applies the NotIn predicate on the "low_runway_elevation" field.
 func LowRunwayElevationNotIn(vs ...int) predicate.Runway {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.NotIn(s.C(FieldLowRunwayElevation), v...))
-	})
+	return predicate.Runway(sql.FieldNotIn(FieldLowRunwayElevation, vs...))
 }
 
 // LowRunwayElevationGT applies the GT predicate on the "low_runway_elevation" field.
 func LowRunwayElevationGT(v int) predicate.Runway {
-	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldLowRunwayElevation), v))
-	})
+	return predicate.Runway(sql.FieldGT(FieldLowRunwayElevation, v))
 }
 
 // LowRunwayElevationGTE applies the GTE predicate on the "low_runway_elevation" field.
 func LowRunwayElevationGTE(v int) predicate.Runway {
-	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldLowRunwayElevation), v))
-	})
+	return predicate.Runway(sql.FieldGTE(FieldLowRunwayElevation, v))
 }
 
 // LowRunwayElevationLT applies the LT predicate on the "low_runway_elevation" field.
 func LowRunwayElevationLT(v int) predicate.Runway {
-	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldLowRunwayElevation), v))
-	})
+	return predicate.Runway(sql.FieldLT(FieldLowRunwayElevation, v))
 }
 
 // LowRunwayElevationLTE applies the LTE predicate on the "low_runway_elevation" field.
 func LowRunwayElevationLTE(v int) predicate.Runway {
-	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldLowRunwayElevation), v))
-	})
+	return predicate.Runway(sql.FieldLTE(FieldLowRunwayElevation, v))
 }
 
 // LowRunwayElevationIsNil applies the IsNil predicate on the "low_runway_elevation" field.
 func LowRunwayElevationIsNil() predicate.Runway {
-	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.IsNull(s.C(FieldLowRunwayElevation)))
-	})
+	return predicate.Runway(sql.FieldIsNull(FieldLowRunwayElevation))
 }
 
 // LowRunwayElevationNotNil applies the NotNil predicate on the "low_runway_elevation" field.
 func LowRunwayElevationNotNil() predicate.Runway {
-	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.NotNull(s.C(FieldLowRunwayElevation)))
-	})
+	return predicate.Runway(sql.FieldNotNull(FieldLowRunwayElevation))
 }
 
 // LowRunwayHeadingEQ applies the EQ predicate on the "low_runway_heading" field.
 func LowRunwayHeadingEQ(v float64) predicate.Runway {
-	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldLowRunwayHeading), v))
-	})
+	return predicate.Runway(sql.FieldEQ(FieldLowRunwayHeading, v))
 }
 
 // LowRunwayHeadingNEQ applies the NEQ predicate on the "low_runway_heading" field.
 func LowRunwayHeadingNEQ(v float64) predicate.Runway {
-	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldLowRunwayHeading), v))
-	})
+	return predicate.Runway(sql.FieldNEQ(FieldLowRunwayHeading, v))
 }
 
 // LowRunwayHeadingIn applies the In predicate on the "low_runway_heading" field.
 func LowRunwayHeadingIn(vs ...float64) predicate.Runway {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.In(s.C(FieldLowRunwayHeading), v...))
-	})
+	return predicate.Runway(sql.FieldIn(FieldLowRunwayHeading, vs...))
 }
 
 // LowRunwayHeadingNotIn applies the NotIn predicate on the "low_runway_heading" field.
 func LowRunwayHeadingNotIn(vs ...float64) predicate.Runway {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.NotIn(s.C(FieldLowRunwayHeading), v...))
-	})
+	return predicate.Runway(sql.FieldNotIn(FieldLowRunwayHeading, vs...))
 }
 
 // LowRunwayHeadingGT applies the GT predicate on the "low_runway_heading" field.
 func LowRunwayHeadingGT(v float64) predicate.Runway {
-	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldLowRunwayHeading), v))
-	})
+	return predicate.Runway(sql.FieldGT(FieldLowRunwayHeading, v))
 }
 
 // LowRunwayHeadingGTE applies the GTE predicate on the "low_runway_heading" field.
 func LowRunwayHeadingGTE(v float64) predicate.Runway {
-	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldLowRunwayHeading), v))
-	})
+	return predicate.Runway(sql.FieldGTE(FieldLowRunwayHeading, v))
 }
 
 // LowRunwayHeadingLT applies the LT predicate on the "low_runway_heading" field.
 func LowRunwayHeadingLT(v float64) predicate.Runway {
-	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldLowRunwayHeading), v))
-	})
+	return predicate.Runway(sql.FieldLT(FieldLowRunwayHeading, v))
 }
 
 // LowRunwayHeadingLTE applies the LTE predicate on the "low_runway_heading" field.
 func LowRunwayHeadingLTE(v float64) predicate.Runway {
-	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldLowRunwayHeading), v))
-	})
+	return predicate.Runway(sql.FieldLTE(FieldLowRunwayHeading, v))
 }
 
 // LowRunwayHeadingIsNil applies the IsNil predicate on the "low_runway_heading" field.
 func LowRunwayHeadingIsNil() predicate.Runway {
-	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.IsNull(s.C(FieldLowRunwayHeading)))
-	})
+	return predicate.Runway(sql.FieldIsNull(FieldLowRunwayHeading))
 }
 
 // LowRunwayHeadingNotNil applies the NotNil predicate on the "low_runway_heading" field.
 func LowRunwayHeadingNotNil() predicate.Runway {
-	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.NotNull(s.C(FieldLowRunwayHeading)))
-	})
+	return predicate.Runway(sql.FieldNotNull(FieldLowRunwayHeading))
 }
 
 // LowRunwayDisplacedThresholdEQ applies the EQ predicate on the "low_runway_displaced_threshold" field.
 func LowRunwayDisplacedThresholdEQ(v int) predicate.Runway {
-	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldLowRunwayDisplacedThreshold), v))
-	})
+	return predicate.Runway(sql.FieldEQ(FieldLowRunwayDisplacedThreshold, v))
 }
 
 // LowRunwayDisplacedThresholdNEQ applies the NEQ predicate on the "low_runway_displaced_threshold" field.
 func LowRunwayDisplacedThresholdNEQ(v int) predicate.Runway {
-	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldLowRunwayDisplacedThreshold), v))
-	})
+	return predicate.Runway(sql.FieldNEQ(FieldLowRunwayDisplacedThreshold, v))
 }
 
 // LowRunwayDisplacedThresholdIn applies the In predicate on the "low_runway_displaced_threshold" field.
 func LowRunwayDisplacedThresholdIn(vs ...int) predicate.Runway {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.In(s.C(FieldLowRunwayDisplacedThreshold), v...))
-	})
+	return predicate.Runway(sql.FieldIn(FieldLowRunwayDisplacedThreshold, vs...))
 }
 
 // LowRunwayDisplacedThresholdNotIn applies the NotIn predicate on the "low_runway_displaced_threshold" field.
 func LowRunwayDisplacedThresholdNotIn(vs ...int) predicate.Runway {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.NotIn(s.C(FieldLowRunwayDisplacedThreshold), v...))
-	})
+	return predicate.Runway(sql.FieldNotIn(FieldLowRunwayDisplacedThreshold, vs...))
 }
 
 // LowRunwayDisplacedThresholdGT applies the GT predicate on the "low_runway_displaced_threshold" field.
 func LowRunwayDisplacedThresholdGT(v int) predicate.Runway {
-	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldLowRunwayDisplacedThreshold), v))
-	})
+	return predicate.Runway(sql.FieldGT(FieldLowRunwayDisplacedThreshold, v))
 }
 
 // LowRunwayDisplacedThresholdGTE applies the GTE predicate on the "low_runway_displaced_threshold" field.
 func LowRunwayDisplacedThresholdGTE(v int) predicate.Runway {
-	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldLowRunwayDisplacedThreshold), v))
-	})
+	return predicate.Runway(sql.FieldGTE(FieldLowRunwayDisplacedThreshold, v))
 }
 
 // LowRunwayDisplacedThresholdLT applies the LT predicate on the "low_runway_displaced_threshold" field.
 func LowRunwayDisplacedThresholdLT(v int) predicate.Runway {
-	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldLowRunwayDisplacedThreshold), v))
-	})
+	return predicate.Runway(sql.FieldLT(FieldLowRunwayDisplacedThreshold, v))
 }
 
 // LowRunwayDisplacedThresholdLTE applies the LTE predicate on the "low_runway_displaced_threshold" field.
 func LowRunwayDisplacedThresholdLTE(v int) predicate.Runway {
-	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldLowRunwayDisplacedThreshold), v))
-	})
+	return predicate.Runway(sql.FieldLTE(FieldLowRunwayDisplacedThreshold, v))
 }
 
 // LowRunwayDisplacedThresholdIsNil applies the IsNil predicate on the "low_runway_displaced_threshold" field.
 func LowRunwayDisplacedThresholdIsNil() predicate.Runway {
-	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.IsNull(s.C(FieldLowRunwayDisplacedThreshold)))
-	})
+	return predicate.Runway(sql.FieldIsNull(FieldLowRunwayDisplacedThreshold))
 }
 
 // LowRunwayDisplacedThresholdNotNil applies the NotNil predicate on the "low_runway_displaced_threshold" field.
 func LowRunwayDisplacedThresholdNotNil() predicate.Runway {
-	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.NotNull(s.C(FieldLowRunwayDisplacedThreshold)))
-	})
+	return predicate.Runway(sql.FieldNotNull(FieldLowRunwayDisplacedThreshold))
 }
 
 // HighRunwayIdentifierEQ applies the EQ predicate on the "high_runway_identifier" field.
 func HighRunwayIdentifierEQ(v string) predicate.Runway {
-	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldHighRunwayIdentifier), v))
-	})
+	return predicate.Runway(sql.FieldEQ(FieldHighRunwayIdentifier, v))
 }
 
 // HighRunwayIdentifierNEQ applies the NEQ predicate on the "high_runway_identifier" field.
 func HighRunwayIdentifierNEQ(v string) predicate.Runway {
-	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldHighRunwayIdentifier), v))
-	})
+	return predicate.Runway(sql.FieldNEQ(FieldHighRunwayIdentifier, v))
 }
 
 // HighRunwayIdentifierIn applies the In predicate on the "high_runway_identifier" field.
 func HighRunwayIdentifierIn(vs ...string) predicate.Runway {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.In(s.C(FieldHighRunwayIdentifier), v...))
-	})
+	return predicate.Runway(sql.FieldIn(FieldHighRunwayIdentifier, vs...))
 }
 
 // HighRunwayIdentifierNotIn applies the NotIn predicate on the "high_runway_identifier" field.
 func HighRunwayIdentifierNotIn(vs ...string) predicate.Runway {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.NotIn(s.C(FieldHighRunwayIdentifier), v...))
-	})
+	return predicate.Runway(sql.FieldNotIn(FieldHighRunwayIdentifier, vs...))
 }
 
 // HighRunwayIdentifierGT applies the GT predicate on the "high_runway_identifier" field.
 func HighRunwayIdentifierGT(v string) predicate.Runway {
-	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldHighRunwayIdentifier), v))
-	})
+	return predicate.Runway(sql.FieldGT(FieldHighRunwayIdentifier, v))
 }
 
 // HighRunwayIdentifierGTE applies the GTE predicate on the "high_runway_identifier" field.
 func HighRunwayIdentifierGTE(v string) predicate.Runway {
-	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldHighRunwayIdentifier), v))
-	})
+	return predicate.Runway(sql.FieldGTE(FieldHighRunwayIdentifier, v))
 }
 
 // HighRunwayIdentifierLT applies the LT predicate on the "high_runway_identifier" field.
 func HighRunwayIdentifierLT(v string) predicate.Runway {
-	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldHighRunwayIdentifier), v))
-	})
+	return predicate.Runway(sql.FieldLT(FieldHighRunwayIdentifier, v))
 }
 
 // HighRunwayIdentifierLTE applies the LTE predicate on the "high_runway_identifier" field.
 func HighRunwayIdentifierLTE(v string) predicate.Runway {
-	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldHighRunwayIdentifier), v))
-	})
+	return predicate.Runway(sql.FieldLTE(FieldHighRunwayIdentifier, v))
 }
 
 // HighRunwayIdentifierContains applies the Contains predicate on the "high_runway_identifier" field.
 func HighRunwayIdentifierContains(v string) predicate.Runway {
-	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.Contains(s.C(FieldHighRunwayIdentifier), v))
-	})
+	return predicate.Runway(sql.FieldContains(FieldHighRunwayIdentifier, v))
 }
 
 // HighRunwayIdentifierHasPrefix applies the HasPrefix predicate on the "high_runway_identifier" field.
 func HighRunwayIdentifierHasPrefix(v string) predicate.Runway {
-	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.HasPrefix(s.C(FieldHighRunwayIdentifier), v))
-	})
+	return predicate.Runway(sql.FieldHasPrefix(FieldHighRunwayIdentifier, v))
 }
 
 // HighRunwayIdentifierHasSuffix applies the HasSuffix predicate on the "high_runway_identifier" field.
 func HighRunwayIdentifierHasSuffix(v string) predicate.Runway {
-	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.HasSuffix(s.C(FieldHighRunwayIdentifier), v))
-	})
+	return predicate.Runway(sql.FieldHasSuffix(FieldHighRunwayIdentifier, v))
 }
 
 // HighRunwayIdentifierEqualFold applies the EqualFold predicate on the "high_runway_identifier" field.
 func HighRunwayIdentifierEqualFold(v string) predicate.Runway {
-	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.EqualFold(s.C(FieldHighRunwayIdentifier), v))
-	})
+	return predicate.Runway(sql.FieldEqualFold(FieldHighRunwayIdentifier, v))
 }
 
 // HighRunwayIdentifierContainsFold applies the ContainsFold predicate on the "high_runway_identifier" field.
 func HighRunwayIdentifierContainsFold(v string) predicate.Runway {
-	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.ContainsFold(s.C(FieldHighRunwayIdentifier), v))
-	})
+	return predicate.Runway(sql.FieldContainsFold(FieldHighRunwayIdentifier, v))
 }
 
 // HighRunwayLatitudeEQ applies the EQ predicate on the "high_runway_latitude" field.
 func HighRunwayLatitudeEQ(v float64) predicate.Runway {
-	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldHighRunwayLatitude), v))
-	})
+	return predicate.Runway(sql.FieldEQ(FieldHighRunwayLatitude, v))
 }
 
 // HighRunwayLatitudeNEQ applies the NEQ predicate on the "high_runway_latitude" field.
 func HighRunwayLatitudeNEQ(v float64) predicate.Runway {
-	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldHighRunwayLatitude), v))
-	})
+	return predicate.Runway(sql.FieldNEQ(FieldHighRunwayLatitude, v))
 }
 
 // HighRunwayLatitudeIn applies the In predicate on the "high_runway_latitude" field.
 func HighRunwayLatitudeIn(vs ...float64) predicate.Runway {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.In(s.C(FieldHighRunwayLatitude), v...))
-	})
+	return predicate.Runway(sql.FieldIn(FieldHighRunwayLatitude, vs...))
 }
 
 // HighRunwayLatitudeNotIn applies the NotIn predicate on the "high_runway_latitude" field.
 func HighRunwayLatitudeNotIn(vs ...float64) predicate.Runway {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.NotIn(s.C(FieldHighRunwayLatitude), v...))
-	})
+	return predicate.Runway(sql.FieldNotIn(FieldHighRunwayLatitude, vs...))
 }
 
 // HighRunwayLatitudeGT applies the GT predicate on the "high_runway_latitude" field.
 func HighRunwayLatitudeGT(v float64) predicate.Runway {
-	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldHighRunwayLatitude), v))
-	})
+	return predicate.Runway(sql.FieldGT(FieldHighRunwayLatitude, v))
 }
 
 // HighRunwayLatitudeGTE applies the GTE predicate on the "high_runway_latitude" field.
 func HighRunwayLatitudeGTE(v float64) predicate.Runway {
-	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldHighRunwayLatitude), v))
-	})
+	return predicate.Runway(sql.FieldGTE(FieldHighRunwayLatitude, v))
 }
 
 // HighRunwayLatitudeLT applies the LT predicate on the "high_runway_latitude" field.
 func HighRunwayLatitudeLT(v float64) predicate.Runway {
-	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldHighRunwayLatitude), v))
-	})
+	return predicate.Runway(sql.FieldLT(FieldHighRunwayLatitude, v))
 }
 
 // HighRunwayLatitudeLTE applies the LTE predicate on the "high_runway_latitude" field.
 func HighRunwayLatitudeLTE(v float64) predicate.Runway {
-	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldHighRunwayLatitude), v))
-	})
+	return predicate.Runway(sql.FieldLTE(FieldHighRunwayLatitude, v))
 }
 
 // HighRunwayLatitudeIsNil applies the IsNil predicate on the "high_runway_latitude" field.
 func HighRunwayLatitudeIsNil() predicate.Runway {
-	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.IsNull(s.C(FieldHighRunwayLatitude)))
-	})
+	return predicate.Runway(sql.FieldIsNull(FieldHighRunwayLatitude))
 }
 
 // HighRunwayLatitudeNotNil applies the NotNil predicate on the "high_runway_latitude" field.
 func HighRunwayLatitudeNotNil() predicate.Runway {
-	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.NotNull(s.C(FieldHighRunwayLatitude)))
-	})
+	return predicate.Runway(sql.FieldNotNull(FieldHighRunwayLatitude))
 }
 
 // HighRunwayLongitudeEQ applies the EQ predicate on the "high_runway_longitude" field.
 func HighRunwayLongitudeEQ(v float64) predicate.Runway {
-	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldHighRunwayLongitude), v))
-	})
+	return predicate.Runway(sql.FieldEQ(FieldHighRunwayLongitude, v))
 }
 
 // HighRunwayLongitudeNEQ applies the NEQ predicate on the "high_runway_longitude" field.
 func HighRunwayLongitudeNEQ(v float64) predicate.Runway {
-	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldHighRunwayLongitude), v))
-	})
+	return predicate.Runway(sql.FieldNEQ(FieldHighRunwayLongitude, v))
 }
 
 // HighRunwayLongitudeIn applies the In predicate on the "high_runway_longitude" field.
 func HighRunwayLongitudeIn(vs ...float64) predicate.Runway {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.In(s.C(FieldHighRunwayLongitude), v...))
-	})
+	return predicate.Runway(sql.FieldIn(FieldHighRunwayLongitude, vs...))
 }
 
 // HighRunwayLongitudeNotIn applies the NotIn predicate on the "high_runway_longitude" field.
 func HighRunwayLongitudeNotIn(vs ...float64) predicate.Runway {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.NotIn(s.C(FieldHighRunwayLongitude), v...))
-	})
+	return predicate.Runway(sql.FieldNotIn(FieldHighRunwayLongitude, vs...))
 }
 
 // HighRunwayLongitudeGT applies the GT predicate on the "high_runway_longitude" field.
 func HighRunwayLongitudeGT(v float64) predicate.Runway {
-	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldHighRunwayLongitude), v))
-	})
+	return predicate.Runway(sql.FieldGT(FieldHighRunwayLongitude, v))
 }
 
 // HighRunwayLongitudeGTE applies the GTE predicate on the "high_runway_longitude" field.
 func HighRunwayLongitudeGTE(v float64) predicate.Runway {
-	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldHighRunwayLongitude), v))
-	})
+	return predicate.Runway(sql.FieldGTE(FieldHighRunwayLongitude, v))
 }
 
 // HighRunwayLongitudeLT applies the LT predicate on the "high_runway_longitude" field.
 func HighRunwayLongitudeLT(v float64) predicate.Runway {
-	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldHighRunwayLongitude), v))
-	})
+	return predicate.Runway(sql.FieldLT(FieldHighRunwayLongitude, v))
 }
 
 // HighRunwayLongitudeLTE applies the LTE predicate on the "high_runway_longitude" field.
 func HighRunwayLongitudeLTE(v float64) predicate.Runway {
-	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldHighRunwayLongitude), v))
-	})
+	return predicate.Runway(sql.FieldLTE(FieldHighRunwayLongitude, v))
 }
 
 // HighRunwayLongitudeIsNil applies the IsNil predicate on the "high_runway_longitude" field.
 func HighRunwayLongitudeIsNil() predicate.Runway {
-	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.IsNull(s.C(FieldHighRunwayLongitude)))
-	})
+	return predicate.Runway(sql.FieldIsNull(FieldHighRunwayLongitude))
 }
 
 // HighRunwayLongitudeNotNil applies the NotNil predicate on the "high_runway_longitude" field.
 func HighRunwayLongitudeNotNil() predicate.Runway {
-	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.NotNull(s.C(FieldHighRunwayLongitude)))
-	})
+	return predicate.Runway(sql.FieldNotNull(FieldHighRunwayLongitude))
 }
 
 // HighRunwayElevationEQ applies the EQ predicate on the "high_runway_elevation" field.
 func HighRunwayElevationEQ(v int) predicate.Runway {
-	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldHighRunwayElevation), v))
-	})
+	return predicate.Runway(sql.FieldEQ(FieldHighRunwayElevation, v))
 }
 
 // HighRunwayElevationNEQ applies the NEQ predicate on the "high_runway_elevation" field.
 func HighRunwayElevationNEQ(v int) predicate.Runway {
-	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldHighRunwayElevation), v))
-	})
+	return predicate.Runway(sql.FieldNEQ(FieldHighRunwayElevation, v))
 }
 
 // HighRunwayElevationIn applies the In predicate on the "high_runway_elevation" field.
 func HighRunwayElevationIn(vs ...int) predicate.Runway {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.In(s.C(FieldHighRunwayElevation), v...))
-	})
+	return predicate.Runway(sql.FieldIn(FieldHighRunwayElevation, vs...))
 }
 
 // HighRunwayElevationNotIn applies the NotIn predicate on the "high_runway_elevation" field.
 func HighRunwayElevationNotIn(vs ...int) predicate.Runway {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.NotIn(s.C(FieldHighRunwayElevation), v...))
-	})
+	return predicate.Runway(sql.FieldNotIn(FieldHighRunwayElevation, vs...))
 }
 
 // HighRunwayElevationGT applies the GT predicate on the "high_runway_elevation" field.
 func HighRunwayElevationGT(v int) predicate.Runway {
-	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldHighRunwayElevation), v))
-	})
+	return predicate.Runway(sql.FieldGT(FieldHighRunwayElevation, v))
 }
 
 // HighRunwayElevationGTE applies the GTE predicate on the "high_runway_elevation" field.
 func HighRunwayElevationGTE(v int) predicate.Runway {
-	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldHighRunwayElevation), v))
-	})
+	return predicate.Runway(sql.FieldGTE(FieldHighRunwayElevation, v))
 }
 
 // HighRunwayElevationLT applies the LT predicate on the "high_runway_elevation" field.
 func HighRunwayElevationLT(v int) predicate.Runway {
-	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldHighRunwayElevation), v))
-	})
+	return predicate.Runway(sql.FieldLT(FieldHighRunwayElevation, v))
 }
 
 // HighRunwayElevationLTE applies the LTE predicate on the "high_runway_elevation" field.
 func HighRunwayElevationLTE(v int) predicate.Runway {
-	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldHighRunwayElevation), v))
-	})
+	return predicate.Runway(sql.FieldLTE(FieldHighRunwayElevation, v))
 }
 
 // HighRunwayElevationIsNil applies the IsNil predicate on the "high_runway_elevation" field.
 func HighRunwayElevationIsNil() predicate.Runway {
-	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.IsNull(s.C(FieldHighRunwayElevation)))
-	})
+	return predicate.Runway(sql.FieldIsNull(FieldHighRunwayElevation))
 }
 
 // HighRunwayElevationNotNil applies the NotNil predicate on the "high_runway_elevation" field.
 func HighRunwayElevationNotNil() predicate.Runway {
-	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.NotNull(s.C(FieldHighRunwayElevation)))
-	})
+	return predicate.Runway(sql.FieldNotNull(FieldHighRunwayElevation))
 }
 
 // HighRunwayHeadingEQ applies the EQ predicate on the "high_runway_heading" field.
 func HighRunwayHeadingEQ(v float64) predicate.Runway {
-	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldHighRunwayHeading), v))
-	})
+	return predicate.Runway(sql.FieldEQ(FieldHighRunwayHeading, v))
 }
 
 // HighRunwayHeadingNEQ applies the NEQ predicate on the "high_runway_heading" field.
 func HighRunwayHeadingNEQ(v float64) predicate.Runway {
-	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldHighRunwayHeading), v))
-	})
+	return predicate.Runway(sql.FieldNEQ(FieldHighRunwayHeading, v))
 }
 
 // HighRunwayHeadingIn applies the In predicate on the "high_runway_heading" field.
 func HighRunwayHeadingIn(vs ...float64) predicate.Runway {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.In(s.C(FieldHighRunwayHeading), v...))
-	})
+	return predicate.Runway(sql.FieldIn(FieldHighRunwayHeading, vs...))
 }
 
 // HighRunwayHeadingNotIn applies the NotIn predicate on the "high_runway_heading" field.
 func HighRunwayHeadingNotIn(vs ...float64) predicate.Runway {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.NotIn(s.C(FieldHighRunwayHeading), v...))
-	})
+	return predicate.Runway(sql.FieldNotIn(FieldHighRunwayHeading, vs...))
 }
 
 // HighRunwayHeadingGT applies the GT predicate on the "high_runway_heading" field.
 func HighRunwayHeadingGT(v float64) predicate.Runway {
-	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldHighRunwayHeading), v))
-	})
+	return predicate.Runway(sql.FieldGT(FieldHighRunwayHeading, v))
 }
 
 // HighRunwayHeadingGTE applies the GTE predicate on the "high_runway_heading" field.
 func HighRunwayHeadingGTE(v float64) predicate.Runway {
-	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldHighRunwayHeading), v))
-	})
+	return predicate.Runway(sql.FieldGTE(FieldHighRunwayHeading, v))
 }
 
 // HighRunwayHeadingLT applies the LT predicate on the "high_runway_heading" field.
 func HighRunwayHeadingLT(v float64) predicate.Runway {
-	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldHighRunwayHeading), v))
-	})
+	return predicate.Runway(sql.FieldLT(FieldHighRunwayHeading, v))
 }
 
 // HighRunwayHeadingLTE applies the LTE predicate on the "high_runway_heading" field.
 func HighRunwayHeadingLTE(v float64) predicate.Runway {
-	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldHighRunwayHeading), v))
-	})
+	return predicate.Runway(sql.FieldLTE(FieldHighRunwayHeading, v))
 }
 
 // HighRunwayHeadingIsNil applies the IsNil predicate on the "high_runway_heading" field.
 func HighRunwayHeadingIsNil() predicate.Runway {
-	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.IsNull(s.C(FieldHighRunwayHeading)))
-	})
+	return predicate.Runway(sql.FieldIsNull(FieldHighRunwayHeading))
 }
 
 // HighRunwayHeadingNotNil applies the NotNil predicate on the "high_runway_heading" field.
 func HighRunwayHeadingNotNil() predicate.Runway {
-	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.NotNull(s.C(FieldHighRunwayHeading)))
-	})
+	return predicate.Runway(sql.FieldNotNull(FieldHighRunwayHeading))
 }
 
 // HighRunwayDisplacedThresholdEQ applies the EQ predicate on the "high_runway_displaced_threshold" field.
 func HighRunwayDisplacedThresholdEQ(v int) predicate.Runway {
-	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldHighRunwayDisplacedThreshold), v))
-	})
+	return predicate.Runway(sql.FieldEQ(FieldHighRunwayDisplacedThreshold, v))
 }
 
 // HighRunwayDisplacedThresholdNEQ applies the NEQ predicate on the "high_runway_displaced_threshold" field.
 func HighRunwayDisplacedThresholdNEQ(v int) predicate.Runway {
-	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldHighRunwayDisplacedThreshold), v))
-	})
+	return predicate.Runway(sql.FieldNEQ(FieldHighRunwayDisplacedThreshold, v))
 }
 
 // HighRunwayDisplacedThresholdIn applies the In predicate on the "high_runway_displaced_threshold" field.
 func HighRunwayDisplacedThresholdIn(vs ...int) predicate.Runway {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.In(s.C(FieldHighRunwayDisplacedThreshold), v...))
-	})
+	return predicate.Runway(sql.FieldIn(FieldHighRunwayDisplacedThreshold, vs...))
 }
 
 // HighRunwayDisplacedThresholdNotIn applies the NotIn predicate on the "high_runway_displaced_threshold" field.
 func HighRunwayDisplacedThresholdNotIn(vs ...int) predicate.Runway {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.NotIn(s.C(FieldHighRunwayDisplacedThreshold), v...))
-	})
+	return predicate.Runway(sql.FieldNotIn(FieldHighRunwayDisplacedThreshold, vs...))
 }
 
 // HighRunwayDisplacedThresholdGT applies the GT predicate on the "high_runway_displaced_threshold" field.
 func HighRunwayDisplacedThresholdGT(v int) predicate.Runway {
-	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldHighRunwayDisplacedThreshold), v))
-	})
+	return predicate.Runway(sql.FieldGT(FieldHighRunwayDisplacedThreshold, v))
 }
 
 // HighRunwayDisplacedThresholdGTE applies the GTE predicate on the "high_runway_displaced_threshold" field.
 func HighRunwayDisplacedThresholdGTE(v int) predicate.Runway {
-	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldHighRunwayDisplacedThreshold), v))
-	})
+	return predicate.Runway(sql.FieldGTE(FieldHighRunwayDisplacedThreshold, v))
 }
 
 // HighRunwayDisplacedThresholdLT applies the LT predicate on the "high_runway_displaced_threshold" field.
 func HighRunwayDisplacedThresholdLT(v int) predicate.Runway {
-	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldHighRunwayDisplacedThreshold), v))
-	})
+	return predicate.Runway(sql.FieldLT(FieldHighRunwayDisplacedThreshold, v))
 }
 
 // HighRunwayDisplacedThresholdLTE applies the LTE predicate on the "high_runway_displaced_threshold" field.
 func HighRunwayDisplacedThresholdLTE(v int) predicate.Runway {
-	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldHighRunwayDisplacedThreshold), v))
-	})
+	return predicate.Runway(sql.FieldLTE(FieldHighRunwayDisplacedThreshold, v))
 }
 
 // HighRunwayDisplacedThresholdIsNil applies the IsNil predicate on the "high_runway_displaced_threshold" field.
 func HighRunwayDisplacedThresholdIsNil() predicate.Runway {
-	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.IsNull(s.C(FieldHighRunwayDisplacedThreshold)))
-	})
+	return predicate.Runway(sql.FieldIsNull(FieldHighRunwayDisplacedThreshold))
 }
 
 // HighRunwayDisplacedThresholdNotNil applies the NotNil predicate on the "high_runway_displaced_threshold" field.
 func HighRunwayDisplacedThresholdNotNil() predicate.Runway {
-	return predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.NotNull(s.C(FieldHighRunwayDisplacedThreshold)))
-	})
+	return predicate.Runway(sql.FieldNotNull(FieldHighRunwayDisplacedThreshold))
 }
 
 // HasAirport applies the HasEdge predicate on the "airport" edge.
@@ -1722,7 +1126,6 @@ func HasAirport() predicate.Runway {
 	return predicate.Runway(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(AirportTable, FieldID),
 			sqlgraph.Edge(sqlgraph.M2O, true, AirportTable, AirportColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)

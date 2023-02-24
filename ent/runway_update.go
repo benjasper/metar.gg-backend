@@ -450,34 +450,7 @@ func (ru *RunwayUpdate) ClearAirport() *RunwayUpdate {
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (ru *RunwayUpdate) Save(ctx context.Context) (int, error) {
-	var (
-		err      error
-		affected int
-	)
-	if len(ru.hooks) == 0 {
-		affected, err = ru.sqlSave(ctx)
-	} else {
-		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
-			mutation, ok := m.(*RunwayMutation)
-			if !ok {
-				return nil, fmt.Errorf("unexpected mutation type %T", m)
-			}
-			ru.mutation = mutation
-			affected, err = ru.sqlSave(ctx)
-			mutation.done = true
-			return affected, err
-		})
-		for i := len(ru.hooks) - 1; i >= 0; i-- {
-			if ru.hooks[i] == nil {
-				return 0, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
-			}
-			mut = ru.hooks[i](mut)
-		}
-		if _, err := mut.Mutate(ctx, ru.mutation); err != nil {
-			return 0, err
-		}
-	}
-	return affected, err
+	return withHooks[int, RunwayMutation](ctx, ru.sqlSave, ru.mutation, ru.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -509,16 +482,7 @@ func (ru *RunwayUpdate) Modify(modifiers ...func(u *sql.UpdateBuilder)) *RunwayU
 }
 
 func (ru *RunwayUpdate) sqlSave(ctx context.Context) (n int, err error) {
-	_spec := &sqlgraph.UpdateSpec{
-		Node: &sqlgraph.NodeSpec{
-			Table:   runway.Table,
-			Columns: runway.Columns,
-			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeUUID,
-				Column: runway.FieldID,
-			},
-		},
-	}
+	_spec := sqlgraph.NewUpdateSpec(runway.Table, runway.Columns, sqlgraph.NewFieldSpec(runway.FieldID, field.TypeUUID))
 	if ps := ru.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
@@ -705,6 +669,7 @@ func (ru *RunwayUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		return 0, err
 	}
+	ru.mutation.done = true
 	return n, nil
 }
 
@@ -1134,6 +1099,12 @@ func (ruo *RunwayUpdateOne) ClearAirport() *RunwayUpdateOne {
 	return ruo
 }
 
+// Where appends a list predicates to the RunwayUpdate builder.
+func (ruo *RunwayUpdateOne) Where(ps ...predicate.Runway) *RunwayUpdateOne {
+	ruo.mutation.Where(ps...)
+	return ruo
+}
+
 // Select allows selecting one or more fields (columns) of the returned entity.
 // The default is selecting all fields defined in the entity schema.
 func (ruo *RunwayUpdateOne) Select(field string, fields ...string) *RunwayUpdateOne {
@@ -1143,40 +1114,7 @@ func (ruo *RunwayUpdateOne) Select(field string, fields ...string) *RunwayUpdate
 
 // Save executes the query and returns the updated Runway entity.
 func (ruo *RunwayUpdateOne) Save(ctx context.Context) (*Runway, error) {
-	var (
-		err  error
-		node *Runway
-	)
-	if len(ruo.hooks) == 0 {
-		node, err = ruo.sqlSave(ctx)
-	} else {
-		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
-			mutation, ok := m.(*RunwayMutation)
-			if !ok {
-				return nil, fmt.Errorf("unexpected mutation type %T", m)
-			}
-			ruo.mutation = mutation
-			node, err = ruo.sqlSave(ctx)
-			mutation.done = true
-			return node, err
-		})
-		for i := len(ruo.hooks) - 1; i >= 0; i-- {
-			if ruo.hooks[i] == nil {
-				return nil, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
-			}
-			mut = ruo.hooks[i](mut)
-		}
-		v, err := mut.Mutate(ctx, ruo.mutation)
-		if err != nil {
-			return nil, err
-		}
-		nv, ok := v.(*Runway)
-		if !ok {
-			return nil, fmt.Errorf("unexpected node type %T returned from RunwayMutation", v)
-		}
-		node = nv
-	}
-	return node, err
+	return withHooks[*Runway, RunwayMutation](ctx, ruo.sqlSave, ruo.mutation, ruo.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -1208,16 +1146,7 @@ func (ruo *RunwayUpdateOne) Modify(modifiers ...func(u *sql.UpdateBuilder)) *Run
 }
 
 func (ruo *RunwayUpdateOne) sqlSave(ctx context.Context) (_node *Runway, err error) {
-	_spec := &sqlgraph.UpdateSpec{
-		Node: &sqlgraph.NodeSpec{
-			Table:   runway.Table,
-			Columns: runway.Columns,
-			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeUUID,
-				Column: runway.FieldID,
-			},
-		},
-	}
+	_spec := sqlgraph.NewUpdateSpec(runway.Table, runway.Columns, sqlgraph.NewFieldSpec(runway.FieldID, field.TypeUUID))
 	id, ok := ruo.mutation.ID()
 	if !ok {
 		return nil, &ValidationError{Name: "id", err: errors.New(`ent: missing "Runway.id" for update`)}
@@ -1424,5 +1353,6 @@ func (ruo *RunwayUpdateOne) sqlSave(ctx context.Context) (_node *Runway, err err
 		}
 		return nil, err
 	}
+	ruo.mutation.done = true
 	return _node, nil
 }

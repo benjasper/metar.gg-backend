@@ -164,24 +164,24 @@ func (ws *WeatherStation) assignValues(columns []string, values []any) error {
 
 // QueryAirport queries the "airport" edge of the WeatherStation entity.
 func (ws *WeatherStation) QueryAirport() *AirportQuery {
-	return (&WeatherStationClient{config: ws.config}).QueryAirport(ws)
+	return NewWeatherStationClient(ws.config).QueryAirport(ws)
 }
 
 // QueryMetars queries the "metars" edge of the WeatherStation entity.
 func (ws *WeatherStation) QueryMetars() *MetarQuery {
-	return (&WeatherStationClient{config: ws.config}).QueryMetars(ws)
+	return NewWeatherStationClient(ws.config).QueryMetars(ws)
 }
 
 // QueryTafs queries the "tafs" edge of the WeatherStation entity.
 func (ws *WeatherStation) QueryTafs() *TafQuery {
-	return (&WeatherStationClient{config: ws.config}).QueryTafs(ws)
+	return NewWeatherStationClient(ws.config).QueryTafs(ws)
 }
 
 // Update returns a builder for updating this WeatherStation.
 // Note that you need to call WeatherStation.Unwrap() before calling this method if this WeatherStation
 // was returned from a transaction, and the transaction was committed or rolled back.
 func (ws *WeatherStation) Update() *WeatherStationUpdateOne {
-	return (&WeatherStationClient{config: ws.config}).UpdateOne(ws)
+	return NewWeatherStationClient(ws.config).UpdateOne(ws)
 }
 
 // Unwrap unwraps the WeatherStation entity that was returned from a transaction after it was closed,
@@ -274,9 +274,3 @@ func (ws *WeatherStation) appendNamedTafs(name string, edges ...*Taf) {
 
 // WeatherStations is a parsable slice of WeatherStation.
 type WeatherStations []*WeatherStation
-
-func (ws WeatherStations) config(cfg config) {
-	for _i := range ws {
-		ws[_i].config = cfg
-	}
-}

@@ -351,34 +351,34 @@ func (a *Airport) assignValues(columns []string, values []any) error {
 
 // QueryRegion queries the "region" edge of the Airport entity.
 func (a *Airport) QueryRegion() *RegionQuery {
-	return (&AirportClient{config: a.config}).QueryRegion(a)
+	return NewAirportClient(a.config).QueryRegion(a)
 }
 
 // QueryCountry queries the "country" edge of the Airport entity.
 func (a *Airport) QueryCountry() *CountryQuery {
-	return (&AirportClient{config: a.config}).QueryCountry(a)
+	return NewAirportClient(a.config).QueryCountry(a)
 }
 
 // QueryRunways queries the "runways" edge of the Airport entity.
 func (a *Airport) QueryRunways() *RunwayQuery {
-	return (&AirportClient{config: a.config}).QueryRunways(a)
+	return NewAirportClient(a.config).QueryRunways(a)
 }
 
 // QueryFrequencies queries the "frequencies" edge of the Airport entity.
 func (a *Airport) QueryFrequencies() *FrequencyQuery {
-	return (&AirportClient{config: a.config}).QueryFrequencies(a)
+	return NewAirportClient(a.config).QueryFrequencies(a)
 }
 
 // QueryStation queries the "station" edge of the Airport entity.
 func (a *Airport) QueryStation() *WeatherStationQuery {
-	return (&AirportClient{config: a.config}).QueryStation(a)
+	return NewAirportClient(a.config).QueryStation(a)
 }
 
 // Update returns a builder for updating this Airport.
 // Note that you need to call Airport.Unwrap() before calling this method if this Airport
 // was returned from a transaction, and the transaction was committed or rolled back.
 func (a *Airport) Update() *AirportUpdateOne {
-	return (&AirportClient{config: a.config}).UpdateOne(a)
+	return NewAirportClient(a.config).UpdateOne(a)
 }
 
 // Unwrap unwraps the Airport entity that was returned from a transaction after it was closed,
@@ -529,9 +529,3 @@ func (a *Airport) appendNamedFrequencies(name string, edges ...*Frequency) {
 
 // Airports is a parsable slice of Airport.
 type Airports []*Airport
-
-func (a Airports) config(cfg config) {
-	for _i := range a {
-		a[_i].config = cfg
-	}
-}

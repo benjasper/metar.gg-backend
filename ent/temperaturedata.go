@@ -105,7 +105,7 @@ func (td *TemperatureData) assignValues(columns []string, values []any) error {
 // Note that you need to call TemperatureData.Unwrap() before calling this method if this TemperatureData
 // was returned from a transaction, and the transaction was committed or rolled back.
 func (td *TemperatureData) Update() *TemperatureDataUpdateOne {
-	return (&TemperatureDataClient{config: td.config}).UpdateOne(td)
+	return NewTemperatureDataClient(td.config).UpdateOne(td)
 }
 
 // Unwrap unwraps the TemperatureData entity that was returned from a transaction after it was closed,
@@ -145,9 +145,3 @@ func (td *TemperatureData) String() string {
 
 // TemperatureDataSlice is a parsable slice of TemperatureData.
 type TemperatureDataSlice []*TemperatureData
-
-func (td TemperatureDataSlice) config(cfg config) {
-	for _i := range td {
-		td[_i].config = cfg
-	}
-}

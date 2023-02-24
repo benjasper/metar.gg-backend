@@ -131,50 +131,8 @@ func (rc *RegionCreate) Mutation() *RegionMutation {
 
 // Save creates the Region in the database.
 func (rc *RegionCreate) Save(ctx context.Context) (*Region, error) {
-	var (
-		err  error
-		node *Region
-	)
 	rc.defaults()
-	if len(rc.hooks) == 0 {
-		if err = rc.check(); err != nil {
-			return nil, err
-		}
-		node, err = rc.sqlSave(ctx)
-	} else {
-		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
-			mutation, ok := m.(*RegionMutation)
-			if !ok {
-				return nil, fmt.Errorf("unexpected mutation type %T", m)
-			}
-			if err = rc.check(); err != nil {
-				return nil, err
-			}
-			rc.mutation = mutation
-			if node, err = rc.sqlSave(ctx); err != nil {
-				return nil, err
-			}
-			mutation.id = &node.ID
-			mutation.done = true
-			return node, err
-		})
-		for i := len(rc.hooks) - 1; i >= 0; i-- {
-			if rc.hooks[i] == nil {
-				return nil, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
-			}
-			mut = rc.hooks[i](mut)
-		}
-		v, err := mut.Mutate(ctx, rc.mutation)
-		if err != nil {
-			return nil, err
-		}
-		nv, ok := v.(*Region)
-		if !ok {
-			return nil, fmt.Errorf("unexpected node type %T returned from RegionMutation", v)
-		}
-		node = nv
-	}
-	return node, err
+	return withHooks[*Region, RegionMutation](ctx, rc.sqlSave, rc.mutation, rc.hooks)
 }
 
 // SaveX calls Save and panics if Save returns an error.
@@ -248,6 +206,9 @@ func (rc *RegionCreate) check() error {
 }
 
 func (rc *RegionCreate) sqlSave(ctx context.Context) (*Region, error) {
+	if err := rc.check(); err != nil {
+		return nil, err
+	}
 	_node, _spec := rc.createSpec()
 	if err := sqlgraph.CreateNode(ctx, rc.driver, _spec); err != nil {
 		if sqlgraph.IsConstraintError(err) {
@@ -262,19 +223,15 @@ func (rc *RegionCreate) sqlSave(ctx context.Context) (*Region, error) {
 			return nil, err
 		}
 	}
+	rc.mutation.id = &_node.ID
+	rc.mutation.done = true
 	return _node, nil
 }
 
 func (rc *RegionCreate) createSpec() (*Region, *sqlgraph.CreateSpec) {
 	var (
 		_node = &Region{config: rc.config}
-		_spec = &sqlgraph.CreateSpec{
-			Table: region.Table,
-			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeUUID,
-				Column: region.FieldID,
-			},
-		}
+		_spec = sqlgraph.NewCreateSpec(region.Table, sqlgraph.NewFieldSpec(region.FieldID, field.TypeUUID))
 	)
 	_spec.OnConflict = rc.conflict
 	if id, ok := rc.mutation.ID(); ok {

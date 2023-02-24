@@ -13,766 +13,502 @@ import (
 
 // ID filters vertices based on their ID field.
 func ID(id uuid.UUID) predicate.Region {
-	return predicate.Region(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldID), id))
-	})
+	return predicate.Region(sql.FieldEQ(FieldID, id))
 }
 
 // IDEQ applies the EQ predicate on the ID field.
 func IDEQ(id uuid.UUID) predicate.Region {
-	return predicate.Region(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldID), id))
-	})
+	return predicate.Region(sql.FieldEQ(FieldID, id))
 }
 
 // IDNEQ applies the NEQ predicate on the ID field.
 func IDNEQ(id uuid.UUID) predicate.Region {
-	return predicate.Region(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldID), id))
-	})
+	return predicate.Region(sql.FieldNEQ(FieldID, id))
 }
 
 // IDIn applies the In predicate on the ID field.
 func IDIn(ids ...uuid.UUID) predicate.Region {
-	return predicate.Region(func(s *sql.Selector) {
-		v := make([]any, len(ids))
-		for i := range v {
-			v[i] = ids[i]
-		}
-		s.Where(sql.In(s.C(FieldID), v...))
-	})
+	return predicate.Region(sql.FieldIn(FieldID, ids...))
 }
 
 // IDNotIn applies the NotIn predicate on the ID field.
 func IDNotIn(ids ...uuid.UUID) predicate.Region {
-	return predicate.Region(func(s *sql.Selector) {
-		v := make([]any, len(ids))
-		for i := range v {
-			v[i] = ids[i]
-		}
-		s.Where(sql.NotIn(s.C(FieldID), v...))
-	})
+	return predicate.Region(sql.FieldNotIn(FieldID, ids...))
 }
 
 // IDGT applies the GT predicate on the ID field.
 func IDGT(id uuid.UUID) predicate.Region {
-	return predicate.Region(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldID), id))
-	})
+	return predicate.Region(sql.FieldGT(FieldID, id))
 }
 
 // IDGTE applies the GTE predicate on the ID field.
 func IDGTE(id uuid.UUID) predicate.Region {
-	return predicate.Region(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldID), id))
-	})
+	return predicate.Region(sql.FieldGTE(FieldID, id))
 }
 
 // IDLT applies the LT predicate on the ID field.
 func IDLT(id uuid.UUID) predicate.Region {
-	return predicate.Region(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldID), id))
-	})
+	return predicate.Region(sql.FieldLT(FieldID, id))
 }
 
 // IDLTE applies the LTE predicate on the ID field.
 func IDLTE(id uuid.UUID) predicate.Region {
-	return predicate.Region(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldID), id))
-	})
+	return predicate.Region(sql.FieldLTE(FieldID, id))
 }
 
 // ImportID applies equality check predicate on the "import_id" field. It's identical to ImportIDEQ.
 func ImportID(v int) predicate.Region {
-	return predicate.Region(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldImportID), v))
-	})
+	return predicate.Region(sql.FieldEQ(FieldImportID, v))
 }
 
 // Hash applies equality check predicate on the "hash" field. It's identical to HashEQ.
 func Hash(v string) predicate.Region {
-	return predicate.Region(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldHash), v))
-	})
+	return predicate.Region(sql.FieldEQ(FieldHash, v))
 }
 
 // ImportFlag applies equality check predicate on the "import_flag" field. It's identical to ImportFlagEQ.
 func ImportFlag(v bool) predicate.Region {
-	return predicate.Region(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldImportFlag), v))
-	})
+	return predicate.Region(sql.FieldEQ(FieldImportFlag, v))
 }
 
 // LastUpdated applies equality check predicate on the "last_updated" field. It's identical to LastUpdatedEQ.
 func LastUpdated(v time.Time) predicate.Region {
-	return predicate.Region(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldLastUpdated), v))
-	})
+	return predicate.Region(sql.FieldEQ(FieldLastUpdated, v))
 }
 
 // Code applies equality check predicate on the "code" field. It's identical to CodeEQ.
 func Code(v string) predicate.Region {
-	return predicate.Region(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldCode), v))
-	})
+	return predicate.Region(sql.FieldEQ(FieldCode, v))
 }
 
 // LocalCode applies equality check predicate on the "local_code" field. It's identical to LocalCodeEQ.
 func LocalCode(v string) predicate.Region {
-	return predicate.Region(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldLocalCode), v))
-	})
+	return predicate.Region(sql.FieldEQ(FieldLocalCode, v))
 }
 
 // Name applies equality check predicate on the "name" field. It's identical to NameEQ.
 func Name(v string) predicate.Region {
-	return predicate.Region(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldName), v))
-	})
+	return predicate.Region(sql.FieldEQ(FieldName, v))
 }
 
 // WikipediaLink applies equality check predicate on the "wikipedia_link" field. It's identical to WikipediaLinkEQ.
 func WikipediaLink(v string) predicate.Region {
-	return predicate.Region(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldWikipediaLink), v))
-	})
+	return predicate.Region(sql.FieldEQ(FieldWikipediaLink, v))
 }
 
 // ImportIDEQ applies the EQ predicate on the "import_id" field.
 func ImportIDEQ(v int) predicate.Region {
-	return predicate.Region(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldImportID), v))
-	})
+	return predicate.Region(sql.FieldEQ(FieldImportID, v))
 }
 
 // ImportIDNEQ applies the NEQ predicate on the "import_id" field.
 func ImportIDNEQ(v int) predicate.Region {
-	return predicate.Region(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldImportID), v))
-	})
+	return predicate.Region(sql.FieldNEQ(FieldImportID, v))
 }
 
 // ImportIDIn applies the In predicate on the "import_id" field.
 func ImportIDIn(vs ...int) predicate.Region {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Region(func(s *sql.Selector) {
-		s.Where(sql.In(s.C(FieldImportID), v...))
-	})
+	return predicate.Region(sql.FieldIn(FieldImportID, vs...))
 }
 
 // ImportIDNotIn applies the NotIn predicate on the "import_id" field.
 func ImportIDNotIn(vs ...int) predicate.Region {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Region(func(s *sql.Selector) {
-		s.Where(sql.NotIn(s.C(FieldImportID), v...))
-	})
+	return predicate.Region(sql.FieldNotIn(FieldImportID, vs...))
 }
 
 // ImportIDGT applies the GT predicate on the "import_id" field.
 func ImportIDGT(v int) predicate.Region {
-	return predicate.Region(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldImportID), v))
-	})
+	return predicate.Region(sql.FieldGT(FieldImportID, v))
 }
 
 // ImportIDGTE applies the GTE predicate on the "import_id" field.
 func ImportIDGTE(v int) predicate.Region {
-	return predicate.Region(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldImportID), v))
-	})
+	return predicate.Region(sql.FieldGTE(FieldImportID, v))
 }
 
 // ImportIDLT applies the LT predicate on the "import_id" field.
 func ImportIDLT(v int) predicate.Region {
-	return predicate.Region(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldImportID), v))
-	})
+	return predicate.Region(sql.FieldLT(FieldImportID, v))
 }
 
 // ImportIDLTE applies the LTE predicate on the "import_id" field.
 func ImportIDLTE(v int) predicate.Region {
-	return predicate.Region(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldImportID), v))
-	})
+	return predicate.Region(sql.FieldLTE(FieldImportID, v))
 }
 
 // HashEQ applies the EQ predicate on the "hash" field.
 func HashEQ(v string) predicate.Region {
-	return predicate.Region(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldHash), v))
-	})
+	return predicate.Region(sql.FieldEQ(FieldHash, v))
 }
 
 // HashNEQ applies the NEQ predicate on the "hash" field.
 func HashNEQ(v string) predicate.Region {
-	return predicate.Region(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldHash), v))
-	})
+	return predicate.Region(sql.FieldNEQ(FieldHash, v))
 }
 
 // HashIn applies the In predicate on the "hash" field.
 func HashIn(vs ...string) predicate.Region {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Region(func(s *sql.Selector) {
-		s.Where(sql.In(s.C(FieldHash), v...))
-	})
+	return predicate.Region(sql.FieldIn(FieldHash, vs...))
 }
 
 // HashNotIn applies the NotIn predicate on the "hash" field.
 func HashNotIn(vs ...string) predicate.Region {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Region(func(s *sql.Selector) {
-		s.Where(sql.NotIn(s.C(FieldHash), v...))
-	})
+	return predicate.Region(sql.FieldNotIn(FieldHash, vs...))
 }
 
 // HashGT applies the GT predicate on the "hash" field.
 func HashGT(v string) predicate.Region {
-	return predicate.Region(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldHash), v))
-	})
+	return predicate.Region(sql.FieldGT(FieldHash, v))
 }
 
 // HashGTE applies the GTE predicate on the "hash" field.
 func HashGTE(v string) predicate.Region {
-	return predicate.Region(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldHash), v))
-	})
+	return predicate.Region(sql.FieldGTE(FieldHash, v))
 }
 
 // HashLT applies the LT predicate on the "hash" field.
 func HashLT(v string) predicate.Region {
-	return predicate.Region(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldHash), v))
-	})
+	return predicate.Region(sql.FieldLT(FieldHash, v))
 }
 
 // HashLTE applies the LTE predicate on the "hash" field.
 func HashLTE(v string) predicate.Region {
-	return predicate.Region(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldHash), v))
-	})
+	return predicate.Region(sql.FieldLTE(FieldHash, v))
 }
 
 // HashContains applies the Contains predicate on the "hash" field.
 func HashContains(v string) predicate.Region {
-	return predicate.Region(func(s *sql.Selector) {
-		s.Where(sql.Contains(s.C(FieldHash), v))
-	})
+	return predicate.Region(sql.FieldContains(FieldHash, v))
 }
 
 // HashHasPrefix applies the HasPrefix predicate on the "hash" field.
 func HashHasPrefix(v string) predicate.Region {
-	return predicate.Region(func(s *sql.Selector) {
-		s.Where(sql.HasPrefix(s.C(FieldHash), v))
-	})
+	return predicate.Region(sql.FieldHasPrefix(FieldHash, v))
 }
 
 // HashHasSuffix applies the HasSuffix predicate on the "hash" field.
 func HashHasSuffix(v string) predicate.Region {
-	return predicate.Region(func(s *sql.Selector) {
-		s.Where(sql.HasSuffix(s.C(FieldHash), v))
-	})
+	return predicate.Region(sql.FieldHasSuffix(FieldHash, v))
 }
 
 // HashEqualFold applies the EqualFold predicate on the "hash" field.
 func HashEqualFold(v string) predicate.Region {
-	return predicate.Region(func(s *sql.Selector) {
-		s.Where(sql.EqualFold(s.C(FieldHash), v))
-	})
+	return predicate.Region(sql.FieldEqualFold(FieldHash, v))
 }
 
 // HashContainsFold applies the ContainsFold predicate on the "hash" field.
 func HashContainsFold(v string) predicate.Region {
-	return predicate.Region(func(s *sql.Selector) {
-		s.Where(sql.ContainsFold(s.C(FieldHash), v))
-	})
+	return predicate.Region(sql.FieldContainsFold(FieldHash, v))
 }
 
 // ImportFlagEQ applies the EQ predicate on the "import_flag" field.
 func ImportFlagEQ(v bool) predicate.Region {
-	return predicate.Region(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldImportFlag), v))
-	})
+	return predicate.Region(sql.FieldEQ(FieldImportFlag, v))
 }
 
 // ImportFlagNEQ applies the NEQ predicate on the "import_flag" field.
 func ImportFlagNEQ(v bool) predicate.Region {
-	return predicate.Region(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldImportFlag), v))
-	})
+	return predicate.Region(sql.FieldNEQ(FieldImportFlag, v))
 }
 
 // LastUpdatedEQ applies the EQ predicate on the "last_updated" field.
 func LastUpdatedEQ(v time.Time) predicate.Region {
-	return predicate.Region(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldLastUpdated), v))
-	})
+	return predicate.Region(sql.FieldEQ(FieldLastUpdated, v))
 }
 
 // LastUpdatedNEQ applies the NEQ predicate on the "last_updated" field.
 func LastUpdatedNEQ(v time.Time) predicate.Region {
-	return predicate.Region(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldLastUpdated), v))
-	})
+	return predicate.Region(sql.FieldNEQ(FieldLastUpdated, v))
 }
 
 // LastUpdatedIn applies the In predicate on the "last_updated" field.
 func LastUpdatedIn(vs ...time.Time) predicate.Region {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Region(func(s *sql.Selector) {
-		s.Where(sql.In(s.C(FieldLastUpdated), v...))
-	})
+	return predicate.Region(sql.FieldIn(FieldLastUpdated, vs...))
 }
 
 // LastUpdatedNotIn applies the NotIn predicate on the "last_updated" field.
 func LastUpdatedNotIn(vs ...time.Time) predicate.Region {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Region(func(s *sql.Selector) {
-		s.Where(sql.NotIn(s.C(FieldLastUpdated), v...))
-	})
+	return predicate.Region(sql.FieldNotIn(FieldLastUpdated, vs...))
 }
 
 // LastUpdatedGT applies the GT predicate on the "last_updated" field.
 func LastUpdatedGT(v time.Time) predicate.Region {
-	return predicate.Region(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldLastUpdated), v))
-	})
+	return predicate.Region(sql.FieldGT(FieldLastUpdated, v))
 }
 
 // LastUpdatedGTE applies the GTE predicate on the "last_updated" field.
 func LastUpdatedGTE(v time.Time) predicate.Region {
-	return predicate.Region(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldLastUpdated), v))
-	})
+	return predicate.Region(sql.FieldGTE(FieldLastUpdated, v))
 }
 
 // LastUpdatedLT applies the LT predicate on the "last_updated" field.
 func LastUpdatedLT(v time.Time) predicate.Region {
-	return predicate.Region(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldLastUpdated), v))
-	})
+	return predicate.Region(sql.FieldLT(FieldLastUpdated, v))
 }
 
 // LastUpdatedLTE applies the LTE predicate on the "last_updated" field.
 func LastUpdatedLTE(v time.Time) predicate.Region {
-	return predicate.Region(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldLastUpdated), v))
-	})
+	return predicate.Region(sql.FieldLTE(FieldLastUpdated, v))
 }
 
 // CodeEQ applies the EQ predicate on the "code" field.
 func CodeEQ(v string) predicate.Region {
-	return predicate.Region(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldCode), v))
-	})
+	return predicate.Region(sql.FieldEQ(FieldCode, v))
 }
 
 // CodeNEQ applies the NEQ predicate on the "code" field.
 func CodeNEQ(v string) predicate.Region {
-	return predicate.Region(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldCode), v))
-	})
+	return predicate.Region(sql.FieldNEQ(FieldCode, v))
 }
 
 // CodeIn applies the In predicate on the "code" field.
 func CodeIn(vs ...string) predicate.Region {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Region(func(s *sql.Selector) {
-		s.Where(sql.In(s.C(FieldCode), v...))
-	})
+	return predicate.Region(sql.FieldIn(FieldCode, vs...))
 }
 
 // CodeNotIn applies the NotIn predicate on the "code" field.
 func CodeNotIn(vs ...string) predicate.Region {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Region(func(s *sql.Selector) {
-		s.Where(sql.NotIn(s.C(FieldCode), v...))
-	})
+	return predicate.Region(sql.FieldNotIn(FieldCode, vs...))
 }
 
 // CodeGT applies the GT predicate on the "code" field.
 func CodeGT(v string) predicate.Region {
-	return predicate.Region(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldCode), v))
-	})
+	return predicate.Region(sql.FieldGT(FieldCode, v))
 }
 
 // CodeGTE applies the GTE predicate on the "code" field.
 func CodeGTE(v string) predicate.Region {
-	return predicate.Region(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldCode), v))
-	})
+	return predicate.Region(sql.FieldGTE(FieldCode, v))
 }
 
 // CodeLT applies the LT predicate on the "code" field.
 func CodeLT(v string) predicate.Region {
-	return predicate.Region(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldCode), v))
-	})
+	return predicate.Region(sql.FieldLT(FieldCode, v))
 }
 
 // CodeLTE applies the LTE predicate on the "code" field.
 func CodeLTE(v string) predicate.Region {
-	return predicate.Region(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldCode), v))
-	})
+	return predicate.Region(sql.FieldLTE(FieldCode, v))
 }
 
 // CodeContains applies the Contains predicate on the "code" field.
 func CodeContains(v string) predicate.Region {
-	return predicate.Region(func(s *sql.Selector) {
-		s.Where(sql.Contains(s.C(FieldCode), v))
-	})
+	return predicate.Region(sql.FieldContains(FieldCode, v))
 }
 
 // CodeHasPrefix applies the HasPrefix predicate on the "code" field.
 func CodeHasPrefix(v string) predicate.Region {
-	return predicate.Region(func(s *sql.Selector) {
-		s.Where(sql.HasPrefix(s.C(FieldCode), v))
-	})
+	return predicate.Region(sql.FieldHasPrefix(FieldCode, v))
 }
 
 // CodeHasSuffix applies the HasSuffix predicate on the "code" field.
 func CodeHasSuffix(v string) predicate.Region {
-	return predicate.Region(func(s *sql.Selector) {
-		s.Where(sql.HasSuffix(s.C(FieldCode), v))
-	})
+	return predicate.Region(sql.FieldHasSuffix(FieldCode, v))
 }
 
 // CodeEqualFold applies the EqualFold predicate on the "code" field.
 func CodeEqualFold(v string) predicate.Region {
-	return predicate.Region(func(s *sql.Selector) {
-		s.Where(sql.EqualFold(s.C(FieldCode), v))
-	})
+	return predicate.Region(sql.FieldEqualFold(FieldCode, v))
 }
 
 // CodeContainsFold applies the ContainsFold predicate on the "code" field.
 func CodeContainsFold(v string) predicate.Region {
-	return predicate.Region(func(s *sql.Selector) {
-		s.Where(sql.ContainsFold(s.C(FieldCode), v))
-	})
+	return predicate.Region(sql.FieldContainsFold(FieldCode, v))
 }
 
 // LocalCodeEQ applies the EQ predicate on the "local_code" field.
 func LocalCodeEQ(v string) predicate.Region {
-	return predicate.Region(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldLocalCode), v))
-	})
+	return predicate.Region(sql.FieldEQ(FieldLocalCode, v))
 }
 
 // LocalCodeNEQ applies the NEQ predicate on the "local_code" field.
 func LocalCodeNEQ(v string) predicate.Region {
-	return predicate.Region(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldLocalCode), v))
-	})
+	return predicate.Region(sql.FieldNEQ(FieldLocalCode, v))
 }
 
 // LocalCodeIn applies the In predicate on the "local_code" field.
 func LocalCodeIn(vs ...string) predicate.Region {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Region(func(s *sql.Selector) {
-		s.Where(sql.In(s.C(FieldLocalCode), v...))
-	})
+	return predicate.Region(sql.FieldIn(FieldLocalCode, vs...))
 }
 
 // LocalCodeNotIn applies the NotIn predicate on the "local_code" field.
 func LocalCodeNotIn(vs ...string) predicate.Region {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Region(func(s *sql.Selector) {
-		s.Where(sql.NotIn(s.C(FieldLocalCode), v...))
-	})
+	return predicate.Region(sql.FieldNotIn(FieldLocalCode, vs...))
 }
 
 // LocalCodeGT applies the GT predicate on the "local_code" field.
 func LocalCodeGT(v string) predicate.Region {
-	return predicate.Region(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldLocalCode), v))
-	})
+	return predicate.Region(sql.FieldGT(FieldLocalCode, v))
 }
 
 // LocalCodeGTE applies the GTE predicate on the "local_code" field.
 func LocalCodeGTE(v string) predicate.Region {
-	return predicate.Region(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldLocalCode), v))
-	})
+	return predicate.Region(sql.FieldGTE(FieldLocalCode, v))
 }
 
 // LocalCodeLT applies the LT predicate on the "local_code" field.
 func LocalCodeLT(v string) predicate.Region {
-	return predicate.Region(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldLocalCode), v))
-	})
+	return predicate.Region(sql.FieldLT(FieldLocalCode, v))
 }
 
 // LocalCodeLTE applies the LTE predicate on the "local_code" field.
 func LocalCodeLTE(v string) predicate.Region {
-	return predicate.Region(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldLocalCode), v))
-	})
+	return predicate.Region(sql.FieldLTE(FieldLocalCode, v))
 }
 
 // LocalCodeContains applies the Contains predicate on the "local_code" field.
 func LocalCodeContains(v string) predicate.Region {
-	return predicate.Region(func(s *sql.Selector) {
-		s.Where(sql.Contains(s.C(FieldLocalCode), v))
-	})
+	return predicate.Region(sql.FieldContains(FieldLocalCode, v))
 }
 
 // LocalCodeHasPrefix applies the HasPrefix predicate on the "local_code" field.
 func LocalCodeHasPrefix(v string) predicate.Region {
-	return predicate.Region(func(s *sql.Selector) {
-		s.Where(sql.HasPrefix(s.C(FieldLocalCode), v))
-	})
+	return predicate.Region(sql.FieldHasPrefix(FieldLocalCode, v))
 }
 
 // LocalCodeHasSuffix applies the HasSuffix predicate on the "local_code" field.
 func LocalCodeHasSuffix(v string) predicate.Region {
-	return predicate.Region(func(s *sql.Selector) {
-		s.Where(sql.HasSuffix(s.C(FieldLocalCode), v))
-	})
+	return predicate.Region(sql.FieldHasSuffix(FieldLocalCode, v))
 }
 
 // LocalCodeEqualFold applies the EqualFold predicate on the "local_code" field.
 func LocalCodeEqualFold(v string) predicate.Region {
-	return predicate.Region(func(s *sql.Selector) {
-		s.Where(sql.EqualFold(s.C(FieldLocalCode), v))
-	})
+	return predicate.Region(sql.FieldEqualFold(FieldLocalCode, v))
 }
 
 // LocalCodeContainsFold applies the ContainsFold predicate on the "local_code" field.
 func LocalCodeContainsFold(v string) predicate.Region {
-	return predicate.Region(func(s *sql.Selector) {
-		s.Where(sql.ContainsFold(s.C(FieldLocalCode), v))
-	})
+	return predicate.Region(sql.FieldContainsFold(FieldLocalCode, v))
 }
 
 // NameEQ applies the EQ predicate on the "name" field.
 func NameEQ(v string) predicate.Region {
-	return predicate.Region(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldName), v))
-	})
+	return predicate.Region(sql.FieldEQ(FieldName, v))
 }
 
 // NameNEQ applies the NEQ predicate on the "name" field.
 func NameNEQ(v string) predicate.Region {
-	return predicate.Region(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldName), v))
-	})
+	return predicate.Region(sql.FieldNEQ(FieldName, v))
 }
 
 // NameIn applies the In predicate on the "name" field.
 func NameIn(vs ...string) predicate.Region {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Region(func(s *sql.Selector) {
-		s.Where(sql.In(s.C(FieldName), v...))
-	})
+	return predicate.Region(sql.FieldIn(FieldName, vs...))
 }
 
 // NameNotIn applies the NotIn predicate on the "name" field.
 func NameNotIn(vs ...string) predicate.Region {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Region(func(s *sql.Selector) {
-		s.Where(sql.NotIn(s.C(FieldName), v...))
-	})
+	return predicate.Region(sql.FieldNotIn(FieldName, vs...))
 }
 
 // NameGT applies the GT predicate on the "name" field.
 func NameGT(v string) predicate.Region {
-	return predicate.Region(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldName), v))
-	})
+	return predicate.Region(sql.FieldGT(FieldName, v))
 }
 
 // NameGTE applies the GTE predicate on the "name" field.
 func NameGTE(v string) predicate.Region {
-	return predicate.Region(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldName), v))
-	})
+	return predicate.Region(sql.FieldGTE(FieldName, v))
 }
 
 // NameLT applies the LT predicate on the "name" field.
 func NameLT(v string) predicate.Region {
-	return predicate.Region(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldName), v))
-	})
+	return predicate.Region(sql.FieldLT(FieldName, v))
 }
 
 // NameLTE applies the LTE predicate on the "name" field.
 func NameLTE(v string) predicate.Region {
-	return predicate.Region(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldName), v))
-	})
+	return predicate.Region(sql.FieldLTE(FieldName, v))
 }
 
 // NameContains applies the Contains predicate on the "name" field.
 func NameContains(v string) predicate.Region {
-	return predicate.Region(func(s *sql.Selector) {
-		s.Where(sql.Contains(s.C(FieldName), v))
-	})
+	return predicate.Region(sql.FieldContains(FieldName, v))
 }
 
 // NameHasPrefix applies the HasPrefix predicate on the "name" field.
 func NameHasPrefix(v string) predicate.Region {
-	return predicate.Region(func(s *sql.Selector) {
-		s.Where(sql.HasPrefix(s.C(FieldName), v))
-	})
+	return predicate.Region(sql.FieldHasPrefix(FieldName, v))
 }
 
 // NameHasSuffix applies the HasSuffix predicate on the "name" field.
 func NameHasSuffix(v string) predicate.Region {
-	return predicate.Region(func(s *sql.Selector) {
-		s.Where(sql.HasSuffix(s.C(FieldName), v))
-	})
+	return predicate.Region(sql.FieldHasSuffix(FieldName, v))
 }
 
 // NameEqualFold applies the EqualFold predicate on the "name" field.
 func NameEqualFold(v string) predicate.Region {
-	return predicate.Region(func(s *sql.Selector) {
-		s.Where(sql.EqualFold(s.C(FieldName), v))
-	})
+	return predicate.Region(sql.FieldEqualFold(FieldName, v))
 }
 
 // NameContainsFold applies the ContainsFold predicate on the "name" field.
 func NameContainsFold(v string) predicate.Region {
-	return predicate.Region(func(s *sql.Selector) {
-		s.Where(sql.ContainsFold(s.C(FieldName), v))
-	})
+	return predicate.Region(sql.FieldContainsFold(FieldName, v))
 }
 
 // WikipediaLinkEQ applies the EQ predicate on the "wikipedia_link" field.
 func WikipediaLinkEQ(v string) predicate.Region {
-	return predicate.Region(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldWikipediaLink), v))
-	})
+	return predicate.Region(sql.FieldEQ(FieldWikipediaLink, v))
 }
 
 // WikipediaLinkNEQ applies the NEQ predicate on the "wikipedia_link" field.
 func WikipediaLinkNEQ(v string) predicate.Region {
-	return predicate.Region(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldWikipediaLink), v))
-	})
+	return predicate.Region(sql.FieldNEQ(FieldWikipediaLink, v))
 }
 
 // WikipediaLinkIn applies the In predicate on the "wikipedia_link" field.
 func WikipediaLinkIn(vs ...string) predicate.Region {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Region(func(s *sql.Selector) {
-		s.Where(sql.In(s.C(FieldWikipediaLink), v...))
-	})
+	return predicate.Region(sql.FieldIn(FieldWikipediaLink, vs...))
 }
 
 // WikipediaLinkNotIn applies the NotIn predicate on the "wikipedia_link" field.
 func WikipediaLinkNotIn(vs ...string) predicate.Region {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Region(func(s *sql.Selector) {
-		s.Where(sql.NotIn(s.C(FieldWikipediaLink), v...))
-	})
+	return predicate.Region(sql.FieldNotIn(FieldWikipediaLink, vs...))
 }
 
 // WikipediaLinkGT applies the GT predicate on the "wikipedia_link" field.
 func WikipediaLinkGT(v string) predicate.Region {
-	return predicate.Region(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldWikipediaLink), v))
-	})
+	return predicate.Region(sql.FieldGT(FieldWikipediaLink, v))
 }
 
 // WikipediaLinkGTE applies the GTE predicate on the "wikipedia_link" field.
 func WikipediaLinkGTE(v string) predicate.Region {
-	return predicate.Region(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldWikipediaLink), v))
-	})
+	return predicate.Region(sql.FieldGTE(FieldWikipediaLink, v))
 }
 
 // WikipediaLinkLT applies the LT predicate on the "wikipedia_link" field.
 func WikipediaLinkLT(v string) predicate.Region {
-	return predicate.Region(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldWikipediaLink), v))
-	})
+	return predicate.Region(sql.FieldLT(FieldWikipediaLink, v))
 }
 
 // WikipediaLinkLTE applies the LTE predicate on the "wikipedia_link" field.
 func WikipediaLinkLTE(v string) predicate.Region {
-	return predicate.Region(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldWikipediaLink), v))
-	})
+	return predicate.Region(sql.FieldLTE(FieldWikipediaLink, v))
 }
 
 // WikipediaLinkContains applies the Contains predicate on the "wikipedia_link" field.
 func WikipediaLinkContains(v string) predicate.Region {
-	return predicate.Region(func(s *sql.Selector) {
-		s.Where(sql.Contains(s.C(FieldWikipediaLink), v))
-	})
+	return predicate.Region(sql.FieldContains(FieldWikipediaLink, v))
 }
 
 // WikipediaLinkHasPrefix applies the HasPrefix predicate on the "wikipedia_link" field.
 func WikipediaLinkHasPrefix(v string) predicate.Region {
-	return predicate.Region(func(s *sql.Selector) {
-		s.Where(sql.HasPrefix(s.C(FieldWikipediaLink), v))
-	})
+	return predicate.Region(sql.FieldHasPrefix(FieldWikipediaLink, v))
 }
 
 // WikipediaLinkHasSuffix applies the HasSuffix predicate on the "wikipedia_link" field.
 func WikipediaLinkHasSuffix(v string) predicate.Region {
-	return predicate.Region(func(s *sql.Selector) {
-		s.Where(sql.HasSuffix(s.C(FieldWikipediaLink), v))
-	})
+	return predicate.Region(sql.FieldHasSuffix(FieldWikipediaLink, v))
 }
 
 // WikipediaLinkEqualFold applies the EqualFold predicate on the "wikipedia_link" field.
 func WikipediaLinkEqualFold(v string) predicate.Region {
-	return predicate.Region(func(s *sql.Selector) {
-		s.Where(sql.EqualFold(s.C(FieldWikipediaLink), v))
-	})
+	return predicate.Region(sql.FieldEqualFold(FieldWikipediaLink, v))
 }
 
 // WikipediaLinkContainsFold applies the ContainsFold predicate on the "wikipedia_link" field.
 func WikipediaLinkContainsFold(v string) predicate.Region {
-	return predicate.Region(func(s *sql.Selector) {
-		s.Where(sql.ContainsFold(s.C(FieldWikipediaLink), v))
-	})
+	return predicate.Region(sql.FieldContainsFold(FieldWikipediaLink, v))
 }
 
 // HasAirports applies the HasEdge predicate on the "airports" edge.
@@ -780,7 +516,6 @@ func HasAirports() predicate.Region {
 	return predicate.Region(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(AirportsTable, FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, false, AirportsTable, AirportsColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)

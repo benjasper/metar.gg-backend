@@ -67,34 +67,7 @@ func (tcu *TurbulenceConditionUpdate) Mutation() *TurbulenceConditionMutation {
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (tcu *TurbulenceConditionUpdate) Save(ctx context.Context) (int, error) {
-	var (
-		err      error
-		affected int
-	)
-	if len(tcu.hooks) == 0 {
-		affected, err = tcu.sqlSave(ctx)
-	} else {
-		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
-			mutation, ok := m.(*TurbulenceConditionMutation)
-			if !ok {
-				return nil, fmt.Errorf("unexpected mutation type %T", m)
-			}
-			tcu.mutation = mutation
-			affected, err = tcu.sqlSave(ctx)
-			mutation.done = true
-			return affected, err
-		})
-		for i := len(tcu.hooks) - 1; i >= 0; i-- {
-			if tcu.hooks[i] == nil {
-				return 0, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
-			}
-			mut = tcu.hooks[i](mut)
-		}
-		if _, err := mut.Mutate(ctx, tcu.mutation); err != nil {
-			return 0, err
-		}
-	}
-	return affected, err
+	return withHooks[int, TurbulenceConditionMutation](ctx, tcu.sqlSave, tcu.mutation, tcu.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -126,16 +99,7 @@ func (tcu *TurbulenceConditionUpdate) Modify(modifiers ...func(u *sql.UpdateBuil
 }
 
 func (tcu *TurbulenceConditionUpdate) sqlSave(ctx context.Context) (n int, err error) {
-	_spec := &sqlgraph.UpdateSpec{
-		Node: &sqlgraph.NodeSpec{
-			Table:   turbulencecondition.Table,
-			Columns: turbulencecondition.Columns,
-			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeUUID,
-				Column: turbulencecondition.FieldID,
-			},
-		},
-	}
+	_spec := sqlgraph.NewUpdateSpec(turbulencecondition.Table, turbulencecondition.Columns, sqlgraph.NewFieldSpec(turbulencecondition.FieldID, field.TypeUUID))
 	if ps := tcu.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
@@ -167,6 +131,7 @@ func (tcu *TurbulenceConditionUpdate) sqlSave(ctx context.Context) (n int, err e
 		}
 		return 0, err
 	}
+	tcu.mutation.done = true
 	return n, nil
 }
 
@@ -216,6 +181,12 @@ func (tcuo *TurbulenceConditionUpdateOne) Mutation() *TurbulenceConditionMutatio
 	return tcuo.mutation
 }
 
+// Where appends a list predicates to the TurbulenceConditionUpdate builder.
+func (tcuo *TurbulenceConditionUpdateOne) Where(ps ...predicate.TurbulenceCondition) *TurbulenceConditionUpdateOne {
+	tcuo.mutation.Where(ps...)
+	return tcuo
+}
+
 // Select allows selecting one or more fields (columns) of the returned entity.
 // The default is selecting all fields defined in the entity schema.
 func (tcuo *TurbulenceConditionUpdateOne) Select(field string, fields ...string) *TurbulenceConditionUpdateOne {
@@ -225,40 +196,7 @@ func (tcuo *TurbulenceConditionUpdateOne) Select(field string, fields ...string)
 
 // Save executes the query and returns the updated TurbulenceCondition entity.
 func (tcuo *TurbulenceConditionUpdateOne) Save(ctx context.Context) (*TurbulenceCondition, error) {
-	var (
-		err  error
-		node *TurbulenceCondition
-	)
-	if len(tcuo.hooks) == 0 {
-		node, err = tcuo.sqlSave(ctx)
-	} else {
-		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
-			mutation, ok := m.(*TurbulenceConditionMutation)
-			if !ok {
-				return nil, fmt.Errorf("unexpected mutation type %T", m)
-			}
-			tcuo.mutation = mutation
-			node, err = tcuo.sqlSave(ctx)
-			mutation.done = true
-			return node, err
-		})
-		for i := len(tcuo.hooks) - 1; i >= 0; i-- {
-			if tcuo.hooks[i] == nil {
-				return nil, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
-			}
-			mut = tcuo.hooks[i](mut)
-		}
-		v, err := mut.Mutate(ctx, tcuo.mutation)
-		if err != nil {
-			return nil, err
-		}
-		nv, ok := v.(*TurbulenceCondition)
-		if !ok {
-			return nil, fmt.Errorf("unexpected node type %T returned from TurbulenceConditionMutation", v)
-		}
-		node = nv
-	}
-	return node, err
+	return withHooks[*TurbulenceCondition, TurbulenceConditionMutation](ctx, tcuo.sqlSave, tcuo.mutation, tcuo.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -290,16 +228,7 @@ func (tcuo *TurbulenceConditionUpdateOne) Modify(modifiers ...func(u *sql.Update
 }
 
 func (tcuo *TurbulenceConditionUpdateOne) sqlSave(ctx context.Context) (_node *TurbulenceCondition, err error) {
-	_spec := &sqlgraph.UpdateSpec{
-		Node: &sqlgraph.NodeSpec{
-			Table:   turbulencecondition.Table,
-			Columns: turbulencecondition.Columns,
-			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeUUID,
-				Column: turbulencecondition.FieldID,
-			},
-		},
-	}
+	_spec := sqlgraph.NewUpdateSpec(turbulencecondition.Table, turbulencecondition.Columns, sqlgraph.NewFieldSpec(turbulencecondition.FieldID, field.TypeUUID))
 	id, ok := tcuo.mutation.ID()
 	if !ok {
 		return nil, &ValidationError{Name: "id", err: errors.New(`ent: missing "TurbulenceCondition.id" for update`)}
@@ -351,5 +280,6 @@ func (tcuo *TurbulenceConditionUpdateOne) sqlSave(ctx context.Context) (_node *T
 		}
 		return nil, err
 	}
+	tcuo.mutation.done = true
 	return _node, nil
 }

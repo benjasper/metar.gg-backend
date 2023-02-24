@@ -96,7 +96,7 @@ func (ic *IcingCondition) assignValues(columns []string, values []any) error {
 // Note that you need to call IcingCondition.Unwrap() before calling this method if this IcingCondition
 // was returned from a transaction, and the transaction was committed or rolled back.
 func (ic *IcingCondition) Update() *IcingConditionUpdateOne {
-	return (&IcingConditionClient{config: ic.config}).UpdateOne(ic)
+	return NewIcingConditionClient(ic.config).UpdateOne(ic)
 }
 
 // Unwrap unwraps the IcingCondition entity that was returned from a transaction after it was closed,
@@ -133,9 +133,3 @@ func (ic *IcingCondition) String() string {
 
 // IcingConditions is a parsable slice of IcingCondition.
 type IcingConditions []*IcingCondition
-
-func (ic IcingConditions) config(cfg config) {
-	for _i := range ic {
-		ic[_i].config = cfg
-	}
-}

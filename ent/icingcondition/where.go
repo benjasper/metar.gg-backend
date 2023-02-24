@@ -10,349 +10,227 @@ import (
 
 // ID filters vertices based on their ID field.
 func ID(id uuid.UUID) predicate.IcingCondition {
-	return predicate.IcingCondition(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldID), id))
-	})
+	return predicate.IcingCondition(sql.FieldEQ(FieldID, id))
 }
 
 // IDEQ applies the EQ predicate on the ID field.
 func IDEQ(id uuid.UUID) predicate.IcingCondition {
-	return predicate.IcingCondition(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldID), id))
-	})
+	return predicate.IcingCondition(sql.FieldEQ(FieldID, id))
 }
 
 // IDNEQ applies the NEQ predicate on the ID field.
 func IDNEQ(id uuid.UUID) predicate.IcingCondition {
-	return predicate.IcingCondition(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldID), id))
-	})
+	return predicate.IcingCondition(sql.FieldNEQ(FieldID, id))
 }
 
 // IDIn applies the In predicate on the ID field.
 func IDIn(ids ...uuid.UUID) predicate.IcingCondition {
-	return predicate.IcingCondition(func(s *sql.Selector) {
-		v := make([]any, len(ids))
-		for i := range v {
-			v[i] = ids[i]
-		}
-		s.Where(sql.In(s.C(FieldID), v...))
-	})
+	return predicate.IcingCondition(sql.FieldIn(FieldID, ids...))
 }
 
 // IDNotIn applies the NotIn predicate on the ID field.
 func IDNotIn(ids ...uuid.UUID) predicate.IcingCondition {
-	return predicate.IcingCondition(func(s *sql.Selector) {
-		v := make([]any, len(ids))
-		for i := range v {
-			v[i] = ids[i]
-		}
-		s.Where(sql.NotIn(s.C(FieldID), v...))
-	})
+	return predicate.IcingCondition(sql.FieldNotIn(FieldID, ids...))
 }
 
 // IDGT applies the GT predicate on the ID field.
 func IDGT(id uuid.UUID) predicate.IcingCondition {
-	return predicate.IcingCondition(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldID), id))
-	})
+	return predicate.IcingCondition(sql.FieldGT(FieldID, id))
 }
 
 // IDGTE applies the GTE predicate on the ID field.
 func IDGTE(id uuid.UUID) predicate.IcingCondition {
-	return predicate.IcingCondition(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldID), id))
-	})
+	return predicate.IcingCondition(sql.FieldGTE(FieldID, id))
 }
 
 // IDLT applies the LT predicate on the ID field.
 func IDLT(id uuid.UUID) predicate.IcingCondition {
-	return predicate.IcingCondition(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldID), id))
-	})
+	return predicate.IcingCondition(sql.FieldLT(FieldID, id))
 }
 
 // IDLTE applies the LTE predicate on the ID field.
 func IDLTE(id uuid.UUID) predicate.IcingCondition {
-	return predicate.IcingCondition(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldID), id))
-	})
+	return predicate.IcingCondition(sql.FieldLTE(FieldID, id))
 }
 
 // Intensity applies equality check predicate on the "intensity" field. It's identical to IntensityEQ.
 func Intensity(v string) predicate.IcingCondition {
-	return predicate.IcingCondition(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldIntensity), v))
-	})
+	return predicate.IcingCondition(sql.FieldEQ(FieldIntensity, v))
 }
 
 // MinAltitude applies equality check predicate on the "min_altitude" field. It's identical to MinAltitudeEQ.
 func MinAltitude(v int) predicate.IcingCondition {
-	return predicate.IcingCondition(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldMinAltitude), v))
-	})
+	return predicate.IcingCondition(sql.FieldEQ(FieldMinAltitude, v))
 }
 
 // MaxAltitude applies equality check predicate on the "max_altitude" field. It's identical to MaxAltitudeEQ.
 func MaxAltitude(v int) predicate.IcingCondition {
-	return predicate.IcingCondition(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldMaxAltitude), v))
-	})
+	return predicate.IcingCondition(sql.FieldEQ(FieldMaxAltitude, v))
 }
 
 // IntensityEQ applies the EQ predicate on the "intensity" field.
 func IntensityEQ(v string) predicate.IcingCondition {
-	return predicate.IcingCondition(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldIntensity), v))
-	})
+	return predicate.IcingCondition(sql.FieldEQ(FieldIntensity, v))
 }
 
 // IntensityNEQ applies the NEQ predicate on the "intensity" field.
 func IntensityNEQ(v string) predicate.IcingCondition {
-	return predicate.IcingCondition(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldIntensity), v))
-	})
+	return predicate.IcingCondition(sql.FieldNEQ(FieldIntensity, v))
 }
 
 // IntensityIn applies the In predicate on the "intensity" field.
 func IntensityIn(vs ...string) predicate.IcingCondition {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.IcingCondition(func(s *sql.Selector) {
-		s.Where(sql.In(s.C(FieldIntensity), v...))
-	})
+	return predicate.IcingCondition(sql.FieldIn(FieldIntensity, vs...))
 }
 
 // IntensityNotIn applies the NotIn predicate on the "intensity" field.
 func IntensityNotIn(vs ...string) predicate.IcingCondition {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.IcingCondition(func(s *sql.Selector) {
-		s.Where(sql.NotIn(s.C(FieldIntensity), v...))
-	})
+	return predicate.IcingCondition(sql.FieldNotIn(FieldIntensity, vs...))
 }
 
 // IntensityGT applies the GT predicate on the "intensity" field.
 func IntensityGT(v string) predicate.IcingCondition {
-	return predicate.IcingCondition(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldIntensity), v))
-	})
+	return predicate.IcingCondition(sql.FieldGT(FieldIntensity, v))
 }
 
 // IntensityGTE applies the GTE predicate on the "intensity" field.
 func IntensityGTE(v string) predicate.IcingCondition {
-	return predicate.IcingCondition(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldIntensity), v))
-	})
+	return predicate.IcingCondition(sql.FieldGTE(FieldIntensity, v))
 }
 
 // IntensityLT applies the LT predicate on the "intensity" field.
 func IntensityLT(v string) predicate.IcingCondition {
-	return predicate.IcingCondition(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldIntensity), v))
-	})
+	return predicate.IcingCondition(sql.FieldLT(FieldIntensity, v))
 }
 
 // IntensityLTE applies the LTE predicate on the "intensity" field.
 func IntensityLTE(v string) predicate.IcingCondition {
-	return predicate.IcingCondition(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldIntensity), v))
-	})
+	return predicate.IcingCondition(sql.FieldLTE(FieldIntensity, v))
 }
 
 // IntensityContains applies the Contains predicate on the "intensity" field.
 func IntensityContains(v string) predicate.IcingCondition {
-	return predicate.IcingCondition(func(s *sql.Selector) {
-		s.Where(sql.Contains(s.C(FieldIntensity), v))
-	})
+	return predicate.IcingCondition(sql.FieldContains(FieldIntensity, v))
 }
 
 // IntensityHasPrefix applies the HasPrefix predicate on the "intensity" field.
 func IntensityHasPrefix(v string) predicate.IcingCondition {
-	return predicate.IcingCondition(func(s *sql.Selector) {
-		s.Where(sql.HasPrefix(s.C(FieldIntensity), v))
-	})
+	return predicate.IcingCondition(sql.FieldHasPrefix(FieldIntensity, v))
 }
 
 // IntensityHasSuffix applies the HasSuffix predicate on the "intensity" field.
 func IntensityHasSuffix(v string) predicate.IcingCondition {
-	return predicate.IcingCondition(func(s *sql.Selector) {
-		s.Where(sql.HasSuffix(s.C(FieldIntensity), v))
-	})
+	return predicate.IcingCondition(sql.FieldHasSuffix(FieldIntensity, v))
 }
 
 // IntensityEqualFold applies the EqualFold predicate on the "intensity" field.
 func IntensityEqualFold(v string) predicate.IcingCondition {
-	return predicate.IcingCondition(func(s *sql.Selector) {
-		s.Where(sql.EqualFold(s.C(FieldIntensity), v))
-	})
+	return predicate.IcingCondition(sql.FieldEqualFold(FieldIntensity, v))
 }
 
 // IntensityContainsFold applies the ContainsFold predicate on the "intensity" field.
 func IntensityContainsFold(v string) predicate.IcingCondition {
-	return predicate.IcingCondition(func(s *sql.Selector) {
-		s.Where(sql.ContainsFold(s.C(FieldIntensity), v))
-	})
+	return predicate.IcingCondition(sql.FieldContainsFold(FieldIntensity, v))
 }
 
 // MinAltitudeEQ applies the EQ predicate on the "min_altitude" field.
 func MinAltitudeEQ(v int) predicate.IcingCondition {
-	return predicate.IcingCondition(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldMinAltitude), v))
-	})
+	return predicate.IcingCondition(sql.FieldEQ(FieldMinAltitude, v))
 }
 
 // MinAltitudeNEQ applies the NEQ predicate on the "min_altitude" field.
 func MinAltitudeNEQ(v int) predicate.IcingCondition {
-	return predicate.IcingCondition(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldMinAltitude), v))
-	})
+	return predicate.IcingCondition(sql.FieldNEQ(FieldMinAltitude, v))
 }
 
 // MinAltitudeIn applies the In predicate on the "min_altitude" field.
 func MinAltitudeIn(vs ...int) predicate.IcingCondition {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.IcingCondition(func(s *sql.Selector) {
-		s.Where(sql.In(s.C(FieldMinAltitude), v...))
-	})
+	return predicate.IcingCondition(sql.FieldIn(FieldMinAltitude, vs...))
 }
 
 // MinAltitudeNotIn applies the NotIn predicate on the "min_altitude" field.
 func MinAltitudeNotIn(vs ...int) predicate.IcingCondition {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.IcingCondition(func(s *sql.Selector) {
-		s.Where(sql.NotIn(s.C(FieldMinAltitude), v...))
-	})
+	return predicate.IcingCondition(sql.FieldNotIn(FieldMinAltitude, vs...))
 }
 
 // MinAltitudeGT applies the GT predicate on the "min_altitude" field.
 func MinAltitudeGT(v int) predicate.IcingCondition {
-	return predicate.IcingCondition(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldMinAltitude), v))
-	})
+	return predicate.IcingCondition(sql.FieldGT(FieldMinAltitude, v))
 }
 
 // MinAltitudeGTE applies the GTE predicate on the "min_altitude" field.
 func MinAltitudeGTE(v int) predicate.IcingCondition {
-	return predicate.IcingCondition(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldMinAltitude), v))
-	})
+	return predicate.IcingCondition(sql.FieldGTE(FieldMinAltitude, v))
 }
 
 // MinAltitudeLT applies the LT predicate on the "min_altitude" field.
 func MinAltitudeLT(v int) predicate.IcingCondition {
-	return predicate.IcingCondition(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldMinAltitude), v))
-	})
+	return predicate.IcingCondition(sql.FieldLT(FieldMinAltitude, v))
 }
 
 // MinAltitudeLTE applies the LTE predicate on the "min_altitude" field.
 func MinAltitudeLTE(v int) predicate.IcingCondition {
-	return predicate.IcingCondition(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldMinAltitude), v))
-	})
+	return predicate.IcingCondition(sql.FieldLTE(FieldMinAltitude, v))
 }
 
 // MinAltitudeIsNil applies the IsNil predicate on the "min_altitude" field.
 func MinAltitudeIsNil() predicate.IcingCondition {
-	return predicate.IcingCondition(func(s *sql.Selector) {
-		s.Where(sql.IsNull(s.C(FieldMinAltitude)))
-	})
+	return predicate.IcingCondition(sql.FieldIsNull(FieldMinAltitude))
 }
 
 // MinAltitudeNotNil applies the NotNil predicate on the "min_altitude" field.
 func MinAltitudeNotNil() predicate.IcingCondition {
-	return predicate.IcingCondition(func(s *sql.Selector) {
-		s.Where(sql.NotNull(s.C(FieldMinAltitude)))
-	})
+	return predicate.IcingCondition(sql.FieldNotNull(FieldMinAltitude))
 }
 
 // MaxAltitudeEQ applies the EQ predicate on the "max_altitude" field.
 func MaxAltitudeEQ(v int) predicate.IcingCondition {
-	return predicate.IcingCondition(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldMaxAltitude), v))
-	})
+	return predicate.IcingCondition(sql.FieldEQ(FieldMaxAltitude, v))
 }
 
 // MaxAltitudeNEQ applies the NEQ predicate on the "max_altitude" field.
 func MaxAltitudeNEQ(v int) predicate.IcingCondition {
-	return predicate.IcingCondition(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldMaxAltitude), v))
-	})
+	return predicate.IcingCondition(sql.FieldNEQ(FieldMaxAltitude, v))
 }
 
 // MaxAltitudeIn applies the In predicate on the "max_altitude" field.
 func MaxAltitudeIn(vs ...int) predicate.IcingCondition {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.IcingCondition(func(s *sql.Selector) {
-		s.Where(sql.In(s.C(FieldMaxAltitude), v...))
-	})
+	return predicate.IcingCondition(sql.FieldIn(FieldMaxAltitude, vs...))
 }
 
 // MaxAltitudeNotIn applies the NotIn predicate on the "max_altitude" field.
 func MaxAltitudeNotIn(vs ...int) predicate.IcingCondition {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.IcingCondition(func(s *sql.Selector) {
-		s.Where(sql.NotIn(s.C(FieldMaxAltitude), v...))
-	})
+	return predicate.IcingCondition(sql.FieldNotIn(FieldMaxAltitude, vs...))
 }
 
 // MaxAltitudeGT applies the GT predicate on the "max_altitude" field.
 func MaxAltitudeGT(v int) predicate.IcingCondition {
-	return predicate.IcingCondition(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldMaxAltitude), v))
-	})
+	return predicate.IcingCondition(sql.FieldGT(FieldMaxAltitude, v))
 }
 
 // MaxAltitudeGTE applies the GTE predicate on the "max_altitude" field.
 func MaxAltitudeGTE(v int) predicate.IcingCondition {
-	return predicate.IcingCondition(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldMaxAltitude), v))
-	})
+	return predicate.IcingCondition(sql.FieldGTE(FieldMaxAltitude, v))
 }
 
 // MaxAltitudeLT applies the LT predicate on the "max_altitude" field.
 func MaxAltitudeLT(v int) predicate.IcingCondition {
-	return predicate.IcingCondition(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldMaxAltitude), v))
-	})
+	return predicate.IcingCondition(sql.FieldLT(FieldMaxAltitude, v))
 }
 
 // MaxAltitudeLTE applies the LTE predicate on the "max_altitude" field.
 func MaxAltitudeLTE(v int) predicate.IcingCondition {
-	return predicate.IcingCondition(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldMaxAltitude), v))
-	})
+	return predicate.IcingCondition(sql.FieldLTE(FieldMaxAltitude, v))
 }
 
 // MaxAltitudeIsNil applies the IsNil predicate on the "max_altitude" field.
 func MaxAltitudeIsNil() predicate.IcingCondition {
-	return predicate.IcingCondition(func(s *sql.Selector) {
-		s.Where(sql.IsNull(s.C(FieldMaxAltitude)))
-	})
+	return predicate.IcingCondition(sql.FieldIsNull(FieldMaxAltitude))
 }
 
 // MaxAltitudeNotNil applies the NotNil predicate on the "max_altitude" field.
 func MaxAltitudeNotNil() predicate.IcingCondition {
-	return predicate.IcingCondition(func(s *sql.Selector) {
-		s.Where(sql.NotNull(s.C(FieldMaxAltitude)))
-	})
+	return predicate.IcingCondition(sql.FieldNotNull(FieldMaxAltitude))
 }
 
 // And groups predicates with the AND operator between them.

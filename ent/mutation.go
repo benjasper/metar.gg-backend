@@ -26,6 +26,7 @@ import (
 	"metar.gg/ent/weatherstation"
 
 	"entgo.io/ent"
+	"entgo.io/ent/dialect/sql"
 )
 
 const (
@@ -1426,9 +1427,24 @@ func (m *AirportMutation) Where(ps ...predicate.Airport) {
 	m.predicates = append(m.predicates, ps...)
 }
 
+// WhereP appends storage-level predicates to the AirportMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *AirportMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.Airport, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
 // Op returns the operation name.
 func (m *AirportMutation) Op() Op {
 	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *AirportMutation) SetOp(op Op) {
+	m.op = op
 }
 
 // Type returns the node type of this mutation (Airport).
@@ -2709,9 +2725,24 @@ func (m *CountryMutation) Where(ps ...predicate.Country) {
 	m.predicates = append(m.predicates, ps...)
 }
 
+// WhereP appends storage-level predicates to the CountryMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *CountryMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.Country, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
 // Op returns the operation name.
 func (m *CountryMutation) Op() Op {
 	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *CountryMutation) SetOp(op Op) {
+	m.op = op
 }
 
 // Type returns the node type of this mutation (Country).
@@ -4398,9 +4429,24 @@ func (m *ForecastMutation) Where(ps ...predicate.Forecast) {
 	m.predicates = append(m.predicates, ps...)
 }
 
+// WhereP appends storage-level predicates to the ForecastMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *ForecastMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.Forecast, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
 // Op returns the operation name.
 func (m *ForecastMutation) Op() Op {
 	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *ForecastMutation) SetOp(op Op) {
+	m.op = op
 }
 
 // Type returns the node type of this mutation (Forecast).
@@ -5599,9 +5645,24 @@ func (m *FrequencyMutation) Where(ps ...predicate.Frequency) {
 	m.predicates = append(m.predicates, ps...)
 }
 
+// WhereP appends storage-level predicates to the FrequencyMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *FrequencyMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.Frequency, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
 // Op returns the operation name.
 func (m *FrequencyMutation) Op() Op {
 	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *FrequencyMutation) SetOp(op Op) {
+	m.op = op
 }
 
 // Type returns the node type of this mutation (Frequency).
@@ -6215,9 +6276,24 @@ func (m *IcingConditionMutation) Where(ps ...predicate.IcingCondition) {
 	m.predicates = append(m.predicates, ps...)
 }
 
+// WhereP appends storage-level predicates to the IcingConditionMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *IcingConditionMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.IcingCondition, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
 // Op returns the operation name.
 func (m *IcingConditionMutation) Op() Op {
 	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *IcingConditionMutation) SetOp(op Op) {
+	m.op = op
 }
 
 // Type returns the node type of this mutation (IcingCondition).
@@ -8644,9 +8720,24 @@ func (m *MetarMutation) Where(ps ...predicate.Metar) {
 	m.predicates = append(m.predicates, ps...)
 }
 
+// WhereP appends storage-level predicates to the MetarMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *MetarMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.Metar, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
 // Op returns the operation name.
 func (m *MetarMutation) Op() Op {
 	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *MetarMutation) SetOp(op Op) {
+	m.op = op
 }
 
 // Type returns the node type of this mutation (Metar).
@@ -10338,9 +10429,24 @@ func (m *RegionMutation) Where(ps ...predicate.Region) {
 	m.predicates = append(m.predicates, ps...)
 }
 
+// WhereP appends storage-level predicates to the RegionMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *RegionMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.Region, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
 // Op returns the operation name.
 func (m *RegionMutation) Op() Op {
 	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *RegionMutation) SetOp(op Op) {
+	m.op = op
 }
 
 // Type returns the node type of this mutation (Region).
@@ -12049,9 +12155,24 @@ func (m *RunwayMutation) Where(ps ...predicate.Runway) {
 	m.predicates = append(m.predicates, ps...)
 }
 
+// WhereP appends storage-level predicates to the RunwayMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *RunwayMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.Runway, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
 // Op returns the operation name.
 func (m *RunwayMutation) Op() Op {
 	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *RunwayMutation) SetOp(op Op) {
+	m.op = op
 }
 
 // Type returns the node type of this mutation (Runway).
@@ -13082,9 +13203,24 @@ func (m *SkyConditionMutation) Where(ps ...predicate.SkyCondition) {
 	m.predicates = append(m.predicates, ps...)
 }
 
+// WhereP appends storage-level predicates to the SkyConditionMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *SkyConditionMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.SkyCondition, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
 // Op returns the operation name.
 func (m *SkyConditionMutation) Op() Op {
 	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *SkyConditionMutation) SetOp(op Op) {
+	m.op = op
 }
 
 // Type returns the node type of this mutation (SkyCondition).
@@ -13820,9 +13956,24 @@ func (m *TafMutation) Where(ps ...predicate.Taf) {
 	m.predicates = append(m.predicates, ps...)
 }
 
+// WhereP appends storage-level predicates to the TafMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *TafMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.Taf, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
 // Op returns the operation name.
 func (m *TafMutation) Op() Op {
 	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *TafMutation) SetOp(op Op) {
+	m.op = op
 }
 
 // Type returns the node type of this mutation (Taf).
@@ -14512,9 +14663,24 @@ func (m *TemperatureDataMutation) Where(ps ...predicate.TemperatureData) {
 	m.predicates = append(m.predicates, ps...)
 }
 
+// WhereP appends storage-level predicates to the TemperatureDataMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *TemperatureDataMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.TemperatureData, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
 // Op returns the operation name.
 func (m *TemperatureDataMutation) Op() Op {
 	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *TemperatureDataMutation) SetOp(op Op) {
+	m.op = op
 }
 
 // Type returns the node type of this mutation (TemperatureData).
@@ -15050,9 +15216,24 @@ func (m *TurbulenceConditionMutation) Where(ps ...predicate.TurbulenceCondition)
 	m.predicates = append(m.predicates, ps...)
 }
 
+// WhereP appends storage-level predicates to the TurbulenceConditionMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *TurbulenceConditionMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.TurbulenceCondition, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
 // Op returns the operation name.
 func (m *TurbulenceConditionMutation) Op() Op {
 	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *TurbulenceConditionMutation) SetOp(op Op) {
+	m.op = op
 }
 
 // Type returns the node type of this mutation (TurbulenceCondition).
@@ -15836,9 +16017,24 @@ func (m *WeatherStationMutation) Where(ps ...predicate.WeatherStation) {
 	m.predicates = append(m.predicates, ps...)
 }
 
+// WhereP appends storage-level predicates to the WeatherStationMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *WeatherStationMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.WeatherStation, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
 // Op returns the operation name.
 func (m *WeatherStationMutation) Op() Op {
 	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *WeatherStationMutation) SetOp(op Op) {
+	m.op = op
 }
 
 // Type returns the node type of this mutation (WeatherStation).

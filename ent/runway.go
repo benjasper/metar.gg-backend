@@ -282,14 +282,14 @@ func (r *Runway) assignValues(columns []string, values []any) error {
 
 // QueryAirport queries the "airport" edge of the Runway entity.
 func (r *Runway) QueryAirport() *AirportQuery {
-	return (&RunwayClient{config: r.config}).QueryAirport(r)
+	return NewRunwayClient(r.config).QueryAirport(r)
 }
 
 // Update returns a builder for updating this Runway.
 // Note that you need to call Runway.Unwrap() before calling this method if this Runway
 // was returned from a transaction, and the transaction was committed or rolled back.
 func (r *Runway) Update() *RunwayUpdateOne {
-	return (&RunwayClient{config: r.config}).UpdateOne(r)
+	return NewRunwayClient(r.config).UpdateOne(r)
 }
 
 // Unwrap unwraps the Runway entity that was returned from a transaction after it was closed,
@@ -398,9 +398,3 @@ func (r *Runway) String() string {
 
 // Runways is a parsable slice of Runway.
 type Runways []*Runway
-
-func (r Runways) config(cfg config) {
-	for _i := range r {
-		r[_i].config = cfg
-	}
-}

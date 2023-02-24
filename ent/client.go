@@ -65,7 +65,7 @@ type Client struct {
 
 // NewClient creates a new client configured with the given options.
 func NewClient(opts ...Option) *Client {
-	cfg := config{log: log.Println, hooks: &hooks{}}
+	cfg := config{log: log.Println, hooks: &hooks{}, inters: &inters{}}
 	cfg.options(opts...)
 	client := &Client{config: cfg}
 	client.init()
@@ -208,6 +208,58 @@ func (c *Client) Use(hooks ...Hook) {
 	c.WeatherStation.Use(hooks...)
 }
 
+// Intercept adds the query interceptors to all the entity clients.
+// In order to add interceptors to a specific client, call: `client.Node.Intercept(...)`.
+func (c *Client) Intercept(interceptors ...Interceptor) {
+	c.Airport.Intercept(interceptors...)
+	c.Country.Intercept(interceptors...)
+	c.Forecast.Intercept(interceptors...)
+	c.Frequency.Intercept(interceptors...)
+	c.IcingCondition.Intercept(interceptors...)
+	c.Metar.Intercept(interceptors...)
+	c.Region.Intercept(interceptors...)
+	c.Runway.Intercept(interceptors...)
+	c.SkyCondition.Intercept(interceptors...)
+	c.Taf.Intercept(interceptors...)
+	c.TemperatureData.Intercept(interceptors...)
+	c.TurbulenceCondition.Intercept(interceptors...)
+	c.WeatherStation.Intercept(interceptors...)
+}
+
+// Mutate implements the ent.Mutator interface.
+func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
+	switch m := m.(type) {
+	case *AirportMutation:
+		return c.Airport.mutate(ctx, m)
+	case *CountryMutation:
+		return c.Country.mutate(ctx, m)
+	case *ForecastMutation:
+		return c.Forecast.mutate(ctx, m)
+	case *FrequencyMutation:
+		return c.Frequency.mutate(ctx, m)
+	case *IcingConditionMutation:
+		return c.IcingCondition.mutate(ctx, m)
+	case *MetarMutation:
+		return c.Metar.mutate(ctx, m)
+	case *RegionMutation:
+		return c.Region.mutate(ctx, m)
+	case *RunwayMutation:
+		return c.Runway.mutate(ctx, m)
+	case *SkyConditionMutation:
+		return c.SkyCondition.mutate(ctx, m)
+	case *TafMutation:
+		return c.Taf.mutate(ctx, m)
+	case *TemperatureDataMutation:
+		return c.TemperatureData.mutate(ctx, m)
+	case *TurbulenceConditionMutation:
+		return c.TurbulenceCondition.mutate(ctx, m)
+	case *WeatherStationMutation:
+		return c.WeatherStation.mutate(ctx, m)
+	default:
+		return nil, fmt.Errorf("ent: unknown mutation type %T", m)
+	}
+}
+
 // AirportClient is a client for the Airport schema.
 type AirportClient struct {
 	config
@@ -222,6 +274,12 @@ func NewAirportClient(c config) *AirportClient {
 // A call to `Use(f, g, h)` equals to `airport.Hooks(f(g(h())))`.
 func (c *AirportClient) Use(hooks ...Hook) {
 	c.hooks.Airport = append(c.hooks.Airport, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `airport.Intercept(f(g(h())))`.
+func (c *AirportClient) Intercept(interceptors ...Interceptor) {
+	c.inters.Airport = append(c.inters.Airport, interceptors...)
 }
 
 // Create returns a builder for creating a Airport entity.
@@ -276,6 +334,8 @@ func (c *AirportClient) DeleteOneID(id uuid.UUID) *AirportDeleteOne {
 func (c *AirportClient) Query() *AirportQuery {
 	return &AirportQuery{
 		config: c.config,
+		ctx:    &QueryContext{Type: TypeAirport},
+		inters: c.Interceptors(),
 	}
 }
 
@@ -295,7 +355,7 @@ func (c *AirportClient) GetX(ctx context.Context, id uuid.UUID) *Airport {
 
 // QueryRegion queries the region edge of a Airport.
 func (c *AirportClient) QueryRegion(a *Airport) *RegionQuery {
-	query := &RegionQuery{config: c.config}
+	query := (&RegionClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := a.ID
 		step := sqlgraph.NewStep(
@@ -311,7 +371,7 @@ func (c *AirportClient) QueryRegion(a *Airport) *RegionQuery {
 
 // QueryCountry queries the country edge of a Airport.
 func (c *AirportClient) QueryCountry(a *Airport) *CountryQuery {
-	query := &CountryQuery{config: c.config}
+	query := (&CountryClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := a.ID
 		step := sqlgraph.NewStep(
@@ -327,7 +387,7 @@ func (c *AirportClient) QueryCountry(a *Airport) *CountryQuery {
 
 // QueryRunways queries the runways edge of a Airport.
 func (c *AirportClient) QueryRunways(a *Airport) *RunwayQuery {
-	query := &RunwayQuery{config: c.config}
+	query := (&RunwayClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := a.ID
 		step := sqlgraph.NewStep(
@@ -343,7 +403,7 @@ func (c *AirportClient) QueryRunways(a *Airport) *RunwayQuery {
 
 // QueryFrequencies queries the frequencies edge of a Airport.
 func (c *AirportClient) QueryFrequencies(a *Airport) *FrequencyQuery {
-	query := &FrequencyQuery{config: c.config}
+	query := (&FrequencyClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := a.ID
 		step := sqlgraph.NewStep(
@@ -359,7 +419,7 @@ func (c *AirportClient) QueryFrequencies(a *Airport) *FrequencyQuery {
 
 // QueryStation queries the station edge of a Airport.
 func (c *AirportClient) QueryStation(a *Airport) *WeatherStationQuery {
-	query := &WeatherStationQuery{config: c.config}
+	query := (&WeatherStationClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := a.ID
 		step := sqlgraph.NewStep(
@@ -378,6 +438,26 @@ func (c *AirportClient) Hooks() []Hook {
 	return c.hooks.Airport
 }
 
+// Interceptors returns the client interceptors.
+func (c *AirportClient) Interceptors() []Interceptor {
+	return c.inters.Airport
+}
+
+func (c *AirportClient) mutate(ctx context.Context, m *AirportMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&AirportCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&AirportUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&AirportUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&AirportDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown Airport mutation op: %q", m.Op())
+	}
+}
+
 // CountryClient is a client for the Country schema.
 type CountryClient struct {
 	config
@@ -392,6 +472,12 @@ func NewCountryClient(c config) *CountryClient {
 // A call to `Use(f, g, h)` equals to `country.Hooks(f(g(h())))`.
 func (c *CountryClient) Use(hooks ...Hook) {
 	c.hooks.Country = append(c.hooks.Country, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `country.Intercept(f(g(h())))`.
+func (c *CountryClient) Intercept(interceptors ...Interceptor) {
+	c.inters.Country = append(c.inters.Country, interceptors...)
 }
 
 // Create returns a builder for creating a Country entity.
@@ -446,6 +532,8 @@ func (c *CountryClient) DeleteOneID(id uuid.UUID) *CountryDeleteOne {
 func (c *CountryClient) Query() *CountryQuery {
 	return &CountryQuery{
 		config: c.config,
+		ctx:    &QueryContext{Type: TypeCountry},
+		inters: c.Interceptors(),
 	}
 }
 
@@ -465,7 +553,7 @@ func (c *CountryClient) GetX(ctx context.Context, id uuid.UUID) *Country {
 
 // QueryAirports queries the airports edge of a Country.
 func (c *CountryClient) QueryAirports(co *Country) *AirportQuery {
-	query := &AirportQuery{config: c.config}
+	query := (&AirportClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := co.ID
 		step := sqlgraph.NewStep(
@@ -484,6 +572,26 @@ func (c *CountryClient) Hooks() []Hook {
 	return c.hooks.Country
 }
 
+// Interceptors returns the client interceptors.
+func (c *CountryClient) Interceptors() []Interceptor {
+	return c.inters.Country
+}
+
+func (c *CountryClient) mutate(ctx context.Context, m *CountryMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&CountryCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&CountryUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&CountryUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&CountryDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown Country mutation op: %q", m.Op())
+	}
+}
+
 // ForecastClient is a client for the Forecast schema.
 type ForecastClient struct {
 	config
@@ -498,6 +606,12 @@ func NewForecastClient(c config) *ForecastClient {
 // A call to `Use(f, g, h)` equals to `forecast.Hooks(f(g(h())))`.
 func (c *ForecastClient) Use(hooks ...Hook) {
 	c.hooks.Forecast = append(c.hooks.Forecast, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `forecast.Intercept(f(g(h())))`.
+func (c *ForecastClient) Intercept(interceptors ...Interceptor) {
+	c.inters.Forecast = append(c.inters.Forecast, interceptors...)
 }
 
 // Create returns a builder for creating a Forecast entity.
@@ -552,6 +666,8 @@ func (c *ForecastClient) DeleteOneID(id uuid.UUID) *ForecastDeleteOne {
 func (c *ForecastClient) Query() *ForecastQuery {
 	return &ForecastQuery{
 		config: c.config,
+		ctx:    &QueryContext{Type: TypeForecast},
+		inters: c.Interceptors(),
 	}
 }
 
@@ -571,7 +687,7 @@ func (c *ForecastClient) GetX(ctx context.Context, id uuid.UUID) *Forecast {
 
 // QuerySkyConditions queries the sky_conditions edge of a Forecast.
 func (c *ForecastClient) QuerySkyConditions(f *Forecast) *SkyConditionQuery {
-	query := &SkyConditionQuery{config: c.config}
+	query := (&SkyConditionClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := f.ID
 		step := sqlgraph.NewStep(
@@ -587,7 +703,7 @@ func (c *ForecastClient) QuerySkyConditions(f *Forecast) *SkyConditionQuery {
 
 // QueryTurbulenceConditions queries the turbulence_conditions edge of a Forecast.
 func (c *ForecastClient) QueryTurbulenceConditions(f *Forecast) *TurbulenceConditionQuery {
-	query := &TurbulenceConditionQuery{config: c.config}
+	query := (&TurbulenceConditionClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := f.ID
 		step := sqlgraph.NewStep(
@@ -603,7 +719,7 @@ func (c *ForecastClient) QueryTurbulenceConditions(f *Forecast) *TurbulenceCondi
 
 // QueryIcingConditions queries the icing_conditions edge of a Forecast.
 func (c *ForecastClient) QueryIcingConditions(f *Forecast) *IcingConditionQuery {
-	query := &IcingConditionQuery{config: c.config}
+	query := (&IcingConditionClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := f.ID
 		step := sqlgraph.NewStep(
@@ -619,7 +735,7 @@ func (c *ForecastClient) QueryIcingConditions(f *Forecast) *IcingConditionQuery 
 
 // QueryTemperatureData queries the temperature_data edge of a Forecast.
 func (c *ForecastClient) QueryTemperatureData(f *Forecast) *TemperatureDataQuery {
-	query := &TemperatureDataQuery{config: c.config}
+	query := (&TemperatureDataClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := f.ID
 		step := sqlgraph.NewStep(
@@ -638,6 +754,26 @@ func (c *ForecastClient) Hooks() []Hook {
 	return c.hooks.Forecast
 }
 
+// Interceptors returns the client interceptors.
+func (c *ForecastClient) Interceptors() []Interceptor {
+	return c.inters.Forecast
+}
+
+func (c *ForecastClient) mutate(ctx context.Context, m *ForecastMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&ForecastCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&ForecastUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&ForecastUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&ForecastDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown Forecast mutation op: %q", m.Op())
+	}
+}
+
 // FrequencyClient is a client for the Frequency schema.
 type FrequencyClient struct {
 	config
@@ -652,6 +788,12 @@ func NewFrequencyClient(c config) *FrequencyClient {
 // A call to `Use(f, g, h)` equals to `frequency.Hooks(f(g(h())))`.
 func (c *FrequencyClient) Use(hooks ...Hook) {
 	c.hooks.Frequency = append(c.hooks.Frequency, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `frequency.Intercept(f(g(h())))`.
+func (c *FrequencyClient) Intercept(interceptors ...Interceptor) {
+	c.inters.Frequency = append(c.inters.Frequency, interceptors...)
 }
 
 // Create returns a builder for creating a Frequency entity.
@@ -706,6 +848,8 @@ func (c *FrequencyClient) DeleteOneID(id uuid.UUID) *FrequencyDeleteOne {
 func (c *FrequencyClient) Query() *FrequencyQuery {
 	return &FrequencyQuery{
 		config: c.config,
+		ctx:    &QueryContext{Type: TypeFrequency},
+		inters: c.Interceptors(),
 	}
 }
 
@@ -725,7 +869,7 @@ func (c *FrequencyClient) GetX(ctx context.Context, id uuid.UUID) *Frequency {
 
 // QueryAirport queries the airport edge of a Frequency.
 func (c *FrequencyClient) QueryAirport(f *Frequency) *AirportQuery {
-	query := &AirportQuery{config: c.config}
+	query := (&AirportClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := f.ID
 		step := sqlgraph.NewStep(
@@ -744,6 +888,26 @@ func (c *FrequencyClient) Hooks() []Hook {
 	return c.hooks.Frequency
 }
 
+// Interceptors returns the client interceptors.
+func (c *FrequencyClient) Interceptors() []Interceptor {
+	return c.inters.Frequency
+}
+
+func (c *FrequencyClient) mutate(ctx context.Context, m *FrequencyMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&FrequencyCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&FrequencyUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&FrequencyUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&FrequencyDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown Frequency mutation op: %q", m.Op())
+	}
+}
+
 // IcingConditionClient is a client for the IcingCondition schema.
 type IcingConditionClient struct {
 	config
@@ -758,6 +922,12 @@ func NewIcingConditionClient(c config) *IcingConditionClient {
 // A call to `Use(f, g, h)` equals to `icingcondition.Hooks(f(g(h())))`.
 func (c *IcingConditionClient) Use(hooks ...Hook) {
 	c.hooks.IcingCondition = append(c.hooks.IcingCondition, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `icingcondition.Intercept(f(g(h())))`.
+func (c *IcingConditionClient) Intercept(interceptors ...Interceptor) {
+	c.inters.IcingCondition = append(c.inters.IcingCondition, interceptors...)
 }
 
 // Create returns a builder for creating a IcingCondition entity.
@@ -812,6 +982,8 @@ func (c *IcingConditionClient) DeleteOneID(id uuid.UUID) *IcingConditionDeleteOn
 func (c *IcingConditionClient) Query() *IcingConditionQuery {
 	return &IcingConditionQuery{
 		config: c.config,
+		ctx:    &QueryContext{Type: TypeIcingCondition},
+		inters: c.Interceptors(),
 	}
 }
 
@@ -834,6 +1006,26 @@ func (c *IcingConditionClient) Hooks() []Hook {
 	return c.hooks.IcingCondition
 }
 
+// Interceptors returns the client interceptors.
+func (c *IcingConditionClient) Interceptors() []Interceptor {
+	return c.inters.IcingCondition
+}
+
+func (c *IcingConditionClient) mutate(ctx context.Context, m *IcingConditionMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&IcingConditionCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&IcingConditionUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&IcingConditionUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&IcingConditionDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown IcingCondition mutation op: %q", m.Op())
+	}
+}
+
 // MetarClient is a client for the Metar schema.
 type MetarClient struct {
 	config
@@ -848,6 +1040,12 @@ func NewMetarClient(c config) *MetarClient {
 // A call to `Use(f, g, h)` equals to `metar.Hooks(f(g(h())))`.
 func (c *MetarClient) Use(hooks ...Hook) {
 	c.hooks.Metar = append(c.hooks.Metar, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `metar.Intercept(f(g(h())))`.
+func (c *MetarClient) Intercept(interceptors ...Interceptor) {
+	c.inters.Metar = append(c.inters.Metar, interceptors...)
 }
 
 // Create returns a builder for creating a Metar entity.
@@ -902,6 +1100,8 @@ func (c *MetarClient) DeleteOneID(id uuid.UUID) *MetarDeleteOne {
 func (c *MetarClient) Query() *MetarQuery {
 	return &MetarQuery{
 		config: c.config,
+		ctx:    &QueryContext{Type: TypeMetar},
+		inters: c.Interceptors(),
 	}
 }
 
@@ -921,7 +1121,7 @@ func (c *MetarClient) GetX(ctx context.Context, id uuid.UUID) *Metar {
 
 // QueryStation queries the station edge of a Metar.
 func (c *MetarClient) QueryStation(m *Metar) *WeatherStationQuery {
-	query := &WeatherStationQuery{config: c.config}
+	query := (&WeatherStationClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := m.ID
 		step := sqlgraph.NewStep(
@@ -937,7 +1137,7 @@ func (c *MetarClient) QueryStation(m *Metar) *WeatherStationQuery {
 
 // QuerySkyConditions queries the sky_conditions edge of a Metar.
 func (c *MetarClient) QuerySkyConditions(m *Metar) *SkyConditionQuery {
-	query := &SkyConditionQuery{config: c.config}
+	query := (&SkyConditionClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := m.ID
 		step := sqlgraph.NewStep(
@@ -956,6 +1156,26 @@ func (c *MetarClient) Hooks() []Hook {
 	return c.hooks.Metar
 }
 
+// Interceptors returns the client interceptors.
+func (c *MetarClient) Interceptors() []Interceptor {
+	return c.inters.Metar
+}
+
+func (c *MetarClient) mutate(ctx context.Context, m *MetarMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&MetarCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&MetarUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&MetarUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&MetarDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown Metar mutation op: %q", m.Op())
+	}
+}
+
 // RegionClient is a client for the Region schema.
 type RegionClient struct {
 	config
@@ -970,6 +1190,12 @@ func NewRegionClient(c config) *RegionClient {
 // A call to `Use(f, g, h)` equals to `region.Hooks(f(g(h())))`.
 func (c *RegionClient) Use(hooks ...Hook) {
 	c.hooks.Region = append(c.hooks.Region, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `region.Intercept(f(g(h())))`.
+func (c *RegionClient) Intercept(interceptors ...Interceptor) {
+	c.inters.Region = append(c.inters.Region, interceptors...)
 }
 
 // Create returns a builder for creating a Region entity.
@@ -1024,6 +1250,8 @@ func (c *RegionClient) DeleteOneID(id uuid.UUID) *RegionDeleteOne {
 func (c *RegionClient) Query() *RegionQuery {
 	return &RegionQuery{
 		config: c.config,
+		ctx:    &QueryContext{Type: TypeRegion},
+		inters: c.Interceptors(),
 	}
 }
 
@@ -1043,7 +1271,7 @@ func (c *RegionClient) GetX(ctx context.Context, id uuid.UUID) *Region {
 
 // QueryAirports queries the airports edge of a Region.
 func (c *RegionClient) QueryAirports(r *Region) *AirportQuery {
-	query := &AirportQuery{config: c.config}
+	query := (&AirportClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := r.ID
 		step := sqlgraph.NewStep(
@@ -1062,6 +1290,26 @@ func (c *RegionClient) Hooks() []Hook {
 	return c.hooks.Region
 }
 
+// Interceptors returns the client interceptors.
+func (c *RegionClient) Interceptors() []Interceptor {
+	return c.inters.Region
+}
+
+func (c *RegionClient) mutate(ctx context.Context, m *RegionMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&RegionCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&RegionUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&RegionUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&RegionDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown Region mutation op: %q", m.Op())
+	}
+}
+
 // RunwayClient is a client for the Runway schema.
 type RunwayClient struct {
 	config
@@ -1076,6 +1324,12 @@ func NewRunwayClient(c config) *RunwayClient {
 // A call to `Use(f, g, h)` equals to `runway.Hooks(f(g(h())))`.
 func (c *RunwayClient) Use(hooks ...Hook) {
 	c.hooks.Runway = append(c.hooks.Runway, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `runway.Intercept(f(g(h())))`.
+func (c *RunwayClient) Intercept(interceptors ...Interceptor) {
+	c.inters.Runway = append(c.inters.Runway, interceptors...)
 }
 
 // Create returns a builder for creating a Runway entity.
@@ -1130,6 +1384,8 @@ func (c *RunwayClient) DeleteOneID(id uuid.UUID) *RunwayDeleteOne {
 func (c *RunwayClient) Query() *RunwayQuery {
 	return &RunwayQuery{
 		config: c.config,
+		ctx:    &QueryContext{Type: TypeRunway},
+		inters: c.Interceptors(),
 	}
 }
 
@@ -1149,7 +1405,7 @@ func (c *RunwayClient) GetX(ctx context.Context, id uuid.UUID) *Runway {
 
 // QueryAirport queries the airport edge of a Runway.
 func (c *RunwayClient) QueryAirport(r *Runway) *AirportQuery {
-	query := &AirportQuery{config: c.config}
+	query := (&AirportClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := r.ID
 		step := sqlgraph.NewStep(
@@ -1168,6 +1424,26 @@ func (c *RunwayClient) Hooks() []Hook {
 	return c.hooks.Runway
 }
 
+// Interceptors returns the client interceptors.
+func (c *RunwayClient) Interceptors() []Interceptor {
+	return c.inters.Runway
+}
+
+func (c *RunwayClient) mutate(ctx context.Context, m *RunwayMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&RunwayCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&RunwayUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&RunwayUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&RunwayDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown Runway mutation op: %q", m.Op())
+	}
+}
+
 // SkyConditionClient is a client for the SkyCondition schema.
 type SkyConditionClient struct {
 	config
@@ -1182,6 +1458,12 @@ func NewSkyConditionClient(c config) *SkyConditionClient {
 // A call to `Use(f, g, h)` equals to `skycondition.Hooks(f(g(h())))`.
 func (c *SkyConditionClient) Use(hooks ...Hook) {
 	c.hooks.SkyCondition = append(c.hooks.SkyCondition, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `skycondition.Intercept(f(g(h())))`.
+func (c *SkyConditionClient) Intercept(interceptors ...Interceptor) {
+	c.inters.SkyCondition = append(c.inters.SkyCondition, interceptors...)
 }
 
 // Create returns a builder for creating a SkyCondition entity.
@@ -1236,6 +1518,8 @@ func (c *SkyConditionClient) DeleteOneID(id uuid.UUID) *SkyConditionDeleteOne {
 func (c *SkyConditionClient) Query() *SkyConditionQuery {
 	return &SkyConditionQuery{
 		config: c.config,
+		ctx:    &QueryContext{Type: TypeSkyCondition},
+		inters: c.Interceptors(),
 	}
 }
 
@@ -1258,6 +1542,26 @@ func (c *SkyConditionClient) Hooks() []Hook {
 	return c.hooks.SkyCondition
 }
 
+// Interceptors returns the client interceptors.
+func (c *SkyConditionClient) Interceptors() []Interceptor {
+	return c.inters.SkyCondition
+}
+
+func (c *SkyConditionClient) mutate(ctx context.Context, m *SkyConditionMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&SkyConditionCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&SkyConditionUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&SkyConditionUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&SkyConditionDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown SkyCondition mutation op: %q", m.Op())
+	}
+}
+
 // TafClient is a client for the Taf schema.
 type TafClient struct {
 	config
@@ -1272,6 +1576,12 @@ func NewTafClient(c config) *TafClient {
 // A call to `Use(f, g, h)` equals to `taf.Hooks(f(g(h())))`.
 func (c *TafClient) Use(hooks ...Hook) {
 	c.hooks.Taf = append(c.hooks.Taf, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `taf.Intercept(f(g(h())))`.
+func (c *TafClient) Intercept(interceptors ...Interceptor) {
+	c.inters.Taf = append(c.inters.Taf, interceptors...)
 }
 
 // Create returns a builder for creating a Taf entity.
@@ -1326,6 +1636,8 @@ func (c *TafClient) DeleteOneID(id uuid.UUID) *TafDeleteOne {
 func (c *TafClient) Query() *TafQuery {
 	return &TafQuery{
 		config: c.config,
+		ctx:    &QueryContext{Type: TypeTaf},
+		inters: c.Interceptors(),
 	}
 }
 
@@ -1345,7 +1657,7 @@ func (c *TafClient) GetX(ctx context.Context, id uuid.UUID) *Taf {
 
 // QueryStation queries the station edge of a Taf.
 func (c *TafClient) QueryStation(t *Taf) *WeatherStationQuery {
-	query := &WeatherStationQuery{config: c.config}
+	query := (&WeatherStationClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := t.ID
 		step := sqlgraph.NewStep(
@@ -1361,7 +1673,7 @@ func (c *TafClient) QueryStation(t *Taf) *WeatherStationQuery {
 
 // QueryForecast queries the forecast edge of a Taf.
 func (c *TafClient) QueryForecast(t *Taf) *ForecastQuery {
-	query := &ForecastQuery{config: c.config}
+	query := (&ForecastClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := t.ID
 		step := sqlgraph.NewStep(
@@ -1380,6 +1692,26 @@ func (c *TafClient) Hooks() []Hook {
 	return c.hooks.Taf
 }
 
+// Interceptors returns the client interceptors.
+func (c *TafClient) Interceptors() []Interceptor {
+	return c.inters.Taf
+}
+
+func (c *TafClient) mutate(ctx context.Context, m *TafMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&TafCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&TafUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&TafUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&TafDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown Taf mutation op: %q", m.Op())
+	}
+}
+
 // TemperatureDataClient is a client for the TemperatureData schema.
 type TemperatureDataClient struct {
 	config
@@ -1394,6 +1726,12 @@ func NewTemperatureDataClient(c config) *TemperatureDataClient {
 // A call to `Use(f, g, h)` equals to `temperaturedata.Hooks(f(g(h())))`.
 func (c *TemperatureDataClient) Use(hooks ...Hook) {
 	c.hooks.TemperatureData = append(c.hooks.TemperatureData, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `temperaturedata.Intercept(f(g(h())))`.
+func (c *TemperatureDataClient) Intercept(interceptors ...Interceptor) {
+	c.inters.TemperatureData = append(c.inters.TemperatureData, interceptors...)
 }
 
 // Create returns a builder for creating a TemperatureData entity.
@@ -1448,6 +1786,8 @@ func (c *TemperatureDataClient) DeleteOneID(id uuid.UUID) *TemperatureDataDelete
 func (c *TemperatureDataClient) Query() *TemperatureDataQuery {
 	return &TemperatureDataQuery{
 		config: c.config,
+		ctx:    &QueryContext{Type: TypeTemperatureData},
+		inters: c.Interceptors(),
 	}
 }
 
@@ -1470,6 +1810,26 @@ func (c *TemperatureDataClient) Hooks() []Hook {
 	return c.hooks.TemperatureData
 }
 
+// Interceptors returns the client interceptors.
+func (c *TemperatureDataClient) Interceptors() []Interceptor {
+	return c.inters.TemperatureData
+}
+
+func (c *TemperatureDataClient) mutate(ctx context.Context, m *TemperatureDataMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&TemperatureDataCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&TemperatureDataUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&TemperatureDataUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&TemperatureDataDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown TemperatureData mutation op: %q", m.Op())
+	}
+}
+
 // TurbulenceConditionClient is a client for the TurbulenceCondition schema.
 type TurbulenceConditionClient struct {
 	config
@@ -1484,6 +1844,12 @@ func NewTurbulenceConditionClient(c config) *TurbulenceConditionClient {
 // A call to `Use(f, g, h)` equals to `turbulencecondition.Hooks(f(g(h())))`.
 func (c *TurbulenceConditionClient) Use(hooks ...Hook) {
 	c.hooks.TurbulenceCondition = append(c.hooks.TurbulenceCondition, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `turbulencecondition.Intercept(f(g(h())))`.
+func (c *TurbulenceConditionClient) Intercept(interceptors ...Interceptor) {
+	c.inters.TurbulenceCondition = append(c.inters.TurbulenceCondition, interceptors...)
 }
 
 // Create returns a builder for creating a TurbulenceCondition entity.
@@ -1538,6 +1904,8 @@ func (c *TurbulenceConditionClient) DeleteOneID(id uuid.UUID) *TurbulenceConditi
 func (c *TurbulenceConditionClient) Query() *TurbulenceConditionQuery {
 	return &TurbulenceConditionQuery{
 		config: c.config,
+		ctx:    &QueryContext{Type: TypeTurbulenceCondition},
+		inters: c.Interceptors(),
 	}
 }
 
@@ -1560,6 +1928,26 @@ func (c *TurbulenceConditionClient) Hooks() []Hook {
 	return c.hooks.TurbulenceCondition
 }
 
+// Interceptors returns the client interceptors.
+func (c *TurbulenceConditionClient) Interceptors() []Interceptor {
+	return c.inters.TurbulenceCondition
+}
+
+func (c *TurbulenceConditionClient) mutate(ctx context.Context, m *TurbulenceConditionMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&TurbulenceConditionCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&TurbulenceConditionUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&TurbulenceConditionUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&TurbulenceConditionDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown TurbulenceCondition mutation op: %q", m.Op())
+	}
+}
+
 // WeatherStationClient is a client for the WeatherStation schema.
 type WeatherStationClient struct {
 	config
@@ -1574,6 +1962,12 @@ func NewWeatherStationClient(c config) *WeatherStationClient {
 // A call to `Use(f, g, h)` equals to `weatherstation.Hooks(f(g(h())))`.
 func (c *WeatherStationClient) Use(hooks ...Hook) {
 	c.hooks.WeatherStation = append(c.hooks.WeatherStation, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `weatherstation.Intercept(f(g(h())))`.
+func (c *WeatherStationClient) Intercept(interceptors ...Interceptor) {
+	c.inters.WeatherStation = append(c.inters.WeatherStation, interceptors...)
 }
 
 // Create returns a builder for creating a WeatherStation entity.
@@ -1628,6 +2022,8 @@ func (c *WeatherStationClient) DeleteOneID(id uuid.UUID) *WeatherStationDeleteOn
 func (c *WeatherStationClient) Query() *WeatherStationQuery {
 	return &WeatherStationQuery{
 		config: c.config,
+		ctx:    &QueryContext{Type: TypeWeatherStation},
+		inters: c.Interceptors(),
 	}
 }
 
@@ -1647,7 +2043,7 @@ func (c *WeatherStationClient) GetX(ctx context.Context, id uuid.UUID) *WeatherS
 
 // QueryAirport queries the airport edge of a WeatherStation.
 func (c *WeatherStationClient) QueryAirport(ws *WeatherStation) *AirportQuery {
-	query := &AirportQuery{config: c.config}
+	query := (&AirportClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := ws.ID
 		step := sqlgraph.NewStep(
@@ -1663,7 +2059,7 @@ func (c *WeatherStationClient) QueryAirport(ws *WeatherStation) *AirportQuery {
 
 // QueryMetars queries the metars edge of a WeatherStation.
 func (c *WeatherStationClient) QueryMetars(ws *WeatherStation) *MetarQuery {
-	query := &MetarQuery{config: c.config}
+	query := (&MetarClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := ws.ID
 		step := sqlgraph.NewStep(
@@ -1679,7 +2075,7 @@ func (c *WeatherStationClient) QueryMetars(ws *WeatherStation) *MetarQuery {
 
 // QueryTafs queries the tafs edge of a WeatherStation.
 func (c *WeatherStationClient) QueryTafs(ws *WeatherStation) *TafQuery {
-	query := &TafQuery{config: c.config}
+	query := (&TafClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := ws.ID
 		step := sqlgraph.NewStep(
@@ -1696,4 +2092,24 @@ func (c *WeatherStationClient) QueryTafs(ws *WeatherStation) *TafQuery {
 // Hooks returns the client hooks.
 func (c *WeatherStationClient) Hooks() []Hook {
 	return c.hooks.WeatherStation
+}
+
+// Interceptors returns the client interceptors.
+func (c *WeatherStationClient) Interceptors() []Interceptor {
+	return c.inters.WeatherStation
+}
+
+func (c *WeatherStationClient) mutate(ctx context.Context, m *WeatherStationMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&WeatherStationCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&WeatherStationUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&WeatherStationUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&WeatherStationDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown WeatherStation mutation op: %q", m.Op())
+	}
 }

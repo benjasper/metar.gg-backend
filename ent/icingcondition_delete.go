@@ -4,7 +4,6 @@ package ent
 
 import (
 	"context"
-	"fmt"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
@@ -28,34 +27,7 @@ func (icd *IcingConditionDelete) Where(ps ...predicate.IcingCondition) *IcingCon
 
 // Exec executes the deletion query and returns how many vertices were deleted.
 func (icd *IcingConditionDelete) Exec(ctx context.Context) (int, error) {
-	var (
-		err      error
-		affected int
-	)
-	if len(icd.hooks) == 0 {
-		affected, err = icd.sqlExec(ctx)
-	} else {
-		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
-			mutation, ok := m.(*IcingConditionMutation)
-			if !ok {
-				return nil, fmt.Errorf("unexpected mutation type %T", m)
-			}
-			icd.mutation = mutation
-			affected, err = icd.sqlExec(ctx)
-			mutation.done = true
-			return affected, err
-		})
-		for i := len(icd.hooks) - 1; i >= 0; i-- {
-			if icd.hooks[i] == nil {
-				return 0, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
-			}
-			mut = icd.hooks[i](mut)
-		}
-		if _, err := mut.Mutate(ctx, icd.mutation); err != nil {
-			return 0, err
-		}
-	}
-	return affected, err
+	return withHooks[int, IcingConditionMutation](ctx, icd.sqlExec, icd.mutation, icd.hooks)
 }
 
 // ExecX is like Exec, but panics if an error occurs.
@@ -68,15 +40,7 @@ func (icd *IcingConditionDelete) ExecX(ctx context.Context) int {
 }
 
 func (icd *IcingConditionDelete) sqlExec(ctx context.Context) (int, error) {
-	_spec := &sqlgraph.DeleteSpec{
-		Node: &sqlgraph.NodeSpec{
-			Table: icingcondition.Table,
-			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeUUID,
-				Column: icingcondition.FieldID,
-			},
-		},
-	}
+	_spec := sqlgraph.NewDeleteSpec(icingcondition.Table, sqlgraph.NewFieldSpec(icingcondition.FieldID, field.TypeUUID))
 	if ps := icd.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
@@ -88,12 +52,19 @@ func (icd *IcingConditionDelete) sqlExec(ctx context.Context) (int, error) {
 	if err != nil && sqlgraph.IsConstraintError(err) {
 		err = &ConstraintError{msg: err.Error(), wrap: err}
 	}
+	icd.mutation.done = true
 	return affected, err
 }
 
 // IcingConditionDeleteOne is the builder for deleting a single IcingCondition entity.
 type IcingConditionDeleteOne struct {
 	icd *IcingConditionDelete
+}
+
+// Where appends a list predicates to the IcingConditionDelete builder.
+func (icdo *IcingConditionDeleteOne) Where(ps ...predicate.IcingCondition) *IcingConditionDeleteOne {
+	icdo.icd.mutation.Where(ps...)
+	return icdo
 }
 
 // Exec executes the deletion query.
@@ -111,5 +82,7 @@ func (icdo *IcingConditionDeleteOne) Exec(ctx context.Context) error {
 
 // ExecX is like Exec, but panics if an error occurs.
 func (icdo *IcingConditionDeleteOne) ExecX(ctx context.Context) {
-	icdo.icd.ExecX(ctx)
+	if err := icdo.Exec(ctx); err != nil {
+		panic(err)
+	}
 }

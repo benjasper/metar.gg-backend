@@ -18,11 +18,9 @@ import (
 // SkyConditionQuery is the builder for querying SkyCondition entities.
 type SkyConditionQuery struct {
 	config
-	limit      *int
-	offset     *int
-	unique     *bool
+	ctx        *QueryContext
 	order      []OrderFunc
-	fields     []string
+	inters     []Interceptor
 	predicates []predicate.SkyCondition
 	withFKs    bool
 	loadTotal  []func(context.Context, []*SkyCondition) error
@@ -38,26 +36,26 @@ func (scq *SkyConditionQuery) Where(ps ...predicate.SkyCondition) *SkyConditionQ
 	return scq
 }
 
-// Limit adds a limit step to the query.
+// Limit the number of records to be returned by this query.
 func (scq *SkyConditionQuery) Limit(limit int) *SkyConditionQuery {
-	scq.limit = &limit
+	scq.ctx.Limit = &limit
 	return scq
 }
 
-// Offset adds an offset step to the query.
+// Offset to start from.
 func (scq *SkyConditionQuery) Offset(offset int) *SkyConditionQuery {
-	scq.offset = &offset
+	scq.ctx.Offset = &offset
 	return scq
 }
 
 // Unique configures the query builder to filter duplicate records on query.
 // By default, unique is set to true, and can be disabled using this method.
 func (scq *SkyConditionQuery) Unique(unique bool) *SkyConditionQuery {
-	scq.unique = &unique
+	scq.ctx.Unique = &unique
 	return scq
 }
 
-// Order adds an order step to the query.
+// Order specifies how the records should be ordered.
 func (scq *SkyConditionQuery) Order(o ...OrderFunc) *SkyConditionQuery {
 	scq.order = append(scq.order, o...)
 	return scq
@@ -66,7 +64,7 @@ func (scq *SkyConditionQuery) Order(o ...OrderFunc) *SkyConditionQuery {
 // First returns the first SkyCondition entity from the query.
 // Returns a *NotFoundError when no SkyCondition was found.
 func (scq *SkyConditionQuery) First(ctx context.Context) (*SkyCondition, error) {
-	nodes, err := scq.Limit(1).All(ctx)
+	nodes, err := scq.Limit(1).All(setContextOp(ctx, scq.ctx, "First"))
 	if err != nil {
 		return nil, err
 	}
@@ -89,7 +87,7 @@ func (scq *SkyConditionQuery) FirstX(ctx context.Context) *SkyCondition {
 // Returns a *NotFoundError when no SkyCondition ID was found.
 func (scq *SkyConditionQuery) FirstID(ctx context.Context) (id uuid.UUID, err error) {
 	var ids []uuid.UUID
-	if ids, err = scq.Limit(1).IDs(ctx); err != nil {
+	if ids, err = scq.Limit(1).IDs(setContextOp(ctx, scq.ctx, "FirstID")); err != nil {
 		return
 	}
 	if len(ids) == 0 {
@@ -112,7 +110,7 @@ func (scq *SkyConditionQuery) FirstIDX(ctx context.Context) uuid.UUID {
 // Returns a *NotSingularError when more than one SkyCondition entity is found.
 // Returns a *NotFoundError when no SkyCondition entities are found.
 func (scq *SkyConditionQuery) Only(ctx context.Context) (*SkyCondition, error) {
-	nodes, err := scq.Limit(2).All(ctx)
+	nodes, err := scq.Limit(2).All(setContextOp(ctx, scq.ctx, "Only"))
 	if err != nil {
 		return nil, err
 	}
@@ -140,7 +138,7 @@ func (scq *SkyConditionQuery) OnlyX(ctx context.Context) *SkyCondition {
 // Returns a *NotFoundError when no entities are found.
 func (scq *SkyConditionQuery) OnlyID(ctx context.Context) (id uuid.UUID, err error) {
 	var ids []uuid.UUID
-	if ids, err = scq.Limit(2).IDs(ctx); err != nil {
+	if ids, err = scq.Limit(2).IDs(setContextOp(ctx, scq.ctx, "OnlyID")); err != nil {
 		return
 	}
 	switch len(ids) {
@@ -165,10 +163,12 @@ func (scq *SkyConditionQuery) OnlyIDX(ctx context.Context) uuid.UUID {
 
 // All executes the query and returns a list of SkyConditions.
 func (scq *SkyConditionQuery) All(ctx context.Context) ([]*SkyCondition, error) {
+	ctx = setContextOp(ctx, scq.ctx, "All")
 	if err := scq.prepareQuery(ctx); err != nil {
 		return nil, err
 	}
-	return scq.sqlAll(ctx)
+	qr := querierAll[[]*SkyCondition, *SkyConditionQuery]()
+	return withInterceptors[[]*SkyCondition](ctx, scq, qr, scq.inters)
 }
 
 // AllX is like All, but panics if an error occurs.
@@ -181,9 +181,12 @@ func (scq *SkyConditionQuery) AllX(ctx context.Context) []*SkyCondition {
 }
 
 // IDs executes the query and returns a list of SkyCondition IDs.
-func (scq *SkyConditionQuery) IDs(ctx context.Context) ([]uuid.UUID, error) {
-	var ids []uuid.UUID
-	if err := scq.Select(skycondition.FieldID).Scan(ctx, &ids); err != nil {
+func (scq *SkyConditionQuery) IDs(ctx context.Context) (ids []uuid.UUID, err error) {
+	if scq.ctx.Unique == nil && scq.path != nil {
+		scq.Unique(true)
+	}
+	ctx = setContextOp(ctx, scq.ctx, "IDs")
+	if err = scq.Select(skycondition.FieldID).Scan(ctx, &ids); err != nil {
 		return nil, err
 	}
 	return ids, nil
@@ -200,10 +203,11 @@ func (scq *SkyConditionQuery) IDsX(ctx context.Context) []uuid.UUID {
 
 // Count returns the count of the given query.
 func (scq *SkyConditionQuery) Count(ctx context.Context) (int, error) {
+	ctx = setContextOp(ctx, scq.ctx, "Count")
 	if err := scq.prepareQuery(ctx); err != nil {
 		return 0, err
 	}
-	return scq.sqlCount(ctx)
+	return withInterceptors[int](ctx, scq, querierCount[*SkyConditionQuery](), scq.inters)
 }
 
 // CountX is like Count, but panics if an error occurs.
@@ -217,10 +221,15 @@ func (scq *SkyConditionQuery) CountX(ctx context.Context) int {
 
 // Exist returns true if the query has elements in the graph.
 func (scq *SkyConditionQuery) Exist(ctx context.Context) (bool, error) {
-	if err := scq.prepareQuery(ctx); err != nil {
-		return false, err
+	ctx = setContextOp(ctx, scq.ctx, "Exist")
+	switch _, err := scq.FirstID(ctx); {
+	case IsNotFound(err):
+		return false, nil
+	case err != nil:
+		return false, fmt.Errorf("ent: check existence: %w", err)
+	default:
+		return true, nil
 	}
-	return scq.sqlExist(ctx)
 }
 
 // ExistX is like Exist, but panics if an error occurs.
@@ -240,14 +249,13 @@ func (scq *SkyConditionQuery) Clone() *SkyConditionQuery {
 	}
 	return &SkyConditionQuery{
 		config:     scq.config,
-		limit:      scq.limit,
-		offset:     scq.offset,
+		ctx:        scq.ctx.Clone(),
 		order:      append([]OrderFunc{}, scq.order...),
+		inters:     append([]Interceptor{}, scq.inters...),
 		predicates: append([]predicate.SkyCondition{}, scq.predicates...),
 		// clone intermediate query.
-		sql:    scq.sql.Clone(),
-		path:   scq.path,
-		unique: scq.unique,
+		sql:  scq.sql.Clone(),
+		path: scq.path,
 	}
 }
 
@@ -266,16 +274,11 @@ func (scq *SkyConditionQuery) Clone() *SkyConditionQuery {
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
 func (scq *SkyConditionQuery) GroupBy(field string, fields ...string) *SkyConditionGroupBy {
-	grbuild := &SkyConditionGroupBy{config: scq.config}
-	grbuild.fields = append([]string{field}, fields...)
-	grbuild.path = func(ctx context.Context) (prev *sql.Selector, err error) {
-		if err := scq.prepareQuery(ctx); err != nil {
-			return nil, err
-		}
-		return scq.sqlQuery(ctx), nil
-	}
+	scq.ctx.Fields = append([]string{field}, fields...)
+	grbuild := &SkyConditionGroupBy{build: scq}
+	grbuild.flds = &scq.ctx.Fields
 	grbuild.label = skycondition.Label
-	grbuild.flds, grbuild.scan = &grbuild.fields, grbuild.Scan
+	grbuild.scan = grbuild.Scan
 	return grbuild
 }
 
@@ -292,11 +295,11 @@ func (scq *SkyConditionQuery) GroupBy(field string, fields ...string) *SkyCondit
 //		Select(skycondition.FieldSkyCover).
 //		Scan(ctx, &v)
 func (scq *SkyConditionQuery) Select(fields ...string) *SkyConditionSelect {
-	scq.fields = append(scq.fields, fields...)
-	selbuild := &SkyConditionSelect{SkyConditionQuery: scq}
-	selbuild.label = skycondition.Label
-	selbuild.flds, selbuild.scan = &scq.fields, selbuild.Scan
-	return selbuild
+	scq.ctx.Fields = append(scq.ctx.Fields, fields...)
+	sbuild := &SkyConditionSelect{SkyConditionQuery: scq}
+	sbuild.label = skycondition.Label
+	sbuild.flds, sbuild.scan = &scq.ctx.Fields, sbuild.Scan
+	return sbuild
 }
 
 // Aggregate returns a SkyConditionSelect configured with the given aggregations.
@@ -305,7 +308,17 @@ func (scq *SkyConditionQuery) Aggregate(fns ...AggregateFunc) *SkyConditionSelec
 }
 
 func (scq *SkyConditionQuery) prepareQuery(ctx context.Context) error {
-	for _, f := range scq.fields {
+	for _, inter := range scq.inters {
+		if inter == nil {
+			return fmt.Errorf("ent: uninitialized interceptor (forgotten import ent/runtime?)")
+		}
+		if trv, ok := inter.(Traverser); ok {
+			if err := trv.Traverse(ctx, scq); err != nil {
+				return err
+			}
+		}
+	}
+	for _, f := range scq.ctx.Fields {
 		if !skycondition.ValidColumn(f) {
 			return &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for query", f)}
 		}
@@ -362,41 +375,22 @@ func (scq *SkyConditionQuery) sqlCount(ctx context.Context) (int, error) {
 	if len(scq.modifiers) > 0 {
 		_spec.Modifiers = scq.modifiers
 	}
-	_spec.Node.Columns = scq.fields
-	if len(scq.fields) > 0 {
-		_spec.Unique = scq.unique != nil && *scq.unique
+	_spec.Node.Columns = scq.ctx.Fields
+	if len(scq.ctx.Fields) > 0 {
+		_spec.Unique = scq.ctx.Unique != nil && *scq.ctx.Unique
 	}
 	return sqlgraph.CountNodes(ctx, scq.driver, _spec)
 }
 
-func (scq *SkyConditionQuery) sqlExist(ctx context.Context) (bool, error) {
-	switch _, err := scq.FirstID(ctx); {
-	case IsNotFound(err):
-		return false, nil
-	case err != nil:
-		return false, fmt.Errorf("ent: check existence: %w", err)
-	default:
-		return true, nil
-	}
-}
-
 func (scq *SkyConditionQuery) querySpec() *sqlgraph.QuerySpec {
-	_spec := &sqlgraph.QuerySpec{
-		Node: &sqlgraph.NodeSpec{
-			Table:   skycondition.Table,
-			Columns: skycondition.Columns,
-			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeUUID,
-				Column: skycondition.FieldID,
-			},
-		},
-		From:   scq.sql,
-		Unique: true,
-	}
-	if unique := scq.unique; unique != nil {
+	_spec := sqlgraph.NewQuerySpec(skycondition.Table, skycondition.Columns, sqlgraph.NewFieldSpec(skycondition.FieldID, field.TypeUUID))
+	_spec.From = scq.sql
+	if unique := scq.ctx.Unique; unique != nil {
 		_spec.Unique = *unique
+	} else if scq.path != nil {
+		_spec.Unique = true
 	}
-	if fields := scq.fields; len(fields) > 0 {
+	if fields := scq.ctx.Fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))
 		_spec.Node.Columns = append(_spec.Node.Columns, skycondition.FieldID)
 		for i := range fields {
@@ -412,10 +406,10 @@ func (scq *SkyConditionQuery) querySpec() *sqlgraph.QuerySpec {
 			}
 		}
 	}
-	if limit := scq.limit; limit != nil {
+	if limit := scq.ctx.Limit; limit != nil {
 		_spec.Limit = *limit
 	}
-	if offset := scq.offset; offset != nil {
+	if offset := scq.ctx.Offset; offset != nil {
 		_spec.Offset = *offset
 	}
 	if ps := scq.order; len(ps) > 0 {
@@ -431,7 +425,7 @@ func (scq *SkyConditionQuery) querySpec() *sqlgraph.QuerySpec {
 func (scq *SkyConditionQuery) sqlQuery(ctx context.Context) *sql.Selector {
 	builder := sql.Dialect(scq.driver.Dialect())
 	t1 := builder.Table(skycondition.Table)
-	columns := scq.fields
+	columns := scq.ctx.Fields
 	if len(columns) == 0 {
 		columns = skycondition.Columns
 	}
@@ -440,7 +434,7 @@ func (scq *SkyConditionQuery) sqlQuery(ctx context.Context) *sql.Selector {
 		selector = scq.sql
 		selector.Select(selector.Columns(columns...)...)
 	}
-	if scq.unique != nil && *scq.unique {
+	if scq.ctx.Unique != nil && *scq.ctx.Unique {
 		selector.Distinct()
 	}
 	for _, m := range scq.modifiers {
@@ -452,12 +446,12 @@ func (scq *SkyConditionQuery) sqlQuery(ctx context.Context) *sql.Selector {
 	for _, p := range scq.order {
 		p(selector)
 	}
-	if offset := scq.offset; offset != nil {
+	if offset := scq.ctx.Offset; offset != nil {
 		// limit is mandatory for offset clause. We start
 		// with default value, and override it below if needed.
 		selector.Offset(*offset).Limit(math.MaxInt32)
 	}
-	if limit := scq.limit; limit != nil {
+	if limit := scq.ctx.Limit; limit != nil {
 		selector.Limit(*limit)
 	}
 	return selector
@@ -471,13 +465,8 @@ func (scq *SkyConditionQuery) Modify(modifiers ...func(s *sql.Selector)) *SkyCon
 
 // SkyConditionGroupBy is the group-by builder for SkyCondition entities.
 type SkyConditionGroupBy struct {
-	config
 	selector
-	fields []string
-	fns    []AggregateFunc
-	// intermediate query (i.e. traversal path).
-	sql  *sql.Selector
-	path func(context.Context) (*sql.Selector, error)
+	build *SkyConditionQuery
 }
 
 // Aggregate adds the given aggregation functions to the group-by query.
@@ -486,58 +475,46 @@ func (scgb *SkyConditionGroupBy) Aggregate(fns ...AggregateFunc) *SkyConditionGr
 	return scgb
 }
 
-// Scan applies the group-by query and scans the result into the given value.
+// Scan applies the selector query and scans the result into the given value.
 func (scgb *SkyConditionGroupBy) Scan(ctx context.Context, v any) error {
-	query, err := scgb.path(ctx)
-	if err != nil {
+	ctx = setContextOp(ctx, scgb.build.ctx, "GroupBy")
+	if err := scgb.build.prepareQuery(ctx); err != nil {
 		return err
 	}
-	scgb.sql = query
-	return scgb.sqlScan(ctx, v)
+	return scanWithInterceptors[*SkyConditionQuery, *SkyConditionGroupBy](ctx, scgb.build, scgb, scgb.build.inters, v)
 }
 
-func (scgb *SkyConditionGroupBy) sqlScan(ctx context.Context, v any) error {
-	for _, f := range scgb.fields {
-		if !skycondition.ValidColumn(f) {
-			return &ValidationError{Name: f, err: fmt.Errorf("invalid field %q for group-by", f)}
-		}
+func (scgb *SkyConditionGroupBy) sqlScan(ctx context.Context, root *SkyConditionQuery, v any) error {
+	selector := root.sqlQuery(ctx).Select()
+	aggregation := make([]string, 0, len(scgb.fns))
+	for _, fn := range scgb.fns {
+		aggregation = append(aggregation, fn(selector))
 	}
-	selector := scgb.sqlQuery()
+	if len(selector.SelectedColumns()) == 0 {
+		columns := make([]string, 0, len(*scgb.flds)+len(scgb.fns))
+		for _, f := range *scgb.flds {
+			columns = append(columns, selector.C(f))
+		}
+		columns = append(columns, aggregation...)
+		selector.Select(columns...)
+	}
+	selector.GroupBy(selector.Columns(*scgb.flds...)...)
 	if err := selector.Err(); err != nil {
 		return err
 	}
 	rows := &sql.Rows{}
 	query, args := selector.Query()
-	if err := scgb.driver.Query(ctx, query, args, rows); err != nil {
+	if err := scgb.build.driver.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
 	defer rows.Close()
 	return sql.ScanSlice(rows, v)
 }
 
-func (scgb *SkyConditionGroupBy) sqlQuery() *sql.Selector {
-	selector := scgb.sql.Select()
-	aggregation := make([]string, 0, len(scgb.fns))
-	for _, fn := range scgb.fns {
-		aggregation = append(aggregation, fn(selector))
-	}
-	if len(selector.SelectedColumns()) == 0 {
-		columns := make([]string, 0, len(scgb.fields)+len(scgb.fns))
-		for _, f := range scgb.fields {
-			columns = append(columns, selector.C(f))
-		}
-		columns = append(columns, aggregation...)
-		selector.Select(columns...)
-	}
-	return selector.GroupBy(selector.Columns(scgb.fields...)...)
-}
-
 // SkyConditionSelect is the builder for selecting fields of SkyCondition entities.
 type SkyConditionSelect struct {
 	*SkyConditionQuery
 	selector
-	// intermediate query (i.e. traversal path).
-	sql *sql.Selector
 }
 
 // Aggregate adds the given aggregation functions to the selector query.
@@ -548,26 +525,27 @@ func (scs *SkyConditionSelect) Aggregate(fns ...AggregateFunc) *SkyConditionSele
 
 // Scan applies the selector query and scans the result into the given value.
 func (scs *SkyConditionSelect) Scan(ctx context.Context, v any) error {
+	ctx = setContextOp(ctx, scs.ctx, "Select")
 	if err := scs.prepareQuery(ctx); err != nil {
 		return err
 	}
-	scs.sql = scs.SkyConditionQuery.sqlQuery(ctx)
-	return scs.sqlScan(ctx, v)
+	return scanWithInterceptors[*SkyConditionQuery, *SkyConditionSelect](ctx, scs.SkyConditionQuery, scs, scs.inters, v)
 }
 
-func (scs *SkyConditionSelect) sqlScan(ctx context.Context, v any) error {
+func (scs *SkyConditionSelect) sqlScan(ctx context.Context, root *SkyConditionQuery, v any) error {
+	selector := root.sqlQuery(ctx)
 	aggregation := make([]string, 0, len(scs.fns))
 	for _, fn := range scs.fns {
-		aggregation = append(aggregation, fn(scs.sql))
+		aggregation = append(aggregation, fn(selector))
 	}
 	switch n := len(*scs.selector.flds); {
 	case n == 0 && len(aggregation) > 0:
-		scs.sql.Select(aggregation...)
+		selector.Select(aggregation...)
 	case n != 0 && len(aggregation) > 0:
-		scs.sql.AppendSelect(aggregation...)
+		selector.AppendSelect(aggregation...)
 	}
 	rows := &sql.Rows{}
-	query, args := scs.sql.Query()
+	query, args := selector.Query()
 	if err := scs.driver.Query(ctx, query, args, rows); err != nil {
 		return err
 	}

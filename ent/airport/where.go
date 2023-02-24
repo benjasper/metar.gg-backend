@@ -13,1869 +13,1227 @@ import (
 
 // ID filters vertices based on their ID field.
 func ID(id uuid.UUID) predicate.Airport {
-	return predicate.Airport(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldID), id))
-	})
+	return predicate.Airport(sql.FieldEQ(FieldID, id))
 }
 
 // IDEQ applies the EQ predicate on the ID field.
 func IDEQ(id uuid.UUID) predicate.Airport {
-	return predicate.Airport(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldID), id))
-	})
+	return predicate.Airport(sql.FieldEQ(FieldID, id))
 }
 
 // IDNEQ applies the NEQ predicate on the ID field.
 func IDNEQ(id uuid.UUID) predicate.Airport {
-	return predicate.Airport(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldID), id))
-	})
+	return predicate.Airport(sql.FieldNEQ(FieldID, id))
 }
 
 // IDIn applies the In predicate on the ID field.
 func IDIn(ids ...uuid.UUID) predicate.Airport {
-	return predicate.Airport(func(s *sql.Selector) {
-		v := make([]any, len(ids))
-		for i := range v {
-			v[i] = ids[i]
-		}
-		s.Where(sql.In(s.C(FieldID), v...))
-	})
+	return predicate.Airport(sql.FieldIn(FieldID, ids...))
 }
 
 // IDNotIn applies the NotIn predicate on the ID field.
 func IDNotIn(ids ...uuid.UUID) predicate.Airport {
-	return predicate.Airport(func(s *sql.Selector) {
-		v := make([]any, len(ids))
-		for i := range v {
-			v[i] = ids[i]
-		}
-		s.Where(sql.NotIn(s.C(FieldID), v...))
-	})
+	return predicate.Airport(sql.FieldNotIn(FieldID, ids...))
 }
 
 // IDGT applies the GT predicate on the ID field.
 func IDGT(id uuid.UUID) predicate.Airport {
-	return predicate.Airport(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldID), id))
-	})
+	return predicate.Airport(sql.FieldGT(FieldID, id))
 }
 
 // IDGTE applies the GTE predicate on the ID field.
 func IDGTE(id uuid.UUID) predicate.Airport {
-	return predicate.Airport(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldID), id))
-	})
+	return predicate.Airport(sql.FieldGTE(FieldID, id))
 }
 
 // IDLT applies the LT predicate on the ID field.
 func IDLT(id uuid.UUID) predicate.Airport {
-	return predicate.Airport(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldID), id))
-	})
+	return predicate.Airport(sql.FieldLT(FieldID, id))
 }
 
 // IDLTE applies the LTE predicate on the ID field.
 func IDLTE(id uuid.UUID) predicate.Airport {
-	return predicate.Airport(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldID), id))
-	})
+	return predicate.Airport(sql.FieldLTE(FieldID, id))
 }
 
 // ImportID applies equality check predicate on the "import_id" field. It's identical to ImportIDEQ.
 func ImportID(v int) predicate.Airport {
-	return predicate.Airport(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldImportID), v))
-	})
+	return predicate.Airport(sql.FieldEQ(FieldImportID, v))
 }
 
 // Hash applies equality check predicate on the "hash" field. It's identical to HashEQ.
 func Hash(v string) predicate.Airport {
-	return predicate.Airport(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldHash), v))
-	})
+	return predicate.Airport(sql.FieldEQ(FieldHash, v))
 }
 
 // ImportFlag applies equality check predicate on the "import_flag" field. It's identical to ImportFlagEQ.
 func ImportFlag(v bool) predicate.Airport {
-	return predicate.Airport(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldImportFlag), v))
-	})
+	return predicate.Airport(sql.FieldEQ(FieldImportFlag, v))
 }
 
 // LastUpdated applies equality check predicate on the "last_updated" field. It's identical to LastUpdatedEQ.
 func LastUpdated(v time.Time) predicate.Airport {
-	return predicate.Airport(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldLastUpdated), v))
-	})
+	return predicate.Airport(sql.FieldEQ(FieldLastUpdated, v))
 }
 
 // IcaoCode applies equality check predicate on the "icao_code" field. It's identical to IcaoCodeEQ.
 func IcaoCode(v string) predicate.Airport {
-	return predicate.Airport(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldIcaoCode), v))
-	})
+	return predicate.Airport(sql.FieldEQ(FieldIcaoCode, v))
 }
 
 // IataCode applies equality check predicate on the "iata_code" field. It's identical to IataCodeEQ.
 func IataCode(v string) predicate.Airport {
-	return predicate.Airport(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldIataCode), v))
-	})
+	return predicate.Airport(sql.FieldEQ(FieldIataCode, v))
 }
 
 // Identifier applies equality check predicate on the "identifier" field. It's identical to IdentifierEQ.
 func Identifier(v string) predicate.Airport {
-	return predicate.Airport(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldIdentifier), v))
-	})
+	return predicate.Airport(sql.FieldEQ(FieldIdentifier, v))
 }
 
 // Importance applies equality check predicate on the "importance" field. It's identical to ImportanceEQ.
 func Importance(v int) predicate.Airport {
-	return predicate.Airport(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldImportance), v))
-	})
+	return predicate.Airport(sql.FieldEQ(FieldImportance, v))
 }
 
 // Name applies equality check predicate on the "name" field. It's identical to NameEQ.
 func Name(v string) predicate.Airport {
-	return predicate.Airport(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldName), v))
-	})
+	return predicate.Airport(sql.FieldEQ(FieldName, v))
 }
 
 // Latitude applies equality check predicate on the "latitude" field. It's identical to LatitudeEQ.
 func Latitude(v float64) predicate.Airport {
-	return predicate.Airport(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldLatitude), v))
-	})
+	return predicate.Airport(sql.FieldEQ(FieldLatitude, v))
 }
 
 // Longitude applies equality check predicate on the "longitude" field. It's identical to LongitudeEQ.
 func Longitude(v float64) predicate.Airport {
-	return predicate.Airport(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldLongitude), v))
-	})
+	return predicate.Airport(sql.FieldEQ(FieldLongitude, v))
 }
 
 // Timezone applies equality check predicate on the "timezone" field. It's identical to TimezoneEQ.
 func Timezone(v string) predicate.Airport {
-	return predicate.Airport(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldTimezone), v))
-	})
+	return predicate.Airport(sql.FieldEQ(FieldTimezone, v))
 }
 
 // Elevation applies equality check predicate on the "elevation" field. It's identical to ElevationEQ.
 func Elevation(v int) predicate.Airport {
-	return predicate.Airport(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldElevation), v))
-	})
+	return predicate.Airport(sql.FieldEQ(FieldElevation, v))
 }
 
 // Municipality applies equality check predicate on the "municipality" field. It's identical to MunicipalityEQ.
 func Municipality(v string) predicate.Airport {
-	return predicate.Airport(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldMunicipality), v))
-	})
+	return predicate.Airport(sql.FieldEQ(FieldMunicipality, v))
 }
 
 // ScheduledService applies equality check predicate on the "scheduled_service" field. It's identical to ScheduledServiceEQ.
 func ScheduledService(v bool) predicate.Airport {
-	return predicate.Airport(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldScheduledService), v))
-	})
+	return predicate.Airport(sql.FieldEQ(FieldScheduledService, v))
 }
 
 // GpsCode applies equality check predicate on the "gps_code" field. It's identical to GpsCodeEQ.
 func GpsCode(v string) predicate.Airport {
-	return predicate.Airport(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldGpsCode), v))
-	})
+	return predicate.Airport(sql.FieldEQ(FieldGpsCode, v))
 }
 
 // LocalCode applies equality check predicate on the "local_code" field. It's identical to LocalCodeEQ.
 func LocalCode(v string) predicate.Airport {
-	return predicate.Airport(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldLocalCode), v))
-	})
+	return predicate.Airport(sql.FieldEQ(FieldLocalCode, v))
 }
 
 // Website applies equality check predicate on the "website" field. It's identical to WebsiteEQ.
 func Website(v string) predicate.Airport {
-	return predicate.Airport(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldWebsite), v))
-	})
+	return predicate.Airport(sql.FieldEQ(FieldWebsite, v))
 }
 
 // Wikipedia applies equality check predicate on the "wikipedia" field. It's identical to WikipediaEQ.
 func Wikipedia(v string) predicate.Airport {
-	return predicate.Airport(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldWikipedia), v))
-	})
+	return predicate.Airport(sql.FieldEQ(FieldWikipedia, v))
 }
 
 // ImportIDEQ applies the EQ predicate on the "import_id" field.
 func ImportIDEQ(v int) predicate.Airport {
-	return predicate.Airport(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldImportID), v))
-	})
+	return predicate.Airport(sql.FieldEQ(FieldImportID, v))
 }
 
 // ImportIDNEQ applies the NEQ predicate on the "import_id" field.
 func ImportIDNEQ(v int) predicate.Airport {
-	return predicate.Airport(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldImportID), v))
-	})
+	return predicate.Airport(sql.FieldNEQ(FieldImportID, v))
 }
 
 // ImportIDIn applies the In predicate on the "import_id" field.
 func ImportIDIn(vs ...int) predicate.Airport {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Airport(func(s *sql.Selector) {
-		s.Where(sql.In(s.C(FieldImportID), v...))
-	})
+	return predicate.Airport(sql.FieldIn(FieldImportID, vs...))
 }
 
 // ImportIDNotIn applies the NotIn predicate on the "import_id" field.
 func ImportIDNotIn(vs ...int) predicate.Airport {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Airport(func(s *sql.Selector) {
-		s.Where(sql.NotIn(s.C(FieldImportID), v...))
-	})
+	return predicate.Airport(sql.FieldNotIn(FieldImportID, vs...))
 }
 
 // ImportIDGT applies the GT predicate on the "import_id" field.
 func ImportIDGT(v int) predicate.Airport {
-	return predicate.Airport(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldImportID), v))
-	})
+	return predicate.Airport(sql.FieldGT(FieldImportID, v))
 }
 
 // ImportIDGTE applies the GTE predicate on the "import_id" field.
 func ImportIDGTE(v int) predicate.Airport {
-	return predicate.Airport(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldImportID), v))
-	})
+	return predicate.Airport(sql.FieldGTE(FieldImportID, v))
 }
 
 // ImportIDLT applies the LT predicate on the "import_id" field.
 func ImportIDLT(v int) predicate.Airport {
-	return predicate.Airport(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldImportID), v))
-	})
+	return predicate.Airport(sql.FieldLT(FieldImportID, v))
 }
 
 // ImportIDLTE applies the LTE predicate on the "import_id" field.
 func ImportIDLTE(v int) predicate.Airport {
-	return predicate.Airport(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldImportID), v))
-	})
+	return predicate.Airport(sql.FieldLTE(FieldImportID, v))
 }
 
 // HashEQ applies the EQ predicate on the "hash" field.
 func HashEQ(v string) predicate.Airport {
-	return predicate.Airport(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldHash), v))
-	})
+	return predicate.Airport(sql.FieldEQ(FieldHash, v))
 }
 
 // HashNEQ applies the NEQ predicate on the "hash" field.
 func HashNEQ(v string) predicate.Airport {
-	return predicate.Airport(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldHash), v))
-	})
+	return predicate.Airport(sql.FieldNEQ(FieldHash, v))
 }
 
 // HashIn applies the In predicate on the "hash" field.
 func HashIn(vs ...string) predicate.Airport {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Airport(func(s *sql.Selector) {
-		s.Where(sql.In(s.C(FieldHash), v...))
-	})
+	return predicate.Airport(sql.FieldIn(FieldHash, vs...))
 }
 
 // HashNotIn applies the NotIn predicate on the "hash" field.
 func HashNotIn(vs ...string) predicate.Airport {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Airport(func(s *sql.Selector) {
-		s.Where(sql.NotIn(s.C(FieldHash), v...))
-	})
+	return predicate.Airport(sql.FieldNotIn(FieldHash, vs...))
 }
 
 // HashGT applies the GT predicate on the "hash" field.
 func HashGT(v string) predicate.Airport {
-	return predicate.Airport(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldHash), v))
-	})
+	return predicate.Airport(sql.FieldGT(FieldHash, v))
 }
 
 // HashGTE applies the GTE predicate on the "hash" field.
 func HashGTE(v string) predicate.Airport {
-	return predicate.Airport(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldHash), v))
-	})
+	return predicate.Airport(sql.FieldGTE(FieldHash, v))
 }
 
 // HashLT applies the LT predicate on the "hash" field.
 func HashLT(v string) predicate.Airport {
-	return predicate.Airport(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldHash), v))
-	})
+	return predicate.Airport(sql.FieldLT(FieldHash, v))
 }
 
 // HashLTE applies the LTE predicate on the "hash" field.
 func HashLTE(v string) predicate.Airport {
-	return predicate.Airport(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldHash), v))
-	})
+	return predicate.Airport(sql.FieldLTE(FieldHash, v))
 }
 
 // HashContains applies the Contains predicate on the "hash" field.
 func HashContains(v string) predicate.Airport {
-	return predicate.Airport(func(s *sql.Selector) {
-		s.Where(sql.Contains(s.C(FieldHash), v))
-	})
+	return predicate.Airport(sql.FieldContains(FieldHash, v))
 }
 
 // HashHasPrefix applies the HasPrefix predicate on the "hash" field.
 func HashHasPrefix(v string) predicate.Airport {
-	return predicate.Airport(func(s *sql.Selector) {
-		s.Where(sql.HasPrefix(s.C(FieldHash), v))
-	})
+	return predicate.Airport(sql.FieldHasPrefix(FieldHash, v))
 }
 
 // HashHasSuffix applies the HasSuffix predicate on the "hash" field.
 func HashHasSuffix(v string) predicate.Airport {
-	return predicate.Airport(func(s *sql.Selector) {
-		s.Where(sql.HasSuffix(s.C(FieldHash), v))
-	})
+	return predicate.Airport(sql.FieldHasSuffix(FieldHash, v))
 }
 
 // HashEqualFold applies the EqualFold predicate on the "hash" field.
 func HashEqualFold(v string) predicate.Airport {
-	return predicate.Airport(func(s *sql.Selector) {
-		s.Where(sql.EqualFold(s.C(FieldHash), v))
-	})
+	return predicate.Airport(sql.FieldEqualFold(FieldHash, v))
 }
 
 // HashContainsFold applies the ContainsFold predicate on the "hash" field.
 func HashContainsFold(v string) predicate.Airport {
-	return predicate.Airport(func(s *sql.Selector) {
-		s.Where(sql.ContainsFold(s.C(FieldHash), v))
-	})
+	return predicate.Airport(sql.FieldContainsFold(FieldHash, v))
 }
 
 // ImportFlagEQ applies the EQ predicate on the "import_flag" field.
 func ImportFlagEQ(v bool) predicate.Airport {
-	return predicate.Airport(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldImportFlag), v))
-	})
+	return predicate.Airport(sql.FieldEQ(FieldImportFlag, v))
 }
 
 // ImportFlagNEQ applies the NEQ predicate on the "import_flag" field.
 func ImportFlagNEQ(v bool) predicate.Airport {
-	return predicate.Airport(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldImportFlag), v))
-	})
+	return predicate.Airport(sql.FieldNEQ(FieldImportFlag, v))
 }
 
 // LastUpdatedEQ applies the EQ predicate on the "last_updated" field.
 func LastUpdatedEQ(v time.Time) predicate.Airport {
-	return predicate.Airport(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldLastUpdated), v))
-	})
+	return predicate.Airport(sql.FieldEQ(FieldLastUpdated, v))
 }
 
 // LastUpdatedNEQ applies the NEQ predicate on the "last_updated" field.
 func LastUpdatedNEQ(v time.Time) predicate.Airport {
-	return predicate.Airport(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldLastUpdated), v))
-	})
+	return predicate.Airport(sql.FieldNEQ(FieldLastUpdated, v))
 }
 
 // LastUpdatedIn applies the In predicate on the "last_updated" field.
 func LastUpdatedIn(vs ...time.Time) predicate.Airport {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Airport(func(s *sql.Selector) {
-		s.Where(sql.In(s.C(FieldLastUpdated), v...))
-	})
+	return predicate.Airport(sql.FieldIn(FieldLastUpdated, vs...))
 }
 
 // LastUpdatedNotIn applies the NotIn predicate on the "last_updated" field.
 func LastUpdatedNotIn(vs ...time.Time) predicate.Airport {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Airport(func(s *sql.Selector) {
-		s.Where(sql.NotIn(s.C(FieldLastUpdated), v...))
-	})
+	return predicate.Airport(sql.FieldNotIn(FieldLastUpdated, vs...))
 }
 
 // LastUpdatedGT applies the GT predicate on the "last_updated" field.
 func LastUpdatedGT(v time.Time) predicate.Airport {
-	return predicate.Airport(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldLastUpdated), v))
-	})
+	return predicate.Airport(sql.FieldGT(FieldLastUpdated, v))
 }
 
 // LastUpdatedGTE applies the GTE predicate on the "last_updated" field.
 func LastUpdatedGTE(v time.Time) predicate.Airport {
-	return predicate.Airport(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldLastUpdated), v))
-	})
+	return predicate.Airport(sql.FieldGTE(FieldLastUpdated, v))
 }
 
 // LastUpdatedLT applies the LT predicate on the "last_updated" field.
 func LastUpdatedLT(v time.Time) predicate.Airport {
-	return predicate.Airport(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldLastUpdated), v))
-	})
+	return predicate.Airport(sql.FieldLT(FieldLastUpdated, v))
 }
 
 // LastUpdatedLTE applies the LTE predicate on the "last_updated" field.
 func LastUpdatedLTE(v time.Time) predicate.Airport {
-	return predicate.Airport(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldLastUpdated), v))
-	})
+	return predicate.Airport(sql.FieldLTE(FieldLastUpdated, v))
 }
 
 // IcaoCodeEQ applies the EQ predicate on the "icao_code" field.
 func IcaoCodeEQ(v string) predicate.Airport {
-	return predicate.Airport(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldIcaoCode), v))
-	})
+	return predicate.Airport(sql.FieldEQ(FieldIcaoCode, v))
 }
 
 // IcaoCodeNEQ applies the NEQ predicate on the "icao_code" field.
 func IcaoCodeNEQ(v string) predicate.Airport {
-	return predicate.Airport(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldIcaoCode), v))
-	})
+	return predicate.Airport(sql.FieldNEQ(FieldIcaoCode, v))
 }
 
 // IcaoCodeIn applies the In predicate on the "icao_code" field.
 func IcaoCodeIn(vs ...string) predicate.Airport {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Airport(func(s *sql.Selector) {
-		s.Where(sql.In(s.C(FieldIcaoCode), v...))
-	})
+	return predicate.Airport(sql.FieldIn(FieldIcaoCode, vs...))
 }
 
 // IcaoCodeNotIn applies the NotIn predicate on the "icao_code" field.
 func IcaoCodeNotIn(vs ...string) predicate.Airport {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Airport(func(s *sql.Selector) {
-		s.Where(sql.NotIn(s.C(FieldIcaoCode), v...))
-	})
+	return predicate.Airport(sql.FieldNotIn(FieldIcaoCode, vs...))
 }
 
 // IcaoCodeGT applies the GT predicate on the "icao_code" field.
 func IcaoCodeGT(v string) predicate.Airport {
-	return predicate.Airport(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldIcaoCode), v))
-	})
+	return predicate.Airport(sql.FieldGT(FieldIcaoCode, v))
 }
 
 // IcaoCodeGTE applies the GTE predicate on the "icao_code" field.
 func IcaoCodeGTE(v string) predicate.Airport {
-	return predicate.Airport(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldIcaoCode), v))
-	})
+	return predicate.Airport(sql.FieldGTE(FieldIcaoCode, v))
 }
 
 // IcaoCodeLT applies the LT predicate on the "icao_code" field.
 func IcaoCodeLT(v string) predicate.Airport {
-	return predicate.Airport(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldIcaoCode), v))
-	})
+	return predicate.Airport(sql.FieldLT(FieldIcaoCode, v))
 }
 
 // IcaoCodeLTE applies the LTE predicate on the "icao_code" field.
 func IcaoCodeLTE(v string) predicate.Airport {
-	return predicate.Airport(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldIcaoCode), v))
-	})
+	return predicate.Airport(sql.FieldLTE(FieldIcaoCode, v))
 }
 
 // IcaoCodeContains applies the Contains predicate on the "icao_code" field.
 func IcaoCodeContains(v string) predicate.Airport {
-	return predicate.Airport(func(s *sql.Selector) {
-		s.Where(sql.Contains(s.C(FieldIcaoCode), v))
-	})
+	return predicate.Airport(sql.FieldContains(FieldIcaoCode, v))
 }
 
 // IcaoCodeHasPrefix applies the HasPrefix predicate on the "icao_code" field.
 func IcaoCodeHasPrefix(v string) predicate.Airport {
-	return predicate.Airport(func(s *sql.Selector) {
-		s.Where(sql.HasPrefix(s.C(FieldIcaoCode), v))
-	})
+	return predicate.Airport(sql.FieldHasPrefix(FieldIcaoCode, v))
 }
 
 // IcaoCodeHasSuffix applies the HasSuffix predicate on the "icao_code" field.
 func IcaoCodeHasSuffix(v string) predicate.Airport {
-	return predicate.Airport(func(s *sql.Selector) {
-		s.Where(sql.HasSuffix(s.C(FieldIcaoCode), v))
-	})
+	return predicate.Airport(sql.FieldHasSuffix(FieldIcaoCode, v))
 }
 
 // IcaoCodeIsNil applies the IsNil predicate on the "icao_code" field.
 func IcaoCodeIsNil() predicate.Airport {
-	return predicate.Airport(func(s *sql.Selector) {
-		s.Where(sql.IsNull(s.C(FieldIcaoCode)))
-	})
+	return predicate.Airport(sql.FieldIsNull(FieldIcaoCode))
 }
 
 // IcaoCodeNotNil applies the NotNil predicate on the "icao_code" field.
 func IcaoCodeNotNil() predicate.Airport {
-	return predicate.Airport(func(s *sql.Selector) {
-		s.Where(sql.NotNull(s.C(FieldIcaoCode)))
-	})
+	return predicate.Airport(sql.FieldNotNull(FieldIcaoCode))
 }
 
 // IcaoCodeEqualFold applies the EqualFold predicate on the "icao_code" field.
 func IcaoCodeEqualFold(v string) predicate.Airport {
-	return predicate.Airport(func(s *sql.Selector) {
-		s.Where(sql.EqualFold(s.C(FieldIcaoCode), v))
-	})
+	return predicate.Airport(sql.FieldEqualFold(FieldIcaoCode, v))
 }
 
 // IcaoCodeContainsFold applies the ContainsFold predicate on the "icao_code" field.
 func IcaoCodeContainsFold(v string) predicate.Airport {
-	return predicate.Airport(func(s *sql.Selector) {
-		s.Where(sql.ContainsFold(s.C(FieldIcaoCode), v))
-	})
+	return predicate.Airport(sql.FieldContainsFold(FieldIcaoCode, v))
 }
 
 // IataCodeEQ applies the EQ predicate on the "iata_code" field.
 func IataCodeEQ(v string) predicate.Airport {
-	return predicate.Airport(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldIataCode), v))
-	})
+	return predicate.Airport(sql.FieldEQ(FieldIataCode, v))
 }
 
 // IataCodeNEQ applies the NEQ predicate on the "iata_code" field.
 func IataCodeNEQ(v string) predicate.Airport {
-	return predicate.Airport(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldIataCode), v))
-	})
+	return predicate.Airport(sql.FieldNEQ(FieldIataCode, v))
 }
 
 // IataCodeIn applies the In predicate on the "iata_code" field.
 func IataCodeIn(vs ...string) predicate.Airport {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Airport(func(s *sql.Selector) {
-		s.Where(sql.In(s.C(FieldIataCode), v...))
-	})
+	return predicate.Airport(sql.FieldIn(FieldIataCode, vs...))
 }
 
 // IataCodeNotIn applies the NotIn predicate on the "iata_code" field.
 func IataCodeNotIn(vs ...string) predicate.Airport {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Airport(func(s *sql.Selector) {
-		s.Where(sql.NotIn(s.C(FieldIataCode), v...))
-	})
+	return predicate.Airport(sql.FieldNotIn(FieldIataCode, vs...))
 }
 
 // IataCodeGT applies the GT predicate on the "iata_code" field.
 func IataCodeGT(v string) predicate.Airport {
-	return predicate.Airport(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldIataCode), v))
-	})
+	return predicate.Airport(sql.FieldGT(FieldIataCode, v))
 }
 
 // IataCodeGTE applies the GTE predicate on the "iata_code" field.
 func IataCodeGTE(v string) predicate.Airport {
-	return predicate.Airport(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldIataCode), v))
-	})
+	return predicate.Airport(sql.FieldGTE(FieldIataCode, v))
 }
 
 // IataCodeLT applies the LT predicate on the "iata_code" field.
 func IataCodeLT(v string) predicate.Airport {
-	return predicate.Airport(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldIataCode), v))
-	})
+	return predicate.Airport(sql.FieldLT(FieldIataCode, v))
 }
 
 // IataCodeLTE applies the LTE predicate on the "iata_code" field.
 func IataCodeLTE(v string) predicate.Airport {
-	return predicate.Airport(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldIataCode), v))
-	})
+	return predicate.Airport(sql.FieldLTE(FieldIataCode, v))
 }
 
 // IataCodeContains applies the Contains predicate on the "iata_code" field.
 func IataCodeContains(v string) predicate.Airport {
-	return predicate.Airport(func(s *sql.Selector) {
-		s.Where(sql.Contains(s.C(FieldIataCode), v))
-	})
+	return predicate.Airport(sql.FieldContains(FieldIataCode, v))
 }
 
 // IataCodeHasPrefix applies the HasPrefix predicate on the "iata_code" field.
 func IataCodeHasPrefix(v string) predicate.Airport {
-	return predicate.Airport(func(s *sql.Selector) {
-		s.Where(sql.HasPrefix(s.C(FieldIataCode), v))
-	})
+	return predicate.Airport(sql.FieldHasPrefix(FieldIataCode, v))
 }
 
 // IataCodeHasSuffix applies the HasSuffix predicate on the "iata_code" field.
 func IataCodeHasSuffix(v string) predicate.Airport {
-	return predicate.Airport(func(s *sql.Selector) {
-		s.Where(sql.HasSuffix(s.C(FieldIataCode), v))
-	})
+	return predicate.Airport(sql.FieldHasSuffix(FieldIataCode, v))
 }
 
 // IataCodeIsNil applies the IsNil predicate on the "iata_code" field.
 func IataCodeIsNil() predicate.Airport {
-	return predicate.Airport(func(s *sql.Selector) {
-		s.Where(sql.IsNull(s.C(FieldIataCode)))
-	})
+	return predicate.Airport(sql.FieldIsNull(FieldIataCode))
 }
 
 // IataCodeNotNil applies the NotNil predicate on the "iata_code" field.
 func IataCodeNotNil() predicate.Airport {
-	return predicate.Airport(func(s *sql.Selector) {
-		s.Where(sql.NotNull(s.C(FieldIataCode)))
-	})
+	return predicate.Airport(sql.FieldNotNull(FieldIataCode))
 }
 
 // IataCodeEqualFold applies the EqualFold predicate on the "iata_code" field.
 func IataCodeEqualFold(v string) predicate.Airport {
-	return predicate.Airport(func(s *sql.Selector) {
-		s.Where(sql.EqualFold(s.C(FieldIataCode), v))
-	})
+	return predicate.Airport(sql.FieldEqualFold(FieldIataCode, v))
 }
 
 // IataCodeContainsFold applies the ContainsFold predicate on the "iata_code" field.
 func IataCodeContainsFold(v string) predicate.Airport {
-	return predicate.Airport(func(s *sql.Selector) {
-		s.Where(sql.ContainsFold(s.C(FieldIataCode), v))
-	})
+	return predicate.Airport(sql.FieldContainsFold(FieldIataCode, v))
 }
 
 // IdentifierEQ applies the EQ predicate on the "identifier" field.
 func IdentifierEQ(v string) predicate.Airport {
-	return predicate.Airport(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldIdentifier), v))
-	})
+	return predicate.Airport(sql.FieldEQ(FieldIdentifier, v))
 }
 
 // IdentifierNEQ applies the NEQ predicate on the "identifier" field.
 func IdentifierNEQ(v string) predicate.Airport {
-	return predicate.Airport(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldIdentifier), v))
-	})
+	return predicate.Airport(sql.FieldNEQ(FieldIdentifier, v))
 }
 
 // IdentifierIn applies the In predicate on the "identifier" field.
 func IdentifierIn(vs ...string) predicate.Airport {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Airport(func(s *sql.Selector) {
-		s.Where(sql.In(s.C(FieldIdentifier), v...))
-	})
+	return predicate.Airport(sql.FieldIn(FieldIdentifier, vs...))
 }
 
 // IdentifierNotIn applies the NotIn predicate on the "identifier" field.
 func IdentifierNotIn(vs ...string) predicate.Airport {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Airport(func(s *sql.Selector) {
-		s.Where(sql.NotIn(s.C(FieldIdentifier), v...))
-	})
+	return predicate.Airport(sql.FieldNotIn(FieldIdentifier, vs...))
 }
 
 // IdentifierGT applies the GT predicate on the "identifier" field.
 func IdentifierGT(v string) predicate.Airport {
-	return predicate.Airport(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldIdentifier), v))
-	})
+	return predicate.Airport(sql.FieldGT(FieldIdentifier, v))
 }
 
 // IdentifierGTE applies the GTE predicate on the "identifier" field.
 func IdentifierGTE(v string) predicate.Airport {
-	return predicate.Airport(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldIdentifier), v))
-	})
+	return predicate.Airport(sql.FieldGTE(FieldIdentifier, v))
 }
 
 // IdentifierLT applies the LT predicate on the "identifier" field.
 func IdentifierLT(v string) predicate.Airport {
-	return predicate.Airport(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldIdentifier), v))
-	})
+	return predicate.Airport(sql.FieldLT(FieldIdentifier, v))
 }
 
 // IdentifierLTE applies the LTE predicate on the "identifier" field.
 func IdentifierLTE(v string) predicate.Airport {
-	return predicate.Airport(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldIdentifier), v))
-	})
+	return predicate.Airport(sql.FieldLTE(FieldIdentifier, v))
 }
 
 // IdentifierContains applies the Contains predicate on the "identifier" field.
 func IdentifierContains(v string) predicate.Airport {
-	return predicate.Airport(func(s *sql.Selector) {
-		s.Where(sql.Contains(s.C(FieldIdentifier), v))
-	})
+	return predicate.Airport(sql.FieldContains(FieldIdentifier, v))
 }
 
 // IdentifierHasPrefix applies the HasPrefix predicate on the "identifier" field.
 func IdentifierHasPrefix(v string) predicate.Airport {
-	return predicate.Airport(func(s *sql.Selector) {
-		s.Where(sql.HasPrefix(s.C(FieldIdentifier), v))
-	})
+	return predicate.Airport(sql.FieldHasPrefix(FieldIdentifier, v))
 }
 
 // IdentifierHasSuffix applies the HasSuffix predicate on the "identifier" field.
 func IdentifierHasSuffix(v string) predicate.Airport {
-	return predicate.Airport(func(s *sql.Selector) {
-		s.Where(sql.HasSuffix(s.C(FieldIdentifier), v))
-	})
+	return predicate.Airport(sql.FieldHasSuffix(FieldIdentifier, v))
 }
 
 // IdentifierEqualFold applies the EqualFold predicate on the "identifier" field.
 func IdentifierEqualFold(v string) predicate.Airport {
-	return predicate.Airport(func(s *sql.Selector) {
-		s.Where(sql.EqualFold(s.C(FieldIdentifier), v))
-	})
+	return predicate.Airport(sql.FieldEqualFold(FieldIdentifier, v))
 }
 
 // IdentifierContainsFold applies the ContainsFold predicate on the "identifier" field.
 func IdentifierContainsFold(v string) predicate.Airport {
-	return predicate.Airport(func(s *sql.Selector) {
-		s.Where(sql.ContainsFold(s.C(FieldIdentifier), v))
-	})
+	return predicate.Airport(sql.FieldContainsFold(FieldIdentifier, v))
 }
 
 // TypeEQ applies the EQ predicate on the "type" field.
 func TypeEQ(v Type) predicate.Airport {
-	return predicate.Airport(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldType), v))
-	})
+	return predicate.Airport(sql.FieldEQ(FieldType, v))
 }
 
 // TypeNEQ applies the NEQ predicate on the "type" field.
 func TypeNEQ(v Type) predicate.Airport {
-	return predicate.Airport(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldType), v))
-	})
+	return predicate.Airport(sql.FieldNEQ(FieldType, v))
 }
 
 // TypeIn applies the In predicate on the "type" field.
 func TypeIn(vs ...Type) predicate.Airport {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Airport(func(s *sql.Selector) {
-		s.Where(sql.In(s.C(FieldType), v...))
-	})
+	return predicate.Airport(sql.FieldIn(FieldType, vs...))
 }
 
 // TypeNotIn applies the NotIn predicate on the "type" field.
 func TypeNotIn(vs ...Type) predicate.Airport {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Airport(func(s *sql.Selector) {
-		s.Where(sql.NotIn(s.C(FieldType), v...))
-	})
+	return predicate.Airport(sql.FieldNotIn(FieldType, vs...))
 }
 
 // ImportanceEQ applies the EQ predicate on the "importance" field.
 func ImportanceEQ(v int) predicate.Airport {
-	return predicate.Airport(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldImportance), v))
-	})
+	return predicate.Airport(sql.FieldEQ(FieldImportance, v))
 }
 
 // ImportanceNEQ applies the NEQ predicate on the "importance" field.
 func ImportanceNEQ(v int) predicate.Airport {
-	return predicate.Airport(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldImportance), v))
-	})
+	return predicate.Airport(sql.FieldNEQ(FieldImportance, v))
 }
 
 // ImportanceIn applies the In predicate on the "importance" field.
 func ImportanceIn(vs ...int) predicate.Airport {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Airport(func(s *sql.Selector) {
-		s.Where(sql.In(s.C(FieldImportance), v...))
-	})
+	return predicate.Airport(sql.FieldIn(FieldImportance, vs...))
 }
 
 // ImportanceNotIn applies the NotIn predicate on the "importance" field.
 func ImportanceNotIn(vs ...int) predicate.Airport {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Airport(func(s *sql.Selector) {
-		s.Where(sql.NotIn(s.C(FieldImportance), v...))
-	})
+	return predicate.Airport(sql.FieldNotIn(FieldImportance, vs...))
 }
 
 // ImportanceGT applies the GT predicate on the "importance" field.
 func ImportanceGT(v int) predicate.Airport {
-	return predicate.Airport(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldImportance), v))
-	})
+	return predicate.Airport(sql.FieldGT(FieldImportance, v))
 }
 
 // ImportanceGTE applies the GTE predicate on the "importance" field.
 func ImportanceGTE(v int) predicate.Airport {
-	return predicate.Airport(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldImportance), v))
-	})
+	return predicate.Airport(sql.FieldGTE(FieldImportance, v))
 }
 
 // ImportanceLT applies the LT predicate on the "importance" field.
 func ImportanceLT(v int) predicate.Airport {
-	return predicate.Airport(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldImportance), v))
-	})
+	return predicate.Airport(sql.FieldLT(FieldImportance, v))
 }
 
 // ImportanceLTE applies the LTE predicate on the "importance" field.
 func ImportanceLTE(v int) predicate.Airport {
-	return predicate.Airport(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldImportance), v))
-	})
+	return predicate.Airport(sql.FieldLTE(FieldImportance, v))
 }
 
 // NameEQ applies the EQ predicate on the "name" field.
 func NameEQ(v string) predicate.Airport {
-	return predicate.Airport(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldName), v))
-	})
+	return predicate.Airport(sql.FieldEQ(FieldName, v))
 }
 
 // NameNEQ applies the NEQ predicate on the "name" field.
 func NameNEQ(v string) predicate.Airport {
-	return predicate.Airport(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldName), v))
-	})
+	return predicate.Airport(sql.FieldNEQ(FieldName, v))
 }
 
 // NameIn applies the In predicate on the "name" field.
 func NameIn(vs ...string) predicate.Airport {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Airport(func(s *sql.Selector) {
-		s.Where(sql.In(s.C(FieldName), v...))
-	})
+	return predicate.Airport(sql.FieldIn(FieldName, vs...))
 }
 
 // NameNotIn applies the NotIn predicate on the "name" field.
 func NameNotIn(vs ...string) predicate.Airport {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Airport(func(s *sql.Selector) {
-		s.Where(sql.NotIn(s.C(FieldName), v...))
-	})
+	return predicate.Airport(sql.FieldNotIn(FieldName, vs...))
 }
 
 // NameGT applies the GT predicate on the "name" field.
 func NameGT(v string) predicate.Airport {
-	return predicate.Airport(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldName), v))
-	})
+	return predicate.Airport(sql.FieldGT(FieldName, v))
 }
 
 // NameGTE applies the GTE predicate on the "name" field.
 func NameGTE(v string) predicate.Airport {
-	return predicate.Airport(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldName), v))
-	})
+	return predicate.Airport(sql.FieldGTE(FieldName, v))
 }
 
 // NameLT applies the LT predicate on the "name" field.
 func NameLT(v string) predicate.Airport {
-	return predicate.Airport(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldName), v))
-	})
+	return predicate.Airport(sql.FieldLT(FieldName, v))
 }
 
 // NameLTE applies the LTE predicate on the "name" field.
 func NameLTE(v string) predicate.Airport {
-	return predicate.Airport(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldName), v))
-	})
+	return predicate.Airport(sql.FieldLTE(FieldName, v))
 }
 
 // NameContains applies the Contains predicate on the "name" field.
 func NameContains(v string) predicate.Airport {
-	return predicate.Airport(func(s *sql.Selector) {
-		s.Where(sql.Contains(s.C(FieldName), v))
-	})
+	return predicate.Airport(sql.FieldContains(FieldName, v))
 }
 
 // NameHasPrefix applies the HasPrefix predicate on the "name" field.
 func NameHasPrefix(v string) predicate.Airport {
-	return predicate.Airport(func(s *sql.Selector) {
-		s.Where(sql.HasPrefix(s.C(FieldName), v))
-	})
+	return predicate.Airport(sql.FieldHasPrefix(FieldName, v))
 }
 
 // NameHasSuffix applies the HasSuffix predicate on the "name" field.
 func NameHasSuffix(v string) predicate.Airport {
-	return predicate.Airport(func(s *sql.Selector) {
-		s.Where(sql.HasSuffix(s.C(FieldName), v))
-	})
+	return predicate.Airport(sql.FieldHasSuffix(FieldName, v))
 }
 
 // NameEqualFold applies the EqualFold predicate on the "name" field.
 func NameEqualFold(v string) predicate.Airport {
-	return predicate.Airport(func(s *sql.Selector) {
-		s.Where(sql.EqualFold(s.C(FieldName), v))
-	})
+	return predicate.Airport(sql.FieldEqualFold(FieldName, v))
 }
 
 // NameContainsFold applies the ContainsFold predicate on the "name" field.
 func NameContainsFold(v string) predicate.Airport {
-	return predicate.Airport(func(s *sql.Selector) {
-		s.Where(sql.ContainsFold(s.C(FieldName), v))
-	})
+	return predicate.Airport(sql.FieldContainsFold(FieldName, v))
 }
 
 // LatitudeEQ applies the EQ predicate on the "latitude" field.
 func LatitudeEQ(v float64) predicate.Airport {
-	return predicate.Airport(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldLatitude), v))
-	})
+	return predicate.Airport(sql.FieldEQ(FieldLatitude, v))
 }
 
 // LatitudeNEQ applies the NEQ predicate on the "latitude" field.
 func LatitudeNEQ(v float64) predicate.Airport {
-	return predicate.Airport(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldLatitude), v))
-	})
+	return predicate.Airport(sql.FieldNEQ(FieldLatitude, v))
 }
 
 // LatitudeIn applies the In predicate on the "latitude" field.
 func LatitudeIn(vs ...float64) predicate.Airport {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Airport(func(s *sql.Selector) {
-		s.Where(sql.In(s.C(FieldLatitude), v...))
-	})
+	return predicate.Airport(sql.FieldIn(FieldLatitude, vs...))
 }
 
 // LatitudeNotIn applies the NotIn predicate on the "latitude" field.
 func LatitudeNotIn(vs ...float64) predicate.Airport {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Airport(func(s *sql.Selector) {
-		s.Where(sql.NotIn(s.C(FieldLatitude), v...))
-	})
+	return predicate.Airport(sql.FieldNotIn(FieldLatitude, vs...))
 }
 
 // LatitudeGT applies the GT predicate on the "latitude" field.
 func LatitudeGT(v float64) predicate.Airport {
-	return predicate.Airport(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldLatitude), v))
-	})
+	return predicate.Airport(sql.FieldGT(FieldLatitude, v))
 }
 
 // LatitudeGTE applies the GTE predicate on the "latitude" field.
 func LatitudeGTE(v float64) predicate.Airport {
-	return predicate.Airport(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldLatitude), v))
-	})
+	return predicate.Airport(sql.FieldGTE(FieldLatitude, v))
 }
 
 // LatitudeLT applies the LT predicate on the "latitude" field.
 func LatitudeLT(v float64) predicate.Airport {
-	return predicate.Airport(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldLatitude), v))
-	})
+	return predicate.Airport(sql.FieldLT(FieldLatitude, v))
 }
 
 // LatitudeLTE applies the LTE predicate on the "latitude" field.
 func LatitudeLTE(v float64) predicate.Airport {
-	return predicate.Airport(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldLatitude), v))
-	})
+	return predicate.Airport(sql.FieldLTE(FieldLatitude, v))
 }
 
 // LongitudeEQ applies the EQ predicate on the "longitude" field.
 func LongitudeEQ(v float64) predicate.Airport {
-	return predicate.Airport(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldLongitude), v))
-	})
+	return predicate.Airport(sql.FieldEQ(FieldLongitude, v))
 }
 
 // LongitudeNEQ applies the NEQ predicate on the "longitude" field.
 func LongitudeNEQ(v float64) predicate.Airport {
-	return predicate.Airport(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldLongitude), v))
-	})
+	return predicate.Airport(sql.FieldNEQ(FieldLongitude, v))
 }
 
 // LongitudeIn applies the In predicate on the "longitude" field.
 func LongitudeIn(vs ...float64) predicate.Airport {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Airport(func(s *sql.Selector) {
-		s.Where(sql.In(s.C(FieldLongitude), v...))
-	})
+	return predicate.Airport(sql.FieldIn(FieldLongitude, vs...))
 }
 
 // LongitudeNotIn applies the NotIn predicate on the "longitude" field.
 func LongitudeNotIn(vs ...float64) predicate.Airport {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Airport(func(s *sql.Selector) {
-		s.Where(sql.NotIn(s.C(FieldLongitude), v...))
-	})
+	return predicate.Airport(sql.FieldNotIn(FieldLongitude, vs...))
 }
 
 // LongitudeGT applies the GT predicate on the "longitude" field.
 func LongitudeGT(v float64) predicate.Airport {
-	return predicate.Airport(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldLongitude), v))
-	})
+	return predicate.Airport(sql.FieldGT(FieldLongitude, v))
 }
 
 // LongitudeGTE applies the GTE predicate on the "longitude" field.
 func LongitudeGTE(v float64) predicate.Airport {
-	return predicate.Airport(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldLongitude), v))
-	})
+	return predicate.Airport(sql.FieldGTE(FieldLongitude, v))
 }
 
 // LongitudeLT applies the LT predicate on the "longitude" field.
 func LongitudeLT(v float64) predicate.Airport {
-	return predicate.Airport(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldLongitude), v))
-	})
+	return predicate.Airport(sql.FieldLT(FieldLongitude, v))
 }
 
 // LongitudeLTE applies the LTE predicate on the "longitude" field.
 func LongitudeLTE(v float64) predicate.Airport {
-	return predicate.Airport(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldLongitude), v))
-	})
+	return predicate.Airport(sql.FieldLTE(FieldLongitude, v))
 }
 
 // TimezoneEQ applies the EQ predicate on the "timezone" field.
 func TimezoneEQ(v string) predicate.Airport {
-	return predicate.Airport(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldTimezone), v))
-	})
+	return predicate.Airport(sql.FieldEQ(FieldTimezone, v))
 }
 
 // TimezoneNEQ applies the NEQ predicate on the "timezone" field.
 func TimezoneNEQ(v string) predicate.Airport {
-	return predicate.Airport(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldTimezone), v))
-	})
+	return predicate.Airport(sql.FieldNEQ(FieldTimezone, v))
 }
 
 // TimezoneIn applies the In predicate on the "timezone" field.
 func TimezoneIn(vs ...string) predicate.Airport {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Airport(func(s *sql.Selector) {
-		s.Where(sql.In(s.C(FieldTimezone), v...))
-	})
+	return predicate.Airport(sql.FieldIn(FieldTimezone, vs...))
 }
 
 // TimezoneNotIn applies the NotIn predicate on the "timezone" field.
 func TimezoneNotIn(vs ...string) predicate.Airport {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Airport(func(s *sql.Selector) {
-		s.Where(sql.NotIn(s.C(FieldTimezone), v...))
-	})
+	return predicate.Airport(sql.FieldNotIn(FieldTimezone, vs...))
 }
 
 // TimezoneGT applies the GT predicate on the "timezone" field.
 func TimezoneGT(v string) predicate.Airport {
-	return predicate.Airport(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldTimezone), v))
-	})
+	return predicate.Airport(sql.FieldGT(FieldTimezone, v))
 }
 
 // TimezoneGTE applies the GTE predicate on the "timezone" field.
 func TimezoneGTE(v string) predicate.Airport {
-	return predicate.Airport(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldTimezone), v))
-	})
+	return predicate.Airport(sql.FieldGTE(FieldTimezone, v))
 }
 
 // TimezoneLT applies the LT predicate on the "timezone" field.
 func TimezoneLT(v string) predicate.Airport {
-	return predicate.Airport(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldTimezone), v))
-	})
+	return predicate.Airport(sql.FieldLT(FieldTimezone, v))
 }
 
 // TimezoneLTE applies the LTE predicate on the "timezone" field.
 func TimezoneLTE(v string) predicate.Airport {
-	return predicate.Airport(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldTimezone), v))
-	})
+	return predicate.Airport(sql.FieldLTE(FieldTimezone, v))
 }
 
 // TimezoneContains applies the Contains predicate on the "timezone" field.
 func TimezoneContains(v string) predicate.Airport {
-	return predicate.Airport(func(s *sql.Selector) {
-		s.Where(sql.Contains(s.C(FieldTimezone), v))
-	})
+	return predicate.Airport(sql.FieldContains(FieldTimezone, v))
 }
 
 // TimezoneHasPrefix applies the HasPrefix predicate on the "timezone" field.
 func TimezoneHasPrefix(v string) predicate.Airport {
-	return predicate.Airport(func(s *sql.Selector) {
-		s.Where(sql.HasPrefix(s.C(FieldTimezone), v))
-	})
+	return predicate.Airport(sql.FieldHasPrefix(FieldTimezone, v))
 }
 
 // TimezoneHasSuffix applies the HasSuffix predicate on the "timezone" field.
 func TimezoneHasSuffix(v string) predicate.Airport {
-	return predicate.Airport(func(s *sql.Selector) {
-		s.Where(sql.HasSuffix(s.C(FieldTimezone), v))
-	})
+	return predicate.Airport(sql.FieldHasSuffix(FieldTimezone, v))
 }
 
 // TimezoneIsNil applies the IsNil predicate on the "timezone" field.
 func TimezoneIsNil() predicate.Airport {
-	return predicate.Airport(func(s *sql.Selector) {
-		s.Where(sql.IsNull(s.C(FieldTimezone)))
-	})
+	return predicate.Airport(sql.FieldIsNull(FieldTimezone))
 }
 
 // TimezoneNotNil applies the NotNil predicate on the "timezone" field.
 func TimezoneNotNil() predicate.Airport {
-	return predicate.Airport(func(s *sql.Selector) {
-		s.Where(sql.NotNull(s.C(FieldTimezone)))
-	})
+	return predicate.Airport(sql.FieldNotNull(FieldTimezone))
 }
 
 // TimezoneEqualFold applies the EqualFold predicate on the "timezone" field.
 func TimezoneEqualFold(v string) predicate.Airport {
-	return predicate.Airport(func(s *sql.Selector) {
-		s.Where(sql.EqualFold(s.C(FieldTimezone), v))
-	})
+	return predicate.Airport(sql.FieldEqualFold(FieldTimezone, v))
 }
 
 // TimezoneContainsFold applies the ContainsFold predicate on the "timezone" field.
 func TimezoneContainsFold(v string) predicate.Airport {
-	return predicate.Airport(func(s *sql.Selector) {
-		s.Where(sql.ContainsFold(s.C(FieldTimezone), v))
-	})
+	return predicate.Airport(sql.FieldContainsFold(FieldTimezone, v))
 }
 
 // ElevationEQ applies the EQ predicate on the "elevation" field.
 func ElevationEQ(v int) predicate.Airport {
-	return predicate.Airport(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldElevation), v))
-	})
+	return predicate.Airport(sql.FieldEQ(FieldElevation, v))
 }
 
 // ElevationNEQ applies the NEQ predicate on the "elevation" field.
 func ElevationNEQ(v int) predicate.Airport {
-	return predicate.Airport(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldElevation), v))
-	})
+	return predicate.Airport(sql.FieldNEQ(FieldElevation, v))
 }
 
 // ElevationIn applies the In predicate on the "elevation" field.
 func ElevationIn(vs ...int) predicate.Airport {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Airport(func(s *sql.Selector) {
-		s.Where(sql.In(s.C(FieldElevation), v...))
-	})
+	return predicate.Airport(sql.FieldIn(FieldElevation, vs...))
 }
 
 // ElevationNotIn applies the NotIn predicate on the "elevation" field.
 func ElevationNotIn(vs ...int) predicate.Airport {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Airport(func(s *sql.Selector) {
-		s.Where(sql.NotIn(s.C(FieldElevation), v...))
-	})
+	return predicate.Airport(sql.FieldNotIn(FieldElevation, vs...))
 }
 
 // ElevationGT applies the GT predicate on the "elevation" field.
 func ElevationGT(v int) predicate.Airport {
-	return predicate.Airport(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldElevation), v))
-	})
+	return predicate.Airport(sql.FieldGT(FieldElevation, v))
 }
 
 // ElevationGTE applies the GTE predicate on the "elevation" field.
 func ElevationGTE(v int) predicate.Airport {
-	return predicate.Airport(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldElevation), v))
-	})
+	return predicate.Airport(sql.FieldGTE(FieldElevation, v))
 }
 
 // ElevationLT applies the LT predicate on the "elevation" field.
 func ElevationLT(v int) predicate.Airport {
-	return predicate.Airport(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldElevation), v))
-	})
+	return predicate.Airport(sql.FieldLT(FieldElevation, v))
 }
 
 // ElevationLTE applies the LTE predicate on the "elevation" field.
 func ElevationLTE(v int) predicate.Airport {
-	return predicate.Airport(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldElevation), v))
-	})
+	return predicate.Airport(sql.FieldLTE(FieldElevation, v))
 }
 
 // ElevationIsNil applies the IsNil predicate on the "elevation" field.
 func ElevationIsNil() predicate.Airport {
-	return predicate.Airport(func(s *sql.Selector) {
-		s.Where(sql.IsNull(s.C(FieldElevation)))
-	})
+	return predicate.Airport(sql.FieldIsNull(FieldElevation))
 }
 
 // ElevationNotNil applies the NotNil predicate on the "elevation" field.
 func ElevationNotNil() predicate.Airport {
-	return predicate.Airport(func(s *sql.Selector) {
-		s.Where(sql.NotNull(s.C(FieldElevation)))
-	})
+	return predicate.Airport(sql.FieldNotNull(FieldElevation))
 }
 
 // MunicipalityEQ applies the EQ predicate on the "municipality" field.
 func MunicipalityEQ(v string) predicate.Airport {
-	return predicate.Airport(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldMunicipality), v))
-	})
+	return predicate.Airport(sql.FieldEQ(FieldMunicipality, v))
 }
 
 // MunicipalityNEQ applies the NEQ predicate on the "municipality" field.
 func MunicipalityNEQ(v string) predicate.Airport {
-	return predicate.Airport(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldMunicipality), v))
-	})
+	return predicate.Airport(sql.FieldNEQ(FieldMunicipality, v))
 }
 
 // MunicipalityIn applies the In predicate on the "municipality" field.
 func MunicipalityIn(vs ...string) predicate.Airport {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Airport(func(s *sql.Selector) {
-		s.Where(sql.In(s.C(FieldMunicipality), v...))
-	})
+	return predicate.Airport(sql.FieldIn(FieldMunicipality, vs...))
 }
 
 // MunicipalityNotIn applies the NotIn predicate on the "municipality" field.
 func MunicipalityNotIn(vs ...string) predicate.Airport {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Airport(func(s *sql.Selector) {
-		s.Where(sql.NotIn(s.C(FieldMunicipality), v...))
-	})
+	return predicate.Airport(sql.FieldNotIn(FieldMunicipality, vs...))
 }
 
 // MunicipalityGT applies the GT predicate on the "municipality" field.
 func MunicipalityGT(v string) predicate.Airport {
-	return predicate.Airport(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldMunicipality), v))
-	})
+	return predicate.Airport(sql.FieldGT(FieldMunicipality, v))
 }
 
 // MunicipalityGTE applies the GTE predicate on the "municipality" field.
 func MunicipalityGTE(v string) predicate.Airport {
-	return predicate.Airport(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldMunicipality), v))
-	})
+	return predicate.Airport(sql.FieldGTE(FieldMunicipality, v))
 }
 
 // MunicipalityLT applies the LT predicate on the "municipality" field.
 func MunicipalityLT(v string) predicate.Airport {
-	return predicate.Airport(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldMunicipality), v))
-	})
+	return predicate.Airport(sql.FieldLT(FieldMunicipality, v))
 }
 
 // MunicipalityLTE applies the LTE predicate on the "municipality" field.
 func MunicipalityLTE(v string) predicate.Airport {
-	return predicate.Airport(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldMunicipality), v))
-	})
+	return predicate.Airport(sql.FieldLTE(FieldMunicipality, v))
 }
 
 // MunicipalityContains applies the Contains predicate on the "municipality" field.
 func MunicipalityContains(v string) predicate.Airport {
-	return predicate.Airport(func(s *sql.Selector) {
-		s.Where(sql.Contains(s.C(FieldMunicipality), v))
-	})
+	return predicate.Airport(sql.FieldContains(FieldMunicipality, v))
 }
 
 // MunicipalityHasPrefix applies the HasPrefix predicate on the "municipality" field.
 func MunicipalityHasPrefix(v string) predicate.Airport {
-	return predicate.Airport(func(s *sql.Selector) {
-		s.Where(sql.HasPrefix(s.C(FieldMunicipality), v))
-	})
+	return predicate.Airport(sql.FieldHasPrefix(FieldMunicipality, v))
 }
 
 // MunicipalityHasSuffix applies the HasSuffix predicate on the "municipality" field.
 func MunicipalityHasSuffix(v string) predicate.Airport {
-	return predicate.Airport(func(s *sql.Selector) {
-		s.Where(sql.HasSuffix(s.C(FieldMunicipality), v))
-	})
+	return predicate.Airport(sql.FieldHasSuffix(FieldMunicipality, v))
 }
 
 // MunicipalityIsNil applies the IsNil predicate on the "municipality" field.
 func MunicipalityIsNil() predicate.Airport {
-	return predicate.Airport(func(s *sql.Selector) {
-		s.Where(sql.IsNull(s.C(FieldMunicipality)))
-	})
+	return predicate.Airport(sql.FieldIsNull(FieldMunicipality))
 }
 
 // MunicipalityNotNil applies the NotNil predicate on the "municipality" field.
 func MunicipalityNotNil() predicate.Airport {
-	return predicate.Airport(func(s *sql.Selector) {
-		s.Where(sql.NotNull(s.C(FieldMunicipality)))
-	})
+	return predicate.Airport(sql.FieldNotNull(FieldMunicipality))
 }
 
 // MunicipalityEqualFold applies the EqualFold predicate on the "municipality" field.
 func MunicipalityEqualFold(v string) predicate.Airport {
-	return predicate.Airport(func(s *sql.Selector) {
-		s.Where(sql.EqualFold(s.C(FieldMunicipality), v))
-	})
+	return predicate.Airport(sql.FieldEqualFold(FieldMunicipality, v))
 }
 
 // MunicipalityContainsFold applies the ContainsFold predicate on the "municipality" field.
 func MunicipalityContainsFold(v string) predicate.Airport {
-	return predicate.Airport(func(s *sql.Selector) {
-		s.Where(sql.ContainsFold(s.C(FieldMunicipality), v))
-	})
+	return predicate.Airport(sql.FieldContainsFold(FieldMunicipality, v))
 }
 
 // ScheduledServiceEQ applies the EQ predicate on the "scheduled_service" field.
 func ScheduledServiceEQ(v bool) predicate.Airport {
-	return predicate.Airport(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldScheduledService), v))
-	})
+	return predicate.Airport(sql.FieldEQ(FieldScheduledService, v))
 }
 
 // ScheduledServiceNEQ applies the NEQ predicate on the "scheduled_service" field.
 func ScheduledServiceNEQ(v bool) predicate.Airport {
-	return predicate.Airport(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldScheduledService), v))
-	})
+	return predicate.Airport(sql.FieldNEQ(FieldScheduledService, v))
 }
 
 // GpsCodeEQ applies the EQ predicate on the "gps_code" field.
 func GpsCodeEQ(v string) predicate.Airport {
-	return predicate.Airport(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldGpsCode), v))
-	})
+	return predicate.Airport(sql.FieldEQ(FieldGpsCode, v))
 }
 
 // GpsCodeNEQ applies the NEQ predicate on the "gps_code" field.
 func GpsCodeNEQ(v string) predicate.Airport {
-	return predicate.Airport(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldGpsCode), v))
-	})
+	return predicate.Airport(sql.FieldNEQ(FieldGpsCode, v))
 }
 
 // GpsCodeIn applies the In predicate on the "gps_code" field.
 func GpsCodeIn(vs ...string) predicate.Airport {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Airport(func(s *sql.Selector) {
-		s.Where(sql.In(s.C(FieldGpsCode), v...))
-	})
+	return predicate.Airport(sql.FieldIn(FieldGpsCode, vs...))
 }
 
 // GpsCodeNotIn applies the NotIn predicate on the "gps_code" field.
 func GpsCodeNotIn(vs ...string) predicate.Airport {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Airport(func(s *sql.Selector) {
-		s.Where(sql.NotIn(s.C(FieldGpsCode), v...))
-	})
+	return predicate.Airport(sql.FieldNotIn(FieldGpsCode, vs...))
 }
 
 // GpsCodeGT applies the GT predicate on the "gps_code" field.
 func GpsCodeGT(v string) predicate.Airport {
-	return predicate.Airport(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldGpsCode), v))
-	})
+	return predicate.Airport(sql.FieldGT(FieldGpsCode, v))
 }
 
 // GpsCodeGTE applies the GTE predicate on the "gps_code" field.
 func GpsCodeGTE(v string) predicate.Airport {
-	return predicate.Airport(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldGpsCode), v))
-	})
+	return predicate.Airport(sql.FieldGTE(FieldGpsCode, v))
 }
 
 // GpsCodeLT applies the LT predicate on the "gps_code" field.
 func GpsCodeLT(v string) predicate.Airport {
-	return predicate.Airport(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldGpsCode), v))
-	})
+	return predicate.Airport(sql.FieldLT(FieldGpsCode, v))
 }
 
 // GpsCodeLTE applies the LTE predicate on the "gps_code" field.
 func GpsCodeLTE(v string) predicate.Airport {
-	return predicate.Airport(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldGpsCode), v))
-	})
+	return predicate.Airport(sql.FieldLTE(FieldGpsCode, v))
 }
 
 // GpsCodeContains applies the Contains predicate on the "gps_code" field.
 func GpsCodeContains(v string) predicate.Airport {
-	return predicate.Airport(func(s *sql.Selector) {
-		s.Where(sql.Contains(s.C(FieldGpsCode), v))
-	})
+	return predicate.Airport(sql.FieldContains(FieldGpsCode, v))
 }
 
 // GpsCodeHasPrefix applies the HasPrefix predicate on the "gps_code" field.
 func GpsCodeHasPrefix(v string) predicate.Airport {
-	return predicate.Airport(func(s *sql.Selector) {
-		s.Where(sql.HasPrefix(s.C(FieldGpsCode), v))
-	})
+	return predicate.Airport(sql.FieldHasPrefix(FieldGpsCode, v))
 }
 
 // GpsCodeHasSuffix applies the HasSuffix predicate on the "gps_code" field.
 func GpsCodeHasSuffix(v string) predicate.Airport {
-	return predicate.Airport(func(s *sql.Selector) {
-		s.Where(sql.HasSuffix(s.C(FieldGpsCode), v))
-	})
+	return predicate.Airport(sql.FieldHasSuffix(FieldGpsCode, v))
 }
 
 // GpsCodeIsNil applies the IsNil predicate on the "gps_code" field.
 func GpsCodeIsNil() predicate.Airport {
-	return predicate.Airport(func(s *sql.Selector) {
-		s.Where(sql.IsNull(s.C(FieldGpsCode)))
-	})
+	return predicate.Airport(sql.FieldIsNull(FieldGpsCode))
 }
 
 // GpsCodeNotNil applies the NotNil predicate on the "gps_code" field.
 func GpsCodeNotNil() predicate.Airport {
-	return predicate.Airport(func(s *sql.Selector) {
-		s.Where(sql.NotNull(s.C(FieldGpsCode)))
-	})
+	return predicate.Airport(sql.FieldNotNull(FieldGpsCode))
 }
 
 // GpsCodeEqualFold applies the EqualFold predicate on the "gps_code" field.
 func GpsCodeEqualFold(v string) predicate.Airport {
-	return predicate.Airport(func(s *sql.Selector) {
-		s.Where(sql.EqualFold(s.C(FieldGpsCode), v))
-	})
+	return predicate.Airport(sql.FieldEqualFold(FieldGpsCode, v))
 }
 
 // GpsCodeContainsFold applies the ContainsFold predicate on the "gps_code" field.
 func GpsCodeContainsFold(v string) predicate.Airport {
-	return predicate.Airport(func(s *sql.Selector) {
-		s.Where(sql.ContainsFold(s.C(FieldGpsCode), v))
-	})
+	return predicate.Airport(sql.FieldContainsFold(FieldGpsCode, v))
 }
 
 // LocalCodeEQ applies the EQ predicate on the "local_code" field.
 func LocalCodeEQ(v string) predicate.Airport {
-	return predicate.Airport(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldLocalCode), v))
-	})
+	return predicate.Airport(sql.FieldEQ(FieldLocalCode, v))
 }
 
 // LocalCodeNEQ applies the NEQ predicate on the "local_code" field.
 func LocalCodeNEQ(v string) predicate.Airport {
-	return predicate.Airport(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldLocalCode), v))
-	})
+	return predicate.Airport(sql.FieldNEQ(FieldLocalCode, v))
 }
 
 // LocalCodeIn applies the In predicate on the "local_code" field.
 func LocalCodeIn(vs ...string) predicate.Airport {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Airport(func(s *sql.Selector) {
-		s.Where(sql.In(s.C(FieldLocalCode), v...))
-	})
+	return predicate.Airport(sql.FieldIn(FieldLocalCode, vs...))
 }
 
 // LocalCodeNotIn applies the NotIn predicate on the "local_code" field.
 func LocalCodeNotIn(vs ...string) predicate.Airport {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Airport(func(s *sql.Selector) {
-		s.Where(sql.NotIn(s.C(FieldLocalCode), v...))
-	})
+	return predicate.Airport(sql.FieldNotIn(FieldLocalCode, vs...))
 }
 
 // LocalCodeGT applies the GT predicate on the "local_code" field.
 func LocalCodeGT(v string) predicate.Airport {
-	return predicate.Airport(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldLocalCode), v))
-	})
+	return predicate.Airport(sql.FieldGT(FieldLocalCode, v))
 }
 
 // LocalCodeGTE applies the GTE predicate on the "local_code" field.
 func LocalCodeGTE(v string) predicate.Airport {
-	return predicate.Airport(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldLocalCode), v))
-	})
+	return predicate.Airport(sql.FieldGTE(FieldLocalCode, v))
 }
 
 // LocalCodeLT applies the LT predicate on the "local_code" field.
 func LocalCodeLT(v string) predicate.Airport {
-	return predicate.Airport(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldLocalCode), v))
-	})
+	return predicate.Airport(sql.FieldLT(FieldLocalCode, v))
 }
 
 // LocalCodeLTE applies the LTE predicate on the "local_code" field.
 func LocalCodeLTE(v string) predicate.Airport {
-	return predicate.Airport(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldLocalCode), v))
-	})
+	return predicate.Airport(sql.FieldLTE(FieldLocalCode, v))
 }
 
 // LocalCodeContains applies the Contains predicate on the "local_code" field.
 func LocalCodeContains(v string) predicate.Airport {
-	return predicate.Airport(func(s *sql.Selector) {
-		s.Where(sql.Contains(s.C(FieldLocalCode), v))
-	})
+	return predicate.Airport(sql.FieldContains(FieldLocalCode, v))
 }
 
 // LocalCodeHasPrefix applies the HasPrefix predicate on the "local_code" field.
 func LocalCodeHasPrefix(v string) predicate.Airport {
-	return predicate.Airport(func(s *sql.Selector) {
-		s.Where(sql.HasPrefix(s.C(FieldLocalCode), v))
-	})
+	return predicate.Airport(sql.FieldHasPrefix(FieldLocalCode, v))
 }
 
 // LocalCodeHasSuffix applies the HasSuffix predicate on the "local_code" field.
 func LocalCodeHasSuffix(v string) predicate.Airport {
-	return predicate.Airport(func(s *sql.Selector) {
-		s.Where(sql.HasSuffix(s.C(FieldLocalCode), v))
-	})
+	return predicate.Airport(sql.FieldHasSuffix(FieldLocalCode, v))
 }
 
 // LocalCodeIsNil applies the IsNil predicate on the "local_code" field.
 func LocalCodeIsNil() predicate.Airport {
-	return predicate.Airport(func(s *sql.Selector) {
-		s.Where(sql.IsNull(s.C(FieldLocalCode)))
-	})
+	return predicate.Airport(sql.FieldIsNull(FieldLocalCode))
 }
 
 // LocalCodeNotNil applies the NotNil predicate on the "local_code" field.
 func LocalCodeNotNil() predicate.Airport {
-	return predicate.Airport(func(s *sql.Selector) {
-		s.Where(sql.NotNull(s.C(FieldLocalCode)))
-	})
+	return predicate.Airport(sql.FieldNotNull(FieldLocalCode))
 }
 
 // LocalCodeEqualFold applies the EqualFold predicate on the "local_code" field.
 func LocalCodeEqualFold(v string) predicate.Airport {
-	return predicate.Airport(func(s *sql.Selector) {
-		s.Where(sql.EqualFold(s.C(FieldLocalCode), v))
-	})
+	return predicate.Airport(sql.FieldEqualFold(FieldLocalCode, v))
 }
 
 // LocalCodeContainsFold applies the ContainsFold predicate on the "local_code" field.
 func LocalCodeContainsFold(v string) predicate.Airport {
-	return predicate.Airport(func(s *sql.Selector) {
-		s.Where(sql.ContainsFold(s.C(FieldLocalCode), v))
-	})
+	return predicate.Airport(sql.FieldContainsFold(FieldLocalCode, v))
 }
 
 // WebsiteEQ applies the EQ predicate on the "website" field.
 func WebsiteEQ(v string) predicate.Airport {
-	return predicate.Airport(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldWebsite), v))
-	})
+	return predicate.Airport(sql.FieldEQ(FieldWebsite, v))
 }
 
 // WebsiteNEQ applies the NEQ predicate on the "website" field.
 func WebsiteNEQ(v string) predicate.Airport {
-	return predicate.Airport(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldWebsite), v))
-	})
+	return predicate.Airport(sql.FieldNEQ(FieldWebsite, v))
 }
 
 // WebsiteIn applies the In predicate on the "website" field.
 func WebsiteIn(vs ...string) predicate.Airport {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Airport(func(s *sql.Selector) {
-		s.Where(sql.In(s.C(FieldWebsite), v...))
-	})
+	return predicate.Airport(sql.FieldIn(FieldWebsite, vs...))
 }
 
 // WebsiteNotIn applies the NotIn predicate on the "website" field.
 func WebsiteNotIn(vs ...string) predicate.Airport {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Airport(func(s *sql.Selector) {
-		s.Where(sql.NotIn(s.C(FieldWebsite), v...))
-	})
+	return predicate.Airport(sql.FieldNotIn(FieldWebsite, vs...))
 }
 
 // WebsiteGT applies the GT predicate on the "website" field.
 func WebsiteGT(v string) predicate.Airport {
-	return predicate.Airport(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldWebsite), v))
-	})
+	return predicate.Airport(sql.FieldGT(FieldWebsite, v))
 }
 
 // WebsiteGTE applies the GTE predicate on the "website" field.
 func WebsiteGTE(v string) predicate.Airport {
-	return predicate.Airport(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldWebsite), v))
-	})
+	return predicate.Airport(sql.FieldGTE(FieldWebsite, v))
 }
 
 // WebsiteLT applies the LT predicate on the "website" field.
 func WebsiteLT(v string) predicate.Airport {
-	return predicate.Airport(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldWebsite), v))
-	})
+	return predicate.Airport(sql.FieldLT(FieldWebsite, v))
 }
 
 // WebsiteLTE applies the LTE predicate on the "website" field.
 func WebsiteLTE(v string) predicate.Airport {
-	return predicate.Airport(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldWebsite), v))
-	})
+	return predicate.Airport(sql.FieldLTE(FieldWebsite, v))
 }
 
 // WebsiteContains applies the Contains predicate on the "website" field.
 func WebsiteContains(v string) predicate.Airport {
-	return predicate.Airport(func(s *sql.Selector) {
-		s.Where(sql.Contains(s.C(FieldWebsite), v))
-	})
+	return predicate.Airport(sql.FieldContains(FieldWebsite, v))
 }
 
 // WebsiteHasPrefix applies the HasPrefix predicate on the "website" field.
 func WebsiteHasPrefix(v string) predicate.Airport {
-	return predicate.Airport(func(s *sql.Selector) {
-		s.Where(sql.HasPrefix(s.C(FieldWebsite), v))
-	})
+	return predicate.Airport(sql.FieldHasPrefix(FieldWebsite, v))
 }
 
 // WebsiteHasSuffix applies the HasSuffix predicate on the "website" field.
 func WebsiteHasSuffix(v string) predicate.Airport {
-	return predicate.Airport(func(s *sql.Selector) {
-		s.Where(sql.HasSuffix(s.C(FieldWebsite), v))
-	})
+	return predicate.Airport(sql.FieldHasSuffix(FieldWebsite, v))
 }
 
 // WebsiteIsNil applies the IsNil predicate on the "website" field.
 func WebsiteIsNil() predicate.Airport {
-	return predicate.Airport(func(s *sql.Selector) {
-		s.Where(sql.IsNull(s.C(FieldWebsite)))
-	})
+	return predicate.Airport(sql.FieldIsNull(FieldWebsite))
 }
 
 // WebsiteNotNil applies the NotNil predicate on the "website" field.
 func WebsiteNotNil() predicate.Airport {
-	return predicate.Airport(func(s *sql.Selector) {
-		s.Where(sql.NotNull(s.C(FieldWebsite)))
-	})
+	return predicate.Airport(sql.FieldNotNull(FieldWebsite))
 }
 
 // WebsiteEqualFold applies the EqualFold predicate on the "website" field.
 func WebsiteEqualFold(v string) predicate.Airport {
-	return predicate.Airport(func(s *sql.Selector) {
-		s.Where(sql.EqualFold(s.C(FieldWebsite), v))
-	})
+	return predicate.Airport(sql.FieldEqualFold(FieldWebsite, v))
 }
 
 // WebsiteContainsFold applies the ContainsFold predicate on the "website" field.
 func WebsiteContainsFold(v string) predicate.Airport {
-	return predicate.Airport(func(s *sql.Selector) {
-		s.Where(sql.ContainsFold(s.C(FieldWebsite), v))
-	})
+	return predicate.Airport(sql.FieldContainsFold(FieldWebsite, v))
 }
 
 // WikipediaEQ applies the EQ predicate on the "wikipedia" field.
 func WikipediaEQ(v string) predicate.Airport {
-	return predicate.Airport(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldWikipedia), v))
-	})
+	return predicate.Airport(sql.FieldEQ(FieldWikipedia, v))
 }
 
 // WikipediaNEQ applies the NEQ predicate on the "wikipedia" field.
 func WikipediaNEQ(v string) predicate.Airport {
-	return predicate.Airport(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldWikipedia), v))
-	})
+	return predicate.Airport(sql.FieldNEQ(FieldWikipedia, v))
 }
 
 // WikipediaIn applies the In predicate on the "wikipedia" field.
 func WikipediaIn(vs ...string) predicate.Airport {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Airport(func(s *sql.Selector) {
-		s.Where(sql.In(s.C(FieldWikipedia), v...))
-	})
+	return predicate.Airport(sql.FieldIn(FieldWikipedia, vs...))
 }
 
 // WikipediaNotIn applies the NotIn predicate on the "wikipedia" field.
 func WikipediaNotIn(vs ...string) predicate.Airport {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Airport(func(s *sql.Selector) {
-		s.Where(sql.NotIn(s.C(FieldWikipedia), v...))
-	})
+	return predicate.Airport(sql.FieldNotIn(FieldWikipedia, vs...))
 }
 
 // WikipediaGT applies the GT predicate on the "wikipedia" field.
 func WikipediaGT(v string) predicate.Airport {
-	return predicate.Airport(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldWikipedia), v))
-	})
+	return predicate.Airport(sql.FieldGT(FieldWikipedia, v))
 }
 
 // WikipediaGTE applies the GTE predicate on the "wikipedia" field.
 func WikipediaGTE(v string) predicate.Airport {
-	return predicate.Airport(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldWikipedia), v))
-	})
+	return predicate.Airport(sql.FieldGTE(FieldWikipedia, v))
 }
 
 // WikipediaLT applies the LT predicate on the "wikipedia" field.
 func WikipediaLT(v string) predicate.Airport {
-	return predicate.Airport(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldWikipedia), v))
-	})
+	return predicate.Airport(sql.FieldLT(FieldWikipedia, v))
 }
 
 // WikipediaLTE applies the LTE predicate on the "wikipedia" field.
 func WikipediaLTE(v string) predicate.Airport {
-	return predicate.Airport(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldWikipedia), v))
-	})
+	return predicate.Airport(sql.FieldLTE(FieldWikipedia, v))
 }
 
 // WikipediaContains applies the Contains predicate on the "wikipedia" field.
 func WikipediaContains(v string) predicate.Airport {
-	return predicate.Airport(func(s *sql.Selector) {
-		s.Where(sql.Contains(s.C(FieldWikipedia), v))
-	})
+	return predicate.Airport(sql.FieldContains(FieldWikipedia, v))
 }
 
 // WikipediaHasPrefix applies the HasPrefix predicate on the "wikipedia" field.
 func WikipediaHasPrefix(v string) predicate.Airport {
-	return predicate.Airport(func(s *sql.Selector) {
-		s.Where(sql.HasPrefix(s.C(FieldWikipedia), v))
-	})
+	return predicate.Airport(sql.FieldHasPrefix(FieldWikipedia, v))
 }
 
 // WikipediaHasSuffix applies the HasSuffix predicate on the "wikipedia" field.
 func WikipediaHasSuffix(v string) predicate.Airport {
-	return predicate.Airport(func(s *sql.Selector) {
-		s.Where(sql.HasSuffix(s.C(FieldWikipedia), v))
-	})
+	return predicate.Airport(sql.FieldHasSuffix(FieldWikipedia, v))
 }
 
 // WikipediaIsNil applies the IsNil predicate on the "wikipedia" field.
 func WikipediaIsNil() predicate.Airport {
-	return predicate.Airport(func(s *sql.Selector) {
-		s.Where(sql.IsNull(s.C(FieldWikipedia)))
-	})
+	return predicate.Airport(sql.FieldIsNull(FieldWikipedia))
 }
 
 // WikipediaNotNil applies the NotNil predicate on the "wikipedia" field.
 func WikipediaNotNil() predicate.Airport {
-	return predicate.Airport(func(s *sql.Selector) {
-		s.Where(sql.NotNull(s.C(FieldWikipedia)))
-	})
+	return predicate.Airport(sql.FieldNotNull(FieldWikipedia))
 }
 
 // WikipediaEqualFold applies the EqualFold predicate on the "wikipedia" field.
 func WikipediaEqualFold(v string) predicate.Airport {
-	return predicate.Airport(func(s *sql.Selector) {
-		s.Where(sql.EqualFold(s.C(FieldWikipedia), v))
-	})
+	return predicate.Airport(sql.FieldEqualFold(FieldWikipedia, v))
 }
 
 // WikipediaContainsFold applies the ContainsFold predicate on the "wikipedia" field.
 func WikipediaContainsFold(v string) predicate.Airport {
-	return predicate.Airport(func(s *sql.Selector) {
-		s.Where(sql.ContainsFold(s.C(FieldWikipedia), v))
-	})
+	return predicate.Airport(sql.FieldContainsFold(FieldWikipedia, v))
 }
 
 // HasRegion applies the HasEdge predicate on the "region" edge.
@@ -1883,7 +1241,6 @@ func HasRegion() predicate.Airport {
 	return predicate.Airport(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(RegionTable, FieldID),
 			sqlgraph.Edge(sqlgraph.M2O, true, RegionTable, RegionColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)
@@ -1911,7 +1268,6 @@ func HasCountry() predicate.Airport {
 	return predicate.Airport(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(CountryTable, FieldID),
 			sqlgraph.Edge(sqlgraph.M2O, true, CountryTable, CountryColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)
@@ -1939,7 +1295,6 @@ func HasRunways() predicate.Airport {
 	return predicate.Airport(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(RunwaysTable, FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, false, RunwaysTable, RunwaysColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)
@@ -1967,7 +1322,6 @@ func HasFrequencies() predicate.Airport {
 	return predicate.Airport(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(FrequenciesTable, FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, false, FrequenciesTable, FrequenciesColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)
@@ -1995,7 +1349,6 @@ func HasStation() predicate.Airport {
 	return predicate.Airport(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(StationTable, FieldID),
 			sqlgraph.Edge(sqlgraph.O2O, false, StationTable, StationColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)

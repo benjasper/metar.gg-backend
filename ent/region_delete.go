@@ -4,7 +4,6 @@ package ent
 
 import (
 	"context"
-	"fmt"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
@@ -28,34 +27,7 @@ func (rd *RegionDelete) Where(ps ...predicate.Region) *RegionDelete {
 
 // Exec executes the deletion query and returns how many vertices were deleted.
 func (rd *RegionDelete) Exec(ctx context.Context) (int, error) {
-	var (
-		err      error
-		affected int
-	)
-	if len(rd.hooks) == 0 {
-		affected, err = rd.sqlExec(ctx)
-	} else {
-		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
-			mutation, ok := m.(*RegionMutation)
-			if !ok {
-				return nil, fmt.Errorf("unexpected mutation type %T", m)
-			}
-			rd.mutation = mutation
-			affected, err = rd.sqlExec(ctx)
-			mutation.done = true
-			return affected, err
-		})
-		for i := len(rd.hooks) - 1; i >= 0; i-- {
-			if rd.hooks[i] == nil {
-				return 0, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
-			}
-			mut = rd.hooks[i](mut)
-		}
-		if _, err := mut.Mutate(ctx, rd.mutation); err != nil {
-			return 0, err
-		}
-	}
-	return affected, err
+	return withHooks[int, RegionMutation](ctx, rd.sqlExec, rd.mutation, rd.hooks)
 }
 
 // ExecX is like Exec, but panics if an error occurs.
@@ -68,15 +40,7 @@ func (rd *RegionDelete) ExecX(ctx context.Context) int {
 }
 
 func (rd *RegionDelete) sqlExec(ctx context.Context) (int, error) {
-	_spec := &sqlgraph.DeleteSpec{
-		Node: &sqlgraph.NodeSpec{
-			Table: region.Table,
-			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeUUID,
-				Column: region.FieldID,
-			},
-		},
-	}
+	_spec := sqlgraph.NewDeleteSpec(region.Table, sqlgraph.NewFieldSpec(region.FieldID, field.TypeUUID))
 	if ps := rd.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
@@ -88,12 +52,19 @@ func (rd *RegionDelete) sqlExec(ctx context.Context) (int, error) {
 	if err != nil && sqlgraph.IsConstraintError(err) {
 		err = &ConstraintError{msg: err.Error(), wrap: err}
 	}
+	rd.mutation.done = true
 	return affected, err
 }
 
 // RegionDeleteOne is the builder for deleting a single Region entity.
 type RegionDeleteOne struct {
 	rd *RegionDelete
+}
+
+// Where appends a list predicates to the RegionDelete builder.
+func (rdo *RegionDeleteOne) Where(ps ...predicate.Region) *RegionDeleteOne {
+	rdo.rd.mutation.Where(ps...)
+	return rdo
 }
 
 // Exec executes the deletion query.
@@ -111,5 +82,7 @@ func (rdo *RegionDeleteOne) Exec(ctx context.Context) error {
 
 // ExecX is like Exec, but panics if an error occurs.
 func (rdo *RegionDeleteOne) ExecX(ctx context.Context) {
-	rdo.rd.ExecX(ctx)
+	if err := rdo.Exec(ctx); err != nil {
+		panic(err)
+	}
 }

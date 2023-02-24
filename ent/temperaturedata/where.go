@@ -12,385 +12,247 @@ import (
 
 // ID filters vertices based on their ID field.
 func ID(id uuid.UUID) predicate.TemperatureData {
-	return predicate.TemperatureData(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldID), id))
-	})
+	return predicate.TemperatureData(sql.FieldEQ(FieldID, id))
 }
 
 // IDEQ applies the EQ predicate on the ID field.
 func IDEQ(id uuid.UUID) predicate.TemperatureData {
-	return predicate.TemperatureData(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldID), id))
-	})
+	return predicate.TemperatureData(sql.FieldEQ(FieldID, id))
 }
 
 // IDNEQ applies the NEQ predicate on the ID field.
 func IDNEQ(id uuid.UUID) predicate.TemperatureData {
-	return predicate.TemperatureData(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldID), id))
-	})
+	return predicate.TemperatureData(sql.FieldNEQ(FieldID, id))
 }
 
 // IDIn applies the In predicate on the ID field.
 func IDIn(ids ...uuid.UUID) predicate.TemperatureData {
-	return predicate.TemperatureData(func(s *sql.Selector) {
-		v := make([]any, len(ids))
-		for i := range v {
-			v[i] = ids[i]
-		}
-		s.Where(sql.In(s.C(FieldID), v...))
-	})
+	return predicate.TemperatureData(sql.FieldIn(FieldID, ids...))
 }
 
 // IDNotIn applies the NotIn predicate on the ID field.
 func IDNotIn(ids ...uuid.UUID) predicate.TemperatureData {
-	return predicate.TemperatureData(func(s *sql.Selector) {
-		v := make([]any, len(ids))
-		for i := range v {
-			v[i] = ids[i]
-		}
-		s.Where(sql.NotIn(s.C(FieldID), v...))
-	})
+	return predicate.TemperatureData(sql.FieldNotIn(FieldID, ids...))
 }
 
 // IDGT applies the GT predicate on the ID field.
 func IDGT(id uuid.UUID) predicate.TemperatureData {
-	return predicate.TemperatureData(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldID), id))
-	})
+	return predicate.TemperatureData(sql.FieldGT(FieldID, id))
 }
 
 // IDGTE applies the GTE predicate on the ID field.
 func IDGTE(id uuid.UUID) predicate.TemperatureData {
-	return predicate.TemperatureData(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldID), id))
-	})
+	return predicate.TemperatureData(sql.FieldGTE(FieldID, id))
 }
 
 // IDLT applies the LT predicate on the ID field.
 func IDLT(id uuid.UUID) predicate.TemperatureData {
-	return predicate.TemperatureData(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldID), id))
-	})
+	return predicate.TemperatureData(sql.FieldLT(FieldID, id))
 }
 
 // IDLTE applies the LTE predicate on the ID field.
 func IDLTE(id uuid.UUID) predicate.TemperatureData {
-	return predicate.TemperatureData(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldID), id))
-	})
+	return predicate.TemperatureData(sql.FieldLTE(FieldID, id))
 }
 
 // ValidTime applies equality check predicate on the "valid_time" field. It's identical to ValidTimeEQ.
 func ValidTime(v time.Time) predicate.TemperatureData {
-	return predicate.TemperatureData(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldValidTime), v))
-	})
+	return predicate.TemperatureData(sql.FieldEQ(FieldValidTime, v))
 }
 
 // Temperature applies equality check predicate on the "temperature" field. It's identical to TemperatureEQ.
 func Temperature(v float64) predicate.TemperatureData {
-	return predicate.TemperatureData(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldTemperature), v))
-	})
+	return predicate.TemperatureData(sql.FieldEQ(FieldTemperature, v))
 }
 
 // MinTemperature applies equality check predicate on the "min_temperature" field. It's identical to MinTemperatureEQ.
 func MinTemperature(v float64) predicate.TemperatureData {
-	return predicate.TemperatureData(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldMinTemperature), v))
-	})
+	return predicate.TemperatureData(sql.FieldEQ(FieldMinTemperature, v))
 }
 
 // MaxTemperature applies equality check predicate on the "max_temperature" field. It's identical to MaxTemperatureEQ.
 func MaxTemperature(v float64) predicate.TemperatureData {
-	return predicate.TemperatureData(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldMaxTemperature), v))
-	})
+	return predicate.TemperatureData(sql.FieldEQ(FieldMaxTemperature, v))
 }
 
 // ValidTimeEQ applies the EQ predicate on the "valid_time" field.
 func ValidTimeEQ(v time.Time) predicate.TemperatureData {
-	return predicate.TemperatureData(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldValidTime), v))
-	})
+	return predicate.TemperatureData(sql.FieldEQ(FieldValidTime, v))
 }
 
 // ValidTimeNEQ applies the NEQ predicate on the "valid_time" field.
 func ValidTimeNEQ(v time.Time) predicate.TemperatureData {
-	return predicate.TemperatureData(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldValidTime), v))
-	})
+	return predicate.TemperatureData(sql.FieldNEQ(FieldValidTime, v))
 }
 
 // ValidTimeIn applies the In predicate on the "valid_time" field.
 func ValidTimeIn(vs ...time.Time) predicate.TemperatureData {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.TemperatureData(func(s *sql.Selector) {
-		s.Where(sql.In(s.C(FieldValidTime), v...))
-	})
+	return predicate.TemperatureData(sql.FieldIn(FieldValidTime, vs...))
 }
 
 // ValidTimeNotIn applies the NotIn predicate on the "valid_time" field.
 func ValidTimeNotIn(vs ...time.Time) predicate.TemperatureData {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.TemperatureData(func(s *sql.Selector) {
-		s.Where(sql.NotIn(s.C(FieldValidTime), v...))
-	})
+	return predicate.TemperatureData(sql.FieldNotIn(FieldValidTime, vs...))
 }
 
 // ValidTimeGT applies the GT predicate on the "valid_time" field.
 func ValidTimeGT(v time.Time) predicate.TemperatureData {
-	return predicate.TemperatureData(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldValidTime), v))
-	})
+	return predicate.TemperatureData(sql.FieldGT(FieldValidTime, v))
 }
 
 // ValidTimeGTE applies the GTE predicate on the "valid_time" field.
 func ValidTimeGTE(v time.Time) predicate.TemperatureData {
-	return predicate.TemperatureData(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldValidTime), v))
-	})
+	return predicate.TemperatureData(sql.FieldGTE(FieldValidTime, v))
 }
 
 // ValidTimeLT applies the LT predicate on the "valid_time" field.
 func ValidTimeLT(v time.Time) predicate.TemperatureData {
-	return predicate.TemperatureData(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldValidTime), v))
-	})
+	return predicate.TemperatureData(sql.FieldLT(FieldValidTime, v))
 }
 
 // ValidTimeLTE applies the LTE predicate on the "valid_time" field.
 func ValidTimeLTE(v time.Time) predicate.TemperatureData {
-	return predicate.TemperatureData(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldValidTime), v))
-	})
+	return predicate.TemperatureData(sql.FieldLTE(FieldValidTime, v))
 }
 
 // TemperatureEQ applies the EQ predicate on the "temperature" field.
 func TemperatureEQ(v float64) predicate.TemperatureData {
-	return predicate.TemperatureData(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldTemperature), v))
-	})
+	return predicate.TemperatureData(sql.FieldEQ(FieldTemperature, v))
 }
 
 // TemperatureNEQ applies the NEQ predicate on the "temperature" field.
 func TemperatureNEQ(v float64) predicate.TemperatureData {
-	return predicate.TemperatureData(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldTemperature), v))
-	})
+	return predicate.TemperatureData(sql.FieldNEQ(FieldTemperature, v))
 }
 
 // TemperatureIn applies the In predicate on the "temperature" field.
 func TemperatureIn(vs ...float64) predicate.TemperatureData {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.TemperatureData(func(s *sql.Selector) {
-		s.Where(sql.In(s.C(FieldTemperature), v...))
-	})
+	return predicate.TemperatureData(sql.FieldIn(FieldTemperature, vs...))
 }
 
 // TemperatureNotIn applies the NotIn predicate on the "temperature" field.
 func TemperatureNotIn(vs ...float64) predicate.TemperatureData {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.TemperatureData(func(s *sql.Selector) {
-		s.Where(sql.NotIn(s.C(FieldTemperature), v...))
-	})
+	return predicate.TemperatureData(sql.FieldNotIn(FieldTemperature, vs...))
 }
 
 // TemperatureGT applies the GT predicate on the "temperature" field.
 func TemperatureGT(v float64) predicate.TemperatureData {
-	return predicate.TemperatureData(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldTemperature), v))
-	})
+	return predicate.TemperatureData(sql.FieldGT(FieldTemperature, v))
 }
 
 // TemperatureGTE applies the GTE predicate on the "temperature" field.
 func TemperatureGTE(v float64) predicate.TemperatureData {
-	return predicate.TemperatureData(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldTemperature), v))
-	})
+	return predicate.TemperatureData(sql.FieldGTE(FieldTemperature, v))
 }
 
 // TemperatureLT applies the LT predicate on the "temperature" field.
 func TemperatureLT(v float64) predicate.TemperatureData {
-	return predicate.TemperatureData(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldTemperature), v))
-	})
+	return predicate.TemperatureData(sql.FieldLT(FieldTemperature, v))
 }
 
 // TemperatureLTE applies the LTE predicate on the "temperature" field.
 func TemperatureLTE(v float64) predicate.TemperatureData {
-	return predicate.TemperatureData(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldTemperature), v))
-	})
+	return predicate.TemperatureData(sql.FieldLTE(FieldTemperature, v))
 }
 
 // MinTemperatureEQ applies the EQ predicate on the "min_temperature" field.
 func MinTemperatureEQ(v float64) predicate.TemperatureData {
-	return predicate.TemperatureData(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldMinTemperature), v))
-	})
+	return predicate.TemperatureData(sql.FieldEQ(FieldMinTemperature, v))
 }
 
 // MinTemperatureNEQ applies the NEQ predicate on the "min_temperature" field.
 func MinTemperatureNEQ(v float64) predicate.TemperatureData {
-	return predicate.TemperatureData(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldMinTemperature), v))
-	})
+	return predicate.TemperatureData(sql.FieldNEQ(FieldMinTemperature, v))
 }
 
 // MinTemperatureIn applies the In predicate on the "min_temperature" field.
 func MinTemperatureIn(vs ...float64) predicate.TemperatureData {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.TemperatureData(func(s *sql.Selector) {
-		s.Where(sql.In(s.C(FieldMinTemperature), v...))
-	})
+	return predicate.TemperatureData(sql.FieldIn(FieldMinTemperature, vs...))
 }
 
 // MinTemperatureNotIn applies the NotIn predicate on the "min_temperature" field.
 func MinTemperatureNotIn(vs ...float64) predicate.TemperatureData {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.TemperatureData(func(s *sql.Selector) {
-		s.Where(sql.NotIn(s.C(FieldMinTemperature), v...))
-	})
+	return predicate.TemperatureData(sql.FieldNotIn(FieldMinTemperature, vs...))
 }
 
 // MinTemperatureGT applies the GT predicate on the "min_temperature" field.
 func MinTemperatureGT(v float64) predicate.TemperatureData {
-	return predicate.TemperatureData(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldMinTemperature), v))
-	})
+	return predicate.TemperatureData(sql.FieldGT(FieldMinTemperature, v))
 }
 
 // MinTemperatureGTE applies the GTE predicate on the "min_temperature" field.
 func MinTemperatureGTE(v float64) predicate.TemperatureData {
-	return predicate.TemperatureData(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldMinTemperature), v))
-	})
+	return predicate.TemperatureData(sql.FieldGTE(FieldMinTemperature, v))
 }
 
 // MinTemperatureLT applies the LT predicate on the "min_temperature" field.
 func MinTemperatureLT(v float64) predicate.TemperatureData {
-	return predicate.TemperatureData(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldMinTemperature), v))
-	})
+	return predicate.TemperatureData(sql.FieldLT(FieldMinTemperature, v))
 }
 
 // MinTemperatureLTE applies the LTE predicate on the "min_temperature" field.
 func MinTemperatureLTE(v float64) predicate.TemperatureData {
-	return predicate.TemperatureData(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldMinTemperature), v))
-	})
+	return predicate.TemperatureData(sql.FieldLTE(FieldMinTemperature, v))
 }
 
 // MinTemperatureIsNil applies the IsNil predicate on the "min_temperature" field.
 func MinTemperatureIsNil() predicate.TemperatureData {
-	return predicate.TemperatureData(func(s *sql.Selector) {
-		s.Where(sql.IsNull(s.C(FieldMinTemperature)))
-	})
+	return predicate.TemperatureData(sql.FieldIsNull(FieldMinTemperature))
 }
 
 // MinTemperatureNotNil applies the NotNil predicate on the "min_temperature" field.
 func MinTemperatureNotNil() predicate.TemperatureData {
-	return predicate.TemperatureData(func(s *sql.Selector) {
-		s.Where(sql.NotNull(s.C(FieldMinTemperature)))
-	})
+	return predicate.TemperatureData(sql.FieldNotNull(FieldMinTemperature))
 }
 
 // MaxTemperatureEQ applies the EQ predicate on the "max_temperature" field.
 func MaxTemperatureEQ(v float64) predicate.TemperatureData {
-	return predicate.TemperatureData(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldMaxTemperature), v))
-	})
+	return predicate.TemperatureData(sql.FieldEQ(FieldMaxTemperature, v))
 }
 
 // MaxTemperatureNEQ applies the NEQ predicate on the "max_temperature" field.
 func MaxTemperatureNEQ(v float64) predicate.TemperatureData {
-	return predicate.TemperatureData(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldMaxTemperature), v))
-	})
+	return predicate.TemperatureData(sql.FieldNEQ(FieldMaxTemperature, v))
 }
 
 // MaxTemperatureIn applies the In predicate on the "max_temperature" field.
 func MaxTemperatureIn(vs ...float64) predicate.TemperatureData {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.TemperatureData(func(s *sql.Selector) {
-		s.Where(sql.In(s.C(FieldMaxTemperature), v...))
-	})
+	return predicate.TemperatureData(sql.FieldIn(FieldMaxTemperature, vs...))
 }
 
 // MaxTemperatureNotIn applies the NotIn predicate on the "max_temperature" field.
 func MaxTemperatureNotIn(vs ...float64) predicate.TemperatureData {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.TemperatureData(func(s *sql.Selector) {
-		s.Where(sql.NotIn(s.C(FieldMaxTemperature), v...))
-	})
+	return predicate.TemperatureData(sql.FieldNotIn(FieldMaxTemperature, vs...))
 }
 
 // MaxTemperatureGT applies the GT predicate on the "max_temperature" field.
 func MaxTemperatureGT(v float64) predicate.TemperatureData {
-	return predicate.TemperatureData(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldMaxTemperature), v))
-	})
+	return predicate.TemperatureData(sql.FieldGT(FieldMaxTemperature, v))
 }
 
 // MaxTemperatureGTE applies the GTE predicate on the "max_temperature" field.
 func MaxTemperatureGTE(v float64) predicate.TemperatureData {
-	return predicate.TemperatureData(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldMaxTemperature), v))
-	})
+	return predicate.TemperatureData(sql.FieldGTE(FieldMaxTemperature, v))
 }
 
 // MaxTemperatureLT applies the LT predicate on the "max_temperature" field.
 func MaxTemperatureLT(v float64) predicate.TemperatureData {
-	return predicate.TemperatureData(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldMaxTemperature), v))
-	})
+	return predicate.TemperatureData(sql.FieldLT(FieldMaxTemperature, v))
 }
 
 // MaxTemperatureLTE applies the LTE predicate on the "max_temperature" field.
 func MaxTemperatureLTE(v float64) predicate.TemperatureData {
-	return predicate.TemperatureData(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldMaxTemperature), v))
-	})
+	return predicate.TemperatureData(sql.FieldLTE(FieldMaxTemperature, v))
 }
 
 // MaxTemperatureIsNil applies the IsNil predicate on the "max_temperature" field.
 func MaxTemperatureIsNil() predicate.TemperatureData {
-	return predicate.TemperatureData(func(s *sql.Selector) {
-		s.Where(sql.IsNull(s.C(FieldMaxTemperature)))
-	})
+	return predicate.TemperatureData(sql.FieldIsNull(FieldMaxTemperature))
 }
 
 // MaxTemperatureNotNil applies the NotNil predicate on the "max_temperature" field.
 func MaxTemperatureNotNil() predicate.TemperatureData {
-	return predicate.TemperatureData(func(s *sql.Selector) {
-		s.Where(sql.NotNull(s.C(FieldMaxTemperature)))
-	})
+	return predicate.TemperatureData(sql.FieldNotNull(FieldMaxTemperature))
 }
 
 // And groups predicates with the AND operator between them.

@@ -411,19 +411,19 @@ func (m *Metar) assignValues(columns []string, values []any) error {
 
 // QueryStation queries the "station" edge of the Metar entity.
 func (m *Metar) QueryStation() *WeatherStationQuery {
-	return (&MetarClient{config: m.config}).QueryStation(m)
+	return NewMetarClient(m.config).QueryStation(m)
 }
 
 // QuerySkyConditions queries the "sky_conditions" edge of the Metar entity.
 func (m *Metar) QuerySkyConditions() *SkyConditionQuery {
-	return (&MetarClient{config: m.config}).QuerySkyConditions(m)
+	return NewMetarClient(m.config).QuerySkyConditions(m)
 }
 
 // Update returns a builder for updating this Metar.
 // Note that you need to call Metar.Unwrap() before calling this method if this Metar
 // was returned from a transaction, and the transaction was committed or rolled back.
 func (m *Metar) Update() *MetarUpdateOne {
-	return (&MetarClient{config: m.config}).UpdateOne(m)
+	return NewMetarClient(m.config).UpdateOne(m)
 }
 
 // Unwrap unwraps the Metar entity that was returned from a transaction after it was closed,
@@ -619,9 +619,3 @@ func (m *Metar) appendNamedSkyConditions(name string, edges ...*SkyCondition) {
 
 // Metars is a parsable slice of Metar.
 type Metars []*Metar
-
-func (m Metars) config(cfg config) {
-	for _i := range m {
-		m[_i].config = cfg
-	}
-}

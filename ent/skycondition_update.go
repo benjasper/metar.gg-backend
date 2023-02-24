@@ -88,40 +88,7 @@ func (scu *SkyConditionUpdate) Mutation() *SkyConditionMutation {
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (scu *SkyConditionUpdate) Save(ctx context.Context) (int, error) {
-	var (
-		err      error
-		affected int
-	)
-	if len(scu.hooks) == 0 {
-		if err = scu.check(); err != nil {
-			return 0, err
-		}
-		affected, err = scu.sqlSave(ctx)
-	} else {
-		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
-			mutation, ok := m.(*SkyConditionMutation)
-			if !ok {
-				return nil, fmt.Errorf("unexpected mutation type %T", m)
-			}
-			if err = scu.check(); err != nil {
-				return 0, err
-			}
-			scu.mutation = mutation
-			affected, err = scu.sqlSave(ctx)
-			mutation.done = true
-			return affected, err
-		})
-		for i := len(scu.hooks) - 1; i >= 0; i-- {
-			if scu.hooks[i] == nil {
-				return 0, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
-			}
-			mut = scu.hooks[i](mut)
-		}
-		if _, err := mut.Mutate(ctx, scu.mutation); err != nil {
-			return 0, err
-		}
-	}
-	return affected, err
+	return withHooks[int, SkyConditionMutation](ctx, scu.sqlSave, scu.mutation, scu.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -168,16 +135,10 @@ func (scu *SkyConditionUpdate) Modify(modifiers ...func(u *sql.UpdateBuilder)) *
 }
 
 func (scu *SkyConditionUpdate) sqlSave(ctx context.Context) (n int, err error) {
-	_spec := &sqlgraph.UpdateSpec{
-		Node: &sqlgraph.NodeSpec{
-			Table:   skycondition.Table,
-			Columns: skycondition.Columns,
-			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeUUID,
-				Column: skycondition.FieldID,
-			},
-		},
+	if err := scu.check(); err != nil {
+		return n, err
 	}
+	_spec := sqlgraph.NewUpdateSpec(skycondition.Table, skycondition.Columns, sqlgraph.NewFieldSpec(skycondition.FieldID, field.TypeUUID))
 	if ps := scu.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
@@ -212,6 +173,7 @@ func (scu *SkyConditionUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		return 0, err
 	}
+	scu.mutation.done = true
 	return n, nil
 }
 
@@ -282,6 +244,12 @@ func (scuo *SkyConditionUpdateOne) Mutation() *SkyConditionMutation {
 	return scuo.mutation
 }
 
+// Where appends a list predicates to the SkyConditionUpdate builder.
+func (scuo *SkyConditionUpdateOne) Where(ps ...predicate.SkyCondition) *SkyConditionUpdateOne {
+	scuo.mutation.Where(ps...)
+	return scuo
+}
+
 // Select allows selecting one or more fields (columns) of the returned entity.
 // The default is selecting all fields defined in the entity schema.
 func (scuo *SkyConditionUpdateOne) Select(field string, fields ...string) *SkyConditionUpdateOne {
@@ -291,46 +259,7 @@ func (scuo *SkyConditionUpdateOne) Select(field string, fields ...string) *SkyCo
 
 // Save executes the query and returns the updated SkyCondition entity.
 func (scuo *SkyConditionUpdateOne) Save(ctx context.Context) (*SkyCondition, error) {
-	var (
-		err  error
-		node *SkyCondition
-	)
-	if len(scuo.hooks) == 0 {
-		if err = scuo.check(); err != nil {
-			return nil, err
-		}
-		node, err = scuo.sqlSave(ctx)
-	} else {
-		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
-			mutation, ok := m.(*SkyConditionMutation)
-			if !ok {
-				return nil, fmt.Errorf("unexpected mutation type %T", m)
-			}
-			if err = scuo.check(); err != nil {
-				return nil, err
-			}
-			scuo.mutation = mutation
-			node, err = scuo.sqlSave(ctx)
-			mutation.done = true
-			return node, err
-		})
-		for i := len(scuo.hooks) - 1; i >= 0; i-- {
-			if scuo.hooks[i] == nil {
-				return nil, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
-			}
-			mut = scuo.hooks[i](mut)
-		}
-		v, err := mut.Mutate(ctx, scuo.mutation)
-		if err != nil {
-			return nil, err
-		}
-		nv, ok := v.(*SkyCondition)
-		if !ok {
-			return nil, fmt.Errorf("unexpected node type %T returned from SkyConditionMutation", v)
-		}
-		node = nv
-	}
-	return node, err
+	return withHooks[*SkyCondition, SkyConditionMutation](ctx, scuo.sqlSave, scuo.mutation, scuo.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -377,16 +306,10 @@ func (scuo *SkyConditionUpdateOne) Modify(modifiers ...func(u *sql.UpdateBuilder
 }
 
 func (scuo *SkyConditionUpdateOne) sqlSave(ctx context.Context) (_node *SkyCondition, err error) {
-	_spec := &sqlgraph.UpdateSpec{
-		Node: &sqlgraph.NodeSpec{
-			Table:   skycondition.Table,
-			Columns: skycondition.Columns,
-			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeUUID,
-				Column: skycondition.FieldID,
-			},
-		},
+	if err := scuo.check(); err != nil {
+		return _node, err
 	}
+	_spec := sqlgraph.NewUpdateSpec(skycondition.Table, skycondition.Columns, sqlgraph.NewFieldSpec(skycondition.FieldID, field.TypeUUID))
 	id, ok := scuo.mutation.ID()
 	if !ok {
 		return nil, &ValidationError{Name: "id", err: errors.New(`ent: missing "SkyCondition.id" for update`)}
@@ -441,5 +364,6 @@ func (scuo *SkyConditionUpdateOne) sqlSave(ctx context.Context) (_node *SkyCondi
 		}
 		return nil, err
 	}
+	scuo.mutation.done = true
 	return _node, nil
 }

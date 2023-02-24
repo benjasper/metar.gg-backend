@@ -123,50 +123,8 @@ func (fc *FrequencyCreate) Mutation() *FrequencyMutation {
 
 // Save creates the Frequency in the database.
 func (fc *FrequencyCreate) Save(ctx context.Context) (*Frequency, error) {
-	var (
-		err  error
-		node *Frequency
-	)
 	fc.defaults()
-	if len(fc.hooks) == 0 {
-		if err = fc.check(); err != nil {
-			return nil, err
-		}
-		node, err = fc.sqlSave(ctx)
-	} else {
-		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
-			mutation, ok := m.(*FrequencyMutation)
-			if !ok {
-				return nil, fmt.Errorf("unexpected mutation type %T", m)
-			}
-			if err = fc.check(); err != nil {
-				return nil, err
-			}
-			fc.mutation = mutation
-			if node, err = fc.sqlSave(ctx); err != nil {
-				return nil, err
-			}
-			mutation.id = &node.ID
-			mutation.done = true
-			return node, err
-		})
-		for i := len(fc.hooks) - 1; i >= 0; i-- {
-			if fc.hooks[i] == nil {
-				return nil, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
-			}
-			mut = fc.hooks[i](mut)
-		}
-		v, err := mut.Mutate(ctx, fc.mutation)
-		if err != nil {
-			return nil, err
-		}
-		nv, ok := v.(*Frequency)
-		if !ok {
-			return nil, fmt.Errorf("unexpected node type %T returned from FrequencyMutation", v)
-		}
-		node = nv
-	}
-	return node, err
+	return withHooks[*Frequency, FrequencyMutation](ctx, fc.sqlSave, fc.mutation, fc.hooks)
 }
 
 // SaveX calls Save and panics if Save returns an error.
@@ -234,6 +192,9 @@ func (fc *FrequencyCreate) check() error {
 }
 
 func (fc *FrequencyCreate) sqlSave(ctx context.Context) (*Frequency, error) {
+	if err := fc.check(); err != nil {
+		return nil, err
+	}
 	_node, _spec := fc.createSpec()
 	if err := sqlgraph.CreateNode(ctx, fc.driver, _spec); err != nil {
 		if sqlgraph.IsConstraintError(err) {
@@ -248,19 +209,15 @@ func (fc *FrequencyCreate) sqlSave(ctx context.Context) (*Frequency, error) {
 			return nil, err
 		}
 	}
+	fc.mutation.id = &_node.ID
+	fc.mutation.done = true
 	return _node, nil
 }
 
 func (fc *FrequencyCreate) createSpec() (*Frequency, *sqlgraph.CreateSpec) {
 	var (
 		_node = &Frequency{config: fc.config}
-		_spec = &sqlgraph.CreateSpec{
-			Table: frequency.Table,
-			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeUUID,
-				Column: frequency.FieldID,
-			},
-		}
+		_spec = sqlgraph.NewCreateSpec(frequency.Table, sqlgraph.NewFieldSpec(frequency.FieldID, field.TypeUUID))
 	)
 	_spec.OnConflict = fc.conflict
 	if id, ok := fc.mutation.ID(); ok {

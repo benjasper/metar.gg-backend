@@ -22,11 +22,9 @@ import (
 // WeatherStationQuery is the builder for querying WeatherStation entities.
 type WeatherStationQuery struct {
 	config
-	limit           *int
-	offset          *int
-	unique          *bool
+	ctx             *QueryContext
 	order           []OrderFunc
-	fields          []string
+	inters          []Interceptor
 	predicates      []predicate.WeatherStation
 	withAirport     *AirportQuery
 	withMetars      *MetarQuery
@@ -47,26 +45,26 @@ func (wsq *WeatherStationQuery) Where(ps ...predicate.WeatherStation) *WeatherSt
 	return wsq
 }
 
-// Limit adds a limit step to the query.
+// Limit the number of records to be returned by this query.
 func (wsq *WeatherStationQuery) Limit(limit int) *WeatherStationQuery {
-	wsq.limit = &limit
+	wsq.ctx.Limit = &limit
 	return wsq
 }
 
-// Offset adds an offset step to the query.
+// Offset to start from.
 func (wsq *WeatherStationQuery) Offset(offset int) *WeatherStationQuery {
-	wsq.offset = &offset
+	wsq.ctx.Offset = &offset
 	return wsq
 }
 
 // Unique configures the query builder to filter duplicate records on query.
 // By default, unique is set to true, and can be disabled using this method.
 func (wsq *WeatherStationQuery) Unique(unique bool) *WeatherStationQuery {
-	wsq.unique = &unique
+	wsq.ctx.Unique = &unique
 	return wsq
 }
 
-// Order adds an order step to the query.
+// Order specifies how the records should be ordered.
 func (wsq *WeatherStationQuery) Order(o ...OrderFunc) *WeatherStationQuery {
 	wsq.order = append(wsq.order, o...)
 	return wsq
@@ -74,7 +72,7 @@ func (wsq *WeatherStationQuery) Order(o ...OrderFunc) *WeatherStationQuery {
 
 // QueryAirport chains the current query on the "airport" edge.
 func (wsq *WeatherStationQuery) QueryAirport() *AirportQuery {
-	query := &AirportQuery{config: wsq.config}
+	query := (&AirportClient{config: wsq.config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := wsq.prepareQuery(ctx); err != nil {
 			return nil, err
@@ -96,7 +94,7 @@ func (wsq *WeatherStationQuery) QueryAirport() *AirportQuery {
 
 // QueryMetars chains the current query on the "metars" edge.
 func (wsq *WeatherStationQuery) QueryMetars() *MetarQuery {
-	query := &MetarQuery{config: wsq.config}
+	query := (&MetarClient{config: wsq.config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := wsq.prepareQuery(ctx); err != nil {
 			return nil, err
@@ -118,7 +116,7 @@ func (wsq *WeatherStationQuery) QueryMetars() *MetarQuery {
 
 // QueryTafs chains the current query on the "tafs" edge.
 func (wsq *WeatherStationQuery) QueryTafs() *TafQuery {
-	query := &TafQuery{config: wsq.config}
+	query := (&TafClient{config: wsq.config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := wsq.prepareQuery(ctx); err != nil {
 			return nil, err
@@ -141,7 +139,7 @@ func (wsq *WeatherStationQuery) QueryTafs() *TafQuery {
 // First returns the first WeatherStation entity from the query.
 // Returns a *NotFoundError when no WeatherStation was found.
 func (wsq *WeatherStationQuery) First(ctx context.Context) (*WeatherStation, error) {
-	nodes, err := wsq.Limit(1).All(ctx)
+	nodes, err := wsq.Limit(1).All(setContextOp(ctx, wsq.ctx, "First"))
 	if err != nil {
 		return nil, err
 	}
@@ -164,7 +162,7 @@ func (wsq *WeatherStationQuery) FirstX(ctx context.Context) *WeatherStation {
 // Returns a *NotFoundError when no WeatherStation ID was found.
 func (wsq *WeatherStationQuery) FirstID(ctx context.Context) (id uuid.UUID, err error) {
 	var ids []uuid.UUID
-	if ids, err = wsq.Limit(1).IDs(ctx); err != nil {
+	if ids, err = wsq.Limit(1).IDs(setContextOp(ctx, wsq.ctx, "FirstID")); err != nil {
 		return
 	}
 	if len(ids) == 0 {
@@ -187,7 +185,7 @@ func (wsq *WeatherStationQuery) FirstIDX(ctx context.Context) uuid.UUID {
 // Returns a *NotSingularError when more than one WeatherStation entity is found.
 // Returns a *NotFoundError when no WeatherStation entities are found.
 func (wsq *WeatherStationQuery) Only(ctx context.Context) (*WeatherStation, error) {
-	nodes, err := wsq.Limit(2).All(ctx)
+	nodes, err := wsq.Limit(2).All(setContextOp(ctx, wsq.ctx, "Only"))
 	if err != nil {
 		return nil, err
 	}
@@ -215,7 +213,7 @@ func (wsq *WeatherStationQuery) OnlyX(ctx context.Context) *WeatherStation {
 // Returns a *NotFoundError when no entities are found.
 func (wsq *WeatherStationQuery) OnlyID(ctx context.Context) (id uuid.UUID, err error) {
 	var ids []uuid.UUID
-	if ids, err = wsq.Limit(2).IDs(ctx); err != nil {
+	if ids, err = wsq.Limit(2).IDs(setContextOp(ctx, wsq.ctx, "OnlyID")); err != nil {
 		return
 	}
 	switch len(ids) {
@@ -240,10 +238,12 @@ func (wsq *WeatherStationQuery) OnlyIDX(ctx context.Context) uuid.UUID {
 
 // All executes the query and returns a list of WeatherStations.
 func (wsq *WeatherStationQuery) All(ctx context.Context) ([]*WeatherStation, error) {
+	ctx = setContextOp(ctx, wsq.ctx, "All")
 	if err := wsq.prepareQuery(ctx); err != nil {
 		return nil, err
 	}
-	return wsq.sqlAll(ctx)
+	qr := querierAll[[]*WeatherStation, *WeatherStationQuery]()
+	return withInterceptors[[]*WeatherStation](ctx, wsq, qr, wsq.inters)
 }
 
 // AllX is like All, but panics if an error occurs.
@@ -256,9 +256,12 @@ func (wsq *WeatherStationQuery) AllX(ctx context.Context) []*WeatherStation {
 }
 
 // IDs executes the query and returns a list of WeatherStation IDs.
-func (wsq *WeatherStationQuery) IDs(ctx context.Context) ([]uuid.UUID, error) {
-	var ids []uuid.UUID
-	if err := wsq.Select(weatherstation.FieldID).Scan(ctx, &ids); err != nil {
+func (wsq *WeatherStationQuery) IDs(ctx context.Context) (ids []uuid.UUID, err error) {
+	if wsq.ctx.Unique == nil && wsq.path != nil {
+		wsq.Unique(true)
+	}
+	ctx = setContextOp(ctx, wsq.ctx, "IDs")
+	if err = wsq.Select(weatherstation.FieldID).Scan(ctx, &ids); err != nil {
 		return nil, err
 	}
 	return ids, nil
@@ -275,10 +278,11 @@ func (wsq *WeatherStationQuery) IDsX(ctx context.Context) []uuid.UUID {
 
 // Count returns the count of the given query.
 func (wsq *WeatherStationQuery) Count(ctx context.Context) (int, error) {
+	ctx = setContextOp(ctx, wsq.ctx, "Count")
 	if err := wsq.prepareQuery(ctx); err != nil {
 		return 0, err
 	}
-	return wsq.sqlCount(ctx)
+	return withInterceptors[int](ctx, wsq, querierCount[*WeatherStationQuery](), wsq.inters)
 }
 
 // CountX is like Count, but panics if an error occurs.
@@ -292,10 +296,15 @@ func (wsq *WeatherStationQuery) CountX(ctx context.Context) int {
 
 // Exist returns true if the query has elements in the graph.
 func (wsq *WeatherStationQuery) Exist(ctx context.Context) (bool, error) {
-	if err := wsq.prepareQuery(ctx); err != nil {
-		return false, err
+	ctx = setContextOp(ctx, wsq.ctx, "Exist")
+	switch _, err := wsq.FirstID(ctx); {
+	case IsNotFound(err):
+		return false, nil
+	case err != nil:
+		return false, fmt.Errorf("ent: check existence: %w", err)
+	default:
+		return true, nil
 	}
-	return wsq.sqlExist(ctx)
 }
 
 // ExistX is like Exist, but panics if an error occurs.
@@ -315,24 +324,23 @@ func (wsq *WeatherStationQuery) Clone() *WeatherStationQuery {
 	}
 	return &WeatherStationQuery{
 		config:      wsq.config,
-		limit:       wsq.limit,
-		offset:      wsq.offset,
+		ctx:         wsq.ctx.Clone(),
 		order:       append([]OrderFunc{}, wsq.order...),
+		inters:      append([]Interceptor{}, wsq.inters...),
 		predicates:  append([]predicate.WeatherStation{}, wsq.predicates...),
 		withAirport: wsq.withAirport.Clone(),
 		withMetars:  wsq.withMetars.Clone(),
 		withTafs:    wsq.withTafs.Clone(),
 		// clone intermediate query.
-		sql:    wsq.sql.Clone(),
-		path:   wsq.path,
-		unique: wsq.unique,
+		sql:  wsq.sql.Clone(),
+		path: wsq.path,
 	}
 }
 
 // WithAirport tells the query-builder to eager-load the nodes that are connected to
 // the "airport" edge. The optional arguments are used to configure the query builder of the edge.
 func (wsq *WeatherStationQuery) WithAirport(opts ...func(*AirportQuery)) *WeatherStationQuery {
-	query := &AirportQuery{config: wsq.config}
+	query := (&AirportClient{config: wsq.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -343,7 +351,7 @@ func (wsq *WeatherStationQuery) WithAirport(opts ...func(*AirportQuery)) *Weathe
 // WithMetars tells the query-builder to eager-load the nodes that are connected to
 // the "metars" edge. The optional arguments are used to configure the query builder of the edge.
 func (wsq *WeatherStationQuery) WithMetars(opts ...func(*MetarQuery)) *WeatherStationQuery {
-	query := &MetarQuery{config: wsq.config}
+	query := (&MetarClient{config: wsq.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -354,7 +362,7 @@ func (wsq *WeatherStationQuery) WithMetars(opts ...func(*MetarQuery)) *WeatherSt
 // WithTafs tells the query-builder to eager-load the nodes that are connected to
 // the "tafs" edge. The optional arguments are used to configure the query builder of the edge.
 func (wsq *WeatherStationQuery) WithTafs(opts ...func(*TafQuery)) *WeatherStationQuery {
-	query := &TafQuery{config: wsq.config}
+	query := (&TafClient{config: wsq.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -377,16 +385,11 @@ func (wsq *WeatherStationQuery) WithTafs(opts ...func(*TafQuery)) *WeatherStatio
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
 func (wsq *WeatherStationQuery) GroupBy(field string, fields ...string) *WeatherStationGroupBy {
-	grbuild := &WeatherStationGroupBy{config: wsq.config}
-	grbuild.fields = append([]string{field}, fields...)
-	grbuild.path = func(ctx context.Context) (prev *sql.Selector, err error) {
-		if err := wsq.prepareQuery(ctx); err != nil {
-			return nil, err
-		}
-		return wsq.sqlQuery(ctx), nil
-	}
+	wsq.ctx.Fields = append([]string{field}, fields...)
+	grbuild := &WeatherStationGroupBy{build: wsq}
+	grbuild.flds = &wsq.ctx.Fields
 	grbuild.label = weatherstation.Label
-	grbuild.flds, grbuild.scan = &grbuild.fields, grbuild.Scan
+	grbuild.scan = grbuild.Scan
 	return grbuild
 }
 
@@ -403,11 +406,11 @@ func (wsq *WeatherStationQuery) GroupBy(field string, fields ...string) *Weather
 //		Select(weatherstation.FieldStationID).
 //		Scan(ctx, &v)
 func (wsq *WeatherStationQuery) Select(fields ...string) *WeatherStationSelect {
-	wsq.fields = append(wsq.fields, fields...)
-	selbuild := &WeatherStationSelect{WeatherStationQuery: wsq}
-	selbuild.label = weatherstation.Label
-	selbuild.flds, selbuild.scan = &wsq.fields, selbuild.Scan
-	return selbuild
+	wsq.ctx.Fields = append(wsq.ctx.Fields, fields...)
+	sbuild := &WeatherStationSelect{WeatherStationQuery: wsq}
+	sbuild.label = weatherstation.Label
+	sbuild.flds, sbuild.scan = &wsq.ctx.Fields, sbuild.Scan
+	return sbuild
 }
 
 // Aggregate returns a WeatherStationSelect configured with the given aggregations.
@@ -416,7 +419,17 @@ func (wsq *WeatherStationQuery) Aggregate(fns ...AggregateFunc) *WeatherStationS
 }
 
 func (wsq *WeatherStationQuery) prepareQuery(ctx context.Context) error {
-	for _, f := range wsq.fields {
+	for _, inter := range wsq.inters {
+		if inter == nil {
+			return fmt.Errorf("ent: uninitialized interceptor (forgotten import ent/runtime?)")
+		}
+		if trv, ok := inter.(Traverser); ok {
+			if err := trv.Traverse(ctx, wsq); err != nil {
+				return err
+			}
+		}
+	}
+	for _, f := range wsq.ctx.Fields {
 		if !weatherstation.ValidColumn(f) {
 			return &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for query", f)}
 		}
@@ -524,6 +537,9 @@ func (wsq *WeatherStationQuery) loadAirport(ctx context.Context, query *AirportQ
 		}
 		nodeids[fk] = append(nodeids[fk], nodes[i])
 	}
+	if len(ids) == 0 {
+		return nil
+	}
 	query.Where(airport.IDIn(ids...))
 	neighbors, err := query.All(ctx)
 	if err != nil {
@@ -608,41 +624,22 @@ func (wsq *WeatherStationQuery) sqlCount(ctx context.Context) (int, error) {
 	if len(wsq.modifiers) > 0 {
 		_spec.Modifiers = wsq.modifiers
 	}
-	_spec.Node.Columns = wsq.fields
-	if len(wsq.fields) > 0 {
-		_spec.Unique = wsq.unique != nil && *wsq.unique
+	_spec.Node.Columns = wsq.ctx.Fields
+	if len(wsq.ctx.Fields) > 0 {
+		_spec.Unique = wsq.ctx.Unique != nil && *wsq.ctx.Unique
 	}
 	return sqlgraph.CountNodes(ctx, wsq.driver, _spec)
 }
 
-func (wsq *WeatherStationQuery) sqlExist(ctx context.Context) (bool, error) {
-	switch _, err := wsq.FirstID(ctx); {
-	case IsNotFound(err):
-		return false, nil
-	case err != nil:
-		return false, fmt.Errorf("ent: check existence: %w", err)
-	default:
-		return true, nil
-	}
-}
-
 func (wsq *WeatherStationQuery) querySpec() *sqlgraph.QuerySpec {
-	_spec := &sqlgraph.QuerySpec{
-		Node: &sqlgraph.NodeSpec{
-			Table:   weatherstation.Table,
-			Columns: weatherstation.Columns,
-			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeUUID,
-				Column: weatherstation.FieldID,
-			},
-		},
-		From:   wsq.sql,
-		Unique: true,
-	}
-	if unique := wsq.unique; unique != nil {
+	_spec := sqlgraph.NewQuerySpec(weatherstation.Table, weatherstation.Columns, sqlgraph.NewFieldSpec(weatherstation.FieldID, field.TypeUUID))
+	_spec.From = wsq.sql
+	if unique := wsq.ctx.Unique; unique != nil {
 		_spec.Unique = *unique
+	} else if wsq.path != nil {
+		_spec.Unique = true
 	}
-	if fields := wsq.fields; len(fields) > 0 {
+	if fields := wsq.ctx.Fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))
 		_spec.Node.Columns = append(_spec.Node.Columns, weatherstation.FieldID)
 		for i := range fields {
@@ -658,10 +655,10 @@ func (wsq *WeatherStationQuery) querySpec() *sqlgraph.QuerySpec {
 			}
 		}
 	}
-	if limit := wsq.limit; limit != nil {
+	if limit := wsq.ctx.Limit; limit != nil {
 		_spec.Limit = *limit
 	}
-	if offset := wsq.offset; offset != nil {
+	if offset := wsq.ctx.Offset; offset != nil {
 		_spec.Offset = *offset
 	}
 	if ps := wsq.order; len(ps) > 0 {
@@ -677,7 +674,7 @@ func (wsq *WeatherStationQuery) querySpec() *sqlgraph.QuerySpec {
 func (wsq *WeatherStationQuery) sqlQuery(ctx context.Context) *sql.Selector {
 	builder := sql.Dialect(wsq.driver.Dialect())
 	t1 := builder.Table(weatherstation.Table)
-	columns := wsq.fields
+	columns := wsq.ctx.Fields
 	if len(columns) == 0 {
 		columns = weatherstation.Columns
 	}
@@ -686,7 +683,7 @@ func (wsq *WeatherStationQuery) sqlQuery(ctx context.Context) *sql.Selector {
 		selector = wsq.sql
 		selector.Select(selector.Columns(columns...)...)
 	}
-	if wsq.unique != nil && *wsq.unique {
+	if wsq.ctx.Unique != nil && *wsq.ctx.Unique {
 		selector.Distinct()
 	}
 	for _, m := range wsq.modifiers {
@@ -698,12 +695,12 @@ func (wsq *WeatherStationQuery) sqlQuery(ctx context.Context) *sql.Selector {
 	for _, p := range wsq.order {
 		p(selector)
 	}
-	if offset := wsq.offset; offset != nil {
+	if offset := wsq.ctx.Offset; offset != nil {
 		// limit is mandatory for offset clause. We start
 		// with default value, and override it below if needed.
 		selector.Offset(*offset).Limit(math.MaxInt32)
 	}
-	if limit := wsq.limit; limit != nil {
+	if limit := wsq.ctx.Limit; limit != nil {
 		selector.Limit(*limit)
 	}
 	return selector
@@ -718,7 +715,7 @@ func (wsq *WeatherStationQuery) Modify(modifiers ...func(s *sql.Selector)) *Weat
 // WithNamedMetars tells the query-builder to eager-load the nodes that are connected to the "metars"
 // edge with the given name. The optional arguments are used to configure the query builder of the edge.
 func (wsq *WeatherStationQuery) WithNamedMetars(name string, opts ...func(*MetarQuery)) *WeatherStationQuery {
-	query := &MetarQuery{config: wsq.config}
+	query := (&MetarClient{config: wsq.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -732,7 +729,7 @@ func (wsq *WeatherStationQuery) WithNamedMetars(name string, opts ...func(*Metar
 // WithNamedTafs tells the query-builder to eager-load the nodes that are connected to the "tafs"
 // edge with the given name. The optional arguments are used to configure the query builder of the edge.
 func (wsq *WeatherStationQuery) WithNamedTafs(name string, opts ...func(*TafQuery)) *WeatherStationQuery {
-	query := &TafQuery{config: wsq.config}
+	query := (&TafClient{config: wsq.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -745,13 +742,8 @@ func (wsq *WeatherStationQuery) WithNamedTafs(name string, opts ...func(*TafQuer
 
 // WeatherStationGroupBy is the group-by builder for WeatherStation entities.
 type WeatherStationGroupBy struct {
-	config
 	selector
-	fields []string
-	fns    []AggregateFunc
-	// intermediate query (i.e. traversal path).
-	sql  *sql.Selector
-	path func(context.Context) (*sql.Selector, error)
+	build *WeatherStationQuery
 }
 
 // Aggregate adds the given aggregation functions to the group-by query.
@@ -760,58 +752,46 @@ func (wsgb *WeatherStationGroupBy) Aggregate(fns ...AggregateFunc) *WeatherStati
 	return wsgb
 }
 
-// Scan applies the group-by query and scans the result into the given value.
+// Scan applies the selector query and scans the result into the given value.
 func (wsgb *WeatherStationGroupBy) Scan(ctx context.Context, v any) error {
-	query, err := wsgb.path(ctx)
-	if err != nil {
+	ctx = setContextOp(ctx, wsgb.build.ctx, "GroupBy")
+	if err := wsgb.build.prepareQuery(ctx); err != nil {
 		return err
 	}
-	wsgb.sql = query
-	return wsgb.sqlScan(ctx, v)
+	return scanWithInterceptors[*WeatherStationQuery, *WeatherStationGroupBy](ctx, wsgb.build, wsgb, wsgb.build.inters, v)
 }
 
-func (wsgb *WeatherStationGroupBy) sqlScan(ctx context.Context, v any) error {
-	for _, f := range wsgb.fields {
-		if !weatherstation.ValidColumn(f) {
-			return &ValidationError{Name: f, err: fmt.Errorf("invalid field %q for group-by", f)}
-		}
+func (wsgb *WeatherStationGroupBy) sqlScan(ctx context.Context, root *WeatherStationQuery, v any) error {
+	selector := root.sqlQuery(ctx).Select()
+	aggregation := make([]string, 0, len(wsgb.fns))
+	for _, fn := range wsgb.fns {
+		aggregation = append(aggregation, fn(selector))
 	}
-	selector := wsgb.sqlQuery()
+	if len(selector.SelectedColumns()) == 0 {
+		columns := make([]string, 0, len(*wsgb.flds)+len(wsgb.fns))
+		for _, f := range *wsgb.flds {
+			columns = append(columns, selector.C(f))
+		}
+		columns = append(columns, aggregation...)
+		selector.Select(columns...)
+	}
+	selector.GroupBy(selector.Columns(*wsgb.flds...)...)
 	if err := selector.Err(); err != nil {
 		return err
 	}
 	rows := &sql.Rows{}
 	query, args := selector.Query()
-	if err := wsgb.driver.Query(ctx, query, args, rows); err != nil {
+	if err := wsgb.build.driver.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
 	defer rows.Close()
 	return sql.ScanSlice(rows, v)
 }
 
-func (wsgb *WeatherStationGroupBy) sqlQuery() *sql.Selector {
-	selector := wsgb.sql.Select()
-	aggregation := make([]string, 0, len(wsgb.fns))
-	for _, fn := range wsgb.fns {
-		aggregation = append(aggregation, fn(selector))
-	}
-	if len(selector.SelectedColumns()) == 0 {
-		columns := make([]string, 0, len(wsgb.fields)+len(wsgb.fns))
-		for _, f := range wsgb.fields {
-			columns = append(columns, selector.C(f))
-		}
-		columns = append(columns, aggregation...)
-		selector.Select(columns...)
-	}
-	return selector.GroupBy(selector.Columns(wsgb.fields...)...)
-}
-
 // WeatherStationSelect is the builder for selecting fields of WeatherStation entities.
 type WeatherStationSelect struct {
 	*WeatherStationQuery
 	selector
-	// intermediate query (i.e. traversal path).
-	sql *sql.Selector
 }
 
 // Aggregate adds the given aggregation functions to the selector query.
@@ -822,26 +802,27 @@ func (wss *WeatherStationSelect) Aggregate(fns ...AggregateFunc) *WeatherStation
 
 // Scan applies the selector query and scans the result into the given value.
 func (wss *WeatherStationSelect) Scan(ctx context.Context, v any) error {
+	ctx = setContextOp(ctx, wss.ctx, "Select")
 	if err := wss.prepareQuery(ctx); err != nil {
 		return err
 	}
-	wss.sql = wss.WeatherStationQuery.sqlQuery(ctx)
-	return wss.sqlScan(ctx, v)
+	return scanWithInterceptors[*WeatherStationQuery, *WeatherStationSelect](ctx, wss.WeatherStationQuery, wss, wss.inters, v)
 }
 
-func (wss *WeatherStationSelect) sqlScan(ctx context.Context, v any) error {
+func (wss *WeatherStationSelect) sqlScan(ctx context.Context, root *WeatherStationQuery, v any) error {
+	selector := root.sqlQuery(ctx)
 	aggregation := make([]string, 0, len(wss.fns))
 	for _, fn := range wss.fns {
-		aggregation = append(aggregation, fn(wss.sql))
+		aggregation = append(aggregation, fn(selector))
 	}
 	switch n := len(*wss.selector.flds); {
 	case n == 0 && len(aggregation) > 0:
-		wss.sql.Select(aggregation...)
+		selector.Select(aggregation...)
 	case n != 0 && len(aggregation) > 0:
-		wss.sql.AppendSelect(aggregation...)
+		selector.AppendSelect(aggregation...)
 	}
 	rows := &sql.Rows{}
-	query, args := wss.sql.Query()
+	query, args := selector.Query()
 	if err := wss.driver.Query(ctx, query, args, rows); err != nil {
 		return err
 	}

@@ -359,50 +359,8 @@ func (ac *AirportCreate) Mutation() *AirportMutation {
 
 // Save creates the Airport in the database.
 func (ac *AirportCreate) Save(ctx context.Context) (*Airport, error) {
-	var (
-		err  error
-		node *Airport
-	)
 	ac.defaults()
-	if len(ac.hooks) == 0 {
-		if err = ac.check(); err != nil {
-			return nil, err
-		}
-		node, err = ac.sqlSave(ctx)
-	} else {
-		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
-			mutation, ok := m.(*AirportMutation)
-			if !ok {
-				return nil, fmt.Errorf("unexpected mutation type %T", m)
-			}
-			if err = ac.check(); err != nil {
-				return nil, err
-			}
-			ac.mutation = mutation
-			if node, err = ac.sqlSave(ctx); err != nil {
-				return nil, err
-			}
-			mutation.id = &node.ID
-			mutation.done = true
-			return node, err
-		})
-		for i := len(ac.hooks) - 1; i >= 0; i-- {
-			if ac.hooks[i] == nil {
-				return nil, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
-			}
-			mut = ac.hooks[i](mut)
-		}
-		v, err := mut.Mutate(ctx, ac.mutation)
-		if err != nil {
-			return nil, err
-		}
-		nv, ok := v.(*Airport)
-		if !ok {
-			return nil, fmt.Errorf("unexpected node type %T returned from AirportMutation", v)
-		}
-		node = nv
-	}
-	return node, err
+	return withHooks[*Airport, AirportMutation](ctx, ac.sqlSave, ac.mutation, ac.hooks)
 }
 
 // SaveX calls Save and panics if Save returns an error.
@@ -499,6 +457,9 @@ func (ac *AirportCreate) check() error {
 }
 
 func (ac *AirportCreate) sqlSave(ctx context.Context) (*Airport, error) {
+	if err := ac.check(); err != nil {
+		return nil, err
+	}
 	_node, _spec := ac.createSpec()
 	if err := sqlgraph.CreateNode(ctx, ac.driver, _spec); err != nil {
 		if sqlgraph.IsConstraintError(err) {
@@ -513,19 +474,15 @@ func (ac *AirportCreate) sqlSave(ctx context.Context) (*Airport, error) {
 			return nil, err
 		}
 	}
+	ac.mutation.id = &_node.ID
+	ac.mutation.done = true
 	return _node, nil
 }
 
 func (ac *AirportCreate) createSpec() (*Airport, *sqlgraph.CreateSpec) {
 	var (
 		_node = &Airport{config: ac.config}
-		_spec = &sqlgraph.CreateSpec{
-			Table: airport.Table,
-			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeUUID,
-				Column: airport.FieldID,
-			},
-		}
+		_spec = sqlgraph.NewCreateSpec(airport.Table, sqlgraph.NewFieldSpec(airport.FieldID, field.TypeUUID))
 	)
 	_spec.OnConflict = ac.conflict
 	if id, ok := ac.mutation.ID(); ok {

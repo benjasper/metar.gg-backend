@@ -547,40 +547,7 @@ func (fu *ForecastUpdate) RemoveTemperatureData(t ...*TemperatureData) *Forecast
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (fu *ForecastUpdate) Save(ctx context.Context) (int, error) {
-	var (
-		err      error
-		affected int
-	)
-	if len(fu.hooks) == 0 {
-		if err = fu.check(); err != nil {
-			return 0, err
-		}
-		affected, err = fu.sqlSave(ctx)
-	} else {
-		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
-			mutation, ok := m.(*ForecastMutation)
-			if !ok {
-				return nil, fmt.Errorf("unexpected mutation type %T", m)
-			}
-			if err = fu.check(); err != nil {
-				return 0, err
-			}
-			fu.mutation = mutation
-			affected, err = fu.sqlSave(ctx)
-			mutation.done = true
-			return affected, err
-		})
-		for i := len(fu.hooks) - 1; i >= 0; i-- {
-			if fu.hooks[i] == nil {
-				return 0, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
-			}
-			mut = fu.hooks[i](mut)
-		}
-		if _, err := mut.Mutate(ctx, fu.mutation); err != nil {
-			return 0, err
-		}
-	}
-	return affected, err
+	return withHooks[int, ForecastMutation](ctx, fu.sqlSave, fu.mutation, fu.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -622,16 +589,10 @@ func (fu *ForecastUpdate) Modify(modifiers ...func(u *sql.UpdateBuilder)) *Forec
 }
 
 func (fu *ForecastUpdate) sqlSave(ctx context.Context) (n int, err error) {
-	_spec := &sqlgraph.UpdateSpec{
-		Node: &sqlgraph.NodeSpec{
-			Table:   forecast.Table,
-			Columns: forecast.Columns,
-			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeUUID,
-				Column: forecast.FieldID,
-			},
-		},
+	if err := fu.check(); err != nil {
+		return n, err
 	}
+	_spec := sqlgraph.NewUpdateSpec(forecast.Table, forecast.Columns, sqlgraph.NewFieldSpec(forecast.FieldID, field.TypeUUID))
 	if ps := fu.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
@@ -984,6 +945,7 @@ func (fu *ForecastUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		return 0, err
 	}
+	fu.mutation.done = true
 	return n, nil
 }
 
@@ -1507,6 +1469,12 @@ func (fuo *ForecastUpdateOne) RemoveTemperatureData(t ...*TemperatureData) *Fore
 	return fuo.RemoveTemperatureDatumIDs(ids...)
 }
 
+// Where appends a list predicates to the ForecastUpdate builder.
+func (fuo *ForecastUpdateOne) Where(ps ...predicate.Forecast) *ForecastUpdateOne {
+	fuo.mutation.Where(ps...)
+	return fuo
+}
+
 // Select allows selecting one or more fields (columns) of the returned entity.
 // The default is selecting all fields defined in the entity schema.
 func (fuo *ForecastUpdateOne) Select(field string, fields ...string) *ForecastUpdateOne {
@@ -1516,46 +1484,7 @@ func (fuo *ForecastUpdateOne) Select(field string, fields ...string) *ForecastUp
 
 // Save executes the query and returns the updated Forecast entity.
 func (fuo *ForecastUpdateOne) Save(ctx context.Context) (*Forecast, error) {
-	var (
-		err  error
-		node *Forecast
-	)
-	if len(fuo.hooks) == 0 {
-		if err = fuo.check(); err != nil {
-			return nil, err
-		}
-		node, err = fuo.sqlSave(ctx)
-	} else {
-		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
-			mutation, ok := m.(*ForecastMutation)
-			if !ok {
-				return nil, fmt.Errorf("unexpected mutation type %T", m)
-			}
-			if err = fuo.check(); err != nil {
-				return nil, err
-			}
-			fuo.mutation = mutation
-			node, err = fuo.sqlSave(ctx)
-			mutation.done = true
-			return node, err
-		})
-		for i := len(fuo.hooks) - 1; i >= 0; i-- {
-			if fuo.hooks[i] == nil {
-				return nil, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
-			}
-			mut = fuo.hooks[i](mut)
-		}
-		v, err := mut.Mutate(ctx, fuo.mutation)
-		if err != nil {
-			return nil, err
-		}
-		nv, ok := v.(*Forecast)
-		if !ok {
-			return nil, fmt.Errorf("unexpected node type %T returned from ForecastMutation", v)
-		}
-		node = nv
-	}
-	return node, err
+	return withHooks[*Forecast, ForecastMutation](ctx, fuo.sqlSave, fuo.mutation, fuo.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -1597,16 +1526,10 @@ func (fuo *ForecastUpdateOne) Modify(modifiers ...func(u *sql.UpdateBuilder)) *F
 }
 
 func (fuo *ForecastUpdateOne) sqlSave(ctx context.Context) (_node *Forecast, err error) {
-	_spec := &sqlgraph.UpdateSpec{
-		Node: &sqlgraph.NodeSpec{
-			Table:   forecast.Table,
-			Columns: forecast.Columns,
-			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeUUID,
-				Column: forecast.FieldID,
-			},
-		},
+	if err := fuo.check(); err != nil {
+		return _node, err
 	}
+	_spec := sqlgraph.NewUpdateSpec(forecast.Table, forecast.Columns, sqlgraph.NewFieldSpec(forecast.FieldID, field.TypeUUID))
 	id, ok := fuo.mutation.ID()
 	if !ok {
 		return nil, &ValidationError{Name: "id", err: errors.New(`ent: missing "Forecast.id" for update`)}
@@ -1979,5 +1902,6 @@ func (fuo *ForecastUpdateOne) sqlSave(ctx context.Context) (_node *Forecast, err
 		}
 		return nil, err
 	}
+	fuo.mutation.done = true
 	return _node, nil
 }

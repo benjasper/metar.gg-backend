@@ -19,11 +19,9 @@ import (
 // RunwayQuery is the builder for querying Runway entities.
 type RunwayQuery struct {
 	config
-	limit       *int
-	offset      *int
-	unique      *bool
+	ctx         *QueryContext
 	order       []OrderFunc
-	fields      []string
+	inters      []Interceptor
 	predicates  []predicate.Runway
 	withAirport *AirportQuery
 	withFKs     bool
@@ -40,26 +38,26 @@ func (rq *RunwayQuery) Where(ps ...predicate.Runway) *RunwayQuery {
 	return rq
 }
 
-// Limit adds a limit step to the query.
+// Limit the number of records to be returned by this query.
 func (rq *RunwayQuery) Limit(limit int) *RunwayQuery {
-	rq.limit = &limit
+	rq.ctx.Limit = &limit
 	return rq
 }
 
-// Offset adds an offset step to the query.
+// Offset to start from.
 func (rq *RunwayQuery) Offset(offset int) *RunwayQuery {
-	rq.offset = &offset
+	rq.ctx.Offset = &offset
 	return rq
 }
 
 // Unique configures the query builder to filter duplicate records on query.
 // By default, unique is set to true, and can be disabled using this method.
 func (rq *RunwayQuery) Unique(unique bool) *RunwayQuery {
-	rq.unique = &unique
+	rq.ctx.Unique = &unique
 	return rq
 }
 
-// Order adds an order step to the query.
+// Order specifies how the records should be ordered.
 func (rq *RunwayQuery) Order(o ...OrderFunc) *RunwayQuery {
 	rq.order = append(rq.order, o...)
 	return rq
@@ -67,7 +65,7 @@ func (rq *RunwayQuery) Order(o ...OrderFunc) *RunwayQuery {
 
 // QueryAirport chains the current query on the "airport" edge.
 func (rq *RunwayQuery) QueryAirport() *AirportQuery {
-	query := &AirportQuery{config: rq.config}
+	query := (&AirportClient{config: rq.config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := rq.prepareQuery(ctx); err != nil {
 			return nil, err
@@ -90,7 +88,7 @@ func (rq *RunwayQuery) QueryAirport() *AirportQuery {
 // First returns the first Runway entity from the query.
 // Returns a *NotFoundError when no Runway was found.
 func (rq *RunwayQuery) First(ctx context.Context) (*Runway, error) {
-	nodes, err := rq.Limit(1).All(ctx)
+	nodes, err := rq.Limit(1).All(setContextOp(ctx, rq.ctx, "First"))
 	if err != nil {
 		return nil, err
 	}
@@ -113,7 +111,7 @@ func (rq *RunwayQuery) FirstX(ctx context.Context) *Runway {
 // Returns a *NotFoundError when no Runway ID was found.
 func (rq *RunwayQuery) FirstID(ctx context.Context) (id uuid.UUID, err error) {
 	var ids []uuid.UUID
-	if ids, err = rq.Limit(1).IDs(ctx); err != nil {
+	if ids, err = rq.Limit(1).IDs(setContextOp(ctx, rq.ctx, "FirstID")); err != nil {
 		return
 	}
 	if len(ids) == 0 {
@@ -136,7 +134,7 @@ func (rq *RunwayQuery) FirstIDX(ctx context.Context) uuid.UUID {
 // Returns a *NotSingularError when more than one Runway entity is found.
 // Returns a *NotFoundError when no Runway entities are found.
 func (rq *RunwayQuery) Only(ctx context.Context) (*Runway, error) {
-	nodes, err := rq.Limit(2).All(ctx)
+	nodes, err := rq.Limit(2).All(setContextOp(ctx, rq.ctx, "Only"))
 	if err != nil {
 		return nil, err
 	}
@@ -164,7 +162,7 @@ func (rq *RunwayQuery) OnlyX(ctx context.Context) *Runway {
 // Returns a *NotFoundError when no entities are found.
 func (rq *RunwayQuery) OnlyID(ctx context.Context) (id uuid.UUID, err error) {
 	var ids []uuid.UUID
-	if ids, err = rq.Limit(2).IDs(ctx); err != nil {
+	if ids, err = rq.Limit(2).IDs(setContextOp(ctx, rq.ctx, "OnlyID")); err != nil {
 		return
 	}
 	switch len(ids) {
@@ -189,10 +187,12 @@ func (rq *RunwayQuery) OnlyIDX(ctx context.Context) uuid.UUID {
 
 // All executes the query and returns a list of Runways.
 func (rq *RunwayQuery) All(ctx context.Context) ([]*Runway, error) {
+	ctx = setContextOp(ctx, rq.ctx, "All")
 	if err := rq.prepareQuery(ctx); err != nil {
 		return nil, err
 	}
-	return rq.sqlAll(ctx)
+	qr := querierAll[[]*Runway, *RunwayQuery]()
+	return withInterceptors[[]*Runway](ctx, rq, qr, rq.inters)
 }
 
 // AllX is like All, but panics if an error occurs.
@@ -205,9 +205,12 @@ func (rq *RunwayQuery) AllX(ctx context.Context) []*Runway {
 }
 
 // IDs executes the query and returns a list of Runway IDs.
-func (rq *RunwayQuery) IDs(ctx context.Context) ([]uuid.UUID, error) {
-	var ids []uuid.UUID
-	if err := rq.Select(runway.FieldID).Scan(ctx, &ids); err != nil {
+func (rq *RunwayQuery) IDs(ctx context.Context) (ids []uuid.UUID, err error) {
+	if rq.ctx.Unique == nil && rq.path != nil {
+		rq.Unique(true)
+	}
+	ctx = setContextOp(ctx, rq.ctx, "IDs")
+	if err = rq.Select(runway.FieldID).Scan(ctx, &ids); err != nil {
 		return nil, err
 	}
 	return ids, nil
@@ -224,10 +227,11 @@ func (rq *RunwayQuery) IDsX(ctx context.Context) []uuid.UUID {
 
 // Count returns the count of the given query.
 func (rq *RunwayQuery) Count(ctx context.Context) (int, error) {
+	ctx = setContextOp(ctx, rq.ctx, "Count")
 	if err := rq.prepareQuery(ctx); err != nil {
 		return 0, err
 	}
-	return rq.sqlCount(ctx)
+	return withInterceptors[int](ctx, rq, querierCount[*RunwayQuery](), rq.inters)
 }
 
 // CountX is like Count, but panics if an error occurs.
@@ -241,10 +245,15 @@ func (rq *RunwayQuery) CountX(ctx context.Context) int {
 
 // Exist returns true if the query has elements in the graph.
 func (rq *RunwayQuery) Exist(ctx context.Context) (bool, error) {
-	if err := rq.prepareQuery(ctx); err != nil {
-		return false, err
+	ctx = setContextOp(ctx, rq.ctx, "Exist")
+	switch _, err := rq.FirstID(ctx); {
+	case IsNotFound(err):
+		return false, nil
+	case err != nil:
+		return false, fmt.Errorf("ent: check existence: %w", err)
+	default:
+		return true, nil
 	}
-	return rq.sqlExist(ctx)
 }
 
 // ExistX is like Exist, but panics if an error occurs.
@@ -264,22 +273,21 @@ func (rq *RunwayQuery) Clone() *RunwayQuery {
 	}
 	return &RunwayQuery{
 		config:      rq.config,
-		limit:       rq.limit,
-		offset:      rq.offset,
+		ctx:         rq.ctx.Clone(),
 		order:       append([]OrderFunc{}, rq.order...),
+		inters:      append([]Interceptor{}, rq.inters...),
 		predicates:  append([]predicate.Runway{}, rq.predicates...),
 		withAirport: rq.withAirport.Clone(),
 		// clone intermediate query.
-		sql:    rq.sql.Clone(),
-		path:   rq.path,
-		unique: rq.unique,
+		sql:  rq.sql.Clone(),
+		path: rq.path,
 	}
 }
 
 // WithAirport tells the query-builder to eager-load the nodes that are connected to
 // the "airport" edge. The optional arguments are used to configure the query builder of the edge.
 func (rq *RunwayQuery) WithAirport(opts ...func(*AirportQuery)) *RunwayQuery {
-	query := &AirportQuery{config: rq.config}
+	query := (&AirportClient{config: rq.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -302,16 +310,11 @@ func (rq *RunwayQuery) WithAirport(opts ...func(*AirportQuery)) *RunwayQuery {
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
 func (rq *RunwayQuery) GroupBy(field string, fields ...string) *RunwayGroupBy {
-	grbuild := &RunwayGroupBy{config: rq.config}
-	grbuild.fields = append([]string{field}, fields...)
-	grbuild.path = func(ctx context.Context) (prev *sql.Selector, err error) {
-		if err := rq.prepareQuery(ctx); err != nil {
-			return nil, err
-		}
-		return rq.sqlQuery(ctx), nil
-	}
+	rq.ctx.Fields = append([]string{field}, fields...)
+	grbuild := &RunwayGroupBy{build: rq}
+	grbuild.flds = &rq.ctx.Fields
 	grbuild.label = runway.Label
-	grbuild.flds, grbuild.scan = &grbuild.fields, grbuild.Scan
+	grbuild.scan = grbuild.Scan
 	return grbuild
 }
 
@@ -328,11 +331,11 @@ func (rq *RunwayQuery) GroupBy(field string, fields ...string) *RunwayGroupBy {
 //		Select(runway.FieldImportID).
 //		Scan(ctx, &v)
 func (rq *RunwayQuery) Select(fields ...string) *RunwaySelect {
-	rq.fields = append(rq.fields, fields...)
-	selbuild := &RunwaySelect{RunwayQuery: rq}
-	selbuild.label = runway.Label
-	selbuild.flds, selbuild.scan = &rq.fields, selbuild.Scan
-	return selbuild
+	rq.ctx.Fields = append(rq.ctx.Fields, fields...)
+	sbuild := &RunwaySelect{RunwayQuery: rq}
+	sbuild.label = runway.Label
+	sbuild.flds, sbuild.scan = &rq.ctx.Fields, sbuild.Scan
+	return sbuild
 }
 
 // Aggregate returns a RunwaySelect configured with the given aggregations.
@@ -341,7 +344,17 @@ func (rq *RunwayQuery) Aggregate(fns ...AggregateFunc) *RunwaySelect {
 }
 
 func (rq *RunwayQuery) prepareQuery(ctx context.Context) error {
-	for _, f := range rq.fields {
+	for _, inter := range rq.inters {
+		if inter == nil {
+			return fmt.Errorf("ent: uninitialized interceptor (forgotten import ent/runtime?)")
+		}
+		if trv, ok := inter.(Traverser); ok {
+			if err := trv.Traverse(ctx, rq); err != nil {
+				return err
+			}
+		}
+	}
+	for _, f := range rq.ctx.Fields {
 		if !runway.ValidColumn(f) {
 			return &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for query", f)}
 		}
@@ -419,6 +432,9 @@ func (rq *RunwayQuery) loadAirport(ctx context.Context, query *AirportQuery, nod
 		}
 		nodeids[fk] = append(nodeids[fk], nodes[i])
 	}
+	if len(ids) == 0 {
+		return nil
+	}
 	query.Where(airport.IDIn(ids...))
 	neighbors, err := query.All(ctx)
 	if err != nil {
@@ -441,41 +457,22 @@ func (rq *RunwayQuery) sqlCount(ctx context.Context) (int, error) {
 	if len(rq.modifiers) > 0 {
 		_spec.Modifiers = rq.modifiers
 	}
-	_spec.Node.Columns = rq.fields
-	if len(rq.fields) > 0 {
-		_spec.Unique = rq.unique != nil && *rq.unique
+	_spec.Node.Columns = rq.ctx.Fields
+	if len(rq.ctx.Fields) > 0 {
+		_spec.Unique = rq.ctx.Unique != nil && *rq.ctx.Unique
 	}
 	return sqlgraph.CountNodes(ctx, rq.driver, _spec)
 }
 
-func (rq *RunwayQuery) sqlExist(ctx context.Context) (bool, error) {
-	switch _, err := rq.FirstID(ctx); {
-	case IsNotFound(err):
-		return false, nil
-	case err != nil:
-		return false, fmt.Errorf("ent: check existence: %w", err)
-	default:
-		return true, nil
-	}
-}
-
 func (rq *RunwayQuery) querySpec() *sqlgraph.QuerySpec {
-	_spec := &sqlgraph.QuerySpec{
-		Node: &sqlgraph.NodeSpec{
-			Table:   runway.Table,
-			Columns: runway.Columns,
-			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeUUID,
-				Column: runway.FieldID,
-			},
-		},
-		From:   rq.sql,
-		Unique: true,
-	}
-	if unique := rq.unique; unique != nil {
+	_spec := sqlgraph.NewQuerySpec(runway.Table, runway.Columns, sqlgraph.NewFieldSpec(runway.FieldID, field.TypeUUID))
+	_spec.From = rq.sql
+	if unique := rq.ctx.Unique; unique != nil {
 		_spec.Unique = *unique
+	} else if rq.path != nil {
+		_spec.Unique = true
 	}
-	if fields := rq.fields; len(fields) > 0 {
+	if fields := rq.ctx.Fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))
 		_spec.Node.Columns = append(_spec.Node.Columns, runway.FieldID)
 		for i := range fields {
@@ -491,10 +488,10 @@ func (rq *RunwayQuery) querySpec() *sqlgraph.QuerySpec {
 			}
 		}
 	}
-	if limit := rq.limit; limit != nil {
+	if limit := rq.ctx.Limit; limit != nil {
 		_spec.Limit = *limit
 	}
-	if offset := rq.offset; offset != nil {
+	if offset := rq.ctx.Offset; offset != nil {
 		_spec.Offset = *offset
 	}
 	if ps := rq.order; len(ps) > 0 {
@@ -510,7 +507,7 @@ func (rq *RunwayQuery) querySpec() *sqlgraph.QuerySpec {
 func (rq *RunwayQuery) sqlQuery(ctx context.Context) *sql.Selector {
 	builder := sql.Dialect(rq.driver.Dialect())
 	t1 := builder.Table(runway.Table)
-	columns := rq.fields
+	columns := rq.ctx.Fields
 	if len(columns) == 0 {
 		columns = runway.Columns
 	}
@@ -519,7 +516,7 @@ func (rq *RunwayQuery) sqlQuery(ctx context.Context) *sql.Selector {
 		selector = rq.sql
 		selector.Select(selector.Columns(columns...)...)
 	}
-	if rq.unique != nil && *rq.unique {
+	if rq.ctx.Unique != nil && *rq.ctx.Unique {
 		selector.Distinct()
 	}
 	for _, m := range rq.modifiers {
@@ -531,12 +528,12 @@ func (rq *RunwayQuery) sqlQuery(ctx context.Context) *sql.Selector {
 	for _, p := range rq.order {
 		p(selector)
 	}
-	if offset := rq.offset; offset != nil {
+	if offset := rq.ctx.Offset; offset != nil {
 		// limit is mandatory for offset clause. We start
 		// with default value, and override it below if needed.
 		selector.Offset(*offset).Limit(math.MaxInt32)
 	}
-	if limit := rq.limit; limit != nil {
+	if limit := rq.ctx.Limit; limit != nil {
 		selector.Limit(*limit)
 	}
 	return selector
@@ -550,13 +547,8 @@ func (rq *RunwayQuery) Modify(modifiers ...func(s *sql.Selector)) *RunwaySelect 
 
 // RunwayGroupBy is the group-by builder for Runway entities.
 type RunwayGroupBy struct {
-	config
 	selector
-	fields []string
-	fns    []AggregateFunc
-	// intermediate query (i.e. traversal path).
-	sql  *sql.Selector
-	path func(context.Context) (*sql.Selector, error)
+	build *RunwayQuery
 }
 
 // Aggregate adds the given aggregation functions to the group-by query.
@@ -565,58 +557,46 @@ func (rgb *RunwayGroupBy) Aggregate(fns ...AggregateFunc) *RunwayGroupBy {
 	return rgb
 }
 
-// Scan applies the group-by query and scans the result into the given value.
+// Scan applies the selector query and scans the result into the given value.
 func (rgb *RunwayGroupBy) Scan(ctx context.Context, v any) error {
-	query, err := rgb.path(ctx)
-	if err != nil {
+	ctx = setContextOp(ctx, rgb.build.ctx, "GroupBy")
+	if err := rgb.build.prepareQuery(ctx); err != nil {
 		return err
 	}
-	rgb.sql = query
-	return rgb.sqlScan(ctx, v)
+	return scanWithInterceptors[*RunwayQuery, *RunwayGroupBy](ctx, rgb.build, rgb, rgb.build.inters, v)
 }
 
-func (rgb *RunwayGroupBy) sqlScan(ctx context.Context, v any) error {
-	for _, f := range rgb.fields {
-		if !runway.ValidColumn(f) {
-			return &ValidationError{Name: f, err: fmt.Errorf("invalid field %q for group-by", f)}
-		}
+func (rgb *RunwayGroupBy) sqlScan(ctx context.Context, root *RunwayQuery, v any) error {
+	selector := root.sqlQuery(ctx).Select()
+	aggregation := make([]string, 0, len(rgb.fns))
+	for _, fn := range rgb.fns {
+		aggregation = append(aggregation, fn(selector))
 	}
-	selector := rgb.sqlQuery()
+	if len(selector.SelectedColumns()) == 0 {
+		columns := make([]string, 0, len(*rgb.flds)+len(rgb.fns))
+		for _, f := range *rgb.flds {
+			columns = append(columns, selector.C(f))
+		}
+		columns = append(columns, aggregation...)
+		selector.Select(columns...)
+	}
+	selector.GroupBy(selector.Columns(*rgb.flds...)...)
 	if err := selector.Err(); err != nil {
 		return err
 	}
 	rows := &sql.Rows{}
 	query, args := selector.Query()
-	if err := rgb.driver.Query(ctx, query, args, rows); err != nil {
+	if err := rgb.build.driver.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
 	defer rows.Close()
 	return sql.ScanSlice(rows, v)
 }
 
-func (rgb *RunwayGroupBy) sqlQuery() *sql.Selector {
-	selector := rgb.sql.Select()
-	aggregation := make([]string, 0, len(rgb.fns))
-	for _, fn := range rgb.fns {
-		aggregation = append(aggregation, fn(selector))
-	}
-	if len(selector.SelectedColumns()) == 0 {
-		columns := make([]string, 0, len(rgb.fields)+len(rgb.fns))
-		for _, f := range rgb.fields {
-			columns = append(columns, selector.C(f))
-		}
-		columns = append(columns, aggregation...)
-		selector.Select(columns...)
-	}
-	return selector.GroupBy(selector.Columns(rgb.fields...)...)
-}
-
 // RunwaySelect is the builder for selecting fields of Runway entities.
 type RunwaySelect struct {
 	*RunwayQuery
 	selector
-	// intermediate query (i.e. traversal path).
-	sql *sql.Selector
 }
 
 // Aggregate adds the given aggregation functions to the selector query.
@@ -627,26 +607,27 @@ func (rs *RunwaySelect) Aggregate(fns ...AggregateFunc) *RunwaySelect {
 
 // Scan applies the selector query and scans the result into the given value.
 func (rs *RunwaySelect) Scan(ctx context.Context, v any) error {
+	ctx = setContextOp(ctx, rs.ctx, "Select")
 	if err := rs.prepareQuery(ctx); err != nil {
 		return err
 	}
-	rs.sql = rs.RunwayQuery.sqlQuery(ctx)
-	return rs.sqlScan(ctx, v)
+	return scanWithInterceptors[*RunwayQuery, *RunwaySelect](ctx, rs.RunwayQuery, rs, rs.inters, v)
 }
 
-func (rs *RunwaySelect) sqlScan(ctx context.Context, v any) error {
+func (rs *RunwaySelect) sqlScan(ctx context.Context, root *RunwayQuery, v any) error {
+	selector := root.sqlQuery(ctx)
 	aggregation := make([]string, 0, len(rs.fns))
 	for _, fn := range rs.fns {
-		aggregation = append(aggregation, fn(rs.sql))
+		aggregation = append(aggregation, fn(selector))
 	}
 	switch n := len(*rs.selector.flds); {
 	case n == 0 && len(aggregation) > 0:
-		rs.sql.Select(aggregation...)
+		selector.Select(aggregation...)
 	case n != 0 && len(aggregation) > 0:
-		rs.sql.AppendSelect(aggregation...)
+		selector.AppendSelect(aggregation...)
 	}
 	rows := &sql.Rows{}
-	query, args := rs.sql.Query()
+	query, args := selector.Query()
 	if err := rs.driver.Query(ctx, query, args, rows); err != nil {
 		return err
 	}

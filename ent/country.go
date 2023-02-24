@@ -163,14 +163,14 @@ func (c *Country) assignValues(columns []string, values []any) error {
 
 // QueryAirports queries the "airports" edge of the Country entity.
 func (c *Country) QueryAirports() *AirportQuery {
-	return (&CountryClient{config: c.config}).QueryAirports(c)
+	return NewCountryClient(c.config).QueryAirports(c)
 }
 
 // Update returns a builder for updating this Country.
 // Note that you need to call Country.Unwrap() before calling this method if this Country
 // was returned from a transaction, and the transaction was committed or rolled back.
 func (c *Country) Update() *CountryUpdateOne {
-	return (&CountryClient{config: c.config}).UpdateOne(c)
+	return NewCountryClient(c.config).UpdateOne(c)
 }
 
 // Unwrap unwraps the Country entity that was returned from a transaction after it was closed,
@@ -245,9 +245,3 @@ func (c *Country) appendNamedAirports(name string, edges ...*Airport) {
 
 // Countries is a parsable slice of Country.
 type Countries []*Country
-
-func (c Countries) config(cfg config) {
-	for _i := range c {
-		c[_i].config = cfg
-	}
-}

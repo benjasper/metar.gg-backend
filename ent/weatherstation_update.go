@@ -223,34 +223,7 @@ func (wsu *WeatherStationUpdate) RemoveTafs(t ...*Taf) *WeatherStationUpdate {
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (wsu *WeatherStationUpdate) Save(ctx context.Context) (int, error) {
-	var (
-		err      error
-		affected int
-	)
-	if len(wsu.hooks) == 0 {
-		affected, err = wsu.sqlSave(ctx)
-	} else {
-		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
-			mutation, ok := m.(*WeatherStationMutation)
-			if !ok {
-				return nil, fmt.Errorf("unexpected mutation type %T", m)
-			}
-			wsu.mutation = mutation
-			affected, err = wsu.sqlSave(ctx)
-			mutation.done = true
-			return affected, err
-		})
-		for i := len(wsu.hooks) - 1; i >= 0; i-- {
-			if wsu.hooks[i] == nil {
-				return 0, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
-			}
-			mut = wsu.hooks[i](mut)
-		}
-		if _, err := mut.Mutate(ctx, wsu.mutation); err != nil {
-			return 0, err
-		}
-	}
-	return affected, err
+	return withHooks[int, WeatherStationMutation](ctx, wsu.sqlSave, wsu.mutation, wsu.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -282,16 +255,7 @@ func (wsu *WeatherStationUpdate) Modify(modifiers ...func(u *sql.UpdateBuilder))
 }
 
 func (wsu *WeatherStationUpdate) sqlSave(ctx context.Context) (n int, err error) {
-	_spec := &sqlgraph.UpdateSpec{
-		Node: &sqlgraph.NodeSpec{
-			Table:   weatherstation.Table,
-			Columns: weatherstation.Columns,
-			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeUUID,
-				Column: weatherstation.FieldID,
-			},
-		},
-	}
+	_spec := sqlgraph.NewUpdateSpec(weatherstation.Table, weatherstation.Columns, sqlgraph.NewFieldSpec(weatherstation.FieldID, field.TypeUUID))
 	if ps := wsu.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
@@ -481,6 +445,7 @@ func (wsu *WeatherStationUpdate) sqlSave(ctx context.Context) (n int, err error)
 		}
 		return 0, err
 	}
+	wsu.mutation.done = true
 	return n, nil
 }
 
@@ -682,6 +647,12 @@ func (wsuo *WeatherStationUpdateOne) RemoveTafs(t ...*Taf) *WeatherStationUpdate
 	return wsuo.RemoveTafIDs(ids...)
 }
 
+// Where appends a list predicates to the WeatherStationUpdate builder.
+func (wsuo *WeatherStationUpdateOne) Where(ps ...predicate.WeatherStation) *WeatherStationUpdateOne {
+	wsuo.mutation.Where(ps...)
+	return wsuo
+}
+
 // Select allows selecting one or more fields (columns) of the returned entity.
 // The default is selecting all fields defined in the entity schema.
 func (wsuo *WeatherStationUpdateOne) Select(field string, fields ...string) *WeatherStationUpdateOne {
@@ -691,40 +662,7 @@ func (wsuo *WeatherStationUpdateOne) Select(field string, fields ...string) *Wea
 
 // Save executes the query and returns the updated WeatherStation entity.
 func (wsuo *WeatherStationUpdateOne) Save(ctx context.Context) (*WeatherStation, error) {
-	var (
-		err  error
-		node *WeatherStation
-	)
-	if len(wsuo.hooks) == 0 {
-		node, err = wsuo.sqlSave(ctx)
-	} else {
-		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
-			mutation, ok := m.(*WeatherStationMutation)
-			if !ok {
-				return nil, fmt.Errorf("unexpected mutation type %T", m)
-			}
-			wsuo.mutation = mutation
-			node, err = wsuo.sqlSave(ctx)
-			mutation.done = true
-			return node, err
-		})
-		for i := len(wsuo.hooks) - 1; i >= 0; i-- {
-			if wsuo.hooks[i] == nil {
-				return nil, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
-			}
-			mut = wsuo.hooks[i](mut)
-		}
-		v, err := mut.Mutate(ctx, wsuo.mutation)
-		if err != nil {
-			return nil, err
-		}
-		nv, ok := v.(*WeatherStation)
-		if !ok {
-			return nil, fmt.Errorf("unexpected node type %T returned from WeatherStationMutation", v)
-		}
-		node = nv
-	}
-	return node, err
+	return withHooks[*WeatherStation, WeatherStationMutation](ctx, wsuo.sqlSave, wsuo.mutation, wsuo.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -756,16 +694,7 @@ func (wsuo *WeatherStationUpdateOne) Modify(modifiers ...func(u *sql.UpdateBuild
 }
 
 func (wsuo *WeatherStationUpdateOne) sqlSave(ctx context.Context) (_node *WeatherStation, err error) {
-	_spec := &sqlgraph.UpdateSpec{
-		Node: &sqlgraph.NodeSpec{
-			Table:   weatherstation.Table,
-			Columns: weatherstation.Columns,
-			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeUUID,
-				Column: weatherstation.FieldID,
-			},
-		},
-	}
+	_spec := sqlgraph.NewUpdateSpec(weatherstation.Table, weatherstation.Columns, sqlgraph.NewFieldSpec(weatherstation.FieldID, field.TypeUUID))
 	id, ok := wsuo.mutation.ID()
 	if !ok {
 		return nil, &ValidationError{Name: "id", err: errors.New(`ent: missing "WeatherStation.id" for update`)}
@@ -975,5 +904,6 @@ func (wsuo *WeatherStationUpdateOne) sqlSave(ctx context.Context) (_node *Weathe
 		}
 		return nil, err
 	}
+	wsuo.mutation.done = true
 	return _node, nil
 }

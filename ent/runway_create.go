@@ -295,50 +295,8 @@ func (rc *RunwayCreate) Mutation() *RunwayMutation {
 
 // Save creates the Runway in the database.
 func (rc *RunwayCreate) Save(ctx context.Context) (*Runway, error) {
-	var (
-		err  error
-		node *Runway
-	)
 	rc.defaults()
-	if len(rc.hooks) == 0 {
-		if err = rc.check(); err != nil {
-			return nil, err
-		}
-		node, err = rc.sqlSave(ctx)
-	} else {
-		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
-			mutation, ok := m.(*RunwayMutation)
-			if !ok {
-				return nil, fmt.Errorf("unexpected mutation type %T", m)
-			}
-			if err = rc.check(); err != nil {
-				return nil, err
-			}
-			rc.mutation = mutation
-			if node, err = rc.sqlSave(ctx); err != nil {
-				return nil, err
-			}
-			mutation.id = &node.ID
-			mutation.done = true
-			return node, err
-		})
-		for i := len(rc.hooks) - 1; i >= 0; i-- {
-			if rc.hooks[i] == nil {
-				return nil, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
-			}
-			mut = rc.hooks[i](mut)
-		}
-		v, err := mut.Mutate(ctx, rc.mutation)
-		if err != nil {
-			return nil, err
-		}
-		nv, ok := v.(*Runway)
-		if !ok {
-			return nil, fmt.Errorf("unexpected node type %T returned from RunwayMutation", v)
-		}
-		node = nv
-	}
-	return node, err
+	return withHooks[*Runway, RunwayMutation](ctx, rc.sqlSave, rc.mutation, rc.hooks)
 }
 
 // SaveX calls Save and panics if Save returns an error.
@@ -415,6 +373,9 @@ func (rc *RunwayCreate) check() error {
 }
 
 func (rc *RunwayCreate) sqlSave(ctx context.Context) (*Runway, error) {
+	if err := rc.check(); err != nil {
+		return nil, err
+	}
 	_node, _spec := rc.createSpec()
 	if err := sqlgraph.CreateNode(ctx, rc.driver, _spec); err != nil {
 		if sqlgraph.IsConstraintError(err) {
@@ -429,19 +390,15 @@ func (rc *RunwayCreate) sqlSave(ctx context.Context) (*Runway, error) {
 			return nil, err
 		}
 	}
+	rc.mutation.id = &_node.ID
+	rc.mutation.done = true
 	return _node, nil
 }
 
 func (rc *RunwayCreate) createSpec() (*Runway, *sqlgraph.CreateSpec) {
 	var (
 		_node = &Runway{config: rc.config}
-		_spec = &sqlgraph.CreateSpec{
-			Table: runway.Table,
-			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeUUID,
-				Column: runway.FieldID,
-			},
-		}
+		_spec = sqlgraph.NewCreateSpec(runway.Table, sqlgraph.NewFieldSpec(runway.FieldID, field.TypeUUID))
 	)
 	_spec.OnConflict = rc.conflict
 	if id, ok := rc.mutation.ID(); ok {

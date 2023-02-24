@@ -78,50 +78,8 @@ func (icc *IcingConditionCreate) Mutation() *IcingConditionMutation {
 
 // Save creates the IcingCondition in the database.
 func (icc *IcingConditionCreate) Save(ctx context.Context) (*IcingCondition, error) {
-	var (
-		err  error
-		node *IcingCondition
-	)
 	icc.defaults()
-	if len(icc.hooks) == 0 {
-		if err = icc.check(); err != nil {
-			return nil, err
-		}
-		node, err = icc.sqlSave(ctx)
-	} else {
-		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
-			mutation, ok := m.(*IcingConditionMutation)
-			if !ok {
-				return nil, fmt.Errorf("unexpected mutation type %T", m)
-			}
-			if err = icc.check(); err != nil {
-				return nil, err
-			}
-			icc.mutation = mutation
-			if node, err = icc.sqlSave(ctx); err != nil {
-				return nil, err
-			}
-			mutation.id = &node.ID
-			mutation.done = true
-			return node, err
-		})
-		for i := len(icc.hooks) - 1; i >= 0; i-- {
-			if icc.hooks[i] == nil {
-				return nil, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
-			}
-			mut = icc.hooks[i](mut)
-		}
-		v, err := mut.Mutate(ctx, icc.mutation)
-		if err != nil {
-			return nil, err
-		}
-		nv, ok := v.(*IcingCondition)
-		if !ok {
-			return nil, fmt.Errorf("unexpected node type %T returned from IcingConditionMutation", v)
-		}
-		node = nv
-	}
-	return node, err
+	return withHooks[*IcingCondition, IcingConditionMutation](ctx, icc.sqlSave, icc.mutation, icc.hooks)
 }
 
 // SaveX calls Save and panics if Save returns an error.
@@ -163,6 +121,9 @@ func (icc *IcingConditionCreate) check() error {
 }
 
 func (icc *IcingConditionCreate) sqlSave(ctx context.Context) (*IcingCondition, error) {
+	if err := icc.check(); err != nil {
+		return nil, err
+	}
 	_node, _spec := icc.createSpec()
 	if err := sqlgraph.CreateNode(ctx, icc.driver, _spec); err != nil {
 		if sqlgraph.IsConstraintError(err) {
@@ -177,19 +138,15 @@ func (icc *IcingConditionCreate) sqlSave(ctx context.Context) (*IcingCondition, 
 			return nil, err
 		}
 	}
+	icc.mutation.id = &_node.ID
+	icc.mutation.done = true
 	return _node, nil
 }
 
 func (icc *IcingConditionCreate) createSpec() (*IcingCondition, *sqlgraph.CreateSpec) {
 	var (
 		_node = &IcingCondition{config: icc.config}
-		_spec = &sqlgraph.CreateSpec{
-			Table: icingcondition.Table,
-			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeUUID,
-				Column: icingcondition.FieldID,
-			},
-		}
+		_spec = sqlgraph.NewCreateSpec(icingcondition.Table, sqlgraph.NewFieldSpec(icingcondition.FieldID, field.TypeUUID))
 	)
 	_spec.OnConflict = icc.conflict
 	if id, ok := icc.mutation.ID(); ok {

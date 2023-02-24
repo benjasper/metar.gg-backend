@@ -174,19 +174,19 @@ func (t *Taf) assignValues(columns []string, values []any) error {
 
 // QueryStation queries the "station" edge of the Taf entity.
 func (t *Taf) QueryStation() *WeatherStationQuery {
-	return (&TafClient{config: t.config}).QueryStation(t)
+	return NewTafClient(t.config).QueryStation(t)
 }
 
 // QueryForecast queries the "forecast" edge of the Taf entity.
 func (t *Taf) QueryForecast() *ForecastQuery {
-	return (&TafClient{config: t.config}).QueryForecast(t)
+	return NewTafClient(t.config).QueryForecast(t)
 }
 
 // Update returns a builder for updating this Taf.
 // Note that you need to call Taf.Unwrap() before calling this method if this Taf
 // was returned from a transaction, and the transaction was committed or rolled back.
 func (t *Taf) Update() *TafUpdateOne {
-	return (&TafClient{config: t.config}).UpdateOne(t)
+	return NewTafClient(t.config).UpdateOne(t)
 }
 
 // Unwrap unwraps the Taf entity that was returned from a transaction after it was closed,
@@ -258,9 +258,3 @@ func (t *Taf) appendNamedForecast(name string, edges ...*Forecast) {
 
 // Tafs is a parsable slice of Taf.
 type Tafs []*Taf
-
-func (t Tafs) config(cfg config) {
-	for _i := range t {
-		t[_i].config = cfg
-	}
-}

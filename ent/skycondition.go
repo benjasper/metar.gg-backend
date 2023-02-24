@@ -106,7 +106,7 @@ func (sc *SkyCondition) assignValues(columns []string, values []any) error {
 // Note that you need to call SkyCondition.Unwrap() before calling this method if this SkyCondition
 // was returned from a transaction, and the transaction was committed or rolled back.
 func (sc *SkyCondition) Update() *SkyConditionUpdateOne {
-	return (&SkyConditionClient{config: sc.config}).UpdateOne(sc)
+	return NewSkyConditionClient(sc.config).UpdateOne(sc)
 }
 
 // Unwrap unwraps the SkyCondition entity that was returned from a transaction after it was closed,
@@ -143,9 +143,3 @@ func (sc *SkyCondition) String() string {
 
 // SkyConditions is a parsable slice of SkyCondition.
 type SkyConditions []*SkyCondition
-
-func (sc SkyConditions) config(cfg config) {
-	for _i := range sc {
-		sc[_i].config = cfg
-	}
-}

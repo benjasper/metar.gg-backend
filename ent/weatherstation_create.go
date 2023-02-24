@@ -150,50 +150,8 @@ func (wsc *WeatherStationCreate) Mutation() *WeatherStationMutation {
 
 // Save creates the WeatherStation in the database.
 func (wsc *WeatherStationCreate) Save(ctx context.Context) (*WeatherStation, error) {
-	var (
-		err  error
-		node *WeatherStation
-	)
 	wsc.defaults()
-	if len(wsc.hooks) == 0 {
-		if err = wsc.check(); err != nil {
-			return nil, err
-		}
-		node, err = wsc.sqlSave(ctx)
-	} else {
-		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
-			mutation, ok := m.(*WeatherStationMutation)
-			if !ok {
-				return nil, fmt.Errorf("unexpected mutation type %T", m)
-			}
-			if err = wsc.check(); err != nil {
-				return nil, err
-			}
-			wsc.mutation = mutation
-			if node, err = wsc.sqlSave(ctx); err != nil {
-				return nil, err
-			}
-			mutation.id = &node.ID
-			mutation.done = true
-			return node, err
-		})
-		for i := len(wsc.hooks) - 1; i >= 0; i-- {
-			if wsc.hooks[i] == nil {
-				return nil, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
-			}
-			mut = wsc.hooks[i](mut)
-		}
-		v, err := mut.Mutate(ctx, wsc.mutation)
-		if err != nil {
-			return nil, err
-		}
-		nv, ok := v.(*WeatherStation)
-		if !ok {
-			return nil, fmt.Errorf("unexpected node type %T returned from WeatherStationMutation", v)
-		}
-		node = nv
-	}
-	return node, err
+	return withHooks[*WeatherStation, WeatherStationMutation](ctx, wsc.sqlSave, wsc.mutation, wsc.hooks)
 }
 
 // SaveX calls Save and panics if Save returns an error.
@@ -238,6 +196,9 @@ func (wsc *WeatherStationCreate) check() error {
 }
 
 func (wsc *WeatherStationCreate) sqlSave(ctx context.Context) (*WeatherStation, error) {
+	if err := wsc.check(); err != nil {
+		return nil, err
+	}
 	_node, _spec := wsc.createSpec()
 	if err := sqlgraph.CreateNode(ctx, wsc.driver, _spec); err != nil {
 		if sqlgraph.IsConstraintError(err) {
@@ -252,19 +213,15 @@ func (wsc *WeatherStationCreate) sqlSave(ctx context.Context) (*WeatherStation, 
 			return nil, err
 		}
 	}
+	wsc.mutation.id = &_node.ID
+	wsc.mutation.done = true
 	return _node, nil
 }
 
 func (wsc *WeatherStationCreate) createSpec() (*WeatherStation, *sqlgraph.CreateSpec) {
 	var (
 		_node = &WeatherStation{config: wsc.config}
-		_spec = &sqlgraph.CreateSpec{
-			Table: weatherstation.Table,
-			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeUUID,
-				Column: weatherstation.FieldID,
-			},
-		}
+		_spec = sqlgraph.NewCreateSpec(weatherstation.Table, sqlgraph.NewFieldSpec(weatherstation.FieldID, field.TypeUUID))
 	)
 	_spec.OnConflict = wsc.conflict
 	if id, ok := wsc.mutation.ID(); ok {

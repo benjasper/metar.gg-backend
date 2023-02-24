@@ -15,11 +15,10 @@ type AirportFunc func(context.Context, *ent.AirportMutation) (ent.Value, error)
 
 // Mutate calls f(ctx, m).
 func (f AirportFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
-	mv, ok := m.(*ent.AirportMutation)
-	if !ok {
-		return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.AirportMutation", m)
+	if mv, ok := m.(*ent.AirportMutation); ok {
+		return f(ctx, mv)
 	}
-	return f(ctx, mv)
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.AirportMutation", m)
 }
 
 // The CountryFunc type is an adapter to allow the use of ordinary
@@ -28,11 +27,10 @@ type CountryFunc func(context.Context, *ent.CountryMutation) (ent.Value, error)
 
 // Mutate calls f(ctx, m).
 func (f CountryFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
-	mv, ok := m.(*ent.CountryMutation)
-	if !ok {
-		return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.CountryMutation", m)
+	if mv, ok := m.(*ent.CountryMutation); ok {
+		return f(ctx, mv)
 	}
-	return f(ctx, mv)
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.CountryMutation", m)
 }
 
 // The ForecastFunc type is an adapter to allow the use of ordinary
@@ -41,11 +39,10 @@ type ForecastFunc func(context.Context, *ent.ForecastMutation) (ent.Value, error
 
 // Mutate calls f(ctx, m).
 func (f ForecastFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
-	mv, ok := m.(*ent.ForecastMutation)
-	if !ok {
-		return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.ForecastMutation", m)
+	if mv, ok := m.(*ent.ForecastMutation); ok {
+		return f(ctx, mv)
 	}
-	return f(ctx, mv)
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.ForecastMutation", m)
 }
 
 // The FrequencyFunc type is an adapter to allow the use of ordinary
@@ -54,11 +51,10 @@ type FrequencyFunc func(context.Context, *ent.FrequencyMutation) (ent.Value, err
 
 // Mutate calls f(ctx, m).
 func (f FrequencyFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
-	mv, ok := m.(*ent.FrequencyMutation)
-	if !ok {
-		return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.FrequencyMutation", m)
+	if mv, ok := m.(*ent.FrequencyMutation); ok {
+		return f(ctx, mv)
 	}
-	return f(ctx, mv)
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.FrequencyMutation", m)
 }
 
 // The IcingConditionFunc type is an adapter to allow the use of ordinary
@@ -67,11 +63,10 @@ type IcingConditionFunc func(context.Context, *ent.IcingConditionMutation) (ent.
 
 // Mutate calls f(ctx, m).
 func (f IcingConditionFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
-	mv, ok := m.(*ent.IcingConditionMutation)
-	if !ok {
-		return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.IcingConditionMutation", m)
+	if mv, ok := m.(*ent.IcingConditionMutation); ok {
+		return f(ctx, mv)
 	}
-	return f(ctx, mv)
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.IcingConditionMutation", m)
 }
 
 // The MetarFunc type is an adapter to allow the use of ordinary
@@ -80,11 +75,10 @@ type MetarFunc func(context.Context, *ent.MetarMutation) (ent.Value, error)
 
 // Mutate calls f(ctx, m).
 func (f MetarFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
-	mv, ok := m.(*ent.MetarMutation)
-	if !ok {
-		return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.MetarMutation", m)
+	if mv, ok := m.(*ent.MetarMutation); ok {
+		return f(ctx, mv)
 	}
-	return f(ctx, mv)
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.MetarMutation", m)
 }
 
 // The RegionFunc type is an adapter to allow the use of ordinary
@@ -93,11 +87,10 @@ type RegionFunc func(context.Context, *ent.RegionMutation) (ent.Value, error)
 
 // Mutate calls f(ctx, m).
 func (f RegionFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
-	mv, ok := m.(*ent.RegionMutation)
-	if !ok {
-		return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.RegionMutation", m)
+	if mv, ok := m.(*ent.RegionMutation); ok {
+		return f(ctx, mv)
 	}
-	return f(ctx, mv)
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.RegionMutation", m)
 }
 
 // The RunwayFunc type is an adapter to allow the use of ordinary
@@ -106,11 +99,10 @@ type RunwayFunc func(context.Context, *ent.RunwayMutation) (ent.Value, error)
 
 // Mutate calls f(ctx, m).
 func (f RunwayFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
-	mv, ok := m.(*ent.RunwayMutation)
-	if !ok {
-		return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.RunwayMutation", m)
+	if mv, ok := m.(*ent.RunwayMutation); ok {
+		return f(ctx, mv)
 	}
-	return f(ctx, mv)
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.RunwayMutation", m)
 }
 
 // The SkyConditionFunc type is an adapter to allow the use of ordinary
@@ -119,11 +111,10 @@ type SkyConditionFunc func(context.Context, *ent.SkyConditionMutation) (ent.Valu
 
 // Mutate calls f(ctx, m).
 func (f SkyConditionFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
-	mv, ok := m.(*ent.SkyConditionMutation)
-	if !ok {
-		return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.SkyConditionMutation", m)
+	if mv, ok := m.(*ent.SkyConditionMutation); ok {
+		return f(ctx, mv)
 	}
-	return f(ctx, mv)
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.SkyConditionMutation", m)
 }
 
 // The TafFunc type is an adapter to allow the use of ordinary
@@ -132,11 +123,10 @@ type TafFunc func(context.Context, *ent.TafMutation) (ent.Value, error)
 
 // Mutate calls f(ctx, m).
 func (f TafFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
-	mv, ok := m.(*ent.TafMutation)
-	if !ok {
-		return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.TafMutation", m)
+	if mv, ok := m.(*ent.TafMutation); ok {
+		return f(ctx, mv)
 	}
-	return f(ctx, mv)
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.TafMutation", m)
 }
 
 // The TemperatureDataFunc type is an adapter to allow the use of ordinary
@@ -145,11 +135,10 @@ type TemperatureDataFunc func(context.Context, *ent.TemperatureDataMutation) (en
 
 // Mutate calls f(ctx, m).
 func (f TemperatureDataFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
-	mv, ok := m.(*ent.TemperatureDataMutation)
-	if !ok {
-		return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.TemperatureDataMutation", m)
+	if mv, ok := m.(*ent.TemperatureDataMutation); ok {
+		return f(ctx, mv)
 	}
-	return f(ctx, mv)
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.TemperatureDataMutation", m)
 }
 
 // The TurbulenceConditionFunc type is an adapter to allow the use of ordinary
@@ -158,11 +147,10 @@ type TurbulenceConditionFunc func(context.Context, *ent.TurbulenceConditionMutat
 
 // Mutate calls f(ctx, m).
 func (f TurbulenceConditionFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
-	mv, ok := m.(*ent.TurbulenceConditionMutation)
-	if !ok {
-		return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.TurbulenceConditionMutation", m)
+	if mv, ok := m.(*ent.TurbulenceConditionMutation); ok {
+		return f(ctx, mv)
 	}
-	return f(ctx, mv)
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.TurbulenceConditionMutation", m)
 }
 
 // The WeatherStationFunc type is an adapter to allow the use of ordinary
@@ -171,11 +159,10 @@ type WeatherStationFunc func(context.Context, *ent.WeatherStationMutation) (ent.
 
 // Mutate calls f(ctx, m).
 func (f WeatherStationFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
-	mv, ok := m.(*ent.WeatherStationMutation)
-	if !ok {
-		return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.WeatherStationMutation", m)
+	if mv, ok := m.(*ent.WeatherStationMutation); ok {
+		return f(ctx, mv)
 	}
-	return f(ctx, mv)
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.WeatherStationMutation", m)
 }
 
 // Condition is a hook condition function.

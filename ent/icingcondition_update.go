@@ -95,34 +95,7 @@ func (icu *IcingConditionUpdate) Mutation() *IcingConditionMutation {
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (icu *IcingConditionUpdate) Save(ctx context.Context) (int, error) {
-	var (
-		err      error
-		affected int
-	)
-	if len(icu.hooks) == 0 {
-		affected, err = icu.sqlSave(ctx)
-	} else {
-		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
-			mutation, ok := m.(*IcingConditionMutation)
-			if !ok {
-				return nil, fmt.Errorf("unexpected mutation type %T", m)
-			}
-			icu.mutation = mutation
-			affected, err = icu.sqlSave(ctx)
-			mutation.done = true
-			return affected, err
-		})
-		for i := len(icu.hooks) - 1; i >= 0; i-- {
-			if icu.hooks[i] == nil {
-				return 0, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
-			}
-			mut = icu.hooks[i](mut)
-		}
-		if _, err := mut.Mutate(ctx, icu.mutation); err != nil {
-			return 0, err
-		}
-	}
-	return affected, err
+	return withHooks[int, IcingConditionMutation](ctx, icu.sqlSave, icu.mutation, icu.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -154,16 +127,7 @@ func (icu *IcingConditionUpdate) Modify(modifiers ...func(u *sql.UpdateBuilder))
 }
 
 func (icu *IcingConditionUpdate) sqlSave(ctx context.Context) (n int, err error) {
-	_spec := &sqlgraph.UpdateSpec{
-		Node: &sqlgraph.NodeSpec{
-			Table:   icingcondition.Table,
-			Columns: icingcondition.Columns,
-			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeUUID,
-				Column: icingcondition.FieldID,
-			},
-		},
-	}
+	_spec := sqlgraph.NewUpdateSpec(icingcondition.Table, icingcondition.Columns, sqlgraph.NewFieldSpec(icingcondition.FieldID, field.TypeUUID))
 	if ps := icu.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
@@ -201,6 +165,7 @@ func (icu *IcingConditionUpdate) sqlSave(ctx context.Context) (n int, err error)
 		}
 		return 0, err
 	}
+	icu.mutation.done = true
 	return n, nil
 }
 
@@ -278,6 +243,12 @@ func (icuo *IcingConditionUpdateOne) Mutation() *IcingConditionMutation {
 	return icuo.mutation
 }
 
+// Where appends a list predicates to the IcingConditionUpdate builder.
+func (icuo *IcingConditionUpdateOne) Where(ps ...predicate.IcingCondition) *IcingConditionUpdateOne {
+	icuo.mutation.Where(ps...)
+	return icuo
+}
+
 // Select allows selecting one or more fields (columns) of the returned entity.
 // The default is selecting all fields defined in the entity schema.
 func (icuo *IcingConditionUpdateOne) Select(field string, fields ...string) *IcingConditionUpdateOne {
@@ -287,40 +258,7 @@ func (icuo *IcingConditionUpdateOne) Select(field string, fields ...string) *Ici
 
 // Save executes the query and returns the updated IcingCondition entity.
 func (icuo *IcingConditionUpdateOne) Save(ctx context.Context) (*IcingCondition, error) {
-	var (
-		err  error
-		node *IcingCondition
-	)
-	if len(icuo.hooks) == 0 {
-		node, err = icuo.sqlSave(ctx)
-	} else {
-		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
-			mutation, ok := m.(*IcingConditionMutation)
-			if !ok {
-				return nil, fmt.Errorf("unexpected mutation type %T", m)
-			}
-			icuo.mutation = mutation
-			node, err = icuo.sqlSave(ctx)
-			mutation.done = true
-			return node, err
-		})
-		for i := len(icuo.hooks) - 1; i >= 0; i-- {
-			if icuo.hooks[i] == nil {
-				return nil, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
-			}
-			mut = icuo.hooks[i](mut)
-		}
-		v, err := mut.Mutate(ctx, icuo.mutation)
-		if err != nil {
-			return nil, err
-		}
-		nv, ok := v.(*IcingCondition)
-		if !ok {
-			return nil, fmt.Errorf("unexpected node type %T returned from IcingConditionMutation", v)
-		}
-		node = nv
-	}
-	return node, err
+	return withHooks[*IcingCondition, IcingConditionMutation](ctx, icuo.sqlSave, icuo.mutation, icuo.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -352,16 +290,7 @@ func (icuo *IcingConditionUpdateOne) Modify(modifiers ...func(u *sql.UpdateBuild
 }
 
 func (icuo *IcingConditionUpdateOne) sqlSave(ctx context.Context) (_node *IcingCondition, err error) {
-	_spec := &sqlgraph.UpdateSpec{
-		Node: &sqlgraph.NodeSpec{
-			Table:   icingcondition.Table,
-			Columns: icingcondition.Columns,
-			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeUUID,
-				Column: icingcondition.FieldID,
-			},
-		},
-	}
+	_spec := sqlgraph.NewUpdateSpec(icingcondition.Table, icingcondition.Columns, sqlgraph.NewFieldSpec(icingcondition.FieldID, field.TypeUUID))
 	id, ok := icuo.mutation.ID()
 	if !ok {
 		return nil, &ValidationError{Name: "id", err: errors.New(`ent: missing "IcingCondition.id" for update`)}
@@ -419,5 +348,6 @@ func (icuo *IcingConditionUpdateOne) sqlSave(ctx context.Context) (_node *IcingC
 		}
 		return nil, err
 	}
+	icuo.mutation.done = true
 	return _node, nil
 }

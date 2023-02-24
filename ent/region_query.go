@@ -20,11 +20,9 @@ import (
 // RegionQuery is the builder for querying Region entities.
 type RegionQuery struct {
 	config
-	limit             *int
-	offset            *int
-	unique            *bool
+	ctx               *QueryContext
 	order             []OrderFunc
-	fields            []string
+	inters            []Interceptor
 	predicates        []predicate.Region
 	withAirports      *AirportQuery
 	loadTotal         []func(context.Context, []*Region) error
@@ -41,26 +39,26 @@ func (rq *RegionQuery) Where(ps ...predicate.Region) *RegionQuery {
 	return rq
 }
 
-// Limit adds a limit step to the query.
+// Limit the number of records to be returned by this query.
 func (rq *RegionQuery) Limit(limit int) *RegionQuery {
-	rq.limit = &limit
+	rq.ctx.Limit = &limit
 	return rq
 }
 
-// Offset adds an offset step to the query.
+// Offset to start from.
 func (rq *RegionQuery) Offset(offset int) *RegionQuery {
-	rq.offset = &offset
+	rq.ctx.Offset = &offset
 	return rq
 }
 
 // Unique configures the query builder to filter duplicate records on query.
 // By default, unique is set to true, and can be disabled using this method.
 func (rq *RegionQuery) Unique(unique bool) *RegionQuery {
-	rq.unique = &unique
+	rq.ctx.Unique = &unique
 	return rq
 }
 
-// Order adds an order step to the query.
+// Order specifies how the records should be ordered.
 func (rq *RegionQuery) Order(o ...OrderFunc) *RegionQuery {
 	rq.order = append(rq.order, o...)
 	return rq
@@ -68,7 +66,7 @@ func (rq *RegionQuery) Order(o ...OrderFunc) *RegionQuery {
 
 // QueryAirports chains the current query on the "airports" edge.
 func (rq *RegionQuery) QueryAirports() *AirportQuery {
-	query := &AirportQuery{config: rq.config}
+	query := (&AirportClient{config: rq.config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := rq.prepareQuery(ctx); err != nil {
 			return nil, err
@@ -91,7 +89,7 @@ func (rq *RegionQuery) QueryAirports() *AirportQuery {
 // First returns the first Region entity from the query.
 // Returns a *NotFoundError when no Region was found.
 func (rq *RegionQuery) First(ctx context.Context) (*Region, error) {
-	nodes, err := rq.Limit(1).All(ctx)
+	nodes, err := rq.Limit(1).All(setContextOp(ctx, rq.ctx, "First"))
 	if err != nil {
 		return nil, err
 	}
@@ -114,7 +112,7 @@ func (rq *RegionQuery) FirstX(ctx context.Context) *Region {
 // Returns a *NotFoundError when no Region ID was found.
 func (rq *RegionQuery) FirstID(ctx context.Context) (id uuid.UUID, err error) {
 	var ids []uuid.UUID
-	if ids, err = rq.Limit(1).IDs(ctx); err != nil {
+	if ids, err = rq.Limit(1).IDs(setContextOp(ctx, rq.ctx, "FirstID")); err != nil {
 		return
 	}
 	if len(ids) == 0 {
@@ -137,7 +135,7 @@ func (rq *RegionQuery) FirstIDX(ctx context.Context) uuid.UUID {
 // Returns a *NotSingularError when more than one Region entity is found.
 // Returns a *NotFoundError when no Region entities are found.
 func (rq *RegionQuery) Only(ctx context.Context) (*Region, error) {
-	nodes, err := rq.Limit(2).All(ctx)
+	nodes, err := rq.Limit(2).All(setContextOp(ctx, rq.ctx, "Only"))
 	if err != nil {
 		return nil, err
 	}
@@ -165,7 +163,7 @@ func (rq *RegionQuery) OnlyX(ctx context.Context) *Region {
 // Returns a *NotFoundError when no entities are found.
 func (rq *RegionQuery) OnlyID(ctx context.Context) (id uuid.UUID, err error) {
 	var ids []uuid.UUID
-	if ids, err = rq.Limit(2).IDs(ctx); err != nil {
+	if ids, err = rq.Limit(2).IDs(setContextOp(ctx, rq.ctx, "OnlyID")); err != nil {
 		return
 	}
 	switch len(ids) {
@@ -190,10 +188,12 @@ func (rq *RegionQuery) OnlyIDX(ctx context.Context) uuid.UUID {
 
 // All executes the query and returns a list of Regions.
 func (rq *RegionQuery) All(ctx context.Context) ([]*Region, error) {
+	ctx = setContextOp(ctx, rq.ctx, "All")
 	if err := rq.prepareQuery(ctx); err != nil {
 		return nil, err
 	}
-	return rq.sqlAll(ctx)
+	qr := querierAll[[]*Region, *RegionQuery]()
+	return withInterceptors[[]*Region](ctx, rq, qr, rq.inters)
 }
 
 // AllX is like All, but panics if an error occurs.
@@ -206,9 +206,12 @@ func (rq *RegionQuery) AllX(ctx context.Context) []*Region {
 }
 
 // IDs executes the query and returns a list of Region IDs.
-func (rq *RegionQuery) IDs(ctx context.Context) ([]uuid.UUID, error) {
-	var ids []uuid.UUID
-	if err := rq.Select(region.FieldID).Scan(ctx, &ids); err != nil {
+func (rq *RegionQuery) IDs(ctx context.Context) (ids []uuid.UUID, err error) {
+	if rq.ctx.Unique == nil && rq.path != nil {
+		rq.Unique(true)
+	}
+	ctx = setContextOp(ctx, rq.ctx, "IDs")
+	if err = rq.Select(region.FieldID).Scan(ctx, &ids); err != nil {
 		return nil, err
 	}
 	return ids, nil
@@ -225,10 +228,11 @@ func (rq *RegionQuery) IDsX(ctx context.Context) []uuid.UUID {
 
 // Count returns the count of the given query.
 func (rq *RegionQuery) Count(ctx context.Context) (int, error) {
+	ctx = setContextOp(ctx, rq.ctx, "Count")
 	if err := rq.prepareQuery(ctx); err != nil {
 		return 0, err
 	}
-	return rq.sqlCount(ctx)
+	return withInterceptors[int](ctx, rq, querierCount[*RegionQuery](), rq.inters)
 }
 
 // CountX is like Count, but panics if an error occurs.
@@ -242,10 +246,15 @@ func (rq *RegionQuery) CountX(ctx context.Context) int {
 
 // Exist returns true if the query has elements in the graph.
 func (rq *RegionQuery) Exist(ctx context.Context) (bool, error) {
-	if err := rq.prepareQuery(ctx); err != nil {
-		return false, err
+	ctx = setContextOp(ctx, rq.ctx, "Exist")
+	switch _, err := rq.FirstID(ctx); {
+	case IsNotFound(err):
+		return false, nil
+	case err != nil:
+		return false, fmt.Errorf("ent: check existence: %w", err)
+	default:
+		return true, nil
 	}
-	return rq.sqlExist(ctx)
 }
 
 // ExistX is like Exist, but panics if an error occurs.
@@ -265,22 +274,21 @@ func (rq *RegionQuery) Clone() *RegionQuery {
 	}
 	return &RegionQuery{
 		config:       rq.config,
-		limit:        rq.limit,
-		offset:       rq.offset,
+		ctx:          rq.ctx.Clone(),
 		order:        append([]OrderFunc{}, rq.order...),
+		inters:       append([]Interceptor{}, rq.inters...),
 		predicates:   append([]predicate.Region{}, rq.predicates...),
 		withAirports: rq.withAirports.Clone(),
 		// clone intermediate query.
-		sql:    rq.sql.Clone(),
-		path:   rq.path,
-		unique: rq.unique,
+		sql:  rq.sql.Clone(),
+		path: rq.path,
 	}
 }
 
 // WithAirports tells the query-builder to eager-load the nodes that are connected to
 // the "airports" edge. The optional arguments are used to configure the query builder of the edge.
 func (rq *RegionQuery) WithAirports(opts ...func(*AirportQuery)) *RegionQuery {
-	query := &AirportQuery{config: rq.config}
+	query := (&AirportClient{config: rq.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -303,16 +311,11 @@ func (rq *RegionQuery) WithAirports(opts ...func(*AirportQuery)) *RegionQuery {
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
 func (rq *RegionQuery) GroupBy(field string, fields ...string) *RegionGroupBy {
-	grbuild := &RegionGroupBy{config: rq.config}
-	grbuild.fields = append([]string{field}, fields...)
-	grbuild.path = func(ctx context.Context) (prev *sql.Selector, err error) {
-		if err := rq.prepareQuery(ctx); err != nil {
-			return nil, err
-		}
-		return rq.sqlQuery(ctx), nil
-	}
+	rq.ctx.Fields = append([]string{field}, fields...)
+	grbuild := &RegionGroupBy{build: rq}
+	grbuild.flds = &rq.ctx.Fields
 	grbuild.label = region.Label
-	grbuild.flds, grbuild.scan = &grbuild.fields, grbuild.Scan
+	grbuild.scan = grbuild.Scan
 	return grbuild
 }
 
@@ -329,11 +332,11 @@ func (rq *RegionQuery) GroupBy(field string, fields ...string) *RegionGroupBy {
 //		Select(region.FieldImportID).
 //		Scan(ctx, &v)
 func (rq *RegionQuery) Select(fields ...string) *RegionSelect {
-	rq.fields = append(rq.fields, fields...)
-	selbuild := &RegionSelect{RegionQuery: rq}
-	selbuild.label = region.Label
-	selbuild.flds, selbuild.scan = &rq.fields, selbuild.Scan
-	return selbuild
+	rq.ctx.Fields = append(rq.ctx.Fields, fields...)
+	sbuild := &RegionSelect{RegionQuery: rq}
+	sbuild.label = region.Label
+	sbuild.flds, sbuild.scan = &rq.ctx.Fields, sbuild.Scan
+	return sbuild
 }
 
 // Aggregate returns a RegionSelect configured with the given aggregations.
@@ -342,7 +345,17 @@ func (rq *RegionQuery) Aggregate(fns ...AggregateFunc) *RegionSelect {
 }
 
 func (rq *RegionQuery) prepareQuery(ctx context.Context) error {
-	for _, f := range rq.fields {
+	for _, inter := range rq.inters {
+		if inter == nil {
+			return fmt.Errorf("ent: uninitialized interceptor (forgotten import ent/runtime?)")
+		}
+		if trv, ok := inter.(Traverser); ok {
+			if err := trv.Traverse(ctx, rq); err != nil {
+				return err
+			}
+		}
+	}
+	for _, f := range rq.ctx.Fields {
 		if !region.ValidColumn(f) {
 			return &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for query", f)}
 		}
@@ -445,41 +458,22 @@ func (rq *RegionQuery) sqlCount(ctx context.Context) (int, error) {
 	if len(rq.modifiers) > 0 {
 		_spec.Modifiers = rq.modifiers
 	}
-	_spec.Node.Columns = rq.fields
-	if len(rq.fields) > 0 {
-		_spec.Unique = rq.unique != nil && *rq.unique
+	_spec.Node.Columns = rq.ctx.Fields
+	if len(rq.ctx.Fields) > 0 {
+		_spec.Unique = rq.ctx.Unique != nil && *rq.ctx.Unique
 	}
 	return sqlgraph.CountNodes(ctx, rq.driver, _spec)
 }
 
-func (rq *RegionQuery) sqlExist(ctx context.Context) (bool, error) {
-	switch _, err := rq.FirstID(ctx); {
-	case IsNotFound(err):
-		return false, nil
-	case err != nil:
-		return false, fmt.Errorf("ent: check existence: %w", err)
-	default:
-		return true, nil
-	}
-}
-
 func (rq *RegionQuery) querySpec() *sqlgraph.QuerySpec {
-	_spec := &sqlgraph.QuerySpec{
-		Node: &sqlgraph.NodeSpec{
-			Table:   region.Table,
-			Columns: region.Columns,
-			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeUUID,
-				Column: region.FieldID,
-			},
-		},
-		From:   rq.sql,
-		Unique: true,
-	}
-	if unique := rq.unique; unique != nil {
+	_spec := sqlgraph.NewQuerySpec(region.Table, region.Columns, sqlgraph.NewFieldSpec(region.FieldID, field.TypeUUID))
+	_spec.From = rq.sql
+	if unique := rq.ctx.Unique; unique != nil {
 		_spec.Unique = *unique
+	} else if rq.path != nil {
+		_spec.Unique = true
 	}
-	if fields := rq.fields; len(fields) > 0 {
+	if fields := rq.ctx.Fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))
 		_spec.Node.Columns = append(_spec.Node.Columns, region.FieldID)
 		for i := range fields {
@@ -495,10 +489,10 @@ func (rq *RegionQuery) querySpec() *sqlgraph.QuerySpec {
 			}
 		}
 	}
-	if limit := rq.limit; limit != nil {
+	if limit := rq.ctx.Limit; limit != nil {
 		_spec.Limit = *limit
 	}
-	if offset := rq.offset; offset != nil {
+	if offset := rq.ctx.Offset; offset != nil {
 		_spec.Offset = *offset
 	}
 	if ps := rq.order; len(ps) > 0 {
@@ -514,7 +508,7 @@ func (rq *RegionQuery) querySpec() *sqlgraph.QuerySpec {
 func (rq *RegionQuery) sqlQuery(ctx context.Context) *sql.Selector {
 	builder := sql.Dialect(rq.driver.Dialect())
 	t1 := builder.Table(region.Table)
-	columns := rq.fields
+	columns := rq.ctx.Fields
 	if len(columns) == 0 {
 		columns = region.Columns
 	}
@@ -523,7 +517,7 @@ func (rq *RegionQuery) sqlQuery(ctx context.Context) *sql.Selector {
 		selector = rq.sql
 		selector.Select(selector.Columns(columns...)...)
 	}
-	if rq.unique != nil && *rq.unique {
+	if rq.ctx.Unique != nil && *rq.ctx.Unique {
 		selector.Distinct()
 	}
 	for _, m := range rq.modifiers {
@@ -535,12 +529,12 @@ func (rq *RegionQuery) sqlQuery(ctx context.Context) *sql.Selector {
 	for _, p := range rq.order {
 		p(selector)
 	}
-	if offset := rq.offset; offset != nil {
+	if offset := rq.ctx.Offset; offset != nil {
 		// limit is mandatory for offset clause. We start
 		// with default value, and override it below if needed.
 		selector.Offset(*offset).Limit(math.MaxInt32)
 	}
-	if limit := rq.limit; limit != nil {
+	if limit := rq.ctx.Limit; limit != nil {
 		selector.Limit(*limit)
 	}
 	return selector
@@ -555,7 +549,7 @@ func (rq *RegionQuery) Modify(modifiers ...func(s *sql.Selector)) *RegionSelect 
 // WithNamedAirports tells the query-builder to eager-load the nodes that are connected to the "airports"
 // edge with the given name. The optional arguments are used to configure the query builder of the edge.
 func (rq *RegionQuery) WithNamedAirports(name string, opts ...func(*AirportQuery)) *RegionQuery {
-	query := &AirportQuery{config: rq.config}
+	query := (&AirportClient{config: rq.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -568,13 +562,8 @@ func (rq *RegionQuery) WithNamedAirports(name string, opts ...func(*AirportQuery
 
 // RegionGroupBy is the group-by builder for Region entities.
 type RegionGroupBy struct {
-	config
 	selector
-	fields []string
-	fns    []AggregateFunc
-	// intermediate query (i.e. traversal path).
-	sql  *sql.Selector
-	path func(context.Context) (*sql.Selector, error)
+	build *RegionQuery
 }
 
 // Aggregate adds the given aggregation functions to the group-by query.
@@ -583,58 +572,46 @@ func (rgb *RegionGroupBy) Aggregate(fns ...AggregateFunc) *RegionGroupBy {
 	return rgb
 }
 
-// Scan applies the group-by query and scans the result into the given value.
+// Scan applies the selector query and scans the result into the given value.
 func (rgb *RegionGroupBy) Scan(ctx context.Context, v any) error {
-	query, err := rgb.path(ctx)
-	if err != nil {
+	ctx = setContextOp(ctx, rgb.build.ctx, "GroupBy")
+	if err := rgb.build.prepareQuery(ctx); err != nil {
 		return err
 	}
-	rgb.sql = query
-	return rgb.sqlScan(ctx, v)
+	return scanWithInterceptors[*RegionQuery, *RegionGroupBy](ctx, rgb.build, rgb, rgb.build.inters, v)
 }
 
-func (rgb *RegionGroupBy) sqlScan(ctx context.Context, v any) error {
-	for _, f := range rgb.fields {
-		if !region.ValidColumn(f) {
-			return &ValidationError{Name: f, err: fmt.Errorf("invalid field %q for group-by", f)}
-		}
+func (rgb *RegionGroupBy) sqlScan(ctx context.Context, root *RegionQuery, v any) error {
+	selector := root.sqlQuery(ctx).Select()
+	aggregation := make([]string, 0, len(rgb.fns))
+	for _, fn := range rgb.fns {
+		aggregation = append(aggregation, fn(selector))
 	}
-	selector := rgb.sqlQuery()
+	if len(selector.SelectedColumns()) == 0 {
+		columns := make([]string, 0, len(*rgb.flds)+len(rgb.fns))
+		for _, f := range *rgb.flds {
+			columns = append(columns, selector.C(f))
+		}
+		columns = append(columns, aggregation...)
+		selector.Select(columns...)
+	}
+	selector.GroupBy(selector.Columns(*rgb.flds...)...)
 	if err := selector.Err(); err != nil {
 		return err
 	}
 	rows := &sql.Rows{}
 	query, args := selector.Query()
-	if err := rgb.driver.Query(ctx, query, args, rows); err != nil {
+	if err := rgb.build.driver.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
 	defer rows.Close()
 	return sql.ScanSlice(rows, v)
 }
 
-func (rgb *RegionGroupBy) sqlQuery() *sql.Selector {
-	selector := rgb.sql.Select()
-	aggregation := make([]string, 0, len(rgb.fns))
-	for _, fn := range rgb.fns {
-		aggregation = append(aggregation, fn(selector))
-	}
-	if len(selector.SelectedColumns()) == 0 {
-		columns := make([]string, 0, len(rgb.fields)+len(rgb.fns))
-		for _, f := range rgb.fields {
-			columns = append(columns, selector.C(f))
-		}
-		columns = append(columns, aggregation...)
-		selector.Select(columns...)
-	}
-	return selector.GroupBy(selector.Columns(rgb.fields...)...)
-}
-
 // RegionSelect is the builder for selecting fields of Region entities.
 type RegionSelect struct {
 	*RegionQuery
 	selector
-	// intermediate query (i.e. traversal path).
-	sql *sql.Selector
 }
 
 // Aggregate adds the given aggregation functions to the selector query.
@@ -645,26 +622,27 @@ func (rs *RegionSelect) Aggregate(fns ...AggregateFunc) *RegionSelect {
 
 // Scan applies the selector query and scans the result into the given value.
 func (rs *RegionSelect) Scan(ctx context.Context, v any) error {
+	ctx = setContextOp(ctx, rs.ctx, "Select")
 	if err := rs.prepareQuery(ctx); err != nil {
 		return err
 	}
-	rs.sql = rs.RegionQuery.sqlQuery(ctx)
-	return rs.sqlScan(ctx, v)
+	return scanWithInterceptors[*RegionQuery, *RegionSelect](ctx, rs.RegionQuery, rs, rs.inters, v)
 }
 
-func (rs *RegionSelect) sqlScan(ctx context.Context, v any) error {
+func (rs *RegionSelect) sqlScan(ctx context.Context, root *RegionQuery, v any) error {
+	selector := root.sqlQuery(ctx)
 	aggregation := make([]string, 0, len(rs.fns))
 	for _, fn := range rs.fns {
-		aggregation = append(aggregation, fn(rs.sql))
+		aggregation = append(aggregation, fn(selector))
 	}
 	switch n := len(*rs.selector.flds); {
 	case n == 0 && len(aggregation) > 0:
-		rs.sql.Select(aggregation...)
+		selector.Select(aggregation...)
 	case n != 0 && len(aggregation) > 0:
-		rs.sql.AppendSelect(aggregation...)
+		selector.AppendSelect(aggregation...)
 	}
 	rows := &sql.Rows{}
-	query, args := rs.sql.Query()
+	query, args := selector.Query()
 	if err := rs.driver.Query(ctx, query, args, rows); err != nil {
 		return err
 	}

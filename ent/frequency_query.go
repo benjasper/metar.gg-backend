@@ -19,11 +19,9 @@ import (
 // FrequencyQuery is the builder for querying Frequency entities.
 type FrequencyQuery struct {
 	config
-	limit       *int
-	offset      *int
-	unique      *bool
+	ctx         *QueryContext
 	order       []OrderFunc
-	fields      []string
+	inters      []Interceptor
 	predicates  []predicate.Frequency
 	withAirport *AirportQuery
 	withFKs     bool
@@ -40,26 +38,26 @@ func (fq *FrequencyQuery) Where(ps ...predicate.Frequency) *FrequencyQuery {
 	return fq
 }
 
-// Limit adds a limit step to the query.
+// Limit the number of records to be returned by this query.
 func (fq *FrequencyQuery) Limit(limit int) *FrequencyQuery {
-	fq.limit = &limit
+	fq.ctx.Limit = &limit
 	return fq
 }
 
-// Offset adds an offset step to the query.
+// Offset to start from.
 func (fq *FrequencyQuery) Offset(offset int) *FrequencyQuery {
-	fq.offset = &offset
+	fq.ctx.Offset = &offset
 	return fq
 }
 
 // Unique configures the query builder to filter duplicate records on query.
 // By default, unique is set to true, and can be disabled using this method.
 func (fq *FrequencyQuery) Unique(unique bool) *FrequencyQuery {
-	fq.unique = &unique
+	fq.ctx.Unique = &unique
 	return fq
 }
 
-// Order adds an order step to the query.
+// Order specifies how the records should be ordered.
 func (fq *FrequencyQuery) Order(o ...OrderFunc) *FrequencyQuery {
 	fq.order = append(fq.order, o...)
 	return fq
@@ -67,7 +65,7 @@ func (fq *FrequencyQuery) Order(o ...OrderFunc) *FrequencyQuery {
 
 // QueryAirport chains the current query on the "airport" edge.
 func (fq *FrequencyQuery) QueryAirport() *AirportQuery {
-	query := &AirportQuery{config: fq.config}
+	query := (&AirportClient{config: fq.config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := fq.prepareQuery(ctx); err != nil {
 			return nil, err
@@ -90,7 +88,7 @@ func (fq *FrequencyQuery) QueryAirport() *AirportQuery {
 // First returns the first Frequency entity from the query.
 // Returns a *NotFoundError when no Frequency was found.
 func (fq *FrequencyQuery) First(ctx context.Context) (*Frequency, error) {
-	nodes, err := fq.Limit(1).All(ctx)
+	nodes, err := fq.Limit(1).All(setContextOp(ctx, fq.ctx, "First"))
 	if err != nil {
 		return nil, err
 	}
@@ -113,7 +111,7 @@ func (fq *FrequencyQuery) FirstX(ctx context.Context) *Frequency {
 // Returns a *NotFoundError when no Frequency ID was found.
 func (fq *FrequencyQuery) FirstID(ctx context.Context) (id uuid.UUID, err error) {
 	var ids []uuid.UUID
-	if ids, err = fq.Limit(1).IDs(ctx); err != nil {
+	if ids, err = fq.Limit(1).IDs(setContextOp(ctx, fq.ctx, "FirstID")); err != nil {
 		return
 	}
 	if len(ids) == 0 {
@@ -136,7 +134,7 @@ func (fq *FrequencyQuery) FirstIDX(ctx context.Context) uuid.UUID {
 // Returns a *NotSingularError when more than one Frequency entity is found.
 // Returns a *NotFoundError when no Frequency entities are found.
 func (fq *FrequencyQuery) Only(ctx context.Context) (*Frequency, error) {
-	nodes, err := fq.Limit(2).All(ctx)
+	nodes, err := fq.Limit(2).All(setContextOp(ctx, fq.ctx, "Only"))
 	if err != nil {
 		return nil, err
 	}
@@ -164,7 +162,7 @@ func (fq *FrequencyQuery) OnlyX(ctx context.Context) *Frequency {
 // Returns a *NotFoundError when no entities are found.
 func (fq *FrequencyQuery) OnlyID(ctx context.Context) (id uuid.UUID, err error) {
 	var ids []uuid.UUID
-	if ids, err = fq.Limit(2).IDs(ctx); err != nil {
+	if ids, err = fq.Limit(2).IDs(setContextOp(ctx, fq.ctx, "OnlyID")); err != nil {
 		return
 	}
 	switch len(ids) {
@@ -189,10 +187,12 @@ func (fq *FrequencyQuery) OnlyIDX(ctx context.Context) uuid.UUID {
 
 // All executes the query and returns a list of Frequencies.
 func (fq *FrequencyQuery) All(ctx context.Context) ([]*Frequency, error) {
+	ctx = setContextOp(ctx, fq.ctx, "All")
 	if err := fq.prepareQuery(ctx); err != nil {
 		return nil, err
 	}
-	return fq.sqlAll(ctx)
+	qr := querierAll[[]*Frequency, *FrequencyQuery]()
+	return withInterceptors[[]*Frequency](ctx, fq, qr, fq.inters)
 }
 
 // AllX is like All, but panics if an error occurs.
@@ -205,9 +205,12 @@ func (fq *FrequencyQuery) AllX(ctx context.Context) []*Frequency {
 }
 
 // IDs executes the query and returns a list of Frequency IDs.
-func (fq *FrequencyQuery) IDs(ctx context.Context) ([]uuid.UUID, error) {
-	var ids []uuid.UUID
-	if err := fq.Select(frequency.FieldID).Scan(ctx, &ids); err != nil {
+func (fq *FrequencyQuery) IDs(ctx context.Context) (ids []uuid.UUID, err error) {
+	if fq.ctx.Unique == nil && fq.path != nil {
+		fq.Unique(true)
+	}
+	ctx = setContextOp(ctx, fq.ctx, "IDs")
+	if err = fq.Select(frequency.FieldID).Scan(ctx, &ids); err != nil {
 		return nil, err
 	}
 	return ids, nil
@@ -224,10 +227,11 @@ func (fq *FrequencyQuery) IDsX(ctx context.Context) []uuid.UUID {
 
 // Count returns the count of the given query.
 func (fq *FrequencyQuery) Count(ctx context.Context) (int, error) {
+	ctx = setContextOp(ctx, fq.ctx, "Count")
 	if err := fq.prepareQuery(ctx); err != nil {
 		return 0, err
 	}
-	return fq.sqlCount(ctx)
+	return withInterceptors[int](ctx, fq, querierCount[*FrequencyQuery](), fq.inters)
 }
 
 // CountX is like Count, but panics if an error occurs.
@@ -241,10 +245,15 @@ func (fq *FrequencyQuery) CountX(ctx context.Context) int {
 
 // Exist returns true if the query has elements in the graph.
 func (fq *FrequencyQuery) Exist(ctx context.Context) (bool, error) {
-	if err := fq.prepareQuery(ctx); err != nil {
-		return false, err
+	ctx = setContextOp(ctx, fq.ctx, "Exist")
+	switch _, err := fq.FirstID(ctx); {
+	case IsNotFound(err):
+		return false, nil
+	case err != nil:
+		return false, fmt.Errorf("ent: check existence: %w", err)
+	default:
+		return true, nil
 	}
-	return fq.sqlExist(ctx)
 }
 
 // ExistX is like Exist, but panics if an error occurs.
@@ -264,22 +273,21 @@ func (fq *FrequencyQuery) Clone() *FrequencyQuery {
 	}
 	return &FrequencyQuery{
 		config:      fq.config,
-		limit:       fq.limit,
-		offset:      fq.offset,
+		ctx:         fq.ctx.Clone(),
 		order:       append([]OrderFunc{}, fq.order...),
+		inters:      append([]Interceptor{}, fq.inters...),
 		predicates:  append([]predicate.Frequency{}, fq.predicates...),
 		withAirport: fq.withAirport.Clone(),
 		// clone intermediate query.
-		sql:    fq.sql.Clone(),
-		path:   fq.path,
-		unique: fq.unique,
+		sql:  fq.sql.Clone(),
+		path: fq.path,
 	}
 }
 
 // WithAirport tells the query-builder to eager-load the nodes that are connected to
 // the "airport" edge. The optional arguments are used to configure the query builder of the edge.
 func (fq *FrequencyQuery) WithAirport(opts ...func(*AirportQuery)) *FrequencyQuery {
-	query := &AirportQuery{config: fq.config}
+	query := (&AirportClient{config: fq.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -302,16 +310,11 @@ func (fq *FrequencyQuery) WithAirport(opts ...func(*AirportQuery)) *FrequencyQue
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
 func (fq *FrequencyQuery) GroupBy(field string, fields ...string) *FrequencyGroupBy {
-	grbuild := &FrequencyGroupBy{config: fq.config}
-	grbuild.fields = append([]string{field}, fields...)
-	grbuild.path = func(ctx context.Context) (prev *sql.Selector, err error) {
-		if err := fq.prepareQuery(ctx); err != nil {
-			return nil, err
-		}
-		return fq.sqlQuery(ctx), nil
-	}
+	fq.ctx.Fields = append([]string{field}, fields...)
+	grbuild := &FrequencyGroupBy{build: fq}
+	grbuild.flds = &fq.ctx.Fields
 	grbuild.label = frequency.Label
-	grbuild.flds, grbuild.scan = &grbuild.fields, grbuild.Scan
+	grbuild.scan = grbuild.Scan
 	return grbuild
 }
 
@@ -328,11 +331,11 @@ func (fq *FrequencyQuery) GroupBy(field string, fields ...string) *FrequencyGrou
 //		Select(frequency.FieldImportID).
 //		Scan(ctx, &v)
 func (fq *FrequencyQuery) Select(fields ...string) *FrequencySelect {
-	fq.fields = append(fq.fields, fields...)
-	selbuild := &FrequencySelect{FrequencyQuery: fq}
-	selbuild.label = frequency.Label
-	selbuild.flds, selbuild.scan = &fq.fields, selbuild.Scan
-	return selbuild
+	fq.ctx.Fields = append(fq.ctx.Fields, fields...)
+	sbuild := &FrequencySelect{FrequencyQuery: fq}
+	sbuild.label = frequency.Label
+	sbuild.flds, sbuild.scan = &fq.ctx.Fields, sbuild.Scan
+	return sbuild
 }
 
 // Aggregate returns a FrequencySelect configured with the given aggregations.
@@ -341,7 +344,17 @@ func (fq *FrequencyQuery) Aggregate(fns ...AggregateFunc) *FrequencySelect {
 }
 
 func (fq *FrequencyQuery) prepareQuery(ctx context.Context) error {
-	for _, f := range fq.fields {
+	for _, inter := range fq.inters {
+		if inter == nil {
+			return fmt.Errorf("ent: uninitialized interceptor (forgotten import ent/runtime?)")
+		}
+		if trv, ok := inter.(Traverser); ok {
+			if err := trv.Traverse(ctx, fq); err != nil {
+				return err
+			}
+		}
+	}
+	for _, f := range fq.ctx.Fields {
 		if !frequency.ValidColumn(f) {
 			return &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for query", f)}
 		}
@@ -419,6 +432,9 @@ func (fq *FrequencyQuery) loadAirport(ctx context.Context, query *AirportQuery, 
 		}
 		nodeids[fk] = append(nodeids[fk], nodes[i])
 	}
+	if len(ids) == 0 {
+		return nil
+	}
 	query.Where(airport.IDIn(ids...))
 	neighbors, err := query.All(ctx)
 	if err != nil {
@@ -441,41 +457,22 @@ func (fq *FrequencyQuery) sqlCount(ctx context.Context) (int, error) {
 	if len(fq.modifiers) > 0 {
 		_spec.Modifiers = fq.modifiers
 	}
-	_spec.Node.Columns = fq.fields
-	if len(fq.fields) > 0 {
-		_spec.Unique = fq.unique != nil && *fq.unique
+	_spec.Node.Columns = fq.ctx.Fields
+	if len(fq.ctx.Fields) > 0 {
+		_spec.Unique = fq.ctx.Unique != nil && *fq.ctx.Unique
 	}
 	return sqlgraph.CountNodes(ctx, fq.driver, _spec)
 }
 
-func (fq *FrequencyQuery) sqlExist(ctx context.Context) (bool, error) {
-	switch _, err := fq.FirstID(ctx); {
-	case IsNotFound(err):
-		return false, nil
-	case err != nil:
-		return false, fmt.Errorf("ent: check existence: %w", err)
-	default:
-		return true, nil
-	}
-}
-
 func (fq *FrequencyQuery) querySpec() *sqlgraph.QuerySpec {
-	_spec := &sqlgraph.QuerySpec{
-		Node: &sqlgraph.NodeSpec{
-			Table:   frequency.Table,
-			Columns: frequency.Columns,
-			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeUUID,
-				Column: frequency.FieldID,
-			},
-		},
-		From:   fq.sql,
-		Unique: true,
-	}
-	if unique := fq.unique; unique != nil {
+	_spec := sqlgraph.NewQuerySpec(frequency.Table, frequency.Columns, sqlgraph.NewFieldSpec(frequency.FieldID, field.TypeUUID))
+	_spec.From = fq.sql
+	if unique := fq.ctx.Unique; unique != nil {
 		_spec.Unique = *unique
+	} else if fq.path != nil {
+		_spec.Unique = true
 	}
-	if fields := fq.fields; len(fields) > 0 {
+	if fields := fq.ctx.Fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))
 		_spec.Node.Columns = append(_spec.Node.Columns, frequency.FieldID)
 		for i := range fields {
@@ -491,10 +488,10 @@ func (fq *FrequencyQuery) querySpec() *sqlgraph.QuerySpec {
 			}
 		}
 	}
-	if limit := fq.limit; limit != nil {
+	if limit := fq.ctx.Limit; limit != nil {
 		_spec.Limit = *limit
 	}
-	if offset := fq.offset; offset != nil {
+	if offset := fq.ctx.Offset; offset != nil {
 		_spec.Offset = *offset
 	}
 	if ps := fq.order; len(ps) > 0 {
@@ -510,7 +507,7 @@ func (fq *FrequencyQuery) querySpec() *sqlgraph.QuerySpec {
 func (fq *FrequencyQuery) sqlQuery(ctx context.Context) *sql.Selector {
 	builder := sql.Dialect(fq.driver.Dialect())
 	t1 := builder.Table(frequency.Table)
-	columns := fq.fields
+	columns := fq.ctx.Fields
 	if len(columns) == 0 {
 		columns = frequency.Columns
 	}
@@ -519,7 +516,7 @@ func (fq *FrequencyQuery) sqlQuery(ctx context.Context) *sql.Selector {
 		selector = fq.sql
 		selector.Select(selector.Columns(columns...)...)
 	}
-	if fq.unique != nil && *fq.unique {
+	if fq.ctx.Unique != nil && *fq.ctx.Unique {
 		selector.Distinct()
 	}
 	for _, m := range fq.modifiers {
@@ -531,12 +528,12 @@ func (fq *FrequencyQuery) sqlQuery(ctx context.Context) *sql.Selector {
 	for _, p := range fq.order {
 		p(selector)
 	}
-	if offset := fq.offset; offset != nil {
+	if offset := fq.ctx.Offset; offset != nil {
 		// limit is mandatory for offset clause. We start
 		// with default value, and override it below if needed.
 		selector.Offset(*offset).Limit(math.MaxInt32)
 	}
-	if limit := fq.limit; limit != nil {
+	if limit := fq.ctx.Limit; limit != nil {
 		selector.Limit(*limit)
 	}
 	return selector
@@ -550,13 +547,8 @@ func (fq *FrequencyQuery) Modify(modifiers ...func(s *sql.Selector)) *FrequencyS
 
 // FrequencyGroupBy is the group-by builder for Frequency entities.
 type FrequencyGroupBy struct {
-	config
 	selector
-	fields []string
-	fns    []AggregateFunc
-	// intermediate query (i.e. traversal path).
-	sql  *sql.Selector
-	path func(context.Context) (*sql.Selector, error)
+	build *FrequencyQuery
 }
 
 // Aggregate adds the given aggregation functions to the group-by query.
@@ -565,58 +557,46 @@ func (fgb *FrequencyGroupBy) Aggregate(fns ...AggregateFunc) *FrequencyGroupBy {
 	return fgb
 }
 
-// Scan applies the group-by query and scans the result into the given value.
+// Scan applies the selector query and scans the result into the given value.
 func (fgb *FrequencyGroupBy) Scan(ctx context.Context, v any) error {
-	query, err := fgb.path(ctx)
-	if err != nil {
+	ctx = setContextOp(ctx, fgb.build.ctx, "GroupBy")
+	if err := fgb.build.prepareQuery(ctx); err != nil {
 		return err
 	}
-	fgb.sql = query
-	return fgb.sqlScan(ctx, v)
+	return scanWithInterceptors[*FrequencyQuery, *FrequencyGroupBy](ctx, fgb.build, fgb, fgb.build.inters, v)
 }
 
-func (fgb *FrequencyGroupBy) sqlScan(ctx context.Context, v any) error {
-	for _, f := range fgb.fields {
-		if !frequency.ValidColumn(f) {
-			return &ValidationError{Name: f, err: fmt.Errorf("invalid field %q for group-by", f)}
-		}
+func (fgb *FrequencyGroupBy) sqlScan(ctx context.Context, root *FrequencyQuery, v any) error {
+	selector := root.sqlQuery(ctx).Select()
+	aggregation := make([]string, 0, len(fgb.fns))
+	for _, fn := range fgb.fns {
+		aggregation = append(aggregation, fn(selector))
 	}
-	selector := fgb.sqlQuery()
+	if len(selector.SelectedColumns()) == 0 {
+		columns := make([]string, 0, len(*fgb.flds)+len(fgb.fns))
+		for _, f := range *fgb.flds {
+			columns = append(columns, selector.C(f))
+		}
+		columns = append(columns, aggregation...)
+		selector.Select(columns...)
+	}
+	selector.GroupBy(selector.Columns(*fgb.flds...)...)
 	if err := selector.Err(); err != nil {
 		return err
 	}
 	rows := &sql.Rows{}
 	query, args := selector.Query()
-	if err := fgb.driver.Query(ctx, query, args, rows); err != nil {
+	if err := fgb.build.driver.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
 	defer rows.Close()
 	return sql.ScanSlice(rows, v)
 }
 
-func (fgb *FrequencyGroupBy) sqlQuery() *sql.Selector {
-	selector := fgb.sql.Select()
-	aggregation := make([]string, 0, len(fgb.fns))
-	for _, fn := range fgb.fns {
-		aggregation = append(aggregation, fn(selector))
-	}
-	if len(selector.SelectedColumns()) == 0 {
-		columns := make([]string, 0, len(fgb.fields)+len(fgb.fns))
-		for _, f := range fgb.fields {
-			columns = append(columns, selector.C(f))
-		}
-		columns = append(columns, aggregation...)
-		selector.Select(columns...)
-	}
-	return selector.GroupBy(selector.Columns(fgb.fields...)...)
-}
-
 // FrequencySelect is the builder for selecting fields of Frequency entities.
 type FrequencySelect struct {
 	*FrequencyQuery
 	selector
-	// intermediate query (i.e. traversal path).
-	sql *sql.Selector
 }
 
 // Aggregate adds the given aggregation functions to the selector query.
@@ -627,26 +607,27 @@ func (fs *FrequencySelect) Aggregate(fns ...AggregateFunc) *FrequencySelect {
 
 // Scan applies the selector query and scans the result into the given value.
 func (fs *FrequencySelect) Scan(ctx context.Context, v any) error {
+	ctx = setContextOp(ctx, fs.ctx, "Select")
 	if err := fs.prepareQuery(ctx); err != nil {
 		return err
 	}
-	fs.sql = fs.FrequencyQuery.sqlQuery(ctx)
-	return fs.sqlScan(ctx, v)
+	return scanWithInterceptors[*FrequencyQuery, *FrequencySelect](ctx, fs.FrequencyQuery, fs, fs.inters, v)
 }
 
-func (fs *FrequencySelect) sqlScan(ctx context.Context, v any) error {
+func (fs *FrequencySelect) sqlScan(ctx context.Context, root *FrequencyQuery, v any) error {
+	selector := root.sqlQuery(ctx)
 	aggregation := make([]string, 0, len(fs.fns))
 	for _, fn := range fs.fns {
-		aggregation = append(aggregation, fn(fs.sql))
+		aggregation = append(aggregation, fn(selector))
 	}
 	switch n := len(*fs.selector.flds); {
 	case n == 0 && len(aggregation) > 0:
-		fs.sql.Select(aggregation...)
+		selector.Select(aggregation...)
 	case n != 0 && len(aggregation) > 0:
-		fs.sql.AppendSelect(aggregation...)
+		selector.AppendSelect(aggregation...)
 	}
 	rows := &sql.Rows{}
-	query, args := fs.sql.Query()
+	query, args := selector.Query()
 	if err := fs.driver.Query(ctx, query, args, rows); err != nil {
 		return err
 	}

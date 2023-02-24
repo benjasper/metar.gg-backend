@@ -159,14 +159,14 @@ func (f *Frequency) assignValues(columns []string, values []any) error {
 
 // QueryAirport queries the "airport" edge of the Frequency entity.
 func (f *Frequency) QueryAirport() *AirportQuery {
-	return (&FrequencyClient{config: f.config}).QueryAirport(f)
+	return NewFrequencyClient(f.config).QueryAirport(f)
 }
 
 // Update returns a builder for updating this Frequency.
 // Note that you need to call Frequency.Unwrap() before calling this method if this Frequency
 // was returned from a transaction, and the transaction was committed or rolled back.
 func (f *Frequency) Update() *FrequencyUpdateOne {
-	return (&FrequencyClient{config: f.config}).UpdateOne(f)
+	return NewFrequencyClient(f.config).UpdateOne(f)
 }
 
 // Unwrap unwraps the Frequency entity that was returned from a transaction after it was closed,
@@ -211,9 +211,3 @@ func (f *Frequency) String() string {
 
 // Frequencies is a parsable slice of Frequency.
 type Frequencies []*Frequency
-
-func (f Frequencies) config(cfg config) {
-	for _i := range f {
-		f[_i].config = cfg
-	}
-}

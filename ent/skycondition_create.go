@@ -78,50 +78,8 @@ func (scc *SkyConditionCreate) Mutation() *SkyConditionMutation {
 
 // Save creates the SkyCondition in the database.
 func (scc *SkyConditionCreate) Save(ctx context.Context) (*SkyCondition, error) {
-	var (
-		err  error
-		node *SkyCondition
-	)
 	scc.defaults()
-	if len(scc.hooks) == 0 {
-		if err = scc.check(); err != nil {
-			return nil, err
-		}
-		node, err = scc.sqlSave(ctx)
-	} else {
-		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
-			mutation, ok := m.(*SkyConditionMutation)
-			if !ok {
-				return nil, fmt.Errorf("unexpected mutation type %T", m)
-			}
-			if err = scc.check(); err != nil {
-				return nil, err
-			}
-			scc.mutation = mutation
-			if node, err = scc.sqlSave(ctx); err != nil {
-				return nil, err
-			}
-			mutation.id = &node.ID
-			mutation.done = true
-			return node, err
-		})
-		for i := len(scc.hooks) - 1; i >= 0; i-- {
-			if scc.hooks[i] == nil {
-				return nil, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
-			}
-			mut = scc.hooks[i](mut)
-		}
-		v, err := mut.Mutate(ctx, scc.mutation)
-		if err != nil {
-			return nil, err
-		}
-		nv, ok := v.(*SkyCondition)
-		if !ok {
-			return nil, fmt.Errorf("unexpected node type %T returned from SkyConditionMutation", v)
-		}
-		node = nv
-	}
-	return node, err
+	return withHooks[*SkyCondition, SkyConditionMutation](ctx, scc.sqlSave, scc.mutation, scc.hooks)
 }
 
 // SaveX calls Save and panics if Save returns an error.
@@ -173,6 +131,9 @@ func (scc *SkyConditionCreate) check() error {
 }
 
 func (scc *SkyConditionCreate) sqlSave(ctx context.Context) (*SkyCondition, error) {
+	if err := scc.check(); err != nil {
+		return nil, err
+	}
 	_node, _spec := scc.createSpec()
 	if err := sqlgraph.CreateNode(ctx, scc.driver, _spec); err != nil {
 		if sqlgraph.IsConstraintError(err) {
@@ -187,19 +148,15 @@ func (scc *SkyConditionCreate) sqlSave(ctx context.Context) (*SkyCondition, erro
 			return nil, err
 		}
 	}
+	scc.mutation.id = &_node.ID
+	scc.mutation.done = true
 	return _node, nil
 }
 
 func (scc *SkyConditionCreate) createSpec() (*SkyCondition, *sqlgraph.CreateSpec) {
 	var (
 		_node = &SkyCondition{config: scc.config}
-		_spec = &sqlgraph.CreateSpec{
-			Table: skycondition.Table,
-			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeUUID,
-				Column: skycondition.FieldID,
-			},
-		}
+		_spec = sqlgraph.NewCreateSpec(skycondition.Table, sqlgraph.NewFieldSpec(skycondition.FieldID, field.TypeUUID))
 	)
 	_spec.OnConflict = scc.conflict
 	if id, ok := scc.mutation.ID(); ok {
