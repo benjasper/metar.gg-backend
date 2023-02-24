@@ -24,8 +24,12 @@ func (a *Airport) Country(ctx context.Context) (*Country, error) {
 	return result, MaskNotFound(err)
 }
 
-func (a *Airport) Frequencies(ctx context.Context) ([]*Frequency, error) {
-	result, err := a.NamedFrequencies(graphql.GetFieldContext(ctx).Field.Alias)
+func (a *Airport) Frequencies(ctx context.Context) (result []*Frequency, err error) {
+	if fc := graphql.GetFieldContext(ctx); fc != nil && fc.Field.Alias != "" {
+		result, err = a.NamedFrequencies(graphql.GetFieldContext(ctx).Field.Alias)
+	} else {
+		result, err = a.Edges.FrequenciesOrErr()
+	}
 	if IsNotLoaded(err) {
 		result, err = a.QueryFrequencies().All(ctx)
 	}
@@ -40,32 +44,48 @@ func (a *Airport) Station(ctx context.Context) (*WeatherStation, error) {
 	return result, MaskNotFound(err)
 }
 
-func (f *Forecast) SkyConditions(ctx context.Context) ([]*SkyCondition, error) {
-	result, err := f.NamedSkyConditions(graphql.GetFieldContext(ctx).Field.Alias)
+func (f *Forecast) SkyConditions(ctx context.Context) (result []*SkyCondition, err error) {
+	if fc := graphql.GetFieldContext(ctx); fc != nil && fc.Field.Alias != "" {
+		result, err = f.NamedSkyConditions(graphql.GetFieldContext(ctx).Field.Alias)
+	} else {
+		result, err = f.Edges.SkyConditionsOrErr()
+	}
 	if IsNotLoaded(err) {
 		result, err = f.QuerySkyConditions().All(ctx)
 	}
 	return result, err
 }
 
-func (f *Forecast) TurbulenceConditions(ctx context.Context) ([]*TurbulenceCondition, error) {
-	result, err := f.NamedTurbulenceConditions(graphql.GetFieldContext(ctx).Field.Alias)
+func (f *Forecast) TurbulenceConditions(ctx context.Context) (result []*TurbulenceCondition, err error) {
+	if fc := graphql.GetFieldContext(ctx); fc != nil && fc.Field.Alias != "" {
+		result, err = f.NamedTurbulenceConditions(graphql.GetFieldContext(ctx).Field.Alias)
+	} else {
+		result, err = f.Edges.TurbulenceConditionsOrErr()
+	}
 	if IsNotLoaded(err) {
 		result, err = f.QueryTurbulenceConditions().All(ctx)
 	}
 	return result, err
 }
 
-func (f *Forecast) IcingConditions(ctx context.Context) ([]*IcingCondition, error) {
-	result, err := f.NamedIcingConditions(graphql.GetFieldContext(ctx).Field.Alias)
+func (f *Forecast) IcingConditions(ctx context.Context) (result []*IcingCondition, err error) {
+	if fc := graphql.GetFieldContext(ctx); fc != nil && fc.Field.Alias != "" {
+		result, err = f.NamedIcingConditions(graphql.GetFieldContext(ctx).Field.Alias)
+	} else {
+		result, err = f.Edges.IcingConditionsOrErr()
+	}
 	if IsNotLoaded(err) {
 		result, err = f.QueryIcingConditions().All(ctx)
 	}
 	return result, err
 }
 
-func (f *Forecast) TemperatureData(ctx context.Context) ([]*TemperatureData, error) {
-	result, err := f.NamedTemperatureData(graphql.GetFieldContext(ctx).Field.Alias)
+func (f *Forecast) TemperatureData(ctx context.Context) (result []*TemperatureData, err error) {
+	if fc := graphql.GetFieldContext(ctx); fc != nil && fc.Field.Alias != "" {
+		result, err = f.NamedTemperatureData(graphql.GetFieldContext(ctx).Field.Alias)
+	} else {
+		result, err = f.Edges.TemperatureDataOrErr()
+	}
 	if IsNotLoaded(err) {
 		result, err = f.QueryTemperatureData().All(ctx)
 	}
@@ -88,8 +108,12 @@ func (m *Metar) Station(ctx context.Context) (*WeatherStation, error) {
 	return result, err
 }
 
-func (m *Metar) SkyConditions(ctx context.Context) ([]*SkyCondition, error) {
-	result, err := m.NamedSkyConditions(graphql.GetFieldContext(ctx).Field.Alias)
+func (m *Metar) SkyConditions(ctx context.Context) (result []*SkyCondition, err error) {
+	if fc := graphql.GetFieldContext(ctx); fc != nil && fc.Field.Alias != "" {
+		result, err = m.NamedSkyConditions(graphql.GetFieldContext(ctx).Field.Alias)
+	} else {
+		result, err = m.Edges.SkyConditionsOrErr()
+	}
 	if IsNotLoaded(err) {
 		result, err = m.QuerySkyConditions().All(ctx)
 	}
@@ -112,8 +136,12 @@ func (t *Taf) Station(ctx context.Context) (*WeatherStation, error) {
 	return result, err
 }
 
-func (t *Taf) Forecast(ctx context.Context) ([]*Forecast, error) {
-	result, err := t.NamedForecast(graphql.GetFieldContext(ctx).Field.Alias)
+func (t *Taf) Forecast(ctx context.Context) (result []*Forecast, err error) {
+	if fc := graphql.GetFieldContext(ctx); fc != nil && fc.Field.Alias != "" {
+		result, err = t.NamedForecast(graphql.GetFieldContext(ctx).Field.Alias)
+	} else {
+		result, err = t.Edges.ForecastOrErr()
+	}
 	if IsNotLoaded(err) {
 		result, err = t.QueryForecast().All(ctx)
 	}

@@ -175,7 +175,7 @@ func (l *Logger) uploadLog() {
 
 	//Ingest with backoff
 	err := backoff.Retry(func() error {
-		res, err := l.axiomClient.Datasets.IngestEvents(context.Background(), environment.Global.AxiomDataset, axiom.IngestOptions{}, l.eventStore...)
+		res, err := l.axiomClient.Datasets.IngestEvents(context.Background(), environment.Global.AxiomDataset, l.eventStore)
 		if err != nil {
 			l.Error(fmt.Sprintf("Error ingesting events: %s", err))
 		}

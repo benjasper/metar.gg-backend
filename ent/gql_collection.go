@@ -29,7 +29,7 @@ func (a *AirportQuery) collectField(ctx context.Context, op *graphql.OperationCo
 			var (
 				alias = field.Alias
 				path  = append(path, alias)
-				query = &RegionQuery{config: a.config}
+				query = (&RegionClient{config: a.config}).Query()
 			)
 			if err := query.collectField(ctx, op, field, path, satisfies...); err != nil {
 				return err
@@ -39,7 +39,7 @@ func (a *AirportQuery) collectField(ctx context.Context, op *graphql.OperationCo
 			var (
 				alias = field.Alias
 				path  = append(path, alias)
-				query = &CountryQuery{config: a.config}
+				query = (&CountryClient{config: a.config}).Query()
 			)
 			if err := query.collectField(ctx, op, field, path, satisfies...); err != nil {
 				return err
@@ -49,7 +49,7 @@ func (a *AirportQuery) collectField(ctx context.Context, op *graphql.OperationCo
 			var (
 				alias = field.Alias
 				path  = append(path, alias)
-				query = &FrequencyQuery{config: a.config}
+				query = (&FrequencyClient{config: a.config}).Query()
 			)
 			if err := query.collectField(ctx, op, field, path, satisfies...); err != nil {
 				return err
@@ -61,7 +61,7 @@ func (a *AirportQuery) collectField(ctx context.Context, op *graphql.OperationCo
 			var (
 				alias = field.Alias
 				path  = append(path, alias)
-				query = &WeatherStationQuery{config: a.config}
+				query = (&WeatherStationClient{config: a.config}).Query()
 			)
 			if err := query.collectField(ctx, op, field, path, satisfies...); err != nil {
 				return err
@@ -179,11 +179,11 @@ func (f *ForecastQuery) collectField(ctx context.Context, op *graphql.OperationC
 	path = append([]string(nil), path...)
 	for _, field := range graphql.CollectFields(op, field.Selections, satisfies) {
 		switch field.Name {
-		case "skyConditions", "sky_conditions":
+		case "skyConditions":
 			var (
 				alias = field.Alias
 				path  = append(path, alias)
-				query = &SkyConditionQuery{config: f.config}
+				query = (&SkyConditionClient{config: f.config}).Query()
 			)
 			if err := query.collectField(ctx, op, field, path, satisfies...); err != nil {
 				return err
@@ -191,11 +191,11 @@ func (f *ForecastQuery) collectField(ctx context.Context, op *graphql.OperationC
 			f.WithNamedSkyConditions(alias, func(wq *SkyConditionQuery) {
 				*wq = *query
 			})
-		case "turbulenceConditions", "turbulence_conditions":
+		case "turbulenceConditions":
 			var (
 				alias = field.Alias
 				path  = append(path, alias)
-				query = &TurbulenceConditionQuery{config: f.config}
+				query = (&TurbulenceConditionClient{config: f.config}).Query()
 			)
 			if err := query.collectField(ctx, op, field, path, satisfies...); err != nil {
 				return err
@@ -203,11 +203,11 @@ func (f *ForecastQuery) collectField(ctx context.Context, op *graphql.OperationC
 			f.WithNamedTurbulenceConditions(alias, func(wq *TurbulenceConditionQuery) {
 				*wq = *query
 			})
-		case "icingConditions", "icing_conditions":
+		case "icingConditions":
 			var (
 				alias = field.Alias
 				path  = append(path, alias)
-				query = &IcingConditionQuery{config: f.config}
+				query = (&IcingConditionClient{config: f.config}).Query()
 			)
 			if err := query.collectField(ctx, op, field, path, satisfies...); err != nil {
 				return err
@@ -215,11 +215,11 @@ func (f *ForecastQuery) collectField(ctx context.Context, op *graphql.OperationC
 			f.WithNamedIcingConditions(alias, func(wq *IcingConditionQuery) {
 				*wq = *query
 			})
-		case "temperatureData", "temperature_data":
+		case "temperatureData":
 			var (
 				alias = field.Alias
 				path  = append(path, alias)
-				query = &TemperatureDataQuery{config: f.config}
+				query = (&TemperatureDataClient{config: f.config}).Query()
 			)
 			if err := query.collectField(ctx, op, field, path, satisfies...); err != nil {
 				return err
@@ -278,7 +278,7 @@ func (f *FrequencyQuery) collectField(ctx context.Context, op *graphql.Operation
 			var (
 				alias = field.Alias
 				path  = append(path, alias)
-				query = &AirportQuery{config: f.config}
+				query = (&AirportClient{config: f.config}).Query()
 			)
 			if err := query.collectField(ctx, op, field, path, satisfies...); err != nil {
 				return err
@@ -378,17 +378,17 @@ func (m *MetarQuery) collectField(ctx context.Context, op *graphql.OperationCont
 			var (
 				alias = field.Alias
 				path  = append(path, alias)
-				query = &WeatherStationQuery{config: m.config}
+				query = (&WeatherStationClient{config: m.config}).Query()
 			)
 			if err := query.collectField(ctx, op, field, path, satisfies...); err != nil {
 				return err
 			}
 			m.withStation = query
-		case "skyConditions", "sky_conditions":
+		case "skyConditions":
 			var (
 				alias = field.Alias
 				path  = append(path, alias)
-				query = &SkyConditionQuery{config: m.config}
+				query = (&SkyConditionClient{config: m.config}).Query()
 			)
 			if err := query.collectField(ctx, op, field, path, satisfies...); err != nil {
 				return err
@@ -490,7 +490,7 @@ func (r *RunwayQuery) collectField(ctx context.Context, op *graphql.OperationCon
 			var (
 				alias = field.Alias
 				path  = append(path, alias)
-				query = &AirportQuery{config: r.config}
+				query = (&AirportClient{config: r.config}).Query()
 			)
 			if err := query.collectField(ctx, op, field, path, satisfies...); err != nil {
 				return err
@@ -590,7 +590,7 @@ func (t *TafQuery) collectField(ctx context.Context, op *graphql.OperationContex
 			var (
 				alias = field.Alias
 				path  = append(path, alias)
-				query = &WeatherStationQuery{config: t.config}
+				query = (&WeatherStationClient{config: t.config}).Query()
 			)
 			if err := query.collectField(ctx, op, field, path, satisfies...); err != nil {
 				return err
@@ -600,7 +600,7 @@ func (t *TafQuery) collectField(ctx context.Context, op *graphql.OperationContex
 			var (
 				alias = field.Alias
 				path  = append(path, alias)
-				query = &ForecastQuery{config: t.config}
+				query = (&ForecastClient{config: t.config}).Query()
 			)
 			if err := query.collectField(ctx, op, field, path, satisfies...); err != nil {
 				return err
@@ -767,7 +767,7 @@ func (ws *WeatherStationQuery) collectField(ctx context.Context, op *graphql.Ope
 			var (
 				alias = field.Alias
 				path  = append(path, alias)
-				query = &AirportQuery{config: ws.config}
+				query = (&AirportClient{config: ws.config}).Query()
 			)
 			if err := query.collectField(ctx, op, field, path, satisfies...); err != nil {
 				return err
