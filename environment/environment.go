@@ -21,6 +21,10 @@ type Environment struct {
 	SitemapBase           string `mapstructure:"SITEMAP_BASE"`
 	SitemapAirportsPath   string `mapstructure:"SITEMAP_AIRPORTS_PATH"`
 	SitemapAdditionalUrls string `mapstructure:"SITEMAP_ADDITIONAL_URLS"`
+
+	HeartbeatEndpointWeather  string `mapstructure:"HEARTBEAT_ENDPOINT_WEATHER"`
+	HeartbeatEndpointAirports string `mapstructure:"HEARTBEAT_ENDPOINT_AIRPORTS"`
+	HeartbeatAuthorization    string `mapstructure:"HEARTBEAT_AUTHORIZATION"`
 }
 
 var Global Environment

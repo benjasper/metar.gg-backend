@@ -123,6 +123,18 @@ func (s *Server) Run() error {
 		c.Status(http.StatusNoContent)
 	})
 
+	r.GET("/health", func(c *gin.Context) {
+		// Check database connection
+		_, err := s.db.Airport.Query().First(context.Background())
+		if err != nil {
+			s.logger.Error(fmt.Sprintf("Failed to query database: %s", err))
+			c.Status(http.StatusInternalServerError)
+			return
+		}
+
+		c.Status(http.StatusNoContent)
+	})
+
 	r.GET("/sitemap.xml", s.respondWithSitemap)
 
 	s.logger.Info("Starting server on port " + port)
@@ -138,26 +150,50 @@ func (s *Server) RunAirportImport(ctx context.Context) {
 	err := imp.ImportCountries(ctx, "https://raw.githubusercontent.com/davidmegginson/ourairports-data/main/countries.csv")
 	if err != nil {
 		s.logger.Error(fmt.Sprintf("[IMPORT] Failed to import countries: %s", err))
+		return
 	}
 
 	err = imp.ImportRegions(ctx, "https://raw.githubusercontent.com/davidmegginson/ourairports-data/main/regions.csv")
 	if err != nil {
 		s.logger.Error(fmt.Sprintf("[IMPORT] Failed to import regions: %s", err))
+		return
 	}
 
 	err = imp.ImportAirports(ctx, "https://raw.githubusercontent.com/davidmegginson/ourairports-data/main/airports.csv")
 	if err != nil {
 		s.logger.Error(fmt.Sprintf("[IMPORT] Failed to import airports: %s", err))
+		return
 	}
 
 	err = imp.ImportRunways(ctx, "https://raw.githubusercontent.com/davidmegginson/ourairports-data/main/runways.csv")
 	if err != nil {
 		s.logger.Error(fmt.Sprintf("[IMPORT] Failed to import runways: %s", err))
+		return
 	}
 
 	err = imp.ImportFrequencies(ctx, "https://raw.githubusercontent.com/davidmegginson/ourairports-data/main/airport-frequencies.csv")
 	if err != nil {
 		s.logger.Error(fmt.Sprintf("[IMPORT] Failed to import frequencies: %s", err))
+		return
+	}
+
+	// Send heartbeat when configured
+	if environment.Global.HeartbeatEndpointAirports != "" {
+		req, err := http.NewRequest(http.MethodGet, environment.Global.HeartbeatEndpointAirports, nil)
+		if err != nil {
+			s.logger.Error(fmt.Sprintf("[HEARTBEAT] Failed to send heartbeat: %s", err))
+			return
+		}
+
+		if environment.Global.HeartbeatAuthorization != "" {
+			req.Header.Set("Authorization", environment.Global.HeartbeatAuthorization)
+		}
+
+		_, err = http.DefaultClient.Do(req)
+		if err != nil {
+			s.logger.Error(fmt.Sprintf("[HEARTBEAT] Failed to send heartbeat: %s", err))
+			return
+		}
 	}
 }
 
@@ -192,6 +228,26 @@ func (s *Server) RunWeatherImport(ctx context.Context) {
 	}, b)
 	if err != nil {
 		s.logger.Error(fmt.Sprintf("[IMPORT] Failed to import TAFs: %s", err))
+		return
+	}
+
+	// Send heartbeat when configured
+	if environment.Global.HeartbeatEndpointWeather != "" {
+		req, err := http.NewRequest(http.MethodGet, environment.Global.HeartbeatEndpointWeather, nil)
+		if err != nil {
+			s.logger.Error(fmt.Sprintf("[HEARTBEAT] Failed to send heartbeat: %s", err))
+			return
+		}
+
+		if environment.Global.HeartbeatAuthorization != "" {
+			req.Header.Set("Authorization", environment.Global.HeartbeatAuthorization)
+		}
+
+		_, err = http.DefaultClient.Do(req)
+		if err != nil {
+			s.logger.Error(fmt.Sprintf("[HEARTBEAT] Failed to send heartbeat: %s", err))
+			return
+		}
 	}
 }
 
