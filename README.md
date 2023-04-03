@@ -55,6 +55,7 @@ Those can be triggered via HTTP POST requests to:
 - POST `/import/weather`: Imports weather data
 - POST `/clean`: Gets rid of old weather data see [`.env.example`](.env.example) for the `WEATHER_DATA_RETENTION_DAYS` variable
 - POST `/sitemap`: Generate sitemap asynchronously
+- GET `/health`: Health check endpoint
 
 ❗️Send the requests including the secret (from the `ADMIN_SECRET` env variable) in the `Authorization` header.
 
