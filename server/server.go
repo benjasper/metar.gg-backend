@@ -90,7 +90,7 @@ func (s *Server) Run() error {
 		}
 
 		go func() {
-			ctx, cancel := context.WithTimeout(context.Background(), 10*time.Minute)
+			ctx, cancel := context.WithTimeout(context.Background(), 30*time.Minute)
 			defer cancel()
 
 			s.RunAirportImport(ctx)
