@@ -137,7 +137,7 @@ func (l *Logger) messageToAxiomEvent(message *Message) {
 
 	// Marshal to JSON string
 	event := axiom.Event{
-		"type":    message.Level,
+		"level":   message.Level,
 		"message": message.Message,
 		"time":    message.Time,
 	}
