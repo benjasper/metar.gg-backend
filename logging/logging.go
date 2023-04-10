@@ -19,14 +19,14 @@ type Logger struct {
 }
 
 type Message struct {
-	Type    string                 `json:"type"`
+	Level   string                 `json:"level"`
 	Message string                 `json:"message"`
 	Time    time.Time              `json:"time"`
 	Data    map[string]interface{} `json:"data"`
 }
 
 func (m *Message) String() string {
-	return fmt.Sprintf("%s [%s] %s\n", m.Time.Format("2006-01-02 15:04:05"), m.Type, m.Message)
+	return fmt.Sprintf("%s [%s] %s\n", m.Time.Format("2006-01-02 15:04:05"), m.Level, m.Message)
 }
 
 func NewLogger() *Logger {
@@ -54,7 +54,7 @@ func NewLogger() *Logger {
 
 func (l *Logger) Debug(input string) {
 	m := Message{
-		Type:    "DEBUG",
+		Level:   "DEBUG",
 		Message: input,
 		Time:    time.Now(),
 	}
@@ -67,7 +67,7 @@ func (l *Logger) Debug(input string) {
 
 func (l *Logger) Info(input string) {
 	m := Message{
-		Type:    "INFO",
+		Level:   "INFO",
 		Message: input,
 		Time:    time.Now(),
 	}
@@ -80,7 +80,7 @@ func (l *Logger) Info(input string) {
 
 func (l *Logger) Warn(input string) {
 	m := Message{
-		Type:    "WARN",
+		Level:   "WARN",
 		Message: input,
 		Time:    time.Now(),
 	}
@@ -93,7 +93,7 @@ func (l *Logger) Warn(input string) {
 
 func (l *Logger) Error(input string) {
 	m := Message{
-		Type:    "ERROR",
+		Level:   "ERROR",
 		Message: input,
 		Time:    time.Now(),
 	}
@@ -106,7 +106,7 @@ func (l *Logger) Error(input string) {
 
 func (l *Logger) Fatal(input error) {
 	m := Message{
-		Type:    "FATAL",
+		Level:   "FATAL",
 		Message: input.Error(),
 		Time:    time.Now(),
 	}
@@ -119,7 +119,7 @@ func (l *Logger) Fatal(input error) {
 
 func (l *Logger) CustomEvent(eventType string, message string, data map[string]interface{}) {
 	m := Message{
-		Type:    strings.ToUpper(eventType),
+		Level:   strings.ToUpper(eventType),
 		Message: message,
 		Time:    time.Now(),
 		Data:    data,
@@ -137,7 +137,7 @@ func (l *Logger) messageToAxiomEvent(message *Message) {
 
 	// Marshal to JSON string
 	event := axiom.Event{
-		"type":    message.Type,
+		"type":    message.Level,
 		"message": message.Message,
 		"time":    message.Time,
 	}
