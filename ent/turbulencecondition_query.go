@@ -19,7 +19,7 @@ import (
 type TurbulenceConditionQuery struct {
 	config
 	ctx        *QueryContext
-	order      []OrderFunc
+	order      []turbulencecondition.OrderOption
 	inters     []Interceptor
 	predicates []predicate.TurbulenceCondition
 	withFKs    bool
@@ -56,7 +56,7 @@ func (tcq *TurbulenceConditionQuery) Unique(unique bool) *TurbulenceConditionQue
 }
 
 // Order specifies how the records should be ordered.
-func (tcq *TurbulenceConditionQuery) Order(o ...OrderFunc) *TurbulenceConditionQuery {
+func (tcq *TurbulenceConditionQuery) Order(o ...turbulencecondition.OrderOption) *TurbulenceConditionQuery {
 	tcq.order = append(tcq.order, o...)
 	return tcq
 }
@@ -250,7 +250,7 @@ func (tcq *TurbulenceConditionQuery) Clone() *TurbulenceConditionQuery {
 	return &TurbulenceConditionQuery{
 		config:     tcq.config,
 		ctx:        tcq.ctx.Clone(),
-		order:      append([]OrderFunc{}, tcq.order...),
+		order:      append([]turbulencecondition.OrderOption{}, tcq.order...),
 		inters:     append([]Interceptor{}, tcq.inters...),
 		predicates: append([]predicate.TurbulenceCondition{}, tcq.predicates...),
 		// clone intermediate query.

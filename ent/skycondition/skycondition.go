@@ -7,6 +7,7 @@ import (
 	"io"
 	"strconv"
 
+	"entgo.io/ent/dialect/sql"
 	"github.com/google/uuid"
 )
 
@@ -113,6 +114,29 @@ func CloudTypeValidator(ct CloudType) error {
 	default:
 		return fmt.Errorf("skycondition: invalid enum value for cloud_type field: %q", ct)
 	}
+}
+
+// OrderOption defines the ordering options for the SkyCondition queries.
+type OrderOption func(*sql.Selector)
+
+// ByID orders the results by the id field.
+func ByID(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldID, opts...).ToFunc()
+}
+
+// BySkyCover orders the results by the sky_cover field.
+func BySkyCover(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldSkyCover, opts...).ToFunc()
+}
+
+// ByCloudBase orders the results by the cloud_base field.
+func ByCloudBase(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldCloudBase, opts...).ToFunc()
+}
+
+// ByCloudType orders the results by the cloud_type field.
+func ByCloudType(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldCloudType, opts...).ToFunc()
 }
 
 // MarshalGQL implements graphql.Marshaler interface.

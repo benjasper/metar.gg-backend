@@ -505,11 +505,7 @@ func HasStation() predicate.Taf {
 // HasStationWith applies the HasEdge predicate on the "station" edge with a given conditions (other predicates).
 func HasStationWith(preds ...predicate.WeatherStation) predicate.Taf {
 	return predicate.Taf(func(s *sql.Selector) {
-		step := sqlgraph.NewStep(
-			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(StationInverseTable, FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, StationTable, StationColumn),
-		)
+		step := newStationStep()
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
 				p(s)
@@ -532,11 +528,7 @@ func HasForecast() predicate.Taf {
 // HasForecastWith applies the HasEdge predicate on the "forecast" edge with a given conditions (other predicates).
 func HasForecastWith(preds ...predicate.Forecast) predicate.Taf {
 	return predicate.Taf(func(s *sql.Selector) {
-		step := sqlgraph.NewStep(
-			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(ForecastInverseTable, FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, ForecastTable, ForecastColumn),
-		)
+		step := newForecastStep()
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
 				p(s)

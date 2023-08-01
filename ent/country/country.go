@@ -8,6 +8,8 @@ import (
 	"strconv"
 	"time"
 
+	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/dialect/sql/sqlgraph"
 	"github.com/google/uuid"
 )
 
@@ -106,6 +108,75 @@ func ContinentValidator(c Continent) error {
 	default:
 		return fmt.Errorf("country: invalid enum value for continent field: %q", c)
 	}
+}
+
+// OrderOption defines the ordering options for the Country queries.
+type OrderOption func(*sql.Selector)
+
+// ByID orders the results by the id field.
+func ByID(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldID, opts...).ToFunc()
+}
+
+// ByImportID orders the results by the import_id field.
+func ByImportID(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldImportID, opts...).ToFunc()
+}
+
+// ByHash orders the results by the hash field.
+func ByHash(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldHash, opts...).ToFunc()
+}
+
+// ByImportFlag orders the results by the import_flag field.
+func ByImportFlag(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldImportFlag, opts...).ToFunc()
+}
+
+// ByLastUpdated orders the results by the last_updated field.
+func ByLastUpdated(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldLastUpdated, opts...).ToFunc()
+}
+
+// ByCode orders the results by the code field.
+func ByCode(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldCode, opts...).ToFunc()
+}
+
+// ByName orders the results by the name field.
+func ByName(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldName, opts...).ToFunc()
+}
+
+// ByContinent orders the results by the continent field.
+func ByContinent(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldContinent, opts...).ToFunc()
+}
+
+// ByWikipediaLink orders the results by the wikipedia_link field.
+func ByWikipediaLink(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldWikipediaLink, opts...).ToFunc()
+}
+
+// ByAirportsCount orders the results by airports count.
+func ByAirportsCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newAirportsStep(), opts...)
+	}
+}
+
+// ByAirports orders the results by airports terms.
+func ByAirports(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newAirportsStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
+func newAirportsStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(AirportsInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, AirportsTable, AirportsColumn),
+	)
 }
 
 // MarshalGQL implements graphql.Marshaler interface.

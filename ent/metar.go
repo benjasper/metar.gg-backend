@@ -7,6 +7,7 @@ import (
 	"strings"
 	"time"
 
+	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"github.com/google/uuid"
 	"metar.gg/ent/metar"
@@ -91,6 +92,7 @@ type Metar struct {
 	// The values are being populated by the MetarQuery when eager-loading is set.
 	Edges                  MetarEdges `json:"edges"`
 	weather_station_metars *uuid.UUID
+	selectValues           sql.SelectValues
 }
 
 // MetarEdges holds the relations/edges for other nodes in the graph.
@@ -150,7 +152,7 @@ func (*Metar) scanValues(columns []string) ([]any, error) {
 		case metar.ForeignKeys[0]: // weather_station_metars
 			values[i] = &sql.NullScanner{S: new(uuid.UUID)}
 		default:
-			return nil, fmt.Errorf("unexpected column %q for type Metar", columns[i])
+			values[i] = new(sql.UnknownType)
 		}
 	}
 	return values, nil
@@ -404,9 +406,17 @@ func (m *Metar) assignValues(columns []string, values []any) error {
 				m.weather_station_metars = new(uuid.UUID)
 				*m.weather_station_metars = *value.S.(*uuid.UUID)
 			}
+		default:
+			m.selectValues.Set(columns[i], values[i])
 		}
 	}
 	return nil
+}
+
+// Value returns the ent.Value that was dynamically selected and assigned to the Metar.
+// This includes values selected through modifiers, order, etc.
+func (m *Metar) Value(name string) (ent.Value, error) {
+	return m.selectValues.Get(name)
 }
 
 // QueryStation queries the "station" edge of the Metar entity.

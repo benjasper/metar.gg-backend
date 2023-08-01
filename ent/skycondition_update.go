@@ -88,7 +88,7 @@ func (scu *SkyConditionUpdate) Mutation() *SkyConditionMutation {
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (scu *SkyConditionUpdate) Save(ctx context.Context) (int, error) {
-	return withHooks[int, SkyConditionMutation](ctx, scu.sqlSave, scu.mutation, scu.hooks)
+	return withHooks(ctx, scu.sqlSave, scu.mutation, scu.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -259,7 +259,7 @@ func (scuo *SkyConditionUpdateOne) Select(field string, fields ...string) *SkyCo
 
 // Save executes the query and returns the updated SkyCondition entity.
 func (scuo *SkyConditionUpdateOne) Save(ctx context.Context) (*SkyCondition, error) {
-	return withHooks[*SkyCondition, SkyConditionMutation](ctx, scuo.sqlSave, scuo.mutation, scuo.hooks)
+	return withHooks(ctx, scuo.sqlSave, scuo.mutation, scuo.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.

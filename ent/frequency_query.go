@@ -20,7 +20,7 @@ import (
 type FrequencyQuery struct {
 	config
 	ctx         *QueryContext
-	order       []OrderFunc
+	order       []frequency.OrderOption
 	inters      []Interceptor
 	predicates  []predicate.Frequency
 	withAirport *AirportQuery
@@ -58,7 +58,7 @@ func (fq *FrequencyQuery) Unique(unique bool) *FrequencyQuery {
 }
 
 // Order specifies how the records should be ordered.
-func (fq *FrequencyQuery) Order(o ...OrderFunc) *FrequencyQuery {
+func (fq *FrequencyQuery) Order(o ...frequency.OrderOption) *FrequencyQuery {
 	fq.order = append(fq.order, o...)
 	return fq
 }
@@ -274,7 +274,7 @@ func (fq *FrequencyQuery) Clone() *FrequencyQuery {
 	return &FrequencyQuery{
 		config:      fq.config,
 		ctx:         fq.ctx.Clone(),
-		order:       append([]OrderFunc{}, fq.order...),
+		order:       append([]frequency.OrderOption{}, fq.order...),
 		inters:      append([]Interceptor{}, fq.inters...),
 		predicates:  append([]predicate.Frequency{}, fq.predicates...),
 		withAirport: fq.withAirport.Clone(),

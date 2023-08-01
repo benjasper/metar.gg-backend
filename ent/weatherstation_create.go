@@ -151,7 +151,7 @@ func (wsc *WeatherStationCreate) Mutation() *WeatherStationMutation {
 // Save creates the WeatherStation in the database.
 func (wsc *WeatherStationCreate) Save(ctx context.Context) (*WeatherStation, error) {
 	wsc.defaults()
-	return withHooks[*WeatherStation, WeatherStationMutation](ctx, wsc.sqlSave, wsc.mutation, wsc.hooks)
+	return withHooks(ctx, wsc.sqlSave, wsc.mutation, wsc.hooks)
 }
 
 // SaveX calls Save and panics if Save returns an error.
@@ -256,10 +256,7 @@ func (wsc *WeatherStationCreate) createSpec() (*WeatherStation, *sqlgraph.Create
 			Columns: []string{weatherstation.AirportColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: airport.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(airport.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -276,10 +273,7 @@ func (wsc *WeatherStationCreate) createSpec() (*WeatherStation, *sqlgraph.Create
 			Columns: []string{weatherstation.MetarsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: metar.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(metar.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -295,10 +289,7 @@ func (wsc *WeatherStationCreate) createSpec() (*WeatherStation, *sqlgraph.Create
 			Columns: []string{weatherstation.TafsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: taf.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(taf.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -654,8 +645,8 @@ func (wscb *WeatherStationCreateBulk) Save(ctx context.Context) ([]*WeatherStati
 					return nil, err
 				}
 				builder.mutation = mutation
-				nodes[i], specs[i] = builder.createSpec()
 				var err error
+				nodes[i], specs[i] = builder.createSpec()
 				if i < len(mutators)-1 {
 					_, err = mutators[i+1].Mutate(root, wscb.builders[i+1].mutation)
 				} else {

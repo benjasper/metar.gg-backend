@@ -7,6 +7,7 @@ import (
 	"strings"
 	"time"
 
+	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"github.com/google/uuid"
 	"metar.gg/ent/temperaturedata"
@@ -27,6 +28,7 @@ type TemperatureData struct {
 	// The maximum temperature in degrees Celsius.
 	MaxTemperature            *float64 `json:"max_temperature,omitempty"`
 	forecast_temperature_data *uuid.UUID
+	selectValues              sql.SelectValues
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -43,7 +45,7 @@ func (*TemperatureData) scanValues(columns []string) ([]any, error) {
 		case temperaturedata.ForeignKeys[0]: // forecast_temperature_data
 			values[i] = &sql.NullScanner{S: new(uuid.UUID)}
 		default:
-			return nil, fmt.Errorf("unexpected column %q for type TemperatureData", columns[i])
+			values[i] = new(sql.UnknownType)
 		}
 	}
 	return values, nil
@@ -96,9 +98,17 @@ func (td *TemperatureData) assignValues(columns []string, values []any) error {
 				td.forecast_temperature_data = new(uuid.UUID)
 				*td.forecast_temperature_data = *value.S.(*uuid.UUID)
 			}
+		default:
+			td.selectValues.Set(columns[i], values[i])
 		}
 	}
 	return nil
+}
+
+// Value returns the ent.Value that was dynamically selected and assigned to the TemperatureData.
+// This includes values selected through modifiers, order, etc.
+func (td *TemperatureData) Value(name string) (ent.Value, error) {
+	return td.selectValues.Get(name)
 }
 
 // Update returns a builder for updating this TemperatureData.

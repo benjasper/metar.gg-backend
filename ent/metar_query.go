@@ -22,7 +22,7 @@ import (
 type MetarQuery struct {
 	config
 	ctx                    *QueryContext
-	order                  []OrderFunc
+	order                  []metar.OrderOption
 	inters                 []Interceptor
 	predicates             []predicate.Metar
 	withStation            *WeatherStationQuery
@@ -62,7 +62,7 @@ func (mq *MetarQuery) Unique(unique bool) *MetarQuery {
 }
 
 // Order specifies how the records should be ordered.
-func (mq *MetarQuery) Order(o ...OrderFunc) *MetarQuery {
+func (mq *MetarQuery) Order(o ...metar.OrderOption) *MetarQuery {
 	mq.order = append(mq.order, o...)
 	return mq
 }
@@ -300,7 +300,7 @@ func (mq *MetarQuery) Clone() *MetarQuery {
 	return &MetarQuery{
 		config:            mq.config,
 		ctx:               mq.ctx.Clone(),
-		order:             append([]OrderFunc{}, mq.order...),
+		order:             append([]metar.OrderOption{}, mq.order...),
 		inters:            append([]Interceptor{}, mq.inters...),
 		predicates:        append([]predicate.Metar{}, mq.predicates...),
 		withStation:       mq.withStation.Clone(),
@@ -516,7 +516,7 @@ func (mq *MetarQuery) loadSkyConditions(ctx context.Context, query *SkyCondition
 	}
 	query.withFKs = true
 	query.Where(predicate.SkyCondition(func(s *sql.Selector) {
-		s.Where(sql.InValues(metar.SkyConditionsColumn, fks...))
+		s.Where(sql.InValues(s.C(metar.SkyConditionsColumn), fks...))
 	}))
 	neighbors, err := query.All(ctx)
 	if err != nil {
@@ -529,7 +529,7 @@ func (mq *MetarQuery) loadSkyConditions(ctx context.Context, query *SkyCondition
 		}
 		node, ok := nodeids[*fk]
 		if !ok {
-			return fmt.Errorf(`unexpected foreign-key "metar_sky_conditions" returned %v for node %v`, *fk, n.ID)
+			return fmt.Errorf(`unexpected referenced foreign-key "metar_sky_conditions" returned %v for node %v`, *fk, n.ID)
 		}
 		assign(node, n)
 	}

@@ -507,7 +507,7 @@ func (au *AirportUpdate) ClearStation() *AirportUpdate {
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (au *AirportUpdate) Save(ctx context.Context) (int, error) {
-	return withHooks[int, AirportMutation](ctx, au.sqlSave, au.mutation, au.hooks)
+	return withHooks(ctx, au.sqlSave, au.mutation, au.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -683,10 +683,7 @@ func (au *AirportUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: []string{airport.RegionColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: region.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(region.FieldID, field.TypeUUID),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -699,10 +696,7 @@ func (au *AirportUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: []string{airport.RegionColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: region.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(region.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -718,10 +712,7 @@ func (au *AirportUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: []string{airport.CountryColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: country.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(country.FieldID, field.TypeUUID),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -734,10 +725,7 @@ func (au *AirportUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: []string{airport.CountryColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: country.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(country.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -753,10 +741,7 @@ func (au *AirportUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: []string{airport.RunwaysColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: runway.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(runway.FieldID, field.TypeUUID),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -769,10 +754,7 @@ func (au *AirportUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: []string{airport.RunwaysColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: runway.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(runway.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -788,10 +770,7 @@ func (au *AirportUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: []string{airport.RunwaysColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: runway.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(runway.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -807,10 +786,7 @@ func (au *AirportUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: []string{airport.FrequenciesColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: frequency.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(frequency.FieldID, field.TypeUUID),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -823,10 +799,7 @@ func (au *AirportUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: []string{airport.FrequenciesColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: frequency.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(frequency.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -842,10 +815,7 @@ func (au *AirportUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: []string{airport.FrequenciesColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: frequency.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(frequency.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -861,10 +831,7 @@ func (au *AirportUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: []string{airport.StationColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: weatherstation.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(weatherstation.FieldID, field.TypeUUID),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -877,10 +844,7 @@ func (au *AirportUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: []string{airport.StationColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: weatherstation.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(weatherstation.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -1394,7 +1358,7 @@ func (auo *AirportUpdateOne) Select(field string, fields ...string) *AirportUpda
 
 // Save executes the query and returns the updated Airport entity.
 func (auo *AirportUpdateOne) Save(ctx context.Context) (*Airport, error) {
-	return withHooks[*Airport, AirportMutation](ctx, auo.sqlSave, auo.mutation, auo.hooks)
+	return withHooks(ctx, auo.sqlSave, auo.mutation, auo.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -1587,10 +1551,7 @@ func (auo *AirportUpdateOne) sqlSave(ctx context.Context) (_node *Airport, err e
 			Columns: []string{airport.RegionColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: region.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(region.FieldID, field.TypeUUID),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -1603,10 +1564,7 @@ func (auo *AirportUpdateOne) sqlSave(ctx context.Context) (_node *Airport, err e
 			Columns: []string{airport.RegionColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: region.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(region.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -1622,10 +1580,7 @@ func (auo *AirportUpdateOne) sqlSave(ctx context.Context) (_node *Airport, err e
 			Columns: []string{airport.CountryColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: country.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(country.FieldID, field.TypeUUID),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -1638,10 +1593,7 @@ func (auo *AirportUpdateOne) sqlSave(ctx context.Context) (_node *Airport, err e
 			Columns: []string{airport.CountryColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: country.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(country.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -1657,10 +1609,7 @@ func (auo *AirportUpdateOne) sqlSave(ctx context.Context) (_node *Airport, err e
 			Columns: []string{airport.RunwaysColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: runway.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(runway.FieldID, field.TypeUUID),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -1673,10 +1622,7 @@ func (auo *AirportUpdateOne) sqlSave(ctx context.Context) (_node *Airport, err e
 			Columns: []string{airport.RunwaysColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: runway.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(runway.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -1692,10 +1638,7 @@ func (auo *AirportUpdateOne) sqlSave(ctx context.Context) (_node *Airport, err e
 			Columns: []string{airport.RunwaysColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: runway.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(runway.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -1711,10 +1654,7 @@ func (auo *AirportUpdateOne) sqlSave(ctx context.Context) (_node *Airport, err e
 			Columns: []string{airport.FrequenciesColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: frequency.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(frequency.FieldID, field.TypeUUID),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -1727,10 +1667,7 @@ func (auo *AirportUpdateOne) sqlSave(ctx context.Context) (_node *Airport, err e
 			Columns: []string{airport.FrequenciesColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: frequency.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(frequency.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -1746,10 +1683,7 @@ func (auo *AirportUpdateOne) sqlSave(ctx context.Context) (_node *Airport, err e
 			Columns: []string{airport.FrequenciesColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: frequency.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(frequency.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -1765,10 +1699,7 @@ func (auo *AirportUpdateOne) sqlSave(ctx context.Context) (_node *Airport, err e
 			Columns: []string{airport.StationColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: weatherstation.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(weatherstation.FieldID, field.TypeUUID),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -1781,10 +1712,7 @@ func (auo *AirportUpdateOne) sqlSave(ctx context.Context) (_node *Airport, err e
 			Columns: []string{airport.StationColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: weatherstation.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(weatherstation.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {

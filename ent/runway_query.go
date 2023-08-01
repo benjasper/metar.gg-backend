@@ -20,7 +20,7 @@ import (
 type RunwayQuery struct {
 	config
 	ctx         *QueryContext
-	order       []OrderFunc
+	order       []runway.OrderOption
 	inters      []Interceptor
 	predicates  []predicate.Runway
 	withAirport *AirportQuery
@@ -58,7 +58,7 @@ func (rq *RunwayQuery) Unique(unique bool) *RunwayQuery {
 }
 
 // Order specifies how the records should be ordered.
-func (rq *RunwayQuery) Order(o ...OrderFunc) *RunwayQuery {
+func (rq *RunwayQuery) Order(o ...runway.OrderOption) *RunwayQuery {
 	rq.order = append(rq.order, o...)
 	return rq
 }
@@ -274,7 +274,7 @@ func (rq *RunwayQuery) Clone() *RunwayQuery {
 	return &RunwayQuery{
 		config:      rq.config,
 		ctx:         rq.ctx.Clone(),
-		order:       append([]OrderFunc{}, rq.order...),
+		order:       append([]runway.OrderOption{}, rq.order...),
 		inters:      append([]Interceptor{}, rq.inters...),
 		predicates:  append([]predicate.Runway{}, rq.predicates...),
 		withAirport: rq.withAirport.Clone(),

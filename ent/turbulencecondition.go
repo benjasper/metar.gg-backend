@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"strings"
 
+	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"github.com/google/uuid"
 	"metar.gg/ent/turbulencecondition"
@@ -24,6 +25,7 @@ type TurbulenceCondition struct {
 	// The maximum altitude in feet that the turbulence is present.
 	MaxAltitude                    int `json:"max_altitude,omitempty"`
 	forecast_turbulence_conditions *uuid.UUID
+	selectValues                   sql.SelectValues
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -40,7 +42,7 @@ func (*TurbulenceCondition) scanValues(columns []string) ([]any, error) {
 		case turbulencecondition.ForeignKeys[0]: // forecast_turbulence_conditions
 			values[i] = &sql.NullScanner{S: new(uuid.UUID)}
 		default:
-			return nil, fmt.Errorf("unexpected column %q for type TurbulenceCondition", columns[i])
+			values[i] = new(sql.UnknownType)
 		}
 	}
 	return values, nil
@@ -85,9 +87,17 @@ func (tc *TurbulenceCondition) assignValues(columns []string, values []any) erro
 				tc.forecast_turbulence_conditions = new(uuid.UUID)
 				*tc.forecast_turbulence_conditions = *value.S.(*uuid.UUID)
 			}
+		default:
+			tc.selectValues.Set(columns[i], values[i])
 		}
 	}
 	return nil
+}
+
+// Value returns the ent.Value that was dynamically selected and assigned to the TurbulenceCondition.
+// This includes values selected through modifiers, order, etc.
+func (tc *TurbulenceCondition) Value(name string) (ent.Value, error) {
+	return tc.selectValues.Get(name)
 }
 
 // Update returns a builder for updating this TurbulenceCondition.

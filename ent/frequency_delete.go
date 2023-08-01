@@ -27,7 +27,7 @@ func (fd *FrequencyDelete) Where(ps ...predicate.Frequency) *FrequencyDelete {
 
 // Exec executes the deletion query and returns how many vertices were deleted.
 func (fd *FrequencyDelete) Exec(ctx context.Context) (int, error) {
-	return withHooks[int, FrequencyMutation](ctx, fd.sqlExec, fd.mutation, fd.hooks)
+	return withHooks(ctx, fd.sqlExec, fd.mutation, fd.hooks)
 }
 
 // ExecX is like Exec, but panics if an error occurs.

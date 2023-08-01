@@ -19,7 +19,7 @@ type Metar struct {
 func (Metar) Fields() []ent.Field {
 	return []ent.Field{
 		field.Text("raw_text").Comment("The raw METAR text."),
-		field.Time("observation_time").Comment("The time the METAR was observed."),
+		field.Time("observation_time").Comment("The time the METAR was observed.").Annotations(entgql.OrderField("OBSERVATION_TIME")),
 		field.Time("import_time").Comment("The time the METAR was imported.").Default(time.Now),
 		field.Time("next_import_time_prediction").Optional().Nillable().Comment("The time the METAR is expected to be imported/available next."),
 		field.Float("temperature").Optional().Nillable().Comment("The temperature in Celsius.").Annotations(entgql.Skip(entgql.SkipType)),

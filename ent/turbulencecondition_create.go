@@ -63,7 +63,7 @@ func (tcc *TurbulenceConditionCreate) Mutation() *TurbulenceConditionMutation {
 // Save creates the TurbulenceCondition in the database.
 func (tcc *TurbulenceConditionCreate) Save(ctx context.Context) (*TurbulenceCondition, error) {
 	tcc.defaults()
-	return withHooks[*TurbulenceCondition, TurbulenceConditionMutation](ctx, tcc.sqlSave, tcc.mutation, tcc.hooks)
+	return withHooks(ctx, tcc.sqlSave, tcc.mutation, tcc.hooks)
 }
 
 // SaveX calls Save and panics if Save returns an error.
@@ -422,8 +422,8 @@ func (tccb *TurbulenceConditionCreateBulk) Save(ctx context.Context) ([]*Turbule
 					return nil, err
 				}
 				builder.mutation = mutation
-				nodes[i], specs[i] = builder.createSpec()
 				var err error
+				nodes[i], specs[i] = builder.createSpec()
 				if i < len(mutators)-1 {
 					_, err = mutators[i+1].Mutate(root, tccb.builders[i+1].mutation)
 				} else {

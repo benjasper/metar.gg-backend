@@ -27,7 +27,7 @@ func (md *MetarDelete) Where(ps ...predicate.Metar) *MetarDelete {
 
 // Exec executes the deletion query and returns how many vertices were deleted.
 func (md *MetarDelete) Exec(ctx context.Context) (int, error) {
-	return withHooks[int, MetarMutation](ctx, md.sqlExec, md.mutation, md.hooks)
+	return withHooks(ctx, md.sqlExec, md.mutation, md.hooks)
 }
 
 // ExecX is like Exec, but panics if an error occurs.

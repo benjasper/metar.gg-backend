@@ -130,7 +130,7 @@ func (tc *TafCreate) Mutation() *TafMutation {
 // Save creates the Taf in the database.
 func (tc *TafCreate) Save(ctx context.Context) (*Taf, error) {
 	tc.defaults()
-	return withHooks[*Taf, TafMutation](ctx, tc.sqlSave, tc.mutation, tc.hooks)
+	return withHooks(ctx, tc.sqlSave, tc.mutation, tc.hooks)
 }
 
 // SaveX calls Save and panics if Save returns an error.
@@ -272,10 +272,7 @@ func (tc *TafCreate) createSpec() (*Taf, *sqlgraph.CreateSpec) {
 			Columns: []string{taf.StationColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: weatherstation.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(weatherstation.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -292,10 +289,7 @@ func (tc *TafCreate) createSpec() (*Taf, *sqlgraph.CreateSpec) {
 			Columns: []string{taf.ForecastColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: forecast.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(forecast.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -674,8 +668,8 @@ func (tcb *TafCreateBulk) Save(ctx context.Context) ([]*Taf, error) {
 					return nil, err
 				}
 				builder.mutation = mutation
-				nodes[i], specs[i] = builder.createSpec()
 				var err error
+				nodes[i], specs[i] = builder.createSpec()
 				if i < len(mutators)-1 {
 					_, err = mutators[i+1].Mutate(root, tcb.builders[i+1].mutation)
 				} else {

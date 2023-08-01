@@ -19,7 +19,7 @@ import (
 type SkyConditionQuery struct {
 	config
 	ctx        *QueryContext
-	order      []OrderFunc
+	order      []skycondition.OrderOption
 	inters     []Interceptor
 	predicates []predicate.SkyCondition
 	withFKs    bool
@@ -56,7 +56,7 @@ func (scq *SkyConditionQuery) Unique(unique bool) *SkyConditionQuery {
 }
 
 // Order specifies how the records should be ordered.
-func (scq *SkyConditionQuery) Order(o ...OrderFunc) *SkyConditionQuery {
+func (scq *SkyConditionQuery) Order(o ...skycondition.OrderOption) *SkyConditionQuery {
 	scq.order = append(scq.order, o...)
 	return scq
 }
@@ -250,7 +250,7 @@ func (scq *SkyConditionQuery) Clone() *SkyConditionQuery {
 	return &SkyConditionQuery{
 		config:     scq.config,
 		ctx:        scq.ctx.Clone(),
-		order:      append([]OrderFunc{}, scq.order...),
+		order:      append([]skycondition.OrderOption{}, scq.order...),
 		inters:     append([]Interceptor{}, scq.inters...),
 		predicates: append([]predicate.SkyCondition{}, scq.predicates...),
 		// clone intermediate query.

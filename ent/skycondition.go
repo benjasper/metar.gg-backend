@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"strings"
 
+	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"github.com/google/uuid"
 	"metar.gg/ent/skycondition"
@@ -25,6 +26,7 @@ type SkyCondition struct {
 	CloudType               *skycondition.CloudType `json:"cloud_type,omitempty"`
 	forecast_sky_conditions *uuid.UUID
 	metar_sky_conditions    *uuid.UUID
+	selectValues            sql.SelectValues
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -43,7 +45,7 @@ func (*SkyCondition) scanValues(columns []string) ([]any, error) {
 		case skycondition.ForeignKeys[1]: // metar_sky_conditions
 			values[i] = &sql.NullScanner{S: new(uuid.UUID)}
 		default:
-			return nil, fmt.Errorf("unexpected column %q for type SkyCondition", columns[i])
+			values[i] = new(sql.UnknownType)
 		}
 	}
 	return values, nil
@@ -97,9 +99,17 @@ func (sc *SkyCondition) assignValues(columns []string, values []any) error {
 				sc.metar_sky_conditions = new(uuid.UUID)
 				*sc.metar_sky_conditions = *value.S.(*uuid.UUID)
 			}
+		default:
+			sc.selectValues.Set(columns[i], values[i])
 		}
 	}
 	return nil
+}
+
+// Value returns the ent.Value that was dynamically selected and assigned to the SkyCondition.
+// This includes values selected through modifiers, order, etc.
+func (sc *SkyCondition) Value(name string) (ent.Value, error) {
+	return sc.selectValues.Get(name)
 }
 
 // Update returns a builder for updating this SkyCondition.

@@ -158,7 +158,7 @@ func (ru *RegionUpdate) RemoveAirports(a ...*Airport) *RegionUpdate {
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (ru *RegionUpdate) Save(ctx context.Context) (int, error) {
-	return withHooks[int, RegionMutation](ctx, ru.sqlSave, ru.mutation, ru.hooks)
+	return withHooks(ctx, ru.sqlSave, ru.mutation, ru.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -241,10 +241,7 @@ func (ru *RegionUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: []string{region.AirportsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: airport.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(airport.FieldID, field.TypeUUID),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -257,10 +254,7 @@ func (ru *RegionUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: []string{region.AirportsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: airport.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(airport.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -276,10 +270,7 @@ func (ru *RegionUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: []string{region.AirportsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: airport.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(airport.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -448,7 +439,7 @@ func (ruo *RegionUpdateOne) Select(field string, fields ...string) *RegionUpdate
 
 // Save executes the query and returns the updated Region entity.
 func (ruo *RegionUpdateOne) Save(ctx context.Context) (*Region, error) {
-	return withHooks[*Region, RegionMutation](ctx, ruo.sqlSave, ruo.mutation, ruo.hooks)
+	return withHooks(ctx, ruo.sqlSave, ruo.mutation, ruo.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -548,10 +539,7 @@ func (ruo *RegionUpdateOne) sqlSave(ctx context.Context) (_node *Region, err err
 			Columns: []string{region.AirportsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: airport.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(airport.FieldID, field.TypeUUID),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -564,10 +552,7 @@ func (ruo *RegionUpdateOne) sqlSave(ctx context.Context) (_node *Region, err err
 			Columns: []string{region.AirportsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: airport.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(airport.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -583,10 +568,7 @@ func (ruo *RegionUpdateOne) sqlSave(ctx context.Context) (_node *Region, err err
 			Columns: []string{region.AirportsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: airport.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(airport.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {

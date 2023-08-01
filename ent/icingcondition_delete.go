@@ -27,7 +27,7 @@ func (icd *IcingConditionDelete) Where(ps ...predicate.IcingCondition) *IcingCon
 
 // Exec executes the deletion query and returns how many vertices were deleted.
 func (icd *IcingConditionDelete) Exec(ctx context.Context) (int, error) {
-	return withHooks[int, IcingConditionMutation](ctx, icd.sqlExec, icd.mutation, icd.hooks)
+	return withHooks(ctx, icd.sqlExec, icd.mutation, icd.hooks)
 }
 
 // ExecX is like Exec, but panics if an error occurs.

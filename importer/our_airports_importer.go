@@ -31,7 +31,7 @@ type Importer struct {
 	db             *ent.Client
 	logger         *logging.Logger
 	stats          *ImportStatistics
-	timezoneFinder *tzf.Finder
+	timezoneFinder tzf.F
 }
 
 // NewImporter creates a new importer instance. Make sure to call Cleanup() when done.

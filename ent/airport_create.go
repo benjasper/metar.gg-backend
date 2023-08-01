@@ -360,7 +360,7 @@ func (ac *AirportCreate) Mutation() *AirportMutation {
 // Save creates the Airport in the database.
 func (ac *AirportCreate) Save(ctx context.Context) (*Airport, error) {
 	ac.defaults()
-	return withHooks[*Airport, AirportMutation](ctx, ac.sqlSave, ac.mutation, ac.hooks)
+	return withHooks(ctx, ac.sqlSave, ac.mutation, ac.hooks)
 }
 
 // SaveX calls Save and panics if Save returns an error.
@@ -581,10 +581,7 @@ func (ac *AirportCreate) createSpec() (*Airport, *sqlgraph.CreateSpec) {
 			Columns: []string{airport.RegionColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: region.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(region.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -601,10 +598,7 @@ func (ac *AirportCreate) createSpec() (*Airport, *sqlgraph.CreateSpec) {
 			Columns: []string{airport.CountryColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: country.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(country.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -621,10 +615,7 @@ func (ac *AirportCreate) createSpec() (*Airport, *sqlgraph.CreateSpec) {
 			Columns: []string{airport.RunwaysColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: runway.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(runway.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -640,10 +631,7 @@ func (ac *AirportCreate) createSpec() (*Airport, *sqlgraph.CreateSpec) {
 			Columns: []string{airport.FrequenciesColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: frequency.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(frequency.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -659,10 +647,7 @@ func (ac *AirportCreate) createSpec() (*Airport, *sqlgraph.CreateSpec) {
 			Columns: []string{airport.StationColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: weatherstation.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(weatherstation.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -1561,8 +1546,8 @@ func (acb *AirportCreateBulk) Save(ctx context.Context) ([]*Airport, error) {
 					return nil, err
 				}
 				builder.mutation = mutation
-				nodes[i], specs[i] = builder.createSpec()
 				var err error
+				nodes[i], specs[i] = builder.createSpec()
 				if i < len(mutators)-1 {
 					_, err = mutators[i+1].Mutate(root, acb.builders[i+1].mutation)
 				} else {

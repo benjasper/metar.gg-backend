@@ -152,7 +152,7 @@ func (cu *CountryUpdate) RemoveAirports(a ...*Airport) *CountryUpdate {
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (cu *CountryUpdate) Save(ctx context.Context) (int, error) {
-	return withHooks[int, CountryMutation](ctx, cu.sqlSave, cu.mutation, cu.hooks)
+	return withHooks(ctx, cu.sqlSave, cu.mutation, cu.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -245,10 +245,7 @@ func (cu *CountryUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: []string{country.AirportsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: airport.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(airport.FieldID, field.TypeUUID),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -261,10 +258,7 @@ func (cu *CountryUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: []string{country.AirportsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: airport.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(airport.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -280,10 +274,7 @@ func (cu *CountryUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: []string{country.AirportsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: airport.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(airport.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -446,7 +437,7 @@ func (cuo *CountryUpdateOne) Select(field string, fields ...string) *CountryUpda
 
 // Save executes the query and returns the updated Country entity.
 func (cuo *CountryUpdateOne) Save(ctx context.Context) (*Country, error) {
-	return withHooks[*Country, CountryMutation](ctx, cuo.sqlSave, cuo.mutation, cuo.hooks)
+	return withHooks(ctx, cuo.sqlSave, cuo.mutation, cuo.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -556,10 +547,7 @@ func (cuo *CountryUpdateOne) sqlSave(ctx context.Context) (_node *Country, err e
 			Columns: []string{country.AirportsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: airport.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(airport.FieldID, field.TypeUUID),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -572,10 +560,7 @@ func (cuo *CountryUpdateOne) sqlSave(ctx context.Context) (_node *Country, err e
 			Columns: []string{country.AirportsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: airport.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(airport.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -591,10 +576,7 @@ func (cuo *CountryUpdateOne) sqlSave(ctx context.Context) (_node *Country, err e
 			Columns: []string{country.AirportsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: airport.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(airport.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {

@@ -8,6 +8,7 @@ import (
 	"strings"
 	"time"
 
+	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"github.com/google/uuid"
 	"metar.gg/ent/country"
@@ -39,7 +40,8 @@ type Country struct {
 	Keywords []string `json:"keywords,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the CountryQuery when eager-loading is set.
-	Edges CountryEdges `json:"edges"`
+	Edges        CountryEdges `json:"edges"`
+	selectValues sql.SelectValues
 }
 
 // CountryEdges holds the relations/edges for other nodes in the graph.
@@ -80,7 +82,7 @@ func (*Country) scanValues(columns []string) ([]any, error) {
 		case country.FieldID:
 			values[i] = new(uuid.UUID)
 		default:
-			return nil, fmt.Errorf("unexpected column %q for type Country", columns[i])
+			values[i] = new(sql.UnknownType)
 		}
 	}
 	return values, nil
@@ -156,9 +158,17 @@ func (c *Country) assignValues(columns []string, values []any) error {
 					return fmt.Errorf("unmarshal field keywords: %w", err)
 				}
 			}
+		default:
+			c.selectValues.Set(columns[i], values[i])
 		}
 	}
 	return nil
+}
+
+// Value returns the ent.Value that was dynamically selected and assigned to the Country.
+// This includes values selected through modifiers, order, etc.
+func (c *Country) Value(name string) (ent.Value, error) {
+	return c.selectValues.Get(name)
 }
 
 // QueryAirports queries the "airports" edge of the Country entity.

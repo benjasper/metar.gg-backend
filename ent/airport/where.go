@@ -1250,11 +1250,7 @@ func HasRegion() predicate.Airport {
 // HasRegionWith applies the HasEdge predicate on the "region" edge with a given conditions (other predicates).
 func HasRegionWith(preds ...predicate.Region) predicate.Airport {
 	return predicate.Airport(func(s *sql.Selector) {
-		step := sqlgraph.NewStep(
-			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(RegionInverseTable, FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, RegionTable, RegionColumn),
-		)
+		step := newRegionStep()
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
 				p(s)
@@ -1277,11 +1273,7 @@ func HasCountry() predicate.Airport {
 // HasCountryWith applies the HasEdge predicate on the "country" edge with a given conditions (other predicates).
 func HasCountryWith(preds ...predicate.Country) predicate.Airport {
 	return predicate.Airport(func(s *sql.Selector) {
-		step := sqlgraph.NewStep(
-			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(CountryInverseTable, FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, CountryTable, CountryColumn),
-		)
+		step := newCountryStep()
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
 				p(s)
@@ -1304,11 +1296,7 @@ func HasRunways() predicate.Airport {
 // HasRunwaysWith applies the HasEdge predicate on the "runways" edge with a given conditions (other predicates).
 func HasRunwaysWith(preds ...predicate.Runway) predicate.Airport {
 	return predicate.Airport(func(s *sql.Selector) {
-		step := sqlgraph.NewStep(
-			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(RunwaysInverseTable, FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, RunwaysTable, RunwaysColumn),
-		)
+		step := newRunwaysStep()
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
 				p(s)
@@ -1331,11 +1319,7 @@ func HasFrequencies() predicate.Airport {
 // HasFrequenciesWith applies the HasEdge predicate on the "frequencies" edge with a given conditions (other predicates).
 func HasFrequenciesWith(preds ...predicate.Frequency) predicate.Airport {
 	return predicate.Airport(func(s *sql.Selector) {
-		step := sqlgraph.NewStep(
-			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(FrequenciesInverseTable, FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, FrequenciesTable, FrequenciesColumn),
-		)
+		step := newFrequenciesStep()
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
 				p(s)
@@ -1358,11 +1342,7 @@ func HasStation() predicate.Airport {
 // HasStationWith applies the HasEdge predicate on the "station" edge with a given conditions (other predicates).
 func HasStationWith(preds ...predicate.WeatherStation) predicate.Airport {
 	return predicate.Airport(func(s *sql.Selector) {
-		step := sqlgraph.NewStep(
-			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(StationInverseTable, FieldID),
-			sqlgraph.Edge(sqlgraph.O2O, false, StationTable, StationColumn),
-		)
+		step := newStationStep()
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
 				p(s)

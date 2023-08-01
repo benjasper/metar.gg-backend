@@ -124,7 +124,7 @@ func (fc *FrequencyCreate) Mutation() *FrequencyMutation {
 // Save creates the Frequency in the database.
 func (fc *FrequencyCreate) Save(ctx context.Context) (*Frequency, error) {
 	fc.defaults()
-	return withHooks[*Frequency, FrequencyMutation](ctx, fc.sqlSave, fc.mutation, fc.hooks)
+	return withHooks(ctx, fc.sqlSave, fc.mutation, fc.hooks)
 }
 
 // SaveX calls Save and panics if Save returns an error.
@@ -260,10 +260,7 @@ func (fc *FrequencyCreate) createSpec() (*Frequency, *sqlgraph.CreateSpec) {
 			Columns: []string{frequency.AirportColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: airport.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(airport.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -643,8 +640,8 @@ func (fcb *FrequencyCreateBulk) Save(ctx context.Context) ([]*Frequency, error) 
 					return nil, err
 				}
 				builder.mutation = mutation
-				nodes[i], specs[i] = builder.createSpec()
 				var err error
+				nodes[i], specs[i] = builder.createSpec()
 				if i < len(mutators)-1 {
 					_, err = mutators[i+1].Mutate(root, fcb.builders[i+1].mutation)
 				} else {

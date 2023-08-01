@@ -3,6 +3,8 @@
 package weatherstation
 
 import (
+	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/dialect/sql/sqlgraph"
 	"github.com/google/uuid"
 )
 
@@ -87,3 +89,92 @@ var (
 	// DefaultID holds the default value on creation for the "id" field.
 	DefaultID func() uuid.UUID
 )
+
+// OrderOption defines the ordering options for the WeatherStation queries.
+type OrderOption func(*sql.Selector)
+
+// ByID orders the results by the id field.
+func ByID(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldID, opts...).ToFunc()
+}
+
+// ByStationID orders the results by the station_id field.
+func ByStationID(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldStationID, opts...).ToFunc()
+}
+
+// ByLatitude orders the results by the latitude field.
+func ByLatitude(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldLatitude, opts...).ToFunc()
+}
+
+// ByLongitude orders the results by the longitude field.
+func ByLongitude(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldLongitude, opts...).ToFunc()
+}
+
+// ByElevation orders the results by the elevation field.
+func ByElevation(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldElevation, opts...).ToFunc()
+}
+
+// ByHash orders the results by the hash field.
+func ByHash(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldHash, opts...).ToFunc()
+}
+
+// ByAirportField orders the results by airport field.
+func ByAirportField(field string, opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newAirportStep(), sql.OrderByField(field, opts...))
+	}
+}
+
+// ByMetarsCount orders the results by metars count.
+func ByMetarsCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newMetarsStep(), opts...)
+	}
+}
+
+// ByMetars orders the results by metars terms.
+func ByMetars(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newMetarsStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
+
+// ByTafsCount orders the results by tafs count.
+func ByTafsCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newTafsStep(), opts...)
+	}
+}
+
+// ByTafs orders the results by tafs terms.
+func ByTafs(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newTafsStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
+func newAirportStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(AirportInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2O, true, AirportTable, AirportColumn),
+	)
+}
+func newMetarsStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(MetarsInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, MetarsTable, MetarsColumn),
+	)
+}
+func newTafsStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(TafsInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, TafsTable, TafsColumn),
+	)
+}

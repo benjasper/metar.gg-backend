@@ -109,7 +109,7 @@ func (tdu *TemperatureDataUpdate) Mutation() *TemperatureDataMutation {
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (tdu *TemperatureDataUpdate) Save(ctx context.Context) (int, error) {
-	return withHooks[int, TemperatureDataMutation](ctx, tdu.sqlSave, tdu.mutation, tdu.hooks)
+	return withHooks(ctx, tdu.sqlSave, tdu.mutation, tdu.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -291,7 +291,7 @@ func (tduo *TemperatureDataUpdateOne) Select(field string, fields ...string) *Te
 
 // Save executes the query and returns the updated TemperatureData entity.
 func (tduo *TemperatureDataUpdateOne) Save(ctx context.Context) (*TemperatureData, error) {
-	return withHooks[*TemperatureData, TemperatureDataMutation](ctx, tduo.sqlSave, tduo.mutation, tduo.hooks)
+	return withHooks(ctx, tduo.sqlSave, tduo.mutation, tduo.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.

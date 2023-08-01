@@ -19,7 +19,7 @@ import (
 type IcingConditionQuery struct {
 	config
 	ctx        *QueryContext
-	order      []OrderFunc
+	order      []icingcondition.OrderOption
 	inters     []Interceptor
 	predicates []predicate.IcingCondition
 	withFKs    bool
@@ -56,7 +56,7 @@ func (icq *IcingConditionQuery) Unique(unique bool) *IcingConditionQuery {
 }
 
 // Order specifies how the records should be ordered.
-func (icq *IcingConditionQuery) Order(o ...OrderFunc) *IcingConditionQuery {
+func (icq *IcingConditionQuery) Order(o ...icingcondition.OrderOption) *IcingConditionQuery {
 	icq.order = append(icq.order, o...)
 	return icq
 }
@@ -250,7 +250,7 @@ func (icq *IcingConditionQuery) Clone() *IcingConditionQuery {
 	return &IcingConditionQuery{
 		config:     icq.config,
 		ctx:        icq.ctx.Clone(),
-		order:      append([]OrderFunc{}, icq.order...),
+		order:      append([]icingcondition.OrderOption{}, icq.order...),
 		inters:     append([]Interceptor{}, icq.inters...),
 		predicates: append([]predicate.IcingCondition{}, icq.predicates...),
 		// clone intermediate query.

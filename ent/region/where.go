@@ -525,11 +525,7 @@ func HasAirports() predicate.Region {
 // HasAirportsWith applies the HasEdge predicate on the "airports" edge with a given conditions (other predicates).
 func HasAirportsWith(preds ...predicate.Airport) predicate.Region {
 	return predicate.Region(func(s *sql.Selector) {
-		step := sqlgraph.NewStep(
-			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(AirportsInverseTable, FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, AirportsTable, AirportsColumn),
-		)
+		step := newAirportsStep()
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
 				p(s)

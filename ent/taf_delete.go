@@ -27,7 +27,7 @@ func (td *TafDelete) Where(ps ...predicate.Taf) *TafDelete {
 
 // Exec executes the deletion query and returns how many vertices were deleted.
 func (td *TafDelete) Exec(ctx context.Context) (int, error) {
-	return withHooks[int, TafMutation](ctx, td.sqlExec, td.mutation, td.hooks)
+	return withHooks(ctx, td.sqlExec, td.mutation, td.hooks)
 }
 
 // ExecX is like Exec, but panics if an error occurs.

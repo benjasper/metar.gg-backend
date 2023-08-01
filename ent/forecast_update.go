@@ -547,7 +547,7 @@ func (fu *ForecastUpdate) RemoveTemperatureData(t ...*TemperatureData) *Forecast
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (fu *ForecastUpdate) Save(ctx context.Context) (int, error) {
-	return withHooks[int, ForecastMutation](ctx, fu.sqlSave, fu.mutation, fu.hooks)
+	return withHooks(ctx, fu.sqlSave, fu.mutation, fu.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -728,10 +728,7 @@ func (fu *ForecastUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: []string{forecast.SkyConditionsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: skycondition.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(skycondition.FieldID, field.TypeUUID),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -744,10 +741,7 @@ func (fu *ForecastUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: []string{forecast.SkyConditionsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: skycondition.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(skycondition.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -763,10 +757,7 @@ func (fu *ForecastUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: []string{forecast.SkyConditionsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: skycondition.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(skycondition.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -782,10 +773,7 @@ func (fu *ForecastUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: []string{forecast.TurbulenceConditionsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: turbulencecondition.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(turbulencecondition.FieldID, field.TypeUUID),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -798,10 +786,7 @@ func (fu *ForecastUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: []string{forecast.TurbulenceConditionsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: turbulencecondition.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(turbulencecondition.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -817,10 +802,7 @@ func (fu *ForecastUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: []string{forecast.TurbulenceConditionsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: turbulencecondition.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(turbulencecondition.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -836,10 +818,7 @@ func (fu *ForecastUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: []string{forecast.IcingConditionsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: icingcondition.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(icingcondition.FieldID, field.TypeUUID),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -852,10 +831,7 @@ func (fu *ForecastUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: []string{forecast.IcingConditionsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: icingcondition.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(icingcondition.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -871,10 +847,7 @@ func (fu *ForecastUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: []string{forecast.IcingConditionsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: icingcondition.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(icingcondition.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -890,10 +863,7 @@ func (fu *ForecastUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: []string{forecast.TemperatureDataColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: temperaturedata.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(temperaturedata.FieldID, field.TypeUUID),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -906,10 +876,7 @@ func (fu *ForecastUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: []string{forecast.TemperatureDataColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: temperaturedata.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(temperaturedata.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -925,10 +892,7 @@ func (fu *ForecastUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: []string{forecast.TemperatureDataColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: temperaturedata.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(temperaturedata.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -1484,7 +1448,7 @@ func (fuo *ForecastUpdateOne) Select(field string, fields ...string) *ForecastUp
 
 // Save executes the query and returns the updated Forecast entity.
 func (fuo *ForecastUpdateOne) Save(ctx context.Context) (*Forecast, error) {
-	return withHooks[*Forecast, ForecastMutation](ctx, fuo.sqlSave, fuo.mutation, fuo.hooks)
+	return withHooks(ctx, fuo.sqlSave, fuo.mutation, fuo.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -1682,10 +1646,7 @@ func (fuo *ForecastUpdateOne) sqlSave(ctx context.Context) (_node *Forecast, err
 			Columns: []string{forecast.SkyConditionsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: skycondition.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(skycondition.FieldID, field.TypeUUID),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -1698,10 +1659,7 @@ func (fuo *ForecastUpdateOne) sqlSave(ctx context.Context) (_node *Forecast, err
 			Columns: []string{forecast.SkyConditionsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: skycondition.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(skycondition.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -1717,10 +1675,7 @@ func (fuo *ForecastUpdateOne) sqlSave(ctx context.Context) (_node *Forecast, err
 			Columns: []string{forecast.SkyConditionsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: skycondition.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(skycondition.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -1736,10 +1691,7 @@ func (fuo *ForecastUpdateOne) sqlSave(ctx context.Context) (_node *Forecast, err
 			Columns: []string{forecast.TurbulenceConditionsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: turbulencecondition.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(turbulencecondition.FieldID, field.TypeUUID),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -1752,10 +1704,7 @@ func (fuo *ForecastUpdateOne) sqlSave(ctx context.Context) (_node *Forecast, err
 			Columns: []string{forecast.TurbulenceConditionsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: turbulencecondition.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(turbulencecondition.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -1771,10 +1720,7 @@ func (fuo *ForecastUpdateOne) sqlSave(ctx context.Context) (_node *Forecast, err
 			Columns: []string{forecast.TurbulenceConditionsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: turbulencecondition.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(turbulencecondition.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -1790,10 +1736,7 @@ func (fuo *ForecastUpdateOne) sqlSave(ctx context.Context) (_node *Forecast, err
 			Columns: []string{forecast.IcingConditionsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: icingcondition.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(icingcondition.FieldID, field.TypeUUID),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -1806,10 +1749,7 @@ func (fuo *ForecastUpdateOne) sqlSave(ctx context.Context) (_node *Forecast, err
 			Columns: []string{forecast.IcingConditionsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: icingcondition.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(icingcondition.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -1825,10 +1765,7 @@ func (fuo *ForecastUpdateOne) sqlSave(ctx context.Context) (_node *Forecast, err
 			Columns: []string{forecast.IcingConditionsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: icingcondition.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(icingcondition.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -1844,10 +1781,7 @@ func (fuo *ForecastUpdateOne) sqlSave(ctx context.Context) (_node *Forecast, err
 			Columns: []string{forecast.TemperatureDataColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: temperaturedata.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(temperaturedata.FieldID, field.TypeUUID),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -1860,10 +1794,7 @@ func (fuo *ForecastUpdateOne) sqlSave(ctx context.Context) (_node *Forecast, err
 			Columns: []string{forecast.TemperatureDataColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: temperaturedata.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(temperaturedata.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -1879,10 +1810,7 @@ func (fuo *ForecastUpdateOne) sqlSave(ctx context.Context) (_node *Forecast, err
 			Columns: []string{forecast.TemperatureDataColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: temperaturedata.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(temperaturedata.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {

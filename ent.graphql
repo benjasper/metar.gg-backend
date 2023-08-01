@@ -41,9 +41,13 @@ type Airport {
   wikipedia: String
   """Extra keywords/phrases to assist with search. May include former names for the airport, alternate codes, names in other languages, nearby tourist destinations, etc."""
   keywords: [String!]!
+  """The region that the airport is located in."""
   region: Region
+  """The country that the airport is located in."""
   country: Country
+  """Frequencies at the airport."""
   frequencies: [Frequency!]
+  """Weather station at the airport."""
   station: WeatherStation
 }
 """Ordering options for Airport connections"""
@@ -116,9 +120,13 @@ type Forecast {
   weather: String
   """The not decoded string."""
   notDecoded: String
+  """The sky conditions."""
   skyConditions: [SkyCondition!]
+  """The turbulence conditions."""
   turbulenceConditions: [TurbulenceCondition!]
+  """The icing conditions."""
   icingConditions: [IcingCondition!]
+  """The temperature data."""
   temperatureData: [TemperatureData!]
 }
 """ForecastChangeIndicator is enum for the field change_indicator"""
@@ -197,7 +205,9 @@ type Metar {
   precipitation24: Float
   """The type of METAR."""
   metarType: MetarMetarType!
+  """The station that provided the METAR."""
   station: WeatherStation!
+  """The sky conditions."""
   skyConditions: [SkyCondition!]
 }
 """MetarFlightCategory is enum for the field flight_category"""
@@ -211,6 +221,17 @@ enum MetarFlightCategory @goModel(model: "metar.gg/ent/metar.FlightCategory") {
 enum MetarMetarType @goModel(model: "metar.gg/ent/metar.MetarType") {
   METAR
   SPECI
+}
+"""Ordering options for Metar connections"""
+input MetarOrder {
+  """The ordering direction."""
+  direction: OrderDirection! = ASC
+  """The field by which to order Metars."""
+  field: MetarOrderField!
+}
+"""Properties by which Metar connections can be ordered."""
+enum MetarOrderField {
+  OBSERVATION_TIME
 }
 """Possible directions in which to order a list of items when provided an `orderBy` argument."""
 enum OrderDirection {
@@ -318,7 +339,9 @@ type Taf {
   validToTime: Time!
   """Remarks."""
   remarks: String!
+  """The station that issued this taf."""
   station: WeatherStation!
+  """The forecasts"""
   forecast: [Forecast!]
 }
 """Ordering options for Taf connections"""
@@ -330,6 +353,7 @@ input TafOrder {
 }
 """Properties by which Taf connections can be ordered."""
 enum TafOrderField {
+  ISSUE_TIME
   valid_from_time
 }
 type TemperatureData {
@@ -355,5 +379,6 @@ type WeatherStation {
   longitude: Float
   """The elevation in meters of the station."""
   elevation: Float
+  """The airport that hosts this station. This can also be empty if the metar is from a weather station outside an airport."""
   airport: Airport
 }

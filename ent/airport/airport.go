@@ -8,6 +8,8 @@ import (
 	"strconv"
 	"time"
 
+	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/dialect/sql/sqlgraph"
 	"github.com/google/uuid"
 )
 
@@ -193,6 +195,198 @@ func TypeValidator(_type Type) error {
 	default:
 		return fmt.Errorf("airport: invalid enum value for type field: %q", _type)
 	}
+}
+
+// OrderOption defines the ordering options for the Airport queries.
+type OrderOption func(*sql.Selector)
+
+// ByID orders the results by the id field.
+func ByID(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldID, opts...).ToFunc()
+}
+
+// ByImportID orders the results by the import_id field.
+func ByImportID(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldImportID, opts...).ToFunc()
+}
+
+// ByHash orders the results by the hash field.
+func ByHash(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldHash, opts...).ToFunc()
+}
+
+// ByImportFlag orders the results by the import_flag field.
+func ByImportFlag(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldImportFlag, opts...).ToFunc()
+}
+
+// ByLastUpdated orders the results by the last_updated field.
+func ByLastUpdated(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldLastUpdated, opts...).ToFunc()
+}
+
+// ByIcaoCode orders the results by the icao_code field.
+func ByIcaoCode(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldIcaoCode, opts...).ToFunc()
+}
+
+// ByIataCode orders the results by the iata_code field.
+func ByIataCode(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldIataCode, opts...).ToFunc()
+}
+
+// ByIdentifier orders the results by the identifier field.
+func ByIdentifier(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldIdentifier, opts...).ToFunc()
+}
+
+// ByType orders the results by the type field.
+func ByType(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldType, opts...).ToFunc()
+}
+
+// ByImportance orders the results by the importance field.
+func ByImportance(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldImportance, opts...).ToFunc()
+}
+
+// ByName orders the results by the name field.
+func ByName(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldName, opts...).ToFunc()
+}
+
+// ByLatitude orders the results by the latitude field.
+func ByLatitude(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldLatitude, opts...).ToFunc()
+}
+
+// ByLongitude orders the results by the longitude field.
+func ByLongitude(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldLongitude, opts...).ToFunc()
+}
+
+// ByTimezone orders the results by the timezone field.
+func ByTimezone(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldTimezone, opts...).ToFunc()
+}
+
+// ByElevation orders the results by the elevation field.
+func ByElevation(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldElevation, opts...).ToFunc()
+}
+
+// ByMunicipality orders the results by the municipality field.
+func ByMunicipality(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldMunicipality, opts...).ToFunc()
+}
+
+// ByScheduledService orders the results by the scheduled_service field.
+func ByScheduledService(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldScheduledService, opts...).ToFunc()
+}
+
+// ByGpsCode orders the results by the gps_code field.
+func ByGpsCode(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldGpsCode, opts...).ToFunc()
+}
+
+// ByLocalCode orders the results by the local_code field.
+func ByLocalCode(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldLocalCode, opts...).ToFunc()
+}
+
+// ByWebsite orders the results by the website field.
+func ByWebsite(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldWebsite, opts...).ToFunc()
+}
+
+// ByWikipedia orders the results by the wikipedia field.
+func ByWikipedia(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldWikipedia, opts...).ToFunc()
+}
+
+// ByRegionField orders the results by region field.
+func ByRegionField(field string, opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newRegionStep(), sql.OrderByField(field, opts...))
+	}
+}
+
+// ByCountryField orders the results by country field.
+func ByCountryField(field string, opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newCountryStep(), sql.OrderByField(field, opts...))
+	}
+}
+
+// ByRunwaysCount orders the results by runways count.
+func ByRunwaysCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newRunwaysStep(), opts...)
+	}
+}
+
+// ByRunways orders the results by runways terms.
+func ByRunways(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newRunwaysStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
+
+// ByFrequenciesCount orders the results by frequencies count.
+func ByFrequenciesCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newFrequenciesStep(), opts...)
+	}
+}
+
+// ByFrequencies orders the results by frequencies terms.
+func ByFrequencies(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newFrequenciesStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
+
+// ByStationField orders the results by station field.
+func ByStationField(field string, opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newStationStep(), sql.OrderByField(field, opts...))
+	}
+}
+func newRegionStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(RegionInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.M2O, true, RegionTable, RegionColumn),
+	)
+}
+func newCountryStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(CountryInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.M2O, true, CountryTable, CountryColumn),
+	)
+}
+func newRunwaysStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(RunwaysInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, RunwaysTable, RunwaysColumn),
+	)
+}
+func newFrequenciesStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(FrequenciesInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, FrequenciesTable, FrequenciesColumn),
+	)
+}
+func newStationStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(StationInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2O, false, StationTable, StationColumn),
+	)
 }
 
 // MarshalGQL implements graphql.Marshaler interface.

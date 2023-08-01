@@ -955,11 +955,7 @@ func HasSkyConditions() predicate.Forecast {
 // HasSkyConditionsWith applies the HasEdge predicate on the "sky_conditions" edge with a given conditions (other predicates).
 func HasSkyConditionsWith(preds ...predicate.SkyCondition) predicate.Forecast {
 	return predicate.Forecast(func(s *sql.Selector) {
-		step := sqlgraph.NewStep(
-			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(SkyConditionsInverseTable, FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, SkyConditionsTable, SkyConditionsColumn),
-		)
+		step := newSkyConditionsStep()
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
 				p(s)
@@ -982,11 +978,7 @@ func HasTurbulenceConditions() predicate.Forecast {
 // HasTurbulenceConditionsWith applies the HasEdge predicate on the "turbulence_conditions" edge with a given conditions (other predicates).
 func HasTurbulenceConditionsWith(preds ...predicate.TurbulenceCondition) predicate.Forecast {
 	return predicate.Forecast(func(s *sql.Selector) {
-		step := sqlgraph.NewStep(
-			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(TurbulenceConditionsInverseTable, FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, TurbulenceConditionsTable, TurbulenceConditionsColumn),
-		)
+		step := newTurbulenceConditionsStep()
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
 				p(s)
@@ -1009,11 +1001,7 @@ func HasIcingConditions() predicate.Forecast {
 // HasIcingConditionsWith applies the HasEdge predicate on the "icing_conditions" edge with a given conditions (other predicates).
 func HasIcingConditionsWith(preds ...predicate.IcingCondition) predicate.Forecast {
 	return predicate.Forecast(func(s *sql.Selector) {
-		step := sqlgraph.NewStep(
-			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(IcingConditionsInverseTable, FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, IcingConditionsTable, IcingConditionsColumn),
-		)
+		step := newIcingConditionsStep()
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
 				p(s)
@@ -1036,11 +1024,7 @@ func HasTemperatureData() predicate.Forecast {
 // HasTemperatureDataWith applies the HasEdge predicate on the "temperature_data" edge with a given conditions (other predicates).
 func HasTemperatureDataWith(preds ...predicate.TemperatureData) predicate.Forecast {
 	return predicate.Forecast(func(s *sql.Selector) {
-		step := sqlgraph.NewStep(
-			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(TemperatureDataInverseTable, FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, TemperatureDataTable, TemperatureDataColumn),
-		)
+		step := newTemperatureDataStep()
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
 				p(s)

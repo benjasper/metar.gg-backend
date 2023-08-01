@@ -318,7 +318,7 @@ func (fc *ForecastCreate) Mutation() *ForecastMutation {
 // Save creates the Forecast in the database.
 func (fc *ForecastCreate) Save(ctx context.Context) (*Forecast, error) {
 	fc.defaults()
-	return withHooks[*Forecast, ForecastMutation](ctx, fc.sqlSave, fc.mutation, fc.hooks)
+	return withHooks(ctx, fc.sqlSave, fc.mutation, fc.hooks)
 }
 
 // SaveX calls Save and panics if Save returns an error.
@@ -472,10 +472,7 @@ func (fc *ForecastCreate) createSpec() (*Forecast, *sqlgraph.CreateSpec) {
 			Columns: []string{forecast.SkyConditionsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: skycondition.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(skycondition.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -491,10 +488,7 @@ func (fc *ForecastCreate) createSpec() (*Forecast, *sqlgraph.CreateSpec) {
 			Columns: []string{forecast.TurbulenceConditionsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: turbulencecondition.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(turbulencecondition.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -510,10 +504,7 @@ func (fc *ForecastCreate) createSpec() (*Forecast, *sqlgraph.CreateSpec) {
 			Columns: []string{forecast.IcingConditionsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: icingcondition.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(icingcondition.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -529,10 +520,7 @@ func (fc *ForecastCreate) createSpec() (*Forecast, *sqlgraph.CreateSpec) {
 			Columns: []string{forecast.TemperatureDataColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: temperaturedata.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(temperaturedata.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -1431,8 +1419,8 @@ func (fcb *ForecastCreateBulk) Save(ctx context.Context) ([]*Forecast, error) {
 					return nil, err
 				}
 				builder.mutation = mutation
-				nodes[i], specs[i] = builder.createSpec()
 				var err error
+				nodes[i], specs[i] = builder.createSpec()
 				if i < len(mutators)-1 {
 					_, err = mutators[i+1].Mutate(root, fcb.builders[i+1].mutation)
 				} else {

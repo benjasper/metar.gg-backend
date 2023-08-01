@@ -27,7 +27,7 @@ func (scd *SkyConditionDelete) Where(ps ...predicate.SkyCondition) *SkyCondition
 
 // Exec executes the deletion query and returns how many vertices were deleted.
 func (scd *SkyConditionDelete) Exec(ctx context.Context) (int, error) {
-	return withHooks[int, SkyConditionMutation](ctx, scd.sqlExec, scd.mutation, scd.hooks)
+	return withHooks(ctx, scd.sqlExec, scd.mutation, scd.hooks)
 }
 
 // ExecX is like Exec, but panics if an error occurs.

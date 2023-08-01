@@ -3,6 +3,7 @@
 package temperaturedata
 
 import (
+	"entgo.io/ent/dialect/sql"
 	"github.com/google/uuid"
 )
 
@@ -57,3 +58,31 @@ var (
 	// DefaultID holds the default value on creation for the "id" field.
 	DefaultID func() uuid.UUID
 )
+
+// OrderOption defines the ordering options for the TemperatureData queries.
+type OrderOption func(*sql.Selector)
+
+// ByID orders the results by the id field.
+func ByID(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldID, opts...).ToFunc()
+}
+
+// ByValidTime orders the results by the valid_time field.
+func ByValidTime(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldValidTime, opts...).ToFunc()
+}
+
+// ByTemperature orders the results by the temperature field.
+func ByTemperature(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldTemperature, opts...).ToFunc()
+}
+
+// ByMinTemperature orders the results by the min_temperature field.
+func ByMinTemperature(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldMinTemperature, opts...).ToFunc()
+}
+
+// ByMaxTemperature orders the results by the max_temperature field.
+func ByMaxTemperature(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldMaxTemperature, opts...).ToFunc()
+}

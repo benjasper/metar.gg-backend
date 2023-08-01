@@ -24,7 +24,7 @@ import (
 type ForecastQuery struct {
 	config
 	ctx                           *QueryContext
-	order                         []OrderFunc
+	order                         []forecast.OrderOption
 	inters                        []Interceptor
 	predicates                    []predicate.Forecast
 	withSkyConditions             *SkyConditionQuery
@@ -69,7 +69,7 @@ func (fq *ForecastQuery) Unique(unique bool) *ForecastQuery {
 }
 
 // Order specifies how the records should be ordered.
-func (fq *ForecastQuery) Order(o ...OrderFunc) *ForecastQuery {
+func (fq *ForecastQuery) Order(o ...forecast.OrderOption) *ForecastQuery {
 	fq.order = append(fq.order, o...)
 	return fq
 }
@@ -351,7 +351,7 @@ func (fq *ForecastQuery) Clone() *ForecastQuery {
 	return &ForecastQuery{
 		config:                   fq.config,
 		ctx:                      fq.ctx.Clone(),
-		order:                    append([]OrderFunc{}, fq.order...),
+		order:                    append([]forecast.OrderOption{}, fq.order...),
 		inters:                   append([]Interceptor{}, fq.inters...),
 		predicates:               append([]predicate.Forecast{}, fq.predicates...),
 		withSkyConditions:        fq.withSkyConditions.Clone(),
@@ -596,7 +596,7 @@ func (fq *ForecastQuery) loadSkyConditions(ctx context.Context, query *SkyCondit
 	}
 	query.withFKs = true
 	query.Where(predicate.SkyCondition(func(s *sql.Selector) {
-		s.Where(sql.InValues(forecast.SkyConditionsColumn, fks...))
+		s.Where(sql.InValues(s.C(forecast.SkyConditionsColumn), fks...))
 	}))
 	neighbors, err := query.All(ctx)
 	if err != nil {
@@ -609,7 +609,7 @@ func (fq *ForecastQuery) loadSkyConditions(ctx context.Context, query *SkyCondit
 		}
 		node, ok := nodeids[*fk]
 		if !ok {
-			return fmt.Errorf(`unexpected foreign-key "forecast_sky_conditions" returned %v for node %v`, *fk, n.ID)
+			return fmt.Errorf(`unexpected referenced foreign-key "forecast_sky_conditions" returned %v for node %v`, *fk, n.ID)
 		}
 		assign(node, n)
 	}
@@ -627,7 +627,7 @@ func (fq *ForecastQuery) loadTurbulenceConditions(ctx context.Context, query *Tu
 	}
 	query.withFKs = true
 	query.Where(predicate.TurbulenceCondition(func(s *sql.Selector) {
-		s.Where(sql.InValues(forecast.TurbulenceConditionsColumn, fks...))
+		s.Where(sql.InValues(s.C(forecast.TurbulenceConditionsColumn), fks...))
 	}))
 	neighbors, err := query.All(ctx)
 	if err != nil {
@@ -640,7 +640,7 @@ func (fq *ForecastQuery) loadTurbulenceConditions(ctx context.Context, query *Tu
 		}
 		node, ok := nodeids[*fk]
 		if !ok {
-			return fmt.Errorf(`unexpected foreign-key "forecast_turbulence_conditions" returned %v for node %v`, *fk, n.ID)
+			return fmt.Errorf(`unexpected referenced foreign-key "forecast_turbulence_conditions" returned %v for node %v`, *fk, n.ID)
 		}
 		assign(node, n)
 	}
@@ -658,7 +658,7 @@ func (fq *ForecastQuery) loadIcingConditions(ctx context.Context, query *IcingCo
 	}
 	query.withFKs = true
 	query.Where(predicate.IcingCondition(func(s *sql.Selector) {
-		s.Where(sql.InValues(forecast.IcingConditionsColumn, fks...))
+		s.Where(sql.InValues(s.C(forecast.IcingConditionsColumn), fks...))
 	}))
 	neighbors, err := query.All(ctx)
 	if err != nil {
@@ -671,7 +671,7 @@ func (fq *ForecastQuery) loadIcingConditions(ctx context.Context, query *IcingCo
 		}
 		node, ok := nodeids[*fk]
 		if !ok {
-			return fmt.Errorf(`unexpected foreign-key "forecast_icing_conditions" returned %v for node %v`, *fk, n.ID)
+			return fmt.Errorf(`unexpected referenced foreign-key "forecast_icing_conditions" returned %v for node %v`, *fk, n.ID)
 		}
 		assign(node, n)
 	}
@@ -689,7 +689,7 @@ func (fq *ForecastQuery) loadTemperatureData(ctx context.Context, query *Tempera
 	}
 	query.withFKs = true
 	query.Where(predicate.TemperatureData(func(s *sql.Selector) {
-		s.Where(sql.InValues(forecast.TemperatureDataColumn, fks...))
+		s.Where(sql.InValues(s.C(forecast.TemperatureDataColumn), fks...))
 	}))
 	neighbors, err := query.All(ctx)
 	if err != nil {
@@ -702,7 +702,7 @@ func (fq *ForecastQuery) loadTemperatureData(ctx context.Context, query *Tempera
 		}
 		node, ok := nodeids[*fk]
 		if !ok {
-			return fmt.Errorf(`unexpected foreign-key "forecast_temperature_data" returned %v for node %v`, *fk, n.ID)
+			return fmt.Errorf(`unexpected referenced foreign-key "forecast_temperature_data" returned %v for node %v`, *fk, n.ID)
 		}
 		assign(node, n)
 	}

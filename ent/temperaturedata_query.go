@@ -19,7 +19,7 @@ import (
 type TemperatureDataQuery struct {
 	config
 	ctx        *QueryContext
-	order      []OrderFunc
+	order      []temperaturedata.OrderOption
 	inters     []Interceptor
 	predicates []predicate.TemperatureData
 	withFKs    bool
@@ -56,7 +56,7 @@ func (tdq *TemperatureDataQuery) Unique(unique bool) *TemperatureDataQuery {
 }
 
 // Order specifies how the records should be ordered.
-func (tdq *TemperatureDataQuery) Order(o ...OrderFunc) *TemperatureDataQuery {
+func (tdq *TemperatureDataQuery) Order(o ...temperaturedata.OrderOption) *TemperatureDataQuery {
 	tdq.order = append(tdq.order, o...)
 	return tdq
 }
@@ -250,7 +250,7 @@ func (tdq *TemperatureDataQuery) Clone() *TemperatureDataQuery {
 	return &TemperatureDataQuery{
 		config:     tdq.config,
 		ctx:        tdq.ctx.Clone(),
-		order:      append([]OrderFunc{}, tdq.order...),
+		order:      append([]temperaturedata.OrderOption{}, tdq.order...),
 		inters:     append([]Interceptor{}, tdq.inters...),
 		predicates: append([]predicate.TemperatureData{}, tdq.predicates...),
 		// clone intermediate query.

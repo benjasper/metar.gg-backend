@@ -5,6 +5,8 @@ package runway
 import (
 	"time"
 
+	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/dialect/sql/sqlgraph"
 	"github.com/google/uuid"
 )
 
@@ -123,3 +125,130 @@ var (
 	// DefaultID holds the default value on creation for the "id" field.
 	DefaultID func() uuid.UUID
 )
+
+// OrderOption defines the ordering options for the Runway queries.
+type OrderOption func(*sql.Selector)
+
+// ByID orders the results by the id field.
+func ByID(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldID, opts...).ToFunc()
+}
+
+// ByImportID orders the results by the import_id field.
+func ByImportID(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldImportID, opts...).ToFunc()
+}
+
+// ByHash orders the results by the hash field.
+func ByHash(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldHash, opts...).ToFunc()
+}
+
+// ByImportFlag orders the results by the import_flag field.
+func ByImportFlag(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldImportFlag, opts...).ToFunc()
+}
+
+// ByLastUpdated orders the results by the last_updated field.
+func ByLastUpdated(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldLastUpdated, opts...).ToFunc()
+}
+
+// ByLength orders the results by the length field.
+func ByLength(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldLength, opts...).ToFunc()
+}
+
+// ByWidth orders the results by the width field.
+func ByWidth(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldWidth, opts...).ToFunc()
+}
+
+// BySurface orders the results by the surface field.
+func BySurface(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldSurface, opts...).ToFunc()
+}
+
+// ByLighted orders the results by the lighted field.
+func ByLighted(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldLighted, opts...).ToFunc()
+}
+
+// ByClosed orders the results by the closed field.
+func ByClosed(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldClosed, opts...).ToFunc()
+}
+
+// ByLowRunwayIdentifier orders the results by the low_runway_identifier field.
+func ByLowRunwayIdentifier(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldLowRunwayIdentifier, opts...).ToFunc()
+}
+
+// ByLowRunwayLatitude orders the results by the low_runway_latitude field.
+func ByLowRunwayLatitude(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldLowRunwayLatitude, opts...).ToFunc()
+}
+
+// ByLowRunwayLongitude orders the results by the low_runway_longitude field.
+func ByLowRunwayLongitude(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldLowRunwayLongitude, opts...).ToFunc()
+}
+
+// ByLowRunwayElevation orders the results by the low_runway_elevation field.
+func ByLowRunwayElevation(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldLowRunwayElevation, opts...).ToFunc()
+}
+
+// ByLowRunwayHeading orders the results by the low_runway_heading field.
+func ByLowRunwayHeading(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldLowRunwayHeading, opts...).ToFunc()
+}
+
+// ByLowRunwayDisplacedThreshold orders the results by the low_runway_displaced_threshold field.
+func ByLowRunwayDisplacedThreshold(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldLowRunwayDisplacedThreshold, opts...).ToFunc()
+}
+
+// ByHighRunwayIdentifier orders the results by the high_runway_identifier field.
+func ByHighRunwayIdentifier(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldHighRunwayIdentifier, opts...).ToFunc()
+}
+
+// ByHighRunwayLatitude orders the results by the high_runway_latitude field.
+func ByHighRunwayLatitude(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldHighRunwayLatitude, opts...).ToFunc()
+}
+
+// ByHighRunwayLongitude orders the results by the high_runway_longitude field.
+func ByHighRunwayLongitude(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldHighRunwayLongitude, opts...).ToFunc()
+}
+
+// ByHighRunwayElevation orders the results by the high_runway_elevation field.
+func ByHighRunwayElevation(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldHighRunwayElevation, opts...).ToFunc()
+}
+
+// ByHighRunwayHeading orders the results by the high_runway_heading field.
+func ByHighRunwayHeading(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldHighRunwayHeading, opts...).ToFunc()
+}
+
+// ByHighRunwayDisplacedThreshold orders the results by the high_runway_displaced_threshold field.
+func ByHighRunwayDisplacedThreshold(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldHighRunwayDisplacedThreshold, opts...).ToFunc()
+}
+
+// ByAirportField orders the results by airport field.
+func ByAirportField(field string, opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newAirportStep(), sql.OrderByField(field, opts...))
+	}
+}
+func newAirportStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(AirportInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.M2O, true, AirportTable, AirportColumn),
+	)
+}

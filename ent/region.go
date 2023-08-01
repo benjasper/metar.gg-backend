@@ -8,6 +8,7 @@ import (
 	"strings"
 	"time"
 
+	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"github.com/google/uuid"
 	"metar.gg/ent/region"
@@ -39,7 +40,8 @@ type Region struct {
 	Keywords []string `json:"keywords,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the RegionQuery when eager-loading is set.
-	Edges RegionEdges `json:"edges"`
+	Edges        RegionEdges `json:"edges"`
+	selectValues sql.SelectValues
 }
 
 // RegionEdges holds the relations/edges for other nodes in the graph.
@@ -80,7 +82,7 @@ func (*Region) scanValues(columns []string) ([]any, error) {
 		case region.FieldID:
 			values[i] = new(uuid.UUID)
 		default:
-			return nil, fmt.Errorf("unexpected column %q for type Region", columns[i])
+			values[i] = new(sql.UnknownType)
 		}
 	}
 	return values, nil
@@ -156,9 +158,17 @@ func (r *Region) assignValues(columns []string, values []any) error {
 					return fmt.Errorf("unmarshal field keywords: %w", err)
 				}
 			}
+		default:
+			r.selectValues.Set(columns[i], values[i])
 		}
 	}
 	return nil
+}
+
+// Value returns the ent.Value that was dynamically selected and assigned to the Region.
+// This includes values selected through modifiers, order, etc.
+func (r *Region) Value(name string) (ent.Value, error) {
+	return r.selectValues.Get(name)
 }
 
 // QueryAirports queries the "airports" edge of the Region entity.

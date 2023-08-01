@@ -759,7 +759,7 @@ func (mu *MetarUpdate) RemoveSkyConditions(s ...*SkyCondition) *MetarUpdate {
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (mu *MetarUpdate) Save(ctx context.Context) (int, error) {
-	return withHooks[int, MetarMutation](ctx, mu.sqlSave, mu.mutation, mu.hooks)
+	return withHooks(ctx, mu.sqlSave, mu.mutation, mu.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -1056,10 +1056,7 @@ func (mu *MetarUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: []string{metar.StationColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: weatherstation.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(weatherstation.FieldID, field.TypeUUID),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -1072,10 +1069,7 @@ func (mu *MetarUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: []string{metar.StationColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: weatherstation.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(weatherstation.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -1091,10 +1085,7 @@ func (mu *MetarUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: []string{metar.SkyConditionsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: skycondition.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(skycondition.FieldID, field.TypeUUID),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -1107,10 +1098,7 @@ func (mu *MetarUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: []string{metar.SkyConditionsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: skycondition.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(skycondition.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -1126,10 +1114,7 @@ func (mu *MetarUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: []string{metar.SkyConditionsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: skycondition.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(skycondition.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -1899,7 +1884,7 @@ func (muo *MetarUpdateOne) Select(field string, fields ...string) *MetarUpdateOn
 
 // Save executes the query and returns the updated Metar entity.
 func (muo *MetarUpdateOne) Save(ctx context.Context) (*Metar, error) {
-	return withHooks[*Metar, MetarMutation](ctx, muo.sqlSave, muo.mutation, muo.hooks)
+	return withHooks(ctx, muo.sqlSave, muo.mutation, muo.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -2213,10 +2198,7 @@ func (muo *MetarUpdateOne) sqlSave(ctx context.Context) (_node *Metar, err error
 			Columns: []string{metar.StationColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: weatherstation.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(weatherstation.FieldID, field.TypeUUID),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -2229,10 +2211,7 @@ func (muo *MetarUpdateOne) sqlSave(ctx context.Context) (_node *Metar, err error
 			Columns: []string{metar.StationColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: weatherstation.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(weatherstation.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -2248,10 +2227,7 @@ func (muo *MetarUpdateOne) sqlSave(ctx context.Context) (_node *Metar, err error
 			Columns: []string{metar.SkyConditionsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: skycondition.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(skycondition.FieldID, field.TypeUUID),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -2264,10 +2240,7 @@ func (muo *MetarUpdateOne) sqlSave(ctx context.Context) (_node *Metar, err error
 			Columns: []string{metar.SkyConditionsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: skycondition.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(skycondition.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -2283,10 +2256,7 @@ func (muo *MetarUpdateOne) sqlSave(ctx context.Context) (_node *Metar, err error
 			Columns: []string{metar.SkyConditionsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: skycondition.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(skycondition.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {

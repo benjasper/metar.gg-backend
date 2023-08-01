@@ -6,9 +6,12 @@ import (
 	"bytes"
 	"context"
 	"errors"
+	"sync/atomic"
 
+	"entgo.io/contrib/entgql"
 	"github.com/99designs/gqlgen/graphql"
 	"github.com/99designs/gqlgen/graphql/introspection"
+	"github.com/google/uuid"
 	gqlparser "github.com/vektah/gqlparser/v2"
 	"github.com/vektah/gqlparser/v2/ast"
 	"metar.gg/ent"
@@ -199,9 +202,9 @@ type ComplexityRoot struct {
 
 	Query struct {
 		GetAirport  func(childComplexity int, id *string, identifier *string, icao *string, iata *string) int
-		GetAirports func(childComplexity int, first *int, after *ent.Cursor, before *ent.Cursor, last *int, identifier *string, icao *string, iata *string, typeArg *airport.Type, search *string, hasWeather *bool, order []*ent.AirportOrder) int
+		GetAirports func(childComplexity int, first *int, after *entgql.Cursor[uuid.UUID], before *entgql.Cursor[uuid.UUID], last *int, identifier *string, icao *string, iata *string, typeArg *airport.Type, search *string, hasWeather *bool, order []*ent.AirportOrder) int
 		GetStation  func(childComplexity int, id *string, identifier *string) int
-		GetStations func(childComplexity int, first *int, after *ent.Cursor, before *ent.Cursor, last *int, identifier *string) int
+		GetStations func(childComplexity int, first *int, after *entgql.Cursor[uuid.UUID], before *entgql.Cursor[uuid.UUID], last *int, identifier *string) int
 	}
 
 	Region struct {
@@ -296,9 +299,9 @@ type ComplexityRoot struct {
 		ID        func(childComplexity int) int
 		Latitude  func(childComplexity int) int
 		Longitude func(childComplexity int) int
-		Metars    func(childComplexity int, after *ent.Cursor, first *int, before *ent.Cursor, last *int) int
+		Metars    func(childComplexity int, after *entgql.Cursor[uuid.UUID], first *int, before *entgql.Cursor[uuid.UUID], last *int) int
 		StationID func(childComplexity int) int
-		Tafs      func(childComplexity int, after *ent.Cursor, first *int, before *ent.Cursor, last *int) int
+		Tafs      func(childComplexity int, after *entgql.Cursor[uuid.UUID], first *int, before *entgql.Cursor[uuid.UUID], last *int) int
 	}
 
 	WeatherStationConnection struct {
@@ -324,7 +327,7 @@ func (e *executableSchema) Schema() *ast.Schema {
 }
 
 func (e *executableSchema) Complexity(typeName, field string, childComplexity int, rawArgs map[string]interface{}) (int, bool) {
-	ec := executionContext{nil, e}
+	ec := executionContext{nil, e, 0, 0, nil}
 	_ = ec
 	switch typeName + "." + field {
 
@@ -1267,7 +1270,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Query.GetAirports(childComplexity, args["first"].(*int), args["after"].(*ent.Cursor), args["before"].(*ent.Cursor), args["last"].(*int), args["identifier"].(*string), args["icao"].(*string), args["iata"].(*string), args["type"].(*airport.Type), args["search"].(*string), args["hasWeather"].(*bool), args["order"].([]*ent.AirportOrder)), true
+		return e.complexity.Query.GetAirports(childComplexity, args["first"].(*int), args["after"].(*entgql.Cursor[uuid.UUID]), args["before"].(*entgql.Cursor[uuid.UUID]), args["last"].(*int), args["identifier"].(*string), args["icao"].(*string), args["iata"].(*string), args["type"].(*airport.Type), args["search"].(*string), args["hasWeather"].(*bool), args["order"].([]*ent.AirportOrder)), true
 
 	case "Query.getStation":
 		if e.complexity.Query.GetStation == nil {
@@ -1291,7 +1294,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Query.GetStations(childComplexity, args["first"].(*int), args["after"].(*ent.Cursor), args["before"].(*ent.Cursor), args["last"].(*int), args["identifier"].(*string)), true
+		return e.complexity.Query.GetStations(childComplexity, args["first"].(*int), args["after"].(*entgql.Cursor[uuid.UUID]), args["before"].(*entgql.Cursor[uuid.UUID]), args["last"].(*int), args["identifier"].(*string)), true
 
 	case "Region.code":
 		if e.complexity.Region.Code == nil {
@@ -1791,7 +1794,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.WeatherStation.Metars(childComplexity, args["after"].(*ent.Cursor), args["first"].(*int), args["before"].(*ent.Cursor), args["last"].(*int)), true
+		return e.complexity.WeatherStation.Metars(childComplexity, args["after"].(*entgql.Cursor[uuid.UUID]), args["first"].(*int), args["before"].(*entgql.Cursor[uuid.UUID]), args["last"].(*int)), true
 
 	case "WeatherStation.stationID":
 		if e.complexity.WeatherStation.StationID == nil {
@@ -1810,7 +1813,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.WeatherStation.Tafs(childComplexity, args["after"].(*ent.Cursor), args["first"].(*int), args["before"].(*ent.Cursor), args["last"].(*int)), true
+		return e.complexity.WeatherStation.Tafs(childComplexity, args["after"].(*entgql.Cursor[uuid.UUID]), args["first"].(*int), args["before"].(*entgql.Cursor[uuid.UUID]), args["last"].(*int)), true
 
 	case "WeatherStationConnection.edges":
 		if e.complexity.WeatherStationConnection.Edges == nil {
@@ -1853,9 +1856,10 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 	rc := graphql.GetOperationContext(ctx)
-	ec := executionContext{rc, e}
+	ec := executionContext{rc, e, 0, 0, make(chan graphql.DeferredResult)}
 	inputUnmarshalMap := graphql.BuildUnmarshalerMap(
 		ec.unmarshalInputAirportOrder,
+		ec.unmarshalInputMetarOrder,
 		ec.unmarshalInputTafOrder,
 	)
 	first := true
@@ -1863,18 +1867,33 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 	switch rc.Operation.Operation {
 	case ast.Query:
 		return func(ctx context.Context) *graphql.Response {
-			if !first {
-				return nil
+			var response graphql.Response
+			var data graphql.Marshaler
+			if first {
+				first = false
+				ctx = graphql.WithUnmarshalerMap(ctx, inputUnmarshalMap)
+				data = ec._Query(ctx, rc.Operation.SelectionSet)
+			} else {
+				if atomic.LoadInt32(&ec.pendingDeferred) > 0 {
+					result := <-ec.deferredResults
+					atomic.AddInt32(&ec.pendingDeferred, -1)
+					data = result.Result
+					response.Path = result.Path
+					response.Label = result.Label
+					response.Errors = result.Errors
+				} else {
+					return nil
+				}
 			}
-			first = false
-			ctx = graphql.WithUnmarshalerMap(ctx, inputUnmarshalMap)
-			data := ec._Query(ctx, rc.Operation.SelectionSet)
 			var buf bytes.Buffer
 			data.MarshalGQL(&buf)
-
-			return &graphql.Response{
-				Data: buf.Bytes(),
+			response.Data = buf.Bytes()
+			if atomic.LoadInt32(&ec.deferred) > 0 {
+				hasNext := atomic.LoadInt32(&ec.pendingDeferred) > 0
+				response.HasNext = &hasNext
 			}
+
+			return &response
 		}
 
 	default:
@@ -1885,6 +1904,28 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 type executionContext struct {
 	*graphql.OperationContext
 	*executableSchema
+	deferred        int32
+	pendingDeferred int32
+	deferredResults chan graphql.DeferredResult
+}
+
+func (ec *executionContext) processDeferredGroup(dg graphql.DeferredGroup) {
+	atomic.AddInt32(&ec.pendingDeferred, 1)
+	go func() {
+		ctx := graphql.WithFreshResponseContext(dg.Context)
+		dg.FieldSet.Dispatch(ctx)
+		ds := graphql.DeferredResult{
+			Path:   dg.Path,
+			Label:  dg.Label,
+			Result: dg.FieldSet,
+			Errors: graphql.GetErrors(ctx),
+		}
+		// null fields should bubble up
+		if dg.FieldSet.Invalids > 0 {
+			ds.Result = graphql.Null
+		}
+		ec.deferredResults <- ds
+	}()
 }
 
 func (ec *executionContext) introspectSchema() (*introspection.Schema, error) {
@@ -1945,9 +1986,13 @@ type Airport {
   wikipedia: String
   """Extra keywords/phrases to assist with search. May include former names for the airport, alternate codes, names in other languages, nearby tourist destinations, etc."""
   keywords: [String!]!
+  """The region that the airport is located in."""
   region: Region
+  """The country that the airport is located in."""
   country: Country
+  """Frequencies at the airport."""
   frequencies: [Frequency!]
+  """Weather station at the airport."""
   station: WeatherStation
 }
 """Ordering options for Airport connections"""
@@ -2020,9 +2065,13 @@ type Forecast {
   weather: String
   """The not decoded string."""
   notDecoded: String
+  """The sky conditions."""
   skyConditions: [SkyCondition!]
+  """The turbulence conditions."""
   turbulenceConditions: [TurbulenceCondition!]
+  """The icing conditions."""
   icingConditions: [IcingCondition!]
+  """The temperature data."""
   temperatureData: [TemperatureData!]
 }
 """ForecastChangeIndicator is enum for the field change_indicator"""
@@ -2101,7 +2150,9 @@ type Metar {
   precipitation24: Float
   """The type of METAR."""
   metarType: MetarMetarType!
+  """The station that provided the METAR."""
   station: WeatherStation!
+  """The sky conditions."""
   skyConditions: [SkyCondition!]
 }
 """MetarFlightCategory is enum for the field flight_category"""
@@ -2115,6 +2166,17 @@ enum MetarFlightCategory @goModel(model: "metar.gg/ent/metar.FlightCategory") {
 enum MetarMetarType @goModel(model: "metar.gg/ent/metar.MetarType") {
   METAR
   SPECI
+}
+"""Ordering options for Metar connections"""
+input MetarOrder {
+  """The ordering direction."""
+  direction: OrderDirection! = ASC
+  """The field by which to order Metars."""
+  field: MetarOrderField!
+}
+"""Properties by which Metar connections can be ordered."""
+enum MetarOrderField {
+  OBSERVATION_TIME
 }
 """Possible directions in which to order a list of items when provided an ` + "`" + `orderBy` + "`" + ` argument."""
 enum OrderDirection {
@@ -2222,7 +2284,9 @@ type Taf {
   validToTime: Time!
   """Remarks."""
   remarks: String!
+  """The station that issued this taf."""
   station: WeatherStation!
+  """The forecasts"""
   forecast: [Forecast!]
 }
 """Ordering options for Taf connections"""
@@ -2234,6 +2298,7 @@ input TafOrder {
 }
 """Properties by which Taf connections can be ordered."""
 enum TafOrderField {
+  ISSUE_TIME
   valid_from_time
 }
 type TemperatureData {
@@ -2259,6 +2324,7 @@ type WeatherStation {
   longitude: Float
   """The elevation in meters of the station."""
   elevation: Float
+  """The airport that hosts this station. This can also be empty if the metar is from a weather station outside an airport."""
   airport: Airport
 }
 `, BuiltIn: false},

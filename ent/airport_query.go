@@ -25,7 +25,7 @@ import (
 type AirportQuery struct {
 	config
 	ctx                  *QueryContext
-	order                []OrderFunc
+	order                []airport.OrderOption
 	inters               []Interceptor
 	predicates           []predicate.Airport
 	withRegion           *RegionQuery
@@ -69,7 +69,7 @@ func (aq *AirportQuery) Unique(unique bool) *AirportQuery {
 }
 
 // Order specifies how the records should be ordered.
-func (aq *AirportQuery) Order(o ...OrderFunc) *AirportQuery {
+func (aq *AirportQuery) Order(o ...airport.OrderOption) *AirportQuery {
 	aq.order = append(aq.order, o...)
 	return aq
 }
@@ -373,7 +373,7 @@ func (aq *AirportQuery) Clone() *AirportQuery {
 	return &AirportQuery{
 		config:          aq.config,
 		ctx:             aq.ctx.Clone(),
-		order:           append([]OrderFunc{}, aq.order...),
+		order:           append([]airport.OrderOption{}, aq.order...),
 		inters:          append([]Interceptor{}, aq.inters...),
 		predicates:      append([]predicate.Airport{}, aq.predicates...),
 		withRegion:      aq.withRegion.Clone(),
@@ -686,7 +686,7 @@ func (aq *AirportQuery) loadRunways(ctx context.Context, query *RunwayQuery, nod
 	}
 	query.withFKs = true
 	query.Where(predicate.Runway(func(s *sql.Selector) {
-		s.Where(sql.InValues(airport.RunwaysColumn, fks...))
+		s.Where(sql.InValues(s.C(airport.RunwaysColumn), fks...))
 	}))
 	neighbors, err := query.All(ctx)
 	if err != nil {
@@ -699,7 +699,7 @@ func (aq *AirportQuery) loadRunways(ctx context.Context, query *RunwayQuery, nod
 		}
 		node, ok := nodeids[*fk]
 		if !ok {
-			return fmt.Errorf(`unexpected foreign-key "airport_runways" returned %v for node %v`, *fk, n.ID)
+			return fmt.Errorf(`unexpected referenced foreign-key "airport_runways" returned %v for node %v`, *fk, n.ID)
 		}
 		assign(node, n)
 	}
@@ -717,7 +717,7 @@ func (aq *AirportQuery) loadFrequencies(ctx context.Context, query *FrequencyQue
 	}
 	query.withFKs = true
 	query.Where(predicate.Frequency(func(s *sql.Selector) {
-		s.Where(sql.InValues(airport.FrequenciesColumn, fks...))
+		s.Where(sql.InValues(s.C(airport.FrequenciesColumn), fks...))
 	}))
 	neighbors, err := query.All(ctx)
 	if err != nil {
@@ -730,7 +730,7 @@ func (aq *AirportQuery) loadFrequencies(ctx context.Context, query *FrequencyQue
 		}
 		node, ok := nodeids[*fk]
 		if !ok {
-			return fmt.Errorf(`unexpected foreign-key "airport_frequencies" returned %v for node %v`, *fk, n.ID)
+			return fmt.Errorf(`unexpected referenced foreign-key "airport_frequencies" returned %v for node %v`, *fk, n.ID)
 		}
 		assign(node, n)
 	}
@@ -745,7 +745,7 @@ func (aq *AirportQuery) loadStation(ctx context.Context, query *WeatherStationQu
 	}
 	query.withFKs = true
 	query.Where(predicate.WeatherStation(func(s *sql.Selector) {
-		s.Where(sql.InValues(airport.StationColumn, fks...))
+		s.Where(sql.InValues(s.C(airport.StationColumn), fks...))
 	}))
 	neighbors, err := query.All(ctx)
 	if err != nil {
@@ -758,7 +758,7 @@ func (aq *AirportQuery) loadStation(ctx context.Context, query *WeatherStationQu
 		}
 		node, ok := nodeids[*fk]
 		if !ok {
-			return fmt.Errorf(`unexpected foreign-key "airport_station" returned %v for node %v`, *fk, n.ID)
+			return fmt.Errorf(`unexpected referenced foreign-key "airport_station" returned %v for node %v`, *fk, n.ID)
 		}
 		assign(node, n)
 	}

@@ -27,7 +27,7 @@ func (wsd *WeatherStationDelete) Where(ps ...predicate.WeatherStation) *WeatherS
 
 // Exec executes the deletion query and returns how many vertices were deleted.
 func (wsd *WeatherStationDelete) Exec(ctx context.Context) (int, error) {
-	return withHooks[int, WeatherStationMutation](ctx, wsd.sqlExec, wsd.mutation, wsd.hooks)
+	return withHooks(ctx, wsd.sqlExec, wsd.mutation, wsd.hooks)
 }
 
 // ExecX is like Exec, but panics if an error occurs.

@@ -5,6 +5,8 @@ package taf
 import (
 	"time"
 
+	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/dialect/sql/sqlgraph"
 	"github.com/google/uuid"
 )
 
@@ -91,3 +93,86 @@ var (
 	// DefaultID holds the default value on creation for the "id" field.
 	DefaultID func() uuid.UUID
 )
+
+// OrderOption defines the ordering options for the Taf queries.
+type OrderOption func(*sql.Selector)
+
+// ByID orders the results by the id field.
+func ByID(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldID, opts...).ToFunc()
+}
+
+// ByRawText orders the results by the raw_text field.
+func ByRawText(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldRawText, opts...).ToFunc()
+}
+
+// ByIssueTime orders the results by the issue_time field.
+func ByIssueTime(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldIssueTime, opts...).ToFunc()
+}
+
+// ByImportTime orders the results by the import_time field.
+func ByImportTime(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldImportTime, opts...).ToFunc()
+}
+
+// ByBulletinTime orders the results by the bulletin_time field.
+func ByBulletinTime(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldBulletinTime, opts...).ToFunc()
+}
+
+// ByValidFromTime orders the results by the valid_from_time field.
+func ByValidFromTime(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldValidFromTime, opts...).ToFunc()
+}
+
+// ByValidToTime orders the results by the valid_to_time field.
+func ByValidToTime(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldValidToTime, opts...).ToFunc()
+}
+
+// ByRemarks orders the results by the remarks field.
+func ByRemarks(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldRemarks, opts...).ToFunc()
+}
+
+// ByHash orders the results by the hash field.
+func ByHash(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldHash, opts...).ToFunc()
+}
+
+// ByStationField orders the results by station field.
+func ByStationField(field string, opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newStationStep(), sql.OrderByField(field, opts...))
+	}
+}
+
+// ByForecastCount orders the results by forecast count.
+func ByForecastCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newForecastStep(), opts...)
+	}
+}
+
+// ByForecast orders the results by forecast terms.
+func ByForecast(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newForecastStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
+func newStationStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(StationInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.M2O, true, StationTable, StationColumn),
+	)
+}
+func newForecastStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(ForecastInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, ForecastTable, ForecastColumn),
+	)
+}

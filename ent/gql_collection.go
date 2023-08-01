@@ -5,8 +5,22 @@ package ent
 import (
 	"context"
 
+	"entgo.io/contrib/entgql"
 	"entgo.io/ent/dialect/sql"
 	"github.com/99designs/gqlgen/graphql"
+	"metar.gg/ent/airport"
+	"metar.gg/ent/country"
+	"metar.gg/ent/forecast"
+	"metar.gg/ent/frequency"
+	"metar.gg/ent/icingcondition"
+	"metar.gg/ent/metar"
+	"metar.gg/ent/region"
+	"metar.gg/ent/runway"
+	"metar.gg/ent/skycondition"
+	"metar.gg/ent/taf"
+	"metar.gg/ent/temperaturedata"
+	"metar.gg/ent/turbulencecondition"
+	"metar.gg/ent/weatherstation"
 )
 
 // CollectFields tells the query-builder to eagerly load connected nodes by resolver context.
@@ -21,9 +35,14 @@ func (a *AirportQuery) CollectFields(ctx context.Context, satisfies ...string) (
 	return a, nil
 }
 
-func (a *AirportQuery) collectField(ctx context.Context, op *graphql.OperationContext, field graphql.CollectedField, path []string, satisfies ...string) error {
+func (a *AirportQuery) collectField(ctx context.Context, opCtx *graphql.OperationContext, collected graphql.CollectedField, path []string, satisfies ...string) error {
 	path = append([]string(nil), path...)
-	for _, field := range graphql.CollectFields(op, field.Selections, satisfies) {
+	var (
+		unknownSeen    bool
+		fieldSeen      = make(map[string]struct{}, len(airport.Columns))
+		selectedFields = []string{airport.FieldID}
+	)
+	for _, field := range graphql.CollectFields(opCtx, collected.Selections, satisfies) {
 		switch field.Name {
 		case "region":
 			var (
@@ -31,7 +50,7 @@ func (a *AirportQuery) collectField(ctx context.Context, op *graphql.OperationCo
 				path  = append(path, alias)
 				query = (&RegionClient{config: a.config}).Query()
 			)
-			if err := query.collectField(ctx, op, field, path, satisfies...); err != nil {
+			if err := query.collectField(ctx, opCtx, field, path, satisfies...); err != nil {
 				return err
 			}
 			a.withRegion = query
@@ -41,7 +60,7 @@ func (a *AirportQuery) collectField(ctx context.Context, op *graphql.OperationCo
 				path  = append(path, alias)
 				query = (&CountryClient{config: a.config}).Query()
 			)
-			if err := query.collectField(ctx, op, field, path, satisfies...); err != nil {
+			if err := query.collectField(ctx, opCtx, field, path, satisfies...); err != nil {
 				return err
 			}
 			a.withCountry = query
@@ -51,7 +70,7 @@ func (a *AirportQuery) collectField(ctx context.Context, op *graphql.OperationCo
 				path  = append(path, alias)
 				query = (&FrequencyClient{config: a.config}).Query()
 			)
-			if err := query.collectField(ctx, op, field, path, satisfies...); err != nil {
+			if err := query.collectField(ctx, opCtx, field, path, satisfies...); err != nil {
 				return err
 			}
 			a.WithNamedFrequencies(alias, func(wq *FrequencyQuery) {
@@ -63,11 +82,113 @@ func (a *AirportQuery) collectField(ctx context.Context, op *graphql.OperationCo
 				path  = append(path, alias)
 				query = (&WeatherStationClient{config: a.config}).Query()
 			)
-			if err := query.collectField(ctx, op, field, path, satisfies...); err != nil {
+			if err := query.collectField(ctx, opCtx, field, path, satisfies...); err != nil {
 				return err
 			}
 			a.withStation = query
+		case "importID":
+			if _, ok := fieldSeen[airport.FieldImportID]; !ok {
+				selectedFields = append(selectedFields, airport.FieldImportID)
+				fieldSeen[airport.FieldImportID] = struct{}{}
+			}
+		case "lastUpdated":
+			if _, ok := fieldSeen[airport.FieldLastUpdated]; !ok {
+				selectedFields = append(selectedFields, airport.FieldLastUpdated)
+				fieldSeen[airport.FieldLastUpdated] = struct{}{}
+			}
+		case "icaoCode":
+			if _, ok := fieldSeen[airport.FieldIcaoCode]; !ok {
+				selectedFields = append(selectedFields, airport.FieldIcaoCode)
+				fieldSeen[airport.FieldIcaoCode] = struct{}{}
+			}
+		case "iataCode":
+			if _, ok := fieldSeen[airport.FieldIataCode]; !ok {
+				selectedFields = append(selectedFields, airport.FieldIataCode)
+				fieldSeen[airport.FieldIataCode] = struct{}{}
+			}
+		case "identifier":
+			if _, ok := fieldSeen[airport.FieldIdentifier]; !ok {
+				selectedFields = append(selectedFields, airport.FieldIdentifier)
+				fieldSeen[airport.FieldIdentifier] = struct{}{}
+			}
+		case "type":
+			if _, ok := fieldSeen[airport.FieldType]; !ok {
+				selectedFields = append(selectedFields, airport.FieldType)
+				fieldSeen[airport.FieldType] = struct{}{}
+			}
+		case "importance":
+			if _, ok := fieldSeen[airport.FieldImportance]; !ok {
+				selectedFields = append(selectedFields, airport.FieldImportance)
+				fieldSeen[airport.FieldImportance] = struct{}{}
+			}
+		case "name":
+			if _, ok := fieldSeen[airport.FieldName]; !ok {
+				selectedFields = append(selectedFields, airport.FieldName)
+				fieldSeen[airport.FieldName] = struct{}{}
+			}
+		case "latitude":
+			if _, ok := fieldSeen[airport.FieldLatitude]; !ok {
+				selectedFields = append(selectedFields, airport.FieldLatitude)
+				fieldSeen[airport.FieldLatitude] = struct{}{}
+			}
+		case "longitude":
+			if _, ok := fieldSeen[airport.FieldLongitude]; !ok {
+				selectedFields = append(selectedFields, airport.FieldLongitude)
+				fieldSeen[airport.FieldLongitude] = struct{}{}
+			}
+		case "timezone":
+			if _, ok := fieldSeen[airport.FieldTimezone]; !ok {
+				selectedFields = append(selectedFields, airport.FieldTimezone)
+				fieldSeen[airport.FieldTimezone] = struct{}{}
+			}
+		case "elevation":
+			if _, ok := fieldSeen[airport.FieldElevation]; !ok {
+				selectedFields = append(selectedFields, airport.FieldElevation)
+				fieldSeen[airport.FieldElevation] = struct{}{}
+			}
+		case "municipality":
+			if _, ok := fieldSeen[airport.FieldMunicipality]; !ok {
+				selectedFields = append(selectedFields, airport.FieldMunicipality)
+				fieldSeen[airport.FieldMunicipality] = struct{}{}
+			}
+		case "scheduledService":
+			if _, ok := fieldSeen[airport.FieldScheduledService]; !ok {
+				selectedFields = append(selectedFields, airport.FieldScheduledService)
+				fieldSeen[airport.FieldScheduledService] = struct{}{}
+			}
+		case "gpsCode":
+			if _, ok := fieldSeen[airport.FieldGpsCode]; !ok {
+				selectedFields = append(selectedFields, airport.FieldGpsCode)
+				fieldSeen[airport.FieldGpsCode] = struct{}{}
+			}
+		case "localCode":
+			if _, ok := fieldSeen[airport.FieldLocalCode]; !ok {
+				selectedFields = append(selectedFields, airport.FieldLocalCode)
+				fieldSeen[airport.FieldLocalCode] = struct{}{}
+			}
+		case "website":
+			if _, ok := fieldSeen[airport.FieldWebsite]; !ok {
+				selectedFields = append(selectedFields, airport.FieldWebsite)
+				fieldSeen[airport.FieldWebsite] = struct{}{}
+			}
+		case "wikipedia":
+			if _, ok := fieldSeen[airport.FieldWikipedia]; !ok {
+				selectedFields = append(selectedFields, airport.FieldWikipedia)
+				fieldSeen[airport.FieldWikipedia] = struct{}{}
+			}
+		case "keywords":
+			if _, ok := fieldSeen[airport.FieldKeywords]; !ok {
+				selectedFields = append(selectedFields, airport.FieldKeywords)
+				fieldSeen[airport.FieldKeywords] = struct{}{}
+			}
+		case "id":
+		case "__typename":
+		default:
+			unknownSeen = true
 		}
+	}
+	if !unknownSeen {
+		a.Select(selectedFields...)
 	}
 	return nil
 }
@@ -78,7 +199,7 @@ type airportPaginateArgs struct {
 	opts          []AirportPaginateOption
 }
 
-func newAirportPaginateArgs(rv map[string]interface{}) *airportPaginateArgs {
+func newAirportPaginateArgs(rv map[string]any) *airportPaginateArgs {
 	args := &airportPaginateArgs{}
 	if rv == nil {
 		return args
@@ -97,10 +218,10 @@ func newAirportPaginateArgs(rv map[string]interface{}) *airportPaginateArgs {
 	}
 	if v, ok := rv[orderByField]; ok {
 		switch v := v.(type) {
-		case map[string]interface{}:
+		case map[string]any:
 			var (
 				err1, err2 error
-				order      = &AirportOrder{Field: &AirportOrderField{}}
+				order      = &AirportOrder{Field: &AirportOrderField{}, Direction: entgql.OrderDirectionAsc}
 			)
 			if d, ok := v[directionField]; ok {
 				err1 = order.Direction.UnmarshalGQL(d)
@@ -132,8 +253,59 @@ func (c *CountryQuery) CollectFields(ctx context.Context, satisfies ...string) (
 	return c, nil
 }
 
-func (c *CountryQuery) collectField(ctx context.Context, op *graphql.OperationContext, field graphql.CollectedField, path []string, satisfies ...string) error {
+func (c *CountryQuery) collectField(ctx context.Context, opCtx *graphql.OperationContext, collected graphql.CollectedField, path []string, satisfies ...string) error {
 	path = append([]string(nil), path...)
+	var (
+		unknownSeen    bool
+		fieldSeen      = make(map[string]struct{}, len(country.Columns))
+		selectedFields = []string{country.FieldID}
+	)
+	for _, field := range graphql.CollectFields(opCtx, collected.Selections, satisfies) {
+		switch field.Name {
+		case "importID":
+			if _, ok := fieldSeen[country.FieldImportID]; !ok {
+				selectedFields = append(selectedFields, country.FieldImportID)
+				fieldSeen[country.FieldImportID] = struct{}{}
+			}
+		case "lastUpdated":
+			if _, ok := fieldSeen[country.FieldLastUpdated]; !ok {
+				selectedFields = append(selectedFields, country.FieldLastUpdated)
+				fieldSeen[country.FieldLastUpdated] = struct{}{}
+			}
+		case "code":
+			if _, ok := fieldSeen[country.FieldCode]; !ok {
+				selectedFields = append(selectedFields, country.FieldCode)
+				fieldSeen[country.FieldCode] = struct{}{}
+			}
+		case "name":
+			if _, ok := fieldSeen[country.FieldName]; !ok {
+				selectedFields = append(selectedFields, country.FieldName)
+				fieldSeen[country.FieldName] = struct{}{}
+			}
+		case "continent":
+			if _, ok := fieldSeen[country.FieldContinent]; !ok {
+				selectedFields = append(selectedFields, country.FieldContinent)
+				fieldSeen[country.FieldContinent] = struct{}{}
+			}
+		case "wikipediaLink":
+			if _, ok := fieldSeen[country.FieldWikipediaLink]; !ok {
+				selectedFields = append(selectedFields, country.FieldWikipediaLink)
+				fieldSeen[country.FieldWikipediaLink] = struct{}{}
+			}
+		case "keywords":
+			if _, ok := fieldSeen[country.FieldKeywords]; !ok {
+				selectedFields = append(selectedFields, country.FieldKeywords)
+				fieldSeen[country.FieldKeywords] = struct{}{}
+			}
+		case "id":
+		case "__typename":
+		default:
+			unknownSeen = true
+		}
+	}
+	if !unknownSeen {
+		c.Select(selectedFields...)
+	}
 	return nil
 }
 
@@ -143,7 +315,7 @@ type countryPaginateArgs struct {
 	opts          []CountryPaginateOption
 }
 
-func newCountryPaginateArgs(rv map[string]interface{}) *countryPaginateArgs {
+func newCountryPaginateArgs(rv map[string]any) *countryPaginateArgs {
 	args := &countryPaginateArgs{}
 	if rv == nil {
 		return args
@@ -175,9 +347,14 @@ func (f *ForecastQuery) CollectFields(ctx context.Context, satisfies ...string) 
 	return f, nil
 }
 
-func (f *ForecastQuery) collectField(ctx context.Context, op *graphql.OperationContext, field graphql.CollectedField, path []string, satisfies ...string) error {
+func (f *ForecastQuery) collectField(ctx context.Context, opCtx *graphql.OperationContext, collected graphql.CollectedField, path []string, satisfies ...string) error {
 	path = append([]string(nil), path...)
-	for _, field := range graphql.CollectFields(op, field.Selections, satisfies) {
+	var (
+		unknownSeen    bool
+		fieldSeen      = make(map[string]struct{}, len(forecast.Columns))
+		selectedFields = []string{forecast.FieldID}
+	)
+	for _, field := range graphql.CollectFields(opCtx, collected.Selections, satisfies) {
 		switch field.Name {
 		case "skyConditions":
 			var (
@@ -185,7 +362,7 @@ func (f *ForecastQuery) collectField(ctx context.Context, op *graphql.OperationC
 				path  = append(path, alias)
 				query = (&SkyConditionClient{config: f.config}).Query()
 			)
-			if err := query.collectField(ctx, op, field, path, satisfies...); err != nil {
+			if err := query.collectField(ctx, opCtx, field, path, satisfies...); err != nil {
 				return err
 			}
 			f.WithNamedSkyConditions(alias, func(wq *SkyConditionQuery) {
@@ -197,7 +374,7 @@ func (f *ForecastQuery) collectField(ctx context.Context, op *graphql.OperationC
 				path  = append(path, alias)
 				query = (&TurbulenceConditionClient{config: f.config}).Query()
 			)
-			if err := query.collectField(ctx, op, field, path, satisfies...); err != nil {
+			if err := query.collectField(ctx, opCtx, field, path, satisfies...); err != nil {
 				return err
 			}
 			f.WithNamedTurbulenceConditions(alias, func(wq *TurbulenceConditionQuery) {
@@ -209,7 +386,7 @@ func (f *ForecastQuery) collectField(ctx context.Context, op *graphql.OperationC
 				path  = append(path, alias)
 				query = (&IcingConditionClient{config: f.config}).Query()
 			)
-			if err := query.collectField(ctx, op, field, path, satisfies...); err != nil {
+			if err := query.collectField(ctx, opCtx, field, path, satisfies...); err != nil {
 				return err
 			}
 			f.WithNamedIcingConditions(alias, func(wq *IcingConditionQuery) {
@@ -221,13 +398,65 @@ func (f *ForecastQuery) collectField(ctx context.Context, op *graphql.OperationC
 				path  = append(path, alias)
 				query = (&TemperatureDataClient{config: f.config}).Query()
 			)
-			if err := query.collectField(ctx, op, field, path, satisfies...); err != nil {
+			if err := query.collectField(ctx, opCtx, field, path, satisfies...); err != nil {
 				return err
 			}
 			f.WithNamedTemperatureData(alias, func(wq *TemperatureDataQuery) {
 				*wq = *query
 			})
+		case "fromTime":
+			if _, ok := fieldSeen[forecast.FieldFromTime]; !ok {
+				selectedFields = append(selectedFields, forecast.FieldFromTime)
+				fieldSeen[forecast.FieldFromTime] = struct{}{}
+			}
+		case "toTime":
+			if _, ok := fieldSeen[forecast.FieldToTime]; !ok {
+				selectedFields = append(selectedFields, forecast.FieldToTime)
+				fieldSeen[forecast.FieldToTime] = struct{}{}
+			}
+		case "changeIndicator":
+			if _, ok := fieldSeen[forecast.FieldChangeIndicator]; !ok {
+				selectedFields = append(selectedFields, forecast.FieldChangeIndicator)
+				fieldSeen[forecast.FieldChangeIndicator] = struct{}{}
+			}
+		case "changeTime":
+			if _, ok := fieldSeen[forecast.FieldChangeTime]; !ok {
+				selectedFields = append(selectedFields, forecast.FieldChangeTime)
+				fieldSeen[forecast.FieldChangeTime] = struct{}{}
+			}
+		case "changeProbability":
+			if _, ok := fieldSeen[forecast.FieldChangeProbability]; !ok {
+				selectedFields = append(selectedFields, forecast.FieldChangeProbability)
+				fieldSeen[forecast.FieldChangeProbability] = struct{}{}
+			}
+		case "windDirection":
+			if _, ok := fieldSeen[forecast.FieldWindDirection]; !ok {
+				selectedFields = append(selectedFields, forecast.FieldWindDirection)
+				fieldSeen[forecast.FieldWindDirection] = struct{}{}
+			}
+		case "windShearDirection":
+			if _, ok := fieldSeen[forecast.FieldWindShearDirection]; !ok {
+				selectedFields = append(selectedFields, forecast.FieldWindShearDirection)
+				fieldSeen[forecast.FieldWindShearDirection] = struct{}{}
+			}
+		case "weather":
+			if _, ok := fieldSeen[forecast.FieldWeather]; !ok {
+				selectedFields = append(selectedFields, forecast.FieldWeather)
+				fieldSeen[forecast.FieldWeather] = struct{}{}
+			}
+		case "notDecoded":
+			if _, ok := fieldSeen[forecast.FieldNotDecoded]; !ok {
+				selectedFields = append(selectedFields, forecast.FieldNotDecoded)
+				fieldSeen[forecast.FieldNotDecoded] = struct{}{}
+			}
+		case "id":
+		case "__typename":
+		default:
+			unknownSeen = true
 		}
+	}
+	if !unknownSeen {
+		f.Select(selectedFields...)
 	}
 	return nil
 }
@@ -238,7 +467,7 @@ type forecastPaginateArgs struct {
 	opts          []ForecastPaginateOption
 }
 
-func newForecastPaginateArgs(rv map[string]interface{}) *forecastPaginateArgs {
+func newForecastPaginateArgs(rv map[string]any) *forecastPaginateArgs {
 	args := &forecastPaginateArgs{}
 	if rv == nil {
 		return args
@@ -270,9 +499,14 @@ func (f *FrequencyQuery) CollectFields(ctx context.Context, satisfies ...string)
 	return f, nil
 }
 
-func (f *FrequencyQuery) collectField(ctx context.Context, op *graphql.OperationContext, field graphql.CollectedField, path []string, satisfies ...string) error {
+func (f *FrequencyQuery) collectField(ctx context.Context, opCtx *graphql.OperationContext, collected graphql.CollectedField, path []string, satisfies ...string) error {
 	path = append([]string(nil), path...)
-	for _, field := range graphql.CollectFields(op, field.Selections, satisfies) {
+	var (
+		unknownSeen    bool
+		fieldSeen      = make(map[string]struct{}, len(frequency.Columns))
+		selectedFields = []string{frequency.FieldID}
+	)
+	for _, field := range graphql.CollectFields(opCtx, collected.Selections, satisfies) {
 		switch field.Name {
 		case "airport":
 			var (
@@ -280,11 +514,43 @@ func (f *FrequencyQuery) collectField(ctx context.Context, op *graphql.Operation
 				path  = append(path, alias)
 				query = (&AirportClient{config: f.config}).Query()
 			)
-			if err := query.collectField(ctx, op, field, path, satisfies...); err != nil {
+			if err := query.collectField(ctx, opCtx, field, path, satisfies...); err != nil {
 				return err
 			}
 			f.withAirport = query
+		case "importID":
+			if _, ok := fieldSeen[frequency.FieldImportID]; !ok {
+				selectedFields = append(selectedFields, frequency.FieldImportID)
+				fieldSeen[frequency.FieldImportID] = struct{}{}
+			}
+		case "lastUpdated":
+			if _, ok := fieldSeen[frequency.FieldLastUpdated]; !ok {
+				selectedFields = append(selectedFields, frequency.FieldLastUpdated)
+				fieldSeen[frequency.FieldLastUpdated] = struct{}{}
+			}
+		case "type":
+			if _, ok := fieldSeen[frequency.FieldType]; !ok {
+				selectedFields = append(selectedFields, frequency.FieldType)
+				fieldSeen[frequency.FieldType] = struct{}{}
+			}
+		case "description":
+			if _, ok := fieldSeen[frequency.FieldDescription]; !ok {
+				selectedFields = append(selectedFields, frequency.FieldDescription)
+				fieldSeen[frequency.FieldDescription] = struct{}{}
+			}
+		case "frequency":
+			if _, ok := fieldSeen[frequency.FieldFrequency]; !ok {
+				selectedFields = append(selectedFields, frequency.FieldFrequency)
+				fieldSeen[frequency.FieldFrequency] = struct{}{}
+			}
+		case "id":
+		case "__typename":
+		default:
+			unknownSeen = true
 		}
+	}
+	if !unknownSeen {
+		f.Select(selectedFields...)
 	}
 	return nil
 }
@@ -295,7 +561,7 @@ type frequencyPaginateArgs struct {
 	opts          []FrequencyPaginateOption
 }
 
-func newFrequencyPaginateArgs(rv map[string]interface{}) *frequencyPaginateArgs {
+func newFrequencyPaginateArgs(rv map[string]any) *frequencyPaginateArgs {
 	args := &frequencyPaginateArgs{}
 	if rv == nil {
 		return args
@@ -327,8 +593,29 @@ func (ic *IcingConditionQuery) CollectFields(ctx context.Context, satisfies ...s
 	return ic, nil
 }
 
-func (ic *IcingConditionQuery) collectField(ctx context.Context, op *graphql.OperationContext, field graphql.CollectedField, path []string, satisfies ...string) error {
+func (ic *IcingConditionQuery) collectField(ctx context.Context, opCtx *graphql.OperationContext, collected graphql.CollectedField, path []string, satisfies ...string) error {
 	path = append([]string(nil), path...)
+	var (
+		unknownSeen    bool
+		fieldSeen      = make(map[string]struct{}, len(icingcondition.Columns))
+		selectedFields = []string{icingcondition.FieldID}
+	)
+	for _, field := range graphql.CollectFields(opCtx, collected.Selections, satisfies) {
+		switch field.Name {
+		case "intensity":
+			if _, ok := fieldSeen[icingcondition.FieldIntensity]; !ok {
+				selectedFields = append(selectedFields, icingcondition.FieldIntensity)
+				fieldSeen[icingcondition.FieldIntensity] = struct{}{}
+			}
+		case "id":
+		case "__typename":
+		default:
+			unknownSeen = true
+		}
+	}
+	if !unknownSeen {
+		ic.Select(selectedFields...)
+	}
 	return nil
 }
 
@@ -338,7 +625,7 @@ type icingconditionPaginateArgs struct {
 	opts          []IcingConditionPaginateOption
 }
 
-func newIcingConditionPaginateArgs(rv map[string]interface{}) *icingconditionPaginateArgs {
+func newIcingConditionPaginateArgs(rv map[string]any) *icingconditionPaginateArgs {
 	args := &icingconditionPaginateArgs{}
 	if rv == nil {
 		return args
@@ -370,9 +657,14 @@ func (m *MetarQuery) CollectFields(ctx context.Context, satisfies ...string) (*M
 	return m, nil
 }
 
-func (m *MetarQuery) collectField(ctx context.Context, op *graphql.OperationContext, field graphql.CollectedField, path []string, satisfies ...string) error {
+func (m *MetarQuery) collectField(ctx context.Context, opCtx *graphql.OperationContext, collected graphql.CollectedField, path []string, satisfies ...string) error {
 	path = append([]string(nil), path...)
-	for _, field := range graphql.CollectFields(op, field.Selections, satisfies) {
+	var (
+		unknownSeen    bool
+		fieldSeen      = make(map[string]struct{}, len(metar.Columns))
+		selectedFields = []string{metar.FieldID}
+	)
+	for _, field := range graphql.CollectFields(opCtx, collected.Selections, satisfies) {
 		switch field.Name {
 		case "station":
 			var (
@@ -380,7 +672,7 @@ func (m *MetarQuery) collectField(ctx context.Context, op *graphql.OperationCont
 				path  = append(path, alias)
 				query = (&WeatherStationClient{config: m.config}).Query()
 			)
-			if err := query.collectField(ctx, op, field, path, satisfies...); err != nil {
+			if err := query.collectField(ctx, opCtx, field, path, satisfies...); err != nil {
 				return err
 			}
 			m.withStation = query
@@ -390,13 +682,135 @@ func (m *MetarQuery) collectField(ctx context.Context, op *graphql.OperationCont
 				path  = append(path, alias)
 				query = (&SkyConditionClient{config: m.config}).Query()
 			)
-			if err := query.collectField(ctx, op, field, path, satisfies...); err != nil {
+			if err := query.collectField(ctx, opCtx, field, path, satisfies...); err != nil {
 				return err
 			}
 			m.WithNamedSkyConditions(alias, func(wq *SkyConditionQuery) {
 				*wq = *query
 			})
+		case "rawText":
+			if _, ok := fieldSeen[metar.FieldRawText]; !ok {
+				selectedFields = append(selectedFields, metar.FieldRawText)
+				fieldSeen[metar.FieldRawText] = struct{}{}
+			}
+		case "observationTime":
+			if _, ok := fieldSeen[metar.FieldObservationTime]; !ok {
+				selectedFields = append(selectedFields, metar.FieldObservationTime)
+				fieldSeen[metar.FieldObservationTime] = struct{}{}
+			}
+		case "importTime":
+			if _, ok := fieldSeen[metar.FieldImportTime]; !ok {
+				selectedFields = append(selectedFields, metar.FieldImportTime)
+				fieldSeen[metar.FieldImportTime] = struct{}{}
+			}
+		case "nextImportTimePrediction":
+			if _, ok := fieldSeen[metar.FieldNextImportTimePrediction]; !ok {
+				selectedFields = append(selectedFields, metar.FieldNextImportTimePrediction)
+				fieldSeen[metar.FieldNextImportTimePrediction] = struct{}{}
+			}
+		case "windDirection":
+			if _, ok := fieldSeen[metar.FieldWindDirection]; !ok {
+				selectedFields = append(selectedFields, metar.FieldWindDirection)
+				fieldSeen[metar.FieldWindDirection] = struct{}{}
+			}
+		case "presentWeather":
+			if _, ok := fieldSeen[metar.FieldPresentWeather]; !ok {
+				selectedFields = append(selectedFields, metar.FieldPresentWeather)
+				fieldSeen[metar.FieldPresentWeather] = struct{}{}
+			}
+		case "flightCategory":
+			if _, ok := fieldSeen[metar.FieldFlightCategory]; !ok {
+				selectedFields = append(selectedFields, metar.FieldFlightCategory)
+				fieldSeen[metar.FieldFlightCategory] = struct{}{}
+			}
+		case "qualityControlCorrected":
+			if _, ok := fieldSeen[metar.FieldQualityControlCorrected]; !ok {
+				selectedFields = append(selectedFields, metar.FieldQualityControlCorrected)
+				fieldSeen[metar.FieldQualityControlCorrected] = struct{}{}
+			}
+		case "qualityControlAutoStation":
+			if _, ok := fieldSeen[metar.FieldQualityControlAutoStation]; !ok {
+				selectedFields = append(selectedFields, metar.FieldQualityControlAutoStation)
+				fieldSeen[metar.FieldQualityControlAutoStation] = struct{}{}
+			}
+		case "qualityControlMaintenanceIndicatorOn":
+			if _, ok := fieldSeen[metar.FieldQualityControlMaintenanceIndicatorOn]; !ok {
+				selectedFields = append(selectedFields, metar.FieldQualityControlMaintenanceIndicatorOn)
+				fieldSeen[metar.FieldQualityControlMaintenanceIndicatorOn] = struct{}{}
+			}
+		case "qualityControlNoSignal":
+			if _, ok := fieldSeen[metar.FieldQualityControlNoSignal]; !ok {
+				selectedFields = append(selectedFields, metar.FieldQualityControlNoSignal)
+				fieldSeen[metar.FieldQualityControlNoSignal] = struct{}{}
+			}
+		case "qualityControlLightningSensorOff":
+			if _, ok := fieldSeen[metar.FieldQualityControlLightningSensorOff]; !ok {
+				selectedFields = append(selectedFields, metar.FieldQualityControlLightningSensorOff)
+				fieldSeen[metar.FieldQualityControlLightningSensorOff] = struct{}{}
+			}
+		case "qualityControlFreezingRainSensorOff":
+			if _, ok := fieldSeen[metar.FieldQualityControlFreezingRainSensorOff]; !ok {
+				selectedFields = append(selectedFields, metar.FieldQualityControlFreezingRainSensorOff)
+				fieldSeen[metar.FieldQualityControlFreezingRainSensorOff] = struct{}{}
+			}
+		case "qualityControlPresentWeatherSensorOff":
+			if _, ok := fieldSeen[metar.FieldQualityControlPresentWeatherSensorOff]; !ok {
+				selectedFields = append(selectedFields, metar.FieldQualityControlPresentWeatherSensorOff)
+				fieldSeen[metar.FieldQualityControlPresentWeatherSensorOff] = struct{}{}
+			}
+		case "maxTemp6":
+			if _, ok := fieldSeen[metar.FieldMaxTemp6]; !ok {
+				selectedFields = append(selectedFields, metar.FieldMaxTemp6)
+				fieldSeen[metar.FieldMaxTemp6] = struct{}{}
+			}
+		case "minTemp6":
+			if _, ok := fieldSeen[metar.FieldMinTemp6]; !ok {
+				selectedFields = append(selectedFields, metar.FieldMinTemp6)
+				fieldSeen[metar.FieldMinTemp6] = struct{}{}
+			}
+		case "maxTemp24":
+			if _, ok := fieldSeen[metar.FieldMaxTemp24]; !ok {
+				selectedFields = append(selectedFields, metar.FieldMaxTemp24)
+				fieldSeen[metar.FieldMaxTemp24] = struct{}{}
+			}
+		case "minTemp24":
+			if _, ok := fieldSeen[metar.FieldMinTemp24]; !ok {
+				selectedFields = append(selectedFields, metar.FieldMinTemp24)
+				fieldSeen[metar.FieldMinTemp24] = struct{}{}
+			}
+		case "precipitation":
+			if _, ok := fieldSeen[metar.FieldPrecipitation]; !ok {
+				selectedFields = append(selectedFields, metar.FieldPrecipitation)
+				fieldSeen[metar.FieldPrecipitation] = struct{}{}
+			}
+		case "precipitation3":
+			if _, ok := fieldSeen[metar.FieldPrecipitation3]; !ok {
+				selectedFields = append(selectedFields, metar.FieldPrecipitation3)
+				fieldSeen[metar.FieldPrecipitation3] = struct{}{}
+			}
+		case "precipitation6":
+			if _, ok := fieldSeen[metar.FieldPrecipitation6]; !ok {
+				selectedFields = append(selectedFields, metar.FieldPrecipitation6)
+				fieldSeen[metar.FieldPrecipitation6] = struct{}{}
+			}
+		case "precipitation24":
+			if _, ok := fieldSeen[metar.FieldPrecipitation24]; !ok {
+				selectedFields = append(selectedFields, metar.FieldPrecipitation24)
+				fieldSeen[metar.FieldPrecipitation24] = struct{}{}
+			}
+		case "metarType":
+			if _, ok := fieldSeen[metar.FieldMetarType]; !ok {
+				selectedFields = append(selectedFields, metar.FieldMetarType)
+				fieldSeen[metar.FieldMetarType] = struct{}{}
+			}
+		case "id":
+		case "__typename":
+		default:
+			unknownSeen = true
 		}
+	}
+	if !unknownSeen {
+		m.Select(selectedFields...)
 	}
 	return nil
 }
@@ -407,7 +821,7 @@ type metarPaginateArgs struct {
 	opts          []MetarPaginateOption
 }
 
-func newMetarPaginateArgs(rv map[string]interface{}) *metarPaginateArgs {
+func newMetarPaginateArgs(rv map[string]any) *metarPaginateArgs {
 	args := &metarPaginateArgs{}
 	if rv == nil {
 		return args
@@ -424,6 +838,28 @@ func newMetarPaginateArgs(rv map[string]interface{}) *metarPaginateArgs {
 	if v := rv[beforeField]; v != nil {
 		args.before = v.(*Cursor)
 	}
+	if v, ok := rv[orderByField]; ok {
+		switch v := v.(type) {
+		case map[string]any:
+			var (
+				err1, err2 error
+				order      = &MetarOrder{Field: &MetarOrderField{}, Direction: entgql.OrderDirectionAsc}
+			)
+			if d, ok := v[directionField]; ok {
+				err1 = order.Direction.UnmarshalGQL(d)
+			}
+			if f, ok := v[fieldField]; ok {
+				err2 = order.Field.UnmarshalGQL(f)
+			}
+			if err1 == nil && err2 == nil {
+				args.opts = append(args.opts, WithMetarOrder(order))
+			}
+		case *MetarOrder:
+			if v != nil {
+				args.opts = append(args.opts, WithMetarOrder(v))
+			}
+		}
+	}
 	return args
 }
 
@@ -439,8 +875,59 @@ func (r *RegionQuery) CollectFields(ctx context.Context, satisfies ...string) (*
 	return r, nil
 }
 
-func (r *RegionQuery) collectField(ctx context.Context, op *graphql.OperationContext, field graphql.CollectedField, path []string, satisfies ...string) error {
+func (r *RegionQuery) collectField(ctx context.Context, opCtx *graphql.OperationContext, collected graphql.CollectedField, path []string, satisfies ...string) error {
 	path = append([]string(nil), path...)
+	var (
+		unknownSeen    bool
+		fieldSeen      = make(map[string]struct{}, len(region.Columns))
+		selectedFields = []string{region.FieldID}
+	)
+	for _, field := range graphql.CollectFields(opCtx, collected.Selections, satisfies) {
+		switch field.Name {
+		case "importID":
+			if _, ok := fieldSeen[region.FieldImportID]; !ok {
+				selectedFields = append(selectedFields, region.FieldImportID)
+				fieldSeen[region.FieldImportID] = struct{}{}
+			}
+		case "lastUpdated":
+			if _, ok := fieldSeen[region.FieldLastUpdated]; !ok {
+				selectedFields = append(selectedFields, region.FieldLastUpdated)
+				fieldSeen[region.FieldLastUpdated] = struct{}{}
+			}
+		case "code":
+			if _, ok := fieldSeen[region.FieldCode]; !ok {
+				selectedFields = append(selectedFields, region.FieldCode)
+				fieldSeen[region.FieldCode] = struct{}{}
+			}
+		case "localCode":
+			if _, ok := fieldSeen[region.FieldLocalCode]; !ok {
+				selectedFields = append(selectedFields, region.FieldLocalCode)
+				fieldSeen[region.FieldLocalCode] = struct{}{}
+			}
+		case "name":
+			if _, ok := fieldSeen[region.FieldName]; !ok {
+				selectedFields = append(selectedFields, region.FieldName)
+				fieldSeen[region.FieldName] = struct{}{}
+			}
+		case "wikipediaLink":
+			if _, ok := fieldSeen[region.FieldWikipediaLink]; !ok {
+				selectedFields = append(selectedFields, region.FieldWikipediaLink)
+				fieldSeen[region.FieldWikipediaLink] = struct{}{}
+			}
+		case "keywords":
+			if _, ok := fieldSeen[region.FieldKeywords]; !ok {
+				selectedFields = append(selectedFields, region.FieldKeywords)
+				fieldSeen[region.FieldKeywords] = struct{}{}
+			}
+		case "id":
+		case "__typename":
+		default:
+			unknownSeen = true
+		}
+	}
+	if !unknownSeen {
+		r.Select(selectedFields...)
+	}
 	return nil
 }
 
@@ -450,7 +937,7 @@ type regionPaginateArgs struct {
 	opts          []RegionPaginateOption
 }
 
-func newRegionPaginateArgs(rv map[string]interface{}) *regionPaginateArgs {
+func newRegionPaginateArgs(rv map[string]any) *regionPaginateArgs {
 	args := &regionPaginateArgs{}
 	if rv == nil {
 		return args
@@ -482,9 +969,14 @@ func (r *RunwayQuery) CollectFields(ctx context.Context, satisfies ...string) (*
 	return r, nil
 }
 
-func (r *RunwayQuery) collectField(ctx context.Context, op *graphql.OperationContext, field graphql.CollectedField, path []string, satisfies ...string) error {
+func (r *RunwayQuery) collectField(ctx context.Context, opCtx *graphql.OperationContext, collected graphql.CollectedField, path []string, satisfies ...string) error {
 	path = append([]string(nil), path...)
-	for _, field := range graphql.CollectFields(op, field.Selections, satisfies) {
+	var (
+		unknownSeen    bool
+		fieldSeen      = make(map[string]struct{}, len(runway.Columns))
+		selectedFields = []string{runway.FieldID}
+	)
+	for _, field := range graphql.CollectFields(opCtx, collected.Selections, satisfies) {
 		switch field.Name {
 		case "airport":
 			var (
@@ -492,11 +984,103 @@ func (r *RunwayQuery) collectField(ctx context.Context, op *graphql.OperationCon
 				path  = append(path, alias)
 				query = (&AirportClient{config: r.config}).Query()
 			)
-			if err := query.collectField(ctx, op, field, path, satisfies...); err != nil {
+			if err := query.collectField(ctx, opCtx, field, path, satisfies...); err != nil {
 				return err
 			}
 			r.withAirport = query
+		case "importID":
+			if _, ok := fieldSeen[runway.FieldImportID]; !ok {
+				selectedFields = append(selectedFields, runway.FieldImportID)
+				fieldSeen[runway.FieldImportID] = struct{}{}
+			}
+		case "lastUpdated":
+			if _, ok := fieldSeen[runway.FieldLastUpdated]; !ok {
+				selectedFields = append(selectedFields, runway.FieldLastUpdated)
+				fieldSeen[runway.FieldLastUpdated] = struct{}{}
+			}
+		case "surface":
+			if _, ok := fieldSeen[runway.FieldSurface]; !ok {
+				selectedFields = append(selectedFields, runway.FieldSurface)
+				fieldSeen[runway.FieldSurface] = struct{}{}
+			}
+		case "lighted":
+			if _, ok := fieldSeen[runway.FieldLighted]; !ok {
+				selectedFields = append(selectedFields, runway.FieldLighted)
+				fieldSeen[runway.FieldLighted] = struct{}{}
+			}
+		case "closed":
+			if _, ok := fieldSeen[runway.FieldClosed]; !ok {
+				selectedFields = append(selectedFields, runway.FieldClosed)
+				fieldSeen[runway.FieldClosed] = struct{}{}
+			}
+		case "lowRunwayIdentifier":
+			if _, ok := fieldSeen[runway.FieldLowRunwayIdentifier]; !ok {
+				selectedFields = append(selectedFields, runway.FieldLowRunwayIdentifier)
+				fieldSeen[runway.FieldLowRunwayIdentifier] = struct{}{}
+			}
+		case "lowRunwayLatitude":
+			if _, ok := fieldSeen[runway.FieldLowRunwayLatitude]; !ok {
+				selectedFields = append(selectedFields, runway.FieldLowRunwayLatitude)
+				fieldSeen[runway.FieldLowRunwayLatitude] = struct{}{}
+			}
+		case "lowRunwayLongitude":
+			if _, ok := fieldSeen[runway.FieldLowRunwayLongitude]; !ok {
+				selectedFields = append(selectedFields, runway.FieldLowRunwayLongitude)
+				fieldSeen[runway.FieldLowRunwayLongitude] = struct{}{}
+			}
+		case "lowRunwayElevation":
+			if _, ok := fieldSeen[runway.FieldLowRunwayElevation]; !ok {
+				selectedFields = append(selectedFields, runway.FieldLowRunwayElevation)
+				fieldSeen[runway.FieldLowRunwayElevation] = struct{}{}
+			}
+		case "lowRunwayHeading":
+			if _, ok := fieldSeen[runway.FieldLowRunwayHeading]; !ok {
+				selectedFields = append(selectedFields, runway.FieldLowRunwayHeading)
+				fieldSeen[runway.FieldLowRunwayHeading] = struct{}{}
+			}
+		case "lowRunwayDisplacedThreshold":
+			if _, ok := fieldSeen[runway.FieldLowRunwayDisplacedThreshold]; !ok {
+				selectedFields = append(selectedFields, runway.FieldLowRunwayDisplacedThreshold)
+				fieldSeen[runway.FieldLowRunwayDisplacedThreshold] = struct{}{}
+			}
+		case "highRunwayIdentifier":
+			if _, ok := fieldSeen[runway.FieldHighRunwayIdentifier]; !ok {
+				selectedFields = append(selectedFields, runway.FieldHighRunwayIdentifier)
+				fieldSeen[runway.FieldHighRunwayIdentifier] = struct{}{}
+			}
+		case "highRunwayLatitude":
+			if _, ok := fieldSeen[runway.FieldHighRunwayLatitude]; !ok {
+				selectedFields = append(selectedFields, runway.FieldHighRunwayLatitude)
+				fieldSeen[runway.FieldHighRunwayLatitude] = struct{}{}
+			}
+		case "highRunwayLongitude":
+			if _, ok := fieldSeen[runway.FieldHighRunwayLongitude]; !ok {
+				selectedFields = append(selectedFields, runway.FieldHighRunwayLongitude)
+				fieldSeen[runway.FieldHighRunwayLongitude] = struct{}{}
+			}
+		case "highRunwayElevation":
+			if _, ok := fieldSeen[runway.FieldHighRunwayElevation]; !ok {
+				selectedFields = append(selectedFields, runway.FieldHighRunwayElevation)
+				fieldSeen[runway.FieldHighRunwayElevation] = struct{}{}
+			}
+		case "highRunwayHeading":
+			if _, ok := fieldSeen[runway.FieldHighRunwayHeading]; !ok {
+				selectedFields = append(selectedFields, runway.FieldHighRunwayHeading)
+				fieldSeen[runway.FieldHighRunwayHeading] = struct{}{}
+			}
+		case "highRunwayDisplacedThreshold":
+			if _, ok := fieldSeen[runway.FieldHighRunwayDisplacedThreshold]; !ok {
+				selectedFields = append(selectedFields, runway.FieldHighRunwayDisplacedThreshold)
+				fieldSeen[runway.FieldHighRunwayDisplacedThreshold] = struct{}{}
+			}
+		case "id":
+		case "__typename":
+		default:
+			unknownSeen = true
 		}
+	}
+	if !unknownSeen {
+		r.Select(selectedFields...)
 	}
 	return nil
 }
@@ -507,7 +1091,7 @@ type runwayPaginateArgs struct {
 	opts          []RunwayPaginateOption
 }
 
-func newRunwayPaginateArgs(rv map[string]interface{}) *runwayPaginateArgs {
+func newRunwayPaginateArgs(rv map[string]any) *runwayPaginateArgs {
 	args := &runwayPaginateArgs{}
 	if rv == nil {
 		return args
@@ -539,8 +1123,34 @@ func (sc *SkyConditionQuery) CollectFields(ctx context.Context, satisfies ...str
 	return sc, nil
 }
 
-func (sc *SkyConditionQuery) collectField(ctx context.Context, op *graphql.OperationContext, field graphql.CollectedField, path []string, satisfies ...string) error {
+func (sc *SkyConditionQuery) collectField(ctx context.Context, opCtx *graphql.OperationContext, collected graphql.CollectedField, path []string, satisfies ...string) error {
 	path = append([]string(nil), path...)
+	var (
+		unknownSeen    bool
+		fieldSeen      = make(map[string]struct{}, len(skycondition.Columns))
+		selectedFields = []string{skycondition.FieldID}
+	)
+	for _, field := range graphql.CollectFields(opCtx, collected.Selections, satisfies) {
+		switch field.Name {
+		case "skyCover":
+			if _, ok := fieldSeen[skycondition.FieldSkyCover]; !ok {
+				selectedFields = append(selectedFields, skycondition.FieldSkyCover)
+				fieldSeen[skycondition.FieldSkyCover] = struct{}{}
+			}
+		case "cloudType":
+			if _, ok := fieldSeen[skycondition.FieldCloudType]; !ok {
+				selectedFields = append(selectedFields, skycondition.FieldCloudType)
+				fieldSeen[skycondition.FieldCloudType] = struct{}{}
+			}
+		case "id":
+		case "__typename":
+		default:
+			unknownSeen = true
+		}
+	}
+	if !unknownSeen {
+		sc.Select(selectedFields...)
+	}
 	return nil
 }
 
@@ -550,7 +1160,7 @@ type skyconditionPaginateArgs struct {
 	opts          []SkyConditionPaginateOption
 }
 
-func newSkyConditionPaginateArgs(rv map[string]interface{}) *skyconditionPaginateArgs {
+func newSkyConditionPaginateArgs(rv map[string]any) *skyconditionPaginateArgs {
 	args := &skyconditionPaginateArgs{}
 	if rv == nil {
 		return args
@@ -582,9 +1192,14 @@ func (t *TafQuery) CollectFields(ctx context.Context, satisfies ...string) (*Taf
 	return t, nil
 }
 
-func (t *TafQuery) collectField(ctx context.Context, op *graphql.OperationContext, field graphql.CollectedField, path []string, satisfies ...string) error {
+func (t *TafQuery) collectField(ctx context.Context, opCtx *graphql.OperationContext, collected graphql.CollectedField, path []string, satisfies ...string) error {
 	path = append([]string(nil), path...)
-	for _, field := range graphql.CollectFields(op, field.Selections, satisfies) {
+	var (
+		unknownSeen    bool
+		fieldSeen      = make(map[string]struct{}, len(taf.Columns))
+		selectedFields = []string{taf.FieldID}
+	)
+	for _, field := range graphql.CollectFields(opCtx, collected.Selections, satisfies) {
 		switch field.Name {
 		case "station":
 			var (
@@ -592,7 +1207,7 @@ func (t *TafQuery) collectField(ctx context.Context, op *graphql.OperationContex
 				path  = append(path, alias)
 				query = (&WeatherStationClient{config: t.config}).Query()
 			)
-			if err := query.collectField(ctx, op, field, path, satisfies...); err != nil {
+			if err := query.collectField(ctx, opCtx, field, path, satisfies...); err != nil {
 				return err
 			}
 			t.withStation = query
@@ -602,13 +1217,55 @@ func (t *TafQuery) collectField(ctx context.Context, op *graphql.OperationContex
 				path  = append(path, alias)
 				query = (&ForecastClient{config: t.config}).Query()
 			)
-			if err := query.collectField(ctx, op, field, path, satisfies...); err != nil {
+			if err := query.collectField(ctx, opCtx, field, path, satisfies...); err != nil {
 				return err
 			}
 			t.WithNamedForecast(alias, func(wq *ForecastQuery) {
 				*wq = *query
 			})
+		case "rawText":
+			if _, ok := fieldSeen[taf.FieldRawText]; !ok {
+				selectedFields = append(selectedFields, taf.FieldRawText)
+				fieldSeen[taf.FieldRawText] = struct{}{}
+			}
+		case "issueTime":
+			if _, ok := fieldSeen[taf.FieldIssueTime]; !ok {
+				selectedFields = append(selectedFields, taf.FieldIssueTime)
+				fieldSeen[taf.FieldIssueTime] = struct{}{}
+			}
+		case "importTime":
+			if _, ok := fieldSeen[taf.FieldImportTime]; !ok {
+				selectedFields = append(selectedFields, taf.FieldImportTime)
+				fieldSeen[taf.FieldImportTime] = struct{}{}
+			}
+		case "bulletinTime":
+			if _, ok := fieldSeen[taf.FieldBulletinTime]; !ok {
+				selectedFields = append(selectedFields, taf.FieldBulletinTime)
+				fieldSeen[taf.FieldBulletinTime] = struct{}{}
+			}
+		case "validFromTime":
+			if _, ok := fieldSeen[taf.FieldValidFromTime]; !ok {
+				selectedFields = append(selectedFields, taf.FieldValidFromTime)
+				fieldSeen[taf.FieldValidFromTime] = struct{}{}
+			}
+		case "validToTime":
+			if _, ok := fieldSeen[taf.FieldValidToTime]; !ok {
+				selectedFields = append(selectedFields, taf.FieldValidToTime)
+				fieldSeen[taf.FieldValidToTime] = struct{}{}
+			}
+		case "remarks":
+			if _, ok := fieldSeen[taf.FieldRemarks]; !ok {
+				selectedFields = append(selectedFields, taf.FieldRemarks)
+				fieldSeen[taf.FieldRemarks] = struct{}{}
+			}
+		case "id":
+		case "__typename":
+		default:
+			unknownSeen = true
 		}
+	}
+	if !unknownSeen {
+		t.Select(selectedFields...)
 	}
 	return nil
 }
@@ -619,7 +1276,7 @@ type tafPaginateArgs struct {
 	opts          []TafPaginateOption
 }
 
-func newTafPaginateArgs(rv map[string]interface{}) *tafPaginateArgs {
+func newTafPaginateArgs(rv map[string]any) *tafPaginateArgs {
 	args := &tafPaginateArgs{}
 	if rv == nil {
 		return args
@@ -638,10 +1295,10 @@ func newTafPaginateArgs(rv map[string]interface{}) *tafPaginateArgs {
 	}
 	if v, ok := rv[orderByField]; ok {
 		switch v := v.(type) {
-		case map[string]interface{}:
+		case map[string]any:
 			var (
 				err1, err2 error
-				order      = &TafOrder{Field: &TafOrderField{}}
+				order      = &TafOrder{Field: &TafOrderField{}, Direction: entgql.OrderDirectionAsc}
 			)
 			if d, ok := v[directionField]; ok {
 				err1 = order.Direction.UnmarshalGQL(d)
@@ -673,8 +1330,29 @@ func (td *TemperatureDataQuery) CollectFields(ctx context.Context, satisfies ...
 	return td, nil
 }
 
-func (td *TemperatureDataQuery) collectField(ctx context.Context, op *graphql.OperationContext, field graphql.CollectedField, path []string, satisfies ...string) error {
+func (td *TemperatureDataQuery) collectField(ctx context.Context, opCtx *graphql.OperationContext, collected graphql.CollectedField, path []string, satisfies ...string) error {
 	path = append([]string(nil), path...)
+	var (
+		unknownSeen    bool
+		fieldSeen      = make(map[string]struct{}, len(temperaturedata.Columns))
+		selectedFields = []string{temperaturedata.FieldID}
+	)
+	for _, field := range graphql.CollectFields(opCtx, collected.Selections, satisfies) {
+		switch field.Name {
+		case "validTime":
+			if _, ok := fieldSeen[temperaturedata.FieldValidTime]; !ok {
+				selectedFields = append(selectedFields, temperaturedata.FieldValidTime)
+				fieldSeen[temperaturedata.FieldValidTime] = struct{}{}
+			}
+		case "id":
+		case "__typename":
+		default:
+			unknownSeen = true
+		}
+	}
+	if !unknownSeen {
+		td.Select(selectedFields...)
+	}
 	return nil
 }
 
@@ -684,7 +1362,7 @@ type temperaturedataPaginateArgs struct {
 	opts          []TemperatureDataPaginateOption
 }
 
-func newTemperatureDataPaginateArgs(rv map[string]interface{}) *temperaturedataPaginateArgs {
+func newTemperatureDataPaginateArgs(rv map[string]any) *temperaturedataPaginateArgs {
 	args := &temperaturedataPaginateArgs{}
 	if rv == nil {
 		return args
@@ -716,8 +1394,29 @@ func (tc *TurbulenceConditionQuery) CollectFields(ctx context.Context, satisfies
 	return tc, nil
 }
 
-func (tc *TurbulenceConditionQuery) collectField(ctx context.Context, op *graphql.OperationContext, field graphql.CollectedField, path []string, satisfies ...string) error {
+func (tc *TurbulenceConditionQuery) collectField(ctx context.Context, opCtx *graphql.OperationContext, collected graphql.CollectedField, path []string, satisfies ...string) error {
 	path = append([]string(nil), path...)
+	var (
+		unknownSeen    bool
+		fieldSeen      = make(map[string]struct{}, len(turbulencecondition.Columns))
+		selectedFields = []string{turbulencecondition.FieldID}
+	)
+	for _, field := range graphql.CollectFields(opCtx, collected.Selections, satisfies) {
+		switch field.Name {
+		case "intensity":
+			if _, ok := fieldSeen[turbulencecondition.FieldIntensity]; !ok {
+				selectedFields = append(selectedFields, turbulencecondition.FieldIntensity)
+				fieldSeen[turbulencecondition.FieldIntensity] = struct{}{}
+			}
+		case "id":
+		case "__typename":
+		default:
+			unknownSeen = true
+		}
+	}
+	if !unknownSeen {
+		tc.Select(selectedFields...)
+	}
 	return nil
 }
 
@@ -727,7 +1426,7 @@ type turbulenceconditionPaginateArgs struct {
 	opts          []TurbulenceConditionPaginateOption
 }
 
-func newTurbulenceConditionPaginateArgs(rv map[string]interface{}) *turbulenceconditionPaginateArgs {
+func newTurbulenceConditionPaginateArgs(rv map[string]any) *turbulenceconditionPaginateArgs {
 	args := &turbulenceconditionPaginateArgs{}
 	if rv == nil {
 		return args
@@ -759,9 +1458,14 @@ func (ws *WeatherStationQuery) CollectFields(ctx context.Context, satisfies ...s
 	return ws, nil
 }
 
-func (ws *WeatherStationQuery) collectField(ctx context.Context, op *graphql.OperationContext, field graphql.CollectedField, path []string, satisfies ...string) error {
+func (ws *WeatherStationQuery) collectField(ctx context.Context, opCtx *graphql.OperationContext, collected graphql.CollectedField, path []string, satisfies ...string) error {
 	path = append([]string(nil), path...)
-	for _, field := range graphql.CollectFields(op, field.Selections, satisfies) {
+	var (
+		unknownSeen    bool
+		fieldSeen      = make(map[string]struct{}, len(weatherstation.Columns))
+		selectedFields = []string{weatherstation.FieldID}
+	)
+	for _, field := range graphql.CollectFields(opCtx, collected.Selections, satisfies) {
 		switch field.Name {
 		case "airport":
 			var (
@@ -769,11 +1473,38 @@ func (ws *WeatherStationQuery) collectField(ctx context.Context, op *graphql.Ope
 				path  = append(path, alias)
 				query = (&AirportClient{config: ws.config}).Query()
 			)
-			if err := query.collectField(ctx, op, field, path, satisfies...); err != nil {
+			if err := query.collectField(ctx, opCtx, field, path, satisfies...); err != nil {
 				return err
 			}
 			ws.withAirport = query
+		case "stationID":
+			if _, ok := fieldSeen[weatherstation.FieldStationID]; !ok {
+				selectedFields = append(selectedFields, weatherstation.FieldStationID)
+				fieldSeen[weatherstation.FieldStationID] = struct{}{}
+			}
+		case "latitude":
+			if _, ok := fieldSeen[weatherstation.FieldLatitude]; !ok {
+				selectedFields = append(selectedFields, weatherstation.FieldLatitude)
+				fieldSeen[weatherstation.FieldLatitude] = struct{}{}
+			}
+		case "longitude":
+			if _, ok := fieldSeen[weatherstation.FieldLongitude]; !ok {
+				selectedFields = append(selectedFields, weatherstation.FieldLongitude)
+				fieldSeen[weatherstation.FieldLongitude] = struct{}{}
+			}
+		case "elevation":
+			if _, ok := fieldSeen[weatherstation.FieldElevation]; !ok {
+				selectedFields = append(selectedFields, weatherstation.FieldElevation)
+				fieldSeen[weatherstation.FieldElevation] = struct{}{}
+			}
+		case "id":
+		case "__typename":
+		default:
+			unknownSeen = true
 		}
+	}
+	if !unknownSeen {
+		ws.Select(selectedFields...)
 	}
 	return nil
 }
@@ -784,7 +1515,7 @@ type weatherstationPaginateArgs struct {
 	opts          []WeatherStationPaginateOption
 }
 
-func newWeatherStationPaginateArgs(rv map[string]interface{}) *weatherstationPaginateArgs {
+func newWeatherStationPaginateArgs(rv map[string]any) *weatherstationPaginateArgs {
 	args := &weatherstationPaginateArgs{}
 	if rv == nil {
 		return args
@@ -815,35 +1546,18 @@ const (
 	whereField     = "where"
 )
 
-func fieldArgs(ctx context.Context, whereInput interface{}, path ...string) map[string]interface{} {
-	fc := graphql.GetFieldContext(ctx)
-	if fc == nil {
+func fieldArgs(ctx context.Context, whereInput any, path ...string) map[string]any {
+	field := collectedField(ctx, path...)
+	if field == nil || field.Arguments == nil {
 		return nil
 	}
 	oc := graphql.GetOperationContext(ctx)
-	for _, name := range path {
-		var field *graphql.CollectedField
-		for _, f := range graphql.CollectFields(oc, fc.Field.Selections, nil) {
-			if f.Alias == name {
-				field = &f
-				break
-			}
-		}
-		if field == nil {
-			return nil
-		}
-		cf, err := fc.Child(ctx, *field)
-		if err != nil {
-			args := field.ArgumentMap(oc.Variables)
-			return unmarshalArgs(ctx, whereInput, args)
-		}
-		fc = cf
-	}
-	return fc.Args
+	args := field.ArgumentMap(oc.Variables)
+	return unmarshalArgs(ctx, whereInput, args)
 }
 
 // unmarshalArgs allows extracting the field arguments from their raw representation.
-func unmarshalArgs(ctx context.Context, whereInput interface{}, args map[string]interface{}) map[string]interface{} {
+func unmarshalArgs(ctx context.Context, whereInput any, args map[string]any) map[string]any {
 	for _, k := range []string{firstField, lastField} {
 		v, ok := args[k]
 		if !ok {
@@ -894,4 +1608,18 @@ func limitRows(partitionBy string, limit int, orderBy ...sql.Querier) func(s *sq
 			Where(sql.LTE(t.C("row_number"), limit)).
 			Prefix(with)
 	}
+}
+
+// mayAddCondition appends another type condition to the satisfies list
+// if condition is enabled (Node/Nodes) and it does not exist in the list.
+func mayAddCondition(satisfies []string, typeCond string) []string {
+	if len(satisfies) == 0 {
+		return satisfies
+	}
+	for _, s := range satisfies {
+		if typeCond == s {
+			return satisfies
+		}
+	}
+	return append(satisfies, typeCond)
 }

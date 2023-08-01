@@ -5,6 +5,8 @@ package frequency
 import (
 	"time"
 
+	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/dialect/sql/sqlgraph"
 	"github.com/google/uuid"
 )
 
@@ -81,3 +83,60 @@ var (
 	// DefaultID holds the default value on creation for the "id" field.
 	DefaultID func() uuid.UUID
 )
+
+// OrderOption defines the ordering options for the Frequency queries.
+type OrderOption func(*sql.Selector)
+
+// ByID orders the results by the id field.
+func ByID(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldID, opts...).ToFunc()
+}
+
+// ByImportID orders the results by the import_id field.
+func ByImportID(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldImportID, opts...).ToFunc()
+}
+
+// ByHash orders the results by the hash field.
+func ByHash(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldHash, opts...).ToFunc()
+}
+
+// ByImportFlag orders the results by the import_flag field.
+func ByImportFlag(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldImportFlag, opts...).ToFunc()
+}
+
+// ByLastUpdated orders the results by the last_updated field.
+func ByLastUpdated(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldLastUpdated, opts...).ToFunc()
+}
+
+// ByType orders the results by the type field.
+func ByType(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldType, opts...).ToFunc()
+}
+
+// ByDescription orders the results by the description field.
+func ByDescription(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldDescription, opts...).ToFunc()
+}
+
+// ByFrequency orders the results by the frequency field.
+func ByFrequency(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldFrequency, opts...).ToFunc()
+}
+
+// ByAirportField orders the results by airport field.
+func ByAirportField(field string, opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newAirportStep(), sql.OrderByField(field, opts...))
+	}
+}
+func newAirportStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(AirportInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.M2O, true, AirportTable, AirportColumn),
+	)
+}

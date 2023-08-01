@@ -11,6 +11,10 @@ import (
 	"github.com/google/uuid"
 	"metar.gg/ent/migrate"
 
+	"entgo.io/ent"
+	"entgo.io/ent/dialect"
+	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/dialect/sql/sqlgraph"
 	"metar.gg/ent/airport"
 	"metar.gg/ent/country"
 	"metar.gg/ent/forecast"
@@ -24,10 +28,6 @@ import (
 	"metar.gg/ent/temperaturedata"
 	"metar.gg/ent/turbulencecondition"
 	"metar.gg/ent/weatherstation"
-
-	"entgo.io/ent/dialect"
-	"entgo.io/ent/dialect/sql"
-	"entgo.io/ent/dialect/sql/sqlgraph"
 )
 
 // Client is the client that holds all ent builders.
@@ -87,6 +87,55 @@ func (c *Client) init() {
 	c.TemperatureData = NewTemperatureDataClient(c.config)
 	c.TurbulenceCondition = NewTurbulenceConditionClient(c.config)
 	c.WeatherStation = NewWeatherStationClient(c.config)
+}
+
+type (
+	// config is the configuration for the client and its builder.
+	config struct {
+		// driver used for executing database requests.
+		driver dialect.Driver
+		// debug enable a debug logging.
+		debug bool
+		// log used for logging on debug mode.
+		log func(...any)
+		// hooks to execute on mutations.
+		hooks *hooks
+		// interceptors to execute on queries.
+		inters *inters
+	}
+	// Option function to configure the client.
+	Option func(*config)
+)
+
+// options applies the options on the config object.
+func (c *config) options(opts ...Option) {
+	for _, opt := range opts {
+		opt(c)
+	}
+	if c.debug {
+		c.driver = dialect.Debug(c.driver, c.log)
+	}
+}
+
+// Debug enables debug logging on the ent.Driver.
+func Debug() Option {
+	return func(c *config) {
+		c.debug = true
+	}
+}
+
+// Log sets the logging function for debug mode.
+func Log(fn func(...any)) Option {
+	return func(c *config) {
+		c.log = fn
+	}
+}
+
+// Driver configures the client driver.
+func Driver(driver dialect.Driver) Option {
+	return func(c *config) {
+		c.driver = driver
+	}
 }
 
 // Open opens a database/sql.DB specified by the driver name and
@@ -193,37 +242,25 @@ func (c *Client) Close() error {
 // Use adds the mutation hooks to all the entity clients.
 // In order to add hooks to a specific client, call: `client.Node.Use(...)`.
 func (c *Client) Use(hooks ...Hook) {
-	c.Airport.Use(hooks...)
-	c.Country.Use(hooks...)
-	c.Forecast.Use(hooks...)
-	c.Frequency.Use(hooks...)
-	c.IcingCondition.Use(hooks...)
-	c.Metar.Use(hooks...)
-	c.Region.Use(hooks...)
-	c.Runway.Use(hooks...)
-	c.SkyCondition.Use(hooks...)
-	c.Taf.Use(hooks...)
-	c.TemperatureData.Use(hooks...)
-	c.TurbulenceCondition.Use(hooks...)
-	c.WeatherStation.Use(hooks...)
+	for _, n := range []interface{ Use(...Hook) }{
+		c.Airport, c.Country, c.Forecast, c.Frequency, c.IcingCondition, c.Metar,
+		c.Region, c.Runway, c.SkyCondition, c.Taf, c.TemperatureData,
+		c.TurbulenceCondition, c.WeatherStation,
+	} {
+		n.Use(hooks...)
+	}
 }
 
 // Intercept adds the query interceptors to all the entity clients.
 // In order to add interceptors to a specific client, call: `client.Node.Intercept(...)`.
 func (c *Client) Intercept(interceptors ...Interceptor) {
-	c.Airport.Intercept(interceptors...)
-	c.Country.Intercept(interceptors...)
-	c.Forecast.Intercept(interceptors...)
-	c.Frequency.Intercept(interceptors...)
-	c.IcingCondition.Intercept(interceptors...)
-	c.Metar.Intercept(interceptors...)
-	c.Region.Intercept(interceptors...)
-	c.Runway.Intercept(interceptors...)
-	c.SkyCondition.Intercept(interceptors...)
-	c.Taf.Intercept(interceptors...)
-	c.TemperatureData.Intercept(interceptors...)
-	c.TurbulenceCondition.Intercept(interceptors...)
-	c.WeatherStation.Intercept(interceptors...)
+	for _, n := range []interface{ Intercept(...Interceptor) }{
+		c.Airport, c.Country, c.Forecast, c.Frequency, c.IcingCondition, c.Metar,
+		c.Region, c.Runway, c.SkyCondition, c.Taf, c.TemperatureData,
+		c.TurbulenceCondition, c.WeatherStation,
+	} {
+		n.Intercept(interceptors...)
+	}
 }
 
 // Mutate implements the ent.Mutator interface.
@@ -2113,3 +2150,17 @@ func (c *WeatherStationClient) mutate(ctx context.Context, m *WeatherStationMuta
 		return nil, fmt.Errorf("ent: unknown WeatherStation mutation op: %q", m.Op())
 	}
 }
+
+// hooks and interceptors per client, for fast access.
+type (
+	hooks struct {
+		Airport, Country, Forecast, Frequency, IcingCondition, Metar, Region, Runway,
+		SkyCondition, Taf, TemperatureData, TurbulenceCondition,
+		WeatherStation []ent.Hook
+	}
+	inters struct {
+		Airport, Country, Forecast, Frequency, IcingCondition, Metar, Region, Runway,
+		SkyCondition, Taf, TemperatureData, TurbulenceCondition,
+		WeatherStation []ent.Interceptor
+	}
+)

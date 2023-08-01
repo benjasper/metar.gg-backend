@@ -373,11 +373,7 @@ func HasAirport() predicate.WeatherStation {
 // HasAirportWith applies the HasEdge predicate on the "airport" edge with a given conditions (other predicates).
 func HasAirportWith(preds ...predicate.Airport) predicate.WeatherStation {
 	return predicate.WeatherStation(func(s *sql.Selector) {
-		step := sqlgraph.NewStep(
-			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(AirportInverseTable, FieldID),
-			sqlgraph.Edge(sqlgraph.O2O, true, AirportTable, AirportColumn),
-		)
+		step := newAirportStep()
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
 				p(s)
@@ -400,11 +396,7 @@ func HasMetars() predicate.WeatherStation {
 // HasMetarsWith applies the HasEdge predicate on the "metars" edge with a given conditions (other predicates).
 func HasMetarsWith(preds ...predicate.Metar) predicate.WeatherStation {
 	return predicate.WeatherStation(func(s *sql.Selector) {
-		step := sqlgraph.NewStep(
-			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(MetarsInverseTable, FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, MetarsTable, MetarsColumn),
-		)
+		step := newMetarsStep()
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
 				p(s)
@@ -427,11 +419,7 @@ func HasTafs() predicate.WeatherStation {
 // HasTafsWith applies the HasEdge predicate on the "tafs" edge with a given conditions (other predicates).
 func HasTafsWith(preds ...predicate.Taf) predicate.WeatherStation {
 	return predicate.WeatherStation(func(s *sql.Selector) {
-		step := sqlgraph.NewStep(
-			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(TafsInverseTable, FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, TafsTable, TafsColumn),
-		)
+		step := newTafsStep()
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
 				p(s)

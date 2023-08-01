@@ -7,6 +7,7 @@ import (
 	"strings"
 	"time"
 
+	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"github.com/google/uuid"
 	"metar.gg/ent/forecast"
@@ -54,6 +55,7 @@ type Forecast struct {
 	// The values are being populated by the ForecastQuery when eager-loading is set.
 	Edges        ForecastEdges `json:"edges"`
 	taf_forecast *uuid.UUID
+	selectValues sql.SelectValues
 }
 
 // ForecastEdges holds the relations/edges for other nodes in the graph.
@@ -132,7 +134,7 @@ func (*Forecast) scanValues(columns []string) ([]any, error) {
 		case forecast.ForeignKeys[0]: // taf_forecast
 			values[i] = &sql.NullScanner{S: new(uuid.UUID)}
 		default:
-			return nil, fmt.Errorf("unexpected column %q for type Forecast", columns[i])
+			values[i] = new(sql.UnknownType)
 		}
 	}
 	return values, nil
@@ -267,9 +269,17 @@ func (f *Forecast) assignValues(columns []string, values []any) error {
 				f.taf_forecast = new(uuid.UUID)
 				*f.taf_forecast = *value.S.(*uuid.UUID)
 			}
+		default:
+			f.selectValues.Set(columns[i], values[i])
 		}
 	}
 	return nil
+}
+
+// Value returns the ent.Value that was dynamically selected and assigned to the Forecast.
+// This includes values selected through modifiers, order, etc.
+func (f *Forecast) Value(name string) (ent.Value, error) {
+	return f.selectValues.Get(name)
 }
 
 // QuerySkyConditions queries the "sky_conditions" edge of the Forecast entity.

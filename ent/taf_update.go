@@ -148,7 +148,7 @@ func (tu *TafUpdate) RemoveForecast(f ...*Forecast) *TafUpdate {
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (tu *TafUpdate) Save(ctx context.Context) (int, error) {
-	return withHooks[int, TafMutation](ctx, tu.sqlSave, tu.mutation, tu.hooks)
+	return withHooks(ctx, tu.sqlSave, tu.mutation, tu.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -231,10 +231,7 @@ func (tu *TafUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: []string{taf.StationColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: weatherstation.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(weatherstation.FieldID, field.TypeUUID),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -247,10 +244,7 @@ func (tu *TafUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: []string{taf.StationColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: weatherstation.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(weatherstation.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -266,10 +260,7 @@ func (tu *TafUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: []string{taf.ForecastColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: forecast.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(forecast.FieldID, field.TypeUUID),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -282,10 +273,7 @@ func (tu *TafUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: []string{taf.ForecastColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: forecast.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(forecast.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -301,10 +289,7 @@ func (tu *TafUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: []string{taf.ForecastColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: forecast.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(forecast.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -463,7 +448,7 @@ func (tuo *TafUpdateOne) Select(field string, fields ...string) *TafUpdateOne {
 
 // Save executes the query and returns the updated Taf entity.
 func (tuo *TafUpdateOne) Save(ctx context.Context) (*Taf, error) {
-	return withHooks[*Taf, TafMutation](ctx, tuo.sqlSave, tuo.mutation, tuo.hooks)
+	return withHooks(ctx, tuo.sqlSave, tuo.mutation, tuo.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -563,10 +548,7 @@ func (tuo *TafUpdateOne) sqlSave(ctx context.Context) (_node *Taf, err error) {
 			Columns: []string{taf.StationColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: weatherstation.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(weatherstation.FieldID, field.TypeUUID),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -579,10 +561,7 @@ func (tuo *TafUpdateOne) sqlSave(ctx context.Context) (_node *Taf, err error) {
 			Columns: []string{taf.StationColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: weatherstation.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(weatherstation.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -598,10 +577,7 @@ func (tuo *TafUpdateOne) sqlSave(ctx context.Context) (_node *Taf, err error) {
 			Columns: []string{taf.ForecastColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: forecast.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(forecast.FieldID, field.TypeUUID),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -614,10 +590,7 @@ func (tuo *TafUpdateOne) sqlSave(ctx context.Context) (_node *Taf, err error) {
 			Columns: []string{taf.ForecastColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: forecast.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(forecast.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -633,10 +606,7 @@ func (tuo *TafUpdateOne) sqlSave(ctx context.Context) (_node *Taf, err error) {
 			Columns: []string{taf.ForecastColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: forecast.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(forecast.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {

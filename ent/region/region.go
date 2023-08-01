@@ -5,6 +5,8 @@ package region
 import (
 	"time"
 
+	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/dialect/sql/sqlgraph"
 	"github.com/google/uuid"
 )
 
@@ -76,3 +78,72 @@ var (
 	// DefaultID holds the default value on creation for the "id" field.
 	DefaultID func() uuid.UUID
 )
+
+// OrderOption defines the ordering options for the Region queries.
+type OrderOption func(*sql.Selector)
+
+// ByID orders the results by the id field.
+func ByID(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldID, opts...).ToFunc()
+}
+
+// ByImportID orders the results by the import_id field.
+func ByImportID(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldImportID, opts...).ToFunc()
+}
+
+// ByHash orders the results by the hash field.
+func ByHash(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldHash, opts...).ToFunc()
+}
+
+// ByImportFlag orders the results by the import_flag field.
+func ByImportFlag(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldImportFlag, opts...).ToFunc()
+}
+
+// ByLastUpdated orders the results by the last_updated field.
+func ByLastUpdated(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldLastUpdated, opts...).ToFunc()
+}
+
+// ByCode orders the results by the code field.
+func ByCode(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldCode, opts...).ToFunc()
+}
+
+// ByLocalCode orders the results by the local_code field.
+func ByLocalCode(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldLocalCode, opts...).ToFunc()
+}
+
+// ByName orders the results by the name field.
+func ByName(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldName, opts...).ToFunc()
+}
+
+// ByWikipediaLink orders the results by the wikipedia_link field.
+func ByWikipediaLink(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldWikipediaLink, opts...).ToFunc()
+}
+
+// ByAirportsCount orders the results by airports count.
+func ByAirportsCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newAirportsStep(), opts...)
+	}
+}
+
+// ByAirports orders the results by airports terms.
+func ByAirports(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newAirportsStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
+func newAirportsStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(AirportsInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, AirportsTable, AirportsColumn),
+	)
+}

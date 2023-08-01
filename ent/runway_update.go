@@ -450,7 +450,7 @@ func (ru *RunwayUpdate) ClearAirport() *RunwayUpdate {
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (ru *RunwayUpdate) Save(ctx context.Context) (int, error) {
-	return withHooks[int, RunwayMutation](ctx, ru.sqlSave, ru.mutation, ru.hooks)
+	return withHooks(ctx, ru.sqlSave, ru.mutation, ru.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -633,10 +633,7 @@ func (ru *RunwayUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: []string{runway.AirportColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: airport.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(airport.FieldID, field.TypeUUID),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -649,10 +646,7 @@ func (ru *RunwayUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: []string{runway.AirportColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: airport.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(airport.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -1114,7 +1108,7 @@ func (ruo *RunwayUpdateOne) Select(field string, fields ...string) *RunwayUpdate
 
 // Save executes the query and returns the updated Runway entity.
 func (ruo *RunwayUpdateOne) Save(ctx context.Context) (*Runway, error) {
-	return withHooks[*Runway, RunwayMutation](ctx, ruo.sqlSave, ruo.mutation, ruo.hooks)
+	return withHooks(ctx, ruo.sqlSave, ruo.mutation, ruo.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -1314,10 +1308,7 @@ func (ruo *RunwayUpdateOne) sqlSave(ctx context.Context) (_node *Runway, err err
 			Columns: []string{runway.AirportColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: airport.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(airport.FieldID, field.TypeUUID),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -1330,10 +1321,7 @@ func (ruo *RunwayUpdateOne) sqlSave(ctx context.Context) (_node *Runway, err err
 			Columns: []string{runway.AirportColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: airport.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(airport.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {

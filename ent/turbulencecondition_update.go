@@ -67,7 +67,7 @@ func (tcu *TurbulenceConditionUpdate) Mutation() *TurbulenceConditionMutation {
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (tcu *TurbulenceConditionUpdate) Save(ctx context.Context) (int, error) {
-	return withHooks[int, TurbulenceConditionMutation](ctx, tcu.sqlSave, tcu.mutation, tcu.hooks)
+	return withHooks(ctx, tcu.sqlSave, tcu.mutation, tcu.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -196,7 +196,7 @@ func (tcuo *TurbulenceConditionUpdateOne) Select(field string, fields ...string)
 
 // Save executes the query and returns the updated TurbulenceCondition entity.
 func (tcuo *TurbulenceConditionUpdateOne) Save(ctx context.Context) (*TurbulenceCondition, error) {
-	return withHooks[*TurbulenceCondition, TurbulenceConditionMutation](ctx, tcuo.sqlSave, tcuo.mutation, tcuo.hooks)
+	return withHooks(ctx, tcuo.sqlSave, tcuo.mutation, tcuo.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.

@@ -135,7 +135,7 @@ func (fu *FrequencyUpdate) ClearAirport() *FrequencyUpdate {
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (fu *FrequencyUpdate) Save(ctx context.Context) (int, error) {
-	return withHooks[int, FrequencyMutation](ctx, fu.sqlSave, fu.mutation, fu.hooks)
+	return withHooks(ctx, fu.sqlSave, fu.mutation, fu.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -210,10 +210,7 @@ func (fu *FrequencyUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: []string{frequency.AirportColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: airport.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(airport.FieldID, field.TypeUUID),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -226,10 +223,7 @@ func (fu *FrequencyUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: []string{frequency.AirportColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: airport.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(airport.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -376,7 +370,7 @@ func (fuo *FrequencyUpdateOne) Select(field string, fields ...string) *Frequency
 
 // Save executes the query and returns the updated Frequency entity.
 func (fuo *FrequencyUpdateOne) Save(ctx context.Context) (*Frequency, error) {
-	return withHooks[*Frequency, FrequencyMutation](ctx, fuo.sqlSave, fuo.mutation, fuo.hooks)
+	return withHooks(ctx, fuo.sqlSave, fuo.mutation, fuo.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -468,10 +462,7 @@ func (fuo *FrequencyUpdateOne) sqlSave(ctx context.Context) (_node *Frequency, e
 			Columns: []string{frequency.AirportColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: airport.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(airport.FieldID, field.TypeUUID),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -484,10 +475,7 @@ func (fuo *FrequencyUpdateOne) sqlSave(ctx context.Context) (_node *Frequency, e
 			Columns: []string{frequency.AirportColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: airport.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(airport.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {

@@ -79,7 +79,7 @@ func (scc *SkyConditionCreate) Mutation() *SkyConditionMutation {
 // Save creates the SkyCondition in the database.
 func (scc *SkyConditionCreate) Save(ctx context.Context) (*SkyCondition, error) {
 	scc.defaults()
-	return withHooks[*SkyCondition, SkyConditionMutation](ctx, scc.sqlSave, scc.mutation, scc.hooks)
+	return withHooks(ctx, scc.sqlSave, scc.mutation, scc.hooks)
 }
 
 // SaveX calls Save and panics if Save returns an error.
@@ -455,8 +455,8 @@ func (sccb *SkyConditionCreateBulk) Save(ctx context.Context) ([]*SkyCondition, 
 					return nil, err
 				}
 				builder.mutation = mutation
-				nodes[i], specs[i] = builder.createSpec()
 				var err error
+				nodes[i], specs[i] = builder.createSpec()
 				if i < len(mutators)-1 {
 					_, err = mutators[i+1].Mutate(root, sccb.builders[i+1].mutation)
 				} else {

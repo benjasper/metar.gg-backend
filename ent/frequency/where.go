@@ -430,11 +430,7 @@ func HasAirport() predicate.Frequency {
 // HasAirportWith applies the HasEdge predicate on the "airport" edge with a given conditions (other predicates).
 func HasAirportWith(preds ...predicate.Airport) predicate.Frequency {
 	return predicate.Frequency(func(s *sql.Selector) {
-		step := sqlgraph.NewStep(
-			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(AirportInverseTable, FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, AirportTable, AirportColumn),
-		)
+		step := newAirportStep()
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
 				p(s)

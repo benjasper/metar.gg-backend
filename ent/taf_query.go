@@ -22,7 +22,7 @@ import (
 type TafQuery struct {
 	config
 	ctx               *QueryContext
-	order             []OrderFunc
+	order             []taf.OrderOption
 	inters            []Interceptor
 	predicates        []predicate.Taf
 	withStation       *WeatherStationQuery
@@ -62,7 +62,7 @@ func (tq *TafQuery) Unique(unique bool) *TafQuery {
 }
 
 // Order specifies how the records should be ordered.
-func (tq *TafQuery) Order(o ...OrderFunc) *TafQuery {
+func (tq *TafQuery) Order(o ...taf.OrderOption) *TafQuery {
 	tq.order = append(tq.order, o...)
 	return tq
 }
@@ -300,7 +300,7 @@ func (tq *TafQuery) Clone() *TafQuery {
 	return &TafQuery{
 		config:       tq.config,
 		ctx:          tq.ctx.Clone(),
-		order:        append([]OrderFunc{}, tq.order...),
+		order:        append([]taf.OrderOption{}, tq.order...),
 		inters:       append([]Interceptor{}, tq.inters...),
 		predicates:   append([]predicate.Taf{}, tq.predicates...),
 		withStation:  tq.withStation.Clone(),
@@ -516,7 +516,7 @@ func (tq *TafQuery) loadForecast(ctx context.Context, query *ForecastQuery, node
 	}
 	query.withFKs = true
 	query.Where(predicate.Forecast(func(s *sql.Selector) {
-		s.Where(sql.InValues(taf.ForecastColumn, fks...))
+		s.Where(sql.InValues(s.C(taf.ForecastColumn), fks...))
 	}))
 	neighbors, err := query.All(ctx)
 	if err != nil {
@@ -529,7 +529,7 @@ func (tq *TafQuery) loadForecast(ctx context.Context, query *ForecastQuery, node
 		}
 		node, ok := nodeids[*fk]
 		if !ok {
-			return fmt.Errorf(`unexpected foreign-key "taf_forecast" returned %v for node %v`, *fk, n.ID)
+			return fmt.Errorf(`unexpected referenced foreign-key "taf_forecast" returned %v for node %v`, *fk, n.ID)
 		}
 		assign(node, n)
 	}

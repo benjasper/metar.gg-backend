@@ -27,7 +27,7 @@ func (tcd *TurbulenceConditionDelete) Where(ps ...predicate.TurbulenceCondition)
 
 // Exec executes the deletion query and returns how many vertices were deleted.
 func (tcd *TurbulenceConditionDelete) Exec(ctx context.Context) (int, error) {
-	return withHooks[int, TurbulenceConditionMutation](ctx, tcd.sqlExec, tcd.mutation, tcd.hooks)
+	return withHooks(ctx, tcd.sqlExec, tcd.mutation, tcd.hooks)
 }
 
 // ExecX is like Exec, but panics if an error occurs.

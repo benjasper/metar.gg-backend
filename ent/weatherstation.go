@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"strings"
 
+	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"github.com/google/uuid"
 	"metar.gg/ent/airport"
@@ -32,6 +33,7 @@ type WeatherStation struct {
 	// The values are being populated by the WeatherStationQuery when eager-loading is set.
 	Edges           WeatherStationEdges `json:"edges"`
 	airport_station *uuid.UUID
+	selectValues    sql.SelectValues
 }
 
 // WeatherStationEdges holds the relations/edges for other nodes in the graph.
@@ -97,7 +99,7 @@ func (*WeatherStation) scanValues(columns []string) ([]any, error) {
 		case weatherstation.ForeignKeys[0]: // airport_station
 			values[i] = &sql.NullScanner{S: new(uuid.UUID)}
 		default:
-			return nil, fmt.Errorf("unexpected column %q for type WeatherStation", columns[i])
+			values[i] = new(sql.UnknownType)
 		}
 	}
 	return values, nil
@@ -157,9 +159,17 @@ func (ws *WeatherStation) assignValues(columns []string, values []any) error {
 				ws.airport_station = new(uuid.UUID)
 				*ws.airport_station = *value.S.(*uuid.UUID)
 			}
+		default:
+			ws.selectValues.Set(columns[i], values[i])
 		}
 	}
 	return nil
+}
+
+// Value returns the ent.Value that was dynamically selected and assigned to the WeatherStation.
+// This includes values selected through modifiers, order, etc.
+func (ws *WeatherStation) Value(name string) (ent.Value, error) {
+	return ws.selectValues.Get(name)
 }
 
 // QueryAirport queries the "airport" edge of the WeatherStation entity.

@@ -3,6 +3,7 @@
 package icingcondition
 
 import (
+	"entgo.io/ent/dialect/sql"
 	"github.com/google/uuid"
 )
 
@@ -54,3 +55,26 @@ var (
 	// DefaultID holds the default value on creation for the "id" field.
 	DefaultID func() uuid.UUID
 )
+
+// OrderOption defines the ordering options for the IcingCondition queries.
+type OrderOption func(*sql.Selector)
+
+// ByID orders the results by the id field.
+func ByID(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldID, opts...).ToFunc()
+}
+
+// ByIntensity orders the results by the intensity field.
+func ByIntensity(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldIntensity, opts...).ToFunc()
+}
+
+// ByMinAltitude orders the results by the min_altitude field.
+func ByMinAltitude(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldMinAltitude, opts...).ToFunc()
+}
+
+// ByMaxAltitude orders the results by the max_altitude field.
+func ByMaxAltitude(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldMaxAltitude, opts...).ToFunc()
+}

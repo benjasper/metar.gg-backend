@@ -132,7 +132,7 @@ func (cc *CountryCreate) Mutation() *CountryMutation {
 // Save creates the Country in the database.
 func (cc *CountryCreate) Save(ctx context.Context) (*Country, error) {
 	cc.defaults()
-	return withHooks[*Country, CountryMutation](ctx, cc.sqlSave, cc.mutation, cc.hooks)
+	return withHooks(ctx, cc.sqlSave, cc.mutation, cc.hooks)
 }
 
 // SaveX calls Save and panics if Save returns an error.
@@ -287,10 +287,7 @@ func (cc *CountryCreate) createSpec() (*Country, *sqlgraph.CreateSpec) {
 			Columns: []string{country.AirportsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: airport.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(airport.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -685,8 +682,8 @@ func (ccb *CountryCreateBulk) Save(ctx context.Context) ([]*Country, error) {
 					return nil, err
 				}
 				builder.mutation = mutation
-				nodes[i], specs[i] = builder.createSpec()
 				var err error
+				nodes[i], specs[i] = builder.createSpec()
 				if i < len(mutators)-1 {
 					_, err = mutators[i+1].Mutate(root, ccb.builders[i+1].mutation)
 				} else {

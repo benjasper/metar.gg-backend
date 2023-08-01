@@ -7,6 +7,7 @@ import (
 	"strings"
 	"time"
 
+	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"github.com/google/uuid"
 	"metar.gg/ent/taf"
@@ -39,6 +40,7 @@ type Taf struct {
 	// The values are being populated by the TafQuery when eager-loading is set.
 	Edges                TafEdges `json:"edges"`
 	weather_station_tafs *uuid.UUID
+	selectValues         sql.SelectValues
 }
 
 // TafEdges holds the relations/edges for other nodes in the graph.
@@ -92,7 +94,7 @@ func (*Taf) scanValues(columns []string) ([]any, error) {
 		case taf.ForeignKeys[0]: // weather_station_tafs
 			values[i] = &sql.NullScanner{S: new(uuid.UUID)}
 		default:
-			return nil, fmt.Errorf("unexpected column %q for type Taf", columns[i])
+			values[i] = new(sql.UnknownType)
 		}
 	}
 	return values, nil
@@ -167,9 +169,17 @@ func (t *Taf) assignValues(columns []string, values []any) error {
 				t.weather_station_tafs = new(uuid.UUID)
 				*t.weather_station_tafs = *value.S.(*uuid.UUID)
 			}
+		default:
+			t.selectValues.Set(columns[i], values[i])
 		}
 	}
 	return nil
+}
+
+// Value returns the ent.Value that was dynamically selected and assigned to the Taf.
+// This includes values selected through modifiers, order, etc.
+func (t *Taf) Value(name string) (ent.Value, error) {
+	return t.selectValues.Get(name)
 }
 
 // QueryStation queries the "station" edge of the Taf entity.

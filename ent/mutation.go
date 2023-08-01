@@ -9,6 +9,8 @@ import (
 	"sync"
 	"time"
 
+	"entgo.io/ent"
+	"entgo.io/ent/dialect/sql"
 	"github.com/google/uuid"
 	"metar.gg/ent/airport"
 	"metar.gg/ent/country"
@@ -24,9 +26,6 @@ import (
 	"metar.gg/ent/temperaturedata"
 	"metar.gg/ent/turbulencecondition"
 	"metar.gg/ent/weatherstation"
-
-	"entgo.io/ent"
-	"entgo.io/ent/dialect/sql"
 )
 
 const (

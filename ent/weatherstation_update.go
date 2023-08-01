@@ -223,7 +223,7 @@ func (wsu *WeatherStationUpdate) RemoveTafs(t ...*Taf) *WeatherStationUpdate {
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (wsu *WeatherStationUpdate) Save(ctx context.Context) (int, error) {
-	return withHooks[int, WeatherStationMutation](ctx, wsu.sqlSave, wsu.mutation, wsu.hooks)
+	return withHooks(ctx, wsu.sqlSave, wsu.mutation, wsu.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -301,10 +301,7 @@ func (wsu *WeatherStationUpdate) sqlSave(ctx context.Context) (n int, err error)
 			Columns: []string{weatherstation.AirportColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: airport.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(airport.FieldID, field.TypeUUID),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -317,10 +314,7 @@ func (wsu *WeatherStationUpdate) sqlSave(ctx context.Context) (n int, err error)
 			Columns: []string{weatherstation.AirportColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: airport.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(airport.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -336,10 +330,7 @@ func (wsu *WeatherStationUpdate) sqlSave(ctx context.Context) (n int, err error)
 			Columns: []string{weatherstation.MetarsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: metar.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(metar.FieldID, field.TypeUUID),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -352,10 +343,7 @@ func (wsu *WeatherStationUpdate) sqlSave(ctx context.Context) (n int, err error)
 			Columns: []string{weatherstation.MetarsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: metar.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(metar.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -371,10 +359,7 @@ func (wsu *WeatherStationUpdate) sqlSave(ctx context.Context) (n int, err error)
 			Columns: []string{weatherstation.MetarsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: metar.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(metar.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -390,10 +375,7 @@ func (wsu *WeatherStationUpdate) sqlSave(ctx context.Context) (n int, err error)
 			Columns: []string{weatherstation.TafsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: taf.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(taf.FieldID, field.TypeUUID),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -406,10 +388,7 @@ func (wsu *WeatherStationUpdate) sqlSave(ctx context.Context) (n int, err error)
 			Columns: []string{weatherstation.TafsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: taf.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(taf.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -425,10 +404,7 @@ func (wsu *WeatherStationUpdate) sqlSave(ctx context.Context) (n int, err error)
 			Columns: []string{weatherstation.TafsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: taf.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(taf.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -662,7 +638,7 @@ func (wsuo *WeatherStationUpdateOne) Select(field string, fields ...string) *Wea
 
 // Save executes the query and returns the updated WeatherStation entity.
 func (wsuo *WeatherStationUpdateOne) Save(ctx context.Context) (*WeatherStation, error) {
-	return withHooks[*WeatherStation, WeatherStationMutation](ctx, wsuo.sqlSave, wsuo.mutation, wsuo.hooks)
+	return withHooks(ctx, wsuo.sqlSave, wsuo.mutation, wsuo.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -757,10 +733,7 @@ func (wsuo *WeatherStationUpdateOne) sqlSave(ctx context.Context) (_node *Weathe
 			Columns: []string{weatherstation.AirportColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: airport.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(airport.FieldID, field.TypeUUID),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -773,10 +746,7 @@ func (wsuo *WeatherStationUpdateOne) sqlSave(ctx context.Context) (_node *Weathe
 			Columns: []string{weatherstation.AirportColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: airport.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(airport.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -792,10 +762,7 @@ func (wsuo *WeatherStationUpdateOne) sqlSave(ctx context.Context) (_node *Weathe
 			Columns: []string{weatherstation.MetarsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: metar.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(metar.FieldID, field.TypeUUID),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -808,10 +775,7 @@ func (wsuo *WeatherStationUpdateOne) sqlSave(ctx context.Context) (_node *Weathe
 			Columns: []string{weatherstation.MetarsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: metar.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(metar.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -827,10 +791,7 @@ func (wsuo *WeatherStationUpdateOne) sqlSave(ctx context.Context) (_node *Weathe
 			Columns: []string{weatherstation.MetarsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: metar.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(metar.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -846,10 +807,7 @@ func (wsuo *WeatherStationUpdateOne) sqlSave(ctx context.Context) (_node *Weathe
 			Columns: []string{weatherstation.TafsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: taf.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(taf.FieldID, field.TypeUUID),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -862,10 +820,7 @@ func (wsuo *WeatherStationUpdateOne) sqlSave(ctx context.Context) (_node *Weathe
 			Columns: []string{weatherstation.TafsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: taf.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(taf.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -881,10 +836,7 @@ func (wsuo *WeatherStationUpdateOne) sqlSave(ctx context.Context) (_node *Weathe
 			Columns: []string{weatherstation.TafsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: taf.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(taf.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {

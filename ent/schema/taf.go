@@ -19,7 +19,7 @@ type Taf struct {
 func (Taf) Fields() []ent.Field {
 	return []ent.Field{
 		field.Text("raw_text").Comment("The raw TAF text."),
-		field.Time("issue_time").Comment("The time the TAF was issued."),
+		field.Time("issue_time").Comment("The time the TAF was issued.").Annotations(entgql.OrderField("ISSUE_TIME")),
 		field.Time("import_time").Comment("The time the TAF was imported.").Default(time.Now),
 		field.Time("bulletin_time").Comment("TAF bulletin time."),
 		field.Time("valid_from_time").Comment("The start time of the TAF validity period.").Annotations(entgql.OrderField("valid_from_time")),

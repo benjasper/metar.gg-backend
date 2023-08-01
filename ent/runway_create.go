@@ -296,7 +296,7 @@ func (rc *RunwayCreate) Mutation() *RunwayMutation {
 // Save creates the Runway in the database.
 func (rc *RunwayCreate) Save(ctx context.Context) (*Runway, error) {
 	rc.defaults()
-	return withHooks[*Runway, RunwayMutation](ctx, rc.sqlSave, rc.mutation, rc.hooks)
+	return withHooks(ctx, rc.sqlSave, rc.mutation, rc.hooks)
 }
 
 // SaveX calls Save and panics if Save returns an error.
@@ -497,10 +497,7 @@ func (rc *RunwayCreate) createSpec() (*Runway, *sqlgraph.CreateSpec) {
 			Columns: []string{runway.AirportColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: airport.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(airport.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -1530,8 +1527,8 @@ func (rcb *RunwayCreateBulk) Save(ctx context.Context) ([]*Runway, error) {
 					return nil, err
 				}
 				builder.mutation = mutation
-				nodes[i], specs[i] = builder.createSpec()
 				var err error
+				nodes[i], specs[i] = builder.createSpec()
 				if i < len(mutators)-1 {
 					_, err = mutators[i+1].Mutate(root, rcb.builders[i+1].mutation)
 				} else {

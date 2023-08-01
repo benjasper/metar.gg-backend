@@ -86,7 +86,7 @@ func (tdc *TemperatureDataCreate) Mutation() *TemperatureDataMutation {
 // Save creates the TemperatureData in the database.
 func (tdc *TemperatureDataCreate) Save(ctx context.Context) (*TemperatureData, error) {
 	tdc.defaults()
-	return withHooks[*TemperatureData, TemperatureDataMutation](ctx, tdc.sqlSave, tdc.mutation, tdc.hooks)
+	return withHooks(ctx, tdc.sqlSave, tdc.mutation, tdc.hooks)
 }
 
 // SaveX calls Save and panics if Save returns an error.
@@ -511,8 +511,8 @@ func (tdcb *TemperatureDataCreateBulk) Save(ctx context.Context) ([]*Temperature
 					return nil, err
 				}
 				builder.mutation = mutation
-				nodes[i], specs[i] = builder.createSpec()
 				var err error
+				nodes[i], specs[i] = builder.createSpec()
 				if i < len(mutators)-1 {
 					_, err = mutators[i+1].Mutate(root, tdcb.builders[i+1].mutation)
 				} else {

@@ -27,7 +27,7 @@ func (tdd *TemperatureDataDelete) Where(ps ...predicate.TemperatureData) *Temper
 
 // Exec executes the deletion query and returns how many vertices were deleted.
 func (tdd *TemperatureDataDelete) Exec(ctx context.Context) (int, error) {
-	return withHooks[int, TemperatureDataMutation](ctx, tdd.sqlExec, tdd.mutation, tdd.hooks)
+	return withHooks(ctx, tdd.sqlExec, tdd.mutation, tdd.hooks)
 }
 
 // ExecX is like Exec, but panics if an error occurs.

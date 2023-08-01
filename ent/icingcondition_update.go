@@ -95,7 +95,7 @@ func (icu *IcingConditionUpdate) Mutation() *IcingConditionMutation {
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (icu *IcingConditionUpdate) Save(ctx context.Context) (int, error) {
-	return withHooks[int, IcingConditionMutation](ctx, icu.sqlSave, icu.mutation, icu.hooks)
+	return withHooks(ctx, icu.sqlSave, icu.mutation, icu.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -258,7 +258,7 @@ func (icuo *IcingConditionUpdateOne) Select(field string, fields ...string) *Ici
 
 // Save executes the query and returns the updated IcingCondition entity.
 func (icuo *IcingConditionUpdateOne) Save(ctx context.Context) (*IcingCondition, error) {
-	return withHooks[*IcingCondition, IcingConditionMutation](ctx, icuo.sqlSave, icuo.mutation, icuo.hooks)
+	return withHooks(ctx, icuo.sqlSave, icuo.mutation, icuo.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.

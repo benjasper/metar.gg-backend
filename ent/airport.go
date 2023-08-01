@@ -8,6 +8,7 @@ import (
 	"strings"
 	"time"
 
+	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"github.com/google/uuid"
 	"metar.gg/ent/airport"
@@ -69,6 +70,7 @@ type Airport struct {
 	Edges            AirportEdges `json:"edges"`
 	country_airports *uuid.UUID
 	region_airports  *uuid.UUID
+	selectValues     sql.SelectValues
 }
 
 // AirportEdges holds the relations/edges for other nodes in the graph.
@@ -174,7 +176,7 @@ func (*Airport) scanValues(columns []string) ([]any, error) {
 		case airport.ForeignKeys[1]: // region_airports
 			values[i] = &sql.NullScanner{S: new(uuid.UUID)}
 		default:
-			return nil, fmt.Errorf("unexpected column %q for type Airport", columns[i])
+			values[i] = new(sql.UnknownType)
 		}
 	}
 	return values, nil
@@ -344,9 +346,17 @@ func (a *Airport) assignValues(columns []string, values []any) error {
 				a.region_airports = new(uuid.UUID)
 				*a.region_airports = *value.S.(*uuid.UUID)
 			}
+		default:
+			a.selectValues.Set(columns[i], values[i])
 		}
 	}
 	return nil
+}
+
+// Value returns the ent.Value that was dynamically selected and assigned to the Airport.
+// This includes values selected through modifiers, order, etc.
+func (a *Airport) Value(name string) (ent.Value, error) {
+	return a.selectValues.Get(name)
 }
 
 // QueryRegion queries the "region" edge of the Airport entity.

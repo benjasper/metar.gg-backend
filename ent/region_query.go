@@ -21,7 +21,7 @@ import (
 type RegionQuery struct {
 	config
 	ctx               *QueryContext
-	order             []OrderFunc
+	order             []region.OrderOption
 	inters            []Interceptor
 	predicates        []predicate.Region
 	withAirports      *AirportQuery
@@ -59,7 +59,7 @@ func (rq *RegionQuery) Unique(unique bool) *RegionQuery {
 }
 
 // Order specifies how the records should be ordered.
-func (rq *RegionQuery) Order(o ...OrderFunc) *RegionQuery {
+func (rq *RegionQuery) Order(o ...region.OrderOption) *RegionQuery {
 	rq.order = append(rq.order, o...)
 	return rq
 }
@@ -275,7 +275,7 @@ func (rq *RegionQuery) Clone() *RegionQuery {
 	return &RegionQuery{
 		config:       rq.config,
 		ctx:          rq.ctx.Clone(),
-		order:        append([]OrderFunc{}, rq.order...),
+		order:        append([]region.OrderOption{}, rq.order...),
 		inters:       append([]Interceptor{}, rq.inters...),
 		predicates:   append([]predicate.Region{}, rq.predicates...),
 		withAirports: rq.withAirports.Clone(),
@@ -433,7 +433,7 @@ func (rq *RegionQuery) loadAirports(ctx context.Context, query *AirportQuery, no
 	}
 	query.withFKs = true
 	query.Where(predicate.Airport(func(s *sql.Selector) {
-		s.Where(sql.InValues(region.AirportsColumn, fks...))
+		s.Where(sql.InValues(s.C(region.AirportsColumn), fks...))
 	}))
 	neighbors, err := query.All(ctx)
 	if err != nil {
@@ -446,7 +446,7 @@ func (rq *RegionQuery) loadAirports(ctx context.Context, query *AirportQuery, no
 		}
 		node, ok := nodeids[*fk]
 		if !ok {
-			return fmt.Errorf(`unexpected foreign-key "region_airports" returned %v for node %v`, *fk, n.ID)
+			return fmt.Errorf(`unexpected referenced foreign-key "region_airports" returned %v for node %v`, *fk, n.ID)
 		}
 		assign(node, n)
 	}

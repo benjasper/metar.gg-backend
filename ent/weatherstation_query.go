@@ -23,7 +23,7 @@ import (
 type WeatherStationQuery struct {
 	config
 	ctx             *QueryContext
-	order           []OrderFunc
+	order           []weatherstation.OrderOption
 	inters          []Interceptor
 	predicates      []predicate.WeatherStation
 	withAirport     *AirportQuery
@@ -65,7 +65,7 @@ func (wsq *WeatherStationQuery) Unique(unique bool) *WeatherStationQuery {
 }
 
 // Order specifies how the records should be ordered.
-func (wsq *WeatherStationQuery) Order(o ...OrderFunc) *WeatherStationQuery {
+func (wsq *WeatherStationQuery) Order(o ...weatherstation.OrderOption) *WeatherStationQuery {
 	wsq.order = append(wsq.order, o...)
 	return wsq
 }
@@ -325,7 +325,7 @@ func (wsq *WeatherStationQuery) Clone() *WeatherStationQuery {
 	return &WeatherStationQuery{
 		config:      wsq.config,
 		ctx:         wsq.ctx.Clone(),
-		order:       append([]OrderFunc{}, wsq.order...),
+		order:       append([]weatherstation.OrderOption{}, wsq.order...),
 		inters:      append([]Interceptor{}, wsq.inters...),
 		predicates:  append([]predicate.WeatherStation{}, wsq.predicates...),
 		withAirport: wsq.withAirport.Clone(),
@@ -568,7 +568,7 @@ func (wsq *WeatherStationQuery) loadMetars(ctx context.Context, query *MetarQuer
 	}
 	query.withFKs = true
 	query.Where(predicate.Metar(func(s *sql.Selector) {
-		s.Where(sql.InValues(weatherstation.MetarsColumn, fks...))
+		s.Where(sql.InValues(s.C(weatherstation.MetarsColumn), fks...))
 	}))
 	neighbors, err := query.All(ctx)
 	if err != nil {
@@ -581,7 +581,7 @@ func (wsq *WeatherStationQuery) loadMetars(ctx context.Context, query *MetarQuer
 		}
 		node, ok := nodeids[*fk]
 		if !ok {
-			return fmt.Errorf(`unexpected foreign-key "weather_station_metars" returned %v for node %v`, *fk, n.ID)
+			return fmt.Errorf(`unexpected referenced foreign-key "weather_station_metars" returned %v for node %v`, *fk, n.ID)
 		}
 		assign(node, n)
 	}
@@ -599,7 +599,7 @@ func (wsq *WeatherStationQuery) loadTafs(ctx context.Context, query *TafQuery, n
 	}
 	query.withFKs = true
 	query.Where(predicate.Taf(func(s *sql.Selector) {
-		s.Where(sql.InValues(weatherstation.TafsColumn, fks...))
+		s.Where(sql.InValues(s.C(weatherstation.TafsColumn), fks...))
 	}))
 	neighbors, err := query.All(ctx)
 	if err != nil {
@@ -612,7 +612,7 @@ func (wsq *WeatherStationQuery) loadTafs(ctx context.Context, query *TafQuery, n
 		}
 		node, ok := nodeids[*fk]
 		if !ok {
-			return fmt.Errorf(`unexpected foreign-key "weather_station_tafs" returned %v for node %v`, *fk, n.ID)
+			return fmt.Errorf(`unexpected referenced foreign-key "weather_station_tafs" returned %v for node %v`, *fk, n.ID)
 		}
 		assign(node, n)
 	}

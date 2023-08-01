@@ -79,7 +79,7 @@ func (icc *IcingConditionCreate) Mutation() *IcingConditionMutation {
 // Save creates the IcingCondition in the database.
 func (icc *IcingConditionCreate) Save(ctx context.Context) (*IcingCondition, error) {
 	icc.defaults()
-	return withHooks[*IcingCondition, IcingConditionMutation](ctx, icc.sqlSave, icc.mutation, icc.hooks)
+	return withHooks(ctx, icc.sqlSave, icc.mutation, icc.hooks)
 }
 
 // SaveX calls Save and panics if Save returns an error.
@@ -458,8 +458,8 @@ func (iccb *IcingConditionCreateBulk) Save(ctx context.Context) ([]*IcingConditi
 					return nil, err
 				}
 				builder.mutation = mutation
-				nodes[i], specs[i] = builder.createSpec()
 				var err error
+				nodes[i], specs[i] = builder.createSpec()
 				if i < len(mutators)-1 {
 					_, err = mutators[i+1].Mutate(root, iccb.builders[i+1].mutation)
 				} else {

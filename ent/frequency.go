@@ -7,6 +7,7 @@ import (
 	"strings"
 	"time"
 
+	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"github.com/google/uuid"
 	"metar.gg/ent/airport"
@@ -37,6 +38,7 @@ type Frequency struct {
 	// The values are being populated by the FrequencyQuery when eager-loading is set.
 	Edges               FrequencyEdges `json:"edges"`
 	airport_frequencies *uuid.UUID
+	selectValues        sql.SelectValues
 }
 
 // FrequencyEdges holds the relations/edges for other nodes in the graph.
@@ -83,7 +85,7 @@ func (*Frequency) scanValues(columns []string) ([]any, error) {
 		case frequency.ForeignKeys[0]: // airport_frequencies
 			values[i] = &sql.NullScanner{S: new(uuid.UUID)}
 		default:
-			return nil, fmt.Errorf("unexpected column %q for type Frequency", columns[i])
+			values[i] = new(sql.UnknownType)
 		}
 	}
 	return values, nil
@@ -152,9 +154,17 @@ func (f *Frequency) assignValues(columns []string, values []any) error {
 				f.airport_frequencies = new(uuid.UUID)
 				*f.airport_frequencies = *value.S.(*uuid.UUID)
 			}
+		default:
+			f.selectValues.Set(columns[i], values[i])
 		}
 	}
 	return nil
+}
+
+// Value returns the ent.Value that was dynamically selected and assigned to the Frequency.
+// This includes values selected through modifiers, order, etc.
+func (f *Frequency) Value(name string) (ent.Value, error) {
+	return f.selectValues.Get(name)
 }
 
 // QueryAirport queries the "airport" edge of the Frequency entity.

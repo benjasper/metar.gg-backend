@@ -470,7 +470,7 @@ func (mc *MetarCreate) Mutation() *MetarMutation {
 // Save creates the Metar in the database.
 func (mc *MetarCreate) Save(ctx context.Context) (*Metar, error) {
 	mc.defaults()
-	return withHooks[*Metar, MetarMutation](ctx, mc.sqlSave, mc.mutation, mc.hooks)
+	return withHooks(ctx, mc.sqlSave, mc.mutation, mc.hooks)
 }
 
 // SaveX calls Save and panics if Save returns an error.
@@ -735,10 +735,7 @@ func (mc *MetarCreate) createSpec() (*Metar, *sqlgraph.CreateSpec) {
 			Columns: []string{metar.StationColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: weatherstation.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(weatherstation.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -755,10 +752,7 @@ func (mc *MetarCreate) createSpec() (*Metar, *sqlgraph.CreateSpec) {
 			Columns: []string{metar.SkyConditionsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeUUID,
-					Column: skycondition.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(skycondition.FieldID, field.TypeUUID),
 			},
 		}
 		for _, k := range nodes {
@@ -2359,8 +2353,8 @@ func (mcb *MetarCreateBulk) Save(ctx context.Context) ([]*Metar, error) {
 					return nil, err
 				}
 				builder.mutation = mutation
-				nodes[i], specs[i] = builder.createSpec()
 				var err error
+				nodes[i], specs[i] = builder.createSpec()
 				if i < len(mutators)-1 {
 					_, err = mutators[i+1].Mutate(root, mcb.builders[i+1].mutation)
 				} else {

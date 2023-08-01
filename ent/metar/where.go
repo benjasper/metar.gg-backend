@@ -1645,11 +1645,7 @@ func HasStation() predicate.Metar {
 // HasStationWith applies the HasEdge predicate on the "station" edge with a given conditions (other predicates).
 func HasStationWith(preds ...predicate.WeatherStation) predicate.Metar {
 	return predicate.Metar(func(s *sql.Selector) {
-		step := sqlgraph.NewStep(
-			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(StationInverseTable, FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, StationTable, StationColumn),
-		)
+		step := newStationStep()
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
 				p(s)
@@ -1672,11 +1668,7 @@ func HasSkyConditions() predicate.Metar {
 // HasSkyConditionsWith applies the HasEdge predicate on the "sky_conditions" edge with a given conditions (other predicates).
 func HasSkyConditionsWith(preds ...predicate.SkyCondition) predicate.Metar {
 	return predicate.Metar(func(s *sql.Selector) {
-		step := sqlgraph.NewStep(
-			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(SkyConditionsInverseTable, FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, SkyConditionsTable, SkyConditionsColumn),
-		)
+		step := newSkyConditionsStep()
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
 				p(s)

@@ -8,6 +8,8 @@ import (
 	"strconv"
 	"time"
 
+	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/dialect/sql/sqlgraph"
 	"github.com/google/uuid"
 )
 
@@ -219,6 +221,219 @@ func MetarTypeValidator(mt MetarType) error {
 	default:
 		return fmt.Errorf("metar: invalid enum value for metar_type field: %q", mt)
 	}
+}
+
+// OrderOption defines the ordering options for the Metar queries.
+type OrderOption func(*sql.Selector)
+
+// ByID orders the results by the id field.
+func ByID(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldID, opts...).ToFunc()
+}
+
+// ByRawText orders the results by the raw_text field.
+func ByRawText(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldRawText, opts...).ToFunc()
+}
+
+// ByObservationTime orders the results by the observation_time field.
+func ByObservationTime(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldObservationTime, opts...).ToFunc()
+}
+
+// ByImportTime orders the results by the import_time field.
+func ByImportTime(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldImportTime, opts...).ToFunc()
+}
+
+// ByNextImportTimePrediction orders the results by the next_import_time_prediction field.
+func ByNextImportTimePrediction(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldNextImportTimePrediction, opts...).ToFunc()
+}
+
+// ByTemperature orders the results by the temperature field.
+func ByTemperature(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldTemperature, opts...).ToFunc()
+}
+
+// ByDewpoint orders the results by the dewpoint field.
+func ByDewpoint(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldDewpoint, opts...).ToFunc()
+}
+
+// ByWindSpeed orders the results by the wind_speed field.
+func ByWindSpeed(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldWindSpeed, opts...).ToFunc()
+}
+
+// ByWindGust orders the results by the wind_gust field.
+func ByWindGust(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldWindGust, opts...).ToFunc()
+}
+
+// ByWindDirection orders the results by the wind_direction field.
+func ByWindDirection(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldWindDirection, opts...).ToFunc()
+}
+
+// ByVisibility orders the results by the visibility field.
+func ByVisibility(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldVisibility, opts...).ToFunc()
+}
+
+// ByAltimeter orders the results by the altimeter field.
+func ByAltimeter(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldAltimeter, opts...).ToFunc()
+}
+
+// ByPresentWeather orders the results by the present_weather field.
+func ByPresentWeather(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldPresentWeather, opts...).ToFunc()
+}
+
+// ByFlightCategory orders the results by the flight_category field.
+func ByFlightCategory(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldFlightCategory, opts...).ToFunc()
+}
+
+// ByQualityControlCorrected orders the results by the quality_control_corrected field.
+func ByQualityControlCorrected(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldQualityControlCorrected, opts...).ToFunc()
+}
+
+// ByQualityControlAutoStation orders the results by the quality_control_auto_station field.
+func ByQualityControlAutoStation(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldQualityControlAutoStation, opts...).ToFunc()
+}
+
+// ByQualityControlMaintenanceIndicatorOn orders the results by the quality_control_maintenance_indicator_on field.
+func ByQualityControlMaintenanceIndicatorOn(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldQualityControlMaintenanceIndicatorOn, opts...).ToFunc()
+}
+
+// ByQualityControlNoSignal orders the results by the quality_control_no_signal field.
+func ByQualityControlNoSignal(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldQualityControlNoSignal, opts...).ToFunc()
+}
+
+// ByQualityControlLightningSensorOff orders the results by the quality_control_lightning_sensor_off field.
+func ByQualityControlLightningSensorOff(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldQualityControlLightningSensorOff, opts...).ToFunc()
+}
+
+// ByQualityControlFreezingRainSensorOff orders the results by the quality_control_freezing_rain_sensor_off field.
+func ByQualityControlFreezingRainSensorOff(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldQualityControlFreezingRainSensorOff, opts...).ToFunc()
+}
+
+// ByQualityControlPresentWeatherSensorOff orders the results by the quality_control_present_weather_sensor_off field.
+func ByQualityControlPresentWeatherSensorOff(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldQualityControlPresentWeatherSensorOff, opts...).ToFunc()
+}
+
+// BySeaLevelPressure orders the results by the sea_level_pressure field.
+func BySeaLevelPressure(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldSeaLevelPressure, opts...).ToFunc()
+}
+
+// ByPressureTendency orders the results by the pressure_tendency field.
+func ByPressureTendency(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldPressureTendency, opts...).ToFunc()
+}
+
+// ByMaxTemp6 orders the results by the max_temp_6 field.
+func ByMaxTemp6(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldMaxTemp6, opts...).ToFunc()
+}
+
+// ByMinTemp6 orders the results by the min_temp_6 field.
+func ByMinTemp6(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldMinTemp6, opts...).ToFunc()
+}
+
+// ByMaxTemp24 orders the results by the max_temp_24 field.
+func ByMaxTemp24(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldMaxTemp24, opts...).ToFunc()
+}
+
+// ByMinTemp24 orders the results by the min_temp_24 field.
+func ByMinTemp24(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldMinTemp24, opts...).ToFunc()
+}
+
+// ByPrecipitation orders the results by the precipitation field.
+func ByPrecipitation(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldPrecipitation, opts...).ToFunc()
+}
+
+// ByPrecipitation3 orders the results by the precipitation_3 field.
+func ByPrecipitation3(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldPrecipitation3, opts...).ToFunc()
+}
+
+// ByPrecipitation6 orders the results by the precipitation_6 field.
+func ByPrecipitation6(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldPrecipitation6, opts...).ToFunc()
+}
+
+// ByPrecipitation24 orders the results by the precipitation_24 field.
+func ByPrecipitation24(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldPrecipitation24, opts...).ToFunc()
+}
+
+// BySnowDepth orders the results by the snow_depth field.
+func BySnowDepth(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldSnowDepth, opts...).ToFunc()
+}
+
+// ByVertVis orders the results by the vert_vis field.
+func ByVertVis(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldVertVis, opts...).ToFunc()
+}
+
+// ByMetarType orders the results by the metar_type field.
+func ByMetarType(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldMetarType, opts...).ToFunc()
+}
+
+// ByHash orders the results by the hash field.
+func ByHash(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldHash, opts...).ToFunc()
+}
+
+// ByStationField orders the results by station field.
+func ByStationField(field string, opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newStationStep(), sql.OrderByField(field, opts...))
+	}
+}
+
+// BySkyConditionsCount orders the results by sky_conditions count.
+func BySkyConditionsCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newSkyConditionsStep(), opts...)
+	}
+}
+
+// BySkyConditions orders the results by sky_conditions terms.
+func BySkyConditions(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newSkyConditionsStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
+func newStationStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(StationInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.M2O, true, StationTable, StationColumn),
+	)
+}
+func newSkyConditionsStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(SkyConditionsInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, SkyConditionsTable, SkyConditionsColumn),
+	)
 }
 
 // MarshalGQL implements graphql.Marshaler interface.
