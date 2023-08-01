@@ -18,6 +18,10 @@ type Environment struct {
 	WeatherDataRetentionDays    int    `mapstructure:"WEATHER_DATA_RETENTION_DAYS"`
 	GraphQLQueryComplexityLimit int    `mapstructure:"GRAPHQL_QUERY_COMPLEXITY_LIMIT"`
 
+	CronWeatherImport     string `mapstructure:"CRON_WEATHER_IMPORT"`
+	CronAirportsImport    string `mapstructure:"CRON_AIRPORTS_IMPORT"`
+	CronSitemapGeneration string `mapstructure:"CRON_SITEMAP_GENERATION"`
+
 	SitemapBase           string `mapstructure:"SITEMAP_BASE"`
 	SitemapAirportsPath   string `mapstructure:"SITEMAP_AIRPORTS_PATH"`
 	SitemapAdditionalUrls string `mapstructure:"SITEMAP_ADDITIONAL_URLS"`

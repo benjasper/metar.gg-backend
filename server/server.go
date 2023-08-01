@@ -8,6 +8,7 @@ import (
 	"github.com/cenkalti/backoff/v4"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
+	"github.com/go-co-op/gocron"
 	"github.com/ikeikeikeike/go-sitemap-generator/v2/stm"
 	"metar.gg/ent"
 	"metar.gg/ent/airport"
@@ -136,6 +137,11 @@ func (s *Server) Run() error {
 	})
 
 	r.GET("/sitemap.xml", s.respondWithSitemap)
+
+	err = s.initializeCron(context.Background())
+	if err != nil {
+		s.logger.Fatal(err)
+	}
 
 	s.logger.Info("Starting server on port " + port)
 
@@ -387,4 +393,35 @@ func (s *Server) generateSitemap(ctx context.Context) *stm.Sitemap {
 	s.logger.Info(fmt.Sprintf("Sitemap generated in %s", time.Since(start)))
 
 	return sm
+}
+
+func (s *Server) initializeCron(ctx context.Context) error {
+	scheduler := gocron.NewScheduler(time.Local)
+
+	if environment.Global.CronWeatherImport != "" {
+		_, err := scheduler.Cron(environment.Global.CronWeatherImport).Do(s.RunWeatherImport, ctx)
+		if err != nil {
+			return nil
+		}
+	}
+
+	if environment.Global.CronAirportsImport != "" {
+		_, err := scheduler.Cron(environment.Global.CronAirportsImport).Do(s.RunAirportImport, ctx)
+		if err != nil {
+			return nil
+		}
+	}
+
+	if environment.Global.CronSitemapGeneration != "" {
+		_, err := scheduler.Cron(environment.Global.CronSitemapGeneration).Do(s.generateSitemap, ctx)
+		if err != nil {
+			return nil
+		}
+	}
+
+	if len(scheduler.Jobs()) > 0 {
+		scheduler.StartAsync()
+	}
+
+	return nil
 }

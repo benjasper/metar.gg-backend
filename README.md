@@ -48,7 +48,10 @@ See the [`Dockerfile`](Dockerfile) for an example of how to compile the server.
 The GraphQL API is available at `/graphql`. You can use introspection to see what queries are available.
 
 ### How to import data
-The server has a few triggers to start the data import from the sources mentioned above.
+You can either use the builtin CRON_* environment Variables (see [`.env.example`](.env.example)) or use the HTTP API to trigger the imports.
+With the environment variables you are not dependent on another system, because the app will trigger the imports itself.
+
+The server also has a few triggers to start the data import from the sources mentioned above.
 Those can be triggered via HTTP POST requests to:
 
 - POST `/import/airports`: Imports airport data
