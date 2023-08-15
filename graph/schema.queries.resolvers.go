@@ -6,14 +6,17 @@ package graph
 
 import (
 	"context"
+	"fmt"
+	"log"
+	"regexp"
+	"strings"
 
 	"entgo.io/contrib/entgql"
+	"entgo.io/ent/dialect/sql"
 	"github.com/google/uuid"
 	"metar.gg/ent"
 	"metar.gg/ent/airport"
-	"metar.gg/ent/country"
 	"metar.gg/ent/predicate"
-	"metar.gg/ent/region"
 	"metar.gg/ent/weatherstation"
 	"metar.gg/graph/generated"
 )
@@ -39,38 +42,52 @@ func (r *queryResolver) GetAirports(ctx context.Context, first *int, after *entg
 		where = append(where, airport.TypeEQ(*typeArg))
 	}
 
-	if search != nil {
-		// Search the airport by its name, ICAO, IATA, GPS code, municipality, local code and keywords.
-		where = append(where, airport.Or(
-			airport.IdentifierContainsFold(*search),
-			airport.NameContainsFold(*search),
-			airport.IcaoCodeEqualFold(*search),
-			airport.IcaoCodeContainsFold(*search),
-			airport.IataCodeEqualFold(*search),
-			airport.IataCodeContainsFold(*search),
-			airport.MunicipalityContainsFold(*search),
-			airport.HasCountryWith(country.NameContainsFold(*search)),
-			airport.LocalCodeEqualFold(*search),
-			airport.LocalCodeContainsFold(*search),
-			airport.HasRegionWith(region.NameContainsFold(*search)),
-		))
-	}
-
 	if hasWeather != nil && *hasWeather {
 		where = append(where, airport.HasStationWith(weatherstation.HasMetars()))
 	} else if hasWeather != nil && !*hasWeather {
 		where = append(where, airport.Not(airport.HasStationWith(weatherstation.HasMetars())))
 	}
 
-	airportPaginateOptions := []ent.AirportPaginateOption{
-		ent.WithAirportOrder(&ent.AirportOrder{Field: ent.AirportOrderFieldImportance, Direction: entgql.OrderDirectionDesc}),
+	var airportPaginateOptions []ent.AirportPaginateOption
+
+	if len(order) == 0 {
+		airportPaginateOptions = append(airportPaginateOptions, ent.WithAirportOrder(&ent.AirportOrder{Field: ent.AirportOrderFieldImportance, Direction: entgql.OrderDirectionDesc}))
 	}
 
-	if len(order) > 0 {
-		airportPaginateOptions = nil
-		for _, airportOrder := range order {
-			airportPaginateOptions = append(airportPaginateOptions, ent.WithAirportOrder(airportOrder))
+	for _, airportOrder := range order {
+		airportPaginateOptions = append(airportPaginateOptions, ent.WithAirportOrder(airportOrder))
+	}
+
+	// If there was a search argument we want to search the db
+	safeSearch := ""
+	if search != nil {
+		compile, err := regexp.Compile("\\w+")
+		if err != nil {
+			log.Panic(err)
 		}
+
+		searchStringResult := compile.FindAllString(*search, 10)
+		if len(searchStringResult) == 0 {
+			return &ent.AirportConnection{}, nil
+		}
+
+		safeSearch = strings.Join(searchStringResult, " ")
+
+		airportPaginateOptions = append(airportPaginateOptions, ent.WithAirportFilter(func(query *ent.AirportQuery) (*ent.AirportQuery, error) {
+			query.Modify(func(s *sql.Selector) {
+				if safeSearch != "" {
+					p := fmt.Sprintf("*%s*", safeSearch)
+					matchStatement := "MATCH(name, municipality, icao_code, iata_code, local_code, identifier) AGAINST (? IN BOOLEAN MODE)"
+
+					s.AppendSelectExpr(sql.ExprP(fmt.Sprintf("%s AS relevance", matchStatement), p))
+					s.Where(sql.ExprP(fmt.Sprintf(matchStatement), p))
+					s.ClearOrder()
+					s.OrderExpr(sql.Expr("relevance DESC, importance DESC, airports.id ASC"))
+				}
+			})
+
+			return query, nil
+		}))
 	}
 
 	connection, err := r.client.Airport.Query().Where(
@@ -80,6 +97,24 @@ func (r *queryResolver) GetAirports(ctx context.Context, first *int, after *entg
 		return nil, err
 	}
 
+	// A bit dirty, but we want to at least calculate the correct total count
+	if safeSearch != "" {
+		count, err := r.client.Airport.Query().Where(
+			airport.And(where...),
+		).Modify(func(s *sql.Selector) {
+			if safeSearch != "" {
+				p := fmt.Sprintf("*%s*", safeSearch)
+				matchStatement := "MATCH(name, municipality, icao_code, iata_code, local_code, identifier) AGAINST (? IN BOOLEAN MODE)"
+
+				s.Where(sql.ExprP(fmt.Sprintf(matchStatement), p))
+			}
+		}).Count(ctx)
+		if err != nil {
+			return nil, err
+		}
+
+		connection.TotalCount = count
+	}
 	return connection, nil
 }
 

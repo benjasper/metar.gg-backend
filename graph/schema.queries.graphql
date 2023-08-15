@@ -114,7 +114,7 @@ type Query {
         """Filter by airport type."""
         type: AirportType
 
-        """Search the airport by its name, ICAO, IATA, GPS code, municipality, local code and keywords."""
+        """Search the airport by its name, ICAO, IATA, GPS code, municipality and local code. This disables the order parameter."""
         search: String,
 
         """Filter whether the airport provides METARs and has recent ones."""

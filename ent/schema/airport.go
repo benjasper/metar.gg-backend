@@ -3,7 +3,9 @@ package schema
 import (
 	"entgo.io/contrib/entgql"
 	"entgo.io/ent"
+	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/entsql"
+	"entgo.io/ent/schema"
 	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
 	"entgo.io/ent/schema/index"
@@ -56,6 +58,12 @@ func (Airport) Edges() []ent.Edge {
 // Indexes of the Airport.
 func (Airport) Indexes() []ent.Index {
 	return []ent.Index{
+		index.Fields("name", "municipality", "icao_code", "iata_code", "local_code", "identifier").
+			Annotations(
+				entsql.IndexTypes(map[string]string{
+					dialect.MySQL: "FULLTEXT",
+				}),
+			).StorageKey("fulltext"),
 		index.Fields("identifier"),
 		index.Fields("name"),
 		index.Fields("municipality"),
@@ -70,5 +78,15 @@ func (Airport) Mixin() []ent.Mixin {
 	return []ent.Mixin{
 		ImportMixin{},
 		IDMixin{},
+	}
+}
+
+// Annotations of the Airport.
+func (Airport) Annotations() []schema.Annotation {
+	return []schema.Annotation{
+		entsql.Annotation{
+			Charset:   "utf8mb4",
+			Collation: "utf8mb4_unicode_520_ci",
+		},
 	}
 }

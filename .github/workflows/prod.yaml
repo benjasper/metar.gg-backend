@@ -1,9 +1,8 @@
 name: 'build'
 
 on:
-  push:
-    branches:
-      - 'main'
+  release:
+    types: [released]
 
 concurrency:
   group: ${{ github.ref }}
@@ -31,6 +30,6 @@ jobs:
           context: .
           platforms: linux/amd64,linux/arm64
           push: true
-          tags: ghcr.io/benjasper/metar.gg:latest
+          tags: ghcr.io/benjasper/metar.gg:latest,ghcr.io/benjasper/metar.gg:${{ github.ref }}
           cache-from: type=gha
           cache-to: type=gha,mode=max

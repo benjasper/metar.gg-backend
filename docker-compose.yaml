@@ -1,13 +1,13 @@
 version: "3.9"
 services:
   db:
-    image: mysql
+    image: mariadb:latest
     ports:
       - "3306:3306"
     volumes:
       - db_data:/var/lib/mysql
     environment:
-        MYSQL_ROOT_PASSWORD: 123
-        MYSQL_DATABASE: metargg
+        MARIADB_ROOT_PASSWORD: 123
+        MARIADB_DATABASE: metargg
 volumes:
   db_data: {}

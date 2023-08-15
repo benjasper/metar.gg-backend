@@ -3,6 +3,7 @@
 package migrate
 
 import (
+	"entgo.io/ent/dialect/entsql"
 	"entgo.io/ent/dialect/sql/schema"
 	"entgo.io/ent/schema/field"
 )
@@ -64,6 +65,16 @@ var (
 				Name:    "airport_import_id",
 				Unique:  false,
 				Columns: []*schema.Column{AirportsColumns[1]},
+			},
+			{
+				Name:    "fulltext",
+				Unique:  false,
+				Columns: []*schema.Column{AirportsColumns[10], AirportsColumns[15], AirportsColumns[5], AirportsColumns[6], AirportsColumns[18], AirportsColumns[7]},
+				Annotation: &entsql.IndexAnnotation{
+					Types: map[string]string{
+						"mysql": "FULLTEXT",
+					},
+				},
 			},
 			{
 				Name:    "airport_identifier",
@@ -556,6 +567,10 @@ var (
 func init() {
 	AirportsTable.ForeignKeys[0].RefTable = CountriesTable
 	AirportsTable.ForeignKeys[1].RefTable = RegionsTable
+	AirportsTable.Annotation = &entsql.Annotation{
+		Charset:   "utf8mb4",
+		Collation: "utf8mb4_unicode_520_ci",
+	}
 	ForecastsTable.ForeignKeys[0].RefTable = TafsTable
 	FrequenciesTable.ForeignKeys[0].RefTable = AirportsTable
 	IcingConditionsTable.ForeignKeys[0].RefTable = ForecastsTable
