@@ -306,6 +306,11 @@ var (
 				Unique:  false,
 				Columns: []*schema.Column{MetarsColumns[36]},
 			},
+			{
+				Name:    "metar_import_time",
+				Unique:  false,
+				Columns: []*schema.Column{MetarsColumns[3]},
+			},
 		},
 	}
 	// RegionsColumns holds the columns for the "regions" table.
@@ -456,6 +461,11 @@ var (
 				Name:    "taf_issue_time",
 				Unique:  false,
 				Columns: []*schema.Column{TafsColumns[2]},
+			},
+			{
+				Name:    "taf_hash",
+				Unique:  false,
+				Columns: []*schema.Column{TafsColumns[8]},
 			},
 		},
 	}

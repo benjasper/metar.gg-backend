@@ -10,12 +10,12 @@ import (
 	"time"
 )
 
-// Taf holds the schema definition for the Metar entity.
+// Taf holds the schema definition for the Taf entity.
 type Taf struct {
 	ent.Schema
 }
 
-// Fields of the Metar.
+// Fields of the Taf.
 func (Taf) Fields() []ent.Field {
 	return []ent.Field{
 		field.Text("raw_text").Comment("The raw TAF text."),
@@ -29,7 +29,7 @@ func (Taf) Fields() []ent.Field {
 	}
 }
 
-// Edges of the Metar.
+// Edges of the Taf.
 func (Taf) Edges() []ent.Edge {
 	return []ent.Edge{
 		edge.From("station", WeatherStation.Type).Ref("tafs").Unique().Required().Comment("The station that issued this taf."),
@@ -41,14 +41,15 @@ func (Taf) Edges() []ent.Edge {
 	}
 }
 
-// Indexes of the Metar.
+// Indexes of the Taf.
 func (Taf) Indexes() []ent.Index {
 	return []ent.Index{
 		index.Fields("issue_time"),
+		index.Fields("hash"),
 	}
 }
 
-// Mixin of the Metar.
+// Mixin of the Taf.
 func (Taf) Mixin() []ent.Mixin {
 	return []ent.Mixin{
 		IDMixin{},

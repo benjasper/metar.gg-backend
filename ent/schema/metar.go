@@ -72,6 +72,7 @@ func (Metar) Indexes() []ent.Index {
 	return []ent.Index{
 		index.Fields("observation_time"),
 		index.Fields("hash"),
+		index.Fields("import_time"),
 	}
 }
 
