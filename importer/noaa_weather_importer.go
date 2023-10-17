@@ -229,7 +229,8 @@ func (i *NoaaWeatherImporter) importMetar(x *XmlMetar, ctx context.Context) erro
 			windIsVariable = true
 		}
 
-		if potWindDir, err := strconv.Atoi(*x.WindDirDegrees); err != nil {
+		potWindDir, err := strconv.Atoi(*x.WindDirDegrees)
+		if err == nil {
 			windDirDegrees = &potWindDir
 		}
 	}
@@ -437,7 +438,7 @@ func (i *NoaaWeatherImporter) importTaf(x *XmlTaf, ctx context.Context) error {
 				windIsVariable = true
 			}
 
-			if potWindDir, err := strconv.Atoi(*xmlForecast.WindDir); err != nil {
+			if potWindDir, err := strconv.Atoi(*xmlForecast.WindDir); err == nil {
 				windDirDegrees = &potWindDir
 			}
 		}
