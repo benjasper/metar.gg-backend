@@ -213,6 +213,12 @@ func (mu *MetarUpdate) ClearWindDirection() *MetarUpdate {
 	return mu
 }
 
+// SetWindDirectionVariable sets the "wind_direction_variable" field.
+func (mu *MetarUpdate) SetWindDirectionVariable(b bool) *MetarUpdate {
+	mu.mutation.SetWindDirectionVariable(b)
+	return mu
+}
+
 // SetVisibility sets the "visibility" field.
 func (mu *MetarUpdate) SetVisibility(f float64) *MetarUpdate {
 	mu.mutation.ResetVisibility()
@@ -237,6 +243,12 @@ func (mu *MetarUpdate) AddVisibility(f float64) *MetarUpdate {
 // ClearVisibility clears the value of the "visibility" field.
 func (mu *MetarUpdate) ClearVisibility() *MetarUpdate {
 	mu.mutation.ClearVisibility()
+	return mu
+}
+
+// SetVisibilityIsMoreThan sets the "visibility_is_more_than" field.
+func (mu *MetarUpdate) SetVisibilityIsMoreThan(b bool) *MetarUpdate {
+	mu.mutation.SetVisibilityIsMoreThan(b)
 	return mu
 }
 
@@ -880,6 +892,9 @@ func (mu *MetarUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if mu.mutation.WindDirectionCleared() {
 		_spec.ClearField(metar.FieldWindDirection, field.TypeInt)
 	}
+	if value, ok := mu.mutation.WindDirectionVariable(); ok {
+		_spec.SetField(metar.FieldWindDirectionVariable, field.TypeBool, value)
+	}
 	if value, ok := mu.mutation.Visibility(); ok {
 		_spec.SetField(metar.FieldVisibility, field.TypeFloat64, value)
 	}
@@ -888,6 +903,9 @@ func (mu *MetarUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	if mu.mutation.VisibilityCleared() {
 		_spec.ClearField(metar.FieldVisibility, field.TypeFloat64)
+	}
+	if value, ok := mu.mutation.VisibilityIsMoreThan(); ok {
+		_spec.SetField(metar.FieldVisibilityIsMoreThan, field.TypeBool, value)
 	}
 	if value, ok := mu.mutation.Altimeter(); ok {
 		_spec.SetField(metar.FieldAltimeter, field.TypeFloat64, value)
@@ -1325,6 +1343,12 @@ func (muo *MetarUpdateOne) ClearWindDirection() *MetarUpdateOne {
 	return muo
 }
 
+// SetWindDirectionVariable sets the "wind_direction_variable" field.
+func (muo *MetarUpdateOne) SetWindDirectionVariable(b bool) *MetarUpdateOne {
+	muo.mutation.SetWindDirectionVariable(b)
+	return muo
+}
+
 // SetVisibility sets the "visibility" field.
 func (muo *MetarUpdateOne) SetVisibility(f float64) *MetarUpdateOne {
 	muo.mutation.ResetVisibility()
@@ -1349,6 +1373,12 @@ func (muo *MetarUpdateOne) AddVisibility(f float64) *MetarUpdateOne {
 // ClearVisibility clears the value of the "visibility" field.
 func (muo *MetarUpdateOne) ClearVisibility() *MetarUpdateOne {
 	muo.mutation.ClearVisibility()
+	return muo
+}
+
+// SetVisibilityIsMoreThan sets the "visibility_is_more_than" field.
+func (muo *MetarUpdateOne) SetVisibilityIsMoreThan(b bool) *MetarUpdateOne {
+	muo.mutation.SetVisibilityIsMoreThan(b)
 	return muo
 }
 
@@ -2022,6 +2052,9 @@ func (muo *MetarUpdateOne) sqlSave(ctx context.Context) (_node *Metar, err error
 	if muo.mutation.WindDirectionCleared() {
 		_spec.ClearField(metar.FieldWindDirection, field.TypeInt)
 	}
+	if value, ok := muo.mutation.WindDirectionVariable(); ok {
+		_spec.SetField(metar.FieldWindDirectionVariable, field.TypeBool, value)
+	}
 	if value, ok := muo.mutation.Visibility(); ok {
 		_spec.SetField(metar.FieldVisibility, field.TypeFloat64, value)
 	}
@@ -2030,6 +2063,9 @@ func (muo *MetarUpdateOne) sqlSave(ctx context.Context) (_node *Metar, err error
 	}
 	if muo.mutation.VisibilityCleared() {
 		_spec.ClearField(metar.FieldVisibility, field.TypeFloat64)
+	}
+	if value, ok := muo.mutation.VisibilityIsMoreThan(); ok {
+		_spec.SetField(metar.FieldVisibilityIsMoreThan, field.TypeBool, value)
 	}
 	if value, ok := muo.mutation.Altimeter(); ok {
 		_spec.SetField(metar.FieldAltimeter, field.TypeFloat64, value)

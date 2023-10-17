@@ -136,6 +136,12 @@ func (mc *MetarCreate) SetNillableWindDirection(i *int) *MetarCreate {
 	return mc
 }
 
+// SetWindDirectionVariable sets the "wind_direction_variable" field.
+func (mc *MetarCreate) SetWindDirectionVariable(b bool) *MetarCreate {
+	mc.mutation.SetWindDirectionVariable(b)
+	return mc
+}
+
 // SetVisibility sets the "visibility" field.
 func (mc *MetarCreate) SetVisibility(f float64) *MetarCreate {
 	mc.mutation.SetVisibility(f)
@@ -147,6 +153,12 @@ func (mc *MetarCreate) SetNillableVisibility(f *float64) *MetarCreate {
 	if f != nil {
 		mc.SetVisibility(*f)
 	}
+	return mc
+}
+
+// SetVisibilityIsMoreThan sets the "visibility_is_more_than" field.
+func (mc *MetarCreate) SetVisibilityIsMoreThan(b bool) *MetarCreate {
+	mc.mutation.SetVisibilityIsMoreThan(b)
 	return mc
 }
 
@@ -518,6 +530,12 @@ func (mc *MetarCreate) check() error {
 	if _, ok := mc.mutation.ImportTime(); !ok {
 		return &ValidationError{Name: "import_time", err: errors.New(`ent: missing required field "Metar.import_time"`)}
 	}
+	if _, ok := mc.mutation.WindDirectionVariable(); !ok {
+		return &ValidationError{Name: "wind_direction_variable", err: errors.New(`ent: missing required field "Metar.wind_direction_variable"`)}
+	}
+	if _, ok := mc.mutation.VisibilityIsMoreThan(); !ok {
+		return &ValidationError{Name: "visibility_is_more_than", err: errors.New(`ent: missing required field "Metar.visibility_is_more_than"`)}
+	}
 	if v, ok := mc.mutation.FlightCategory(); ok {
 		if err := metar.FlightCategoryValidator(v); err != nil {
 			return &ValidationError{Name: "flight_category", err: fmt.Errorf(`ent: validator failed for field "Metar.flight_category": %w`, err)}
@@ -627,9 +645,17 @@ func (mc *MetarCreate) createSpec() (*Metar, *sqlgraph.CreateSpec) {
 		_spec.SetField(metar.FieldWindDirection, field.TypeInt, value)
 		_node.WindDirection = &value
 	}
+	if value, ok := mc.mutation.WindDirectionVariable(); ok {
+		_spec.SetField(metar.FieldWindDirectionVariable, field.TypeBool, value)
+		_node.WindDirectionVariable = value
+	}
 	if value, ok := mc.mutation.Visibility(); ok {
 		_spec.SetField(metar.FieldVisibility, field.TypeFloat64, value)
 		_node.Visibility = &value
+	}
+	if value, ok := mc.mutation.VisibilityIsMoreThan(); ok {
+		_spec.SetField(metar.FieldVisibilityIsMoreThan, field.TypeBool, value)
+		_node.VisibilityIsMoreThan = value
 	}
 	if value, ok := mc.mutation.Altimeter(); ok {
 		_spec.SetField(metar.FieldAltimeter, field.TypeFloat64, value)
@@ -986,6 +1012,18 @@ func (u *MetarUpsert) ClearWindDirection() *MetarUpsert {
 	return u
 }
 
+// SetWindDirectionVariable sets the "wind_direction_variable" field.
+func (u *MetarUpsert) SetWindDirectionVariable(v bool) *MetarUpsert {
+	u.Set(metar.FieldWindDirectionVariable, v)
+	return u
+}
+
+// UpdateWindDirectionVariable sets the "wind_direction_variable" field to the value that was provided on create.
+func (u *MetarUpsert) UpdateWindDirectionVariable() *MetarUpsert {
+	u.SetExcluded(metar.FieldWindDirectionVariable)
+	return u
+}
+
 // SetVisibility sets the "visibility" field.
 func (u *MetarUpsert) SetVisibility(v float64) *MetarUpsert {
 	u.Set(metar.FieldVisibility, v)
@@ -1007,6 +1045,18 @@ func (u *MetarUpsert) AddVisibility(v float64) *MetarUpsert {
 // ClearVisibility clears the value of the "visibility" field.
 func (u *MetarUpsert) ClearVisibility() *MetarUpsert {
 	u.SetNull(metar.FieldVisibility)
+	return u
+}
+
+// SetVisibilityIsMoreThan sets the "visibility_is_more_than" field.
+func (u *MetarUpsert) SetVisibilityIsMoreThan(v bool) *MetarUpsert {
+	u.Set(metar.FieldVisibilityIsMoreThan, v)
+	return u
+}
+
+// UpdateVisibilityIsMoreThan sets the "visibility_is_more_than" field to the value that was provided on create.
+func (u *MetarUpsert) UpdateVisibilityIsMoreThan() *MetarUpsert {
+	u.SetExcluded(metar.FieldVisibilityIsMoreThan)
 	return u
 }
 
@@ -1723,6 +1773,20 @@ func (u *MetarUpsertOne) ClearWindDirection() *MetarUpsertOne {
 	})
 }
 
+// SetWindDirectionVariable sets the "wind_direction_variable" field.
+func (u *MetarUpsertOne) SetWindDirectionVariable(v bool) *MetarUpsertOne {
+	return u.Update(func(s *MetarUpsert) {
+		s.SetWindDirectionVariable(v)
+	})
+}
+
+// UpdateWindDirectionVariable sets the "wind_direction_variable" field to the value that was provided on create.
+func (u *MetarUpsertOne) UpdateWindDirectionVariable() *MetarUpsertOne {
+	return u.Update(func(s *MetarUpsert) {
+		s.UpdateWindDirectionVariable()
+	})
+}
+
 // SetVisibility sets the "visibility" field.
 func (u *MetarUpsertOne) SetVisibility(v float64) *MetarUpsertOne {
 	return u.Update(func(s *MetarUpsert) {
@@ -1748,6 +1812,20 @@ func (u *MetarUpsertOne) UpdateVisibility() *MetarUpsertOne {
 func (u *MetarUpsertOne) ClearVisibility() *MetarUpsertOne {
 	return u.Update(func(s *MetarUpsert) {
 		s.ClearVisibility()
+	})
+}
+
+// SetVisibilityIsMoreThan sets the "visibility_is_more_than" field.
+func (u *MetarUpsertOne) SetVisibilityIsMoreThan(v bool) *MetarUpsertOne {
+	return u.Update(func(s *MetarUpsert) {
+		s.SetVisibilityIsMoreThan(v)
+	})
+}
+
+// UpdateVisibilityIsMoreThan sets the "visibility_is_more_than" field to the value that was provided on create.
+func (u *MetarUpsertOne) UpdateVisibilityIsMoreThan() *MetarUpsertOne {
+	return u.Update(func(s *MetarUpsert) {
+		s.UpdateVisibilityIsMoreThan()
 	})
 }
 
@@ -2704,6 +2782,20 @@ func (u *MetarUpsertBulk) ClearWindDirection() *MetarUpsertBulk {
 	})
 }
 
+// SetWindDirectionVariable sets the "wind_direction_variable" field.
+func (u *MetarUpsertBulk) SetWindDirectionVariable(v bool) *MetarUpsertBulk {
+	return u.Update(func(s *MetarUpsert) {
+		s.SetWindDirectionVariable(v)
+	})
+}
+
+// UpdateWindDirectionVariable sets the "wind_direction_variable" field to the value that was provided on create.
+func (u *MetarUpsertBulk) UpdateWindDirectionVariable() *MetarUpsertBulk {
+	return u.Update(func(s *MetarUpsert) {
+		s.UpdateWindDirectionVariable()
+	})
+}
+
 // SetVisibility sets the "visibility" field.
 func (u *MetarUpsertBulk) SetVisibility(v float64) *MetarUpsertBulk {
 	return u.Update(func(s *MetarUpsert) {
@@ -2729,6 +2821,20 @@ func (u *MetarUpsertBulk) UpdateVisibility() *MetarUpsertBulk {
 func (u *MetarUpsertBulk) ClearVisibility() *MetarUpsertBulk {
 	return u.Update(func(s *MetarUpsert) {
 		s.ClearVisibility()
+	})
+}
+
+// SetVisibilityIsMoreThan sets the "visibility_is_more_than" field.
+func (u *MetarUpsertBulk) SetVisibilityIsMoreThan(v bool) *MetarUpsertBulk {
+	return u.Update(func(s *MetarUpsert) {
+		s.SetVisibilityIsMoreThan(v)
+	})
+}
+
+// UpdateVisibilityIsMoreThan sets the "visibility_is_more_than" field to the value that was provided on create.
+func (u *MetarUpsertBulk) UpdateVisibilityIsMoreThan() *MetarUpsertBulk {
+	return u.Update(func(s *MetarUpsert) {
+		s.UpdateVisibilityIsMoreThan()
 	})
 }
 

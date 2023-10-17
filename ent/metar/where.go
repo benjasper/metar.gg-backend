@@ -101,9 +101,19 @@ func WindDirection(v int) predicate.Metar {
 	return predicate.Metar(sql.FieldEQ(FieldWindDirection, v))
 }
 
+// WindDirectionVariable applies equality check predicate on the "wind_direction_variable" field. It's identical to WindDirectionVariableEQ.
+func WindDirectionVariable(v bool) predicate.Metar {
+	return predicate.Metar(sql.FieldEQ(FieldWindDirectionVariable, v))
+}
+
 // Visibility applies equality check predicate on the "visibility" field. It's identical to VisibilityEQ.
 func Visibility(v float64) predicate.Metar {
 	return predicate.Metar(sql.FieldEQ(FieldVisibility, v))
+}
+
+// VisibilityIsMoreThan applies equality check predicate on the "visibility_is_more_than" field. It's identical to VisibilityIsMoreThanEQ.
+func VisibilityIsMoreThan(v bool) predicate.Metar {
+	return predicate.Metar(sql.FieldEQ(FieldVisibilityIsMoreThan, v))
 }
 
 // Altimeter applies equality check predicate on the "altimeter" field. It's identical to AltimeterEQ.
@@ -661,6 +671,16 @@ func WindDirectionNotNil() predicate.Metar {
 	return predicate.Metar(sql.FieldNotNull(FieldWindDirection))
 }
 
+// WindDirectionVariableEQ applies the EQ predicate on the "wind_direction_variable" field.
+func WindDirectionVariableEQ(v bool) predicate.Metar {
+	return predicate.Metar(sql.FieldEQ(FieldWindDirectionVariable, v))
+}
+
+// WindDirectionVariableNEQ applies the NEQ predicate on the "wind_direction_variable" field.
+func WindDirectionVariableNEQ(v bool) predicate.Metar {
+	return predicate.Metar(sql.FieldNEQ(FieldWindDirectionVariable, v))
+}
+
 // VisibilityEQ applies the EQ predicate on the "visibility" field.
 func VisibilityEQ(v float64) predicate.Metar {
 	return predicate.Metar(sql.FieldEQ(FieldVisibility, v))
@@ -709,6 +729,16 @@ func VisibilityIsNil() predicate.Metar {
 // VisibilityNotNil applies the NotNil predicate on the "visibility" field.
 func VisibilityNotNil() predicate.Metar {
 	return predicate.Metar(sql.FieldNotNull(FieldVisibility))
+}
+
+// VisibilityIsMoreThanEQ applies the EQ predicate on the "visibility_is_more_than" field.
+func VisibilityIsMoreThanEQ(v bool) predicate.Metar {
+	return predicate.Metar(sql.FieldEQ(FieldVisibilityIsMoreThan, v))
+}
+
+// VisibilityIsMoreThanNEQ applies the NEQ predicate on the "visibility_is_more_than" field.
+func VisibilityIsMoreThanNEQ(v bool) predicate.Metar {
+	return predicate.Metar(sql.FieldNEQ(FieldVisibilityIsMoreThan, v))
 }
 
 // AltimeterEQ applies the EQ predicate on the "altimeter" field.

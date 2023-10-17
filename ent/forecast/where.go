@@ -81,6 +81,11 @@ func WindDirection(v int) predicate.Forecast {
 	return predicate.Forecast(sql.FieldEQ(FieldWindDirection, v))
 }
 
+// WindDirectionVariable applies equality check predicate on the "wind_direction_variable" field. It's identical to WindDirectionVariableEQ.
+func WindDirectionVariable(v bool) predicate.Forecast {
+	return predicate.Forecast(sql.FieldEQ(FieldWindDirectionVariable, v))
+}
+
 // WindSpeed applies equality check predicate on the "wind_speed" field. It's identical to WindSpeedEQ.
 func WindSpeed(v int) predicate.Forecast {
 	return predicate.Forecast(sql.FieldEQ(FieldWindSpeed, v))
@@ -109,6 +114,11 @@ func WindShearSpeed(v int) predicate.Forecast {
 // VisibilityHorizontal applies equality check predicate on the "visibility_horizontal" field. It's identical to VisibilityHorizontalEQ.
 func VisibilityHorizontal(v float64) predicate.Forecast {
 	return predicate.Forecast(sql.FieldEQ(FieldVisibilityHorizontal, v))
+}
+
+// VisibilityHorizontalIsMoreThan applies equality check predicate on the "visibility_horizontal_is_more_than" field. It's identical to VisibilityHorizontalIsMoreThanEQ.
+func VisibilityHorizontalIsMoreThan(v bool) predicate.Forecast {
+	return predicate.Forecast(sql.FieldEQ(FieldVisibilityHorizontalIsMoreThan, v))
 }
 
 // VisibilityVertical applies equality check predicate on the "visibility_vertical" field. It's identical to VisibilityVerticalEQ.
@@ -389,6 +399,16 @@ func WindDirectionIsNil() predicate.Forecast {
 // WindDirectionNotNil applies the NotNil predicate on the "wind_direction" field.
 func WindDirectionNotNil() predicate.Forecast {
 	return predicate.Forecast(sql.FieldNotNull(FieldWindDirection))
+}
+
+// WindDirectionVariableEQ applies the EQ predicate on the "wind_direction_variable" field.
+func WindDirectionVariableEQ(v bool) predicate.Forecast {
+	return predicate.Forecast(sql.FieldEQ(FieldWindDirectionVariable, v))
+}
+
+// WindDirectionVariableNEQ applies the NEQ predicate on the "wind_direction_variable" field.
+func WindDirectionVariableNEQ(v bool) predicate.Forecast {
+	return predicate.Forecast(sql.FieldNEQ(FieldWindDirectionVariable, v))
 }
 
 // WindSpeedEQ applies the EQ predicate on the "wind_speed" field.
@@ -689,6 +709,16 @@ func VisibilityHorizontalIsNil() predicate.Forecast {
 // VisibilityHorizontalNotNil applies the NotNil predicate on the "visibility_horizontal" field.
 func VisibilityHorizontalNotNil() predicate.Forecast {
 	return predicate.Forecast(sql.FieldNotNull(FieldVisibilityHorizontal))
+}
+
+// VisibilityHorizontalIsMoreThanEQ applies the EQ predicate on the "visibility_horizontal_is_more_than" field.
+func VisibilityHorizontalIsMoreThanEQ(v bool) predicate.Forecast {
+	return predicate.Forecast(sql.FieldEQ(FieldVisibilityHorizontalIsMoreThan, v))
+}
+
+// VisibilityHorizontalIsMoreThanNEQ applies the NEQ predicate on the "visibility_horizontal_is_more_than" field.
+func VisibilityHorizontalIsMoreThanNEQ(v bool) predicate.Forecast {
+	return predicate.Forecast(sql.FieldNEQ(FieldVisibilityHorizontalIsMoreThan, v))
 }
 
 // VisibilityVerticalEQ applies the EQ predicate on the "visibility_vertical" field.

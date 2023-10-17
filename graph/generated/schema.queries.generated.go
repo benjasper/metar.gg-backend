@@ -767,6 +767,10 @@ func (ec *executionContext) fieldContext_MetarEdge_node(ctx context.Context, fie
 				return ec.fieldContext_Metar_nextImportTimePrediction(ctx, field)
 			case "windDirection":
 				return ec.fieldContext_Metar_windDirection(ctx, field)
+			case "windDirectionVariable":
+				return ec.fieldContext_Metar_windDirectionVariable(ctx, field)
+			case "visibilityIsMoreThan":
+				return ec.fieldContext_Metar_visibilityIsMoreThan(ctx, field)
 			case "presentWeather":
 				return ec.fieldContext_Metar_presentWeather(ctx, field)
 			case "flightCategory":

@@ -434,10 +434,20 @@ func (f *ForecastQuery) collectField(ctx context.Context, opCtx *graphql.Operati
 				selectedFields = append(selectedFields, forecast.FieldWindDirection)
 				fieldSeen[forecast.FieldWindDirection] = struct{}{}
 			}
+		case "windDirectionVariable":
+			if _, ok := fieldSeen[forecast.FieldWindDirectionVariable]; !ok {
+				selectedFields = append(selectedFields, forecast.FieldWindDirectionVariable)
+				fieldSeen[forecast.FieldWindDirectionVariable] = struct{}{}
+			}
 		case "windShearDirection":
 			if _, ok := fieldSeen[forecast.FieldWindShearDirection]; !ok {
 				selectedFields = append(selectedFields, forecast.FieldWindShearDirection)
 				fieldSeen[forecast.FieldWindShearDirection] = struct{}{}
+			}
+		case "visibilityHorizontalIsMoreThan":
+			if _, ok := fieldSeen[forecast.FieldVisibilityHorizontalIsMoreThan]; !ok {
+				selectedFields = append(selectedFields, forecast.FieldVisibilityHorizontalIsMoreThan)
+				fieldSeen[forecast.FieldVisibilityHorizontalIsMoreThan] = struct{}{}
 			}
 		case "weather":
 			if _, ok := fieldSeen[forecast.FieldWeather]; !ok {
@@ -712,6 +722,16 @@ func (m *MetarQuery) collectField(ctx context.Context, opCtx *graphql.OperationC
 			if _, ok := fieldSeen[metar.FieldWindDirection]; !ok {
 				selectedFields = append(selectedFields, metar.FieldWindDirection)
 				fieldSeen[metar.FieldWindDirection] = struct{}{}
+			}
+		case "windDirectionVariable":
+			if _, ok := fieldSeen[metar.FieldWindDirectionVariable]; !ok {
+				selectedFields = append(selectedFields, metar.FieldWindDirectionVariable)
+				fieldSeen[metar.FieldWindDirectionVariable] = struct{}{}
+			}
+		case "visibilityIsMoreThan":
+			if _, ok := fieldSeen[metar.FieldVisibilityIsMoreThan]; !ok {
+				selectedFields = append(selectedFields, metar.FieldVisibilityIsMoreThan)
+				fieldSeen[metar.FieldVisibilityIsMoreThan] = struct{}{}
 			}
 		case "presentWeather":
 			if _, ok := fieldSeen[metar.FieldPresentWeather]; !ok {

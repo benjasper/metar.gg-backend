@@ -140,6 +140,12 @@ func (fu *ForecastUpdate) ClearWindDirection() *ForecastUpdate {
 	return fu
 }
 
+// SetWindDirectionVariable sets the "wind_direction_variable" field.
+func (fu *ForecastUpdate) SetWindDirectionVariable(b bool) *ForecastUpdate {
+	fu.mutation.SetWindDirectionVariable(b)
+	return fu
+}
+
 // SetWindSpeed sets the "wind_speed" field.
 func (fu *ForecastUpdate) SetWindSpeed(i int) *ForecastUpdate {
 	fu.mutation.ResetWindSpeed()
@@ -299,6 +305,12 @@ func (fu *ForecastUpdate) AddVisibilityHorizontal(f float64) *ForecastUpdate {
 // ClearVisibilityHorizontal clears the value of the "visibility_horizontal" field.
 func (fu *ForecastUpdate) ClearVisibilityHorizontal() *ForecastUpdate {
 	fu.mutation.ClearVisibilityHorizontal()
+	return fu
+}
+
+// SetVisibilityHorizontalIsMoreThan sets the "visibility_horizontal_is_more_than" field.
+func (fu *ForecastUpdate) SetVisibilityHorizontalIsMoreThan(b bool) *ForecastUpdate {
+	fu.mutation.SetVisibilityHorizontalIsMoreThan(b)
 	return fu
 }
 
@@ -636,6 +648,9 @@ func (fu *ForecastUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if fu.mutation.WindDirectionCleared() {
 		_spec.ClearField(forecast.FieldWindDirection, field.TypeInt)
 	}
+	if value, ok := fu.mutation.WindDirectionVariable(); ok {
+		_spec.SetField(forecast.FieldWindDirectionVariable, field.TypeBool, value)
+	}
 	if value, ok := fu.mutation.WindSpeed(); ok {
 		_spec.SetField(forecast.FieldWindSpeed, field.TypeInt, value)
 	}
@@ -689,6 +704,9 @@ func (fu *ForecastUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	if fu.mutation.VisibilityHorizontalCleared() {
 		_spec.ClearField(forecast.FieldVisibilityHorizontal, field.TypeFloat64)
+	}
+	if value, ok := fu.mutation.VisibilityHorizontalIsMoreThan(); ok {
+		_spec.SetField(forecast.FieldVisibilityHorizontalIsMoreThan, field.TypeBool, value)
 	}
 	if value, ok := fu.mutation.VisibilityVertical(); ok {
 		_spec.SetField(forecast.FieldVisibilityVertical, field.TypeInt, value)
@@ -1028,6 +1046,12 @@ func (fuo *ForecastUpdateOne) ClearWindDirection() *ForecastUpdateOne {
 	return fuo
 }
 
+// SetWindDirectionVariable sets the "wind_direction_variable" field.
+func (fuo *ForecastUpdateOne) SetWindDirectionVariable(b bool) *ForecastUpdateOne {
+	fuo.mutation.SetWindDirectionVariable(b)
+	return fuo
+}
+
 // SetWindSpeed sets the "wind_speed" field.
 func (fuo *ForecastUpdateOne) SetWindSpeed(i int) *ForecastUpdateOne {
 	fuo.mutation.ResetWindSpeed()
@@ -1187,6 +1211,12 @@ func (fuo *ForecastUpdateOne) AddVisibilityHorizontal(f float64) *ForecastUpdate
 // ClearVisibilityHorizontal clears the value of the "visibility_horizontal" field.
 func (fuo *ForecastUpdateOne) ClearVisibilityHorizontal() *ForecastUpdateOne {
 	fuo.mutation.ClearVisibilityHorizontal()
+	return fuo
+}
+
+// SetVisibilityHorizontalIsMoreThan sets the "visibility_horizontal_is_more_than" field.
+func (fuo *ForecastUpdateOne) SetVisibilityHorizontalIsMoreThan(b bool) *ForecastUpdateOne {
+	fuo.mutation.SetVisibilityHorizontalIsMoreThan(b)
 	return fuo
 }
 
@@ -1554,6 +1584,9 @@ func (fuo *ForecastUpdateOne) sqlSave(ctx context.Context) (_node *Forecast, err
 	if fuo.mutation.WindDirectionCleared() {
 		_spec.ClearField(forecast.FieldWindDirection, field.TypeInt)
 	}
+	if value, ok := fuo.mutation.WindDirectionVariable(); ok {
+		_spec.SetField(forecast.FieldWindDirectionVariable, field.TypeBool, value)
+	}
 	if value, ok := fuo.mutation.WindSpeed(); ok {
 		_spec.SetField(forecast.FieldWindSpeed, field.TypeInt, value)
 	}
@@ -1607,6 +1640,9 @@ func (fuo *ForecastUpdateOne) sqlSave(ctx context.Context) (_node *Forecast, err
 	}
 	if fuo.mutation.VisibilityHorizontalCleared() {
 		_spec.ClearField(forecast.FieldVisibilityHorizontal, field.TypeFloat64)
+	}
+	if value, ok := fuo.mutation.VisibilityHorizontalIsMoreThan(); ok {
+		_spec.SetField(forecast.FieldVisibilityHorizontalIsMoreThan, field.TypeBool, value)
 	}
 	if value, ok := fuo.mutation.VisibilityVertical(); ok {
 		_spec.SetField(forecast.FieldVisibilityVertical, field.TypeInt, value)

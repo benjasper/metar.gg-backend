@@ -114,8 +114,12 @@ type Forecast {
   changeProbability: Int
   """The wind direction in degrees."""
   windDirection: Int
+  """Whether the wind direction is variable (VRB)"""
+  windDirectionVariable: Boolean!
   """The wind shear direction in degrees."""
   windShearDirection: Int
+  """Whether the visibility is more than it's assigned value (+)"""
+  visibilityHorizontalIsMoreThan: Boolean!
   """The weather string."""
   weather: String
   """The not decoded string."""
@@ -170,6 +174,10 @@ type Metar {
   nextImportTimePrediction: Time
   """The wind direction in degrees, or 0 if calm."""
   windDirection: Int
+  """Whether the wind direction is variable (VRB)"""
+  windDirectionVariable: Boolean!
+  """Whether the visibility is more than it's assigned value (+)"""
+  visibilityIsMoreThan: Boolean!
   """The present weather string."""
   presentWeather: String
   flightCategory: MetarFlightCategory

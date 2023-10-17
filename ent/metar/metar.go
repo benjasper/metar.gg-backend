@@ -36,8 +36,12 @@ const (
 	FieldWindGust = "wind_gust"
 	// FieldWindDirection holds the string denoting the wind_direction field in the database.
 	FieldWindDirection = "wind_direction"
+	// FieldWindDirectionVariable holds the string denoting the wind_direction_variable field in the database.
+	FieldWindDirectionVariable = "wind_direction_variable"
 	// FieldVisibility holds the string denoting the visibility field in the database.
 	FieldVisibility = "visibility"
+	// FieldVisibilityIsMoreThan holds the string denoting the visibility_is_more_than field in the database.
+	FieldVisibilityIsMoreThan = "visibility_is_more_than"
 	// FieldAltimeter holds the string denoting the altimeter field in the database.
 	FieldAltimeter = "altimeter"
 	// FieldPresentWeather holds the string denoting the present_weather field in the database.
@@ -120,7 +124,9 @@ var Columns = []string{
 	FieldWindSpeed,
 	FieldWindGust,
 	FieldWindDirection,
+	FieldWindDirectionVariable,
 	FieldVisibility,
+	FieldVisibilityIsMoreThan,
 	FieldAltimeter,
 	FieldPresentWeather,
 	FieldFlightCategory,
@@ -276,9 +282,19 @@ func ByWindDirection(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldWindDirection, opts...).ToFunc()
 }
 
+// ByWindDirectionVariable orders the results by the wind_direction_variable field.
+func ByWindDirectionVariable(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldWindDirectionVariable, opts...).ToFunc()
+}
+
 // ByVisibility orders the results by the visibility field.
 func ByVisibility(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldVisibility, opts...).ToFunc()
+}
+
+// ByVisibilityIsMoreThan orders the results by the visibility_is_more_than field.
+func ByVisibilityIsMoreThan(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldVisibilityIsMoreThan, opts...).ToFunc()
 }
 
 // ByAltimeter orders the results by the altimeter field.

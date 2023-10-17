@@ -38,8 +38,12 @@ type Metar struct {
 	WindGust *int `json:"wind_gust,omitempty"`
 	// The wind direction in degrees, or 0 if calm.
 	WindDirection *int `json:"wind_direction,omitempty"`
+	// Whether the wind direction is variable (VRB)
+	WindDirectionVariable bool `json:"wind_direction_variable,omitempty"`
 	// The visibility in statute miles.
 	Visibility *float64 `json:"visibility,omitempty"`
+	// Whether the visibility is more than it's assigned value (+)
+	VisibilityIsMoreThan bool `json:"visibility_is_more_than,omitempty"`
 	// The altimeter setting in inches of mercury.
 	Altimeter *float64 `json:"altimeter,omitempty"`
 	// The present weather string.
@@ -137,7 +141,7 @@ func (*Metar) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case metar.FieldQualityControlCorrected, metar.FieldQualityControlAutoStation, metar.FieldQualityControlMaintenanceIndicatorOn, metar.FieldQualityControlNoSignal, metar.FieldQualityControlLightningSensorOff, metar.FieldQualityControlFreezingRainSensorOff, metar.FieldQualityControlPresentWeatherSensorOff:
+		case metar.FieldWindDirectionVariable, metar.FieldVisibilityIsMoreThan, metar.FieldQualityControlCorrected, metar.FieldQualityControlAutoStation, metar.FieldQualityControlMaintenanceIndicatorOn, metar.FieldQualityControlNoSignal, metar.FieldQualityControlLightningSensorOff, metar.FieldQualityControlFreezingRainSensorOff, metar.FieldQualityControlPresentWeatherSensorOff:
 			values[i] = new(sql.NullBool)
 		case metar.FieldTemperature, metar.FieldDewpoint, metar.FieldVisibility, metar.FieldAltimeter, metar.FieldSeaLevelPressure, metar.FieldPressureTendency, metar.FieldMaxTemp6, metar.FieldMinTemp6, metar.FieldMaxTemp24, metar.FieldMinTemp24, metar.FieldPrecipitation, metar.FieldPrecipitation3, metar.FieldPrecipitation6, metar.FieldPrecipitation24, metar.FieldSnowDepth, metar.FieldVertVis:
 			values[i] = new(sql.NullFloat64)
@@ -232,12 +236,24 @@ func (m *Metar) assignValues(columns []string, values []any) error {
 				m.WindDirection = new(int)
 				*m.WindDirection = int(value.Int64)
 			}
+		case metar.FieldWindDirectionVariable:
+			if value, ok := values[i].(*sql.NullBool); !ok {
+				return fmt.Errorf("unexpected type %T for field wind_direction_variable", values[i])
+			} else if value.Valid {
+				m.WindDirectionVariable = value.Bool
+			}
 		case metar.FieldVisibility:
 			if value, ok := values[i].(*sql.NullFloat64); !ok {
 				return fmt.Errorf("unexpected type %T for field visibility", values[i])
 			} else if value.Valid {
 				m.Visibility = new(float64)
 				*m.Visibility = value.Float64
+			}
+		case metar.FieldVisibilityIsMoreThan:
+			if value, ok := values[i].(*sql.NullBool); !ok {
+				return fmt.Errorf("unexpected type %T for field visibility_is_more_than", values[i])
+			} else if value.Valid {
+				m.VisibilityIsMoreThan = value.Bool
 			}
 		case metar.FieldAltimeter:
 			if value, ok := values[i].(*sql.NullFloat64); !ok {
@@ -491,10 +507,16 @@ func (m *Metar) String() string {
 		builder.WriteString(fmt.Sprintf("%v", *v))
 	}
 	builder.WriteString(", ")
+	builder.WriteString("wind_direction_variable=")
+	builder.WriteString(fmt.Sprintf("%v", m.WindDirectionVariable))
+	builder.WriteString(", ")
 	if v := m.Visibility; v != nil {
 		builder.WriteString("visibility=")
 		builder.WriteString(fmt.Sprintf("%v", *v))
 	}
+	builder.WriteString(", ")
+	builder.WriteString("visibility_is_more_than=")
+	builder.WriteString(fmt.Sprintf("%v", m.VisibilityIsMoreThan))
 	builder.WriteString(", ")
 	if v := m.Altimeter; v != nil {
 		builder.WriteString("altimeter=")

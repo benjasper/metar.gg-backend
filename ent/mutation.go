@@ -3088,51 +3088,53 @@ func (m *CountryMutation) ResetEdge(name string) error {
 // ForecastMutation represents an operation that mutates the Forecast nodes in the graph.
 type ForecastMutation struct {
 	config
-	op                           Op
-	typ                          string
-	id                           *uuid.UUID
-	from_time                    *time.Time
-	to_time                      *time.Time
-	change_indicator             *forecast.ChangeIndicator
-	change_time                  *time.Time
-	change_probability           *int
-	addchange_probability        *int
-	wind_direction               *int
-	addwind_direction            *int
-	wind_speed                   *int
-	addwind_speed                *int
-	wind_gust                    *int
-	addwind_gust                 *int
-	wind_shear_height            *int
-	addwind_shear_height         *int
-	wind_shear_direction         *int
-	addwind_shear_direction      *int
-	wind_shear_speed             *int
-	addwind_shear_speed          *int
-	visibility_horizontal        *float64
-	addvisibility_horizontal     *float64
-	visibility_vertical          *int
-	addvisibility_vertical       *int
-	altimeter                    *float64
-	addaltimeter                 *float64
-	weather                      *string
-	not_decoded                  *string
-	clearedFields                map[string]struct{}
-	sky_conditions               map[uuid.UUID]struct{}
-	removedsky_conditions        map[uuid.UUID]struct{}
-	clearedsky_conditions        bool
-	turbulence_conditions        map[uuid.UUID]struct{}
-	removedturbulence_conditions map[uuid.UUID]struct{}
-	clearedturbulence_conditions bool
-	icing_conditions             map[uuid.UUID]struct{}
-	removedicing_conditions      map[uuid.UUID]struct{}
-	clearedicing_conditions      bool
-	temperature_data             map[uuid.UUID]struct{}
-	removedtemperature_data      map[uuid.UUID]struct{}
-	clearedtemperature_data      bool
-	done                         bool
-	oldValue                     func(context.Context) (*Forecast, error)
-	predicates                   []predicate.Forecast
+	op                                 Op
+	typ                                string
+	id                                 *uuid.UUID
+	from_time                          *time.Time
+	to_time                            *time.Time
+	change_indicator                   *forecast.ChangeIndicator
+	change_time                        *time.Time
+	change_probability                 *int
+	addchange_probability              *int
+	wind_direction                     *int
+	addwind_direction                  *int
+	wind_direction_variable            *bool
+	wind_speed                         *int
+	addwind_speed                      *int
+	wind_gust                          *int
+	addwind_gust                       *int
+	wind_shear_height                  *int
+	addwind_shear_height               *int
+	wind_shear_direction               *int
+	addwind_shear_direction            *int
+	wind_shear_speed                   *int
+	addwind_shear_speed                *int
+	visibility_horizontal              *float64
+	addvisibility_horizontal           *float64
+	visibility_horizontal_is_more_than *bool
+	visibility_vertical                *int
+	addvisibility_vertical             *int
+	altimeter                          *float64
+	addaltimeter                       *float64
+	weather                            *string
+	not_decoded                        *string
+	clearedFields                      map[string]struct{}
+	sky_conditions                     map[uuid.UUID]struct{}
+	removedsky_conditions              map[uuid.UUID]struct{}
+	clearedsky_conditions              bool
+	turbulence_conditions              map[uuid.UUID]struct{}
+	removedturbulence_conditions       map[uuid.UUID]struct{}
+	clearedturbulence_conditions       bool
+	icing_conditions                   map[uuid.UUID]struct{}
+	removedicing_conditions            map[uuid.UUID]struct{}
+	clearedicing_conditions            bool
+	temperature_data                   map[uuid.UUID]struct{}
+	removedtemperature_data            map[uuid.UUID]struct{}
+	clearedtemperature_data            bool
+	done                               bool
+	oldValue                           func(context.Context) (*Forecast, error)
+	predicates                         []predicate.Forecast
 }
 
 var _ ent.Mutation = (*ForecastMutation)(nil)
@@ -3547,6 +3549,42 @@ func (m *ForecastMutation) ResetWindDirection() {
 	m.wind_direction = nil
 	m.addwind_direction = nil
 	delete(m.clearedFields, forecast.FieldWindDirection)
+}
+
+// SetWindDirectionVariable sets the "wind_direction_variable" field.
+func (m *ForecastMutation) SetWindDirectionVariable(b bool) {
+	m.wind_direction_variable = &b
+}
+
+// WindDirectionVariable returns the value of the "wind_direction_variable" field in the mutation.
+func (m *ForecastMutation) WindDirectionVariable() (r bool, exists bool) {
+	v := m.wind_direction_variable
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldWindDirectionVariable returns the old "wind_direction_variable" field's value of the Forecast entity.
+// If the Forecast object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ForecastMutation) OldWindDirectionVariable(ctx context.Context) (v bool, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldWindDirectionVariable is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldWindDirectionVariable requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldWindDirectionVariable: %w", err)
+	}
+	return oldValue.WindDirectionVariable, nil
+}
+
+// ResetWindDirectionVariable resets all changes to the "wind_direction_variable" field.
+func (m *ForecastMutation) ResetWindDirectionVariable() {
+	m.wind_direction_variable = nil
 }
 
 // SetWindSpeed sets the "wind_speed" field.
@@ -3967,6 +4005,42 @@ func (m *ForecastMutation) ResetVisibilityHorizontal() {
 	m.visibility_horizontal = nil
 	m.addvisibility_horizontal = nil
 	delete(m.clearedFields, forecast.FieldVisibilityHorizontal)
+}
+
+// SetVisibilityHorizontalIsMoreThan sets the "visibility_horizontal_is_more_than" field.
+func (m *ForecastMutation) SetVisibilityHorizontalIsMoreThan(b bool) {
+	m.visibility_horizontal_is_more_than = &b
+}
+
+// VisibilityHorizontalIsMoreThan returns the value of the "visibility_horizontal_is_more_than" field in the mutation.
+func (m *ForecastMutation) VisibilityHorizontalIsMoreThan() (r bool, exists bool) {
+	v := m.visibility_horizontal_is_more_than
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldVisibilityHorizontalIsMoreThan returns the old "visibility_horizontal_is_more_than" field's value of the Forecast entity.
+// If the Forecast object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ForecastMutation) OldVisibilityHorizontalIsMoreThan(ctx context.Context) (v bool, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldVisibilityHorizontalIsMoreThan is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldVisibilityHorizontalIsMoreThan requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldVisibilityHorizontalIsMoreThan: %w", err)
+	}
+	return oldValue.VisibilityHorizontalIsMoreThan, nil
+}
+
+// ResetVisibilityHorizontalIsMoreThan resets all changes to the "visibility_horizontal_is_more_than" field.
+func (m *ForecastMutation) ResetVisibilityHorizontalIsMoreThan() {
+	m.visibility_horizontal_is_more_than = nil
 }
 
 // SetVisibilityVertical sets the "visibility_vertical" field.
@@ -4457,7 +4531,7 @@ func (m *ForecastMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *ForecastMutation) Fields() []string {
-	fields := make([]string, 0, 16)
+	fields := make([]string, 0, 18)
 	if m.from_time != nil {
 		fields = append(fields, forecast.FieldFromTime)
 	}
@@ -4476,6 +4550,9 @@ func (m *ForecastMutation) Fields() []string {
 	if m.wind_direction != nil {
 		fields = append(fields, forecast.FieldWindDirection)
 	}
+	if m.wind_direction_variable != nil {
+		fields = append(fields, forecast.FieldWindDirectionVariable)
+	}
 	if m.wind_speed != nil {
 		fields = append(fields, forecast.FieldWindSpeed)
 	}
@@ -4493,6 +4570,9 @@ func (m *ForecastMutation) Fields() []string {
 	}
 	if m.visibility_horizontal != nil {
 		fields = append(fields, forecast.FieldVisibilityHorizontal)
+	}
+	if m.visibility_horizontal_is_more_than != nil {
+		fields = append(fields, forecast.FieldVisibilityHorizontalIsMoreThan)
 	}
 	if m.visibility_vertical != nil {
 		fields = append(fields, forecast.FieldVisibilityVertical)
@@ -4526,6 +4606,8 @@ func (m *ForecastMutation) Field(name string) (ent.Value, bool) {
 		return m.ChangeProbability()
 	case forecast.FieldWindDirection:
 		return m.WindDirection()
+	case forecast.FieldWindDirectionVariable:
+		return m.WindDirectionVariable()
 	case forecast.FieldWindSpeed:
 		return m.WindSpeed()
 	case forecast.FieldWindGust:
@@ -4538,6 +4620,8 @@ func (m *ForecastMutation) Field(name string) (ent.Value, bool) {
 		return m.WindShearSpeed()
 	case forecast.FieldVisibilityHorizontal:
 		return m.VisibilityHorizontal()
+	case forecast.FieldVisibilityHorizontalIsMoreThan:
+		return m.VisibilityHorizontalIsMoreThan()
 	case forecast.FieldVisibilityVertical:
 		return m.VisibilityVertical()
 	case forecast.FieldAltimeter:
@@ -4567,6 +4651,8 @@ func (m *ForecastMutation) OldField(ctx context.Context, name string) (ent.Value
 		return m.OldChangeProbability(ctx)
 	case forecast.FieldWindDirection:
 		return m.OldWindDirection(ctx)
+	case forecast.FieldWindDirectionVariable:
+		return m.OldWindDirectionVariable(ctx)
 	case forecast.FieldWindSpeed:
 		return m.OldWindSpeed(ctx)
 	case forecast.FieldWindGust:
@@ -4579,6 +4665,8 @@ func (m *ForecastMutation) OldField(ctx context.Context, name string) (ent.Value
 		return m.OldWindShearSpeed(ctx)
 	case forecast.FieldVisibilityHorizontal:
 		return m.OldVisibilityHorizontal(ctx)
+	case forecast.FieldVisibilityHorizontalIsMoreThan:
+		return m.OldVisibilityHorizontalIsMoreThan(ctx)
 	case forecast.FieldVisibilityVertical:
 		return m.OldVisibilityVertical(ctx)
 	case forecast.FieldAltimeter:
@@ -4638,6 +4726,13 @@ func (m *ForecastMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetWindDirection(v)
 		return nil
+	case forecast.FieldWindDirectionVariable:
+		v, ok := value.(bool)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetWindDirectionVariable(v)
+		return nil
 	case forecast.FieldWindSpeed:
 		v, ok := value.(int)
 		if !ok {
@@ -4679,6 +4774,13 @@ func (m *ForecastMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetVisibilityHorizontal(v)
+		return nil
+	case forecast.FieldVisibilityHorizontalIsMoreThan:
+		v, ok := value.(bool)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetVisibilityHorizontalIsMoreThan(v)
 		return nil
 	case forecast.FieldVisibilityVertical:
 		v, ok := value.(int)
@@ -4985,6 +5087,9 @@ func (m *ForecastMutation) ResetField(name string) error {
 	case forecast.FieldWindDirection:
 		m.ResetWindDirection()
 		return nil
+	case forecast.FieldWindDirectionVariable:
+		m.ResetWindDirectionVariable()
+		return nil
 	case forecast.FieldWindSpeed:
 		m.ResetWindSpeed()
 		return nil
@@ -5002,6 +5107,9 @@ func (m *ForecastMutation) ResetField(name string) error {
 		return nil
 	case forecast.FieldVisibilityHorizontal:
 		m.ResetVisibilityHorizontal()
+		return nil
+	case forecast.FieldVisibilityHorizontalIsMoreThan:
+		m.ResetVisibilityHorizontalIsMoreThan()
 		return nil
 	case forecast.FieldVisibilityVertical:
 		m.ResetVisibilityVertical()
@@ -6545,8 +6653,10 @@ type MetarMutation struct {
 	addwind_gust                               *int
 	wind_direction                             *int
 	addwind_direction                          *int
+	wind_direction_variable                    *bool
 	visibility                                 *float64
 	addvisibility                              *float64
+	visibility_is_more_than                    *bool
 	altimeter                                  *float64
 	addaltimeter                               *float64
 	present_weather                            *string
@@ -7206,6 +7316,42 @@ func (m *MetarMutation) ResetWindDirection() {
 	delete(m.clearedFields, metar.FieldWindDirection)
 }
 
+// SetWindDirectionVariable sets the "wind_direction_variable" field.
+func (m *MetarMutation) SetWindDirectionVariable(b bool) {
+	m.wind_direction_variable = &b
+}
+
+// WindDirectionVariable returns the value of the "wind_direction_variable" field in the mutation.
+func (m *MetarMutation) WindDirectionVariable() (r bool, exists bool) {
+	v := m.wind_direction_variable
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldWindDirectionVariable returns the old "wind_direction_variable" field's value of the Metar entity.
+// If the Metar object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *MetarMutation) OldWindDirectionVariable(ctx context.Context) (v bool, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldWindDirectionVariable is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldWindDirectionVariable requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldWindDirectionVariable: %w", err)
+	}
+	return oldValue.WindDirectionVariable, nil
+}
+
+// ResetWindDirectionVariable resets all changes to the "wind_direction_variable" field.
+func (m *MetarMutation) ResetWindDirectionVariable() {
+	m.wind_direction_variable = nil
+}
+
 // SetVisibility sets the "visibility" field.
 func (m *MetarMutation) SetVisibility(f float64) {
 	m.visibility = &f
@@ -7274,6 +7420,42 @@ func (m *MetarMutation) ResetVisibility() {
 	m.visibility = nil
 	m.addvisibility = nil
 	delete(m.clearedFields, metar.FieldVisibility)
+}
+
+// SetVisibilityIsMoreThan sets the "visibility_is_more_than" field.
+func (m *MetarMutation) SetVisibilityIsMoreThan(b bool) {
+	m.visibility_is_more_than = &b
+}
+
+// VisibilityIsMoreThan returns the value of the "visibility_is_more_than" field in the mutation.
+func (m *MetarMutation) VisibilityIsMoreThan() (r bool, exists bool) {
+	v := m.visibility_is_more_than
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldVisibilityIsMoreThan returns the old "visibility_is_more_than" field's value of the Metar entity.
+// If the Metar object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *MetarMutation) OldVisibilityIsMoreThan(ctx context.Context) (v bool, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldVisibilityIsMoreThan is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldVisibilityIsMoreThan requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldVisibilityIsMoreThan: %w", err)
+	}
+	return oldValue.VisibilityIsMoreThan, nil
+}
+
+// ResetVisibilityIsMoreThan resets all changes to the "visibility_is_more_than" field.
+func (m *MetarMutation) ResetVisibilityIsMoreThan() {
+	m.visibility_is_more_than = nil
 }
 
 // SetAltimeter sets the "altimeter" field.
@@ -8748,7 +8930,7 @@ func (m *MetarMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *MetarMutation) Fields() []string {
-	fields := make([]string, 0, 34)
+	fields := make([]string, 0, 36)
 	if m.raw_text != nil {
 		fields = append(fields, metar.FieldRawText)
 	}
@@ -8776,8 +8958,14 @@ func (m *MetarMutation) Fields() []string {
 	if m.wind_direction != nil {
 		fields = append(fields, metar.FieldWindDirection)
 	}
+	if m.wind_direction_variable != nil {
+		fields = append(fields, metar.FieldWindDirectionVariable)
+	}
 	if m.visibility != nil {
 		fields = append(fields, metar.FieldVisibility)
+	}
+	if m.visibility_is_more_than != nil {
+		fields = append(fields, metar.FieldVisibilityIsMoreThan)
 	}
 	if m.altimeter != nil {
 		fields = append(fields, metar.FieldAltimeter)
@@ -8877,8 +9065,12 @@ func (m *MetarMutation) Field(name string) (ent.Value, bool) {
 		return m.WindGust()
 	case metar.FieldWindDirection:
 		return m.WindDirection()
+	case metar.FieldWindDirectionVariable:
+		return m.WindDirectionVariable()
 	case metar.FieldVisibility:
 		return m.Visibility()
+	case metar.FieldVisibilityIsMoreThan:
+		return m.VisibilityIsMoreThan()
 	case metar.FieldAltimeter:
 		return m.Altimeter()
 	case metar.FieldPresentWeather:
@@ -8954,8 +9146,12 @@ func (m *MetarMutation) OldField(ctx context.Context, name string) (ent.Value, e
 		return m.OldWindGust(ctx)
 	case metar.FieldWindDirection:
 		return m.OldWindDirection(ctx)
+	case metar.FieldWindDirectionVariable:
+		return m.OldWindDirectionVariable(ctx)
 	case metar.FieldVisibility:
 		return m.OldVisibility(ctx)
+	case metar.FieldVisibilityIsMoreThan:
+		return m.OldVisibilityIsMoreThan(ctx)
 	case metar.FieldAltimeter:
 		return m.OldAltimeter(ctx)
 	case metar.FieldPresentWeather:
@@ -9076,12 +9272,26 @@ func (m *MetarMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetWindDirection(v)
 		return nil
+	case metar.FieldWindDirectionVariable:
+		v, ok := value.(bool)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetWindDirectionVariable(v)
+		return nil
 	case metar.FieldVisibility:
 		v, ok := value.(float64)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetVisibility(v)
+		return nil
+	case metar.FieldVisibilityIsMoreThan:
+		v, ok := value.(bool)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetVisibilityIsMoreThan(v)
 		return nil
 	case metar.FieldAltimeter:
 		v, ok := value.(float64)
@@ -9699,8 +9909,14 @@ func (m *MetarMutation) ResetField(name string) error {
 	case metar.FieldWindDirection:
 		m.ResetWindDirection()
 		return nil
+	case metar.FieldWindDirectionVariable:
+		m.ResetWindDirectionVariable()
+		return nil
 	case metar.FieldVisibility:
 		m.ResetVisibility()
+		return nil
+	case metar.FieldVisibilityIsMoreThan:
+		m.ResetVisibilityIsMoreThan()
 		return nil
 	case metar.FieldAltimeter:
 		m.ResetAltimeter()
