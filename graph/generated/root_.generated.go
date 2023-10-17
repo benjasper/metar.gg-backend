@@ -103,27 +103,29 @@ type ComplexityRoot struct {
 	}
 
 	Forecast struct {
-		Altimeter            func(childComplexity int, unit model.PressureUnit) int
-		ChangeIndicator      func(childComplexity int) int
-		ChangeProbability    func(childComplexity int) int
-		ChangeTime           func(childComplexity int) int
-		FromTime             func(childComplexity int) int
-		ID                   func(childComplexity int) int
-		IcingConditions      func(childComplexity int) int
-		NotDecoded           func(childComplexity int) int
-		SkyConditions        func(childComplexity int) int
-		TemperatureData      func(childComplexity int) int
-		ToTime               func(childComplexity int) int
-		TurbulenceConditions func(childComplexity int) int
-		VisibilityHorizontal func(childComplexity int, unit model.LengthUnit) int
-		VisibilityVertical   func(childComplexity int, unit model.LengthUnit) int
-		Weather              func(childComplexity int) int
-		WindDirection        func(childComplexity int) int
-		WindGust             func(childComplexity int, unit model.SpeedUnit) int
-		WindShearDirection   func(childComplexity int) int
-		WindShearHeight      func(childComplexity int, unit model.LengthUnit) int
-		WindShearSpeed       func(childComplexity int, unit model.SpeedUnit) int
-		WindSpeed            func(childComplexity int, unit model.SpeedUnit) int
+		Altimeter                      func(childComplexity int, unit model.PressureUnit) int
+		ChangeIndicator                func(childComplexity int) int
+		ChangeProbability              func(childComplexity int) int
+		ChangeTime                     func(childComplexity int) int
+		FromTime                       func(childComplexity int) int
+		ID                             func(childComplexity int) int
+		IcingConditions                func(childComplexity int) int
+		NotDecoded                     func(childComplexity int) int
+		SkyConditions                  func(childComplexity int) int
+		TemperatureData                func(childComplexity int) int
+		ToTime                         func(childComplexity int) int
+		TurbulenceConditions           func(childComplexity int) int
+		VisibilityHorizontal           func(childComplexity int, unit model.LengthUnit) int
+		VisibilityHorizontalIsMoreThan func(childComplexity int) int
+		VisibilityVertical             func(childComplexity int, unit model.LengthUnit) int
+		Weather                        func(childComplexity int) int
+		WindDirection                  func(childComplexity int) int
+		WindDirectionVariable          func(childComplexity int) int
+		WindGust                       func(childComplexity int, unit model.SpeedUnit) int
+		WindShearDirection             func(childComplexity int) int
+		WindShearHeight                func(childComplexity int, unit model.LengthUnit) int
+		WindShearSpeed                 func(childComplexity int, unit model.SpeedUnit) int
+		WindSpeed                      func(childComplexity int, unit model.SpeedUnit) int
 	}
 
 	Frequency struct {
@@ -177,7 +179,9 @@ type ComplexityRoot struct {
 		Temperature                           func(childComplexity int, unit model.TemperatureUnit) int
 		VerticalVisibility                    func(childComplexity int, unit model.LengthUnit) int
 		Visibility                            func(childComplexity int, unit model.LengthUnit) int
+		VisibilityIsMoreThan                  func(childComplexity int) int
 		WindDirection                         func(childComplexity int) int
+		WindDirectionVariable                 func(childComplexity int) int
 		WindGust                              func(childComplexity int, unit model.SpeedUnit) int
 		WindSpeed                             func(childComplexity int, unit model.SpeedUnit) int
 	}
@@ -715,6 +719,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Forecast.VisibilityHorizontal(childComplexity, args["unit"].(model.LengthUnit)), true
 
+	case "Forecast.visibilityHorizontalIsMoreThan":
+		if e.complexity.Forecast.VisibilityHorizontalIsMoreThan == nil {
+			break
+		}
+
+		return e.complexity.Forecast.VisibilityHorizontalIsMoreThan(childComplexity), true
+
 	case "Forecast.visibilityVertical":
 		if e.complexity.Forecast.VisibilityVertical == nil {
 			break
@@ -740,6 +751,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Forecast.WindDirection(childComplexity), true
+
+	case "Forecast.windDirectionVariable":
+		if e.complexity.Forecast.WindDirectionVariable == nil {
+			break
+		}
+
+		return e.complexity.Forecast.WindDirectionVariable(childComplexity), true
 
 	case "Forecast.windGust":
 		if e.complexity.Forecast.WindGust == nil {
@@ -1154,12 +1172,26 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Metar.Visibility(childComplexity, args["unit"].(model.LengthUnit)), true
 
+	case "Metar.visibilityIsMoreThan":
+		if e.complexity.Metar.VisibilityIsMoreThan == nil {
+			break
+		}
+
+		return e.complexity.Metar.VisibilityIsMoreThan(childComplexity), true
+
 	case "Metar.windDirection":
 		if e.complexity.Metar.WindDirection == nil {
 			break
 		}
 
 		return e.complexity.Metar.WindDirection(childComplexity), true
+
+	case "Metar.windDirectionVariable":
+		if e.complexity.Metar.WindDirectionVariable == nil {
+			break
+		}
+
+		return e.complexity.Metar.WindDirectionVariable(childComplexity), true
 
 	case "Metar.windGust":
 		if e.complexity.Metar.WindGust == nil {
@@ -2059,8 +2091,12 @@ type Forecast {
   changeProbability: Int
   """The wind direction in degrees."""
   windDirection: Int
+  """Whether the wind direction is variable (VRB)"""
+  windDirectionVariable: Boolean!
   """The wind shear direction in degrees."""
   windShearDirection: Int
+  """Whether the visibility is more than it's assigned value (+)"""
+  visibilityHorizontalIsMoreThan: Boolean!
   """The weather string."""
   weather: String
   """The not decoded string."""
@@ -2115,6 +2151,10 @@ type Metar {
   nextImportTimePrediction: Time
   """The wind direction in degrees, or 0 if calm."""
   windDirection: Int
+  """Whether the wind direction is variable (VRB)"""
+  windDirectionVariable: Boolean!
+  """Whether the visibility is more than it's assigned value (+)"""
+  visibilityIsMoreThan: Boolean!
   """The present weather string."""
   presentWeather: String
   flightCategory: MetarFlightCategory

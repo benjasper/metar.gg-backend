@@ -2511,6 +2511,50 @@ func (ec *executionContext) fieldContext_Forecast_windDirection(ctx context.Cont
 	return fc, nil
 }
 
+func (ec *executionContext) _Forecast_windDirectionVariable(ctx context.Context, field graphql.CollectedField, obj *ent.Forecast) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Forecast_windDirectionVariable(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.WindDirectionVariable, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(bool)
+	fc.Result = res
+	return ec.marshalNBoolean2bool(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Forecast_windDirectionVariable(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Forecast",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Boolean does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _Forecast_windShearDirection(ctx context.Context, field graphql.CollectedField, obj *ent.Forecast) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_Forecast_windShearDirection(ctx, field)
 	if err != nil {
@@ -2547,6 +2591,50 @@ func (ec *executionContext) fieldContext_Forecast_windShearDirection(ctx context
 		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			return nil, errors.New("field of type Int does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Forecast_visibilityHorizontalIsMoreThan(ctx context.Context, field graphql.CollectedField, obj *ent.Forecast) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Forecast_visibilityHorizontalIsMoreThan(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.VisibilityHorizontalIsMoreThan, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(bool)
+	fc.Result = res
+	return ec.marshalNBoolean2bool(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Forecast_visibilityHorizontalIsMoreThan(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Forecast",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Boolean does not have child fields")
 		},
 	}
 	return fc, nil
@@ -4008,6 +4096,94 @@ func (ec *executionContext) fieldContext_Metar_windDirection(ctx context.Context
 		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			return nil, errors.New("field of type Int does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Metar_windDirectionVariable(ctx context.Context, field graphql.CollectedField, obj *ent.Metar) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Metar_windDirectionVariable(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.WindDirectionVariable, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(bool)
+	fc.Result = res
+	return ec.marshalNBoolean2bool(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Metar_windDirectionVariable(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Metar",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Boolean does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Metar_visibilityIsMoreThan(ctx context.Context, field graphql.CollectedField, obj *ent.Metar) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Metar_visibilityIsMoreThan(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.VisibilityIsMoreThan, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(bool)
+	fc.Result = res
+	return ec.marshalNBoolean2bool(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Metar_visibilityIsMoreThan(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Metar",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Boolean does not have child fields")
 		},
 	}
 	return fc, nil
@@ -7360,8 +7536,12 @@ func (ec *executionContext) fieldContext_Taf_forecast(ctx context.Context, field
 				return ec.fieldContext_Forecast_changeProbability(ctx, field)
 			case "windDirection":
 				return ec.fieldContext_Forecast_windDirection(ctx, field)
+			case "windDirectionVariable":
+				return ec.fieldContext_Forecast_windDirectionVariable(ctx, field)
 			case "windShearDirection":
 				return ec.fieldContext_Forecast_windShearDirection(ctx, field)
+			case "visibilityHorizontalIsMoreThan":
+				return ec.fieldContext_Forecast_visibilityHorizontalIsMoreThan(ctx, field)
 			case "weather":
 				return ec.fieldContext_Forecast_weather(ctx, field)
 			case "notDecoded":
@@ -8823,8 +9003,18 @@ func (ec *executionContext) _Forecast(ctx context.Context, sel ast.SelectionSet,
 			out.Values[i] = ec._Forecast_changeProbability(ctx, field, obj)
 		case "windDirection":
 			out.Values[i] = ec._Forecast_windDirection(ctx, field, obj)
+		case "windDirectionVariable":
+			out.Values[i] = ec._Forecast_windDirectionVariable(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				atomic.AddUint32(&out.Invalids, 1)
+			}
 		case "windShearDirection":
 			out.Values[i] = ec._Forecast_windShearDirection(ctx, field, obj)
+		case "visibilityHorizontalIsMoreThan":
+			out.Values[i] = ec._Forecast_visibilityHorizontalIsMoreThan(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				atomic.AddUint32(&out.Invalids, 1)
+			}
 		case "weather":
 			out.Values[i] = ec._Forecast_weather(ctx, field, obj)
 		case "notDecoded":
@@ -9457,6 +9647,16 @@ func (ec *executionContext) _Metar(ctx context.Context, sel ast.SelectionSet, ob
 			out.Values[i] = ec._Metar_nextImportTimePrediction(ctx, field, obj)
 		case "windDirection":
 			out.Values[i] = ec._Metar_windDirection(ctx, field, obj)
+		case "windDirectionVariable":
+			out.Values[i] = ec._Metar_windDirectionVariable(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				atomic.AddUint32(&out.Invalids, 1)
+			}
+		case "visibilityIsMoreThan":
+			out.Values[i] = ec._Metar_visibilityIsMoreThan(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				atomic.AddUint32(&out.Invalids, 1)
+			}
 		case "presentWeather":
 			out.Values[i] = ec._Metar_presentWeather(ctx, field, obj)
 		case "flightCategory":

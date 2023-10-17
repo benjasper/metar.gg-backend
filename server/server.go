@@ -218,7 +218,7 @@ func (s *Server) RunWeatherImport(ctx context.Context) {
 	b.MaxElapsedTime = 5 * time.Minute
 
 	err := backoff.Retry(func() error {
-		err := metarImporter.ImportMetars("https://www.aviationweather.gov/adds/dataserver_current/current/metars.cache.xml", ctx)
+		err := metarImporter.ImportMetars("https://aviationweather.gov/data/cache/metars.cache.xml.gz", ctx)
 		return err
 	}, b)
 	if err != nil {
@@ -229,7 +229,7 @@ func (s *Server) RunWeatherImport(ctx context.Context) {
 
 	err = backoff.Retry(func() error {
 		tafImporter := importer.NewNoaaWeatherImporter(s.db, s.logger)
-		err = tafImporter.ImportTafs("https://www.aviationweather.gov/adds/dataserver_current/current/tafs.cache.xml", ctx)
+		err = tafImporter.ImportTafs("https://aviationweather.gov/data/cache/tafs.cache.xml.gz", ctx)
 		return err
 	}, b)
 	if err != nil {

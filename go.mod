@@ -1,6 +1,8 @@
 module metar.gg
 
-go 1.20
+go 1.21
+
+toolchain go1.21.2
 
 require (
 	entgo.io/contrib v0.4.5

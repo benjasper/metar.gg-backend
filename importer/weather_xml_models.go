@@ -30,10 +30,10 @@ type XmlMetar struct {
 	Longitude                 *float64               `xml:"longitude"`
 	TempC                     *float64               `xml:"temp_c"`
 	DewpointC                 *float64               `xml:"dewpoint_c"`
-	WindDirDegrees            *int                   `xml:"wind_dir_degrees"`
+	WindDirDegrees            *string                `xml:"wind_dir_degrees"`
 	WindSpeedKt               *int                   `xml:"wind_speed_kt"`
 	WindGustKt                *int                   `xml:"wind_gust_kt"`
-	VisibilityStatuteMi       *float64               `xml:"visibility_statute_mi"`
+	VisibilityStatuteMi       *string                `xml:"visibility_statute_mi"`
 	AltimeterInHg             *float64               `xml:"altim_in_hg"`
 	SeaLevelPressureMb        *float64               `xml:"sea_level_pressure_mb"`
 	QualityControlFlags       XmlQualityControlFlags `xml:"quality_control_flags"`
@@ -109,13 +109,13 @@ type XmlForecast struct {
 	Change              *string                  `xml:"change_indicator"`
 	TimeBecoming        *time.Time               `xml:"time_becoming"`
 	Probability         *int                     `xml:"probability"`
-	WindDir             *int                     `xml:"wind_dir_degrees"`
+	WindDir             *string                  `xml:"wind_dir_degrees"`
 	WindSpeed           *int                     `xml:"wind_speed_kt"`
 	WindGust            *int                     `xml:"wind_gust_kt"`
 	WindShear           *int                     `xml:"wind_shear_hgt_ft_agl"`
 	WindShearDir        *int                     `xml:"wind_shear_dir_degrees"`
 	WindShearSpd        *int                     `xml:"wind_shear_speed_kt"`
-	Visibility          *float64                 `xml:"visibility_statute_mi"`
+	Visibility          *string                 `xml:"visibility_statute_mi"`
 	Altimeter           *float64                 `xml:"altim_in_hg"`
 	VertVis             *int                     `xml:"vert_vis_ft"`
 	Weather             string                   `xml:"wx_string"`

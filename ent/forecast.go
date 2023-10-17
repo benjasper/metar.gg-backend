@@ -31,6 +31,8 @@ type Forecast struct {
 	ChangeProbability *int `json:"change_probability,omitempty"`
 	// The wind direction in degrees.
 	WindDirection *int `json:"wind_direction,omitempty"`
+	// Whether the wind direction is variable (VRB)
+	WindDirectionVariable bool `json:"wind_direction_variable,omitempty"`
 	// The wind speed in knots.
 	WindSpeed *int `json:"wind_speed,omitempty"`
 	// The wind gust in knots.
@@ -43,6 +45,8 @@ type Forecast struct {
 	WindShearSpeed *int `json:"wind_shear_speed,omitempty"`
 	// The visibility in statute miles.
 	VisibilityHorizontal *float64 `json:"visibility_horizontal,omitempty"`
+	// Whether the visibility is more than it's assigned value (+)
+	VisibilityHorizontalIsMoreThan bool `json:"visibility_horizontal_is_more_than,omitempty"`
 	// The vertical visibility in feet.
 	VisibilityVertical *int `json:"visibility_vertical,omitempty"`
 	// The altimeter in inches of mercury.
@@ -121,6 +125,8 @@ func (*Forecast) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
+		case forecast.FieldWindDirectionVariable, forecast.FieldVisibilityHorizontalIsMoreThan:
+			values[i] = new(sql.NullBool)
 		case forecast.FieldVisibilityHorizontal, forecast.FieldAltimeter:
 			values[i] = new(sql.NullFloat64)
 		case forecast.FieldChangeProbability, forecast.FieldWindDirection, forecast.FieldWindSpeed, forecast.FieldWindGust, forecast.FieldWindShearHeight, forecast.FieldWindShearDirection, forecast.FieldWindShearSpeed, forecast.FieldVisibilityVertical:
@@ -194,6 +200,12 @@ func (f *Forecast) assignValues(columns []string, values []any) error {
 				f.WindDirection = new(int)
 				*f.WindDirection = int(value.Int64)
 			}
+		case forecast.FieldWindDirectionVariable:
+			if value, ok := values[i].(*sql.NullBool); !ok {
+				return fmt.Errorf("unexpected type %T for field wind_direction_variable", values[i])
+			} else if value.Valid {
+				f.WindDirectionVariable = value.Bool
+			}
 		case forecast.FieldWindSpeed:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for field wind_speed", values[i])
@@ -235,6 +247,12 @@ func (f *Forecast) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				f.VisibilityHorizontal = new(float64)
 				*f.VisibilityHorizontal = value.Float64
+			}
+		case forecast.FieldVisibilityHorizontalIsMoreThan:
+			if value, ok := values[i].(*sql.NullBool); !ok {
+				return fmt.Errorf("unexpected type %T for field visibility_horizontal_is_more_than", values[i])
+			} else if value.Valid {
+				f.VisibilityHorizontalIsMoreThan = value.Bool
 			}
 		case forecast.FieldVisibilityVertical:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
@@ -351,6 +369,9 @@ func (f *Forecast) String() string {
 		builder.WriteString(fmt.Sprintf("%v", *v))
 	}
 	builder.WriteString(", ")
+	builder.WriteString("wind_direction_variable=")
+	builder.WriteString(fmt.Sprintf("%v", f.WindDirectionVariable))
+	builder.WriteString(", ")
 	if v := f.WindSpeed; v != nil {
 		builder.WriteString("wind_speed=")
 		builder.WriteString(fmt.Sprintf("%v", *v))
@@ -380,6 +401,9 @@ func (f *Forecast) String() string {
 		builder.WriteString("visibility_horizontal=")
 		builder.WriteString(fmt.Sprintf("%v", *v))
 	}
+	builder.WriteString(", ")
+	builder.WriteString("visibility_horizontal_is_more_than=")
+	builder.WriteString(fmt.Sprintf("%v", f.VisibilityHorizontalIsMoreThan))
 	builder.WriteString(", ")
 	if v := f.VisibilityVertical; v != nil {
 		builder.WriteString("visibility_vertical=")

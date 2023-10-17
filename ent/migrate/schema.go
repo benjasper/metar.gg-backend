@@ -153,12 +153,14 @@ var (
 		{Name: "change_time", Type: field.TypeTime, Nullable: true},
 		{Name: "change_probability", Type: field.TypeInt, Nullable: true},
 		{Name: "wind_direction", Type: field.TypeInt, Nullable: true},
+		{Name: "wind_direction_variable", Type: field.TypeBool},
 		{Name: "wind_speed", Type: field.TypeInt, Nullable: true},
 		{Name: "wind_gust", Type: field.TypeInt, Nullable: true},
 		{Name: "wind_shear_height", Type: field.TypeInt, Nullable: true},
 		{Name: "wind_shear_direction", Type: field.TypeInt, Nullable: true},
 		{Name: "wind_shear_speed", Type: field.TypeInt, Nullable: true},
 		{Name: "visibility_horizontal", Type: field.TypeFloat64, Nullable: true},
+		{Name: "visibility_horizontal_is_more_than", Type: field.TypeBool},
 		{Name: "visibility_vertical", Type: field.TypeInt, Nullable: true},
 		{Name: "altimeter", Type: field.TypeFloat64, Nullable: true},
 		{Name: "weather", Type: field.TypeString, Nullable: true},
@@ -173,7 +175,7 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "forecasts_tafs_forecast",
-				Columns:    []*schema.Column{ForecastsColumns[17]},
+				Columns:    []*schema.Column{ForecastsColumns[19]},
 				RefColumns: []*schema.Column{TafsColumns[0]},
 				OnDelete:   schema.Cascade,
 			},
@@ -251,7 +253,9 @@ var (
 		{Name: "wind_speed", Type: field.TypeInt, Nullable: true},
 		{Name: "wind_gust", Type: field.TypeInt, Nullable: true},
 		{Name: "wind_direction", Type: field.TypeInt, Nullable: true},
+		{Name: "wind_direction_variable", Type: field.TypeBool},
 		{Name: "visibility", Type: field.TypeFloat64, Nullable: true},
+		{Name: "visibility_is_more_than", Type: field.TypeBool},
 		{Name: "altimeter", Type: field.TypeFloat64, Nullable: true},
 		{Name: "present_weather", Type: field.TypeString, Nullable: true},
 		{Name: "flight_category", Type: field.TypeEnum, Nullable: true, Enums: []string{"VFR", "MVFR", "IFR", "LIFR"}},
@@ -286,7 +290,7 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "metars_weather_stations_metars",
-				Columns:    []*schema.Column{MetarsColumns[35]},
+				Columns:    []*schema.Column{MetarsColumns[37]},
 				RefColumns: []*schema.Column{WeatherStationsColumns[0]},
 				OnDelete:   schema.NoAction,
 			},
@@ -300,7 +304,7 @@ var (
 			{
 				Name:    "metar_hash",
 				Unique:  false,
-				Columns: []*schema.Column{MetarsColumns[34]},
+				Columns: []*schema.Column{MetarsColumns[36]},
 			},
 		},
 	}

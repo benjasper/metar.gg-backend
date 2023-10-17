@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"compress/gzip"
 	"fmt"
 	"io"
 	"math"
@@ -37,7 +38,7 @@ func NillableString(input string) *string {
 }
 
 // DownloadFile file and save it to disk.
-func DownloadFile(url string, filepath string) error {
+func DownloadFile(url string, filepath string, useGzip bool) error {
 	out, err := os.Create(filepath)
 	if err != nil {
 		return err
@@ -60,8 +61,18 @@ func DownloadFile(url string, filepath string) error {
 		return fmt.Errorf("could not download file from %s: %s", url, resp.Status)
 	}
 
+	content := resp.Body
+	if useGzip {
+		gzreader, err := gzip.NewReader(resp.Body);
+		if(err != nil){
+			return err
+		}
+
+		content = gzreader
+	}
+
 	// Writer the body to file
-	_, err = io.Copy(out, resp.Body)
+	_, err = io.Copy(out, content)
 	if err != nil {
 		return err
 	}

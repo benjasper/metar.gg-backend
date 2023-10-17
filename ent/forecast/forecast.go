@@ -29,6 +29,8 @@ const (
 	FieldChangeProbability = "change_probability"
 	// FieldWindDirection holds the string denoting the wind_direction field in the database.
 	FieldWindDirection = "wind_direction"
+	// FieldWindDirectionVariable holds the string denoting the wind_direction_variable field in the database.
+	FieldWindDirectionVariable = "wind_direction_variable"
 	// FieldWindSpeed holds the string denoting the wind_speed field in the database.
 	FieldWindSpeed = "wind_speed"
 	// FieldWindGust holds the string denoting the wind_gust field in the database.
@@ -41,6 +43,8 @@ const (
 	FieldWindShearSpeed = "wind_shear_speed"
 	// FieldVisibilityHorizontal holds the string denoting the visibility_horizontal field in the database.
 	FieldVisibilityHorizontal = "visibility_horizontal"
+	// FieldVisibilityHorizontalIsMoreThan holds the string denoting the visibility_horizontal_is_more_than field in the database.
+	FieldVisibilityHorizontalIsMoreThan = "visibility_horizontal_is_more_than"
 	// FieldVisibilityVertical holds the string denoting the visibility_vertical field in the database.
 	FieldVisibilityVertical = "visibility_vertical"
 	// FieldAltimeter holds the string denoting the altimeter field in the database.
@@ -98,12 +102,14 @@ var Columns = []string{
 	FieldChangeTime,
 	FieldChangeProbability,
 	FieldWindDirection,
+	FieldWindDirectionVariable,
 	FieldWindSpeed,
 	FieldWindGust,
 	FieldWindShearHeight,
 	FieldWindShearDirection,
 	FieldWindShearSpeed,
 	FieldVisibilityHorizontal,
+	FieldVisibilityHorizontalIsMoreThan,
 	FieldVisibilityVertical,
 	FieldAltimeter,
 	FieldWeather,
@@ -199,6 +205,11 @@ func ByWindDirection(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldWindDirection, opts...).ToFunc()
 }
 
+// ByWindDirectionVariable orders the results by the wind_direction_variable field.
+func ByWindDirectionVariable(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldWindDirectionVariable, opts...).ToFunc()
+}
+
 // ByWindSpeed orders the results by the wind_speed field.
 func ByWindSpeed(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldWindSpeed, opts...).ToFunc()
@@ -227,6 +238,11 @@ func ByWindShearSpeed(opts ...sql.OrderTermOption) OrderOption {
 // ByVisibilityHorizontal orders the results by the visibility_horizontal field.
 func ByVisibilityHorizontal(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldVisibilityHorizontal, opts...).ToFunc()
+}
+
+// ByVisibilityHorizontalIsMoreThan orders the results by the visibility_horizontal_is_more_than field.
+func ByVisibilityHorizontalIsMoreThan(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldVisibilityHorizontalIsMoreThan, opts...).ToFunc()
 }
 
 // ByVisibilityVertical orders the results by the visibility_vertical field.

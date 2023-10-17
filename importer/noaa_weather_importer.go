@@ -4,6 +4,11 @@ import (
 	"context"
 	"encoding/xml"
 	"fmt"
+	"os"
+	"strconv"
+	"strings"
+	"time"
+
 	"github.com/segmentio/fasthash/fnv1a"
 	"golang.org/x/sync/errgroup"
 	"metar.gg/ent"
@@ -16,9 +21,6 @@ import (
 	"metar.gg/environment"
 	"metar.gg/logging"
 	"metar.gg/utils"
-	"os"
-	"strconv"
-	"time"
 )
 
 type NoaaWeatherImporter struct {
@@ -40,7 +42,7 @@ func (i *NoaaWeatherImporter) ImportMetars(url string, ctx context.Context) erro
 	i.stats.Start()
 
 	filepath := fmt.Sprintf("metars-%s.xml", time.Now().Format("2006-01-02-15-04-05"))
-	err := utils.DownloadFile(url, filepath)
+	err := utils.DownloadFile(url, filepath, true)
 	if err != nil {
 		return err
 	}
@@ -103,7 +105,7 @@ func (i *NoaaWeatherImporter) ImportTafs(url string, ctx context.Context) error 
 	i.stats.Start()
 
 	filepath := fmt.Sprintf("taf-%s.xml", time.Now().Format("2006-01-02-15-04-05"))
-	err := utils.DownloadFile(url, filepath)
+	err := utils.DownloadFile(url, filepath, true)
 	if err != nil {
 		return err
 	}
@@ -220,6 +222,35 @@ func (i *NoaaWeatherImporter) importMetar(x *XmlMetar, ctx context.Context) erro
 		metarType = metar.MetarTypeSPECI
 	}
 
+	windIsVariable := false
+	var windDirDegrees *int = nil
+	if x.WindDirDegrees != nil {
+		if *x.WindDirDegrees == "VRB" {
+			windIsVariable = true
+		}
+
+		if potWindDir, err := strconv.Atoi(*x.WindDirDegrees); err != nil {
+			windDirDegrees = &potWindDir
+		}
+	}
+
+	visibilityIsMoreThan := false
+	var visibility *float64 = nil
+	if x.VisibilityStatuteMi != nil {
+		visibilityToParse := *x.VisibilityStatuteMi
+		if strings.Contains(*x.VisibilityStatuteMi, "+") {
+			visibilityIsMoreThan = true
+			visibilityToParse = strings.Replace(*x.VisibilityStatuteMi, "+", "", -1)
+		}
+
+		visibilityClear, err := strconv.ParseFloat(visibilityToParse, 64)
+		if err != nil {
+			return err
+		}
+
+		visibility = &visibilityClear
+	}
+
 	// Check accuracy of last prediction
 	lastMetar, err := i.db.Metar.Query().Where(metar.HasStationWith(weatherstation.StationID(x.StationId))).Order(ent.Desc(metar.FieldImportTime)).First(ctx)
 	if err != nil {
@@ -261,10 +292,12 @@ func (i *NoaaWeatherImporter) importMetar(x *XmlMetar, ctx context.Context) erro
 		SetObservationTime(x.ObservationTime).
 		SetNillableTemperature(x.TempC).
 		SetNillableDewpoint(x.DewpointC).
-		SetNillableWindDirection(x.WindDirDegrees).
+		SetNillableWindDirection(windDirDegrees).
+		SetWindDirectionVariable(windIsVariable).
 		SetNillableWindSpeed(x.WindSpeedKt).
 		SetNillableWindGust(x.WindGustKt).
-		SetVisibility(utils.Nillable(x.VisibilityStatuteMi)).
+		SetVisibility(utils.Nillable(visibility)).
+		SetVisibilityIsMoreThan(visibilityIsMoreThan).
 		SetNillableAltimeter(x.AltimeterInHg).
 		SetNillableSeaLevelPressure(x.SeaLevelPressureMb).
 		SetQualityControlAutoStation(x.QualityControlFlags.Auto).
@@ -366,13 +399,11 @@ func (i *NoaaWeatherImporter) importTaf(x *XmlTaf, ctx context.Context) error {
 			SetToTime(xmlForecast.TimeTo).
 			SetNillableChangeTime(xmlForecast.TimeBecoming).
 			SetNillableChangeProbability(xmlForecast.Probability).
-			SetNillableWindDirection(xmlForecast.WindDir).
 			SetNillableWindSpeed(xmlForecast.WindSpeed).
 			SetNillableWindGust(xmlForecast.WindGust).
 			SetNillableWindShearHeight(xmlForecast.WindShear).
 			SetNillableWindShearDirection(xmlForecast.WindShearDir).
 			SetNillableWindShearSpeed(xmlForecast.WindShearSpd).
-			SetNillableVisibilityHorizontal(xmlForecast.Visibility).
 			SetNillableAltimeter(xmlForecast.Altimeter).
 			SetNillableVisibilityVertical(xmlForecast.VertVis).
 			SetWeather(xmlForecast.Weather).
@@ -398,6 +429,41 @@ func (i *NoaaWeatherImporter) importTaf(x *XmlTaf, ctx context.Context) error {
 				break
 			}
 		}
+
+		windIsVariable := false
+		var windDirDegrees *int = nil
+		if xmlForecast.WindDir != nil {
+			if *xmlForecast.WindDir == "VRB" {
+				windIsVariable = true
+			}
+
+			if potWindDir, err := strconv.Atoi(*xmlForecast.WindDir); err != nil {
+				windDirDegrees = &potWindDir
+			}
+		}
+
+		fc.SetNillableWindDirection(windDirDegrees)
+		fc.SetWindDirectionVariable(windIsVariable)
+
+		visibilityHorizontalIsMoreThan := false
+		var visibilityHorizontal *float64 = nil
+		if xmlForecast.Visibility != nil {
+			visibilityToParse := *xmlForecast.Visibility
+			if strings.Contains(*xmlForecast.Visibility, "+") {
+				visibilityHorizontalIsMoreThan = true
+				visibilityToParse = strings.Replace(*xmlForecast.Visibility, "+", "", -1)
+			}
+
+			visibilityClear, err := strconv.ParseFloat(visibilityToParse, 64)
+			if err != nil {
+				return err
+			}
+
+			visibilityHorizontal = &visibilityClear
+		}
+
+		fc.SetNillableVisibilityHorizontal(visibilityHorizontal)
+		fc.SetVisibilityHorizontalIsMoreThan(visibilityHorizontalIsMoreThan)
 
 		for _, condition := range xmlForecast.SkyCondition {
 			skyCover, err := getSkyCoverFromString(condition.Coverage)

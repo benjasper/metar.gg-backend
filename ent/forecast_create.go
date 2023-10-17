@@ -96,6 +96,12 @@ func (fc *ForecastCreate) SetNillableWindDirection(i *int) *ForecastCreate {
 	return fc
 }
 
+// SetWindDirectionVariable sets the "wind_direction_variable" field.
+func (fc *ForecastCreate) SetWindDirectionVariable(b bool) *ForecastCreate {
+	fc.mutation.SetWindDirectionVariable(b)
+	return fc
+}
+
 // SetWindSpeed sets the "wind_speed" field.
 func (fc *ForecastCreate) SetWindSpeed(i int) *ForecastCreate {
 	fc.mutation.SetWindSpeed(i)
@@ -177,6 +183,12 @@ func (fc *ForecastCreate) SetNillableVisibilityHorizontal(f *float64) *ForecastC
 	if f != nil {
 		fc.SetVisibilityHorizontal(*f)
 	}
+	return fc
+}
+
+// SetVisibilityHorizontalIsMoreThan sets the "visibility_horizontal_is_more_than" field.
+func (fc *ForecastCreate) SetVisibilityHorizontalIsMoreThan(b bool) *ForecastCreate {
+	fc.mutation.SetVisibilityHorizontalIsMoreThan(b)
 	return fc
 }
 
@@ -364,6 +376,12 @@ func (fc *ForecastCreate) check() error {
 			return &ValidationError{Name: "change_indicator", err: fmt.Errorf(`ent: validator failed for field "Forecast.change_indicator": %w`, err)}
 		}
 	}
+	if _, ok := fc.mutation.WindDirectionVariable(); !ok {
+		return &ValidationError{Name: "wind_direction_variable", err: errors.New(`ent: missing required field "Forecast.wind_direction_variable"`)}
+	}
+	if _, ok := fc.mutation.VisibilityHorizontalIsMoreThan(); !ok {
+		return &ValidationError{Name: "visibility_horizontal_is_more_than", err: errors.New(`ent: missing required field "Forecast.visibility_horizontal_is_more_than"`)}
+	}
 	return nil
 }
 
@@ -424,6 +442,10 @@ func (fc *ForecastCreate) createSpec() (*Forecast, *sqlgraph.CreateSpec) {
 		_spec.SetField(forecast.FieldWindDirection, field.TypeInt, value)
 		_node.WindDirection = &value
 	}
+	if value, ok := fc.mutation.WindDirectionVariable(); ok {
+		_spec.SetField(forecast.FieldWindDirectionVariable, field.TypeBool, value)
+		_node.WindDirectionVariable = value
+	}
 	if value, ok := fc.mutation.WindSpeed(); ok {
 		_spec.SetField(forecast.FieldWindSpeed, field.TypeInt, value)
 		_node.WindSpeed = &value
@@ -447,6 +469,10 @@ func (fc *ForecastCreate) createSpec() (*Forecast, *sqlgraph.CreateSpec) {
 	if value, ok := fc.mutation.VisibilityHorizontal(); ok {
 		_spec.SetField(forecast.FieldVisibilityHorizontal, field.TypeFloat64, value)
 		_node.VisibilityHorizontal = &value
+	}
+	if value, ok := fc.mutation.VisibilityHorizontalIsMoreThan(); ok {
+		_spec.SetField(forecast.FieldVisibilityHorizontalIsMoreThan, field.TypeBool, value)
+		_node.VisibilityHorizontalIsMoreThan = value
 	}
 	if value, ok := fc.mutation.VisibilityVertical(); ok {
 		_spec.SetField(forecast.FieldVisibilityVertical, field.TypeInt, value)
@@ -688,6 +714,18 @@ func (u *ForecastUpsert) ClearWindDirection() *ForecastUpsert {
 	return u
 }
 
+// SetWindDirectionVariable sets the "wind_direction_variable" field.
+func (u *ForecastUpsert) SetWindDirectionVariable(v bool) *ForecastUpsert {
+	u.Set(forecast.FieldWindDirectionVariable, v)
+	return u
+}
+
+// UpdateWindDirectionVariable sets the "wind_direction_variable" field to the value that was provided on create.
+func (u *ForecastUpsert) UpdateWindDirectionVariable() *ForecastUpsert {
+	u.SetExcluded(forecast.FieldWindDirectionVariable)
+	return u
+}
+
 // SetWindSpeed sets the "wind_speed" field.
 func (u *ForecastUpsert) SetWindSpeed(v int) *ForecastUpsert {
 	u.Set(forecast.FieldWindSpeed, v)
@@ -829,6 +867,18 @@ func (u *ForecastUpsert) AddVisibilityHorizontal(v float64) *ForecastUpsert {
 // ClearVisibilityHorizontal clears the value of the "visibility_horizontal" field.
 func (u *ForecastUpsert) ClearVisibilityHorizontal() *ForecastUpsert {
 	u.SetNull(forecast.FieldVisibilityHorizontal)
+	return u
+}
+
+// SetVisibilityHorizontalIsMoreThan sets the "visibility_horizontal_is_more_than" field.
+func (u *ForecastUpsert) SetVisibilityHorizontalIsMoreThan(v bool) *ForecastUpsert {
+	u.Set(forecast.FieldVisibilityHorizontalIsMoreThan, v)
+	return u
+}
+
+// UpdateVisibilityHorizontalIsMoreThan sets the "visibility_horizontal_is_more_than" field to the value that was provided on create.
+func (u *ForecastUpsert) UpdateVisibilityHorizontalIsMoreThan() *ForecastUpsert {
+	u.SetExcluded(forecast.FieldVisibilityHorizontalIsMoreThan)
 	return u
 }
 
@@ -1090,6 +1140,20 @@ func (u *ForecastUpsertOne) ClearWindDirection() *ForecastUpsertOne {
 	})
 }
 
+// SetWindDirectionVariable sets the "wind_direction_variable" field.
+func (u *ForecastUpsertOne) SetWindDirectionVariable(v bool) *ForecastUpsertOne {
+	return u.Update(func(s *ForecastUpsert) {
+		s.SetWindDirectionVariable(v)
+	})
+}
+
+// UpdateWindDirectionVariable sets the "wind_direction_variable" field to the value that was provided on create.
+func (u *ForecastUpsertOne) UpdateWindDirectionVariable() *ForecastUpsertOne {
+	return u.Update(func(s *ForecastUpsert) {
+		s.UpdateWindDirectionVariable()
+	})
+}
+
 // SetWindSpeed sets the "wind_speed" field.
 func (u *ForecastUpsertOne) SetWindSpeed(v int) *ForecastUpsertOne {
 	return u.Update(func(s *ForecastUpsert) {
@@ -1255,6 +1319,20 @@ func (u *ForecastUpsertOne) UpdateVisibilityHorizontal() *ForecastUpsertOne {
 func (u *ForecastUpsertOne) ClearVisibilityHorizontal() *ForecastUpsertOne {
 	return u.Update(func(s *ForecastUpsert) {
 		s.ClearVisibilityHorizontal()
+	})
+}
+
+// SetVisibilityHorizontalIsMoreThan sets the "visibility_horizontal_is_more_than" field.
+func (u *ForecastUpsertOne) SetVisibilityHorizontalIsMoreThan(v bool) *ForecastUpsertOne {
+	return u.Update(func(s *ForecastUpsert) {
+		s.SetVisibilityHorizontalIsMoreThan(v)
+	})
+}
+
+// UpdateVisibilityHorizontalIsMoreThan sets the "visibility_horizontal_is_more_than" field to the value that was provided on create.
+func (u *ForecastUpsertOne) UpdateVisibilityHorizontalIsMoreThan() *ForecastUpsertOne {
+	return u.Update(func(s *ForecastUpsert) {
+		s.UpdateVisibilityHorizontalIsMoreThan()
 	})
 }
 
@@ -1693,6 +1771,20 @@ func (u *ForecastUpsertBulk) ClearWindDirection() *ForecastUpsertBulk {
 	})
 }
 
+// SetWindDirectionVariable sets the "wind_direction_variable" field.
+func (u *ForecastUpsertBulk) SetWindDirectionVariable(v bool) *ForecastUpsertBulk {
+	return u.Update(func(s *ForecastUpsert) {
+		s.SetWindDirectionVariable(v)
+	})
+}
+
+// UpdateWindDirectionVariable sets the "wind_direction_variable" field to the value that was provided on create.
+func (u *ForecastUpsertBulk) UpdateWindDirectionVariable() *ForecastUpsertBulk {
+	return u.Update(func(s *ForecastUpsert) {
+		s.UpdateWindDirectionVariable()
+	})
+}
+
 // SetWindSpeed sets the "wind_speed" field.
 func (u *ForecastUpsertBulk) SetWindSpeed(v int) *ForecastUpsertBulk {
 	return u.Update(func(s *ForecastUpsert) {
@@ -1858,6 +1950,20 @@ func (u *ForecastUpsertBulk) UpdateVisibilityHorizontal() *ForecastUpsertBulk {
 func (u *ForecastUpsertBulk) ClearVisibilityHorizontal() *ForecastUpsertBulk {
 	return u.Update(func(s *ForecastUpsert) {
 		s.ClearVisibilityHorizontal()
+	})
+}
+
+// SetVisibilityHorizontalIsMoreThan sets the "visibility_horizontal_is_more_than" field.
+func (u *ForecastUpsertBulk) SetVisibilityHorizontalIsMoreThan(v bool) *ForecastUpsertBulk {
+	return u.Update(func(s *ForecastUpsert) {
+		s.SetVisibilityHorizontalIsMoreThan(v)
+	})
+}
+
+// UpdateVisibilityHorizontalIsMoreThan sets the "visibility_horizontal_is_more_than" field to the value that was provided on create.
+func (u *ForecastUpsertBulk) UpdateVisibilityHorizontalIsMoreThan() *ForecastUpsertBulk {
+	return u.Update(func(s *ForecastUpsert) {
+		s.UpdateVisibilityHorizontalIsMoreThan()
 	})
 }
 

@@ -127,7 +127,7 @@ func (i *Importer) importModelType(ctx context.Context, url string, importFuncti
 	i.stats.Start()
 
 	filepath := "file.csv"
-	err := utils.DownloadFile(url, filepath)
+	err := utils.DownloadFile(url, filepath, false)
 	if err != nil {
 		return err
 	}
