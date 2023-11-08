@@ -21,6 +21,7 @@ type Environment struct {
 	CronWeatherImport     string `mapstructure:"CRON_WEATHER_IMPORT"`
 	CronAirportsImport    string `mapstructure:"CRON_AIRPORTS_IMPORT"`
 	CronSitemapGeneration string `mapstructure:"CRON_SITEMAP_GENERATION"`
+	CronDataClean         string `mapstructure:"CRON_DATA_CLEAN"`
 
 	SitemapBase           string `mapstructure:"SITEMAP_BASE"`
 	SitemapAirportsPath   string `mapstructure:"SITEMAP_AIRPORTS_PATH"`

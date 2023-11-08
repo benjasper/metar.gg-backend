@@ -419,6 +419,13 @@ func (s *Server) initializeCron(ctx context.Context) error {
 		}
 	}
 
+	if environment.Global.CronDataClean != "" {
+		_, err := scheduler.Cron(environment.Global.CronDataClean).Do(s.DeleteOldData, ctx)
+		if err != nil {
+			return nil
+		}
+	}
+
 	if len(scheduler.Jobs()) > 0 {
 		scheduler.StartAsync()
 	}
