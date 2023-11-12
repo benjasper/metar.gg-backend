@@ -59,6 +59,7 @@ func (s *Server) Run() error {
 
 	config := cors.DefaultConfig()
 	config.AllowAllOrigins = true
+	config.MaxAge = time.Hour * 24
 
 	err := r.SetTrustedProxies(nil)
 	if err != nil {
@@ -385,7 +386,7 @@ func (s *Server) generateSitemap(ctx context.Context) *stm.Sitemap {
 
 	sm.Add(stm.URL{{"loc", environment.Global.SitemapBase}, {"changefreq", "always"}, {"priority", "1.0"}})
 
-	s.logger.Info(fmt.Sprintf("[SITEMAP] Sitemap generation completed"))
+	s.logger.Info("[SITEMAP] Sitemap generation completed")
 
 	s.sitemap = sm
 	s.sitemapLastUpdated = time.Now()
