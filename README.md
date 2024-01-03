@@ -4,7 +4,7 @@
 
 ## What is this?
 
-metar.gg is server written in Go that provides a GraphQL API, for querying the latest METARs, TAFs, airports and runways.
+metar.gg is a server written in Go that provides a GraphQL API, for querying the latest METARs, TAFs, airports and runways.
 It imports airport data from [OurAirports.com](https://github.com/davidmegginson/ourairports-data) and METAR and TAF data from [NOAA](https://www.aviationweather.gov/metar).
 
 You can either host it yourself or use the hosted version of this API available at [rapidapi.com](https://rapidapi.com/benjasper/api/aviation-weather-and-airport-data).
