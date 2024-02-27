@@ -58,7 +58,14 @@ func (s *Server) Run() error {
 	r := gin.New()
 
 	config := cors.DefaultConfig()
-	config.AllowAllOrigins = true
+
+	if len(environment.Global.AllowedCorsOrigins) > 0 {
+		s.logger.Info(fmt.Sprintf("Allowed CORS origins: %s\n", strings.Join(environment.Global.AllowedCorsOrigins, ", ")))
+		config.AllowOrigins = environment.Global.AllowedCorsOrigins
+	} else {
+		config.AllowAllOrigins = true
+	}
+
 	config.MaxAge = time.Hour * 24
 
 	err := r.SetTrustedProxies(nil)

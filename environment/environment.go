@@ -10,13 +10,14 @@ import (
 )
 
 type Environment struct {
-	AdminSecret                 string `mapstructure:"ADMIN_SECRET"`
-	Database                    string `mapstructure:"DATABASE"`
-	Port                        string `mapstructure:"PORT"`
-	MaxConcurrentImports        int    `mapstructure:"MAX_CONCURRENT_IMPORTS"`
-	AxiomDataset                string `mapstructure:"AXIOM_DATASET"`
-	WeatherDataRetentionDays    int    `mapstructure:"WEATHER_DATA_RETENTION_DAYS"`
-	GraphQLQueryComplexityLimit int    `mapstructure:"GRAPHQL_QUERY_COMPLEXITY_LIMIT"`
+	AdminSecret                 string   `mapstructure:"ADMIN_SECRET"`
+	Database                    string   `mapstructure:"DATABASE"`
+	Port                        string   `mapstructure:"PORT"`
+	AllowedCorsOrigins          []string `mapstructure:"ALLOWED_CORS_ORIGINS"`
+	MaxConcurrentImports        int      `mapstructure:"MAX_CONCURRENT_IMPORTS"`
+	AxiomDataset                string   `mapstructure:"AXIOM_DATASET"`
+	WeatherDataRetentionDays    int      `mapstructure:"WEATHER_DATA_RETENTION_DAYS"`
+	GraphQLQueryComplexityLimit int      `mapstructure:"GRAPHQL_QUERY_COMPLEXITY_LIMIT"`
 
 	CronWeatherImport     string `mapstructure:"CRON_WEATHER_IMPORT"`
 	CronAirportsImport    string `mapstructure:"CRON_AIRPORTS_IMPORT"`
@@ -74,6 +75,18 @@ func Initialize() {
 				log.Println("Did not receive a valid value for GRAPHQL_QUERY_COMPLEXITY_LIMIT, defaulting to 80")
 				data[split[0]] = 80
 			}
+
+			continue
+		}
+
+		if split[0] == "ALLOWED_CORS_ORIGINS" {
+			if strings.TrimSpace(split[1]) == "" {
+				data[split[0]] = []string{}
+
+				continue
+			} 
+
+			data[split[0]] = strings.Split(split[1], ",")
 
 			continue
 		}
