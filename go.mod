@@ -9,7 +9,7 @@ require (
 	github.com/axiomhq/axiom-go v0.16.2
 	github.com/cenkalti/backoff/v4 v4.2.1
 	github.com/cnf/structhash v0.0.0-20201127153200-e1b16c1ebc08
-	github.com/gin-contrib/cors v1.4.0
+	github.com/gin-contrib/cors v1.7.2
 	github.com/gin-gonic/gin v1.10.0
 	github.com/go-co-op/gocron v1.31.1
 	github.com/go-sql-driver/mysql v1.7.1
