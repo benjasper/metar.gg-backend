@@ -23,7 +23,7 @@ require (
 	github.com/ringsaturn/tzf v0.14.0
 	github.com/ringsaturn/tzf-rel v0.0.2023-b
 	github.com/segmentio/fasthash v1.0.3
-	github.com/vektah/gqlparser/v2 v2.5.8
+	github.com/vektah/gqlparser/v2 v2.5.15
 	golang.org/x/sync v0.3.0
 	google.golang.org/protobuf v1.31.0
 )
