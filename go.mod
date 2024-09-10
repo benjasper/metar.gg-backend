@@ -25,7 +25,7 @@ require (
 	github.com/segmentio/fasthash v1.0.3
 	github.com/vektah/gqlparser/v2 v2.5.8
 	golang.org/x/sync v0.3.0
-	google.golang.org/protobuf v1.31.0
+	google.golang.org/protobuf v1.33.0
 )
 
 require (
