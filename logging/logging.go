@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"log"
-	"strings"
 	"sync"
 	"time"
 
@@ -116,19 +115,6 @@ func (l *Logger) Fatal(input error) {
 	go l.messageToAxiomEvent(&m)
 
 	log.Fatal(message)
-}
-
-func (l *Logger) CustomEvent(eventType string, message string, data map[string]interface{}) {
-	m := Message{
-		Level:   strings.ToUpper(eventType),
-		Message: message,
-		Time:    time.Now(),
-		Data:    data,
-	}
-
-	go l.messageToAxiomEvent(&m)
-
-	log.Printf("[%s] %s %v\n", eventType, message, data)
 }
 
 func (l *Logger) messageToAxiomEvent(message *Message) {

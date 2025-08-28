@@ -252,34 +252,6 @@ func (i *NoaaWeatherImporter) importMetar(x *XmlMetar, ctx context.Context) erro
 		visibility = &visibilityClear
 	}
 
-	// Check accuracy of last prediction
-	lastMetar, err := i.db.Metar.Query().Where(metar.HasStationWith(weatherstation.StationID(x.StationId))).Order(ent.Desc(metar.FieldImportTime)).First(ctx)
-	if err != nil {
-		// No last metar found
-	}
-
-	if lastMetar != nil && lastMetar.NextImportTimePrediction != nil && *lastMetar.NextImportTimePrediction != (time.Time{}) {
-		// Calculate difference between last prediction and actual import time
-		diff := importTime.Sub(*lastMetar.NextImportTimePrediction)
-		i.logger.CustomEvent(fmt.Sprintf("Import time prediction diff"), "import_time_prediction_diff", map[string]interface{}{
-			"station_id":  x.StationId,
-			"diff":        diff.String(),
-			"diff_in_min": diff.Minutes(),
-			"prediction":  lastMetar.NextImportTimePrediction.String(),
-			"actual":      importTime.String(),
-		})
-	}
-
-	// Log time difference between import and observation time
-	diff := importTime.Sub(x.ObservationTime)
-	i.logger.CustomEvent(fmt.Sprintf("Import observation time diff"), "import_observation_time_diff", map[string]interface{}{
-		"station_id":  x.StationId,
-		"diff":        diff.String(),
-		"diff_in_min": diff.Minutes(),
-		"import":      importTime.String(),
-		"observation": x.ObservationTime.String(),
-	})
-
 	prediction, err := i.MakeNextImportPrediction(ctx, s.StationID, &importTime, &x.ObservationTime)
 	if err != nil {
 		// Ignore error, because it could be that we don't have enough data for a prediction
