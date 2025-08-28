@@ -3,13 +3,14 @@ package logging
 import (
 	"context"
 	"fmt"
-	"github.com/axiomhq/axiom-go/axiom"
-	"github.com/cenkalti/backoff/v4"
 	"log"
-	"metar.gg/environment"
 	"strings"
 	"sync"
 	"time"
+
+	"github.com/axiomhq/axiom-go/axiom"
+	"github.com/cenkalti/backoff/v4"
+	"metar.gg/environment"
 )
 
 type Logger struct {
@@ -30,17 +31,17 @@ func (m *Message) String() string {
 }
 
 func NewLogger() *Logger {
-	client, err := axiom.NewClient()
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	loggerObject := &Logger{
-		axiomClient: client,
-	}
+	loggerObject := &Logger{}
 
 	// Trigger upload every 10 seconds, when axiom is configured
 	if environment.Global.AxiomDataset != "" {
+		client, err := axiom.NewClient()
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		loggerObject.axiomClient = client
+
 		go func() {
 			for {
 				time.Sleep(10 * time.Second)
