@@ -37,6 +37,8 @@ The hosted version imports airport data every 7 days and weather data every 5 mi
 The easiest way to run the server is by using the [Docker image](https://github.com/benjasper/metar.gg-backend/pkgs/container/metar.gg).
 You only need to provide it with a MySQL database and off you go! 🛫
 
+See the [sample configuration](./docs/sample-configuration.md) for an example of how to get the app running via containers!
+
 ### Environment
 See [`.env.example`](.env.example) to see what environment variables are required.
 
@@ -63,7 +65,7 @@ Those can be triggered via HTTP POST requests to:
 ❗️Send the requests including the secret (from the `ADMIN_SECRET` env variable) in the `Authorization` header.
 
 In every case, the server will respond with a `204 No content` if the import was successfully triggered. You can use some kind of cron service to trigger these endpoints at your desired intervals.
-The airport data is synced, while the weather data is will only be added and not automatically removed. You can use the `/clean` endpoint to remove old weather data.
+The airport data is synced while the weather data will only be added and not automatically removed. You can use the `/clean` endpoint to remove old weather data.
 
 ## Development 💻
 
