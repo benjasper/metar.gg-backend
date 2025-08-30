@@ -3,3 +3,7 @@
 .env
 .env.local
 vendor
+
+# Imported files
+*.csv
+*.xml
